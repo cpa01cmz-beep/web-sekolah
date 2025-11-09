@@ -105,7 +105,7 @@ jobs:
                - Update labels: remove `status/in-progress`, add `status/review` or `status/done`
 
             5. Error handling  
-               - On any failure, revert: `git reset --hard HEAD && git checkout -`  
+               - On any failure, revert: `git reset --hard HEAD && git checkout main`
                - Comment failure details with next steps  
 
             ## RULES
