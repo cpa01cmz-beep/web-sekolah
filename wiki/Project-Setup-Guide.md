@@ -61,7 +61,7 @@ This document outlines the steps to set up the Akademia Pro project based on the
 Based on the blueprint, ensure the following directory structure is maintained:
 
 ```
-akademia-pro/
+web-sekolah/
 ├── src/                  # Frontend application
 │   ├── components/       # Reusable UI components
 │   ├── hooks/            # Custom React hooks
