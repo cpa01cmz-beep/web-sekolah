@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter, DialogTrigger, DialogClose } from '@/components/ui/dialog';
@@ -7,24 +7,13 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Edit, Trash2, PlusCircle } from 'lucide-react';
+import { Edit, Trash2, PlusCircle, AlertTriangle } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
-import { UserRole } from '@shared/types';
-type User = {
-  id: string;
-  name: string;
-  email: string;
-  role: UserRole;
-};
-const mockUsers: User[] = [
-  { id: 's1', name: 'Budi Hartono', email: 'budi@example.com', role: 'student' },
-  { id: 't1', name: 'Ibu Siti', email: 'siti@example.com', role: 'teacher' },
-  { id: 'p1', name: 'Ayah Budi', email: 'ayah.budi@example.com', role: 'parent' },
-  { id: 'a1', name: 'Admin Sekolah', email: 'admin@example.com', role: 'admin' },
-  { id: 's2', name: 'Ani Suryani', email: 'ani@example.com', role: 'student' },
-  { id: 't2', name: 'Bapak Agus', email: 'agus@example.com', role: 'teacher' },
-];
+import { UserRole, SchoolUser } from '@shared/types';
+import { useQuery, useMutation, queryClient } from '@/lib/api-client';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 const roleColors: Record<UserRole, string> = {
   student: 'bg-blue-500',
   teacher: 'bg-green-500',
@@ -32,31 +21,53 @@ const roleColors: Record<UserRole, string> = {
   admin: 'bg-red-500',
 };
 export function AdminUserManagementPage() {
-  const [users, setUsers] = useState<User[]>(mockUsers);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingUser, setEditingUser] = useState<User | null>(null);
+  const [editingUser, setEditingUser] = useState<SchoolUser | null>(null);
+  const { data: users, isLoading, error } = useQuery<SchoolUser[]>(['users']);
+  const createUserMutation = useMutation<SchoolUser, Error, Omit<SchoolUser, 'id'>>(['users'], {
+    method: 'POST',
+    onSuccess: () => {
+      toast.success('User created successfully.');
+      queryClient.invalidateQueries({ queryKey: ['users'] });
+      setIsModalOpen(false);
+    },
+    onError: (err) => toast.error(`Failed to create user: ${err.message}`),
+  });
+  const updateUserMutation = useMutation<SchoolUser, Error, Partial<SchoolUser> & { id: string }>(['users', editingUser?.id || ''], {
+    method: 'PUT',
+    onSuccess: () => {
+      toast.success('User updated successfully.');
+      queryClient.invalidateQueries({ queryKey: ['users'] });
+      setIsModalOpen(false);
+      setEditingUser(null);
+    },
+    onError: (err) => toast.error(`Failed to update user: ${err.message}`),
+  });
+  const deleteUserMutation = useMutation<{ deleted: boolean }, Error, string>(['users'], {
+    method: 'DELETE',
+    onSuccess: (_, userId) => {
+      toast.success('User deleted successfully.');
+      queryClient.setQueryData(['users'], (oldData: SchoolUser[] | undefined) => oldData?.filter(u => u.id !== userId) || []);
+    },
+    onError: (err) => toast.error(`Failed to delete user: ${err.message}`),
+  });
   const handleSaveUser = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
-    const user: User = {
-      id: editingUser?.id || `user-${Date.now()}`,
+    const userData = {
       name: formData.get('name') as string,
       email: formData.get('email') as string,
       role: formData.get('role') as UserRole,
+      avatarUrl: `https://i.pravatar.cc/150?u=${formData.get('email')}`,
     };
     if (editingUser) {
-      setUsers(users.map(u => u.id === user.id ? user : u));
-      toast.success(`User ${user.name} updated successfully.`);
+      updateUserMutation.mutate({ id: editingUser.id, ...userData });
     } else {
-      setUsers([user, ...users]);
-      toast.success(`User ${user.name} created successfully.`);
+      createUserMutation.mutate(userData as Omit<SchoolUser, 'id'>);
     }
-    setIsModalOpen(false);
-    setEditingUser(null);
   };
   const handleDeleteUser = (userId: string) => {
-    setUsers(users.filter(u => u.id !== userId));
-    toast.success('User deleted successfully.');
+    deleteUserMutation.mutate(userId);
   };
   return (
     <motion.div
@@ -96,9 +107,7 @@ export function AdminUserManagementPage() {
                 <div className="grid grid-cols-4 items-center gap-4">
                   <Label htmlFor="role" className="text-right">Role</Label>
                   <Select name="role" defaultValue={editingUser?.role} required>
-                    <SelectTrigger className="col-span-3">
-                      <SelectValue placeholder="Select a role" />
-                    </SelectTrigger>
+                    <SelectTrigger className="col-span-3"><SelectValue placeholder="Select a role" /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="student">Student</SelectItem>
                       <SelectItem value="teacher">Teacher</SelectItem>
@@ -109,10 +118,8 @@ export function AdminUserManagementPage() {
                 </div>
               </div>
               <DialogFooter>
-                <DialogClose asChild>
-                  <Button type="button" variant="secondary">Cancel</Button>
-                </DialogClose>
-                <Button type="submit">Save changes</Button>
+                <DialogClose asChild><Button type="button" variant="secondary">Cancel</Button></DialogClose>
+                <Button type="submit" disabled={createUserMutation.isPending || updateUserMutation.isPending}>Save changes</Button>
               </DialogFooter>
             </form>
           </DialogContent>
@@ -120,35 +127,47 @@ export function AdminUserManagementPage() {
       </div>
       <Card>
         <CardContent className="pt-6">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Email</TableHead>
-                <TableHead className="text-center">Role</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {users.map(user => (
-                <TableRow key={user.id}>
-                  <TableCell className="font-medium">{user.name}</TableCell>
-                  <TableCell>{user.email}</TableCell>
-                  <TableCell className="text-center">
-                    <Badge className={`text-white ${roleColors[user.role]}`}>{user.role}</Badge>
-                  </TableCell>
-                  <TableCell className="text-right space-x-2">
-                    <Button variant="outline" size="icon" onClick={() => { setEditingUser(user); setIsModalOpen(true); }}>
-                      <Edit className="h-4 w-4" />
-                    </Button>
-                    <Button variant="destructive" size="icon" onClick={() => handleDeleteUser(user.id)}>
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </TableCell>
+          {isLoading ? (
+            <div className="space-y-2">
+              {[...Array(5)].map((_, i) => <Skeleton key={i} className="h-12 w-full" />)}
+            </div>
+          ) : error ? (
+            <Alert variant="destructive">
+              <AlertTriangle className="h-4 w-4" />
+              <AlertTitle>Error</AlertTitle>
+              <AlertDescription>Failed to load users.</AlertDescription>
+            </Alert>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Email</TableHead>
+                  <TableHead className="text-center">Role</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {users?.map(user => (
+                  <TableRow key={user.id}>
+                    <TableCell className="font-medium">{user.name}</TableCell>
+                    <TableCell>{user.email}</TableCell>
+                    <TableCell className="text-center">
+                      <Badge className={`text-white ${roleColors[user.role]}`}>{user.role}</Badge>
+                    </TableCell>
+                    <TableCell className="text-right space-x-2">
+                      <Button variant="outline" size="icon" onClick={() => { setEditingUser(user); setIsModalOpen(true); }}>
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                      <Button variant="destructive" size="icon" onClick={() => handleDeleteUser(user.id)}>
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
         </CardContent>
       </Card>
     </motion.div>

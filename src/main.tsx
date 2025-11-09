@@ -4,12 +4,17 @@ enableMapSet();
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { createBrowserRouter, RouterProvider, Navigate } from "react-router-dom";
+import { QueryClientProvider } from '@tanstack/react-query';
+import { queryClient } from '@/lib/api-client';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { RouteErrorBoundary } from '@/components/RouteErrorBoundary';
 import '@/index.css';
 // Import Pages
 import { HomePage } from '@/pages/HomePage';
 import { LoginPage } from '@/pages/LoginPage';
+import { AboutPage } from '@/pages/AboutPage';
+import { ContactPage } from '@/pages/ContactPage';
+import { PrivacyPolicyPage } from '@/pages/PrivacyPolicyPage';
 import { PortalLayout } from '@/pages/portal/PortalLayout';
 // Student Pages
 import { StudentDashboardPage } from '@/pages/portal/student/StudentDashboardPage';
@@ -27,6 +32,7 @@ import { ParentStudentSchedulePage } from '@/pages/portal/parent/ParentStudentSc
 import { AdminDashboardPage } from '@/pages/portal/admin/AdminDashboardPage';
 import { AdminUserManagementPage } from '@/pages/portal/admin/AdminUserManagementPage';
 import { AdminAnnouncementsPage } from '@/pages/portal/admin/AdminAnnouncementsPage';
+import { AdminSettingsPage } from '@/pages/portal/admin/AdminSettingsPage';
 const router = createBrowserRouter([
   {
     path: "/",
@@ -77,21 +83,22 @@ const router = createBrowserRouter([
           { path: "dashboard", element: <AdminDashboardPage /> },
           { path: "users", element: <AdminUserManagementPage /> },
           { path: "announcements", element: <AdminAnnouncementsPage /> },
-          { path: "settings", element: <div>Admin Settings Page</div> }, // Placeholder
+          { path: "settings", element: <AdminSettingsPage /> },
         ],
       },
     ],
   },
-  // Placeholder routes for links in header/footer
-  { path: "/about", element: <div>About Page</div> },
-  { path: "/contact", element: <div>Contact Page</div> },
-  { path: "/privacy", element: <div>Privacy Policy Page</div> },
+  { path: "/about", element: <AboutPage /> },
+  { path: "/contact", element: <ContactPage /> },
+  { path: "/privacy", element: <PrivacyPolicyPage /> },
 ]);
 // Do not touch this code
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <ErrorBoundary>
-      <RouterProvider router={router} />
+      <QueryClientProvider client={queryClient}>
+        <RouterProvider router={router} />
+      </QueryClientProvider>
     </ErrorBoundary>
   </StrictMode>,
 );

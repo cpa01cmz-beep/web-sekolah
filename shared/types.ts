@@ -5,50 +5,71 @@ export interface ApiResponse<T = unknown> {
 }
 // --- Akademia Pro Types ---
 export type UserRole = 'student' | 'teacher' | 'parent' | 'admin';
-export interface AuthUser {
+export interface BaseUser {
   id: string;
   name: string;
+  email: string;
   role: UserRole;
-  avatarUrl?: string;
+  avatarUrl: string;
 }
-export interface Student {
+export interface Student extends BaseUser {
+  role: 'student';
+  classId: string;
+  studentIdNumber: string;
+}
+export interface Teacher extends BaseUser {
+  role: 'teacher';
+  classIds: string[];
+}
+export interface Parent extends BaseUser {
+  role: 'parent';
+  childId: string;
+}
+export interface Admin extends BaseUser {
+  role: 'admin';
+}
+export type SchoolUser = Student | Teacher | Parent | Admin;
+export interface SchoolClass {
   id: string;
-  name: string;
-  class: string; // e.g., "10-A"
-  photoUrl: string;
+  name: string; // e.g., "11-A"
+  teacherId: string;
 }
 export interface Course {
   id: string;
   name: string;
-  teacherName: string;
-  time: string; // e.g., "08:00 - 09:30"
+  teacherId: string;
 }
 export interface Grade {
-  courseName: string;
+  id: string;
+  studentId: string;
+  courseId: string;
   score: number;
-  grade: 'A' | 'B' | 'C' | 'D' | 'E';
-  teacherFeedback: string;
+  feedback: string;
 }
 export interface Announcement {
   id: string;
   title: string;
   content: string;
   date: string; // ISO 8601 format
-  author: string;
+  authorId: string;
 }
-// --- Original Template Types (for reference, can be removed later) ---
-export interface User {
-  id: string;
-  name: string;
+export interface ScheduleItem {
+  day: 'Senin' | 'Selasa' | 'Rabu' | 'Kamis' | 'Jumat';
+  time: string; // "07:30 - 09:00"
+  courseId: string;
 }
-export interface Chat {
-  id: string;
-  title: string;
+// --- API Payloads & Responses ---
+export interface StudentDashboardData {
+  schedule: (ScheduleItem & { courseName: string; teacherName: string })[];
+  recentGrades: (Grade & { courseName: string })[];
+  announcements: (Announcement & { authorName: string })[];
 }
-export interface ChatMessage {
-  id: string;
-  chatId: string;
-  userId: string;
-  text: string;
-  ts: number; // epoch millis
+// For seeding
+export interface SchoolData {
+  users: SchoolUser[];
+  classes: SchoolClass[];
+  courses: Course[];
+  grades: Grade[];
+  announcements: Announcement[];
+  schedules: (ScheduleItem & { classId: string })[];
 }

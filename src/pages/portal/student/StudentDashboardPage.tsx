@@ -1,42 +1,52 @@
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Clock, BookOpen, Megaphone, CheckCircle } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Clock, BookOpen, Megaphone, AlertTriangle } from 'lucide-react';
 import { motion, Variants } from 'framer-motion';
-// Mock Data for Phase 1
-const mockSchedule = [
-  { time: '08:00 - 09:30', subject: 'Mathematics', teacher: 'Mr. John Doe' },
-  { time: '10:00 - 11:30', subject: 'Physics', teacher: 'Ms. Jane Smith' },
-  { time: '13:00 - 14:30', subject: 'History', teacher: 'Mr. Robert Brown' },
-];
-const mockGrades = [
-  { subject: 'Mathematics', grade: 'A', score: 95 },
-  { subject: 'Physics', grade: 'B+', score: 88 },
-];
-const mockAnnouncements = [
-  { title: 'School Holiday Announcement', date: '2024-07-20' },
-  { title: 'Mid-term Exam Schedule', date: '2024-07-18' },
-];
+import { useQuery } from '@/lib/api-client';
+import { useAuthStore } from '@/lib/authStore';
+import type { StudentDashboardData } from '@shared/types';
 const containerVariants: Variants = {
   hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.1,
-    },
-  },
+  visible: { opacity: 1, transition: { staggerChildren: 0.1 } },
 };
 const itemVariants: Variants = {
   hidden: { y: 20, opacity: 0 },
-  visible: {
-    y: 0,
-    opacity: 1,
-    transition: {
-      type: 'spring' as const, // Fix: Explicitly cast type to satisfy framer-motion's Variants type
-      stiffness: 100,
-    },
-  },
+  visible: { y: 0, opacity: 1, transition: { type: 'spring' as const, stiffness: 100 } },
 };
+function DashboardSkeleton() {
+  return (
+    <div className="space-y-6">
+      <div>
+        <Skeleton className="h-8 w-1/2" />
+        <Skeleton className="h-4 w-3/4 mt-2" />
+      </div>
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <Card><CardHeader><Skeleton className="h-4 w-1/3" /></CardHeader><CardContent className="space-y-4"><Skeleton className="h-16 w-full" /><Skeleton className="h-16 w-full" /></CardContent></Card>
+        <Card><CardHeader><Skeleton className="h-4 w-1/3" /></CardHeader><CardContent className="space-y-4"><Skeleton className="h-8 w-full" /><Skeleton className="h-8 w-full" /></CardContent></Card>
+        <Card><CardHeader><Skeleton className="h-4 w-1/3" /></CardHeader><CardContent className="space-y-4"><Skeleton className="h-8 w-full" /><Skeleton className="h-8 w-full" /></CardContent></Card>
+      </div>
+    </div>
+  );
+}
 export function StudentDashboardPage() {
+  const user = useAuthStore((state) => state.user);
+  const { data, isLoading, error } = useQuery<StudentDashboardData>(
+    ['students', user?.id || '', 'dashboard'],
+    { enabled: !!user }
+  );
+  if (isLoading) return <DashboardSkeleton />;
+  if (error) {
+    return (
+      <Alert variant="destructive">
+        <AlertTriangle className="h-4 w-4" />
+        <AlertTitle>Error</AlertTitle>
+        <AlertDescription>Failed to load dashboard data. Please try again later.</AlertDescription>
+      </Alert>
+    );
+  }
+  if (!data) return <div>No data available.</div>;
   return (
     <motion.div
       className="space-y-6"
@@ -57,12 +67,12 @@ export function StudentDashboardPage() {
             </CardHeader>
             <CardContent>
               <ul className="space-y-3">
-                {mockSchedule.map((item, index) => (
+                {data.schedule.slice(0, 3).map((item, index) => (
                   <li key={index} className="flex items-start">
                     <div className="text-sm font-semibold w-24">{item.time}</div>
                     <div className="text-sm">
-                      <p className="font-medium">{item.subject}</p>
-                      <p className="text-xs text-muted-foreground">{item.teacher}</p>
+                      <p className="font-medium">{item.courseName}</p>
+                      <p className="text-xs text-muted-foreground">{item.teacherName}</p>
                     </div>
                   </li>
                 ))}
@@ -78,11 +88,11 @@ export function StudentDashboardPage() {
             </CardHeader>
             <CardContent>
               <ul className="space-y-3">
-                {mockGrades.map((grade, index) => (
+                {data.recentGrades.map((grade, index) => (
                   <li key={index} className="flex items-center justify-between">
-                    <p className="text-sm font-medium">{grade.subject}</p>
-                    <Badge variant={grade.grade === 'A' ? 'default' : 'secondary'} className="bg-green-500 text-white">
-                      {grade.grade} ({grade.score})
+                    <p className="text-sm font-medium">{grade.courseName}</p>
+                    <Badge className="bg-green-500 text-white">
+                      {grade.score}
                     </Badge>
                   </li>
                 ))}
@@ -98,10 +108,10 @@ export function StudentDashboardPage() {
             </CardHeader>
             <CardContent>
               <ul className="space-y-3">
-                {mockAnnouncements.map((ann, index) => (
+                {data.announcements.map((ann, index) => (
                   <li key={index} className="text-sm">
                     <p className="font-medium truncate">{ann.title}</p>
-                    <p className="text-xs text-muted-foreground">{ann.date}</p>
+                    <p className="text-xs text-muted-foreground">{new Date(ann.date).toLocaleDateString()}</p>
                   </li>
                 ))}
               </ul>

@@ -1,75 +1,126 @@
 import { Hono } from "hono";
 import type { Env } from './core-utils';
-import { UserEntity, ChatBoardEntity } from "./entities";
 import { ok, bad, notFound, isStr } from './core-utils';
-
+import {
+  UserEntity,
+  ClassEntity,
+  CourseEntity,
+  GradeEntity,
+  AnnouncementEntity,
+  ScheduleEntity,
+  ensureAllSeedData
+} from "./entities";
+import type { Grade, SchoolUser, Student, StudentDashboardData } from "@shared/types";
 export function userRoutes(app: Hono<{ Bindings: Env }>) {
-  app.get('/api/test', (c) => c.json({ success: true, data: { name: 'CF Workers Demo' }}));
-
-  // USERS
+  // --- SEED ENDPOINT ---
+  app.post('/api/seed', async (c) => {
+    await ensureAllSeedData(c.env);
+    return ok(c, { message: 'Database seeded successfully.' });
+  });
+  // --- STUDENT PORTAL ---
+  app.get('/api/students/:id/dashboard', async (c) => {
+    const studentId = c.req.param('id');
+    const student = new UserEntity(c.env, studentId);
+    const studentState = await student.getState() as Student;
+    if (!studentState || studentState.role !== 'student') {
+      return notFound(c, 'Student not found');
+    }
+    // Fetch schedule
+    const scheduleEntity = new ScheduleEntity(c.env, studentState.classId);
+    const scheduleState = await scheduleEntity.getState();
+    const courseIds = scheduleState.items.map(item => item.courseId);
+    const courses = await Promise.all(courseIds.map(id => new CourseEntity(c.env, id).getState()));
+    const teacherIds = courses.map(course => course.teacherId);
+    const teachers = await Promise.all(teacherIds.map(id => new UserEntity(c.env, id).getState()));
+    const coursesMap = new Map(courses.map(c => [c.id, c]));
+    const teachersMap = new Map(teachers.map(t => [t.id, t]));
+    const schedule = scheduleState.items.map(item => ({
+      ...item,
+      courseName: coursesMap.get(item.courseId)?.name || 'Unknown Course',
+      teacherName: teachersMap.get(coursesMap.get(item.courseId)?.teacherId || '')?.name || 'Unknown Teacher',
+    }));
+    // Fetch recent grades
+    const allGrades = (await GradeEntity.list(c.env)).items;
+    const studentGrades = allGrades.filter(g => g.studentId === studentId).slice(0, 5);
+    const gradeCourseIds = studentGrades.map(g => g.courseId);
+    const gradeCourses = await Promise.all(gradeCourseIds.map(id => new CourseEntity(c.env, id).getState()));
+    const gradeCoursesMap = new Map(gradeCourses.map(c => [c.id, c]));
+    const recentGrades = studentGrades.map(grade => ({
+      ...grade,
+      courseName: gradeCoursesMap.get(grade.courseId)?.name || 'Unknown Course',
+    }));
+    // Fetch announcements
+    const allAnnouncements = (await AnnouncementEntity.list(c.env)).items.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    const announcementAuthors = await Promise.all(allAnnouncements.map(a => new UserEntity(c.env, a.authorId).getState()));
+    const authorsMap = new Map(announcementAuthors.map(a => [a.id, a]));
+    const announcements = allAnnouncements.slice(0, 5).map(ann => ({
+      ...ann,
+      authorName: authorsMap.get(ann.authorId)?.name || 'Unknown Author',
+    }));
+    const dashboardData: StudentDashboardData = { schedule, recentGrades, announcements };
+    return ok(c, dashboardData);
+  });
+  // --- TEACHER PORTAL ---
+  app.get('/api/teachers/:id/classes', async (c) => {
+    const teacherId = c.req.param('id');
+    const classes = (await ClassEntity.list(c.env)).items.filter(c => c.teacherId === teacherId);
+    return ok(c, classes);
+  });
+  app.get('/api/classes/:id/students', async (c) => {
+    const classId = c.req.param('id');
+    const allUsers = (await UserEntity.list(c.env)).items;
+    const students = allUsers.filter(u => u.role === 'student' && (u as Student).classId === classId);
+    const studentGrades = (await GradeEntity.list(c.env)).items;
+    const gradesMap = new Map(studentGrades.map(g => [`${g.studentId}-${g.courseId}`, g]));
+    // This is a simplified version. A real app would filter by the teacher's course.
+    const studentsWithGrades = students.map(s => {
+      // A placeholder for grade fetching logic
+      return { id: s.id, name: s.name, score: null, feedback: '' };
+    });
+    return ok(c, studentsWithGrades);
+  });
+  app.put('/api/grades/:id', async (c) => {
+    const gradeId = c.req.param('id');
+    const { score, feedback } = await c.req.json<{ score: number; feedback: string }>();
+    const gradeEntity = new GradeEntity(c.env, gradeId);
+    if (!await gradeEntity.exists()) return notFound(c, 'Grade not found');
+    await gradeEntity.patch({ score, feedback });
+    return ok(c, await gradeEntity.getState());
+  });
+  app.post('/api/grades', async (c) => {
+    const { studentId, courseId, score, feedback } = await c.req.json<Partial<Grade> & { studentId: string; courseId: string }>();
+    if (!studentId || !courseId) return bad(c, 'studentId and courseId are required');
+    const newGrade: Grade = {
+      id: crypto.randomUUID(),
+      studentId,
+      courseId,
+      score: score ?? 0,
+      feedback: feedback ?? '',
+    };
+    await GradeEntity.create(c.env, newGrade);
+    return ok(c, newGrade);
+  });
+  // --- ADMIN PORTAL ---
   app.get('/api/users', async (c) => {
-    await UserEntity.ensureSeed(c.env);
-    const cq = c.req.query('cursor');
-    const lq = c.req.query('limit');
-    const page = await UserEntity.list(c.env, cq ?? null, lq ? Math.max(1, (Number(lq) | 0)) : undefined);
-    return ok(c, page);
+    return ok(c, (await UserEntity.list(c.env)).items);
   });
-
   app.post('/api/users', async (c) => {
-    const { name } = (await c.req.json()) as { name?: string };
-    if (!name?.trim()) return bad(c, 'name required');
-    return ok(c, await UserEntity.create(c.env, { id: crypto.randomUUID(), name: name.trim() }));
+    const userData = await c.req.json<Omit<SchoolUser, 'id'>>();
+    const newUser: SchoolUser = { ...userData, id: crypto.randomUUID() };
+    await UserEntity.create(c.env, newUser);
+    return ok(c, newUser);
   });
-
-  // CHATS
-  app.get('/api/chats', async (c) => {
-    await ChatBoardEntity.ensureSeed(c.env);
-    const cq = c.req.query('cursor');
-    const lq = c.req.query('limit');
-    const page = await ChatBoardEntity.list(c.env, cq ?? null, lq ? Math.max(1, (Number(lq) | 0)) : undefined);
-    return ok(c, page);
+  app.put('/api/users/:id', async (c) => {
+    const userId = c.req.param('id');
+    const userData = await c.req.json<Partial<SchoolUser>>();
+    const userEntity = new UserEntity(c.env, userId);
+    if (!await userEntity.exists()) return notFound(c, 'User not found');
+    await userEntity.patch(userData);
+    return ok(c, await userEntity.getState());
   });
-
-  app.post('/api/chats', async (c) => {
-    const { title } = (await c.req.json()) as { title?: string };
-    if (!title?.trim()) return bad(c, 'title required');
-    const created = await ChatBoardEntity.create(c.env, { id: crypto.randomUUID(), title: title.trim(), messages: [] });
-    return ok(c, { id: created.id, title: created.title });
-  });
-
-  // MESSAGES
-  app.get('/api/chats/:chatId/messages', async (c) => {
-    const chat = new ChatBoardEntity(c.env, c.req.param('chatId'));
-    if (!await chat.exists()) return notFound(c, 'chat not found');
-    return ok(c, await chat.listMessages());
-  });
-
-  app.post('/api/chats/:chatId/messages', async (c) => {
-    const chatId = c.req.param('chatId');
-    const { userId, text } = (await c.req.json()) as { userId?: string; text?: string };
-    if (!isStr(userId) || !text?.trim()) return bad(c, 'userId and text required');
-    const chat = new ChatBoardEntity(c.env, chatId);
-    if (!await chat.exists()) return notFound(c, 'chat not found');
-    return ok(c, await chat.sendMessage(userId, text.trim()));
-  });
-
-  // DELETE: Users
-  app.delete('/api/users/:id', async (c) => ok(c, { id: c.req.param('id'), deleted: await UserEntity.delete(c.env, c.req.param('id')) }));
-
-  app.post('/api/users/deleteMany', async (c) => {
-    const { ids } = (await c.req.json()) as { ids?: string[] };
-    const list = ids?.filter(isStr) ?? [];
-    if (list.length === 0) return bad(c, 'ids required');
-    return ok(c, { deletedCount: await UserEntity.deleteMany(c.env, list), ids: list });
-  });
-
-  // DELETE: Chats
-  app.delete('/api/chats/:id', async (c) => ok(c, { id: c.req.param('id'), deleted: await ChatBoardEntity.delete(c.env, c.req.param('id')) }));
-
-  app.post('/api/chats/deleteMany', async (c) => {
-    const { ids } = (await c.req.json()) as { ids?: string[] };
-    const list = ids?.filter(isStr) ?? [];
-    if (list.length === 0) return bad(c, 'ids required');
-    return ok(c, { deletedCount: await ChatBoardEntity.deleteMany(c.env, list), ids: list });
+  app.delete('/api/users/:id', async (c) => {
+    const userId = c.req.param('id');
+    const deleted = await UserEntity.delete(c.env, userId);
+    return ok(c, { id: userId, deleted });
   });
 }
