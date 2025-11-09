@@ -12,6 +12,8 @@ import {
   ChevronRight,
   BookCopy,
   Megaphone,
+  Users,
+  Settings,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
@@ -27,11 +29,21 @@ const teacherLinks = [
   { to: 'grades', icon: <BookCopy className="h-5 w-5" />, label: 'Grade Management' },
   { to: 'announcements', icon: <Megaphone className="h-5 w-5" />, label: 'Announcements' },
 ];
+const parentLinks = [
+  { to: 'dashboard', icon: <LayoutDashboard className="h-5 w-5" />, label: 'Dashboard' },
+  { to: 'schedule', icon: <Calendar className="h-5 w-5" />, label: 'Student Schedule' },
+];
+const adminLinks = [
+  { to: 'dashboard', icon: <LayoutDashboard className="h-5 w-5" />, label: 'Dashboard' },
+  { to: 'users', icon: <Users className="h-5 w-5" />, label: 'User Management' },
+  { to: 'announcements', icon: <Megaphone className="h-5 w-5" />, label: 'Announcements' },
+  { to: 'settings', icon: <Settings className="h-5 w-5" />, label: 'Settings' },
+];
 const navLinksMap = {
   student: studentLinks,
   teacher: teacherLinks,
-  parent: [],  // Placeholder
-  admin: [],   // Placeholder
+  parent: parentLinks,
+  admin: adminLinks,
 };
 export function PortalSidebar() {
   const user = useAuthStore((state) => state.user);

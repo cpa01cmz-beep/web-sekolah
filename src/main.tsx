@@ -20,6 +20,13 @@ import { StudentCardPage } from '@/pages/portal/student/StudentCardPage';
 import { TeacherDashboardPage } from '@/pages/portal/teacher/TeacherDashboardPage';
 import { TeacherGradeManagementPage } from '@/pages/portal/teacher/TeacherGradeManagementPage';
 import { TeacherAnnouncementsPage } from '@/pages/portal/teacher/TeacherAnnouncementsPage';
+// Parent Pages
+import { ParentDashboardPage } from '@/pages/portal/parent/ParentDashboardPage';
+import { ParentStudentSchedulePage } from '@/pages/portal/parent/ParentStudentSchedulePage';
+// Admin Pages
+import { AdminDashboardPage } from '@/pages/portal/admin/AdminDashboardPage';
+import { AdminUserManagementPage } from '@/pages/portal/admin/AdminUserManagementPage';
+import { AdminAnnouncementsPage } from '@/pages/portal/admin/AdminAnnouncementsPage';
 const router = createBrowserRouter([
   {
     path: "/",
@@ -35,7 +42,7 @@ const router = createBrowserRouter([
     element: <PortalLayout />,
     errorElement: <RouteErrorBoundary />,
     children: [
-      { index: true, element: <Navigate to="/login" replace /> }, // Default redirect if no role
+      { index: true, element: <Navigate to="/login" replace /> },
       {
         path: "student",
         children: [
@@ -55,7 +62,24 @@ const router = createBrowserRouter([
           { path: "announcements", element: <TeacherAnnouncementsPage /> },
         ],
       },
-      // Future routes for other roles (parent, admin)
+      {
+        path: "parent",
+        children: [
+          { index: true, element: <Navigate to="dashboard" replace /> },
+          { path: "dashboard", element: <ParentDashboardPage /> },
+          { path: "schedule", element: <ParentStudentSchedulePage /> },
+        ],
+      },
+      {
+        path: "admin",
+        children: [
+          { index: true, element: <Navigate to="dashboard" replace /> },
+          { path: "dashboard", element: <AdminDashboardPage /> },
+          { path: "users", element: <AdminUserManagementPage /> },
+          { path: "announcements", element: <AdminAnnouncementsPage /> },
+          { path: "settings", element: <div>Admin Settings Page</div> }, // Placeholder
+        ],
+      },
     ],
   },
   // Placeholder routes for links in header/footer
