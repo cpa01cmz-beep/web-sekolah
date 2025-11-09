@@ -11,10 +11,15 @@ import '@/index.css';
 import { HomePage } from '@/pages/HomePage';
 import { LoginPage } from '@/pages/LoginPage';
 import { PortalLayout } from '@/pages/portal/PortalLayout';
+// Student Pages
 import { StudentDashboardPage } from '@/pages/portal/student/StudentDashboardPage';
 import { StudentGradesPage } from '@/pages/portal/student/StudentGradesPage';
 import { StudentSchedulePage } from '@/pages/portal/student/StudentSchedulePage';
 import { StudentCardPage } from '@/pages/portal/student/StudentCardPage';
+// Teacher Pages
+import { TeacherDashboardPage } from '@/pages/portal/teacher/TeacherDashboardPage';
+import { TeacherGradeManagementPage } from '@/pages/portal/teacher/TeacherGradeManagementPage';
+import { TeacherAnnouncementsPage } from '@/pages/portal/teacher/TeacherAnnouncementsPage';
 const router = createBrowserRouter([
   {
     path: "/",
@@ -30,7 +35,7 @@ const router = createBrowserRouter([
     element: <PortalLayout />,
     errorElement: <RouteErrorBoundary />,
     children: [
-      { index: true, element: <Navigate to="/portal/student/dashboard" replace /> }, // Default redirect
+      { index: true, element: <Navigate to="/login" replace /> }, // Default redirect if no role
       {
         path: "student",
         children: [
@@ -41,7 +46,16 @@ const router = createBrowserRouter([
           { path: "card", element: <StudentCardPage /> },
         ],
       },
-      // Future routes for other roles (teacher, parent, admin)
+      {
+        path: "teacher",
+        children: [
+          { index: true, element: <Navigate to="dashboard" replace /> },
+          { path: "dashboard", element: <TeacherDashboardPage /> },
+          { path: "grades", element: <TeacherGradeManagementPage /> },
+          { path: "announcements", element: <TeacherAnnouncementsPage /> },
+        ],
+      },
+      // Future routes for other roles (parent, admin)
     ],
   },
   // Placeholder routes for links in header/footer

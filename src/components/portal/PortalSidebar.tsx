@@ -1,19 +1,17 @@
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/lib/authStore';
 import { Button } from '@/components/ui/button';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   LayoutDashboard,
-  Book,
   Calendar,
   Award,
-  Users,
   User,
-  Settings,
   LogOut,
   GraduationCap,
   ChevronLeft,
   ChevronRight,
+  BookCopy,
+  Megaphone,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
@@ -24,13 +22,14 @@ const studentLinks = [
   { to: 'grades', icon: <Award className="h-5 w-5" />, label: 'Grades' },
   { to: 'card', icon: <User className="h-5 w-5" />, label: 'Student Card' },
 ];
-// Define other roles' links here for future phases
-// const teacherLinks = [...];
-// const parentLinks = [...];
-// const adminLinks = [...];
+const teacherLinks = [
+  { to: 'dashboard', icon: <LayoutDashboard className="h-5 w-5" />, label: 'Dashboard' },
+  { to: 'grades', icon: <BookCopy className="h-5 w-5" />, label: 'Grade Management' },
+  { to: 'announcements', icon: <Megaphone className="h-5 w-5" />, label: 'Announcements' },
+];
 const navLinksMap = {
   student: studentLinks,
-  teacher: [], // Placeholder
+  teacher: teacherLinks,
   parent: [],  // Placeholder
   admin: [],   // Placeholder
 };
