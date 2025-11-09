@@ -13,6 +13,7 @@ A modern, all-in-one school management portal for students, teachers, parents, a
   - [Prerequisites](#prerequisites)
   - [Installation](#installation)
 - [Usage](#usage)
+- [Documentation](#documentation)
 - [Deployment](#deployment)
 - [Project Structure](#project-structure)
 - [License](#license)
@@ -84,6 +85,19 @@ bun dev
 ```
 
 The application will be available at `http://localhost:3000` (or the port specified in your environment).
+
+## Documentation
+
+Comprehensive documentation is available in our [wiki](./wiki):
+
+- [Home](./wiki/Home.md) - Main documentation hub
+- [Technical Blueprint](./wiki/Technical-Blueprint.md) - Detailed technical documentation
+- [Development Roadmap](./wiki/Development-Roadmap.md) - Project development roadmap
+- [API Documentation](./wiki/API-Documentation.md) - API endpoints and usage
+- [User Guides](./wiki/User-Guides.md) - Instructions for using the application
+- [Deployment Guide](./wiki/Deployment-Guide.md) - Instructions for deploying the application
+- [Security Guidelines](./wiki/Security-Guidelines.md) - Security best practices and guidelines
+- [Contributing](./wiki/Contributing.md) - Guidelines for contributing to the project
 
 ## Deployment
 
