@@ -1,0 +1,125 @@
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Award, CalendarCheck, Megaphone, UserCheck } from 'lucide-react';
+import { motion, Variants } from 'framer-motion';
+import { useAuthStore } from '@/lib/authStore';
+const mockParentData = {
+  childName: 'Budi Hartono',
+  recentGrades: [
+    { subject: 'Mathematics', grade: 'A', score: 95 },
+    { subject: 'Physics', grade: 'B+', score: 88 },
+    { subject: 'History', grade: 'A-', score: 91 },
+  ],
+  attendance: {
+    present: 120,
+    absent: 2,
+    late: 1,
+  },
+  announcements: [
+    { title: 'Parent-Teacher Meeting Schedule', date: '2024-07-19', author: 'Admin' },
+    { title: 'School Holiday Announcement', date: '2024-07-20', author: 'Admin' },
+    { title: 'Mid-term Exam Schedule', date: '2024-07-18', author: 'Admin' },
+  ],
+};
+const containerVariants: Variants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+    },
+  },
+};
+const itemVariants: Variants = {
+  hidden: { y: 20, opacity: 0 },
+  visible: {
+    y: 0,
+    opacity: 1,
+    transition: {
+      type: 'spring' as const,
+      stiffness: 100,
+    },
+  },
+};
+export function ParentDashboardPage() {
+  const user = useAuthStore((state) => state.user);
+  return (
+    <motion.div
+      className="space-y-6"
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+    >
+      <motion.div variants={itemVariants}>
+        <h1 className="text-3xl font-bold">Parent Dashboard</h1>
+        <p className="text-muted-foreground">
+          Monitoring academic progress for <span className="font-semibold">{mockParentData.childName}</span>.
+        </p>
+      </motion.div>
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <motion.div variants={itemVariants}>
+          <Card className="h-full hover:shadow-lg transition-shadow duration-200">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Recent Grades</CardTitle>
+              <Award className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <ul className="space-y-3">
+                {mockParentData.recentGrades.map((grade, index) => (
+                  <li key={index} className="flex items-center justify-between">
+                    <p className="text-sm font-medium">{grade.subject}</p>
+                    <Badge variant={grade.grade.startsWith('A') ? 'default' : 'secondary'} className="bg-green-500 text-white">
+                      {grade.grade} ({grade.score})
+                    </Badge>
+                  </li>
+                ))}
+              </ul>
+            </CardContent>
+          </Card>
+        </motion.div>
+        <motion.div variants={itemVariants}>
+          <Card className="h-full hover:shadow-lg transition-shadow duration-200">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Attendance Summary</CardTitle>
+              <CalendarCheck className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent className="grid grid-cols-3 gap-4 text-center pt-4">
+              <div>
+                <p className="text-2xl font-bold text-green-600">{mockParentData.attendance.present}</p>
+                <p className="text-xs text-muted-foreground">Present</p>
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-yellow-600">{mockParentData.attendance.late}</p>
+                <p className="text-xs text-muted-foreground">Late</p>
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-red-600">{mockParentData.attendance.absent}</p>
+                <p className="text-xs text-muted-foreground">Absent</p>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+        <motion.div variants={itemVariants}>
+          <Card className="h-full hover:shadow-lg transition-shadow duration-200">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">School Announcements</CardTitle>
+              <Megaphone className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <ul className="space-y-3">
+                {mockParentData.announcements.map((ann, index) => (
+                  <li key={index} className="text-sm">
+                    <p className="font-medium truncate">{ann.title}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {ann.date} by {ann.author}
+                    </p>
+                  </li>
+                ))}
+              </ul>
+            </CardContent>
+          </Card>
+        </motion.div>
+      </div>
+    </motion.div>
+  );
+}

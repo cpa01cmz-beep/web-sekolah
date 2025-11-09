@@ -1,0 +1,104 @@
+import { useState } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import { Separator } from '@/components/ui/separator';
+import { useAuthStore } from '@/lib/authStore';
+import { motion } from 'framer-motion';
+import { toast } from 'sonner';
+import { format } from 'date-fns';
+type Announcement = {
+  id: string;
+  title: string;
+  content: string;
+  author: string;
+  date: string;
+};
+const initialAnnouncements: Announcement[] = [
+  { id: 'ann1', title: 'Mid-term Exam Schedule', content: 'The mid-term exam schedule has been posted. Please check the main notice board.', author: 'Admin Sekolah', date: new Date('2024-07-18').toISOString() },
+  { id: 'ann2', title: 'Class 11-A Project Deadline', content: 'Reminder: The mathematics project is due this Friday.', author: 'Ibu Siti', date: new Date('2024-07-22').toISOString() },
+];
+export function TeacherAnnouncementsPage() {
+  const user = useAuthStore((state) => state.user);
+  const [announcements, setAnnouncements] = useState<Announcement[]>(initialAnnouncements);
+  const [newTitle, setNewTitle] = useState('');
+  const [newContent, setNewContent] = useState('');
+  const handlePostAnnouncement = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newTitle.trim() || !newContent.trim() || !user) {
+      toast.error('Title and content cannot be empty.');
+      return;
+    }
+    const newAnnouncement: Announcement = {
+      id: `ann${announcements.length + 1}`,
+      title: newTitle,
+      content: newContent,
+      author: user.name,
+      date: new Date().toISOString(),
+    };
+    setAnnouncements([newAnnouncement, ...announcements]);
+    setNewTitle('');
+    setNewContent('');
+    toast.success('Announcement posted successfully!');
+  };
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className="space-y-6"
+    >
+      <h1 className="text-3xl font-bold">Announcements</h1>
+      <div className="grid gap-8 md:grid-cols-3">
+        <div className="md:col-span-1">
+          <Card>
+            <CardHeader>
+              <CardTitle>Create Announcement</CardTitle>
+              <CardDescription>Post a new announcement for students and parents.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handlePostAnnouncement} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="title">Title</Label>
+                  <Input id="title" value={newTitle} onChange={(e) => setNewTitle(e.target.value)} placeholder="Announcement Title" />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="content">Content</Label>
+                  <Textarea id="content" value={newContent} onChange={(e) => setNewContent(e.target.value)} placeholder="Write your announcement here..." rows={5} />
+                </div>
+                <Button type="submit" className="w-full">Post Announcement</Button>
+              </form>
+            </CardContent>
+          </Card>
+        </div>
+        <div className="md:col-span-2">
+          <Card>
+            <CardHeader>
+              <CardTitle>Posted Announcements</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {announcements.length > 0 ? (
+                announcements.map((ann, index) => (
+                  <div key={ann.id}>
+                    <div>
+                      <h3 className="font-semibold">{ann.title}</h3>
+                      <p className="text-sm text-muted-foreground">
+                        By {ann.author} on {format(new Date(ann.date), 'PPP')}
+                      </p>
+                      <p className="mt-2 text-sm">{ann.content}</p>
+                    </div>
+                    {index < announcements.length - 1 && <Separator className="mt-6" />}
+                  </div>
+                ))
+              ) : (
+                <p className="text-sm text-muted-foreground text-center py-8">No announcements posted yet.</p>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
