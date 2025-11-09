@@ -4,7 +4,7 @@ This document outlines the recommended settings for the Akademia Pro repository.
 
 ## General Settings
 
-- Repository name: akademia-pro
+- Repository name: web-sekolah
 - Description: A comprehensive school management system
 - Website: [Project website URL]
 - Template repository: No
