@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Clock, BookOpen, Megaphone, CheckCircle } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { motion, Variants } from 'framer-motion';
 // Mock Data for Phase 1
 const mockSchedule = [
   { time: '08:00 - 09:30', subject: 'Mathematics', teacher: 'Mr. John Doe' },
@@ -16,7 +16,7 @@ const mockAnnouncements = [
   { title: 'School Holiday Announcement', date: '2024-07-20' },
   { title: 'Mid-term Exam Schedule', date: '2024-07-18' },
 ];
-const containerVariants = {
+const containerVariants: Variants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
@@ -25,20 +25,20 @@ const containerVariants = {
     },
   },
 };
-const itemVariants = {
+const itemVariants: Variants = {
   hidden: { y: 20, opacity: 0 },
   visible: {
     y: 0,
     opacity: 1,
     transition: {
-      type: 'spring',
+      type: 'spring' as const, // Fix: Explicitly cast type to satisfy framer-motion's Variants type
       stiffness: 100,
     },
   },
 };
 export function StudentDashboardPage() {
   return (
-    <motion.div 
+    <motion.div
       className="space-y-6"
       variants={containerVariants}
       initial="hidden"

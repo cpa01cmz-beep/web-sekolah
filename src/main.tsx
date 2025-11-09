@@ -12,6 +12,9 @@ import { HomePage } from '@/pages/HomePage';
 import { LoginPage } from '@/pages/LoginPage';
 import { PortalLayout } from '@/pages/portal/PortalLayout';
 import { StudentDashboardPage } from '@/pages/portal/student/StudentDashboardPage';
+import { StudentGradesPage } from '@/pages/portal/student/StudentGradesPage';
+import { StudentSchedulePage } from '@/pages/portal/student/StudentSchedulePage';
+import { StudentCardPage } from '@/pages/portal/student/StudentCardPage';
 const router = createBrowserRouter([
   {
     path: "/",
@@ -31,8 +34,11 @@ const router = createBrowserRouter([
       {
         path: "student",
         children: [
+          { index: true, element: <Navigate to="dashboard" replace /> },
           { path: "dashboard", element: <StudentDashboardPage /> },
-          // Future student routes can be added here
+          { path: "grades", element: <StudentGradesPage /> },
+          { path: "schedule", element: <StudentSchedulePage /> },
+          { path: "card", element: <StudentCardPage /> },
         ],
       },
       // Future routes for other roles (teacher, parent, admin)
