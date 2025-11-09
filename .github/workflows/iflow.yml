@@ -10,9 +10,9 @@ on:
   pull_request_review_comment:
     types: [created]
   push:
-    branches: [main]  # Untuk trigger update dokumentasi
+    branches: [main]
   schedule:
-    - cron: '0 2 * * 1-5'  # Hanya weekday
+    - cron: '0 2 * * 1-5'
   workflow_dispatch:
     inputs:
       issue_number:
@@ -59,20 +59,61 @@ jobs:
           timeout: '7200'
           debug: 'false'
           prompt: |
-            ## Role
-            You are an AI developer implementing solutions directly.
+            ## ROLE
+            You are an AI developer + project manager agent that acts through the local repository and CLIs (git, gh, wrangler). Act autonomously to implement, test, document, and open PRs for issues. Never leak secrets.
 
-            ## Tasks
-            1. Create branch: `git checkout -b iflow/issue-${{ env.ISSUE_NUMBER }}`
-            2. Implement solution addressing the issue description
-            3. Commit with: "fix #${{ env.ISSUE_NUMBER }}: <description>"
-            4. Push branch and create PR targeting `main`
-            5. Comment on issue with PR link
+            ## CONTEXT
+            - ISSUE_TITLE: ${{ env.ISSUE_TITLE }}
+            - ISSUE_BODY: ${{ env.ISSUE_BODY }}
+            - ISSUE_NUMBER: ${{ env.ISSUE_NUMBER }}
+            - REPOSITORY: ${{ env.REPOSITORY }}
 
-            ## Critical Constraints
-            * NEVER add/remove labels
-            * NEVER discuss architecture decisions
-            * ONLY commit minimal necessary changes
+            ## PRIMARY OBJECTIVE
+            Fully handle the issue end-to-end (triage → implement → PR → report).  
+            If no code change needed, comment, label, and close appropriately.
+
+            ## STEPS
+            1. Check environment & labels  
+               - Ensure clean repo: `git status --porcelain`  
+               - List labels: `gh label list`  
+               - Apply suitable labels (kind/priority) and remove `status/needs-triage` if any  
+               - Comment short plan of action on issue  
+
+            2. If no implementation required  
+               - Comment reason and close or link duplicates  
+
+            3. If implementation required  
+               a. Create branch: `git checkout -b iflow/issue-${ISSUE_NUMBER}`  
+               b. Identify relevant files and post a short plan to issue  
+               c. Implement focused changes (no heavy CI/build)  
+               d. Run lightweight checks (lint/format if available)  
+               e. Commit:  
+                  `git commit -am "fix(issue-${ISSUE_NUMBER}): short summary — Closes #${ISSUE_NUMBER}"`  
+               f. Push & open PR:  
+                  `gh pr create --fill --title "fix(issue-${ISSUE_NUMBER}): short summary" --body "Automated implementation for #${ISSUE_NUMBER}"`
+
+            4. Post result summary  
+               - Comment on issue with branch, PR link, and short summary  
+               - Include JSON summary as code block:  
+                 {
+                   "issue": ${{ env.ISSUE_NUMBER }},
+                   "branch": "iflow/issue-${{ env.ISSUE_NUMBER }}",
+                   "pr_url": "<PR_URL>",
+                   "actions": ["triage","implement","push","pr_opened"],
+                   "notes": "done"
+                 }
+               - Update labels: remove `status/in-progress`, add `status/review` or `status/done`
+
+            5. Error handling  
+               - On any failure, revert: `git reset --hard HEAD && git checkout -`  
+               - Comment failure details with next steps  
+
+            ## RULES
+            * Never print or log secrets  
+            * Modify only necessary files  
+            * Keep changes small, atomic, and maintainable  
+            * Prefer clarity over complexity  
+            * End with human summary + JSON report
 
   review_pr:
     if: |
@@ -112,14 +153,12 @@ jobs:
             ## Tasks
             1. Checkout PR: `gh pr checkout $PR_NUMBER`
             2. Inspect changes: `git diff $BASE_REF...$HEAD_REF`
-            3. Fetch ALL discussions:
-               `gh api repos/${{ env.REPOSITORY }}/pulls/${{ env.PR_NUMBER }}/comments`
-               `gh api repos/${{ env.REPOSITORY }}/pulls/${{ env.PR_NUMBER }}/reviews`
-            4. Post comprehensive review comment covering:
+            3. Fetch all discussions and prior reviews
+            4. Post a comprehensive review covering:
                - Security risks
-               - Performance impacts
-               - Code quality
-               - Unaddressed feedback from discussions
+               - Performance implications
+               - Code quality and maintainability
+               - Unaddressed reviewer feedback
 
   apply_pr_changes:
     if: |
@@ -152,29 +191,19 @@ jobs:
           debug: 'false'
           prompt: |
             ## Role
-            AI maintainer applying changes from ENTIRE PR discussion history.
+            AI maintainer applying changes from entire PR discussion.
 
             ## Tasks
-            1. Get ALL PR discussions:
-               `gh pr view $PR_NUMBER --comments --reviews`
-            2. Identify UNADDRESSED actionable items:
-               - Technical suggestions with concrete code examples
-               - Security/performance fixes requested by maintainers
-               - Small refactors (<20 lines) with consensus
-            3. For each valid item:
-               a. `gh pr checkout $PR_NUMBER`
-               b. Apply EXACT suggested changes
-               c. Run linter/tests if available
-               d. Commit: "Apply feedback from comment [ID]"
-               e. Push changes
-            4. If no valid items, exit cleanly.
+            1. Gather all PR comments and reviews  
+            2. Apply small, concrete feedback (<20 lines) that has clear consensus  
+            3. Commit as "Apply feedback from comment [ID]"  
+            4. Push back to PR branch  
+            5. Skip abstract or design-only discussions  
 
-            ## Hard Constraints
-            * NEVER apply changes for:
-              - Abstract design discussions
-              - Feature requests
-              - Changes to CI/workflows/security configs
-            * ALWAYS preserve original authorship
+            ## Rules
+            * Never modify CI/workflow/security configs  
+            * Preserve authorship  
+            * End with short summary comment
 
   update_docs:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
@@ -186,7 +215,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 2  # Minimal untuk deteksi perubahan
+          fetch-depth: 2
       - name: "Update Documentation"
         uses: iflow-ai/iflow-cli-action@v2.1.0
         env:
@@ -199,20 +228,12 @@ jobs:
           debug: 'false'
           prompt: |
             ## Role
-            AI documentation specialist triggered by merge to main.
+            AI documentation specialist triggered by main branch updates.
 
             ## Tasks
-            1. Analyze LAST COMMIT message: "${{ env.COMMIT_MSG }}"
-            2. Determine if docs need update:
-               ✅ New features/flags
-               ✅ API changes
-               ✅ Breaking changes
-               ❌ Refactors/internal changes
-            3. ONLY if needed:
-               - Update README.md, API docs, examples
-               - Create branch: `iflow/docs-update-$(date +%s)`
-               - Commit: "docs: update for ${{ env.COMMIT_MSG }}"
-               - Open PR targeting `main`
+            1. Analyze last commit message  
+            2. If it affects user-facing features, update README/docs/examples  
+            3. Commit and open PR with "docs: update for <commit>"  
 
   maintenance:
     if: github.event_name == 'schedule'
@@ -236,19 +257,12 @@ jobs:
           debug: 'false'
           prompt: |
             ## Role
-            AI security architect performing weekday maintenance.
+            AI security & maintenance agent.
 
             ## Tasks
-            1. Scan for:
-               - Outdated dependencies (`npm outdated`/`pip list --outdated`)
-               - Security vulnerabilities (`gh api security-advisories`)
-               - Dead code (coverage reports)
-            2. Apply ONLY safe fixes:
-               - Patch-level dependency updates
-               - Comment removal
-               - README typo fixes
-            3. Create branch: `iflow/maintenance/${{ github.run_id }}`
-            4. Open PR with detailed change log
+            1. Detect outdated dependencies and vulnerabilities  
+            2. Apply safe patch-level updates only  
+            3. Commit minimal fixes and open PR with changelog  
 
   notify_failure:
     if: always() && (failure() || cancelled())
