@@ -2,7 +2,7 @@
 
 A modern, all-in-one school management portal for students, teachers, parents, and administrators, featuring a stunning user interface and seamless user experience.
 
-[cloudflarebutton]
+[![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/cpa01cmz-beep/web-sekolah)
 
 ## Table of Contents
 
@@ -101,7 +101,7 @@ This command will build the application and deploy it to your Cloudflare account
 
 Alternatively, you can deploy directly from your GitHub repository.
 
-[cloudflarebutton]
+[![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/cpa01cmz-beep/web-sekolah)
 
 ## Project Structure
 
