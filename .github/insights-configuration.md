@@ -78,4 +78,4 @@ This document outlines the configuration for repository insights and analytics.
 - Create dashboards for real-time monitoring
 - Display key metrics and KPIs
 - Set up alerts for metric thresholds
-- Provide access to relevant stakeholders
+Provide access to relevant stakeholders
