@@ -30,7 +30,7 @@ Please note that this project is released with a Contributor Code of Conduct. By
 
 1. Clone the repository:
    ```
-   git clone https://github.com/your-username/akademia-pro.git
+   git clone <repository-url>
    ```
 
 2. Install dependencies:
