@@ -48,7 +48,7 @@ bun run build
 ### 4. Deploy the Worker
 
 ```bash
-bangler deploy
+wrangler deploy
 ```
 
 ### 5. Deploy Static Assets
