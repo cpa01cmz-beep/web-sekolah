@@ -1,0 +1,274 @@
+name: "🤖 iFlow CLI Automation"
+
+on:
+  issues:
+    types: [opened, reopened]
+  issue_comment:
+    types: [created]
+  pull_request:
+    types: [opened, reopened, synchronize]
+  pull_request_review_comment:
+    types: [created]
+  push:
+    branches: [main]  # Untuk trigger update dokumentasi
+  schedule:
+    - cron: '0 2 * * 1-5'  # Hanya weekday
+  workflow_dispatch:
+    inputs:
+      issue_number:
+        description: 'Optional: issue number to implement'
+        required: false
+        type: number
+      pr_number:
+        description: 'Optional: pull request number to review'
+        required: false
+        type: number
+      trigger_apply:
+        description: 'Manually trigger apply changes for a PR'
+        required: false
+        type: number
+
+jobs:
+  solve_issue:
+    if: |
+      github.event_name == 'issues' ||
+      (github.event_name == 'issue_comment' &&
+       contains(github.event.comment.body, '@iflow-cli /solve')) ||
+      (github.event_name == 'workflow_dispatch' && inputs.issue_number)
+    concurrency:
+      group: ${{ github.workflow }}-issue-${{ github.event.issue.number || inputs.issue_number || github.run_id }}
+      cancel-in-progress: true
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: "Solve Issue"
+        uses: iflow-ai/iflow-cli-action@v2.1.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          ISSUE_TITLE: ${{ github.event.issue.title || 'manual' }}
+          ISSUE_BODY: ${{ github.event.issue.body || '' }}
+          ISSUE_NUMBER: ${{ github.event.issue.number || inputs.issue_number }}
+          REPOSITORY: ${{ github.repository }}
+        with:
+          api_key: ${{ secrets.IFLOW_API_KEY }}
+          timeout: '7200'
+          debug: 'false'
+          prompt: |
+            ## Role
+            You are an AI developer implementing solutions directly.
+
+            ## Tasks
+            1. Create branch: `git checkout -b iflow/issue-${{ env.ISSUE_NUMBER }}`
+            2. Implement solution addressing the issue description
+            3. Commit with: "fix #${{ env.ISSUE_NUMBER }}: <description>"
+            4. Push branch and create PR targeting `main`
+            5. Comment on issue with PR link
+
+            ## Critical Constraints
+            * NEVER add/remove labels
+            * NEVER discuss architecture decisions
+            * ONLY commit minimal necessary changes
+
+  review_pr:
+    if: |
+      github.event_name == 'pull_request' ||
+      (github.event_name == 'pull_request_review_comment' &&
+       contains(github.event.comment.body, '@iflow-cli /review')) ||
+      (github.event_name == 'workflow_dispatch' && inputs.pr_number)
+    concurrency:
+      group: ${{ github.workflow }}-pr-${{ github.event.pull_request.number || inputs.pr_number || github.run_id }}
+      cancel-in-progress: true
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: "Review PR"
+        uses: iflow-ai/iflow-cli-action@v2.1.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number || inputs.pr_number }}
+          BASE_REF: ${{ github.event.pull_request.base.ref || 'main' }}
+          HEAD_REF: ${{ github.event.pull_request.head.ref || '' }}
+          REPOSITORY: ${{ github.repository }}
+        with:
+          api_key: ${{ secrets.IFLOW_API_KEY }}
+          timeout: '7200'
+          debug: 'false'
+          prompt: |
+            ## Role
+            AI code reviewer analyzing full PR context.
+
+            ## Tasks
+            1. Checkout PR: `gh pr checkout $PR_NUMBER`
+            2. Inspect changes: `git diff $BASE_REF...$HEAD_REF`
+            3. Fetch ALL discussions:
+               `gh api repos/${{ env.REPOSITORY }}/pulls/${{ env.PR_NUMBER }}/comments`
+               `gh api repos/${{ env.REPOSITORY }}/pulls/${{ env.PR_NUMBER }}/reviews`
+            4. Post comprehensive review comment covering:
+               - Security risks
+               - Performance impacts
+               - Code quality
+               - Unaddressed feedback from discussions
+
+  apply_pr_changes:
+    if: |
+      (github.event_name == 'pull_request_review_comment' &&
+       (contains(github.event.comment.body, '@iflow-cli /apply') ||
+        github.event.comment.author_association == 'COLLABORATOR')) ||
+      (github.event_name == 'workflow_dispatch' && inputs.trigger_apply)
+    concurrency:
+      group: ${{ github.workflow }}-apply-${{ github.event.pull_request.number || inputs.trigger_apply || github.run_id }}
+      cancel-in-progress: true
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: "Apply Changes from Full Discussion"
+        uses: iflow-ai/iflow-cli-action@v2.1.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number || inputs.trigger_apply }}
+          REPOSITORY: ${{ github.repository }}
+        with:
+          api_key: ${{ secrets.IFLOW_API_KEY }}
+          timeout: '7200'
+          debug: 'false'
+          prompt: |
+            ## Role
+            AI maintainer applying changes from ENTIRE PR discussion history.
+
+            ## Tasks
+            1. Get ALL PR discussions:
+               `gh pr view $PR_NUMBER --comments --reviews`
+            2. Identify UNADDRESSED actionable items:
+               - Technical suggestions with concrete code examples
+               - Security/performance fixes requested by maintainers
+               - Small refactors (<20 lines) with consensus
+            3. For each valid item:
+               a. `gh pr checkout $PR_NUMBER`
+               b. Apply EXACT suggested changes
+               c. Run linter/tests if available
+               d. Commit: "Apply feedback from comment [ID]"
+               e. Push changes
+            4. If no valid items, exit cleanly.
+
+            ## Hard Constraints
+            * NEVER apply changes for:
+              - Abstract design discussions
+              - Feature requests
+              - Changes to CI/workflows/security configs
+            * ALWAYS preserve original authorship
+
+  update_docs:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2  # Minimal untuk deteksi perubahan
+      - name: "Update Documentation"
+        uses: iflow-ai/iflow-cli-action@v2.1.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          REPOSITORY: ${{ github.repository }}
+          COMMIT_MSG: ${{ github.event.head_commit.message }}
+        with:
+          api_key: ${{ secrets.IFLOW_API_KEY }}
+          timeout: '3600'
+          debug: 'false'
+          prompt: |
+            ## Role
+            AI documentation specialist triggered by merge to main.
+
+            ## Tasks
+            1. Analyze LAST COMMIT message: "${{ env.COMMIT_MSG }}"
+            2. Determine if docs need update:
+               ✅ New features/flags
+               ✅ API changes
+               ✅ Breaking changes
+               ❌ Refactors/internal changes
+            3. ONLY if needed:
+               - Update README.md, API docs, examples
+               - Create branch: `iflow/docs-update-$(date +%s)`
+               - Commit: "docs: update for ${{ env.COMMIT_MSG }}"
+               - Open PR targeting `main`
+
+  maintenance:
+    if: github.event_name == 'schedule'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: "Repository Maintenance"
+        uses: iflow-ai/iflow-cli-action@v2.1.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          REPOSITORY: ${{ github.repository }}
+        with:
+          api_key: ${{ secrets.IFLOW_API_KEY }}
+          timeout: '10800'
+          debug: 'false'
+          prompt: |
+            ## Role
+            AI security architect performing weekday maintenance.
+
+            ## Tasks
+            1. Scan for:
+               - Outdated dependencies (`npm outdated`/`pip list --outdated`)
+               - Security vulnerabilities (`gh api security-advisories`)
+               - Dead code (coverage reports)
+            2. Apply ONLY safe fixes:
+               - Patch-level dependency updates
+               - Comment removal
+               - README typo fixes
+            3. Create branch: `iflow/maintenance/${{ github.run_id }}`
+            4. Open PR with detailed change log
+
+  notify_failure:
+    if: always() && (failure() || cancelled())
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    steps:
+      - name: Create failure issue
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GH_TOKEN }}
+          script: |
+            if (process.env.GITHUB_RUN_ATTEMPT === '1') {
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: `🚨 Workflow Failure: ${{ github.workflow }}`,
+                body: `Failed run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}`,
+                labels: ['automation-error']
+              });
+            }
+        env:
+          GITHUB_RUN_ATTEMPT: ${{ github.run_attempt }}
