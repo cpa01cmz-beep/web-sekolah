@@ -14,7 +14,7 @@ This document outlines the steps to set up the Akademia Pro project based on the
 1. Clone the repository:
    ```
    git clone <repository-url>
-   cd akademia-pro
+   cd web-sekolah
    ```
 
 2. Install dependencies:
