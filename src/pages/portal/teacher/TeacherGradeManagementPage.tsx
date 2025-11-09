@@ -16,10 +16,11 @@ import type { SchoolClass } from '@shared/types';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 type StudentGrade = {
-  id: string;
+  id: string; // studentId
   name: string;
   score: number | null;
   feedback: string;
+  gradeId: string | null; // This is the actual ID of the grade record
 };
 export function TeacherGradeManagementPage() {
   const user = useAuthStore((state) => state.user);
@@ -35,26 +36,27 @@ export function TeacherGradeManagementPage() {
     ['classes', selectedClass || '', 'students'],
     { enabled: !!selectedClass }
   );
-  const gradeMutation = useMutation(['grades', editingStudent?.id || ''], {
+  const gradeMutation = useMutation(['grades', editingStudent?.gradeId || ''], {
     method: 'PUT',
     onSuccess: () => {
       toast.success(`Grade for ${editingStudent?.name} updated successfully.`);
       queryClient.invalidateQueries({ queryKey: ['classes', selectedClass, 'students'] });
       setEditingStudent(null);
     },
-    onError: () => {
-      toast.error('Failed to update grade.');
+    onError: (error) => {
+      toast.error(`Failed to update grade: ${error.message}`);
     },
   });
   const handleSaveChanges = () => {
-    if (!editingStudent) return;
+    if (!editingStudent || !editingStudent.gradeId) {
+        toast.error("Cannot save changes. No grade record exists for this student yet.");
+        return;
+    };
     const scoreValue = currentScore === '' ? null : parseInt(currentScore, 10);
     if (scoreValue !== null && (isNaN(scoreValue) || scoreValue < 0 || scoreValue > 100)) {
       toast.error('Please enter a valid score between 0 and 100.');
       return;
     }
-    // This is a simplification. In a real app, you'd need the grade ID.
-    // We'll mock this by just sending student ID and assuming the backend finds the grade.
     gradeMutation.mutate({ score: scoreValue, feedback: currentFeedback } as any);
   };
   const handleEditClick = (student: StudentGrade) => {

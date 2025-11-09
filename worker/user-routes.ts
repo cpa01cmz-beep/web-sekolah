@@ -10,7 +10,7 @@ import {
   ScheduleEntity,
   ensureAllSeedData
 } from "./entities";
-import type { Grade, SchoolUser, Student, StudentDashboardData } from "@shared/types";
+import type { Grade, SchoolUser, Student, StudentDashboardData, Teacher } from "@shared/types";
 export function userRoutes(app: Hono<{ Bindings: Env }>) {
   // --- SEED ENDPOINT ---
   app.post('/api/seed', async (c) => {
@@ -68,20 +68,33 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
   });
   app.get('/api/classes/:id/students', async (c) => {
     const classId = c.req.param('id');
+    const classEntity = new ClassEntity(c.env, classId);
+    const classState = await classEntity.getState();
+    if (!classState) return notFound(c, 'Class not found');
+    const teacher = await new UserEntity(c.env, classState.teacherId).getState() as Teacher;
+    const teacherCourses = (await CourseEntity.list(c.env)).items.filter(course => teacher.classIds.includes(classId) && course.teacherId === teacher.id);
+    const teacherCourseIds = new Set(teacherCourses.map(c => c.id));
     const allUsers = (await UserEntity.list(c.env)).items;
     const students = allUsers.filter(u => u.role === 'student' && (u as Student).classId === classId);
-    const studentGrades = (await GradeEntity.list(c.env)).items;
-    const gradesMap = new Map(studentGrades.map(g => [`${g.studentId}-${g.courseId}`, g]));
-    // This is a simplified version. A real app would filter by the teacher's course.
+    const allGrades = (await GradeEntity.list(c.env)).items;
     const studentsWithGrades = students.map(s => {
-      // A placeholder for grade fetching logic
-      return { id: s.id, name: s.name, score: null, feedback: '' };
+      const studentGrades = allGrades.filter(g => g.studentId === s.id && teacherCourseIds.has(g.courseId));
+      // For simplicity, we'll just show the first grade found for a relevant course.
+      const relevantGrade = studentGrades[0];
+      return {
+        id: s.id,
+        name: s.name,
+        score: relevantGrade?.score ?? null,
+        feedback: relevantGrade?.feedback ?? '',
+        gradeId: relevantGrade?.id ?? null, // Pass the gradeId to the frontend
+      };
     });
     return ok(c, studentsWithGrades);
   });
   app.put('/api/grades/:id', async (c) => {
     const gradeId = c.req.param('id');
     const { score, feedback } = await c.req.json<{ score: number; feedback: string }>();
+    if (gradeId === 'null' || !gradeId) return bad(c, 'Grade has not been created yet. Cannot update.');
     const gradeEntity = new GradeEntity(c.env, gradeId);
     if (!await gradeEntity.exists()) return notFound(c, 'Grade not found');
     await gradeEntity.patch({ score, feedback });
