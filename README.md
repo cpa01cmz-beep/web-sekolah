@@ -15,6 +15,7 @@ A modern, all-in-one school management portal for students, teachers, parents, a
   - [Prerequisites](#prerequisites)
   - [Installation](#installation)
 - [Usage](#usage)
+- [Documentation](#documentation)
 - [Deployment](#deployment)
 - [iFlow CLI Automation](#iflow-cli-automation)
 - [Project Structure](#project-structure)
@@ -87,6 +88,19 @@ bun dev
 ```
 
 The application will be available at `http://localhost:3000` (or the port specified in your environment).
+
+## Documentation
+
+Comprehensive documentation is available in our [wiki](../../wiki/Home):
+
+- [Home](../../wiki/Home) - Main documentation hub
+- [Technical Blueprint](../../wiki/Technical-Blueprint) - Detailed technical documentation
+- [Development Roadmap](../../wiki/Development-Roadmap) - Project development roadmap
+- [API Documentation](../../wiki/API-Documentation) - API endpoints and usage
+- [User Guides](../../wiki/User-Guides) - Instructions for using the application
+- [Deployment Guide](../../wiki/Deployment-Guide) - Instructions for deploying the application
+- [Security Guidelines](../../wiki/Security-Guidelines) - Security best practices and guidelines
+- [Contributing](../../wiki/Contributing) - Guidelines for contributing to the project
 
 ## Deployment
 
