@@ -143,7 +143,7 @@ export function HomePage() {
             <div className="mt-12 grid gap-6 md:grid-cols-3">
               {contactInfo.map((info, index) => (
                 <motion.div
-                  key={index}
+                  key={info.text}
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
