@@ -1,3 +1,37 @@
-
 # Bootstrap marker
 .bootstrap-complete
+
+# Build artifacts
+dist/
+build/
+out/
+
+# Dependencies
+node_modules/
+
+# Logs
+*.log
+
+# Cache
+.cache/
+.eslintcache
+.wrangler/
+tsconfig.tsbuildinfo
+
+# Environment variables
+.env*
+!.env.example
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Package manager
+package-lock.json
+yarn.lock
