@@ -87,7 +87,7 @@
   "devDependencies": {
     "@cloudflare/vite-plugin": "^1.9.4",
     "@cloudflare/workers-types": "^4.20250807.0",
-    "@eslint/js": "^9.22.0",
+    "@eslint/js": "^9.39.1",
     "@types/node": "^22.15.3",
     "@types/react": "^18.3.1",
     "@types/react-dom": "^18.3.1",
