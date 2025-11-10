@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { SiteHeader } from '@/components/SiteHeader';
 import { SiteFooter } from '@/components/SiteFooter';
-import { CheckCircle, BookOpen, Users, BarChart } from 'lucide-react';
+import { CheckCircle, BookOpen, Users, BarChart, MapPin, Phone, Mail } from 'lucide-react';
 import { motion } from 'framer-motion';
 const features = [
   {
@@ -26,6 +26,11 @@ const values = [
   { title: 'Excellence', description: 'Striving for the highest standards in education and technology.' },
   { title: 'Collaboration', description: 'Fostering a connected community between all school stakeholders.' },
   { title: 'Innovation', description: 'Continuously improving the educational experience with modern tools.' },
+];
+const contactInfo = [
+  { icon: <MapPin className="h-5 w-5" />, text: 'Jl. Raya No. 123, Jakarta, Indonesia' },
+  { icon: <Phone className="h-5 w-5" />, text: '(021) 123-4567' },
+  { icon: <Mail className="h-5 w-5" />, text: 'info@akademiapro.sch.id' },
 ];
 export function HomePage() {
   return (
@@ -81,7 +86,7 @@ export function HomePage() {
                 <motion.div
                   key={feature.title}
                   initial={{ opacity: 0, y: 50 }}
-                  whileInView={{ opacity: 1, y: 0 }}
+                  animate={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.5, delay: index * 0.1 }}
                 >
@@ -123,6 +128,32 @@ export function HomePage() {
             </div>
             <div className="hidden md:block">
               <img src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?q=80&w=2070&auto=format&fit=crop" alt="Students collaborating" className="rounded-lg shadow-lg" />
+            </div>
+          </div>
+        </section>
+        {/* Contact Section */}
+        <section className="py-16 md:py-24 bg-background">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center">
+              <h2 className="text-3xl md:text-4xl font-bold text-foreground">Contact Our School</h2>
+              <p className="mt-4 text-lg text-muted-foreground">
+                Get in touch with us for more information about our programs and services.
+              </p>
+            </div>
+            <div className="mt-12 grid gap-6 md:grid-cols-3">
+              {contactInfo.map((info, index) => (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5, delay: index * 0.1 }}
+                  className="flex items-center justify-center gap-3 p-4 bg-card rounded-lg shadow-sm"
+                >
+                  {info.icon}
+                  <span className="text-muted-foreground">{info.text}</span>
+                </motion.div>
+              ))}
             </div>
           </div>
         </section>
