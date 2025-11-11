@@ -56,6 +56,20 @@ Configure system-wide settings and preferences.
 ### Analytics
 View school-wide analytics and reports.
 
+## Authentication
+
+### Login Process
+1. Navigate to the login page
+2. Enter your email and password
+3. Select your role (Student, Teacher, Parent, or Admin)
+4. Click the login button for your role
+5. You will be redirected to your role-specific dashboard
+
+### Logout Process
+1. Click on your profile icon in the top right corner
+2. Select "Logout" from the dropdown menu
+3. You will be redirected to the login page
+
 ## General Navigation
 
 ### Sidebar Menu

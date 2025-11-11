@@ -9,7 +9,8 @@ Authenticate a user and receive a JWT token.
 ```json
 {
   "email": "user@example.com",
-  "password": "userpassword"
+  "password": "userpassword",
+  "role": "student|teacher|parent|admin"
 }
 ```
 
@@ -21,7 +22,8 @@ Authenticate a user and receive a JWT token.
     "id": "user_id",
     "email": "user@example.com",
     "name": "User Name",
-    "role": "student|teacher|parent|admin"
+    "role": "student|teacher|parent|admin",
+    "avatarUrl": "https://example.com/avatar.jpg"
   }
 }
 ```
@@ -56,7 +58,8 @@ Register a new user (admin only).
     "id": "new_user_id",
     "email": "newuser@example.com",
     "name": "New User",
-    "role": "student|teacher|parent|admin"
+    "role": "student|teacher|parent|admin",
+    "avatarUrl": "https://example.com/avatar.jpg"
   }
 }
 ```
@@ -73,6 +76,7 @@ Get the current user's profile.
   "email": "user@example.com",
   "name": "User Name",
   "role": "student|teacher|parent|admin",
+  "avatarUrl": "https://example.com/avatar.jpg",
   "createdAt": "2023-01-01T00:00:00.000Z",
   "lastLogin": "2023-01-01T00:00:00.000Z"
 }
@@ -96,6 +100,7 @@ Update the current user's profile.
   "email": "updated@example.com",
   "name": "Updated Name",
   "role": "student|teacher|parent|admin",
+  "avatarUrl": "https://example.com/avatar.jpg",
   "createdAt": "2023-01-01T00:00:00.000Z",
   "lastLogin": "2023-01-01T00:00:00.000Z"
 }
@@ -111,6 +116,7 @@ Get a specific user (admin only).
   "email": "user@example.com",
   "name": "User Name",
   "role": "student|teacher|parent|admin",
+  "avatarUrl": "https://example.com/avatar.jpg",
   "createdAt": "2023-01-01T00:00:00.000Z",
   "lastLogin": "2023-01-01T00:00:00.000Z"
 }

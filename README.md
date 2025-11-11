@@ -30,7 +30,7 @@ The system is built on Cloudflare's high-performance serverless infrastructure, 
 ## Key Features
 
 - **Public Landing Page**: A professional, public-facing homepage serving as the school's digital front door.
-- **Unified Login Portal**: A single, secure login page for all user roles (Student, Teacher, Parent, Admin).
+- **Unified Login Portal**: A single, secure login page for all user roles (Student, Teacher, Parent, Admin) with role-specific authentication.
 - **Student Portal**: A personalized dashboard for students to view their class schedule, check grades (with UI designed for RDM data), access their digital student card, and receive announcements.
 - **Teacher Portal**: A dedicated workspace for teachers to manage their classes, submit grades, and post announcements.
 - **Parent Portal**: An overview for parents to monitor their child's academic progress and communicate with teachers.
