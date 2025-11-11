@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -55,11 +55,11 @@ export function AdminNewsManagementPage() {
     }
     
     const newNewsItem: NewsItem = {
-      id: `news-${Date.now()}`,
+      id: `news-${crypto.randomUUID()}`,
       title: newTitle,
       content: newContent,
       categoryId: newCategory,
-      author: user.name,
+      author: user.name || 'Unknown Author',
       date: new Date().toISOString(),
     };
     
@@ -78,7 +78,7 @@ export function AdminNewsManagementPage() {
     }
     
     const newCat: NewsCategory = {
-      id: `cat-${Date.now()}`,
+      id: `cat-${crypto.randomUUID()}`,
       name: newCategoryName,
     };
     
@@ -105,9 +105,14 @@ export function AdminNewsManagementPage() {
     toast.success('Category deleted.');
   };
 
+  const categoryMap = useMemo(() => {
+    const map = new Map<string, string>();
+    categories.forEach(cat => map.set(cat.id, cat.name));
+    return map;
+  }, [categories]);
+
   const getCategoryName = (categoryId: string) => {
-    const category = categories.find(cat => cat.id === categoryId);
-    return category ? category.name : 'Unknown';
+    return categoryMap.get(categoryId) || 'Unknown';
   };
 
   return (
@@ -209,7 +214,7 @@ export function AdminNewsManagementPage() {
                         </p>
                       </div>
                       <div className="flex space-x-2">
-                        <Button variant="outline" size="icon" className="h-8 w-8">
+                        <Button variant="outline" size="icon" className="h-8 w-8" disabled>
                           <Edit className="h-4 w-4" />
                         </Button>
                         <Button variant="destructive" size="icon" className="h-8 w-8" onClick={() => handleDeleteNews(news.id)}>
