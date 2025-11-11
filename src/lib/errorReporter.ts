@@ -1,3 +1,7 @@
+// ====================
+// Error Reporting Types
+// ====================
+
 interface BaseErrorData {
   url: string;
   timestamp: string;
@@ -18,11 +22,6 @@ interface ErrorReport extends BaseErrorData {
   category?: "react" | "javascript" | "network" | "user" | "unknown";
 }
 
-// Removed legacy ErrorSignature and related internal dedup logic in favor of GlobalErrorDeduplication
-
-type ConsoleMethod = "warn" | "error";
-type ConsoleArgs = unknown[];
-
 interface ErrorFilterResult {
   shouldReport: boolean;
   reason?: string;
@@ -36,23 +35,9 @@ interface ErrorContext {
   level: "error" | "warning" | "info";
 }
 
-// Shared categorization utility (used by both class and immediate interceptors)
-const categorize = (message: string): ErrorReport["category"] => {
-  if (message.includes("Warning:") || message.includes("React")) return "react";
-  if (
-    message.includes("fetch") ||
-    message.includes("network") ||
-    message.includes("Failed to load")
-  )
-    return "network";
-  if (
-    message.includes("TypeError") ||
-    message.includes("ReferenceError") ||
-    message.includes("SyntaxError")
-  )
-    return "javascript";
-  return "unknown";
-};
+// ====================
+// Constants
+// ====================
 
 // Shared patterns and wrappers
 const REACT_WARNING_PATTERN = "Warning:" as const;
@@ -70,10 +55,27 @@ const VENDOR_PATTERNS: ReadonlyArray<RegExp> = [
   /deps/,
 ];
 
-type WrappedConsoleFn = ((...args: unknown[]) => void) & {
-  __errorReporterWrapped?: boolean;
+// ====================
+// Utility Functions
+// ====================
+
+// Shared categorization utility (used by both class and immediate interceptors)
+const categorizeError = (message: string): ErrorReport["category"] => {
+  if (message.includes("Warning:") || message.includes("React")) return "react";
+  if (
+    message.includes("fetch") ||
+    message.includes("network") ||
+    message.includes("Failed to load")
+  )
+    return "network";
+  if (
+    message.includes("TypeError") ||
+    message.includes("ReferenceError") ||
+    message.includes("SyntaxError")
+  )
+    return "javascript";
+  return "unknown";
 };
-type ConsoleNative = (...args: unknown[]) => void;
 
 const isReactRouterFutureFlagMessage = (message: string): boolean => {
   const futurePatterns = [
@@ -112,12 +114,20 @@ const hasRelevantSourceInStack = (stack?: string): boolean => {
   return !isAllVendor;
 };
 
+// ====================
+// Error Precedence
+// ====================
+
 interface ErrorPrecedence {
   hasSourceCode: boolean;
   isWarning: boolean;
   stackDepth: number;
   timestamp: number;
 }
+
+// ====================
+// Global Error Deduplication System
+// ====================
 
 // Shared deduplication system between immediate and class interceptors
 class GlobalErrorDeduplication {
@@ -129,7 +139,7 @@ class GlobalErrorDeduplication {
   private readonly cleanupInterval = 60000; // 1 minute
   private lastCleanup = Date.now();
 
-  private calculatePrecedence(context: ErrorContext): ErrorPrecedence {
+  private calculateErrorPrecedence(context: ErrorContext): ErrorPrecedence {
     const hasSourceCode = this.hasRelevantSourceCode(context.stack);
     const isWarning = context.level === "warning";
     const stackDepth = context.stack ? context.stack.split("\n").length : 0;
@@ -153,29 +163,29 @@ class GlobalErrorDeduplication {
   }
 
   private isHigherPrecedence(
-    newPrec: ErrorPrecedence,
-    existingPrec: ErrorPrecedence
+    newPrecedence: ErrorPrecedence,
+    existingPrecedence: ErrorPrecedence
   ): boolean {
     // Prefer errors with source code
-    if (newPrec.hasSourceCode !== existingPrec.hasSourceCode) {
-      return newPrec.hasSourceCode;
+    if (newPrecedence.hasSourceCode !== existingPrecedence.hasSourceCode) {
+      return newPrecedence.hasSourceCode;
     }
 
     // For same source code presence, prefer warnings (they often have better stack traces)
-    if (newPrec.isWarning !== existingPrec.isWarning) {
-      return newPrec.isWarning;
+    if (newPrecedence.isWarning !== existingPrecedence.isWarning) {
+      return newPrecedence.isWarning;
     }
 
     // Prefer deeper stack traces (more context)
-    if (newPrec.stackDepth !== existingPrec.stackDepth) {
-      return newPrec.stackDepth > existingPrec.stackDepth;
+    if (newPrecedence.stackDepth !== existingPrecedence.stackDepth) {
+      return newPrecedence.stackDepth > existingPrecedence.stackDepth;
     }
 
     // Prefer newer errors
-    return newPrec.timestamp > existingPrec.timestamp;
+    return newPrecedence.timestamp > existingPrecedence.timestamp;
   }
 
-  private generateSignature(context: ErrorContext): string {
+  private generateErrorSignature(context: ErrorContext): string {
     // Normalize message to group all variants of the same error
     let messageCore = context.message
       .replace(/\[CONSOLE ERROR\]|\[WARNING\]/g, "")
@@ -212,8 +222,8 @@ class GlobalErrorDeduplication {
   ): { shouldReport: boolean; reason?: string } {
     this.maybeCleanup();
 
-    const signature = this.generateSignature(context);
-    const precedence = this.calculatePrecedence(context);
+    const signature = this.generateErrorSignature(context);
+    const precedence = this.calculateErrorPrecedence(context);
     const existing = this.reportedErrors.get(signature);
     const now = Date.now();
 

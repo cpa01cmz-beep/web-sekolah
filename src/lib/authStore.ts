@@ -1,18 +1,86 @@
-import { create } from 'zustand';
-import { BaseUser, UserRole } from '@shared/types';
-interface AuthState {
-  user: BaseUser | null;
-  login: (role: UserRole) => void;
-  logout: () => void;
-}
-const mockUsers: Record<UserRole, BaseUser> = {
-  student: { id: 'student-01', name: 'Budi Hartono', email: 'budi@example.com', role: 'student', avatarUrl: 'https://i.pravatar.cc/150?u=student01' },
-  teacher: { id: 'teacher-01', name: 'Ibu Siti', email: 'siti@example.com', role: 'teacher', avatarUrl: 'https://i.pravatar.cc/150?u=teacher01' },
-  parent: { id: 'parent-01', name: 'Ayah Budi', email: 'ayah.budi@example.com', role: 'parent', avatarUrl: 'https://i.pravatar.cc/150?u=parent01' },
-  admin: { id: 'admin-01', name: 'Admin Sekolah', email: 'admin@example.com', role: 'admin', avatarUrl: 'https://i.pravatar.cc/150?u=admin01' },
-};
-export const useAuthStore = create<AuthState>((set) => ({
-  user: null,
-  login: (role) => set({ user: mockUsers[role] }),
-  logout: () => set({ user: null }),
-}));
+// ====================
+// Authentication Store
+// ====================
+
+import { create } from 'zustand';
+import { BaseUser, UserRole } from '@shared/types';
+import { AuthService } from '@/services/authService';
+
+// ====================
+// Types
+// ====================
+
+interface AuthState {
+  user: BaseUser | null;
+  token: string | null;
+  login: (email: string, password: string, role: UserRole) => Promise<void>;
+  logout: () => Promise<void>;
+  initializeAuth: () => Promise<void>;
+}
+
+// ====================
+// Store Implementation
+// ====================
+
+/**
+ * Zustand store for authentication state management
+ * Handles user login, logout, and authentication initialization
+ */
+export const useAuthStore = create<AuthState>((set) => ({
+  user: null,
+  token: null,
+  
+  /**
+   * Authenticate user with email, password, and role
+   * @param email - User's email address
+   * @param password - User's password
+   * @param role - User's role in the system
+   * @throws Error if authentication fails
+   */
+  login: async (email, password, role) => {
+    try {
+      const authResponse = await AuthService.login({ email, password, role });
+      set({ user: authResponse.user, token: authResponse.token });
+    } catch (error) {
+      console.error('Login failed:', error);
+      throw error;
+    }
+  },
+  
+  /**
+   * Log out the current user and clear authentication state
+   * Clears both in-memory state and any stored tokens
+   */
+  logout: async () => {
+    try {
+      await AuthService.logout();
+      set({ user: null, token: null });
+    } catch (error) {
+      console.error('Logout failed:', error);
+      set({ user: null, token: null }); // Clear state anyway
+    }
+  },
+  
+  /**
+   * Initialize authentication state from stored token
+   * Checks for a stored token and validates it to restore session
+   */
+  initializeAuth: async () => {
+    // Check for stored token and validate it
+    const storedToken = localStorage.getItem('authToken');
+    if (storedToken) {
+      try {
+        const user = await AuthService.getCurrentUser(storedToken);
+        if (user) {
+          set({ user, token: storedToken });
+        } else {
+          // Token is invalid, clear it
+          localStorage.removeItem('authToken');
+        }
+      } catch (error) {
+        console.error('Auth initialization failed:', error);
+        localStorage.removeItem('authToken');
+      }
+    }
+  },
+}));
