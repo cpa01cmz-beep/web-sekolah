@@ -11,21 +11,31 @@ import { motion } from 'framer-motion';
 import { Toaster, toast } from 'sonner';
 export function LoginPage() {
   const navigate = useNavigate();
-  const login = useAuthStore((state) => state.login);
+  const { login } = useAuthStore();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const handleLogin = (role: UserRole) => {
+  const [isLoading, setIsLoading] = useState<UserRole | null>(null);
+  const handleLogin = async (role: UserRole) => {
     // In a real app, you'd validate credentials here.
     // For this mock, we just log in with the selected role.
     if (!email || !password) {
       toast.error('Please enter email and password.');
       return;
     }
-    login(role);
-    toast.success(`Logged in as ${role}. Redirecting...`);
-    setTimeout(() => {
-      navigate(`/portal/${role}/dashboard`);
-    }, 1000);
+    
+    setIsLoading(role);
+    try {
+      await login(email, password, role);
+      toast.success(`Logged in as ${role}. Redirecting...`);
+      setTimeout(() => {
+        navigate(`/portal/${role}/dashboard`);
+      }, 1000);
+    } catch (error) {
+      toast.error('Login failed. Please check your credentials.');
+      console.error('Login error:', error);
+    } finally {
+      setIsLoading(null);
+    }
   };
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-[#F5F7FA] p-4">
@@ -49,20 +59,60 @@ export function LoginPage() {
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
-              <Input id="email" type="email" placeholder="user@example.com" value={email} onChange={(e) => setEmail(e.target.value)} required />
+              <Input 
+                id="email" 
+                type="email" 
+                placeholder="user@example.com" 
+                value={email} 
+                onChange={(e) => setEmail(e.target.value)} 
+                required 
+                disabled={!!isLoading}
+              />
             </div>
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
-              <Input id="password" type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} required />
+              <Input 
+                id="password" 
+                type="password" 
+                placeholder="••••••••" 
+                value={password} 
+                onChange={(e) => setPassword(e.target.value)} 
+                required 
+                disabled={!!isLoading}
+              />
             </div>
           </CardContent>
           <CardFooter className="flex flex-col gap-4">
             <p className="text-sm text-muted-foreground">Select your role to login:</p>
             <div className="grid grid-cols-2 gap-2 w-full">
-              <Button onClick={() => handleLogin('student')} className="w-full bg-[#0D47A1] hover:bg-[#0b3a8a]">Student</Button>
-              <Button onClick={() => handleLogin('teacher')} className="w-full bg-[#00ACC1] hover:bg-[#008a99]">Teacher</Button>
-              <Button onClick={() => handleLogin('parent')} className="w-full bg-secondary text-secondary-foreground hover:bg-secondary/80">Parent</Button>
-              <Button onClick={() => handleLogin('admin')} className="w-full bg-secondary text-secondary-foreground hover:bg-secondary/80">Admin</Button>
+              <Button 
+                onClick={() => handleLogin('student')} 
+                className="w-full bg-[#0D47A1] hover:bg-[#0b3a8a]" 
+                disabled={isLoading === 'student'}
+              >
+                {isLoading === 'student' ? 'Logging in...' : 'Student'}
+              </Button>
+              <Button 
+                onClick={() => handleLogin('teacher')} 
+                className="w-full bg-[#00ACC1] hover:bg-[#008a99]" 
+                disabled={isLoading === 'teacher'}
+              >
+                {isLoading === 'teacher' ? 'Logging in...' : 'Teacher'}
+              </Button>
+              <Button 
+                onClick={() => handleLogin('parent')} 
+                className="w-full bg-secondary text-secondary-foreground hover:bg-secondary/80" 
+                disabled={isLoading === 'parent'}
+              >
+                {isLoading === 'parent' ? 'Logging in...' : 'Parent'}
+              </Button>
+              <Button 
+                onClick={() => handleLogin('admin')} 
+                className="w-full bg-secondary text-secondary-foreground hover:bg-secondary/80" 
+                disabled={isLoading === 'admin'}
+              >
+                {isLoading === 'admin' ? 'Logging in...' : 'Admin'}
+              </Button>
             </div>
             <Link to="/" className="text-sm text-primary hover:underline mt-4 flex items-center gap-1">
               Back to Home <ArrowRight className="h-4 w-4" />
