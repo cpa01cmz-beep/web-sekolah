@@ -74,10 +74,20 @@ export class AuthService {
     if (!token) return null;
     
     // Extract user role from token (simplified)
-    const roleMatch = token.match(/mock-jwt-token-(\w+)-/);
+    const roleMatch = token.match(/mock-jwt-token-(\w+)-\d+-/);
     if (!roleMatch) return null;
     
-    const role = roleMatch[1] as UserRole;
+    const userId = roleMatch[1];
+    // Map user ID to role
+    const roleMap: Record<string, UserRole> = {
+      'student-01': 'student',
+      'teacher-01': 'teacher', 
+      'parent-01': 'parent',
+      'admin-01': 'admin'
+    };
+    
+    const role = roleMap[userId];
+    if (!role) return null;
     const mockUsers: Record<UserRole, BaseUser> = {
       student: { 
         id: 'student-01', 
