@@ -26,6 +26,23 @@ Please note that this project is released with a Contributor Code of Conduct. By
 5. Make sure your code lints.
 6. Issue that pull request!
 
+### Using iFlow Automation
+
+This repository includes iFlow CLI automation to streamline the contribution process:
+
+- **Issue Implementation**: When you create an issue, iFlow can automatically implement solutions and open PRs
+- **PR Review**: All pull requests are automatically reviewed for code quality, security, and performance
+- **Documentation Updates**: Documentation is automatically updated when changes are merged to main
+- **Maintenance**: Scheduled maintenance tasks help keep dependencies up-to-date and secure
+
+You can interact with iFlow directly:
+- Comment `@iflow-cli /solve` on an issue to trigger automated implementation
+- Comment `@iflow-cli /review` on a PR to request an additional review
+- Comment `@iflow-cli /apply` on a PR to automatically apply review feedback
+
+For OpenCode integration, you can use:
+- Comment `/opencode` or `/oc` on any issue or PR to trigger AI-assisted development
+
 ## Development Setup
 
 1. Clone the repository:

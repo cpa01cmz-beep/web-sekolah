@@ -14,11 +14,18 @@ Akademia Pro is a comprehensive, modern school management system designed to str
 - [User Guides](./User-Guides.md)
 - [Deployment Guide](./Deployment-Guide.md)
 - [Security Guidelines](./Security-Guidelines.md)
+- [Contributing](./Contributing.md)
+- [iFlow Automation](./iFlow-Automation.md)
 
 ## Getting Started
 
 To get started with Akademia Pro development, please refer to our [Technical Blueprint](./Technical-Blueprint.md) and [Development Roadmap](./Development-Roadmap.md).
 
-## Contributing
+## Automation
 
-Please read our [contribution guidelines](./Contributing.md) before making any changes to the project.
+This repository is configured with comprehensive automation workflows:
+
+- **iFlow CLI Automation**: Streamlines development with issue automation, PR review, documentation updates, and maintenance
+- **OpenCode Integration**: AI-assisted development through natural language commands
+
+For details on how to leverage these automation tools, see our [Contributing Guidelines](./Contributing.md).

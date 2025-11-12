@@ -229,6 +229,23 @@ We welcome contributions to Akademia Pro! Please follow these steps:
 
 Please ensure your code follows the project's coding standards and includes appropriate tests.
 
+### iFlow Automation for Contributors
+
+This repository uses iFlow CLI automation to streamline development workflows:
+
+- **Issue Automation**: When you create an issue, iFlow can automatically implement solutions and open PRs
+- **PR Review**: All pull requests are automatically reviewed for code quality, security, and performance
+- **Documentation Updates**: Documentation is automatically updated when changes are merged to main
+- **Maintenance**: Scheduled maintenance tasks help keep dependencies up-to-date and secure
+
+You can also interact with iFlow directly:
+- Comment `@iflow-cli /solve` on an issue to trigger automated implementation
+- Comment `@iflow-cli /review` on a PR to request an additional review
+- Comment `@iflow-cli /apply` on a PR to automatically apply review feedback
+
+For OpenCode integration, you can use:
+- Comment `/opencode` or `/oc` on any issue or PR to trigger AI-assisted development
+
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.

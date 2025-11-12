@@ -122,12 +122,19 @@ Alternatively, you can deploy directly from your GitHub repository.
 
 ## iFlow CLI Automation
 
-This repository is configured with iFlow CLI automation that helps streamline development workflows:
+This repository is configured with comprehensive iFlow CLI automation that helps streamline development workflows:
 
 - **Issue Automation**: When issues are created, iFlow automatically implements solutions and opens PRs
 - **PR Review**: Pull requests are automatically reviewed for code quality, security, and performance
 - **Documentation Updates**: Documentation is automatically updated when changes are merged to main
 - **Maintenance**: Scheduled maintenance tasks help keep dependencies up-to-date and secure
+- **Intelligence Gathering**: Weekly repository analysis to identify improvement opportunities and create issues automatically
+- **OpenCode Integration**: AI-assisted development through natural language commands
+
+The automation is powered by multiple GitHub Actions workflows:
+- `iflow.yml`: Main automation workflow handling issues, PRs, and documentation
+- `iflow-inteligent.yml`: Weekly intelligence gathering and analysis
+- `opencode.yml`: AI-assisted development commands
 
 To learn more about iFlow CLI, visit [iflow.ai](https://iflow.ai).
 
