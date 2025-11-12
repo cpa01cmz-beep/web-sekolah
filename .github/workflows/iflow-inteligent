@@ -39,6 +39,8 @@ jobs:
       - name: Fetch recent PR history
         run: |
           gh pr list --state all --limit 200 --json number,title,merged,createdAt,closedAt,author > intel/recent_prs.json
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload collected data
         uses: actions/upload-artifact@v3
