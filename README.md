@@ -101,6 +101,7 @@ Comprehensive documentation is available in our [wiki](../../wiki/Home):
 - [Deployment Guide](../../wiki/Deployment-Guide) - Instructions for deploying the application
 - [Security Guidelines](../../wiki/Security-Guidelines) - Security best practices and guidelines
 - [Contributing](../../wiki/Contributing) - Guidelines for contributing to the project
+- [iFlow CLI Automation](../../wiki/iFlow-CLI-Automation) - Documentation for iFlow CLI automation features
 
 ## Deployment
 
