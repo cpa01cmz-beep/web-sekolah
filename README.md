@@ -102,6 +102,7 @@ Comprehensive documentation is available in our [wiki](../../wiki/Home):
 - [Security Guidelines](../../wiki/Security-Guidelines) - Security best practices and guidelines
 - [iFlow CLI Automation](../../wiki/iFlow-CLI-Automation) - Documentation for iFlow CLI automation features
 - [Contributing](../../wiki/Contributing) - Guidelines for contributing to the project
+- [iFlow CLI Automation](../../wiki/iFlow-CLI-Automation) - Documentation for iFlow CLI automation features
 
 ## Deployment
 
