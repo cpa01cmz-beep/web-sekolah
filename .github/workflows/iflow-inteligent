@@ -35,6 +35,8 @@ jobs:
       - name: Fetch recent open issues
         run: |
           gh issue list --state open --limit 200 --json number,title,labels,createdAt,updatedAt > intel/open_issues.json
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Fetch recent PR history
         run: |
