@@ -29,8 +29,8 @@ This document outlines the steps to set up the Akademia Pro project based on the
    CLOUDFLARE_ACCOUNT_ID=your_account_id
    CLOUDFLARE_API_TOKEN=your_api_token
    
-   # Authentication
-   JWT_SECRET=your_jwt_secret
+   # Authentication (currently using mock tokens)
+   # JWT_SECRET=your_jwt_secret
    
    # Development
    NODE_ENV=development
@@ -49,39 +49,38 @@ This document outlines the steps to set up the Akademia Pro project based on the
 
 ### Backend Development
 
-1. Start the worker in development mode:
-   ```
-   bun run worker:dev
-   ```
-
-2. Access the API at `http://localhost:8787`
+The backend runs as part of the main development server. When you start the development server, both frontend and backend will be available.
 
 ## Project Structure Implementation
 
-Based on the blueprint, ensure the following directory structure is maintained:
+The actual project structure is as follows:
 
 ```
 web-sekolah/
 ├── src/                  # Frontend application
+│   ├── assets/           # Static assets (images, icons, etc.)
 │   ├── components/       # Reusable UI components
 │   ├── hooks/            # Custom React hooks
 │   ├── lib/              # Utility functions and helpers
 │   ├── pages/            # Page components for routing
-│   │   ├── student/      # Student portal pages
-│   │   ├── teacher/      # Teacher portal pages
-│   │   ├── parent/       # Parent portal pages
-│   │   ├── admin/        # Admin portal pages
-│   │   └── public/       # Public pages (landing, login)
-│   ├── store/            # Zustand stores for state management
-│   └── App.tsx           # Main application component
+│   │   ├── portal/       # Role-specific portal pages
+│   │   │   ├── admin/    # Admin portal pages
+│   │   │   ├── parent/   # Parent portal pages
+│   │   │   ├── student/  # Student portal pages
+│   │   │   └── teacher/  # Teacher portal pages
+│   │   └── public/       # Public pages (landing, login, etc.)
+│   ├── services/         # Service modules for API communication
+│   ├── App.tsx           # Main application component
+│   ├── main.tsx          # Application entry point
+│   └── vite-env.d.ts     # Vite environment types
 ├── worker/               # Backend application
-│   ├── api/              # API route handlers
-│   ├── lib/              # Backend utility functions
-│   ├── middleware/       # Authentication and validation middleware
-│   └── index.ts          # Worker entry point
+│   ├── core-utils.ts     # Core utilities and types
+│   ├── entities.ts       # Durable Object entities
+│   ├── index.ts          # Worker entry point
+│   └── user-routes.ts    # User route handlers
 ├── shared/               # Shared types and interfaces
 ├── public/               # Static assets
-└── tests/                # Test files
+└── wiki/                 # Project documentation
 ```
 
 ## Implementation Roadmap
