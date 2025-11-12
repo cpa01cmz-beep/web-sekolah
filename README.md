@@ -127,7 +127,7 @@ This repository is configured with iFlow CLI automation that helps streamline de
 - **Issue Automation**: When issues are created, iFlow automatically implements solutions and opens PRs
 - **PR Review**: Pull requests are automatically reviewed for code quality, security, and performance
 - **Documentation Updates**: Documentation is automatically updated when changes are merged to main
-- **Intelligent Repository Analysis**: Scheduled analysis of codebase, CI/CD patterns, and issue history to identify improvements
+- **Intelligent Repository Analysis**: Scheduled analysis of codebase, CI/CD patterns, and issue history to identify improvements and opportunities
 - **Maintenance**: Scheduled maintenance tasks help keep dependencies up-to-date and secure
 
 To learn more about iFlow CLI, visit [iflow.ai](https://iflow.ai).
