@@ -29,6 +29,8 @@ jobs:
         run: |
           mkdir -p intel
           gh run list --limit 100 --json run_number,workflow_name,conclusion,run_duration_ms,created_at > intel/gha_runs.json
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Fetch recent open issues
         run: |
