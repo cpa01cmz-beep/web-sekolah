@@ -14,10 +14,11 @@ Akademia Pro is a comprehensive, modern school management system designed to str
 - [User Guides](./User-Guides.md)
 - [Deployment Guide](./Deployment-Guide.md)
 - [Security Guidelines](./Security-Guidelines.md)
+- [iFlow CLI Automation](./iFlow-CLI-Automation.md)
 
 ## Getting Started
 
-To get started with Akademia Pro development, please refer to our [Technical Blueprint](./Technical-Blueprint.md) and [Development Roadmap](./Development-Roadmap.md).
+To get started with Akademia Pro development, please refer to our [Technical Blueprint](./Technical-Blueprint.md) and [Development-Roadmap](./Development-Roadmap.md).
 
 ## Contributing
 

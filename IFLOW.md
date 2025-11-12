@@ -102,6 +102,18 @@ Alternatively, you can deploy directly from your GitHub repository using the Clo
 - **Data Visualization**: Recharts for displaying charts and graphs
 - **Code Quality**: ESLint with TypeScript ESLint plugin for linting
 
+## iFlow CLI Automation
+
+This repository is configured with iFlow CLI automation that helps streamline development workflows:
+
+- **Issue Automation**: When issues are created, iFlow automatically implements solutions and opens PRs
+- **PR Review**: Pull requests are automatically reviewed for code quality, security, and performance
+- **Documentation Updates**: Documentation is automatically updated when changes are merged to main
+- **Intelligent Repository Analysis**: Scheduled analysis of codebase, CI/CD patterns, and issue history to identify improvements and opportunities
+- **Maintenance**: Scheduled maintenance tasks help keep dependencies up-to-date and secure
+
+To learn more about iFlow CLI, visit [iflow.ai](https://iflow.ai).
+
 ## Key Features
 
 - Unified login portal for all user roles (Student, Teacher, Parent, Admin)
