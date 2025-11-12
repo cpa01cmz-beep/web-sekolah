@@ -32,7 +32,7 @@ Ensure `wrangler.jsonc` is properly configured with your Cloudflare settings:
 
 ### 2. Set Environment Variables
 
-Configure secrets in Cloudflare Workers:
+Currently, the application uses mock authentication tokens for development purposes. In a production environment, you would need to configure secrets in Cloudflare Workers:
 
 ```bash
 wrangler secret put JWT_SECRET
@@ -80,6 +80,8 @@ NODE_ENV=production
 CLOUDFLARE_ACCOUNT_ID=your_production_account_id
 ```
 
+Note: Currently, the application uses mock authentication tokens for development purposes. In a production environment, you would also need to set JWT-related environment variables.
+
 ### Staging Environment
 
 Create a `.env.staging` file with staging-specific variables:
@@ -88,6 +90,8 @@ Create a `.env.staging` file with staging-specific variables:
 NODE_ENV=staging
 CLOUDFLARE_ACCOUNT_ID=your_staging_account_id
 ```
+
+Note: Currently, the application uses mock authentication tokens for development purposes. In a production environment, you would also need to set JWT-related environment variables.
 
 ## Monitoring and Logging
 
