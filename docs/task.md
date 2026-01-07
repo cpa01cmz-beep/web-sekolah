@@ -906,7 +906,8 @@ This document tracks architectural refactoring tasks for Akademia Pro.
 | High | Integration Monitor Testing | Completed | Created comprehensive tests for integration-monitor.ts covering circuit breaker state, rate limiting, webhook delivery tracking, API error monitoring, and reset functionality (33 tests) |
 | High | Type Guards Testing | Completed | Created comprehensive tests for type-guards.ts covering isStudent, isTeacher, isParent, isAdmin type guards and getRoleSpecificFields utility (28 tests) |
 | Medium | Validation Middleware Testing | Completed | Created tests for validation.ts covering sanitizeHtml and sanitizeString utility functions (27 tests) |
-| Medium | Referential Integrity Testing | Completed | Created comprehensive tests for referential-integrity.ts covering API structure, input validation, and edge cases (22 tests). Tests gracefully skip when Cloudflare Workers environment unavailable, documenting testing limitations and production safety measures (2026-01-07) |
+<<<<<<< HEAD
+| Medium | Referential Integrity Testing | Pending | Create tests for referential-integrity.ts - skipped due to Cloudflare Workers entity instantiation complexity, requires advanced mocking setup |
 | Medium | Timeout Middleware Testing | Completed | Created comprehensive tests for timeout middleware (worker/middleware/timeout.ts) covering timeout behavior, custom timeouts, predefined middlewares, Hono integration, and edge cases (25 tests) |
 | Medium | Error Monitoring Testing | Completed | Created comprehensive tests for error monitoring middleware (worker/middleware/error-monitoring.ts) covering error monitoring, response error monitoring, all HTTP status codes, and edge cases (30 tests) |
 
@@ -923,7 +924,6 @@ This document tracks architectural refactoring tasks for Akademia Pro.
 **Flaky Test Fix (2026-01-07):**
 - ✅ Fixed flaky test in worker/__tests__/integration-monitor.test.ts by excluding timestamp and uptime from object equality check
 - ✅ Tests now consistently pass without timing-based race conditions
->>>>>>> 149b46939c29ff87d47decaeb6ba1b3ec3384518
 
 
 ## New Refactoring Tasks (2026-01-07)
