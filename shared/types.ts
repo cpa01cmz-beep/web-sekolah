@@ -5,7 +5,13 @@ export interface ApiResponse<T = unknown> {
 }
 // --- Akademia Pro Types ---
 export type UserRole = 'student' | 'teacher' | 'parent' | 'admin';
-export interface BaseUser {
+export interface TimestampedEntity {
+  createdAt: string;
+  updatedAt: string;
+  deletedAt?: string | null;
+}
+
+export interface BaseUser extends TimestampedEntity {
   id: string;
   name: string;
   email: string;
@@ -29,24 +35,24 @@ export interface Admin extends BaseUser {
   role: 'admin';
 }
 export type SchoolUser = Student | Teacher | Parent | Admin;
-export interface SchoolClass {
+export interface SchoolClass extends TimestampedEntity {
   id: string;
   name: string; // e.g., "11-A"
   teacherId: string;
 }
-export interface Course {
+export interface Course extends TimestampedEntity {
   id: string;
   name: string;
   teacherId: string;
 }
-export interface Grade {
+export interface Grade extends TimestampedEntity {
   id: string;
   studentId: string;
   courseId: string;
   score: number;
   feedback: string;
 }
-export interface Announcement {
+export interface Announcement extends TimestampedEntity {
   id: string;
   title: string;
   content: string;

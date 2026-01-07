@@ -247,29 +247,53 @@ export abstract class Entity<State> {
     return this._state;
   }
 
-  /**
-   * Mutate the entity state with a function
-   * Uses optimistic locking with retry mechanism
-   * @param updater - Function that takes the current state and returns the new state
-   * @returns The new state after mutation
-   * @throws Error if concurrent modification is detected after all retries
-   */
-  async mutate(updater: (current: State) => State): Promise<State> {
-    // Small bounded retry loop for CAS contention
-    for (let i = 0; i < 4; i++) {
-      const current = await this.ensureState();
-      const startV = this._version;
-      const next = updater(current);
-      const res = await this.stub.casPut(this.key(), startV, next);
-      if (res.ok) {
-        this._version = res.v;
-        this._state = next;
-        return next;
-      }
-      // someone else updated; retry
-    }
-    throw new Error("Concurrent modification detected");
-  }
+  /**
+   * Mutate the entity state with a function
+   * Uses optimistic locking with retry mechanism
+   * @param updater - Function that takes the current state and returns the new state
+   * @returns The new state after mutation
+   * @throws Error if concurrent modification is detected after all retries
+   */
+  async mutate(updater: (current: State) => State): Promise<State> {
+    // Small bounded retry loop for CAS contention
+    for (let i = 0; i < 4; i++) {
+      const current = await this.ensureState();
+      const startV = this._version;
+      const next = updater(current);
+      // Auto-update timestamps if present
+      const withTimestamps = this.applyTimestamps(current, next) as State;
+      const res = await this.stub.casPut(this.key(), startV, withTimestamps);
+      if (res.ok) {
+        this._version = res.v;
+        this._state = withTimestamps;
+        return withTimestamps;
+      }
+      // someone else updated; retry
+    }
+    throw new Error("Concurrent modification detected");
+  }
+
+  /**
+   * Apply timestamp updates to state if it supports them
+   * @param current - Current state
+   * @param next - New state
+   * @returns State with timestamps applied
+   */
+  protected applyTimestamps(current: unknown, next: unknown): unknown {
+    const state = next as Record<string, unknown>;
+    const curr = current as Record<string, unknown>;
+    
+    // Check if state has timestamp fields
+    if ('updatedAt' in state && 'createdAt' in state) {
+      const now = new Date().toISOString();
+      return {
+        ...state,
+        updatedAt: now,
+        createdAt: state.createdAt || curr.createdAt || now
+      };
+    }
+    return state;
+  }
 
   /**
    * Get the current state of the entity
@@ -295,19 +319,54 @@ export abstract class Entity<State> {
     return this.stub.has(this.key());
   }
 
-  /** 
-   * Delete the entity from storage
-   * @returns true if the entity existed and was deleted, false otherwise
-   */
-  async delete(): Promise<boolean> {
-    const ok = await this.stub.del(this.key());
-    if (ok) {
-      const Ctor = this.constructor as EntityStatics<State, this>;
-      this._version = 0;
-      this._state = Ctor.initialState;
-    }
-    return ok;
-  }
+  /**
+   * Check if the entity is soft deleted
+   * @returns true if the entity is marked as deleted
+   */
+  async isSoftDeleted(): Promise<boolean> {
+    const state = await this.ensureState() as Record<string, unknown>;
+    return 'deletedAt' in state && state.deletedAt !== null && state.deletedAt !== undefined;
+  }
+
+  /**
+   * Soft delete the entity by marking as deleted
+   * @returns true if the entity existed and was soft deleted, false otherwise
+   */
+  async softDelete(): Promise<boolean> {
+    const state = await this.ensureState() as Record<string, unknown>;
+    if ('deletedAt' in state && state.deletedAt !== null && state.deletedAt !== undefined) {
+      return false; // Already deleted
+    }
+    await this.patch({ deletedAt: new Date().toISOString() } as unknown as Partial<State>);
+    return true;
+  }
+
+  /**
+   * Restore a soft-deleted entity
+   * @returns true if the entity was restored, false otherwise
+   */
+  async restore(): Promise<boolean> {
+    const state = await this.ensureState() as Record<string, unknown>;
+    if (!('deletedAt' in state) || (state.deletedAt === null || state.deletedAt === undefined)) {
+      return false; // Not deleted
+    }
+    await this.patch({ deletedAt: null } as unknown as Partial<State>);
+    return true;
+  }
+
+  /**
+   * Permanently delete the entity from storage
+   * @returns true if the entity existed and was deleted, false otherwise
+   */
+  async delete(): Promise<boolean> {
+    const ok = await this.stub.del(this.key());
+    if (ok) {
+      const Ctor = this.constructor as EntityStatics<State, this>;
+      this._version = 0;
+      this._state = Ctor.initialState;
+    }
+    return ok;
+  }
 }
 
 // ====================
@@ -409,39 +468,51 @@ export abstract class IndexedEntity<S extends { id: string }> extends Entity<S> 
   static readonly indexName: string;
   static keyOf<U extends { id: string }>(state: U): string { return state.id; }
 
-  /**
-   * Create a new indexed entity and add it to the index
-   * @param env - The environment context
-   * @param state - The initial state of the entity
-   * @returns The created entity state
-   */
-  static async create<TCtor extends CtorAny>(this: HS<TCtor>, env: Env, state: IS<TCtor>): Promise<IS<TCtor>> {
-    const id = this.keyOf(state);
-    const inst = new this(env, id);
-    await inst.save(state);
-    const idx = new Index<string>(env, this.indexName);
-    await idx.add(id);
-    return state;
-  }
+  /**
+   * Create a new indexed entity and add it to the index
+   * @param env - The environment context
+   * @param state - The initial state of the entity
+   * @returns The created entity state
+   */
+  static async create<TCtor extends CtorAny>(this: HS<TCtor>, env: Env, state: IS<TCtor>): Promise<IS<TCtor>> {
+    const id = this.keyOf(state);
+    const inst = new this(env, id);
+    const withTimestamps = inst.applyTimestamps({}, state) as IS<TCtor>;
+    await inst.save(withTimestamps);
+    const idx = new Index<string>(env, this.indexName);
+    await idx.add(id);
+    return withTimestamps;
+  }
 
-  /**
-   * List entities with optional pagination
-   * @param env - The environment context
-   * @param cursor - The cursor for pagination (optional)
-   * @param limit - The maximum number of items to return (optional)
-   * @returns An object with items and the next cursor for pagination
-   */
-  static async list<TCtor extends CtorAny>(
-    this: HS<TCtor>,
-    env: Env,
-    cursor?: string | null,
-    limit?: number
-  ): Promise<{ items: IS<TCtor>[]; next: string | null }> {
-    const idx = new Index<string>(env, this.indexName);
-    const { items: ids, next } = await idx.page(cursor, limit);
-    const rows = (await Promise.all(ids.map((id) => new this(env, id).getState()))) as IS<TCtor>[];
-    return { items: rows, next };
-  }
+  /**
+   * List entities with optional pagination
+   * @param env - The environment context
+   * @param cursor - The cursor for pagination (optional)
+   * @param limit - The maximum number of items to return (optional)
+   * @param includeDeleted - Whether to include soft-deleted records (default: false)
+   * @returns An object with items and the next cursor for pagination
+   */
+  static async list<TCtor extends CtorAny>(
+    this: HS<TCtor>,
+    env: Env,
+    cursor?: string | null,
+    limit?: number,
+    includeDeleted = false
+  ): Promise<{ items: IS<TCtor>[]; next: string | null }> {
+    const idx = new Index<string>(env, this.indexName);
+    const { items: ids, next } = await idx.page(cursor, limit);
+    const rows = (await Promise.all(ids.map((id) => new this(env, id).getState()))) as IS<TCtor>[];
+    
+    if (!includeDeleted) {
+      const filtered = rows.filter((row) => {
+        const r = row as Record<string, unknown>;
+        return !('deletedAt' in r) || r.deletedAt === null || r.deletedAt === undefined;
+      });
+      return { items: filtered, next };
+    }
+    
+    return { items: rows, next };
+  }
 
   /**
    * Ensure seed data is loaded if the index is empty
