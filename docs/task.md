@@ -404,6 +404,43 @@ This document tracks architectural refactoring tasks for Akademia Pro.
 | Low | State Management Guidelines | Completed | Documented comprehensive state management patterns with guidelines, examples, and best practices (2026-01-07) |
 | Low | Business Logic Extraction | Pending | Extract business logic to dedicated domain layer |
 
+## New Refactoring Tasks (2026-01-07)
+
+### [REFACTOR] Replace Framer Motion in Remaining Pages
+- Location: src/pages/*.tsx (13 pages)
+- Issue: Despite documented completion of Framer Motion replacement, 13 pages still use `framer-motion` (AboutPage, ContactPage, GalleryPage, LinksDownloadPage, LinksRelatedPage, NewsIndexPage, NewsUpdatePage, PPDBPage, PrivacyPolicyPage, ProfileExtracurricularPage, ProfileFacilitiesPage, ProfileSchoolPage, ProfileServicesPage, WorksPage)
+- Suggestion: Replace all `motion.*` components with CSS animations from `src/components/animations.tsx` (FadeIn, SlideUp, SlideLeft, SlideRight) to complete the optimization started in 2026-01-07
+- Priority: High
+- Effort: Medium
+
+### [REFACTOR] Improve Type Safety in Auth Routes
+- Location: worker/auth-routes.ts, worker/user-routes.ts, worker/middleware/auth.ts
+- Issue: Multiple uses of `as any` type casts (11 instances) to access role-specific fields (classId, classIds, childId, studentIdNumber) indicating poor type design
+- Suggestion: Create proper type guards or use discriminated unions to safely access role-specific properties without type casts
+- Priority: High
+- Effort: Medium
+
+### [REFACTOR] Split Large core-utils.ts File
+- Location: worker/core-utils.ts (852 lines)
+- Issue: File contains multiple responsibilities: GlobalDurableObject, Entity, IndexedEntity, Index, SecondaryIndex, API helpers, and type definitions - violates Single Responsibility Principle
+- Suggestion: Split into separate files: `worker/storage/GlobalDurableObject.ts`, `worker/entities/Entity.ts`, `worker/entities/IndexedEntity.ts`, `worker/storage/Index.ts`, `worker/storage/SecondaryIndex.ts`, `worker/api/response-helpers.ts`
+- Priority: High
+- Effort: Large
+
+### [REFACTOR] Extract Role-Specific User Field Access Pattern
+- Location: worker/auth-routes.ts (lines 24-34, 84-94)
+- Issue: Duplicated logic for conditionally accessing role-specific fields (classId for students, classIds for teachers, childId for parents, studentIdNumber for students)
+- Suggestion: Create utility function `getUserRoleFields(user: BaseUser, role: UserRole)` that returns appropriate fields based on role
+- Priority: Medium
+- Effort: Small
+
+### [REFACTOR] Refactor Large Page Components
+- Location: src/pages/WorksPage.tsx (192 lines), ProfileExtracurricularPage.tsx (174 lines), LinksDownloadPage.tsx (160 lines), ProfileFacilitiesPage.tsx (158 lines), LoginPage.tsx (163 lines), PPDBPage.tsx (164 lines)
+- Issue: Several page components exceed 150 lines, making them hard to maintain and test
+- Suggestion: Extract reusable sub-components (e.g., WorkCard, ExtracurricularCard, DownloadSection, FacilitySection) to improve modularity and testability
+- Priority: Low
+- Effort: Medium
+
 ## Integration Hardening (2026-01-07)
 
 **Task**: Verify and document complete integration resilience patterns implementation
