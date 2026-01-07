@@ -5,6 +5,7 @@ import { cors } from 'hono/cors';
 import { logger } from 'hono/logger';
 import { userRoutes } from './user-routes';
 import { authRoutes } from './auth-routes';
+import { webhookRoutes } from './webhook-routes';
 import { Env, GlobalDurableObject, ok, notFound, serverError } from './core-utils';
 import { defaultRateLimiter, strictRateLimiter } from './middleware/rate-limit';
 import { defaultTimeout } from './middleware/timeout';
@@ -69,9 +70,12 @@ app.use('/api/students', defaultRateLimiter());
 app.use('/api/teachers', defaultRateLimiter());
 app.use('/api/classes', defaultRateLimiter());
 app.use('/api/auth', strictRateLimiter());
+app.use('/api/webhooks', defaultRateLimiter());
+app.use('/api/admin/webhooks', strictRateLimiter());
 
 authRoutes(app);
 userRoutes(app);
+webhookRoutes(app);
 
 app.get('/api/health', (c) => ok(c, { status: 'healthy', timestamp: new Date().toISOString() }));
 

@@ -257,3 +257,38 @@ export interface DownloadItem {
   fileType?: string;
   date: string;
 }
+
+export interface WebhookConfig extends TimestampedEntity {
+  id: string;
+  url: string;
+  events: string[];
+  secret: string;
+  active: boolean;
+}
+
+export interface WebhookEvent extends TimestampedEntity {
+  id: string;
+  eventType: string;
+  data: Record<string, unknown>;
+  processed: boolean;
+}
+
+export interface WebhookDelivery extends TimestampedEntity {
+  id: string;
+  eventId: string;
+  webhookConfigId: string;
+  status: 'pending' | 'delivered' | 'failed';
+  statusCode?: number;
+  attempts: number;
+  nextAttemptAt?: string;
+  errorMessage?: string;
+}
+
+export type WebhookEventType =
+  | 'grade.created'
+  | 'grade.updated'
+  | 'user.created'
+  | 'user.updated'
+  | 'user.deleted'
+  | 'announcement.created'
+  | 'announcement.updated';
