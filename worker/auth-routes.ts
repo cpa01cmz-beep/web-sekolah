@@ -6,6 +6,7 @@ import { generateToken, verifyToken, optionalAuthenticate, AuthUser } from './mi
 import { loginSchema } from './middleware/schemas';
 import { logger } from './logger';
 import { verifyPassword } from './password-utils';
+import { getRoleSpecificFields } from './type-guards';
 
 export function authRoutes(app: Hono<{ Bindings: Env }>) {
   app.get('/api/auth/verify', optionalAuthenticate(), async (c) => {
@@ -21,16 +22,18 @@ export function authRoutes(app: Hono<{ Bindings: Env }>) {
       return notFound(c, 'User not found');
     }
 
+    const roleFields = getRoleSpecificFields(dbUser);
+
     return ok(c, {
       id: dbUser.id,
       name: dbUser.name,
       email: dbUser.email,
       role: dbUser.role,
       avatarUrl: dbUser.avatarUrl,
-      classId: dbUser.role === 'student' ? (dbUser as any).classId : undefined,
-      classIds: dbUser.role === 'teacher' ? (dbUser as any).classIds : undefined,
-      childId: dbUser.role === 'parent' ? (dbUser as any).childId : undefined,
-      studentIdNumber: dbUser.role === 'student' ? (dbUser as any).studentIdNumber : undefined,
+      classId: roleFields.classId,
+      classIds: roleFields.classIds,
+      childId: roleFields.childId,
+      studentIdNumber: roleFields.studentIdNumber,
     });
   });
 
@@ -81,19 +84,19 @@ export function authRoutes(app: Hono<{ Bindings: Env }>) {
         '24h'
       );
 
+      const roleFields = getRoleSpecificFields(user);
+
       const userResponse = {
         id: user.id,
         name: user.name,
         email: user.email,
         role: user.role,
         avatarUrl: user.avatarUrl,
-        classId: user.role === 'student' ? (user as any).classId : undefined,
-        classIds: user.role === 'teacher' ? (user as any).classIds : undefined,
-        childId: user.role === 'parent' ? (user as any).childId : undefined,
-        studentIdNumber: user.role === 'student' ? (user as any).studentIdNumber : undefined,
+        classId: roleFields.classId,
+        classIds: roleFields.classIds,
+        childId: roleFields.childId,
+        studentIdNumber: roleFields.studentIdNumber,
       };
-
-      delete (userResponse as any).passwordHash;
 
       logger.info('[AUTH] User logged in successfully', { userId: user.id, email: user.email, role: user.role });
 

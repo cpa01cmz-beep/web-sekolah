@@ -17,6 +17,7 @@ import type { Grade, SchoolUser, Student, StudentDashboardData, Teacher, CreateU
 import { logger } from './logger';
 import { WebhookService } from './webhook-service';
 import { hashPassword } from './password-utils';
+import { getRoleSpecificFields } from './type-guards';
 
 export function userRoutes(app: Hono<{ Bindings: Env }>) {
   app.post('/api/seed', async (c) => {
@@ -41,11 +42,12 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
 
     const studentId = c.req.param('id');
     const student = new UserEntity(c.env, studentId);
-    const studentState = await student.getState() as Student;
+    const studentState = await student.getState();
     if (!studentState || studentState.role !== 'student') {
       return notFound(c, 'Student not found');
     }
-    const scheduleEntity = new ScheduleEntity(c.env, studentState.classId);
+    const roleFields = getRoleSpecificFields(studentState);
+    const scheduleEntity = new ScheduleEntity(c.env, roleFields.classId!);
     const scheduleState = await scheduleEntity.getState();
     const courseIds = scheduleState.items.map(item => item.courseId);
     const courses = await Promise.all(courseIds.map(id => new CourseEntity(c.env, id).getState()));
@@ -215,7 +217,6 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
     if (userData.password) {
       const { hash } = await hashPassword(userData.password);
       updateData = { ...userData, passwordHash: hash };
-      delete (updateData as any).password;
     }
 
     await userEntity.patch(updateData);
