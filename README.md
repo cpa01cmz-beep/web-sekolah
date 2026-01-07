@@ -100,10 +100,10 @@ The application will be available at `http://localhost:3000` (or the port specif
 Comprehensive documentation is available in our [docs/](./docs/) directory and [GitHub Wiki](https://github.com/cpa01cmz-beep/web-sekolah/wiki):
 
 - [API Blueprint](./docs/blueprint.md) - Complete API reference with endpoints, error codes, and integration patterns
+- [User Guides](https://github.com/cpa01cmz-beep/web-sekolah/wiki/User-Guides) - Instructions for students, teachers, parents, and admins
 - [Architectural Task List](./docs/task.md) - Implementation status and roadmap
 - [Technical Blueprint](https://github.com/cpa01cmz-beep/web-sekolah/wiki/Technical-Blueprint) - Detailed technical documentation
 - [Development Roadmap](https://github.com/cpa01cmz-beep/web-sekolah/wiki/Development-Roadmap) - Project development roadmap
-- [User Guides](https://github.com/cpa01cmz-beep/web-sekolah/wiki/User-Guides) - Instructions for using the application
 - [Deployment Guide](https://github.com/cpa01cmz-beep/web-sekolah/wiki/Deployment-Guide) - Instructions for deploying the application
 - [Security Guidelines](https://github.com/cpa01cmz-beep/web-sekolah/wiki/Security-Guidelines) - Security best practices and guidelines
 - [Contributing](https://github.com/cpa01cmz-beep/web-sekolah/wiki/Contributing) - Guidelines for contributing to the project

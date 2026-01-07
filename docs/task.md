@@ -1558,3 +1558,65 @@ Created comprehensive `docs/blueprint.md` with:
 - Suggestion: Create a centralized date utility function `formatDate(date: string | Date, format?: 'short' | 'long' | 'time')` that ensures consistent date formatting across the application
 - Priority: Low
 - Effort: Small
+
+## [REFACTOR] Extract Duplicate Caching Configuration Pattern
+- Location: src/hooks/useStudent.ts (useStudentDashboard, useStudentGrades, useStudentSchedule, useStudentCard hooks)
+- Issue: All hooks repeat identical caching configuration (staleTime, gcTime, refetchOnWindowFocus, refetchOnMount, refetchOnReconnect), violating DRY principle and making future caching strategy changes error-prone
+- Suggestion: Create a reusable hook configuration utility in `src/config/query-config.ts` with `createQueryOptions<T>(options)` function that provides sensible defaults and allows overrides, then update all hooks to use this utility
+- Priority: Medium
+- Effort: Small
+
+## [REFACTOR] Refactor errorReporter.ts God Object
+- Location: src/lib/errorReporter.ts (802 lines)
+- Issue: Single file handles multiple responsibilities: error deduplication (~150 lines), console interception (~100 lines), global error handlers (~80 lines), error reporting/queueing (~200 lines), stack parsing/filtering (~150 lines). This god object anti-pattern makes testing, modification, and understanding difficult
+- Suggestion: Split into focused modules: `src/lib/error-deduplication.ts` (GlobalErrorDeduplication class), `src/lib/console-interceptor.ts` (interceptor logic), `src/lib/error-handler.ts` (global handlers), `src/lib/error-queue.ts` (queue/reporting), `src/lib/error-parser.ts` (stack parsing/filtering), and keep `src/lib/errorReporter.ts` as main orchestrator
+- Priority: High
+- Effort: Large
+
+## [REFACTOR] Consolidate Form State in AdminUserManagementPage
+- Location: src/pages/portal/admin/AdminUserManagementPage.tsx (lines 35-39, 68-84)
+- Issue: Five separate `useState` calls for form management (isModalOpen, editingUser, userName, userEmail, userRole) with complex reset logic scattered in multiple places, and form validation mixed with state management
+- Suggestion: Extract to a custom hook `src/hooks/useUserForm.ts` that manages form state, editing status, and provides reset/clear functions, or integrate with react-hook-form for comprehensive validation support
+- Priority: Medium
+- Effort: Medium
+
+## Documentation Fixes (2026-01-07)
+
+### Completed
+
+1. **Updated DOCUMENTATION.md** - Fixed outdated information and added modern features
+    - Corrected project structure to match actual implementation (removed non-existent `worker/api/`, `worker/lib/` directories)
+    - Added JWT authentication documentation
+    - Added webhook system documentation
+    - Added resilience patterns (circuit breaker, retry, timeout, rate limiting)
+    - Added performance optimizations (caching, asset optimization, bundle optimization)
+    - Updated test commands to match package.json (`bun test`, `bun test:run`, `bun test:coverage`, `bun test:ui`)
+    - Added comprehensive section on data layer with Durable Objects
+    - Added links to additional documentation (blueprint.md, task.md, wiki)
+    - Benefits: Documentation now matches current implementation
+
+2. **Deprecated wiki/API-Documentation.md** - Added deprecation notice
+    - Added prominent deprecation warning at top of file
+    - Clear redirect to comprehensive docs/blueprint.md
+    - Listed missing features in outdated documentation (webhooks, announcements, etc.)
+    - Benefits: Users are directed to most current API documentation
+
+3. **Enhanced README.md Documentation Links** - Improved user accessibility
+    - Promoted User Guides link to second position in documentation list
+    - Ensured users can easily find step-by-step instructions
+    - Benefits: Better discoverability of user guides for students, teachers, parents, admins
+
+4. **Verified Documentation Links** - Ensured all internal links work
+    - Verified `docs/blueprint.md` exists and is comprehensive
+    - Verified `docs/task.md` exists
+    - Verified `wiki/User-Guides.md` exists
+    - All internal relative links validated
+    - Benefits: No broken documentation links
+
+**Benefits Achieved**:
+- ✅ DOCUMENTATION.md now reflects current implementation
+- ✅ Outdated wiki/API-Documentation.md has clear deprecation notice
+- ✅ README.md has improved user guide accessibility
+- ✅ All documentation links verified as working
+- ✅ Users directed to most current documentation
+- ✅ Reduced confusion from multiple conflicting documentation sources
