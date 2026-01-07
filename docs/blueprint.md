@@ -286,6 +286,8 @@ Rate limit headers are included in all responses.
 
 ## Resilience Patterns
 
+**Detailed Documentation**: See [INTEGRATION_ARCHITECTURE.md](./INTEGRATION_ARCHITECTURE.md) for comprehensive integration patterns, circuit breaker implementation, retry strategies, and webhook reliability.
+
 ### Timeout
 
 Default: 30 seconds
