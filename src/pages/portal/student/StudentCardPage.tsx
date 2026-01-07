@@ -6,7 +6,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { GraduationCap, QrCode, Download, AlertTriangle } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { SlideUp } from '@/components/animations';
 import { toast } from 'sonner';
 import { logger } from '@/lib/logger';
 
@@ -37,7 +37,7 @@ export function StudentCardPage() {
     if (!cardRef.current) return;
     setIsDownloading(true);
     toast.info('Generating PDF...');
-    
+
     try {
       const [html2canvas, jsPDF] = await Promise.all([
         import('html2canvas').then(m => m.default),
@@ -49,14 +49,14 @@ export function StudentCardPage() {
         useCORS: true,
         backgroundColor: null,
       });
-      
+
       const imgData = canvas.toDataURL('image/png');
       const pdf = new jsPDF({
         orientation: 'landscape',
         unit: 'px',
         format: [canvas.width, canvas.height],
       });
-      
+
       pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
       pdf.save(`student-card-${user?.id || 'user'}.pdf`);
       toast.success('PDF downloaded successfully!');
@@ -71,19 +71,14 @@ export function StudentCardPage() {
   if (!user) return null;
 
   if (isLoading) return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-      className="space-y-6 flex flex-col items-center"
-    >
+    <SlideUp className="space-y-6 flex flex-col items-center">
       <div className="text-center">
         <Skeleton className="h-9 w-1/3 mx-auto mb-2" />
         <Skeleton className="h-4 w-2/3 mx-auto" />
       </div>
       <CardSkeleton />
       <Skeleton className="h-12 w-48" />
-    </motion.div>
+    </SlideUp>
   );
 
   if (error) {
@@ -104,12 +99,7 @@ export function StudentCardPage() {
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-      className="space-y-6 flex flex-col items-center"
-    >
+    <SlideUp className="space-y-6 flex flex-col items-center">
       <div className="text-center">
         <h1 className="text-3xl font-bold">Kartu Pelajar Digital</h1>
         <p className="text-muted-foreground">Ini adalah kartu pelajar digital Anda. Anda dapat mengunduhnya sebagai PDF.</p>
@@ -161,6 +151,6 @@ export function StudentCardPage() {
         <Download className="mr-2 h-5 w-5" />
         {isDownloading ? 'Downloading...' : 'Download as PDF'}
       </Button>
-    </motion.div>
+    </SlideUp>
   );
 }

@@ -1,6 +1,6 @@
 import { SiteHeader } from '@/components/SiteHeader';
 import { SiteFooter } from '@/components/SiteFooter';
-import { motion } from 'framer-motion';
+import { SlideUp, SlideLeft, SlideRight } from '@/components/animations';
 
 export function ProfileServicesPage() {
   return (
@@ -9,32 +9,21 @@ export function ProfileServicesPage() {
       <main className="flex-grow">
         <div className="bg-primary/5">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24 text-center">
-            <motion.h1
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-              className="text-4xl md:text-5xl font-bold text-primary"
-            >
-              Layanan & Produk
-            </motion.h1>
-            <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-              className="mt-4 max-w-3xl mx-auto text-lg text-muted-foreground"
-            >
-              Berbagai layanan dan produk unggulan yang kami tawarkan untuk mendukung proses pendidikan.
-            </motion.p>
+            <SlideUp>
+              <h1 className="text-4xl md:text-5xl font-bold text-primary">
+                Layanan & Produk
+              </h1>
+            </SlideUp>
+            <SlideUp delay={0.2}>
+              <p className="mt-4 max-w-3xl mx-auto text-lg text-muted-foreground">
+                Berbagai layanan dan produk unggulan yang kami tawarkan untuk mendukung proses pendidikan.
+              </p>
+            </SlideUp>
           </div>
         </div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
           <div className="grid md:grid-cols-2 gap-12">
-            <motion.div
-              initial={{ opacity: 0, x: -30 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5 }}
-            >
+            <SlideLeft>
               <h2 className="text-3xl font-bold text-foreground mb-6">Layanan Pendidikan</h2>
               <div className="space-y-6">
                 <div className="flex gap-4">
@@ -48,7 +37,7 @@ export function ProfileServicesPage() {
                     </p>
                   </div>
                 </div>
-                
+
                 <div className="flex gap-4">
                   <div className="flex-shrink-0 w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
                     <span className="text-green-600 font-bold">2</span>
@@ -60,7 +49,7 @@ export function ProfileServicesPage() {
                     </p>
                   </div>
                 </div>
-                
+
                 <div className="flex gap-4">
                   <div className="flex-shrink-0 w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
                     <span className="text-purple-600 font-bold">3</span>
@@ -73,14 +62,9 @@ export function ProfileServicesPage() {
                   </div>
                 </div>
               </div>
-            </motion.div>
-            
-            <motion.div
-              initial={{ opacity: 0, x: 30 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: 0.1 }}
-            >
+            </SlideLeft>
+
+            <SlideRight delay={0.1}>
               <h2 className="text-3xl font-bold text-foreground mb-6">Produk Unggulan</h2>
               <div className="space-y-6">
                 <div className="flex gap-4">
@@ -94,7 +78,7 @@ export function ProfileServicesPage() {
                     </p>
                   </div>
                 </div>
-                
+
                 <div className="flex gap-4">
                   <div className="flex-shrink-0 w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
                     <span className="text-red-600 font-bold">B</span>
@@ -106,7 +90,7 @@ export function ProfileServicesPage() {
                     </p>
                   </div>
                 </div>
-                
+
                 <div className="flex gap-4">
                   <div className="flex-shrink-0 w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center">
                     <span className="text-indigo-600 font-bold">C</span>
@@ -119,7 +103,7 @@ export function ProfileServicesPage() {
                   </div>
                 </div>
               </div>
-            </motion.div>
+            </SlideRight>
           </div>
         </div>
       </main>

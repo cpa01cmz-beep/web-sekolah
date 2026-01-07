@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { motion } from 'framer-motion';
+import { SlideUp, SlideLeft, SlideRight } from '@/components/animations';
 
 export function PPDBPage() {
   return (
@@ -13,32 +13,21 @@ export function PPDBPage() {
       <main className="flex-grow">
         <div className="bg-primary/5">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24 text-center">
-            <motion.h1
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-              className="text-4xl md:text-5xl font-bold text-primary"
-            >
-              Pendaftaran PPDB
-            </motion.h1>
-            <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-              className="mt-4 max-w-3xl mx-auto text-lg text-muted-foreground"
-            >
-              Pendaftaran Peserta Didik Baru Tahun Ajaran 2025/2026
-            </motion.p>
+            <SlideUp>
+              <h1 className="text-4xl md:text-5xl font-bold text-primary">
+                Pendaftaran PPDB
+              </h1>
+            </SlideUp>
+            <SlideUp delay={0.2}>
+              <p className="mt-4 max-w-3xl mx-auto text-lg text-muted-foreground">
+                Pendaftaran Peserta Didik Baru Tahun Ajaran 2025/2026
+              </p>
+            </SlideUp>
           </div>
         </div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
           <div className="grid md:grid-cols-2 gap-16">
-            <motion.div
-              initial={{ opacity: 0, x: -50 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
-            >
+            <SlideLeft>
               <h2 className="text-3xl font-bold text-foreground mb-6">Informasi PPDB</h2>
               <div className="space-y-6">
                 <div>
@@ -62,7 +51,7 @@ export function PPDBPage() {
                     </li>
                   </ul>
                 </div>
-                
+
                 <div>
                   <h3 className="text-xl font-bold text-primary">Persyaratan</h3>
                   <ul className="mt-4 space-y-2 list-disc list-inside text-muted-foreground">
@@ -73,7 +62,7 @@ export function PPDBPage() {
                     <li>Nilai rapor semester 1-5 (fotokopi dilegalisir)</li>
                   </ul>
                 </div>
-                
+
                 <div>
                   <h3 className="text-xl font-bold text-primary">Kontak Informasi</h3>
                   <p className="mt-4 text-muted-foreground">
@@ -85,14 +74,9 @@ export function PPDBPage() {
                   </div>
                 </div>
               </div>
-            </motion.div>
-            
-            <motion.div
-              initial={{ opacity: 0, x: 50 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
-            >
+            </SlideLeft>
+
+            <SlideRight>
               <div className="bg-card rounded-lg shadow-md p-6">
                 <h2 className="text-2xl font-bold text-foreground mb-6">Formulir Pendaftaran</h2>
                 <form className="space-y-6">
@@ -100,7 +84,7 @@ export function PPDBPage() {
                     <Label htmlFor="name">Nama Lengkap</Label>
                     <Input id="name" placeholder="Masukkan nama lengkap" required />
                   </div>
-                  
+
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="placeOfBirth">Tempat Lahir</Label>
@@ -111,17 +95,17 @@ export function PPDBPage() {
                       <Input id="dateOfBirth" type="date" required />
                     </div>
                   </div>
-                  
+
                   <div className="space-y-2">
                     <Label htmlFor="nisn">NISN</Label>
                     <Input id="nisn" placeholder="Nomor Induk Siswa Nasional" required />
                   </div>
-                  
+
                   <div className="space-y-2">
                     <Label htmlFor="school">Asal Sekolah</Label>
                     <Input id="school" placeholder="Nama sekolah sebelumnya" required />
                   </div>
-                  
+
                   <div className="space-y-2">
                     <Label htmlFor="level">Jenjang yang Dituju</Label>
                     <Select>
@@ -134,28 +118,28 @@ export function PPDBPage() {
                       </SelectContent>
                     </Select>
                   </div>
-                  
+
                   <div className="space-y-2">
                     <Label htmlFor="email">Email Orang Tua</Label>
                     <Input id="email" type="email" placeholder="email@contoh.com" required />
                   </div>
-                  
+
                   <div className="space-y-2">
                     <Label htmlFor="phone">Nomor Telepon</Label>
                     <Input id="phone" type="tel" placeholder="081234567890" required />
                   </div>
-                  
+
                   <Button type="submit" className="w-full">Daftar Sekarang</Button>
                 </form>
               </div>
-              
+
               <div className="mt-8 bg-blue-50 rounded-lg p-6 border border-blue-200">
                 <h3 className="text-lg font-bold text-blue-800 mb-2">Panduan Pendaftaran</h3>
                 <p className="text-blue-700">
                   Pastikan semua data yang Anda masukkan sudah benar dan lengkap. Setelah mendaftar, Anda akan menerima email konfirmasi dengan instruksi selanjutnya.
                 </p>
               </div>
-            </motion.div>
+            </SlideRight>
           </div>
         </div>
       </main>

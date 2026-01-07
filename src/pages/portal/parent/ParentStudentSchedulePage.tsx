@@ -1,6 +1,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { motion } from 'framer-motion';
+import { SlideUp } from '@/components/animations';
+
 const scheduleData = {
   "Senin": [
     { time: "07:30 - 09:00", subject: "Matematika", teacher: "Mr. John Doe" },
@@ -27,34 +28,15 @@ const scheduleData = {
     { time: "09:30 - 11:00", subject: "Pendidikan Agama", teacher: "Mr. Abdul" },
   ],
 };
-const pageVariants = {
-  initial: { opacity: 0, y: 20 },
-  in: { opacity: 1, y: 0 },
-  out: { opacity: 0, y: -20 },
-};
-const cardVariants = {
-  initial: { opacity: 0, scale: 0.95 },
-  in: { opacity: 1, scale: 1 },
-};
+
 export function ParentStudentSchedulePage() {
   return (
-    <motion.div
-      initial="initial"
-      animate="in"
-      exit="out"
-      variants={pageVariants}
-      transition={{ type: 'tween', ease: 'anticipate', duration: 0.5 }}
-      className="space-y-6"
-    >
+    <SlideUp className="space-y-6">
       <h1 className="text-3xl font-bold">Jadwal Pelajaran Anak Anda</h1>
       <p className="text-muted-foreground">Berikut adalah jadwal pelajaran mingguan untuk Budi Hartono.</p>
       <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
         {Object.entries(scheduleData).map(([day, lessons], index) => (
-          <motion.div
-            key={day}
-            variants={cardVariants}
-            transition={{ duration: 0.5, delay: index * 0.1 }}
-          >
+          <SlideUp key={day} delay={index * 0.1}>
             <Card className="h-full hover:shadow-lg transition-shadow duration-200">
               <CardHeader>
                 <CardTitle>{day}</CardTitle>
@@ -81,9 +63,9 @@ export function ParentStudentSchedulePage() {
                 </Table>
               </CardContent>
             </Card>
-          </motion.div>
+          </SlideUp>
         ))}
       </div>
-    </motion.div>
+    </SlideUp>
   );
 }

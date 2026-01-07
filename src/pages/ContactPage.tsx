@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent } from '@/components/ui/card';
-import { motion } from 'framer-motion';
+import { SlideUp, SlideLeft, SlideRight } from '@/components/animations';
 import { Phone, Mail, MapPin } from 'lucide-react';
 import { toast } from 'sonner';
 export function ContactPage() {
@@ -20,35 +20,24 @@ export function ContactPage() {
       <main className="flex-grow">
         <div className="bg-primary/5">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24 text-center">
-            <motion.h1
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-              className="text-4xl md:text-5xl font-bold text-primary"
-            >
-              Get in Touch
-            </motion.h1>
-            <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-              className="mt-4 max-w-2xl mx-auto text-lg text-muted-foreground"
-            >
-              We'd love to hear from you. Whether you have a question about features, trials, or anything else, our team is ready to answer all your questions.
-            </motion.p>
+            <SlideUp>
+              <h1 className="text-4xl md:text-5xl font-bold text-primary">
+                Get in Touch
+              </h1>
+            </SlideUp>
+            <SlideUp delay={0.2}>
+              <p className="mt-4 max-w-2xl mx-auto text-lg text-muted-foreground">
+                We'd love to hear from you. Whether you have a question about features, trials, or anything else, our team is ready to answer all your questions.
+              </p>
+            </SlideUp>
           </div>
         </div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
           <div className="grid md:grid-cols-2 gap-16">
-            <motion.div
-              initial={{ opacity: 0, x: -50 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
-            >
+            <SlideLeft>
               <h2 className="text-3xl font-bold text-foreground">Contact Information</h2>
               <p className="mt-4 text-muted-foreground">
-                Fill up the form and our team will get back to you within 24 hours.
+                Fill up form and our team will get back to you within 24 hours.
               </p>
               <div className="mt-8 space-y-6">
                 <div className="flex items-center gap-4">
@@ -64,13 +53,8 @@ export function ContactPage() {
                   <span>Jl. Pendidikan No. 123, Jakarta, Indonesia</span>
                 </div>
               </div>
-            </motion.div>
-            <motion.div
-              initial={{ opacity: 0, x: 50 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
-            >
+            </SlideLeft>
+            <SlideRight>
               <Card>
                 <CardContent className="p-6">
                   <form onSubmit={handleSubmit} className="space-y-6">
@@ -90,7 +74,7 @@ export function ContactPage() {
                   </form>
                 </CardContent>
               </Card>
-            </motion.div>
+            </SlideRight>
           </div>
         </div>
       </main>

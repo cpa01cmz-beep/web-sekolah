@@ -1,6 +1,6 @@
 import { SiteHeader } from '@/components/SiteHeader';
 import { SiteFooter } from '@/components/SiteFooter';
-import { motion } from 'framer-motion';
+import { SlideUp } from '@/components/animations';
 export function PrivacyPolicyPage() {
   return (
     <div className="flex flex-col min-h-screen bg-background">
@@ -8,22 +8,16 @@ export function PrivacyPolicyPage() {
       <main className="flex-grow">
         <div className="bg-primary/5">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24 text-center">
-            <motion.h1
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-              className="text-4xl md:text-5xl font-bold text-primary"
-            >
-              Privacy Policy
-            </motion.h1>
-            <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-              className="mt-4 max-w-2xl mx-auto text-lg text-muted-foreground"
-            >
-              Last updated: {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
-            </motion.p>
+            <SlideUp>
+              <h1 className="text-4xl md:text-5xl font-bold text-primary">
+                Privacy Policy
+              </h1>
+            </SlideUp>
+            <SlideUp delay={0.2}>
+              <p className="mt-4 max-w-2xl mx-auto text-lg text-muted-foreground">
+                Last updated: {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+              </p>
+            </SlideUp>
           </div>
         </div>
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
@@ -33,11 +27,11 @@ export function PrivacyPolicyPage() {
             </p>
             <h2>1. Information We Collect</h2>
             <p>
-              We may collect personal information from you such as your name, email address, role (student, teacher, parent, admin), and other information necessary for the functioning of the school portal.
+              We may collect personal information from you such as your name, email address, role (student, teacher, parent, admin), and other information necessary for functioning of school portal.
             </p>
             <h2>2. How We Use Your Information</h2>
             <p>
-              We use the information we collect to:
+              We use information we collect to:
             </p>
             <ul>
               <li>Provide, operate, and maintain our services.</li>
@@ -52,7 +46,7 @@ export function PrivacyPolicyPage() {
             </p>
             <h2>4. Data Security</h2>
             <p>
-              We implement a variety of security measures to maintain the safety of your personal information. Your personal information is contained behind secured networks and is only accessible by a limited number of persons who have special access rights to such systems, and are required to keep the information confidential.
+              We implement a variety of security measures to maintain safety of your personal information. Your personal information is contained behind secured networks and is only accessible by a limited number of persons who have special access rights to such systems, and are required to keep information confidential.
             </p>
             <h2>5. Changes to This Privacy Policy</h2>
             <p>
