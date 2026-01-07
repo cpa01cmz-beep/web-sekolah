@@ -27,6 +27,8 @@ export interface RateLimitMiddlewareOptions {
   standardHeaders?: boolean;
   skipFailedRequests?: boolean;
   skipSuccessfulRequests?: boolean;
+  windowMs?: number;
+  maxRequests?: number;
 }
 
 const DEFAULT_CONFIG: RateLimitConfig = {
@@ -76,8 +78,8 @@ function getOrCreateEntry(key: string, config: RateLimitConfig): RateLimitStore 
 
 export function rateLimit(options: RateLimitMiddlewareOptions = {}) {
   const config: RateLimitConfig = {
-    windowMs: 15 * 60 * 1000,
-    maxRequests: 100,
+    windowMs: options.windowMs ?? 15 * 60 * 1000,
+    maxRequests: options.maxRequests ?? 100,
     skipFailedRequests: options.skipFailedRequests,
     skipSuccessfulRequests: options.skipSuccessfulRequests,
   };
@@ -146,6 +148,8 @@ export function createRateLimiter(config?: Partial<RateLimitConfig>) {
       ...options,
       skipFailedRequests: mergedConfig.skipFailedRequests,
       skipSuccessfulRequests: mergedConfig.skipSuccessfulRequests,
+      windowMs: mergedConfig.windowMs,
+      maxRequests: mergedConfig.maxRequests,
     });
   };
 }
