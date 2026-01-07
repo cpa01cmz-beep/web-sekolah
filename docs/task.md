@@ -751,6 +751,34 @@ This document tracks architectural refactoring tasks for Akademia Pro.
 - Priority: Low
 - Effort: Medium
 
+### [REFACTOR] Extract Reusable Card Component for Static Pages
+- Location: src/pages/WorksPage.tsx (lines 25-156), ProfileExtracurricularPage.tsx (lines 25-122), ProfileServicesPage.tsx, ProfileFacilitiesPage.tsx, LinksDownloadPage.tsx, NewsUpdatePage.tsx
+- Issue: Repeated card structure pattern across multiple static pages (gradient header, title, description, tags, footer). Each page has 4-6 nearly identical card blocks with different content
+- Suggestion: Extract generic `ContentCard` component that accepts title, description, gradient color, tags, and author/footer props. This reduces code duplication from ~800 lines to ~200 lines
+- Priority: Medium
+- Effort: Medium
+
+### [REFACTOR] Move Seed Data from entities.ts to Separate Module
+- Location: worker/entities.ts (lines 1-200+)
+- Issue: entities.ts file (381 lines) mixes entity definitions with static seed data. Seed data is development/migration tooling, not core domain logic. This violates Single Responsibility Principle and makes the file harder to maintain
+- Suggestion: Extract seed data to `worker/seed-data.ts` module. Keep entities.ts focused on entity class definitions only. This improves separation of concerns and makes it easier to seed different environments
+- Priority: Medium
+- Effort: Small
+
+### [REFACTOR] Replace Console Statements with Logger in Worker
+- Location: worker/migrations.ts (1 instance), worker/webhook-service.ts (1 instance), worker/index-rebuilder.ts (1 instance), worker/webhook-routes.ts (1 instance)
+- Issue: 4 console.log/error statements exist in non-test worker code instead of using the centralized pino logger. This bypasses structured logging, log level filtering, and production monitoring
+- Suggestion: Replace all console statements with `logger.info()`, `logger.error()`, or `logger.warn()` to maintain consistent logging patterns and proper log level filtering
+- Priority: Medium
+- Effort: Small
+
+### [REFACTOR] Extract Validation Logic from LoginPage
+- Location: src/pages/LoginPage.tsx (lines 21-31)
+- Issue: Email and password validation logic is duplicated (email regex and password length check). This validation should be reusable across forms and components
+- Suggestion: Extract to shared validation utility `src/utils/formValidation.ts` with `validateEmail()` and `validatePassword()` functions. This makes validation logic testable and reusable
+- Priority: Low
+- Effort: Small
+
 ## Integration Hardening (2026-01-07)
 
 **Task**: Verify and document complete integration resilience patterns implementation
