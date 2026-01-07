@@ -116,7 +116,7 @@ export function StudentSchedulePage() {
                     </TableHeader>
                     <TableBody>
                       {lessons.map((lesson, lessonIndex) => (
-                        <TableRow key={lessonIndex}>
+                        <TableRow key={lesson.time}>
                           <TableCell className="font-mono text-xs">{lesson.time}</TableCell>
                           <TableCell>
                             <p className="font-medium">{lesson.courseName}</p>

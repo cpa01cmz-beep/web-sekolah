@@ -100,7 +100,7 @@ export function StudentGradesPage() {
             </TableHeader>
             <TableBody>
               {grades.map((grade, index) => (
-                <TableRow key={index} className="hover:bg-muted/50">
+                <TableRow key={grade.id} className="hover:bg-muted/50">
                   <TableCell className="font-medium">{index + 1}</TableCell>
                   <TableCell>{grade.courseName}</TableCell>
                   <TableCell className="text-center font-semibold">{grade.score}</TableCell>
