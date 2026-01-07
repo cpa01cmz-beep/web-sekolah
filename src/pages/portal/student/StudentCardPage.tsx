@@ -9,6 +9,7 @@ import { GraduationCap, QrCode, Download, AlertTriangle } from 'lucide-react';
 import { SlideUp } from '@/components/animations';
 import { toast } from 'sonner';
 import { logger } from '@/lib/logger';
+import { THEME_COLORS } from '@/theme/colors';
 
 function CardSkeleton() {
   return (
@@ -106,7 +107,7 @@ export function StudentCardPage() {
       </div>
       <div
         ref={cardRef}
-        className="w-full max-w-[550px] min-h-[330px] bg-gradient-to-br from-[#0D47A1] to-[#00ACC1] rounded-2xl p-4 sm:p-6 text-white shadow-2xl flex flex-col justify-between relative overflow-hidden"
+        className="w-full max-w-[550px] min-h-[330px] rounded-2xl p-4 sm:p-6 text-white shadow-2xl flex flex-col justify-between relative overflow-hidden" style={{ background: `linear-gradient(to bottom right, ${THEME_COLORS.PRIMARY}, ${THEME_COLORS.SECONDARY})` }}
       >
         <div className="absolute -top-10 -right-10 w-32 h-32 sm:w-40 sm:h-40 bg-white/10 rounded-full"></div>
         <div className="absolute -bottom-12 -left-12 w-32 h-32 sm:w-40 sm:h-40 bg-white/10 rounded-full"></div>

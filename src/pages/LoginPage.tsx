@@ -10,6 +10,7 @@ import { GraduationCap, ArrowRight } from 'lucide-react';
 import { UserRole } from '@shared/types';
 import { SlideUp } from '@/components/animations';
 import { Toaster, toast } from 'sonner';
+import { THEME_COLORS } from '@/theme/colors';
 
 export function LoginPage() {
   const navigate = useNavigate();
@@ -52,15 +53,15 @@ export function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-[#F5F7FA] p-4">
+    <div className="min-h-screen flex flex-col items-center justify-center p-4" style={{ backgroundColor: THEME_COLORS.BACKGROUND }}>
       <Toaster richColors />
-      <div className="absolute inset-0 bg-gradient-to-br from-[#0D47A1]/10 to-[#00ACC1]/10"></div>
+      <div className="absolute inset-0" style={{ background: `linear-gradient(to bottom right, ${THEME_COLORS.PRIMARY}10, ${THEME_COLORS.SECONDARY}10)` }}></div>
       <SlideUp>
         <div className="w-full max-w-md z-10">
           <Card>
             <CardHeader className="text-center">
               <Link to="/" className="flex items-center justify-center gap-2 mb-4">
-                <GraduationCap className="h-10 w-10 text-[#0D47A1]" />
+                <GraduationCap className="h-10 w-10" style={{ color: THEME_COLORS.PRIMARY }} />
                 <span className="text-2xl font-bold text-foreground">Akademia Pro</span>
               </Link>
               <CardTitle className="text-2xl">Unified Login</CardTitle>
@@ -119,7 +120,7 @@ export function LoginPage() {
               <div className="grid grid-cols-2 gap-2 w-full">
                 <Button
                   onClick={() => handleLogin('student')}
-                  className="w-full bg-[#0D47A1] hover:bg-[#0b3a8a]"
+                  className="w-full" style={{ backgroundColor: THEME_COLORS.PRIMARY }}
                   disabled={isLoading === 'student'}
                   aria-busy={isLoading === 'student'}
                 >
@@ -127,7 +128,7 @@ export function LoginPage() {
                 </Button>
                 <Button
                   onClick={() => handleLogin('teacher')}
-                  className="w-full bg-[#00ACC1] hover:bg-[#008a99]"
+                  className="w-full" style={{ backgroundColor: THEME_COLORS.SECONDARY }}
                   disabled={isLoading === 'teacher'}
                   aria-busy={isLoading === 'teacher'}
                 >

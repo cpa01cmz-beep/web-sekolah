@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Users, GraduationCap, School, Megaphone, Activity } from 'lucide-react';
 import { SlideUp } from '@/components/animations';
 import { useReducedMotion } from '@/hooks/use-reduced-motion';
+import { THEME_COLORS } from '@/theme/colors';
 const mockAdminData = {
   stats: [
     { title: 'Total Students', value: '1,250', icon: <Users className="h-6 w-6 text-blue-500" /> },
@@ -55,7 +56,7 @@ function EnrollmentChart() {
         <Chart.YAxis />
         <Chart.Tooltip />
         <Chart.Legend />
-        <Chart.Bar dataKey="students" fill="#0D47A1" />
+        <Chart.Bar dataKey="students" fill={THEME_COLORS.PRIMARY} />
       </Chart.BarChart>
     </Chart.ResponsiveContainer>
   );

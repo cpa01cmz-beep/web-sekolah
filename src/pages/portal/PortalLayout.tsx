@@ -11,6 +11,7 @@ import { useState } from 'react';
 import { SkipLink } from '@/components/SkipLink';
 import { navLinksMap, NavLink as NavLinkType } from '@/config/navigation';
 import React from 'react';
+import { THEME_COLORS } from '@/theme/colors';
 export function PortalLayout() {
   const user = useAuthStore((state) => state.user);
   const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -20,7 +21,7 @@ export function PortalLayout() {
   const navLinks = navLinksMap[user.role as keyof typeof navLinksMap] || [];
   const basePortalPath = `/portal/${user.role}`;
   return (
-    <div className="flex h-screen bg-[#F5F7FA]">
+    <div className="flex h-screen" style={{ backgroundColor: THEME_COLORS.BACKGROUND }}>
       <SkipLink targetId="main-content" />
       <PortalSidebar />
       <div className="flex-1 flex flex-col overflow-hidden">
@@ -35,7 +36,7 @@ export function PortalLayout() {
               <SheetContent side="left" className="p-0 w-64">
                 <div className="flex flex-col h-full">
                   <div className="flex items-center h-16 border-b px-4">
-                    <GraduationCap className="h-7 w-7 text-[#0D47A1]" aria-hidden="true" />
+                    <GraduationCap className="h-7 w-7" style={{ color: THEME_COLORS.PRIMARY }} aria-hidden="true" />
                     <span className="ml-2 text-lg font-bold">Akademia Pro</span>
                   </div>
                   <nav className="flex-grow p-4 space-y-2" aria-label={`${user.role} portal mobile navigation`} role="navigation">

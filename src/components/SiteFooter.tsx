@@ -1,5 +1,6 @@
 import { GraduationCap, Twitter, Facebook, Instagram } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { THEME_COLORS } from '@/theme/colors';
 export function SiteFooter() {
   return (
     <footer className="bg-muted text-muted-foreground">
@@ -7,7 +8,7 @@ export function SiteFooter() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div className="space-y-4">
             <Link to="/" className="flex items-center gap-2" aria-label="Akademia Pro Home">
-              <GraduationCap className="h-8 w-8 text-[#0D47A1]" aria-hidden="true" />
+              <GraduationCap className="h-8 w-8 text-[var(--color-primary)]" style={{ color: THEME_COLORS.PRIMARY }} aria-hidden="true" />
               <span className="text-xl font-bold text-foreground">Akademia Pro</span>
             </Link>
             <p className="text-sm">

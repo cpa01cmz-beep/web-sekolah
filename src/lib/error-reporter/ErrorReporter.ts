@@ -8,7 +8,7 @@ import type {
   ConsoleNative,
   WrappedConsoleFn
 } from './types';
-import { REACT_WARNING_PATTERN, WARNING_PREFIX, CONSOLE_ERROR_PREFIX } from './constants';
+import { REACT_WARNING_PATTERN, WARNING_PREFIX, CONSOLE_ERROR_PREFIX, ERROR_REPORTER_CONFIG } from './constants';
 import { categorizeError, isReactRouterFutureFlagMessage, isDeprecatedReactWarningMessage, hasRelevantSourceInStack, parseStackTrace } from './utils';
 import { VENDOR_PATTERNS } from './constants';
 import { globalDeduplication } from './deduplication';
@@ -17,14 +17,14 @@ import { ConsoleArgs } from './types';
 class ErrorReporter {
   private errorQueue: ErrorReport[] = [];
   private isReporting = false;
-  private readonly maxQueueSize = 10;
+  private readonly maxQueueSize = ERROR_REPORTER_CONFIG.MAX_QUEUE_SIZE;
   private readonly reportingEndpoint = "/api/client-errors";
   private originalConsoleWarn: typeof console.warn | null = null;
   private originalConsoleError: typeof console.error | null = null;
   private isInitialized = false;
-  private readonly maxRetries = 3;
-  private readonly baseRetryDelay = 1000;
-  private readonly requestTimeout = 10000;
+  private readonly maxRetries = ERROR_REPORTER_CONFIG.MAX_RETRIES;
+  private readonly baseRetryDelay = ERROR_REPORTER_CONFIG.BASE_RETRY_DELAY_MS;
+  private readonly requestTimeout = ERROR_REPORTER_CONFIG.REQUEST_TIMEOUT_MS;
 
   constructor() {
     if (typeof window === "undefined") return;
