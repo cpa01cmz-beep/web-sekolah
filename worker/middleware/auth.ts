@@ -3,12 +3,10 @@ import { jwtVerify, SignJWT } from 'jose';
 import type { JWTPayload } from 'jose';
 import { logger } from '../logger';
 
-export interface AuthContext {
-  user?: {
-    id: string;
-    email: string;
-    role: 'student' | 'teacher' | 'parent' | 'admin';
-  };
+export interface AuthUser {
+  id: string;
+  email: string;
+  role: 'student' | 'teacher' | 'parent' | 'admin';
 }
 
 export interface JwtPayload extends JWTPayload {
@@ -111,7 +109,8 @@ export function authenticate(secretEnvVar: string = 'JWT_SECRET') {
       );
     }
 
-    (c as any).set('user', {
+    const context = c as any;
+    context.set('user', {
       id: payload.sub,
       email: payload.email,
       role: payload.role,
@@ -123,7 +122,8 @@ export function authenticate(secretEnvVar: string = 'JWT_SECRET') {
 
 export function authorize(...allowedRoles: ('student' | 'teacher' | 'parent' | 'admin')[]) {
   return async (c: Context, next: Next) => {
-    const user = c.get('user');
+    const context = c as any;
+    const user = context.get('user');
 
     if (!user) {
       return c.json(
@@ -176,7 +176,8 @@ export function optionalAuthenticate(secretEnvVar: string = 'JWT_SECRET') {
 
     const payload = await verifyToken(token, secret);
     if (payload) {
-      (c as any).set('user', {
+      const context = c as any;
+      context.set('user', {
         id: payload.sub,
         email: payload.email,
         role: payload.role,

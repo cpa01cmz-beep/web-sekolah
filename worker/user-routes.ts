@@ -12,28 +12,37 @@ import {
 } from "./entities";
 import { ReferentialIntegrity } from "./referential-integrity";
 import { rebuildAllIndexes } from "./index-rebuilder";
+import { authenticate, authorize } from './middleware/auth';
 import type { Grade, SchoolUser, Student, StudentDashboardData, Teacher, CreateUserData } from "@shared/types";
+import { logger } from './logger';
+
 export function userRoutes(app: Hono<{ Bindings: Env }>) {
-  // --- SEED ENDPOINT ---
   app.post('/api/seed', async (c) => {
     await ensureAllSeedData(c.env);
     return ok(c, { message: 'Database seeded successfully.' });
   });
 
-  // --- INDEX REBUILD ENDPOINT ---
-  app.post('/api/admin/rebuild-indexes', async (c) => {
+  app.post('/api/admin/rebuild-indexes', authenticate(), authorize('admin'), async (c) => {
     await rebuildAllIndexes(c.env);
     return ok(c, { message: 'All secondary indexes rebuilt successfully.' });
   });
-  // --- STUDENT PORTAL ---
-  app.get('/api/students/:id/dashboard', async (c) => {
+
+  app.get('/api/students/:id/dashboard', authenticate(), authorize('student'), async (c) => {
+    const context = c as any;
+    const userId = context.get('user').id;
+    const requestedStudentId = c.req.param('id');
+
+    if (userId !== requestedStudentId) {
+      logger.warn('[AUTH] Student accessing another student dashboard', { userId, requestedStudentId });
+      return bad(c, 'Access denied');
+    }
+
     const studentId = c.req.param('id');
     const student = new UserEntity(c.env, studentId);
     const studentState = await student.getState() as Student;
     if (!studentState || studentState.role !== 'student') {
       return notFound(c, 'Student not found');
     }
-    // Fetch schedule
     const scheduleEntity = new ScheduleEntity(c.env, studentState.classId);
     const scheduleState = await scheduleEntity.getState();
     const courseIds = scheduleState.items.map(item => item.courseId);
@@ -47,7 +56,6 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
       courseName: coursesMap.get(item.courseId)?.name || 'Unknown Course',
       teacherName: teachersMap.get(coursesMap.get(item.courseId)?.teacherId || '')?.name || 'Unknown Teacher',
     }));
-    // Fetch recent grades using optimized method
     const studentGrades = (await GradeEntity.getByStudentId(c.env, studentId)).slice(0, 5);
     const gradeCourseIds = studentGrades.map(g => g.courseId);
     const gradeCourses = await Promise.all(gradeCourseIds.map(id => new CourseEntity(c.env, id).getState()));
@@ -56,7 +64,6 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
       ...grade,
       courseName: gradeCoursesMap.get(grade.courseId)?.name || 'Unknown Course',
     }));
-    // Fetch announcements
     const allAnnouncements = (await AnnouncementEntity.list(c.env)).items.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
     const announcementAuthors = await Promise.all(allAnnouncements.map(a => new UserEntity(c.env, a.authorId).getState()));
     const authorsMap = new Map(announcementAuthors.map(a => [a.id, a]));
@@ -67,13 +74,23 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
     const dashboardData: StudentDashboardData = { schedule, recentGrades, announcements };
     return ok(c, dashboardData);
   });
-  // --- TEACHER PORTAL ---
-  app.get('/api/teachers/:id/classes', async (c) => {
+
+  app.get('/api/teachers/:id/classes', authenticate(), authorize('teacher'), async (c) => {
+    const context = c as any;
+    const userId = context.get('user').id;
+    const requestedTeacherId = c.req.param('id');
+
+    if (userId !== requestedTeacherId) {
+      logger.warn('[AUTH] Teacher accessing another teacher data', { userId, requestedTeacherId });
+      return bad(c, 'Access denied');
+    }
+
     const teacherId = c.req.param('id');
     const classes = await ClassEntity.getByTeacherId(c.env, teacherId);
     return ok(c, classes);
   });
-  app.get('/api/classes/:id/students', async (c) => {
+
+  app.get('/api/classes/:id/students', authenticate(), authorize('teacher'), async (c) => {
     const classId = c.req.param('id');
     const classEntity = new ClassEntity(c.env, classId);
     const classState = await classEntity.getState();
@@ -101,7 +118,8 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
 
     return ok(c, studentsWithGrades);
   });
-  app.put('/api/grades/:id', async (c) => {
+
+  app.put('/api/grades/:id', authenticate(), authorize('teacher'), async (c) => {
     const gradeId = c.req.param('id');
     const { score, feedback } = await c.req.json<{ score: number; feedback: string }>();
     if (gradeId === 'null' || !gradeId) return bad(c, 'Grade has not been created yet. Cannot update.');
@@ -110,7 +128,8 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
     await gradeEntity.patch({ score, feedback });
     return ok(c, await gradeEntity.getState());
   });
-  app.post('/api/grades', async (c) => {
+
+  app.post('/api/grades', authenticate(), authorize('teacher'), async (c) => {
     const { studentId, courseId, score, feedback } = await c.req.json<Partial<Grade> & { studentId: string; courseId: string }>();
     if (!studentId || !courseId) return bad(c, 'studentId and courseId are required');
     
@@ -133,11 +152,12 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
     await GradeEntity.create(c.env, newGrade as Grade);
     return ok(c, newGrade);
   });
-  // --- ADMIN PORTAL ---
-  app.get('/api/users', async (c) => {
+
+  app.get('/api/users', authenticate(), authorize('admin'), async (c) => {
     return ok(c, (await UserEntity.list(c.env)).items);
   });
-  app.post('/api/users', async (c) => {
+
+  app.post('/api/users', authenticate(), authorize('admin'), async (c) => {
     const userData = await c.req.json<CreateUserData>();
     const now = new Date().toISOString();
     const base = { id: crypto.randomUUID(), createdAt: now, updatedAt: now, avatarUrl: '' };
@@ -156,7 +176,8 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
     await UserEntity.create(c.env, newUser);
     return ok(c, newUser);
   });
-  app.put('/api/users/:id', async (c) => {
+
+  app.put('/api/users/:id', authenticate(), authorize('admin'), async (c) => {
     const userId = c.req.param('id');
     const userData = await c.req.json<Partial<SchoolUser>>();
     const userEntity = new UserEntity(c.env, userId);
@@ -164,7 +185,8 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
     await userEntity.patch(userData);
     return ok(c, await userEntity.getState());
   });
-  app.delete('/api/users/:id', async (c) => {
+
+  app.delete('/api/users/:id', authenticate(), authorize('admin'), async (c) => {
     const userId = c.req.param('id');
     const warnings = await ReferentialIntegrity.checkDependents(c.env, 'user', userId);
     if (warnings.length > 0) {

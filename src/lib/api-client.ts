@@ -5,6 +5,8 @@
 import { QueryClient, useQuery as useTanstackQuery, useMutation as useTanstackMutation, UseQueryOptions, UseMutationOptions } from '@tanstack/react-query';
 import { ApiResponse } from "../../shared/types";
 
+const getAuthToken = () => localStorage.getItem('authToken');
+
 // ====================
 // Type Definitions
 // ====================
@@ -242,13 +244,20 @@ export async function apiClient<T>(path: string, init?: RequestInit & { timeout?
   const requestId = crypto.randomUUID();
 
   const executeRequest = async (): Promise<T> => {
+    const token = getAuthToken();
+    const headers: HeadersInit = {
+      'Content-Type': 'application/json',
+      'X-Request-ID': requestId,
+      ...initHeaders,
+    };
+
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+
     const res = await fetchWithTimeout(path, {
       timeout,
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Request-ID': requestId,
-        ...initHeaders,
-      },
+      headers,
       ...restInit,
     });
 

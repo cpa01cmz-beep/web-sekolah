@@ -68,8 +68,8 @@ This document tracks architectural refactoring tasks for Akademia Pro.
 
 | Priority | Task | Status | Description |
 |----------|------|--------|-------------|
-| High | Apply JWT Authentication | Pending | Apply authentication middleware to all protected API endpoints (requires login endpoint implementation) |
-| High | Apply Role-Based Authorization | Pending | Enforce role-based access control on protected routes |
+| High | Apply JWT Authentication | Completed | Implemented `/api/auth/login` endpoint and applied authentication middleware to all protected API endpoints |
+| High | Apply Role-Based Authorization | Completed | Applied role-based authorization to all protected routes (student, teacher, admin) |
 | Medium | Remove Extraneous Dependency | Completed | Removed @emnapi/runtime (extraneous package, no actual security risk) |
 | Medium | CSP Security Review | Completed | Added security notes and recommendations for production deployment |
 

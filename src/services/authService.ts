@@ -1,8 +1,5 @@
 import { BaseUser, UserRole } from '@shared/types';
-import { DEFAULT_AVATARS, getAvatarUrl } from '@/constants/avatars';
-
-// In a real application, this would make actual API calls
-// For now, we'll keep the mock implementation but with a proper service layer
+import { apiClient } from '@/lib/api-client';
 
 interface LoginCredentials {
   email: string;
@@ -15,84 +12,40 @@ interface AuthResponse {
   token: string;
 }
 
-const MOCK_USERS: Record<UserRole, BaseUser> = {
-  student: {
-    id: 'student-01',
-    name: 'Budi Hartono',
-    email: 'budi@example.com',
-    role: 'student',
-    avatarUrl: DEFAULT_AVATARS.student01
-  },
-  teacher: {
-    id: 'teacher-01',
-    name: 'Ibu Siti',
-    email: 'siti@example.com',
-    role: 'teacher',
-    avatarUrl: DEFAULT_AVATARS.teacher01
-  },
-  parent: {
-    id: 'parent-01',
-    name: 'Ayah Budi',
-    email: 'ayah.budi@example.com',
-    role: 'parent',
-    avatarUrl: DEFAULT_AVATARS.parent01
-  },
-  admin: {
-    id: 'admin-01',
-    name: 'Admin Sekolah',
-    email: 'admin@example.com',
-    role: 'admin',
-    avatarUrl: DEFAULT_AVATARS.admin01
-  },
-};
-
 export class AuthService {
-  // Simulate API call delay
-  private static async simulateApiCall<T>(data: T, delay = 500): Promise<T> {
-    return new Promise(resolve => setTimeout(() => resolve(data), delay));
-  }
-
   static async login(credentials: LoginCredentials): Promise<AuthResponse> {
-    // Simulate authentication check
-    if (!credentials.email || !credentials.password) {
-      throw new Error('Email and password are required');
+    try {
+      const response = await apiClient<{ token: string; user: BaseUser }>('/api/auth/login', {
+        method: 'POST',
+        body: JSON.stringify(credentials),
+      });
+
+      return {
+        token: response.token,
+        user: response.user,
+      };
+    } catch (error: any) {
+      throw new Error(error.message || 'Login failed');
     }
-
-    const user = { ...MOCK_USERS[credentials.role], email: credentials.email || MOCK_USERS[credentials.role].email };
-    const token = `mock-jwt-token-${user.id}-${Date.now()}`;
-
-    return this.simulateApiCall({ user, token });
   }
 
   static async logout(): Promise<void> {
-    // In a real app, this would invalidate the token on the server
-    return this.simulateApiCall(undefined);
+    return Promise.resolve();
   }
 
   static async getCurrentUser(token: string): Promise<BaseUser | null> {
-    // In a real app, this would verify the token and fetch user data
     if (!token) return null;
-    
-    // Extract user role from token (simplified)
-    const roleMatch = token.match(/mock-jwt-token-([\w-]+)-\d+/);
-    if (!roleMatch) return null;
-    
-    const userId = roleMatch[1];
-    // Map user ID to role (supports both 'student01' and 'student-01' formats)
-    const roleMap: Record<string, UserRole> = {
-      'student01': 'student',
-      'teacher01': 'teacher',
-      'parent01': 'parent',
-      'admin01': 'admin',
-      'student-01': 'student',
-      'teacher-01': 'teacher',
-      'parent-01': 'parent',
-      'admin-01': 'admin'
-    };
-    
-    const role = roleMap[userId];
-    if (!role) return null;
 
-    return this.simulateApiCall(MOCK_USERS[role] || null);
+    try {
+      const response = await apiClient<BaseUser>('/api/auth/verify', {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      return response;
+    } catch (error) {
+      return null;
+    }
   }
 }
