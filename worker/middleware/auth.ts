@@ -97,7 +97,6 @@ export function authenticate(secretEnvVar: string = 'JWT_SECRET') {
 export function authorize(...allowedRoles: ('student' | 'teacher' | 'parent' | 'admin')[]) {
   return async (c: Context, next: Next) => {
     const { unauthorized, forbidden } = await import('../core-utils');
-    
     const context = c as any;
     const user = context.get('user');
 
