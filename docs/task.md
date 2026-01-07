@@ -1222,3 +1222,38 @@ Created comprehensive `docs/blueprint.md` with:
 - [x] Test coverage for retry logic
 - [x] All tests passing
 - [x] Zero breaking changes
+
+## [REFACTOR] Extract Authorization Check Pattern in user-routes.ts
+- Location: worker/user-routes.ts (lines 32-39, 80-88)
+- Issue: Duplicate authorization checks for student and teacher access control with identical pattern: get userId, get requestedId, compare them, log warning, return forbidden if mismatch
+- Suggestion: Create a helper function `validateUserAccess(userId: string, requestedId: string, role: string)` that encapsulates the authorization check logic, including logging and error response
+- Priority: Medium
+- Effort: Small
+
+## [REFACTOR] Format Seed Data Properly in entities.ts
+- Location: worker/entities.ts (line 6)
+- Issue: All seed data is defined on a single unreadable line, making it difficult to maintain or modify (though the object itself is formatted across multiple lines in newer versions)
+- Suggestion: Ensure seedData object is formatted with proper indentation across multiple lines for better readability and maintainability
+- Priority: Medium
+- Effort: Small
+
+## [REFACTOR] Extract Data Transformation Logic in user-routes.ts
+- Location: worker/user-routes.ts (lines 47-76)
+- Issue: Complex nested logic for building enriched schedule data and announcements involves multiple map operations, Promise.all calls, and manual map construction that obscures the data transformation flow
+- Suggestion: Create utility functions like `enrichScheduleData(env, scheduleItems)` and `enrichAnnouncementsWithAuthors(env, announcements)` that handle the data enrichment pattern consistently
+- Priority: Medium
+- Effort: Medium
+
+## [REFACTOR] Extract Duplicate Loading State Components
+- Location: Multiple page files (StudentDashboardPage.tsx, AdminDashboardPage.tsx, TeacherGradeManagementPage.tsx, etc.)
+- Issue: Each page implements its own loading skeleton with identical structure (skeleton cards, loading indicators, empty states), creating code duplication
+- Suggestion: Create reusable components like `<TableSkeleton>`, `<DashboardSkeleton>`, and `<CardSkeleton>` that can be imported across all pages
+- Priority: Low
+- Effort: Small
+
+## [REFACTOR] Consolidate Date Formatting Logic
+- Location: Multiple files (StudentDashboardPage.tsx:133, StudentGradesPage.tsx, etc.)
+- Issue: Date formatting is done inline with `new Date(dateString).toLocaleDateString()` throughout the codebase, creating inconsistent formats and potential timezone issues
+- Suggestion: Create a centralized date utility function `formatDate(date: string | Date, format?: 'short' | 'long' | 'time')` that ensures consistent date formatting across the application
+- Priority: Low
+- Effort: Small
