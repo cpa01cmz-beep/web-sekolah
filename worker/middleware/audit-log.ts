@@ -1,4 +1,5 @@
 import type { Context, Next } from 'hono';
+import { logger } from '../logger';
 
 export interface AuditLogEntry {
   timestamp: string;
@@ -62,7 +63,7 @@ export function auditLog(action: string) {
       };
 
       if (sensitiveOperations.has(action) || statusCode >= 400) {
-        console.log(`[AUDIT] ${action}`, JSON.stringify(logEntry, null, 2));
+        logger.info(`[AUDIT] ${action}`, logEntry);
       }
     } catch (error) {
       const logEntry: AuditLogEntry = {
@@ -82,7 +83,7 @@ export function auditLog(action: string) {
         },
       };
 
-      console.error(`[AUDIT] ${action} - ERROR`, JSON.stringify(logEntry, null, 2));
+      logger.error(`[AUDIT] ${action} - ERROR`, error instanceof Error ? error : 'Unknown error', logEntry);
       throw error;
     }
   };

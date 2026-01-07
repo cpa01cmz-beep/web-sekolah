@@ -1,6 +1,7 @@
 import type { Context, Next, Env as HonoEnv } from 'hono';
 import { jwtVerify, SignJWT } from 'jose';
 import type { JWTPayload } from 'jose';
+import { logger } from '../logger';
 
 export interface AuthContext {
   user?: {
@@ -51,7 +52,7 @@ export async function verifyToken(
     const { payload } = await jwtVerify(token, key);
     return payload as JwtPayload;
   } catch (error) {
-    console.error('[AUTH] Token verification failed:', error);
+    logger.error('[AUTH] Token verification failed', error);
     return null;
   }
 }
@@ -87,7 +88,7 @@ export function authenticate(secretEnvVar: string = 'JWT_SECRET') {
     const secret = c.env[secretEnvVar] || '';
 
     if (!secret) {
-      console.error('[AUTH] JWT_SECRET not configured');
+      logger.error('[AUTH] JWT_SECRET not configured');
       return c.json(
         {
           success: false,

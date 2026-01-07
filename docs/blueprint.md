@@ -724,6 +724,78 @@ try {
 
 ---
 
+## Logging Strategy
+
+### Frontend Logging
+
+Use the centralized logger utility for consistent logging across the application:
+
+```typescript
+import { logger } from '@/lib/logger';
+
+// Basic logging
+logger.info('User logged in', { userId, email });
+logger.warn('Cache miss', { key });
+logger.error('API request failed', error, { endpoint, status });
+
+// Child logger for request-scoped context
+const requestLogger = createChildLogger({ requestId, userId });
+requestLogger.info('Processing request');
+requestLogger.error('Processing failed', err);
+```
+
+### Worker Logging
+
+Worker-specific logger with environment-based filtering:
+
+```typescript
+import { logger } from '../logger';
+
+logger.info('Migration applied', { id, description });
+logger.error('Auth failed', error, { tokenHash: hash(token) });
+```
+
+### Log Levels
+
+| Level | Usage | Environment |
+|-------|-------|-------------|
+| `debug` | Detailed diagnostics | Development only |
+| `info` | General informational messages | Development + Production |
+| `warn` | Warning conditions | Development + Production |
+| `error` | Error conditions | Development + Production |
+
+### Configuration
+
+Environment variable: `VITE_LOG_LEVEL` (frontend) or `LOG_LEVEL` (worker)
+
+```bash
+# .env
+VITE_LOG_LEVEL=debug  # Development
+VITE_LOG_LEVEL=info   # Production
+```
+
+### Structured Logging
+
+All logs include:
+- Timestamp (ISO 8601 format)
+- Log level
+- Message
+- Context object (optional)
+- Error details (for error level)
+
+Example output:
+```json
+{
+  "level": 30,
+  "time": "2026-01-07T11:48:17.000Z",
+  "msg": "User logged in",
+  "userId": "student-01",
+  "email": "student@example.com"
+}
+```
+
+---
+
 ## Monitoring & Debugging
 
 ### Circuit Breaker State
@@ -762,6 +834,7 @@ All requests include `X-Request-ID` header for tracing:
 6. **Don't disable circuit breaker** - Only in exceptional circumstances
 7. **Use service layer** - Abstract API calls behind services for testability
 8. **Validate inputs** - Use Zod schemas for request/response validation
+9. **Use centralized logger** - Import from `@/lib/logger` (frontend) or `../logger` (worker) for consistent logging
 
 ---
 

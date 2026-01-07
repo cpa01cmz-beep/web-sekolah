@@ -1,4 +1,5 @@
 import type { Env } from './core-utils';
+import { logger } from './logger';
 
 /**
  * Migration interface
@@ -32,25 +33,25 @@ export class MigrationRunner {
     const pending = migrations.filter(m => !this.appliedMigrations.has(m.id));
     
     if (pending.length === 0) {
-      console.log('[Migration] No pending migrations to apply');
+      logger.info('[Migration] No pending migrations to apply');
       return;
     }
 
-    console.log(`[Migration] Found ${pending.length} pending migration(s) to apply`);
+    logger.info('[Migration] Found pending migrations', { count: pending.length });
 
     for (const migration of pending) {
       try {
-        console.log(`[Migration] Applying: ${migration.id} - ${migration.description}`);
+        logger.info('[Migration] Applying', { id: migration.id, description: migration.description });
         await migration.up(env);
         this.appliedMigrations.add(migration.id);
-        console.log(`[Migration] Successfully applied: ${migration.id}`);
+        logger.info('[Migration] Successfully applied', { id: migration.id });
       } catch (error) {
-        console.error(`[Migration] Failed to apply ${migration.id}:`, error);
+        logger.error(`[Migration] Failed to apply ${migration.id}`, error);
         throw new Error(`Migration ${migration.id} failed: ${error}`);
       }
     }
 
-    console.log('[Migration] All migrations applied successfully');
+    logger.info('[Migration] All migrations applied successfully');
   }
 
   /**
@@ -64,23 +65,23 @@ export class MigrationRunner {
     const toRollback = migrations.filter(m => this.appliedMigrations.has(m.id)).slice(-count);
     
     if (toRollback.length === 0) {
-      console.log('[Migration] No migrations to rollback');
+      logger.info('[Migration] No migrations to rollback');
       return;
     }
 
     for (const migration of toRollback) {
       try {
-        console.log(`[Migration] Rolling back: ${migration.id} - ${migration.description}`);
+        logger.info('[Migration] Rolling back', { id: migration.id, description: migration.description });
         await migration.down(env);
         this.appliedMigrations.delete(migration.id);
-        console.log(`[Migration] Successfully rolled back: ${migration.id}`);
+        logger.info('[Migration] Successfully rolled back', { id: migration.id });
       } catch (error) {
-        console.error(`[Migration] Failed to rollback ${migration.id}:`, error);
+        logger.error(`[Migration] Failed to rollback ${migration.id}`, error);
         throw new Error(`Rollback of ${migration.id} failed: ${error}`);
       }
     }
 
-    console.log('[Migration] Rollback completed successfully');
+    logger.info('[Migration] Rollback completed successfully');
   }
 
   /**
@@ -103,7 +104,7 @@ export class MigrationRunner {
    */
   static reset(): void {
     this.appliedMigrations.clear();
-    console.warn('[Migration] Migration history has been reset');
+    logger.warn('[Migration] Migration history has been reset');
   }
 }
 
@@ -130,7 +131,7 @@ export const MigrationHelpers = {
    * Log migration step
    */
   log(step: string): void {
-    console.log(`[Migration] ${step}`);
+    logger.info(`[Migration] ${step}`);
   },
 
   /**
@@ -146,10 +147,10 @@ export const MigrationHelpers = {
         const passed = await check();
         results.push({ name, passed });
         if (!passed) {
-          console.error(`[Migration] Integrity check failed: ${name}`);
+          logger.error(`[Migration] Integrity check failed`, { name });
         }
       } catch (error) {
-        console.error(`[Migration] Integrity check error (${name}):`, error);
+        logger.error(`[Migration] Integrity check error`, error, { name });
         results.push({ name, passed: false });
       }
     }
