@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { debug, info, warn, error, createChildLogger, logger } from '../logger';
+import { debug, info, warn, error, createChildLogger, logger, resetForTesting } from '../logger';
 import pino from 'pino';
 
 vi.mock('pino');
@@ -9,6 +9,7 @@ describe('Logger (Worker)', () => {
 
   beforeEach(() => {
     delete process.env.LOG_LEVEL;
+    resetForTesting();
 
     mockPinoLogger = {
       debug: vi.fn(),
@@ -272,10 +273,8 @@ describe('Logger (Worker)', () => {
       process.env.LOG_LEVEL = 'debug';
 
       vi.mocked(pino).mockClear();
-
-      // eslint-disable-next-line @typescript-eslint/no-require-imports
-      const { debug: debug2 } = require('../logger');
-      debug2('Test');
+      resetForTesting();
+      debug('Test');
 
       expect(pino).toHaveBeenCalledWith(expect.objectContaining({
         level: 'debug'
@@ -286,10 +285,8 @@ describe('Logger (Worker)', () => {
       process.env.LOG_LEVEL = 'info';
 
       vi.mocked(pino).mockClear();
-
-      // eslint-disable-next-line @typescript-eslint/no-require-imports
-      const { debug: debug2 } = require('../logger');
-      debug2('Test');
+      resetForTesting();
+      debug('Test');
 
       expect(pino).toHaveBeenCalledWith(expect.objectContaining({
         level: 'info'
@@ -300,10 +297,8 @@ describe('Logger (Worker)', () => {
       process.env.LOG_LEVEL = 'warn';
 
       vi.mocked(pino).mockClear();
-
-      // eslint-disable-next-line @typescript-eslint/no-require-imports
-      const { debug: debug2 } = require('../logger');
-      debug2('Test');
+      resetForTesting();
+      debug('Test');
 
       expect(pino).toHaveBeenCalledWith(expect.objectContaining({
         level: 'warn'
@@ -314,10 +309,8 @@ describe('Logger (Worker)', () => {
       process.env.LOG_LEVEL = 'error';
 
       vi.mocked(pino).mockClear();
-
-      // eslint-disable-next-line @typescript-eslint/no-require-imports
-      const { debug: debug2 } = require('../logger');
-      debug2('Test');
+      resetForTesting();
+      debug('Test');
 
       expect(pino).toHaveBeenCalledWith(expect.objectContaining({
         level: 'error'
@@ -325,6 +318,10 @@ describe('Logger (Worker)', () => {
     });
 
     it('should default to info when LOG_LEVEL is not set', () => {
+      vi.mocked(pino).mockClear();
+      resetForTesting();
+      debug('Test');
+
       expect(pino).toHaveBeenCalledWith(expect.objectContaining({
         level: 'info'
       }));
@@ -334,10 +331,8 @@ describe('Logger (Worker)', () => {
       process.env.LOG_LEVEL = 'invalid';
 
       vi.mocked(pino).mockClear();
-
-      // eslint-disable-next-line @typescript-eslint/no-require-imports
-      const { debug: debug2 } = require('../logger');
-      debug2('Test');
+      resetForTesting();
+      debug('Test');
 
       expect(pino).toHaveBeenCalledWith(expect.objectContaining({
         level: 'info'
