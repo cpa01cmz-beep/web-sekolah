@@ -55,6 +55,9 @@ The application uses **Cloudflare Workers Durable Objects** for persistent stora
 | GradeEntity | ID | studentId, courseId |
 | AnnouncementEntity | ID | authorId |
 | ScheduleEntity | ID | - |
+| WebhookConfigEntity | ID | - |
+| WebhookEventEntity | ID | - |
+| WebhookDeliveryEntity | ID | eventId, webhookConfigId |
 
 ### Index Performance
 
@@ -79,6 +82,21 @@ POST /api/admin/rebuild-indexes
 ```
 
 This clears and rebuilds all secondary indexes from existing data.
+
+### Data Model Design Notes
+
+**Union Types**: UserEntity uses `SchoolUser` union type to support different user roles (Student, Teacher, Parent, Admin). The `initialState` is defined with Admin role (simplest structure) and excludes role-specific fields (classId, studentIdNumber) to maintain type safety across the union.
+
+**Secondary Index Management**: Some entities (GradeEntity, AnnouncementEntity, WebhookDeliveryEntity) manually manage their secondary indexes using `SecondaryIndex` class. This is an acceptable pattern that provides explicit control over index operations.
+
+**Index Usage Patterns**:
+- Secondary indexes use field-based lookups: `SecondaryIndex<T>(env, entityName, fieldName)`
+- Primary indexes use ID-based lookups: `Index<T>(env, indexName)`
+- All indexed queries filter out soft-deleted records automatically
+
+**Optimization Opportunities**:
+- `GradeEntity.getByStudentIdAndCourseId()`: Currently uses studentId index + in-memory filtering. Could benefit from compound index on (studentId, courseId) for large datasets
+- Announcement sorting by date: Currently loads all announcements and sorts in-memory (O(n log n)). For production scale, consider date-based secondary index or cursor-based pagination
 
 ## Base URL
 

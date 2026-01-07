@@ -6,6 +6,7 @@ import { create } from 'zustand';
 import { BaseUser, UserRole } from '@shared/types';
 import { AuthService } from '@/services/authService';
 import { logger } from '@/lib/logger';
+import { STORAGE_KEYS } from '@/constants/storage-keys';
 
 // ====================
 // Types
@@ -41,7 +42,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   login: async (email, password, role) => {
     try {
       const authResponse = await AuthService.login({ email, password, role });
-      localStorage.setItem('authToken', authResponse.token);
+      localStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, authResponse.token);
       set({ user: authResponse.user, token: authResponse.token });
     } catch (error) {
       logger.error('Login failed', error, { email, role });
@@ -69,7 +70,7 @@ export const useAuthStore = create<AuthState>((set) => ({
    */
   initializeAuth: async () => {
     // Check for stored token and validate it
-    const storedToken = localStorage.getItem('authToken');
+    const storedToken = localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN);
     if (storedToken) {
       try {
         const user = await AuthService.getCurrentUser(storedToken);
@@ -77,11 +78,11 @@ export const useAuthStore = create<AuthState>((set) => ({
           set({ user, token: storedToken });
         } else {
           // Token is invalid, clear it
-          localStorage.removeItem('authToken');
+          localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
         }
       } catch (error) {
         logger.error('Auth initialization failed', error);
-        localStorage.removeItem('authToken');
+        localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
       }
     }
   },

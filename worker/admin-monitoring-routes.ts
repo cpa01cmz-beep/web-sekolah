@@ -94,7 +94,7 @@ export function adminMonitoringRoutes(app: Hono<{ Bindings: Env }>) {
       const recentDeliveries = await WebhookDeliveryEntity.list(c.env);
 
       return ok(c, {
-        pending: pendingDeliveries.map((d: any) => ({
+        pending: pendingDeliveries.map((d: WebhookDelivery) => ({
           id: d.id,
           webhookConfigId: d.webhookConfigId,
           attempts: d.attempts,
