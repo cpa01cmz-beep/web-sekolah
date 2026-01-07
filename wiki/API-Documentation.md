@@ -1,89 +1,253 @@
 # API Documentation
 
-## Authentication Endpoints
+## Health Endpoint
 
-### POST /api/auth/login
-Authenticate a user and receive a JWT token.
-
-**Request Body:**
-```json
-{
-  "email": "user@example.com",
-  "password": "userpassword",
-  "role": "student|teacher|parent|admin"
-}
-```
+### GET /api/health
+Check the health status of the API.
 
 **Response:**
 ```json
 {
-  "token": "jwt_token",
-  "user": {
-    "id": "user_id",
-    "email": "user@example.com",
-    "name": "User Name",
-    "role": "student|teacher|parent|admin",
-    "avatarUrl": "https://example.com/avatar.jpg"
+  "success": true,
+  "data": {
+    "status": "healthy",
+    "timestamp": "2023-01-01T00:00:00.000Z"
   }
 }
 ```
 
-### POST /api/auth/logout
-Logout the current user.
+## Seed Endpoint
+
+### POST /api/seed
+Seed the database with initial data.
 
 **Response:**
 ```json
 {
-  "message": "Successfully logged out"
+  "success": true,
+  "data": {
+    "message": "Database seeded successfully."
+  }
 }
 ```
 
-### POST /api/auth/register
-Register a new user (admin only).
+## Client Error Reporting
+
+### POST /api/client-errors
+Report client-side errors to the server.
+
+**Security Note:** All input data should be validated and sanitized before processing. Implement rate limiting to prevent abuse.
 
 **Request Body:**
 ```json
 {
-  "email": "newuser@example.com",
-  "password": "newuserpassword",
-  "name": "New User",
-  "role": "student|teacher|parent|admin"
+  "message": "Error message",
+  "url": "",
+  "userAgent": "Mozilla/5.0...",
+  "timestamp": "2023-01-01T00:00:00.000Z",
+  "stack": "Error stack trace",
+  "componentStack": "React component stack",
+  "errorBoundary": true,
+  "errorBoundaryProps": {},
+  "source": "",
+  "lineno": 10,
+  "colno": 5,
+  "error": {}
 }
 ```
 
 **Response:**
 ```json
 {
-  "user": {
-    "id": "new_user_id",
-    "email": "newuser@example.com",
-    "name": "New User",
-    "role": "student|teacher|parent|admin",
-    "avatarUrl": "https://example.com/avatar.jpg"
+  "success": true
+}
+```
+
+## Student Endpoints
+
+### GET /api/students/:id/dashboard
+Get a student's dashboard data including schedule, recent grades, and announcements.
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "schedule": [
+      {
+        "day": "Senin",
+        "time": "07:30 - 09:00",
+        "courseId": "course_id",
+        "courseName": "Mathematics",
+        "teacherName": "Teacher Name"
+      }
+    ],
+    "recentGrades": [
+      {
+        "id": "grade_id",
+        "studentId": "student_id",
+        "courseId": "course_id",
+        "score": 85,
+        "feedback": "Good work",
+        "courseName": "Mathematics"
+      }
+    ],
+    "announcements": [
+      {
+        "id": "announcement_id",
+        "title": "School Event",
+        "content": "Details about the event",
+        "date": "2023-01-01T00:00:00.000Z",
+        "authorId": "author_id",
+        "authorName": "Author Name"
+      }
+    ]
+  }
+}
+```
+
+## Teacher Endpoints
+
+### GET /api/teachers/:id/classes
+Get the classes assigned to a teacher.
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": "class_id",
+      "name": "Class Name",
+      "teacherId": "teacher_id"
+    }
+  ]
+}
+```
+
+### GET /api/classes/:id/students
+Get the students in a specific class along with their grades.
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": "student_id",
+      "name": "Student Name",
+      "score": 85,
+      "feedback": "Good work",
+      "gradeId": "grade_id"
+    }
+  ]
+}
+```
+
+## Grade Endpoints
+
+### POST /api/grades
+Create a new grade entry.
+
+**Request Body:**
+```json
+{
+  "studentId": "student_id",
+  "courseId": "course_id",
+  "score": 85,
+  "feedback": "Good work"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "id": "grade_id",
+    "studentId": "student_id",
+    "courseId": "course_id",
+    "score": 85,
+    "feedback": "Good work"
+  }
+}
+```
+
+### PUT /api/grades/:id
+Update an existing grade entry.
+
+**Request Body:**
+```json
+{
+  "score": 90,
+  "feedback": "Excellent work"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "id": "grade_id",
+    "studentId": "student_id",
+    "courseId": "course_id",
+    "score": 90,
+    "feedback": "Excellent work"
   }
 }
 ```
 
 ## User Endpoints
 
-### GET /api/users/profile
-Get the current user's profile.
+### GET /api/users
+Get all users (admin only).
 
 **Response:**
 ```json
 {
-  "id": "user_id",
-  "email": "user@example.com",
-  "name": "User Name",
-  "role": "student|teacher|parent|admin",
-  "avatarUrl": "https://example.com/avatar.jpg",
-  "createdAt": "2023-01-01T00:00:00.000Z",
-  "lastLogin": "2023-01-01T00:00:00.000Z"
+  "success": true,
+  "data": [
+    {
+      "id": "user_id",
+      "name": "User Name",
+      "email": "user@example.com",
+      "role": "student",
+      "avatarUrl": "https://example.com/avatar.jpg"
+    }
+  ]
 }
 ```
 
-### PUT /api/users/profile
-Update the current user's profile.
+### POST /api/users
+Create a new user (admin only).
+
+**Request Body:**
+```json
+{
+  "name": "New User",
+  "email": "newuser@example.com",
+  "role": "student",
+  "avatarUrl": "https://example.com/avatar.jpg"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "id": "new_user_id",
+    "name": "New User",
+    "email": "newuser@example.com",
+    "role": "student",
+    "avatarUrl": "https://example.com/avatar.jpg"
+  }
+}
+```
+
+### PUT /api/users/:id
+Update an existing user (admin only).
 
 **Request Body:**
 ```json
@@ -96,141 +260,27 @@ Update the current user's profile.
 **Response:**
 ```json
 {
-  "id": "user_id",
-  "email": "updated@example.com",
-  "name": "Updated Name",
-  "role": "student|teacher|parent|admin",
-  "avatarUrl": "https://example.com/avatar.jpg",
-  "createdAt": "2023-01-01T00:00:00.000Z",
-  "lastLogin": "2023-01-01T00:00:00.000Z"
+  "success": true,
+  "data": {
+    "id": "user_id",
+    "name": "Updated Name",
+    "email": "updated@example.com",
+    "role": "student",
+    "avatarUrl": "https://example.com/avatar.jpg"
+  }
 }
 ```
 
-### GET /api/users/:id
-Get a specific user (admin only).
+### DELETE /api/users/:id
+Delete a user (admin only).
 
 **Response:**
 ```json
 {
-  "id": "user_id",
-  "email": "user@example.com",
-  "name": "User Name",
-  "role": "student|teacher|parent|admin",
-  "avatarUrl": "https://example.com/avatar.jpg",
-  "createdAt": "2023-01-01T00:00:00.000Z",
-  "lastLogin": "2023-01-01T00:00:00.000Z"
-}
-```
-
-## Student-Specific Endpoints
-
-### GET /api/student/schedule
-Get the student's class schedule.
-
-**Response:**
-```json
-{
-  "schedule": [
-    {
-      "classId": "class_id",
-      "subject": "Mathematics",
-      "teacher": "Teacher Name",
-      "startTime": "08:00",
-      "endTime": "09:00",
-      "days": ["Monday", "Wednesday", "Friday"]
-    }
-  ]
-}
-```
-
-### GET /api/student/grades
-Get the student's grades.
-
-**Response:**
-```json
-{
-  "grades": [
-    {
-      "subject": "Mathematics",
-      "grade": "A",
-      "term": "Semester 1"
-    }
-  ]
-}
-```
-
-### GET /api/student/card
-Get the student's digital card.
-
-**Response:**
-```json
-{
-  "studentId": "student_id",
-  "name": "Student Name",
-  "gradeLevel": 10,
-  "photo": "base64_encoded_image",
-  "validUntil": "2024-06-30"
-}
-```
-
-## Teacher-Specific Endpoints
-
-### GET /api/teacher/classes
-Get the teacher's assigned classes.
-
-**Response:**
-```json
-{
-  "classes": [
-    {
-      "classId": "class_id",
-      "name": "Class Name",
-      "subject": "Mathematics",
-      "studentCount": 25
-    }
-  ]
-}
-```
-
-### POST /api/teacher/grades
-Submit grades for students.
-
-**Request Body:**
-```json
-{
-  "classId": "class_id",
-  "grades": [
-    {
-      "studentId": "student_id",
-      "grade": "A",
-      "term": "Semester 1"
-    }
-  ]
-}
-```
-
-**Response:**
-```json
-{
-  "message": "Grades submitted successfully"
-}
-```
-
-### POST /api/teacher/announce
-Post an announcement.
-
-**Request Body:**
-```json
-{
-  "title": "Class Announcement",
-  "content": "Announcement content",
-  "classId": "class_id"
-}
-```
-
-**Response:**
-```json
-{
-  "message": "Announcement posted successfully"
+  "success": true,
+  "data": {
+    "id": "user_id",
+    "deleted": true
+  }
 }
 ```

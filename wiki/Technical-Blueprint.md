@@ -48,122 +48,219 @@ Akademia Pro follows a modern, scalable architecture leveraging Cloudflare's edg
 ```
 akademia-pro/
 ├── src/                  # Frontend application
+│   ├── assets/           # Static assets (images, icons, etc.)
 │   ├── components/       # Reusable UI components
 │   ├── hooks/            # Custom React hooks
 │   ├── lib/              # Utility functions and helpers
 │   ├── pages/            # Page components for routing
-│   │   ├── student/      # Student portal pages
-│   │   ├── teacher/      # Teacher portal pages
-│   │   ├── parent/       # Parent portal pages
-│   │   ├── admin/        # Admin portal pages
-│   │   └── public/       # Public pages (landing, login)
-│   ├── store/            # Zustand stores for state management
-│   └── App.tsx           # Main application component
+│   │   ├── portal/       # Role-specific portal pages
+│   │   │   ├── admin/    # Admin portal pages
+│   │   │   ├── parent/   # Parent portal pages
+│   │   │   ├── student/  # Student portal pages
+│   │   │   └── teacher/  # Teacher portal pages
+│   │   └── public/       # Public pages (landing, login, etc.)
+│   ├── services/         # Service modules for API communication
+│   ├── App.tsx           # Main application component
+│   ├── main.tsx          # Application entry point
+│   └── vite-env.d.ts     # Vite environment types
 ├── worker/               # Backend application
-│   ├── api/              # API route handlers
-│   ├── lib/              # Backend utility functions
-│   ├── middleware/       # Authentication and validation middleware
-│   └── index.ts          # Worker entry point
+│   ├── core-utils.ts     # Core utilities and types
+│   ├── entities.ts       # Durable Object entities
+│   ├── index.ts          # Worker entry point
+│   └── user-routes.ts    # User route handlers
 ├── shared/               # Shared types and interfaces
 ├── public/               # Static assets
-└── tests/                # Test files
+└── wiki/                 # Project documentation
 ```
 
 ## Core Components
 
-### 1. Authentication System
-- Unified login portal for all user roles
-- JWT-based session management
-- Role-based access control (RBAC)
-- Password reset and account recovery
+### 1. User Management
+- User roles (student, teacher, parent, admin)
+- User CRUD operations (admin only)
 
-### 2. User Portals
-- **Student Portal**: Dashboard, schedule, grades, digital ID, announcements
-- **Teacher Portal**: Class management, grade submission, announcements
-- **Parent Portal**: Progress tracking, communication tools
-- **Admin Portal**: User management, system configuration, analytics
+### 2. Academic Management
+- Class management
+- Course management
+- Grade management
 
 ### 3. Data Management
-- Durable Objects for each entity type (Users, Classes, Grades, etc.)
-- Real-time data synchronization
-- Backup and recovery procedures
+- Durable Objects for each entity type (Users, Classes, Courses, Grades, etc.)
+- Data seeding for initial setup
 
 ### 4. Communication System
-- Internal messaging between users
 - Announcement broadcasting
-- Notification system (email, in-app)
 
 ## API Design
 
-### Authentication Endpoints
+### Health Endpoint
 ```
-POST   /api/auth/login     # User login
-POST   /api/auth/logout    # User logout
-POST   /api/auth/register  # User registration (admin only)
+GET    /api/health             # Check API health status
+```
+
+### Seed Endpoint
+```
+POST   /api/seed               # Seed database with initial data
+```
+
+### Client Error Reporting
+```
+POST   /api/client-errors      # Report client-side errors
+```
+
+### Student Endpoints
+```
+GET    /api/students/:id/dashboard  # Get student dashboard data
+```
+
+### Teacher Endpoints
+```
+GET    /api/teachers/:id/classes    # Get teacher's assigned classes
+GET    /api/classes/:id/students    # Get students in a class with grades
+```
+
+### Grade Endpoints
+```
+POST   /api/grades             # Create a new grade entry
+PUT    /api/grades/:id         # Update an existing grade entry
 ```
 
 ### User Endpoints
 ```
-GET    /api/users/profile   # Get user profile
-PUT    /api/users/profile   # Update user profile
-GET    /api/users/:id       # Get specific user (admin only)
-```
-
-### Student-Specific Endpoints
-```
-GET    /api/student/schedule   # Get class schedule
-GET    /api/student/grades     # Get grades
-GET    /api/student/card       # Get digital student card
-```
-
-### Teacher-Specific Endpoints
-```
-GET    /api/teacher/classes    # Get assigned classes
-POST   /api/teacher/grades     # Submit grades
-POST   /api/teacher/announce   # Post announcement
+GET    /api/users              # Get all users (admin only)
+POST   /api/users              # Create a new user (admin only)
+PUT    /api/users/:id          # Update an existing user (admin only)
+DELETE /api/users/:id          # Delete a user (admin only)
 ```
 
 ## Data Models
 
+### Base Types
+```typescript
+interface ApiResponse<T = unknown> {
+  success: boolean;
+  data?: T;
+  error?: string;
+}
+
+type UserRole = 'student' | 'teacher' | 'parent' | 'admin';
+```
+
 ### User
 ```typescript
-interface User {
+interface BaseUser {
   id: string;
-  email: string;
   name: string;
-  role: 'student' | 'teacher' | 'parent' | 'admin';
-  createdAt: Date;
-  lastLogin: Date;
+  email: string;
+  role: UserRole;
+  avatarUrl: string;
 }
-```
 
-### Student
-```typescript
-interface Student extends User {
-  studentId: string;
-  gradeLevel: number;
+interface Student extends BaseUser {
+  role: 'student';
   classId: string;
-  parentId: string; // Reference to parent user
+  studentIdNumber: string;
+}
+
+interface Teacher extends BaseUser {
+  role: 'teacher';
+  classIds: string[];
+}
+
+interface Parent extends BaseUser {
+  role: 'parent';
+  childId: string;
+}
+
+interface Admin extends BaseUser {
+  role: 'admin';
+}
+
+type SchoolUser = Student | Teacher | Parent | Admin;
+```
+
+### School Entities
+```typescript
+interface SchoolClass {
+  id: string;
+  name: string; // e.g., "11-A"
+  teacherId: string;
+}
+
+interface Course {
+  id: string;
+  name: string;
+  teacherId: string;
+}
+
+interface Grade {
+  id: string;
+  studentId: string;
+  courseId: string;
+  score: number;
+  feedback: string;
+}
+
+interface Announcement {
+  id: string;
+  title: string;
+  content: string;
+  date: string; // ISO 8601 format
+  authorId: string;
+}
+
+interface ScheduleItem {
+  day: 'Senin' | 'Selasa' | 'Rabu' | 'Kamis' | 'Jumat';
+  time: string; // "07:30 - 09:00"
+  courseId: string;
 }
 ```
 
-### Teacher
+### API Response Types
 ```typescript
-interface Teacher extends User {
-  teacherId: string;
-  subject: string;
-  classIds: string[]; // References to classes
+interface StudentDashboardData {
+  schedule: (ScheduleItem & { courseName: string; teacherName: string })[];
+  recentGrades: (Grade & { courseName: string })[];
+  announcements: (Announcement & { authorName: string })[];
+}
+
+interface SchoolData {
+  users: SchoolUser[];
+  classes: SchoolClass[];
+  courses: Course[];
+  grades: Grade[];
+  announcements: Announcement[];
+  schedules: (ScheduleItem & { classId: string })[];
 }
 ```
 
 ## Security Considerations
 
-- All API endpoints protected with authentication middleware
-- Role-based access control for all resources
-- Input validation and sanitization using Zod
-- Secure JWT implementation with short expiration times
+### Authentication & Authorization
+- CORS configuration for API endpoints
+- JWT token-based authentication for production
+- Role-based access control (RBAC)
+- Secure session management with HttpOnly cookies
+- Rate limiting on authentication endpoints
+
+### Data Protection
 - HTTPS enforcement for all connections
+- Input validation and sanitization
+- Output encoding to prevent XSS
+- SQL injection prevention through parameterized queries
+- Sensitive data encryption at rest
+
+### Infrastructure Security
+- Cloudflare WAF with OWASP rules
+- DDoS protection and rate limiting
+- Secure headers configuration (CSP, HSTS, X-Frame-Options)
+- Environment variable management for secrets
 - Regular security audits and dependency updates
+
+### Monitoring & Logging
+- Security event logging
+- Intrusion detection
+- Audit trail for privileged operations
 
 ## Performance Optimization
 

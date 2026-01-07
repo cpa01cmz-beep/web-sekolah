@@ -32,7 +32,9 @@ Ensure `wrangler.jsonc` is properly configured with your Cloudflare settings:
 
 ### 2. Set Environment Variables
 
-Configure secrets in Cloudflare Workers:
+⚠️ **CRITICAL SECURITY WARNING**: The application currently uses mock authentication tokens for development purposes. DO NOT deploy to production without implementing proper JWT authentication.
+
+In a production environment, you would need to configure secrets in Cloudflare Workers:
 
 ```bash
 wrangler secret put JWT_SECRET
