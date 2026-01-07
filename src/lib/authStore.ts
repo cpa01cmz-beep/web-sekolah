@@ -5,6 +5,7 @@
 import { create } from 'zustand';
 import { BaseUser, UserRole } from '@shared/types';
 import { AuthService } from '@/services/authService';
+import { logger } from '@/lib/logger';
 
 // ====================
 // Types
@@ -43,7 +44,7 @@ export const useAuthStore = create<AuthState>((set) => ({
       localStorage.setItem('authToken', authResponse.token);
       set({ user: authResponse.user, token: authResponse.token });
     } catch (error) {
-      console.error('Login failed:', error);
+      logger.error('Login failed', error, { email, role });
       throw error;
     }
   },
@@ -57,8 +58,8 @@ export const useAuthStore = create<AuthState>((set) => ({
       await AuthService.logout();
       set({ user: null, token: null });
     } catch (error) {
-      console.error('Logout failed:', error);
-      set({ user: null, token: null }); // Clear state anyway
+      logger.error('Logout failed', error);
+      set({ user: null, token: null });
     }
   },
   
@@ -79,7 +80,7 @@ export const useAuthStore = create<AuthState>((set) => ({
           localStorage.removeItem('authToken');
         }
       } catch (error) {
-        console.error('Auth initialization failed:', error);
+        logger.error('Auth initialization failed', error);
         localStorage.removeItem('authToken');
       }
     }

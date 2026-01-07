@@ -35,6 +35,8 @@ interface ErrorContext {
   level: "error" | "warning" | "info";
 }
 
+import { logger } from './logger';
+
 // ====================
 // Constants
 // ====================
@@ -308,7 +310,7 @@ class ErrorReporter {
 
       this.isInitialized = true;
     } catch (err) {
-      console.error("[ErrorReporter] Failed to initialize:", err);
+      logger.error("[ErrorReporter] Failed to initialize", err);
     }
   }
 
@@ -595,8 +597,7 @@ class ErrorReporter {
         await this.sendError(error);
       }
     } catch (err) {
-      // If reporting fails, add errors back to queue
-      console.error("[ErrorReporter] Failed to report errors:", err);
+      logger.error("[ErrorReporter] Failed to report errors", err);
       this.errorQueue.unshift(...errorsToReport);
     } finally {
       this.isReporting = false;
@@ -628,12 +629,9 @@ class ErrorReporter {
         throw new Error(result.error || "Unknown error occurred");
       }
 
-      console.log(
-        "[ErrorReporter] Error reported successfully:",
-        error.message
-      );
+      logger.debug("[ErrorReporter] Error reported successfully", { message: error.message });
     } catch (err) {
-      console.error("[ErrorReporter] Failed to send error:", err);
+      logger.error("[ErrorReporter] Failed to send error", err);
       throw err;
     }
   }
