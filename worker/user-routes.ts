@@ -65,8 +65,9 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
       courseName: gradeCoursesMap.get(grade.courseId)?.name || 'Unknown Course',
     }));
     const allAnnouncements = (await AnnouncementEntity.list(c.env)).items.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-    const announcementAuthors = await Promise.all(allAnnouncements.map(a => new UserEntity(c.env, a.authorId).getState()));
-    const authorsMap = new Map(announcementAuthors.map(a => [a.id, a]));
+    const uniqueAuthorIds = Array.from(new Set(allAnnouncements.map(a => a.authorId)));
+    const announcementAuthors = await Promise.all(uniqueAuthorIds.map(id => new UserEntity(c.env, id).getState()));
+    const authorsMap = new Map(announcementAuthors.filter(a => a !== null).map(a => [a!.id, a!]));
     const announcements = allAnnouncements.slice(0, 5).map(ann => ({
       ...ann,
       authorName: authorsMap.get(ann.authorId)?.name || 'Unknown Author',
@@ -100,13 +101,19 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
     const teacherCourseIds = new Set(teacherCourses.map(c => c.id));
     const students = await UserEntity.getByClassId(c.env, classId);
 
-    const studentsWithGrades = await Promise.all(students.map(async (s) => {
-      const studentGrades = [];
-      for (const courseId of teacherCourseIds) {
-        const grade = await GradeEntity.getByStudentIdAndCourseId(c.env, s.id, courseId);
-        if (grade) studentGrades.push(grade);
-      }
-      const relevantGrade = studentGrades[0];
+    const allStudentGrades = await Promise.all(
+      students.map(s => GradeEntity.getByStudentId(c.env, s.id))
+    );
+    const gradesMap = new Map<string, Grade>();
+    allStudentGrades.flat().forEach(grade => {
+      const key = `${grade.studentId}:${grade.courseId}`;
+      gradesMap.set(key, grade);
+    });
+
+    const studentsWithGrades = students.map(s => {
+      const relevantGrade = Array.from(teacherCourseIds)
+        .map(courseId => gradesMap.get(`${s.id}:${courseId}`))
+        .find(g => g !== undefined) ?? null;
       return {
         id: s.id,
         name: s.name,
@@ -114,7 +121,7 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
         feedback: relevantGrade?.feedback ?? '',
         gradeId: relevantGrade?.id ?? null,
       };
-    }));
+    });
 
     return ok(c, studentsWithGrades);
   });
