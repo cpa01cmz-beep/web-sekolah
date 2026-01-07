@@ -116,7 +116,7 @@ export default ({ mode }: { mode: string }) => {
     optimizeDeps: {
       // This is still crucial for reducing the time from when `bun run dev`
       // is executed to when the server is actually ready.
-      include: ["react", "react-dom", "react-router-dom"],
+      include: ["react", "react-dom", "react-router-dom", "framer-motion"],
       exclude: ["agents"], // Exclude agents package from pre-bundling due to Node.js dependencies
       force: true,
     },
