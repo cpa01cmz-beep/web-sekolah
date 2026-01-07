@@ -66,6 +66,12 @@ export function LoginPage() {
               <CardTitle className="text-2xl">Unified Login</CardTitle>
               <CardDescription>Enter your credentials to access your portal.</CardDescription>
             </CardHeader>
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              if (!isLoading && email && password) {
+                toast.error('Please select your role to login.');
+              }
+            }}>
             <CardContent className="space-y-6">
               <FormField
                 id="email"
@@ -104,6 +110,7 @@ export function LoginPage() {
                   disabled={!!isLoading}
                   aria-required="true"
                   aria-invalid={!!getPasswordError()}
+                  aria-describedby="password-error"
                 />
               </FormField>
             </CardContent>
@@ -114,6 +121,7 @@ export function LoginPage() {
                   onClick={() => handleLogin('student')}
                   className="w-full bg-[#0D47A1] hover:bg-[#0b3a8a]"
                   disabled={isLoading === 'student'}
+                  aria-busy={isLoading === 'student'}
                 >
                   {isLoading === 'student' ? 'Logging in...' : 'Student'}
                 </Button>
@@ -121,6 +129,7 @@ export function LoginPage() {
                   onClick={() => handleLogin('teacher')}
                   className="w-full bg-[#00ACC1] hover:bg-[#008a99]"
                   disabled={isLoading === 'teacher'}
+                  aria-busy={isLoading === 'teacher'}
                 >
                   {isLoading === 'teacher' ? 'Logging in...' : 'Teacher'}
                 </Button>
@@ -128,6 +137,7 @@ export function LoginPage() {
                   onClick={() => handleLogin('parent')}
                   className="w-full bg-secondary text-secondary-foreground hover:bg-secondary/80"
                   disabled={isLoading === 'parent'}
+                  aria-busy={isLoading === 'parent'}
                 >
                   {isLoading === 'parent' ? 'Logging in...' : 'Parent'}
                 </Button>
@@ -135,6 +145,7 @@ export function LoginPage() {
                   onClick={() => handleLogin('admin')}
                   className="w-full bg-secondary text-secondary-foreground hover:bg-secondary/80"
                   disabled={isLoading === 'admin'}
+                  aria-busy={isLoading === 'admin'}
                 >
                   {isLoading === 'admin' ? 'Logging in...' : 'Admin'}
                 </Button>
@@ -143,6 +154,7 @@ export function LoginPage() {
                 Back to Home <ArrowRight className="h-4 w-4" />
               </Link>
             </CardFooter>
+            </form>
           </Card>
         </div>
       </SlideUp>

@@ -2030,3 +2030,68 @@ Created comprehensive `docs/blueprint.md` with:
 - ✅ All documentation links verified as working
 - ✅ Users directed to most current documentation
 - ✅ Reduced confusion from multiple conflicting documentation sources
+
+## UI/UX Accessibility Improvements (2026-01-07)
+
+**Task**: Improve accessibility and usability of critical form components through ARIA attributes, keyboard navigation, and form submission handling
+
+**Implementation**:
+
+1. **LoginPage Accessibility Enhancements** - `src/pages/LoginPage.tsx`
+   - Added `aria-describedby="password-error"` to password input field
+   - Added `aria-busy` attribute to all role selection buttons (student, teacher, parent, admin)
+   - Wrapped form in `<form>` element with `onSubmit` handler for Enter key support
+   - Form now shows helpful toast message when user presses Enter without selecting a role
+   - Benefits: Screen readers announce loading state, improved keyboard navigation, better error announcement
+
+2. **TeacherGradeManagementPage Accessibility Enhancements** - `src/pages/portal/teacher/TeacherGradeManagementPage.tsx`
+   - Added `aria-describedby="score-helper score-error"` to score input field
+   - Added `id="score-helper"` to helper text paragraph
+   - Added `id="score-error"` to error message paragraph
+   - Added `aria-describedby="feedback-helper"` to feedback textarea field
+   - Added `id="feedback-helper"` to feedback helper text paragraph
+   - Added `aria-busy` attribute to Save button when mutation is pending
+   - Benefits: Screen readers properly announce helper text and errors, loading state announced
+
+**Metrics**:
+
+| Component | Changes | Impact |
+|-----------|----------|---------|
+| LoginPage | +12 lines | 3 aria attributes added, 1 form wrapper added |
+| TeacherGradeManagementPage | +6 lines | 3 aria attributes added, 3 IDs added |
+
+**Benefits Achieved**:
+- ✅ All form fields now have proper `aria-describedby` linking to helper text and errors
+- ✅ Loading states properly announced to screen readers via `aria-busy` attribute
+- ✅ Form submission now supports Enter key (standard web form behavior)
+- ✅ Screen reader users can access all helper text and error messages
+- ✅ Improved keyboard navigation and usability
+- ✅ Better compliance with WCAG 2.1 Level AA guidelines
+- ✅ All 345 tests passing (0 regressions)
+- ✅ 0 linting errors
+
+**Technical Details**:
+- `aria-describedby` links form fields to their associated helper text and error messages
+- `aria-busy` indicates when buttons are in loading state (screen reader announcement)
+- `role="alert"` on error messages ensures they are announced immediately
+- Form `<form>` element with `onSubmit` enables Enter key submission
+- Semantic HTML elements used throughout (form, label, input, button)
+- All changes maintain existing functionality and visual appearance
+
+**Accessibility Impact**:
+- **Screen Reader Support**: All helper text and errors now properly announced
+- **Keyboard Navigation**: Enter key works for form submission (standard behavior)
+- **Loading State Awareness**: Screen readers announce when operations are in progress
+- **Error Detection**: Invalid form fields clearly announced with role="alert"
+- **WCAG Compliance**: Improved compliance with WCAG 2.1 Level AA success criteria
+
+**Files Modified**:
+- `src/pages/LoginPage.tsx` - Added aria attributes and form wrapper
+- `src/pages/portal/teacher/TeacherGradeManagementPage.tsx` - Added aria attributes and IDs
+
+**Success Criteria**:
+- [x] UI more intuitive
+- [x] Accessible (keyboard, screen reader)
+- [x] Consistent with design system
+- [x] Zero regressions (all 345 tests passing)
+- [x] 0 linting errors

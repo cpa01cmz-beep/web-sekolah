@@ -172,10 +172,11 @@ export function TeacherGradeManagementPage() {
                     max="100"
                     step="1"
                     aria-invalid={isScoreInvalid}
+                    aria-describedby="score-helper score-error"
                   />
-                  <p className="text-xs text-muted-foreground">Enter a score between 0 and 100. Leave empty for no score.</p>
+                  <p id="score-helper" className="text-xs text-muted-foreground">Enter a score between 0 and 100. Leave empty for no score.</p>
                   {isScoreInvalid && (
-                    <p className="text-xs text-destructive" role="alert">
+                    <p id="score-error" className="text-xs text-destructive" role="alert">
                       Please enter a valid score between 0 and 100
                     </p>
                   )}
@@ -193,14 +194,15 @@ export function TeacherGradeManagementPage() {
                     className="col-span-3"
                     placeholder="Enter feedback..."
                     rows={3}
+                    aria-describedby="feedback-helper"
                   />
-                  <p className="text-xs text-muted-foreground">Provide constructive feedback to help student improve</p>
+                  <p id="feedback-helper" className="text-xs text-muted-foreground">Provide constructive feedback to help student improve</p>
                 </div>
               </div>
             </div>
             <DialogFooter>
               <DialogClose asChild><Button type="button" variant="secondary">Cancel</Button></DialogClose>
-              <Button type="submit" onClick={handleSaveChanges} disabled={gradeMutation.isPending}>
+              <Button type="submit" onClick={handleSaveChanges} disabled={gradeMutation.isPending} aria-busy={gradeMutation.isPending}>
                 {gradeMutation.isPending ? 'Saving...' : 'Save changes'}
               </Button>
             </DialogFooter>
