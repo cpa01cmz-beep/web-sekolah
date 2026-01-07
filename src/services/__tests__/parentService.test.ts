@@ -1,14 +1,16 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { parentService } from '../parentService';
-import type { ApiResponse } from '@shared/types';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { createParentService } from '../parentService';
+import { MockRepository } from '@/test/utils/mocks';
 
 describe('ParentService', () => {
+  let mockRepository: MockRepository;
+
   beforeEach(() => {
-    vi.clearAllMocks();
+    mockRepository = new MockRepository();
   });
 
   afterEach(() => {
-    vi.restoreAllMocks();
+    mockRepository.reset();
   });
 
   describe('getDashboard', () => {
@@ -55,37 +57,24 @@ describe('ParentService', () => {
           },
         ],
       };
-      const mockResponse: ApiResponse<typeof mockData> = {
-        success: true,
-        data: mockData,
-      };
 
-      global.fetch = vi.fn().mockResolvedValue({
-        ok: true,
-        status: 200,
-        json: vi.fn().mockResolvedValue(mockResponse),
-      });
+      mockRepository.setMockData(`/api/parents/${parentId}/dashboard`, mockData);
+      const parentService = createParentService(mockRepository);
 
       const result = await parentService.getDashboard(parentId);
 
       expect(result).toEqual(mockData);
-      expect(fetch).toHaveBeenCalledWith('/api/parents/parent-01/dashboard', {
-        headers: { 'Content-Type': 'application/json' },
-      });
+      expect(result.child.name).toBe('Budi Hartono');
     });
 
     it('should handle parent with no children', async () => {
       const parentId = 'parent-01';
-      const mockResponse: ApiResponse<any> = {
-        success: false,
-        error: 'No children found',
-      };
+      const mockError = new Error('No children found');
+      mockError.name = 'ApiError';
+      (mockError as any).status = 404;
 
-      global.fetch = vi.fn().mockResolvedValue({
-        ok: false,
-        status: 404,
-        json: vi.fn().mockResolvedValue(mockResponse),
-      });
+      mockRepository.setMockError(`/api/parents/${parentId}/dashboard`, mockError);
+      const parentService = createParentService(mockRepository);
 
       await expect(parentService.getDashboard(parentId)).rejects.toThrow('No children found');
     });
@@ -106,33 +95,36 @@ describe('ParentService', () => {
           courseId: 'eng-01',
         },
       ];
-      const mockResponse: ApiResponse<typeof mockData> = {
-        success: true,
-        data: mockData,
-      };
 
-      global.fetch = vi.fn().mockResolvedValue({
-        ok: true,
-        status: 200,
-        json: vi.fn().mockResolvedValue(mockResponse),
-      });
+      mockRepository.setMockData(`/api/students/${childId}/schedule`, mockData);
+      const parentService = createParentService(mockRepository);
 
       const result = await parentService.getChildSchedule(childId);
 
       expect(result).toEqual(mockData);
-      expect(fetch).toHaveBeenCalledWith('/api/students/student-01/schedule', {
-        headers: { 'Content-Type': 'application/json' },
-      });
+      expect(result).toHaveLength(2);
+    });
+
+    it('should handle empty schedule', async () => {
+      const childId = 'student-01';
+      const mockData: any[] = [];
+
+      mockRepository.setMockData(`/api/students/${childId}/schedule`, mockData);
+      const parentService = createParentService(mockRepository);
+
+      const result = await parentService.getChildSchedule(childId);
+
+      expect(result).toEqual([]);
     });
 
     it('should handle invalid child ID', async () => {
       const childId = 'invalid-child';
+      const mockError = new Error('Child not found');
+      mockError.name = 'ApiError';
+      (mockError as any).status = 404;
 
-      global.fetch = vi.fn().mockResolvedValue({
-        ok: false,
-        status: 404,
-        json: vi.fn().mockResolvedValue({ error: 'Child not found' }),
-      });
+      mockRepository.setMockError(`/api/students/${childId}/schedule`, mockError);
+      const parentService = createParentService(mockRepository);
 
       await expect(parentService.getChildSchedule(childId)).rejects.toThrow('Child not found');
     });

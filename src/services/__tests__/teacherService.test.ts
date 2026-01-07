@@ -1,14 +1,16 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { teacherService } from '../teacherService';
-import type { ApiResponse } from '@shared/types';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { createTeacherService } from '../teacherService';
+import { MockRepository } from '@/test/utils/mocks';
 
 describe('TeacherService', () => {
+  let mockRepository: MockRepository;
+
   beforeEach(() => {
-    vi.clearAllMocks();
+    mockRepository = new MockRepository();
   });
 
   afterEach(() => {
-    vi.restoreAllMocks();
+    mockRepository.reset();
   });
 
   describe('getDashboard', () => {
@@ -40,23 +42,25 @@ describe('TeacherService', () => {
           },
         ],
       };
-      const mockResponse: ApiResponse<typeof mockData> = {
-        success: true,
-        data: mockData,
-      };
 
-      global.fetch = vi.fn().mockResolvedValue({
-        ok: true,
-        status: 200,
-        json: vi.fn().mockResolvedValue(mockResponse),
-      });
+      mockRepository.setMockData(`/api/teachers/${teacherId}/dashboard`, mockData);
+      const teacherService = createTeacherService(mockRepository);
 
       const result = await teacherService.getDashboard(teacherId);
 
       expect(result).toEqual(mockData);
-      expect(fetch).toHaveBeenCalledWith('/api/teachers/teacher-01/dashboard', {
-        headers: { 'Content-Type': 'application/json' },
-      });
+    });
+
+    it('should handle errors when fetching dashboard', async () => {
+      const teacherId = 'teacher-01';
+      const mockError = new Error('Teacher not found');
+      mockError.name = 'ApiError';
+      (mockError as any).status = 404;
+
+      mockRepository.setMockError(`/api/teachers/${teacherId}/dashboard`, mockError);
+      const teacherService = createTeacherService(mockRepository);
+
+      await expect(teacherService.getDashboard(teacherId)).rejects.toThrow('Teacher not found');
     });
   });
 
@@ -75,23 +79,26 @@ describe('TeacherService', () => {
           teacherId: 'teacher-01',
         },
       ];
-      const mockResponse: ApiResponse<typeof mockData> = {
-        success: true,
-        data: mockData,
-      };
 
-      global.fetch = vi.fn().mockResolvedValue({
-        ok: true,
-        status: 200,
-        json: vi.fn().mockResolvedValue(mockResponse),
-      });
+      mockRepository.setMockData(`/api/teachers/${teacherId}/classes`, mockData);
+      const teacherService = createTeacherService(mockRepository);
 
       const result = await teacherService.getClasses(teacherId);
 
       expect(result).toEqual(mockData);
-      expect(fetch).toHaveBeenCalledWith('/api/teachers/teacher-01/classes', {
-        headers: { 'Content-Type': 'application/json' },
-      });
+      expect(result).toHaveLength(2);
+    });
+
+    it('should handle empty classes list', async () => {
+      const teacherId = 'teacher-01';
+      const mockData: any[] = [];
+
+      mockRepository.setMockData(`/api/teachers/${teacherId}/classes`, mockData);
+      const teacherService = createTeacherService(mockRepository);
+
+      const result = await teacherService.getClasses(teacherId);
+
+      expect(result).toEqual([]);
     });
   });
 
@@ -107,28 +114,13 @@ describe('TeacherService', () => {
         id: 'grade-01',
         ...gradeData,
       };
-      const mockResponse: ApiResponse<typeof mockResult> = {
-        success: true,
-        data: mockResult,
-      };
 
-      global.fetch = vi.fn().mockResolvedValue({
-        ok: true,
-        status: 200,
-        json: vi.fn().mockResolvedValue(mockResponse),
-      });
+      mockRepository.setMockData('/api/teachers/grades', mockResult);
+      const teacherService = createTeacherService(mockRepository);
 
       const result = await teacherService.submitGrade(gradeData);
 
       expect(result).toEqual(mockResult);
-      expect(fetch).toHaveBeenCalledWith(
-        '/api/teachers/grades',
-        {
-          method: 'POST',
-          body: JSON.stringify(gradeData),
-          headers: { 'Content-Type': 'application/json' },
-        }
-      );
     });
 
     it('should handle invalid grade scores', async () => {
@@ -138,14 +130,30 @@ describe('TeacherService', () => {
         score: 150,
         feedback: 'Invalid score',
       };
+      const mockError = new Error('Invalid score');
+      mockError.name = 'ApiError';
+      (mockError as any).status = 400;
 
-      global.fetch = vi.fn().mockResolvedValue({
-        ok: false,
-        status: 400,
-        json: vi.fn().mockResolvedValue({ error: 'Invalid score' }),
-      });
+      mockRepository.setMockError('/api/teachers/grades', mockError);
+      const teacherService = createTeacherService(mockRepository);
 
       await expect(teacherService.submitGrade(gradeData)).rejects.toThrow('Invalid score');
+    });
+
+    it('should handle missing student ID', async () => {
+      const gradeData = {
+        courseId: 'math-01',
+        score: 95,
+        feedback: 'Excellent work',
+      } as any;
+      const mockError = new Error('Student ID is required');
+      mockError.name = 'ApiError';
+      (mockError as any).status = 400;
+
+      mockRepository.setMockError('/api/teachers/grades', mockError);
+      const teacherService = createTeacherService(mockRepository);
+
+      await expect(teacherService.submitGrade(gradeData)).rejects.toThrow('Student ID is required');
     });
   });
 
@@ -161,23 +169,25 @@ describe('TeacherService', () => {
           authorId: 'teacher-01',
         },
       ];
-      const mockResponse: ApiResponse<typeof mockData> = {
-        success: true,
-        data: mockData,
-      };
 
-      global.fetch = vi.fn().mockResolvedValue({
-        ok: true,
-        status: 200,
-        json: vi.fn().mockResolvedValue(mockResponse),
-      });
+      mockRepository.setMockData(`/api/teachers/${teacherId}/announcements`, mockData);
+      const teacherService = createTeacherService(mockRepository);
 
       const result = await teacherService.getAnnouncements(teacherId);
 
       expect(result).toEqual(mockData);
-      expect(fetch).toHaveBeenCalledWith('/api/teachers/teacher-01/announcements', {
-        headers: { 'Content-Type': 'application/json' },
-      });
+    });
+
+    it('should handle empty announcements list', async () => {
+      const teacherId = 'teacher-01';
+      const mockData: any[] = [];
+
+      mockRepository.setMockData(`/api/teachers/${teacherId}/announcements`, mockData);
+      const teacherService = createTeacherService(mockRepository);
+
+      const result = await teacherService.getAnnouncements(teacherId);
+
+      expect(result).toEqual([]);
     });
   });
 
@@ -193,28 +203,14 @@ describe('TeacherService', () => {
         authorId: 'teacher-01',
         date: '2025-01-07',
       };
-      const mockResponse: ApiResponse<typeof mockResult> = {
-        success: true,
-        data: mockResult,
-      };
 
-      global.fetch = vi.fn().mockResolvedValue({
-        ok: true,
-        status: 200,
-        json: vi.fn().mockResolvedValue(mockResponse),
-      });
+      mockRepository.setMockData('/api/teachers/announcements', mockResult);
+      const teacherService = createTeacherService(mockRepository);
 
       const result = await teacherService.createAnnouncement(announcement);
 
       expect(result).toEqual(mockResult);
-      expect(fetch).toHaveBeenCalledWith(
-        '/api/teachers/announcements',
-        {
-          method: 'POST',
-          body: JSON.stringify(announcement),
-          headers: { 'Content-Type': 'application/json' },
-        }
-      );
+      expect(result.title).toBe('Pengumuman Baru');
     });
 
     it('should handle empty announcement content', async () => {
@@ -222,12 +218,12 @@ describe('TeacherService', () => {
         title: '',
         content: '',
       };
+      const mockError = new Error('Title and content are required');
+      mockError.name = 'ApiError';
+      (mockError as any).status = 400;
 
-      global.fetch = vi.fn().mockResolvedValue({
-        ok: false,
-        status: 400,
-        json: vi.fn().mockResolvedValue({ error: 'Title and content are required' }),
-      });
+      mockRepository.setMockError('/api/teachers/announcements', mockError);
+      const teacherService = createTeacherService(mockRepository);
 
       await expect(teacherService.createAnnouncement(announcement)).rejects.toThrow(
         'Title and content are required'

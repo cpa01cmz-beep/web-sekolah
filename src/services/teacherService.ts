@@ -1,4 +1,3 @@
-import { apiClient } from '@/lib/api-client';
 import type { TeacherService } from './serviceContracts';
 import type {
   TeacherDashboardData,
@@ -8,31 +7,31 @@ import type {
   SubmitGradeData,
   CreateAnnouncementData
 } from '@shared/types';
+import type { IRepository } from '@/repositories/IRepository';
+import { apiRepository } from '@/repositories/ApiRepository';
 
-export const teacherService: TeacherService = {
-  async getDashboard(teacherId: string): Promise<TeacherDashboardData> {
-    return apiClient<TeacherDashboardData>(`/api/teachers/${teacherId}/dashboard`);
-  },
+export function createTeacherService(repository: IRepository = apiRepository): TeacherService {
+  return {
+    async getDashboard(teacherId: string): Promise<TeacherDashboardData> {
+      return repository.get<TeacherDashboardData>(`/api/teachers/${teacherId}/dashboard`);
+    },
 
-  async getClasses(teacherId: string): Promise<SchoolClass[]> {
-    return apiClient<SchoolClass[]>(`/api/teachers/${teacherId}/classes`);
-  },
+    async getClasses(teacherId: string): Promise<SchoolClass[]> {
+      return repository.get<SchoolClass[]>(`/api/teachers/${teacherId}/classes`);
+    },
 
-  async submitGrade(gradeData: SubmitGradeData): Promise<Grade> {
-    return apiClient<Grade>(`/api/teachers/grades`, {
-      method: 'POST',
-      body: JSON.stringify(gradeData)
-    });
-  },
+    async submitGrade(gradeData: SubmitGradeData): Promise<Grade> {
+      return repository.post<Grade>(`/api/teachers/grades`, gradeData);
+    },
 
-  async getAnnouncements(teacherId: string): Promise<Announcement[]> {
-    return apiClient<Announcement[]>(`/api/teachers/${teacherId}/announcements`);
-  },
+    async getAnnouncements(teacherId: string): Promise<Announcement[]> {
+      return repository.get<Announcement[]>(`/api/teachers/${teacherId}/announcements`);
+    },
 
-  async createAnnouncement(announcement: CreateAnnouncementData): Promise<Announcement> {
-    return apiClient<Announcement>(`/api/teachers/announcements`, {
-      method: 'POST',
-      body: JSON.stringify(announcement)
-    });
-  }
-};
+    async createAnnouncement(announcement: CreateAnnouncementData): Promise<Announcement> {
+      return repository.post<Announcement>(`/api/teachers/announcements`, announcement);
+    }
+  };
+}
+
+export const teacherService = createTeacherService();

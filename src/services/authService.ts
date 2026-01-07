@@ -1,4 +1,5 @@
 import { BaseUser, UserRole } from '@shared/types';
+import { DEFAULT_AVATARS, getAvatarUrl } from '@/constants/avatars';
 
 // In a real application, this would make actual API calls
 // For now, we'll keep the mock implementation but with a proper service layer
@@ -23,33 +24,33 @@ export class AuthService {
   static async login(credentials: LoginCredentials): Promise<AuthResponse> {
     // In a real app, this would make an API call to authenticate the user
     const mockUsers: Record<UserRole, BaseUser> = {
-      student: { 
-        id: 'student-01', 
-        name: 'Budi Hartono', 
-        email: credentials.email || 'budi@example.com', 
-        role: 'student', 
-        avatarUrl: 'https://i.pravatar.cc/150?u=student01' 
+      student: {
+        id: 'student-01',
+        name: 'Budi Hartono',
+        email: credentials.email || 'budi@example.com',
+        role: 'student',
+        avatarUrl: DEFAULT_AVATARS.student01
       },
-      teacher: { 
-        id: 'teacher-01', 
-        name: 'Ibu Siti', 
-        email: credentials.email || 'siti@example.com', 
-        role: 'teacher', 
-        avatarUrl: 'https://i.pravatar.cc/150?u=teacher01' 
+      teacher: {
+        id: 'teacher-01',
+        name: 'Ibu Siti',
+        email: credentials.email || 'siti@example.com',
+        role: 'teacher',
+        avatarUrl: DEFAULT_AVATARS.teacher01
       },
-      parent: { 
-        id: 'parent-01', 
-        name: 'Ayah Budi', 
-        email: credentials.email || 'ayah.budi@example.com', 
-        role: 'parent', 
-        avatarUrl: 'https://i.pravatar.cc/150?u=parent01' 
+      parent: {
+        id: 'parent-01',
+        name: 'Ayah Budi',
+        email: credentials.email || 'ayah.budi@example.com',
+        role: 'parent',
+        avatarUrl: DEFAULT_AVATARS.parent01
       },
-      admin: { 
-        id: 'admin-01', 
-        name: 'Admin Sekolah', 
-        email: credentials.email || 'admin@example.com', 
-        role: 'admin', 
-        avatarUrl: 'https://i.pravatar.cc/150?u=admin01' 
+      admin: {
+        id: 'admin-01',
+        name: 'Admin Sekolah',
+        email: credentials.email || 'admin@example.com',
+        role: 'admin',
+        avatarUrl: DEFAULT_AVATARS.admin01
       },
     };
 
@@ -98,28 +99,28 @@ export class AuthService {
         name: 'Budi Hartono',
         email: 'budi@example.com',
         role: 'student',
-        avatarUrl: 'https://i.pravatar.cc/150?u=student01'
+        avatarUrl: DEFAULT_AVATARS.student01
       },
       teacher: {
         id: 'teacher-01',
         name: 'Ibu Siti',
         email: 'siti@example.com',
         role: 'teacher',
-        avatarUrl: 'https://i.pravatar.cc/150?u=teacher01'
+        avatarUrl: DEFAULT_AVATARS.teacher01
       },
       parent: {
         id: 'parent-01',
         name: 'Ayah Budi',
         email: 'ayah.budi@example.com',
         role: 'parent',
-        avatarUrl: 'https://i.pravatar.cc/150?u=parent01'
+        avatarUrl: DEFAULT_AVATARS.parent01
       },
       admin: {
         id: 'admin-01',
         name: 'Admin Sekolah',
         email: 'admin@example.com',
         role: 'admin',
-        avatarUrl: 'https://i.pravatar.cc/150?u=admin01'
+        avatarUrl: DEFAULT_AVATARS.admin01
       },
     };
 

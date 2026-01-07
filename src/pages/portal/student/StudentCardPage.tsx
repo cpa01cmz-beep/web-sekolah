@@ -88,15 +88,11 @@ export function StudentCardPage() {
     );
   }
 
-  if (!cardData) {
-    return (
-      <Alert variant="destructive">
-        <AlertTriangle className="h-4 w-4" />
-        <AlertTitle>No Card Data</AlertTitle>
-        <AlertDescription>Student card information is not available.</AlertDescription>
-      </Alert>
-    );
-  }
+  const studentData = cardData || {
+    studentIdNumber: user.id,
+    className: 'N/A',
+    validUntil: new Date().toISOString().split('T')[0]
+  };
 
   return (
     <motion.div
@@ -127,7 +123,7 @@ export function StudentCardPage() {
         </header>
         <main className="flex items-center gap-6 z-10">
           <Avatar className="h-32 w-32 border-4 border-white/50">
-            <AvatarImage src={cardData.photoUrl || user.avatarUrl} alt={user.name} />
+            <AvatarImage src={studentData.photoUrl || user.avatarUrl} alt={user.name} />
             <AvatarFallback className="text-4xl bg-white/20">{user.name.charAt(0)}</AvatarFallback>
           </Avatar>
           <div className="space-y-2">
@@ -137,11 +133,11 @@ export function StudentCardPage() {
             </div>
             <div>
               <p className="text-sm opacity-80">Nomor Induk Siswa</p>
-              <p className="font-semibold text-lg">{cardData.studentIdNumber}</p>
+              <p className="font-semibold text-lg">{studentData.studentIdNumber}</p>
             </div>
              <div>
               <p className="text-sm opacity-80">Kelas</p>
-              <p className="font-semibold text-lg">{cardData.className}</p>
+              <p className="font-semibold text-lg">{studentData.className}</p>
             </div>
           </div>
         </main>

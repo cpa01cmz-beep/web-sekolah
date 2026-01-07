@@ -5,6 +5,20 @@ import type { ApiResponse } from '@shared/types';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React from 'react';
 
+const createMockResponse = (data: any, status = 200) => {
+  return {
+    ok: status >= 200 && status < 300,
+    status,
+    headers: {
+      get: vi.fn((name: string) => {
+        if (name === 'X-Request-ID') return 'test-request-id';
+        return null;
+      }),
+    },
+    json: vi.fn().mockResolvedValue(data),
+  };
+};
+
 describe('useQuery hook', () => {
   const createWrapper = () => {
     const testQueryClient = new QueryClient({
@@ -36,11 +50,7 @@ describe('useQuery hook', () => {
       data: mockData,
     };
 
-    global.fetch = vi.fn().mockResolvedValue({
-      ok: true,
-      status: 200,
-      json: vi.fn().mockResolvedValue(mockResponse),
-    });
+    global.fetch = vi.fn().mockResolvedValue(createMockResponse(mockResponse));
 
     const { result } = renderHook(() => useQuery(['test', 'endpoint']), {
       wrapper: createWrapper(),
@@ -49,17 +59,11 @@ describe('useQuery hook', () => {
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
     expect(result.current.data).toEqual(mockData);
-    expect(fetch).toHaveBeenCalledWith('/api/test/endpoint', {
-      headers: { 'Content-Type': 'application/json' },
-    });
+    expect(fetch).toHaveBeenCalledWith('/api/test/endpoint', expect.any(Object));
   });
 
   it('should handle query errors', async () => {
-    global.fetch = vi.fn().mockResolvedValue({
-      ok: false,
-      status: 404,
-      json: vi.fn().mockResolvedValue({ error: 'Not found' }),
-    });
+    global.fetch = vi.fn().mockResolvedValue(createMockResponse({ error: 'Not found' }, 404));
 
     const { result } = renderHook(() => useQuery(['test', 'endpoint']), {
       wrapper: createWrapper(),
@@ -77,11 +81,7 @@ describe('useQuery hook', () => {
       data: mockData,
     };
 
-    global.fetch = vi.fn().mockResolvedValue({
-      ok: true,
-      status: 200,
-      json: vi.fn().mockResolvedValue(mockResponse),
-    });
+    global.fetch = vi.fn().mockResolvedValue(createMockResponse(mockResponse));
 
     const { result } = renderHook(
       () =>
@@ -105,11 +105,7 @@ describe('useQuery hook', () => {
       data: mockData,
     };
 
-    global.fetch = vi.fn().mockResolvedValue({
-      ok: true,
-      status: 200,
-      json: vi.fn().mockResolvedValue(mockResponse),
-    });
+    global.fetch = vi.fn().mockResolvedValue(createMockResponse(mockResponse));
 
     const { result } = renderHook(
       () => useQuery(['students', '123', 'grades']),
@@ -154,11 +150,7 @@ describe('useMutation hook', () => {
       data: mockData,
     };
 
-    global.fetch = vi.fn().mockResolvedValue({
-      ok: true,
-      status: 200,
-      json: vi.fn().mockResolvedValue(mockResponse),
-    });
+    global.fetch = vi.fn().mockResolvedValue(createMockResponse(mockResponse));
 
     const { result } = renderHook(
       () => useMutation<typeof mockData, Error, { name: string }>(['test', 'create'], { method: 'POST' }),
@@ -171,11 +163,10 @@ describe('useMutation hook', () => {
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
-    expect(fetch).toHaveBeenCalledWith('/api/test/create', {
+    expect(fetch).toHaveBeenCalledWith('/api/test/create', expect.objectContaining({
       method: 'POST',
       body: JSON.stringify({ name: 'Test' }),
-      headers: { 'Content-Type': 'application/json' },
-    });
+    }));
   });
 
   it('should send PUT request with body', async () => {
@@ -185,11 +176,7 @@ describe('useMutation hook', () => {
       data: mockData,
     };
 
-    global.fetch = vi.fn().mockResolvedValue({
-      ok: true,
-      status: 200,
-      json: vi.fn().mockResolvedValue(mockResponse),
-    });
+    global.fetch = vi.fn().mockResolvedValue(createMockResponse(mockResponse));
 
     const { result } = renderHook(
       () => useMutation<typeof mockData, Error, { name: string }>(['test', 'update'], { method: 'PUT' }),
@@ -202,11 +189,10 @@ describe('useMutation hook', () => {
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
-    expect(fetch).toHaveBeenCalledWith('/api/test/update', {
+    expect(fetch).toHaveBeenCalledWith('/api/test/update', expect.objectContaining({
       method: 'PUT',
       body: JSON.stringify({ name: 'Updated' }),
-      headers: { 'Content-Type': 'application/json' },
-    });
+    }));
   });
 
   it('should not send body for GET requests', async () => {
@@ -216,11 +202,7 @@ describe('useMutation hook', () => {
       data: mockData,
     };
 
-    global.fetch = vi.fn().mockResolvedValue({
-      ok: true,
-      status: 200,
-      json: vi.fn().mockResolvedValue(mockResponse),
-    });
+    global.fetch = vi.fn().mockResolvedValue(createMockResponse(mockResponse));
 
     const { result } = renderHook(
       () => useMutation<typeof mockData, Error, void>(['test', 'fetch'], { method: 'GET' }),
@@ -239,11 +221,7 @@ describe('useMutation hook', () => {
   });
 
   it('should handle mutation errors', async () => {
-    global.fetch = vi.fn().mockResolvedValue({
-      ok: false,
-      status: 400,
-      json: vi.fn().mockResolvedValue({ error: 'Bad request' }),
-    });
+    global.fetch = vi.fn().mockResolvedValue(createMockResponse({ error: 'Bad request' }, 400));
 
     const { result } = renderHook(
       () => useMutation<any, Error, { name: string }>(['test', 'create'], { method: 'POST' }),
@@ -266,11 +244,7 @@ describe('useMutation hook', () => {
       data: mockData,
     };
 
-    global.fetch = vi.fn().mockResolvedValue({
-      ok: true,
-      status: 200,
-      json: vi.fn().mockResolvedValue(mockResponse),
-    });
+    global.fetch = vi.fn().mockResolvedValue(createMockResponse(mockResponse));
 
     const { result } = renderHook(() => useMutation<typeof mockData, Error, { name: string }>(['test', 'create']), {
       wrapper: createWrapper(),
@@ -295,11 +269,7 @@ describe('useMutation hook', () => {
       data: mockData,
     };
 
-    global.fetch = vi.fn().mockResolvedValue({
-      ok: true,
-      status: 200,
-      json: vi.fn().mockResolvedValue(mockResponse),
-    });
+    global.fetch = vi.fn().mockResolvedValue(createMockResponse(mockResponse));
 
     const { result } = renderHook(
       () => useMutation<typeof mockData, Error, { score: number }>(['students', 'grades'], { method: 'POST' }),

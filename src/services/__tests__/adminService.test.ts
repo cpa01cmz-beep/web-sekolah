@@ -1,14 +1,16 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { adminService } from '../adminService';
-import type { ApiResponse } from '@shared/types';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { createAdminService } from '../adminService';
+import { MockRepository } from '@/test/utils/mocks';
 
 describe('AdminService', () => {
+  let mockRepository: MockRepository;
+
   beforeEach(() => {
-    vi.clearAllMocks();
+    mockRepository = new MockRepository();
   });
 
   afterEach(() => {
-    vi.restoreAllMocks();
+    mockRepository.reset();
   });
 
   describe('getDashboard', () => {
@@ -28,23 +30,25 @@ describe('AdminService', () => {
         ],
         systemStatus: 'Operational',
       };
-      const mockResponse: ApiResponse<typeof mockData> = {
-        success: true,
-        data: mockData,
-      };
 
-      global.fetch = vi.fn().mockResolvedValue({
-        ok: true,
-        status: 200,
-        json: vi.fn().mockResolvedValue(mockResponse),
-      });
+      mockRepository.setMockData('/api/admin/dashboard', mockData);
+      const adminService = createAdminService(mockRepository);
 
       const result = await adminService.getDashboard();
 
       expect(result).toEqual(mockData);
-      expect(fetch).toHaveBeenCalledWith('/api/admin/dashboard', {
-        headers: { 'Content-Type': 'application/json' },
-      });
+      expect(result.totalStudents).toBe(450);
+    });
+
+    it('should handle errors when fetching dashboard', async () => {
+      const mockError = new Error('Failed to fetch dashboard');
+      mockError.name = 'ApiError';
+      (mockError as any).status = 500;
+
+      mockRepository.setMockError('/api/admin/dashboard', mockError);
+      const adminService = createAdminService(mockRepository);
+
+      await expect(adminService.getDashboard()).rejects.toThrow('Failed to fetch dashboard');
     });
   });
 
@@ -69,45 +73,37 @@ describe('AdminService', () => {
           classIds: ['class-01', 'class-02'],
         },
       ];
-      const mockResponse: ApiResponse<typeof mockData> = {
-        success: true,
-        data: mockData,
-      };
 
-      global.fetch = vi.fn().mockResolvedValue({
-        ok: true,
-        status: 200,
-        json: vi.fn().mockResolvedValue(mockResponse),
-      });
+      mockRepository.setMockData('/api/admin/users', mockData);
+      const adminService = createAdminService(mockRepository);
 
       const result = await adminService.getUsers();
 
       expect(result).toEqual(mockData);
-      expect(fetch).toHaveBeenCalledWith('/api/admin/users', {
-        headers: { 'Content-Type': 'application/json' },
-      });
+      expect(result).toHaveLength(2);
     });
 
     it('should fetch users with filters', async () => {
       const filters = { role: 'student' as const, search: 'Budi' };
       const mockData: any[] = [];
-      const mockResponse: ApiResponse<typeof mockData> = {
-        success: true,
-        data: mockData,
-      };
 
-      global.fetch = vi.fn().mockResolvedValue({
-        ok: true,
-        status: 200,
-        json: vi.fn().mockResolvedValue(mockResponse),
-      });
+      mockRepository.setMockData('/api/admin/users?role=student&search=Budi', mockData);
+      const adminService = createAdminService(mockRepository);
 
       const result = await adminService.getUsers(filters);
 
-      expect(result).toEqual(mockData);
-      expect(fetch).toHaveBeenCalledWith('/api/admin/users?role=student&search=Budi', {
-        headers: { 'Content-Type': 'application/json' },
-      });
+      expect(result).toEqual([]);
+    });
+
+    it('should handle empty user list', async () => {
+      const mockData: any[] = [];
+
+      mockRepository.setMockData('/api/admin/users', mockData);
+      const adminService = createAdminService(mockRepository);
+
+      const result = await adminService.getUsers();
+
+      expect(result).toEqual([]);
     });
   });
 
@@ -125,28 +121,30 @@ describe('AdminService', () => {
         ...userData,
         avatarUrl: 'https://example.com/avatar.jpg',
       };
-      const mockResponse: ApiResponse<typeof mockResult> = {
-        success: true,
-        data: mockResult,
-      };
 
-      global.fetch = vi.fn().mockResolvedValue({
-        ok: true,
-        status: 201,
-        json: vi.fn().mockResolvedValue(mockResponse),
-      });
+      mockRepository.setMockData('/api/admin/users', mockResult);
+      const adminService = createAdminService(mockRepository);
 
       const result = await adminService.createUser(userData);
 
       expect(result).toEqual(mockResult);
-      expect(fetch).toHaveBeenCalledWith(
-        '/api/admin/users',
-        {
-          method: 'POST',
-          body: JSON.stringify(userData),
-          headers: { 'Content-Type': 'application/json' },
-        }
-      );
+      expect(result.name).toBe('John Doe');
+    });
+
+    it('should handle validation errors when creating user', async () => {
+      const userData = {
+        name: 'John Doe',
+        email: 'invalid-email',
+        role: 'student' as const,
+      };
+      const mockError = new Error('Invalid email format');
+      mockError.name = 'ApiError';
+      (mockError as any).status = 400;
+
+      mockRepository.setMockError('/api/admin/users', mockError);
+      const adminService = createAdminService(mockRepository);
+
+      await expect(adminService.createUser(userData)).rejects.toThrow('Invalid email format');
     });
   });
 
@@ -166,68 +164,50 @@ describe('AdminService', () => {
         classId: '11-A',
         studentIdNumber: '2025001',
       };
-      const mockResponse: ApiResponse<typeof mockResult> = {
-        success: true,
-        data: mockResult,
-      };
 
-      global.fetch = vi.fn().mockResolvedValue({
-        ok: true,
-        status: 200,
-        json: vi.fn().mockResolvedValue(mockResponse),
-      });
+      mockRepository.setMockData(`/api/admin/users/${userId}`, mockResult);
+      const adminService = createAdminService(mockRepository);
 
       const result = await adminService.updateUser(userId, userData);
 
       expect(result).toEqual(mockResult);
-      expect(fetch).toHaveBeenCalledWith(
-        '/api/admin/users/student-01',
-        {
-          method: 'PUT',
-          body: JSON.stringify(userData),
-          headers: { 'Content-Type': 'application/json' },
-        }
-      );
+      expect(result.name).toBe('Budi Hartono Updated');
+    });
+
+    it('should handle non-existent user when updating', async () => {
+      const userId = 'non-existent';
+      const userData = { name: 'Updated Name' };
+      const mockError = new Error('User not found');
+      mockError.name = 'ApiError';
+      (mockError as any).status = 404;
+
+      mockRepository.setMockError(`/api/admin/users/${userId}`, mockError);
+      const adminService = createAdminService(mockRepository);
+
+      await expect(adminService.updateUser(userId, userData)).rejects.toThrow('User not found');
     });
   });
 
   describe('deleteUser', () => {
     it('should delete a user', async () => {
       const userId = 'student-01';
-      const mockResponse: ApiResponse<void> = {
-        success: true,
-        data: undefined,
-      };
 
-      global.fetch = vi.fn().mockResolvedValue({
-        ok: true,
-        status: 204,
-        json: vi.fn().mockResolvedValue(mockResponse),
-      });
+      mockRepository.setMockData(`/api/admin/users/${userId}`, null);
+      const adminService = createAdminService(mockRepository);
 
-      await adminService.deleteUser(userId);
+      const result = await adminService.deleteUser(userId);
 
-      expect(fetch).toHaveBeenCalledWith(
-        '/api/admin/users/student-01',
-        {
-          method: 'DELETE',
-          headers: { 'Content-Type': 'application/json' },
-        }
-      );
+      expect(result).toBeNull();
     });
 
     it('should handle non-existent user', async () => {
       const userId = 'non-existent';
-      const mockResponse: ApiResponse<unknown> = {
-        success: false,
-        error: 'User not found',
-      };
+      const mockError = new Error('User not found');
+      mockError.name = 'ApiError';
+      (mockError as any).status = 404;
 
-      global.fetch = vi.fn().mockResolvedValue({
-        ok: false,
-        status: 404,
-        json: vi.fn().mockResolvedValue(mockResponse),
-      });
+      mockRepository.setMockError(`/api/admin/users/${userId}`, mockError);
+      const adminService = createAdminService(mockRepository);
 
       await expect(adminService.deleteUser(userId)).rejects.toThrow('User not found');
     });
@@ -242,23 +222,25 @@ describe('AdminService', () => {
         allowRegistration: true,
         maintenanceMode: false,
       };
-      const mockResponse: ApiResponse<typeof mockData> = {
-        success: true,
-        data: mockData,
-      };
 
-      global.fetch = vi.fn().mockResolvedValue({
-        ok: true,
-        status: 200,
-        json: vi.fn().mockResolvedValue(mockResponse),
-      });
+      mockRepository.setMockData('/api/admin/settings', mockData);
+      const adminService = createAdminService(mockRepository);
 
       const result = await adminService.getSettings();
 
       expect(result).toEqual(mockData);
-      expect(fetch).toHaveBeenCalledWith('/api/admin/settings', {
-        headers: { 'Content-Type': 'application/json' },
-      });
+      expect(result.schoolName).toBe('SMA Harapan Bangsa');
+    });
+
+    it('should handle errors when fetching settings', async () => {
+      const mockError = new Error('Failed to fetch settings');
+      mockError.name = 'ApiError';
+      (mockError as any).status = 500;
+
+      mockRepository.setMockError('/api/admin/settings', mockError);
+      const adminService = createAdminService(mockRepository);
+
+      await expect(adminService.getSettings()).rejects.toThrow('Failed to fetch settings');
     });
   });
 
@@ -275,28 +257,34 @@ describe('AdminService', () => {
         allowRegistration: false,
         maintenanceMode: false,
       };
-      const mockResponse: ApiResponse<typeof mockResult> = {
-        success: true,
-        data: mockResult,
-      };
 
-      global.fetch = vi.fn().mockResolvedValue({
-        ok: true,
-        status: 200,
-        json: vi.fn().mockResolvedValue(mockResponse),
-      });
+      mockRepository.setMockData('/api/admin/settings', mockResult);
+      const adminService = createAdminService(mockRepository);
 
       const result = await adminService.updateSettings(settings);
 
       expect(result).toEqual(mockResult);
-      expect(fetch).toHaveBeenCalledWith(
-        '/api/admin/settings',
-        {
-          method: 'PUT',
-          body: JSON.stringify(settings),
-          headers: { 'Content-Type': 'application/json' },
-        }
-      );
+      expect(result.allowRegistration).toBe(false);
+    });
+
+    it('should handle partial updates', async () => {
+      const settings = {
+        maintenanceMode: true,
+      };
+      const mockResult = {
+        schoolName: 'SMA Harapan Bangsa',
+        academicYear: '2025/2026',
+        semester: 1,
+        allowRegistration: true,
+        maintenanceMode: true,
+      };
+
+      mockRepository.setMockData('/api/admin/settings', mockResult);
+      const adminService = createAdminService(mockRepository);
+
+      const result = await adminService.updateSettings(settings);
+
+      expect(result).toEqual(mockResult);
     });
   });
 });

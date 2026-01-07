@@ -14,6 +14,7 @@ import { UserRole, SchoolUser } from '@shared/types';
 import { useQuery, useMutation, queryClient } from '@/lib/api-client';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { getAvatarUrl } from '@/constants/avatars';
 const roleColors: Record<UserRole, string> = {
   student: 'bg-blue-500',
   teacher: 'bg-green-500',
@@ -58,7 +59,7 @@ export function AdminUserManagementPage() {
       name: formData.get('name') as string,
       email: formData.get('email') as string,
       role: formData.get('role') as UserRole,
-      avatarUrl: `https://i.pravatar.cc/150?u=${formData.get('email')}`,
+      avatarUrl: getAvatarUrl(formData.get('email') as string),
     };
     if (editingUser) {
       updateUserMutation.mutate({ id: editingUser.id, ...userData });

@@ -10,7 +10,8 @@ import {
   ScheduleEntity,
   ensureAllSeedData
 } from "./entities";
-import type { Grade, SchoolUser, Student, StudentDashboardData, Teacher } from "@shared/types";
+import { ReferentialIntegrity } from "./referential-integrity";
+import type { Grade, SchoolUser, Student, StudentDashboardData, Teacher, CreateUserData } from "@shared/types";
 export function userRoutes(app: Hono<{ Bindings: Env }>) {
   // --- SEED ENDPOINT ---
   app.post('/api/seed', async (c) => {
@@ -39,9 +40,8 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
       courseName: coursesMap.get(item.courseId)?.name || 'Unknown Course',
       teacherName: teachersMap.get(coursesMap.get(item.courseId)?.teacherId || '')?.name || 'Unknown Teacher',
     }));
-    // Fetch recent grades
-    const allGrades = (await GradeEntity.list(c.env)).items;
-    const studentGrades = allGrades.filter(g => g.studentId === studentId).slice(0, 5);
+    // Fetch recent grades using optimized method
+    const studentGrades = (await GradeEntity.getByStudentId(c.env, studentId)).slice(0, 5);
     const gradeCourseIds = studentGrades.map(g => g.courseId);
     const gradeCourses = await Promise.all(gradeCourseIds.map(id => new CourseEntity(c.env, id).getState()));
     const gradeCoursesMap = new Map(gradeCourses.map(c => [c.id, c]));
@@ -103,14 +103,24 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
   app.post('/api/grades', async (c) => {
     const { studentId, courseId, score, feedback } = await c.req.json<Partial<Grade> & { studentId: string; courseId: string }>();
     if (!studentId || !courseId) return bad(c, 'studentId and courseId are required');
-    const newGrade: Grade = {
+    
+    const now = new Date().toISOString();
+    const newGrade: Partial<Grade> & { id: string; createdAt: string; updatedAt: string } = {
       id: crypto.randomUUID(),
       studentId,
       courseId,
       score: score ?? 0,
       feedback: feedback ?? '',
+      createdAt: now,
+      updatedAt: now,
     };
-    await GradeEntity.create(c.env, newGrade);
+
+    const validation = await ReferentialIntegrity.validateGrade(c.env, newGrade);
+    if (!validation.valid) {
+      return bad(c, validation.error!);
+    }
+
+    await GradeEntity.create(c.env, newGrade as Grade);
     return ok(c, newGrade);
   });
   // --- ADMIN PORTAL ---
@@ -118,8 +128,21 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
     return ok(c, (await UserEntity.list(c.env)).items);
   });
   app.post('/api/users', async (c) => {
-    const userData = await c.req.json<Omit<SchoolUser, 'id'>>();
-    const newUser: SchoolUser = { ...userData, id: crypto.randomUUID() };
+    const userData = await c.req.json<CreateUserData>();
+    const now = new Date().toISOString();
+    const base = { id: crypto.randomUUID(), createdAt: now, updatedAt: now, avatarUrl: '' };
+    
+    let newUser: SchoolUser;
+    if (userData.role === 'student') {
+      newUser = { ...base, ...userData, role: 'student', classId: userData.classId ?? '', studentIdNumber: userData.studentIdNumber ?? '' };
+    } else if (userData.role === 'teacher') {
+      newUser = { ...base, ...userData, role: 'teacher', classIds: userData.classIds ?? [] };
+    } else if (userData.role === 'parent') {
+      newUser = { ...base, ...userData, role: 'parent', childId: userData.childId ?? '' };
+    } else {
+      newUser = { ...base, ...userData, role: 'admin' };
+    }
+    
     await UserEntity.create(c.env, newUser);
     return ok(c, newUser);
   });
@@ -133,7 +156,11 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
   });
   app.delete('/api/users/:id', async (c) => {
     const userId = c.req.param('id');
+    const warnings = await ReferentialIntegrity.checkDependents(c.env, 'user', userId);
+    if (warnings.length > 0) {
+      return ok(c, { id: userId, deleted: false, warnings });
+    }
     const deleted = await UserEntity.delete(c.env, userId);
-    return ok(c, { id: userId, deleted });
+    return ok(c, { id: userId, deleted, warnings: [] });
   });
 }
