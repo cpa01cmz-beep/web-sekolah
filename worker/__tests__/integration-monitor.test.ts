@@ -330,7 +330,10 @@ describe('IntegrationMonitor', () => {
       const metrics1 = integrationMonitor.getHealthMetrics();
       const metrics2 = integrationMonitor.getHealthMetrics();
 
-      expect(metrics1).toEqual(metrics2);
+      const { timestamp: ts1, uptime: up1, ...metrics1Data } = metrics1;
+      const { timestamp: ts2, uptime: up2, ...metrics2Data } = metrics2;
+
+      expect(metrics1Data).toEqual(metrics2Data);
       expect(metrics1).not.toBe(metrics2);
       expect(metrics1.rateLimit).not.toBe(metrics2.rateLimit);
     });
