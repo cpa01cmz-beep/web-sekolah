@@ -2,10 +2,11 @@ import { Hono } from 'hono';
 import type { Env } from './core-utils';
 import { ok, bad, unauthorized, notFound, serverError } from './core-utils';
 import { UserEntity } from './entities';
-import { generateToken, verifyToken, optionalAuthenticate, AuthUser } from './middleware/auth';
+import { generateToken, optionalAuthenticate, AuthUser } from './middleware/auth';
 import { loginSchema } from './middleware/schemas';
 import { logger } from './logger';
 import { verifyPassword } from './password-utils';
+import { UserService } from './domain';
 import { getRoleSpecificFields } from './type-guards';
 
 export function authRoutes(app: Hono<{ Bindings: Env }>) {
@@ -17,7 +18,7 @@ export function authRoutes(app: Hono<{ Bindings: Env }>) {
       return unauthorized(c, 'Invalid or expired token');
     }
 
-    const dbUser = await new UserEntity(c.env, user.id).getState();
+    const dbUser = await UserService.getUserWithoutPassword(c.env, user.id);
     if (!dbUser) {
       return notFound(c, 'User not found');
     }
