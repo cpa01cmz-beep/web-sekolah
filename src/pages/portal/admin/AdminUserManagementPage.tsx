@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
@@ -15,12 +16,21 @@ import { useQuery, useMutation, queryClient } from '@/lib/api-client';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { getAvatarUrl } from '@/constants/avatars';
-const roleConfig: Record<UserRole, { color: string; icon: React.ReactNode; label: string }> = {
-  student: { color: 'bg-blue-500', icon: <GraduationCap className="h-3 w-3" />, label: 'Student' },
-  teacher: { color: 'bg-green-500', icon: <Users className="h-3 w-3" />, label: 'Teacher' },
-  parent: { color: 'bg-purple-500', icon: <UserCog className="h-3 w-3" />, label: 'Parent' },
-  admin: { color: 'bg-red-500', icon: <Shield className="h-3 w-3" />, label: 'Admin' },
+
+const RoleIcon: Record<UserRole, React.ComponentType<{ className?: string }>> = {
+  student: GraduationCap,
+  teacher: Users,
+  parent: UserCog,
+  admin: Shield,
 };
+
+const roleConfig: Record<UserRole, { color: string; label: string }> = {
+  student: { color: 'bg-blue-500', label: 'Student' },
+  teacher: { color: 'bg-green-500', label: 'Teacher' },
+  parent: { color: 'bg-purple-500', label: 'Parent' },
+  admin: { color: 'bg-red-500', label: 'Admin' },
+};
+
 export function AdminUserManagementPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<SchoolUser | null>(null);
@@ -188,7 +198,7 @@ export function AdminUserManagementPage() {
                       <TableCell>{user.email}</TableCell>
                       <TableCell className="text-center">
                         <Badge className={`text-white ${roleConfig[user.role].color} flex items-center gap-1.5 px-2.5 py-1`}>
-                          <span aria-hidden="true">{roleConfig[user.role].icon}</span>
+                          <span aria-hidden="true">{React.createElement(RoleIcon[user.role], { className: "h-3 w-3" })}</span>
                           <span>{roleConfig[user.role].label}</span>
                         </Badge>
                       </TableCell>
