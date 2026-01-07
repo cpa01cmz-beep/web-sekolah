@@ -14,6 +14,41 @@ This document tracks architectural refactoring tasks for Akademia Pro.
 | Low | State Management Guidelines | Pending | Document and enforce consistent state management patterns |
 | Low | Business Logic Extraction | Pending | Extract business logic to dedicated domain layer |
 
+## [REFACTOR] Remove Duplicate Code in authService
+- Location: src/services/authService.ts
+- Issue: `mockUsers` object is defined twice (lines 26-55 and 96-125) with identical data, violating DRY principle
+- Suggestion: Extract `mockUsers` to a constant or separate file, reference it in both `login()` and `getCurrentUser()` methods
+- Priority: Medium
+- Effort: Small
+
+## [REFACTOR] Eliminate Repetitive Suspense Wrappers in App.tsx
+- Location: src/App.tsx (lines 62-134)
+- Issue: Every route uses identical `<Suspense fallback={<LoadingFallback />}>` wrapper, creating code duplication
+- Suggestion: Create a helper function `withSuspense(component)` or use a wrapper component to reduce repetition
+- Priority: Medium
+- Effort: Small
+
+## [REFACTOR] Consolidate Error Filtering Logic in errorReporter
+- Location: src/lib/errorReporter.ts (lines 470-516, 684-733)
+- Issue: `filterError()` method and `shouldReportImmediate()` function contain duplicate filtering logic
+- Suggestion: Extract common filtering logic to shared utility function, reuse in both locations
+- Priority: Medium
+- Effort: Small
+
+## [REFACTOR] Modularize Route Configuration in App.tsx
+- Location: src/App.tsx (lines 62-134)
+- Issue: Route definitions are in a single large array, making it hard to maintain as application grows
+- Suggestion: Split routes into separate files by feature (studentRoutes.ts, teacherRoutes.ts, etc.) and combine them
+- Priority: Low
+- Effort: Medium
+
+## [REFACTOR] Centralize Console Logging Strategy
+- Location: Multiple files (60+ occurrences across src/ and worker/)
+- Issue: Inconsistent use of console.log/error/warn; some in production code (worker/index.ts line 90), no centralized logging
+- Suggestion: Implement a centralized logger utility with levels (debug, info, warn, error) and environment-based filtering
+- Priority: High
+- Effort: Medium
+
 ## Documentation Fixes (2026-01-07)
 
 ### Critical README Fixes
