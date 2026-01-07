@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Edit, AlertTriangle } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { SlideUp } from '@/components/animations';
 import { toast } from 'sonner';
 import { useQuery, useMutation, queryClient } from '@/lib/api-client';
 import { useAuthStore } from '@/lib/authStore';
@@ -78,12 +78,7 @@ export function TeacherGradeManagementPage() {
     return !isValidScore(score);
   }, [currentScore]);
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-      className="space-y-6"
-    >
+    <SlideUp className="space-y-6">
       <h1 className="text-3xl font-bold">Grade Management</h1>
       <Card>
         <CardHeader>
@@ -212,6 +207,6 @@ export function TeacherGradeManagementPage() {
           </DialogContent>
         </Dialog>
       )}
-    </motion.div>
+    </SlideUp>
   );
 }

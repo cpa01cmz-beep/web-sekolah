@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Clock, BookCopy, Megaphone, Users } from 'lucide-react';
-import { motion, Variants } from 'framer-motion';
+import { SlideUp } from '@/components/animations';
 const mockTeacherData = {
   schedule: [
     { time: '08:00 - 09:30', subject: 'Mathematics', class: '11-A' },
@@ -19,40 +19,15 @@ const mockTeacherData = {
     { title: 'Mid-term Exam Schedule', date: '2024-07-18', author: 'Admin' },
   ],
 };
-const containerVariants: Variants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.1,
-    },
-  },
-};
-const itemVariants: Variants = {
-  hidden: { y: 20, opacity: 0 },
-  visible: {
-    y: 0,
-    opacity: 1,
-    transition: {
-      type: 'spring' as const,
-      stiffness: 100,
-    },
-  },
-};
 export function TeacherDashboardPage() {
   return (
-    <motion.div
-      className="space-y-6"
-      variants={containerVariants}
-      initial="hidden"
-      animate="visible"
-    >
-      <motion.div variants={itemVariants}>
+    <SlideUp className="space-y-6">
+      <div>
         <h1 className="text-3xl font-bold">Teacher Dashboard</h1>
         <p className="text-muted-foreground">A summary of your teaching activities and announcements.</p>
-      </motion.div>
+      </div>
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        <motion.div variants={itemVariants}>
+        <SlideUp delay={0.1}>
           <Card className="h-full hover:shadow-lg transition-shadow duration-200">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Today's Schedule</CardTitle>
@@ -72,8 +47,8 @@ export function TeacherDashboardPage() {
               </ul>
             </CardContent>
           </Card>
-        </motion.div>
-        <motion.div variants={itemVariants}>
+        </SlideUp>
+        <SlideUp delay={0.2}>
           <Card className="h-full hover:shadow-lg transition-shadow duration-200">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">My Classes</CardTitle>
@@ -96,8 +71,8 @@ export function TeacherDashboardPage() {
               </ul>
             </CardContent>
           </Card>
-        </motion.div>
-        <motion.div variants={itemVariants}>
+        </SlideUp>
+        <SlideUp delay={0.3}>
           <Card className="h-full hover:shadow-lg transition-shadow duration-200">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Recent Announcements</CardTitle>
@@ -116,8 +91,8 @@ export function TeacherDashboardPage() {
               </ul>
             </CardContent>
           </Card>
-        </motion.div>
+        </SlideUp>
       </div>
-    </motion.div>
+    </SlideUp>
   );
 }

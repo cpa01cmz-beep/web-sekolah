@@ -6,7 +6,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { useAuthStore } from '@/lib/authStore';
-import { motion } from 'framer-motion';
+import { SlideUp } from '@/components/animations';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { Trash2, Edit } from 'lucide-react';
@@ -50,12 +50,7 @@ export function AdminAnnouncementsPage() {
     toast.success('Announcement deleted.');
   };
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-      className="space-y-6"
-    >
+    <SlideUp className="space-y-6">
       <h1 className="text-3xl font-bold">Manage Announcements</h1>
       <div className="grid gap-8 md:grid-cols-3">
         <div className="md:col-span-1">
@@ -115,6 +110,6 @@ export function AdminAnnouncementsPage() {
           </Card>
         </div>
       </div>
-    </motion.div>
+    </SlideUp>
   );
 }

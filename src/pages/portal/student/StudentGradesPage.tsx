@@ -5,7 +5,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { CardSkeleton } from '@/components/ui/loading-skeletons';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { AlertTriangle } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { SlideUp } from '@/components/animations';
 import { useStudentGrades } from '@/hooks/useStudent';
 import { useAuthStore } from '@/lib/authStore';
 import { GRADE_A_THRESHOLD, GRADE_B_THRESHOLD, GRADE_C_THRESHOLD } from '@/constants/grades';
@@ -22,12 +22,6 @@ const getGrade = (score: number) => {
   if (score >= GRADE_B_THRESHOLD) return 'B';
   if (score >= GRADE_C_THRESHOLD) return 'C';
   return 'D';
-};
-
-const pageVariants = {
-  initial: { opacity: 0, y: 20 },
-  in: { opacity: 1, y: 0 },
-  out: { opacity: 0, y: -20 },
 };
 
 export function StudentGradesPage() {
@@ -51,14 +45,7 @@ export function StudentGradesPage() {
     : '0.00';
 
   return (
-    <motion.div
-      initial="initial"
-      animate="in"
-      exit="out"
-      variants={pageVariants}
-      transition={{ type: 'tween', ease: 'anticipate', duration: 0.5 }}
-      className="space-y-6"
-    >
+    <SlideUp className="space-y-6">
       <h1 className="text-3xl font-bold">Rapor Akademik</h1>
       <Card className="overflow-hidden">
         <CardHeader>
@@ -101,6 +88,6 @@ export function StudentGradesPage() {
           </Table>
         </CardContent>
       </Card>
-    </motion.div>
+    </SlideUp>
   );
 }

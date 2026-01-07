@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Users, GraduationCap, School, Megaphone, Activity } from 'lucide-react';
-import { motion, Variants } from 'framer-motion';
+import { SlideUp } from '@/components/animations';
 import { useReducedMotion } from '@/hooks/use-reduced-motion';
 const mockAdminData = {
   stats: [
@@ -21,14 +21,6 @@ const mockAdminData = {
     { action: 'Grade report for Class 11-A updated', timestamp: '3 hours ago' },
     { action: 'New teacher account created: Mr. Budi', timestamp: '1 day ago' },
   ],
-};
-const containerVariants: Variants = {
-  hidden: { opacity: 0 },
-  visible: { opacity: 1, transition: { staggerChildren: 0.1 } },
-};
-const itemVariants: Variants = {
-  hidden: { y: 20, opacity: 0 },
-  visible: { y: 0, opacity: 1, transition: { type: 'spring' as const, stiffness: 100 } },
 };
 
 function EnrollmentChart() {
@@ -71,27 +63,15 @@ function EnrollmentChart() {
 
 export function AdminDashboardPage() {
   const prefersReducedMotion = useReducedMotion();
-
-  const motionProps = prefersReducedMotion ? {} : {
-    variants: containerVariants,
-    initial: "hidden",
-    animate: "visible"
-  };
-
-  const itemProps = prefersReducedMotion ? {} : { variants: itemVariants };
-
   return (
-    <motion.div
-      className="space-y-6"
-      {...motionProps}
-    >
-      <motion.div variants={itemVariants}>
+    <SlideUp className="space-y-6" style={prefersReducedMotion ? { opacity: 1 } : {}}>
+      <div>
         <h1 className="text-3xl font-bold">Admin Dashboard</h1>
         <p className="text-muted-foreground">Overall school management and statistics.</p>
-      </motion.div>
+      </div>
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         {mockAdminData.stats.map((stat, index) => (
-          <motion.div key={index} {...itemProps}>
+          <SlideUp key={index} delay={index * 0.1} style={prefersReducedMotion ? { opacity: 1 } : {}}>
             <Card className="hover:shadow-lg transition-shadow duration-200">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">{stat.title}</CardTitle>
@@ -101,11 +81,11 @@ export function AdminDashboardPage() {
                 <div className="text-2xl font-bold">{stat.value}</div>
               </CardContent>
             </Card>
-          </motion.div>
+          </SlideUp>
         ))}
       </div>
       <div className="grid gap-6 lg:grid-cols-5">
-        <motion.div {...itemProps} className="lg:col-span-3">
+        <SlideUp delay={0.4} className="lg:col-span-3" style={prefersReducedMotion ? { opacity: 1 } : {}}>
           <Card className="h-[400px] hover:shadow-lg transition-shadow duration-200">
             <CardHeader>
               <CardTitle>Student Enrollment by Grade</CardTitle>
@@ -114,8 +94,8 @@ export function AdminDashboardPage() {
               <EnrollmentChart />
             </CardContent>
           </Card>
-        </motion.div>
-        <motion.div {...itemProps} className="lg:col-span-2">
+        </SlideUp>
+        <SlideUp delay={0.5} className="lg:col-span-2" style={prefersReducedMotion ? { opacity: 1 } : {}}>
           <Card className="h-[400px] hover:shadow-lg transition-shadow duration-200">
             <CardHeader>
               <CardTitle>Recent Activity</CardTitle>
@@ -134,8 +114,8 @@ export function AdminDashboardPage() {
               </ul>
             </CardContent>
           </Card>
-        </motion.div>
+        </SlideUp>
       </div>
-    </motion.div>
+    </SlideUp>
   );
 }

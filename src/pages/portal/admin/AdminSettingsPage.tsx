@@ -5,7 +5,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Separator } from '@/components/ui/separator';
-import { motion } from 'framer-motion';
+import { SlideUp } from '@/components/animations';
 import { toast } from 'sonner';
 export function AdminSettingsPage() {
   const handleSubmit = (e: React.FormEvent) => {
@@ -13,12 +13,7 @@ export function AdminSettingsPage() {
     toast.success('Settings saved successfully!');
   };
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-      className="space-y-6"
-    >
+    <SlideUp className="space-y-6">
       <h1 className="text-3xl font-bold">School Settings</h1>
       <form onSubmit={handleSubmit}>
         <div className="space-y-8">
@@ -94,6 +89,6 @@ export function AdminSettingsPage() {
           </div>
         </div>
       </form>
-    </motion.div>
+    </SlideUp>
   );
 }

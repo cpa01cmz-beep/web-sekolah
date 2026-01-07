@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Award, CalendarCheck, Megaphone, UserCheck } from 'lucide-react';
-import { motion, Variants } from 'framer-motion';
+import { SlideUp } from '@/components/animations';
 import { useAuthStore } from '@/lib/authStore';
 const mockParentData = {
   childName: 'Budi Hartono',
@@ -21,43 +21,18 @@ const mockParentData = {
     { title: 'Mid-term Exam Schedule', date: '2024-07-18', author: 'Admin' },
   ],
 };
-const containerVariants: Variants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.1,
-    },
-  },
-};
-const itemVariants: Variants = {
-  hidden: { y: 20, opacity: 0 },
-  visible: {
-    y: 0,
-    opacity: 1,
-    transition: {
-      type: 'spring' as const,
-      stiffness: 100,
-    },
-  },
-};
 export function ParentDashboardPage() {
   const user = useAuthStore((state) => state.user);
   return (
-    <motion.div
-      className="space-y-6"
-      variants={containerVariants}
-      initial="hidden"
-      animate="visible"
-    >
-      <motion.div variants={itemVariants}>
+    <SlideUp className="space-y-6">
+      <div>
         <h1 className="text-3xl font-bold">Parent Dashboard</h1>
         <p className="text-muted-foreground">
           Monitoring academic progress for <span className="font-semibold">{mockParentData.childName}</span>.
         </p>
-      </motion.div>
+      </div>
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        <motion.div variants={itemVariants}>
+        <SlideUp delay={0.1}>
           <Card className="h-full hover:shadow-lg transition-shadow duration-200">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Recent Grades</CardTitle>
@@ -76,8 +51,8 @@ export function ParentDashboardPage() {
               </ul>
             </CardContent>
           </Card>
-        </motion.div>
-        <motion.div variants={itemVariants}>
+        </SlideUp>
+        <SlideUp delay={0.2}>
           <Card className="h-full hover:shadow-lg transition-shadow duration-200">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Attendance Summary</CardTitle>
@@ -98,8 +73,8 @@ export function ParentDashboardPage() {
               </div>
             </CardContent>
           </Card>
-        </motion.div>
-        <motion.div variants={itemVariants}>
+        </SlideUp>
+        <SlideUp delay={0.3}>
           <Card className="h-full hover:shadow-lg transition-shadow duration-200">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">School Announcements</CardTitle>
@@ -118,8 +93,8 @@ export function ParentDashboardPage() {
               </ul>
             </CardContent>
           </Card>
-        </motion.div>
+        </SlideUp>
       </div>
-    </motion.div>
+    </SlideUp>
   );
 }
