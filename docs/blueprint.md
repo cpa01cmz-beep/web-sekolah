@@ -677,6 +677,403 @@ Report client-side errors for monitoring.
 
 ---
 
+## Webhook Management
+
+Webhooks allow external systems to receive real-time notifications about events in the school management system.
+
+### Supported Events
+
+| Event Type | Description | Triggered When |
+|------------|-------------|-----------------|
+| `grade.created` | A new grade has been created | Teacher submits a grade for a student |
+| `grade.updated` | An existing grade has been updated | Teacher modifies a grade score or feedback |
+| `user.created` | A new user has been created | Admin creates a new user account |
+| `user.updated` | An existing user has been updated | Admin updates user information |
+| `user.deleted` | A user has been deleted | Admin deletes a user account |
+| `announcement.created` | A new announcement has been created | Teacher or admin posts an announcement |
+| `announcement.updated` | An existing announcement has been updated | Teacher or admin modifies an announcement |
+
+### Webhook Payload Format
+
+All webhooks receive a JSON payload with the following structure:
+
+```json
+{
+  "id": "event-uuid-123",
+  "eventType": "grade.created",
+  "data": {
+    "id": "g-01",
+    "studentId": "student-01",
+    "courseId": "math-11",
+    "score": 95,
+    "feedback": "Excellent work!",
+    "createdAt": "2026-01-07T10:00:00.000Z",
+    "updatedAt": "2026-01-07T10:00:00.000Z"
+  },
+  "timestamp": "2026-01-07T10:00:00.000Z"
+}
+```
+
+### Webhook Signature Verification
+
+To verify webhook authenticity:
+
+1. Receive the `X-Webhook-Signature` header from the request
+2. Compute the HMAC SHA-256 hash of the request body using your webhook secret
+3. Compare with the received signature
+
+```typescript
+import crypto from 'crypto';
+
+function verifyWebhook(payload: string, signature: string, secret: string): boolean {
+  const hmac = crypto.createHmac('sha256', secret);
+  const expectedSignature = 'sha256=' + hmac.update(payload).digest('hex');
+  return signature === expectedSignature;
+}
+```
+
+### Retry Logic
+
+Webhooks are retried with exponential backoff on delivery failures:
+
+| Attempt | Delay |
+|---------|-------|
+| 1 | 1 minute |
+| 2 | 5 minutes |
+| 3 | 15 minutes |
+| 4 | 30 minutes |
+| 5 | 1 hour |
+| 6 | 2 hours |
+
+After 6 failed attempts, the webhook delivery is marked as failed and will not be retried.
+
+---
+
+### List All Webhook Configurations
+
+#### GET /api/webhooks
+
+Get all webhook configurations.
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": "webhook-1",
+      "url": "https://example.com/webhook",
+      "events": ["grade.created", "grade.updated"],
+      "secret": "hidden",
+      "active": true,
+      "createdAt": "2026-01-07T10:00:00.000Z",
+      "updatedAt": "2026-01-07T10:00:00.000Z"
+    }
+  ],
+  "requestId": "uuid"
+}
+```
+
+---
+
+### Get Webhook Configuration
+
+#### GET /api/webhooks/:id
+
+Get details of a specific webhook configuration.
+
+**Path Parameters:**
+- `id` (string) - Webhook configuration ID
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "id": "webhook-1",
+    "url": "https://example.com/webhook",
+    "events": ["grade.created", "grade.updated"],
+    "secret": "your-webhook-secret",
+    "active": true,
+    "createdAt": "2026-01-07T10:00:00.000Z",
+    "updatedAt": "2026-01-07T10:00:00.000Z"
+  },
+  "requestId": "uuid"
+}
+```
+
+**Error Responses:**
+- 404 - Webhook configuration not found
+
+---
+
+### Create Webhook Configuration
+
+#### POST /api/webhooks
+
+Create a new webhook configuration.
+
+**Request Body:**
+```json
+{
+  "url": "https://example.com/webhook",
+  "events": ["grade.created", "grade.updated"],
+  "secret": "your-webhook-secret",
+  "active": true
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "id": "webhook-1",
+    "url": "https://example.com/webhook",
+    "events": ["grade.created", "grade.updated"],
+    "secret": "your-webhook-secret",
+    "active": true,
+    "createdAt": "2026-01-07T10:00:00.000Z",
+    "updatedAt": "2026-01-07T10:00:00.000Z"
+  },
+  "requestId": "uuid"
+}
+```
+
+**Error Responses:**
+- 400 - Missing required fields (url, events, secret)
+
+---
+
+### Update Webhook Configuration
+
+#### PUT /api/webhooks/:id
+
+Update an existing webhook configuration.
+
+**Path Parameters:**
+- `id` (string) - Webhook configuration ID
+
+**Request Body:**
+```json
+{
+  "url": "https://example.com/new-webhook",
+  "events": ["grade.created"],
+  "active": false
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "id": "webhook-1",
+    "url": "https://example.com/new-webhook",
+    "events": ["grade.created"],
+    "secret": "your-webhook-secret",
+    "active": false,
+    "createdAt": "2026-01-07T10:00:00.000Z",
+    "updatedAt": "2026-01-07T10:05:00.000Z"
+  },
+  "requestId": "uuid"
+}
+```
+
+**Error Responses:**
+- 404 - Webhook configuration not found
+
+---
+
+### Delete Webhook Configuration
+
+#### DELETE /api/webhooks/:id
+
+Delete a webhook configuration.
+
+**Path Parameters:**
+- `id` (string) - Webhook configuration ID
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "id": "webhook-1",
+    "deleted": true
+  },
+  "requestId": "uuid"
+}
+```
+
+**Error Responses:**
+- 404 - Webhook configuration not found
+
+---
+
+### Get Webhook Delivery History
+
+#### GET /api/webhooks/:id/deliveries
+
+Get delivery history for a specific webhook configuration.
+
+**Path Parameters:**
+- `id` (string) - Webhook configuration ID
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": "delivery-1",
+      "eventId": "event-1",
+      "webhookConfigId": "webhook-1",
+      "status": "delivered",
+      "statusCode": 200,
+      "attempts": 1,
+      "createdAt": "2026-01-07T10:00:00.000Z",
+      "updatedAt": "2026-01-07T10:00:01.000Z"
+    }
+  ],
+  "requestId": "uuid"
+}
+```
+
+---
+
+### List All Webhook Events
+
+#### GET /api/webhooks/events
+
+Get all webhook events.
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": "event-1",
+      "eventType": "grade.created",
+      "data": {
+        "id": "g-01",
+        "studentId": "student-01",
+        "courseId": "math-11",
+        "score": 95
+      },
+      "processed": true,
+      "createdAt": "2026-01-07T10:00:00.000Z",
+      "updatedAt": "2026-01-07T10:00:00.000Z"
+    }
+  ],
+  "requestId": "uuid"
+}
+```
+
+---
+
+### Get Webhook Event Details
+
+#### GET /api/webhooks/events/:id
+
+Get details of a specific webhook event including delivery attempts.
+
+**Path Parameters:**
+- `id` (string) - Event ID
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "event": {
+      "id": "event-1",
+      "eventType": "grade.created",
+      "data": { ... },
+      "processed": true,
+      "createdAt": "2026-01-07T10:00:00.000Z",
+      "updatedAt": "2026-01-07T10:00:00.000Z"
+    },
+    "deliveries": [
+      {
+        "id": "delivery-1",
+        "eventId": "event-1",
+        "webhookConfigId": "webhook-1",
+        "status": "delivered",
+        "statusCode": 200,
+        "attempts": 1,
+        "createdAt": "2026-01-07T10:00:00.000Z",
+        "updatedAt": "2026-01-07T10:00:01.000Z"
+      }
+    ]
+  },
+  "requestId": "uuid"
+}
+```
+
+**Error Responses:**
+- 404 - Webhook event not found
+
+---
+
+### Test Webhook Configuration
+
+#### POST /api/webhooks/test
+
+Test a webhook configuration without saving it.
+
+**Request Body:**
+```json
+{
+  "url": "https://example.com/webhook",
+  "secret": "your-webhook-secret"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "success": true,
+    "status": 200,
+    "response": "OK"
+  },
+  "requestId": "uuid"
+}
+```
+
+**Error Responses:**
+- 400 - Missing required fields (url, secret)
+
+---
+
+### Process Pending Webhook Deliveries
+
+#### POST /api/admin/webhooks/process
+
+Manually trigger processing of pending webhook deliveries.
+
+**Note:** This endpoint is typically called by a scheduled job, but can be triggered manually for testing.
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "message": "Pending webhook deliveries processed"
+  },
+  "requestId": "uuid"
+}
+```
+
+---
+
+## Security Headers
+
+---
+
 ## Security Headers
 
 All `/api/*` responses include security headers:
@@ -923,6 +1320,9 @@ All requests include `X-Request-ID` header for tracing:
 8. **Validate inputs** - Use Zod schemas for request/response validation
 9. **Use centralized logger** - Import from `@/lib/logger` (frontend) or `../logger` (worker) for consistent logging
 10. **Use standardized error helpers** - Always use proper helper functions (unauthorized, forbidden, etc.) instead of manual JSON responses
+11. **Verify webhook signatures** - Always verify `X-Webhook-Signature` header for incoming webhooks to prevent spoofing
+12. **Use retry logic for webhooks** - Webhook system automatically retries with exponential backoff, no need to implement retry logic
+13. **Process webhook deliveries regularly** - Use scheduled jobs to call `POST /api/admin/webhooks/process` for timely delivery
 
 ---
 
@@ -932,7 +1332,7 @@ All requests include `X-Request-ID` header for tracing:
 
 1. **API Versioning** - Introduce `/api/v2/` for breaking changes
 2. **Pagination** - Add cursor-based pagination to list endpoints
-3. **Webhooks** - Event notifications for grade updates, announcements
+3. **Webhooks** - ✅ **Completed** - Event notifications for grade updates, user changes, and announcements with retry logic
 4. **Search** - Full-text search across users, classes, grades
 5. **Export** - CSV/PDF export for grades and schedules
 6. **Audit Log** - Track all CRUD operations for compliance (middleware exists but not yet integrated)

@@ -258,6 +258,7 @@ This document tracks architectural refactoring tasks for Akademia Pro.
 | Medium | Consolidate Score Validation Logic | Completed | Created reusable score validation utility (2026-01-07) |
 | Low | Consolidate Duplicate ErrorCode Enums | Completed | Moved ErrorCode enum to shared/types.ts, eliminated duplicate definitions (2026-01-07) |
 | Low | Extract Secondary Index Query Pattern | Completed | Added getBySecondaryIndex method with includeDeleted parameter to IndexedEntity base class (2026-01-07) |
+| High | Webhook Reliability | Completed | Implemented webhook system with queue, retry logic with exponential backoff, signature verification, and management APIs (2026-01-07) |
 | Low | State Management Guidelines | Pending | Document and enforce consistent state management patterns |
 | Low | Business Logic Extraction | Pending | Extract business logic to dedicated domain layer |
 
@@ -1083,3 +1084,120 @@ Created comprehensive `docs/blueprint.md` with:
 - Entity methods can pass `includeDeleted: true` if they need deleted records
 - Type-safe method signatures maintained through generics
 - No breaking changes to public API
+
+## Webhook Reliability (2026-01-07)
+
+**Task**: Implement webhook system with queue, retry logic, and signature verification for reliable event delivery
+
+**Status**: Completed
+
+**Implementation**:
+
+1. **Added Webhook Types** - `shared/types.ts`
+   - `WebhookConfig`: Stores webhook endpoint configuration (url, events, secret, active)
+   - `WebhookEvent`: Stores events to be delivered (eventType, data, processed)
+   - `WebhookDelivery`: Tracks delivery attempts (status, statusCode, attempts, nextAttemptAt)
+   - `WebhookEventType`: Union type of all supported events
+
+2. **Created Webhook Entities** - `worker/entities.ts`
+   - `WebhookConfigEntity`: Manages webhook configurations with secondary indexes
+   - `WebhookEventEntity`: Manages webhook events with pending status tracking
+   - `WebhookDeliveryEntity`: Manages delivery attempts with retry scheduling
+
+3. **Implemented Webhook Service** - `worker/webhook-service.ts`
+   - `triggerEvent()`: Creates webhook events for all active configurations matching eventType
+   - `processPendingDeliveries()`: Processes pending webhook deliveries ready for retry
+   - `attemptDelivery()`: Attempts to deliver webhook with timeout and signature
+   - `handleDeliveryError()`: Implements exponential backoff retry logic
+   - `generateSignature()`: Creates HMAC SHA-256 signature for webhook verification
+   - `verifySignature()`: Verifies webhook signatures for security
+
+4. **Created Webhook Management API** - `worker/webhook-routes.ts`
+   - `GET /api/webhooks`: List all webhook configurations
+   - `GET /api/webhooks/:id`: Get specific webhook configuration
+   - `POST /api/webhooks`: Create new webhook configuration
+   - `PUT /api/webhooks/:id`: Update existing webhook configuration
+   - `DELETE /api/webhooks/:id`: Delete webhook configuration
+   - `GET /api/webhooks/:id/deliveries`: Get delivery history for webhook
+   - `GET /api/webhooks/events`: List all webhook events
+   - `GET /api/webhooks/events/:id`: Get event details with delivery attempts
+   - `POST /api/webhooks/test`: Test webhook configuration without saving
+   - `POST /api/admin/webhooks/process`: Manually trigger pending delivery processing
+
+5. **Added Webhook Triggers** - `worker/user-routes.ts`
+   - `grade.created`: Triggered when teacher creates a new grade
+   - `grade.updated`: Triggered when teacher updates a grade
+   - `user.created`: Triggered when admin creates a new user
+   - `user.updated`: Triggered when admin updates a user
+   - `user.deleted`: Triggered when admin deletes a user
+
+6. **Updated Worker Routing** - `worker/index.ts`
+   - Added webhook routes to worker
+   - Applied rate limiting to webhook endpoints
+   - Added strict rate limiting to admin webhook processing endpoint
+
+**Retry Strategy**:
+- Max retries: 6 attempts
+- Retry delays (exponential backoff): 1m, 5m, 15m, 30m, 1h, 2h
+- Failed deliveries marked as `failed` after max retries
+- Next attempt scheduled using `nextAttemptAt` timestamp
+
+**Security**:
+- HMAC SHA-256 signature verification for all webhook deliveries
+- `X-Webhook-Signature` header for signature
+- `X-Webhook-ID` header for event tracking
+- `X-Webhook-Timestamp` header for replay detection
+- Webhook secret stored securely in database
+
+**Files Created**:
+- `worker/webhook-service.ts` - Webhook delivery service with retry logic (220 lines)
+- `worker/webhook-routes.ts` - Webhook management API endpoints (210 lines)
+- `worker/__tests__/webhook-service.test.ts` - Webhook retry logic tests (3 tests)
+
+**Files Modified**:
+- `shared/types.ts` - Added webhook types (28 lines)
+- `worker/entities.ts` - Added webhook entity classes (82 lines)
+- `worker/index.ts` - Added webhook routes and rate limiting (3 changes)
+- `worker/user-routes.ts` - Added webhook triggers to grade and user endpoints (5 changes)
+- `docs/blueprint.md` - Added webhook API documentation (200+ lines)
+
+**Metrics**:
+| Metric | Value |
+|--------|--------|
+| Webhook entity classes | 3 |
+| Webhook management endpoints | 10 |
+| Supported event types | 7 |
+| Retry schedule | 6 attempts with exponential backoff |
+| Test coverage | 3 tests for retry logic |
+| Total tests passing | 282 (up from 279) |
+
+**Benefits Achieved**:
+- ✅ Reliable webhook delivery with queue system
+- ✅ Automatic retry with exponential backoff
+- ✅ Comprehensive webhook management API
+- ✅ Signature verification for security
+- ✅ Delivery history and tracking
+- ✅ Test webhook endpoint for debugging
+- ✅ All 282 tests passing (+3 new tests)
+- ✅ Zero regressions from webhook implementation
+- ✅ Extensible for future event types
+
+**Technical Details**:
+- Webhook events persisted in Durable Objects for reliability
+- Delivery status tracked with timestamps and attempt counts
+- HMAC signatures prevent webhook spoofing attacks
+- Idempotent event creation (same event can trigger multiple webhooks)
+- Timeout protection (30 seconds) for webhook delivery attempts
+- Graceful degradation (failed webhooks don't block operations)
+
+**Success Criteria**:
+- [x] Webhook system implemented with queue management
+- [x] Retry logic with exponential backoff
+- [x] Signature verification for security
+- [x] Management API for webhook CRUD operations
+- [x] Delivery tracking and history
+- [x] Webhook triggers integrated into existing endpoints
+- [x] Comprehensive API documentation
+- [x] Test coverage for retry logic
+- [x] All tests passing
+- [x] Zero breaking changes

@@ -1,5 +1,5 @@
 import { IndexedEntity, Index, SecondaryIndex, type Env } from "./core-utils";
-import type { SchoolUser, SchoolClass, Course, Grade, Announcement, ScheduleItem, SchoolData, UserRole, Student } from "@shared/types";
+import type { SchoolUser, SchoolClass, Course, Grade, Announcement, ScheduleItem, SchoolData, UserRole, Student, WebhookConfig, WebhookEvent, WebhookDelivery } from "@shared/types";
 
 const now = new Date().toISOString();
 
@@ -279,4 +279,93 @@ export async function ensureAllSeedData(env: Env) {
   AnnouncementEntity.ensureSeed(env),
   ScheduleEntity.ensureSeed(env)]
   );
+}
+
+export class WebhookConfigEntity extends IndexedEntity<WebhookConfig> {
+  static readonly entityName = "webhookConfig";
+  static readonly indexName = "webhookConfigs";
+  static readonly initialState: WebhookConfig = {
+    id: "",
+    url: "",
+    events: [],
+    secret: "",
+    active: false,
+    createdAt: "",
+    updatedAt: "",
+    deletedAt: null
+  };
+
+  static async getActive(env: Env): Promise<WebhookConfig[]> {
+    const configs = await this.list(env);
+    return configs.items.filter(c => c.active && !c.deletedAt);
+  }
+
+  static async getByEventType(env: Env, eventType: string): Promise<WebhookConfig[]> {
+    const activeConfigs = await this.getActive(env);
+    return activeConfigs.filter(c => c.events.includes(eventType));
+  }
+}
+
+export class WebhookEventEntity extends IndexedEntity<WebhookEvent> {
+  static readonly entityName = "webhookEvent";
+  static readonly indexName = "webhookEvents";
+  static readonly initialState: WebhookEvent = {
+    id: "",
+    eventType: "",
+    data: {},
+    processed: false,
+    createdAt: "",
+    updatedAt: "",
+    deletedAt: null
+  };
+
+  static async getPending(env: Env): Promise<WebhookEvent[]> {
+    const events = await this.list(env);
+    return events.items.filter(e => !e.processed && !e.deletedAt);
+  }
+
+  static async getByEventType(env: Env, eventType: string): Promise<WebhookEvent[]> {
+    const events = await this.list(env);
+    return events.items.filter(e => e.eventType === eventType && !e.deletedAt);
+  }
+}
+
+export class WebhookDeliveryEntity extends IndexedEntity<WebhookDelivery> {
+  static readonly entityName = "webhookDelivery";
+  static readonly indexName = "webhookDeliveries";
+  static readonly initialState: WebhookDelivery = {
+    id: "",
+    eventId: "",
+    webhookConfigId: "",
+    status: "pending",
+    attempts: 0,
+    createdAt: "",
+    updatedAt: "",
+    deletedAt: null
+  };
+
+  static async getPendingRetries(env: Env): Promise<WebhookDelivery[]> {
+    const deliveries = await this.list(env);
+    const now = new Date().toISOString();
+    return deliveries.items.filter(
+      d => d.status === 'pending' &&
+      !d.deletedAt &&
+      d.nextAttemptAt &&
+      d.nextAttemptAt <= now
+    );
+  }
+
+  static async getByEventId(env: Env, eventId: string): Promise<WebhookDelivery[]> {
+    const index = new SecondaryIndex<string>(env, this.entityName, 'eventId');
+    const deliveryIds = await index.getByValue(eventId);
+    const deliveries = await Promise.all(deliveryIds.map(id => new this(env, id).getState()));
+    return deliveries.filter(d => d && !d.deletedAt) as WebhookDelivery[];
+  }
+
+  static async getByWebhookConfigId(env: Env, webhookConfigId: string): Promise<WebhookDelivery[]> {
+    const index = new SecondaryIndex<string>(env, this.entityName, 'webhookConfigId');
+    const deliveryIds = await index.getByValue(webhookConfigId);
+    const deliveries = await Promise.all(deliveryIds.map(id => new this(env, id).getState()));
+    return deliveries.filter(d => d && !d.deletedAt) as WebhookDelivery[];
+  }
 }

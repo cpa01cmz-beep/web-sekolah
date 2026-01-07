@@ -15,6 +15,7 @@ import { rebuildAllIndexes } from "./index-rebuilder";
 import { authenticate, authorize } from './middleware/auth';
 import type { Grade, SchoolUser, Student, StudentDashboardData, Teacher, CreateUserData } from "@shared/types";
 import { logger } from './logger';
+import { WebhookService } from './webhook-service';
 
 export function userRoutes(app: Hono<{ Bindings: Env }>) {
   app.post('/api/seed', async (c) => {
@@ -133,13 +134,17 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
     const gradeEntity = new GradeEntity(c.env, gradeId);
     if (!await gradeEntity.exists()) return notFound(c, 'Grade not found');
     await gradeEntity.patch({ score, feedback });
-    return ok(c, await gradeEntity.getState());
+    const updatedGrade = await gradeEntity.getState();
+
+    await WebhookService.triggerEvent(c.env, 'grade.updated', updatedGrade as unknown as Record<string, unknown>);
+
+    return ok(c, updatedGrade);
   });
 
   app.post('/api/grades', authenticate(), authorize('teacher'), async (c) => {
     const { studentId, courseId, score, feedback } = await c.req.json<Partial<Grade> & { studentId: string; courseId: string }>();
     if (!studentId || !courseId) return bad(c, 'studentId and courseId are required');
-    
+
     const now = new Date().toISOString();
     const newGrade: Partial<Grade> & { id: string; createdAt: string; updatedAt: string } = {
       id: crypto.randomUUID(),
@@ -157,6 +162,9 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
     }
 
     await GradeEntity.create(c.env, newGrade as Grade);
+
+    await WebhookService.triggerEvent(c.env, 'grade.created', newGrade);
+
     return ok(c, newGrade);
   });
 
@@ -168,7 +176,7 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
     const userData = await c.req.json<CreateUserData>();
     const now = new Date().toISOString();
     const base = { id: crypto.randomUUID(), createdAt: now, updatedAt: now, avatarUrl: '' };
-    
+
     let newUser: SchoolUser;
     if (userData.role === 'student') {
       newUser = { ...base, ...userData, role: 'student', classId: userData.classId ?? '', studentIdNumber: userData.studentIdNumber ?? '' };
@@ -179,8 +187,11 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
     } else {
       newUser = { ...base, ...userData, role: 'admin' };
     }
-    
+
     await UserEntity.create(c.env, newUser);
+
+    await WebhookService.triggerEvent(c.env, 'user.created', newUser as unknown as Record<string, unknown>);
+
     return ok(c, newUser);
   });
 
@@ -190,7 +201,11 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
     const userEntity = new UserEntity(c.env, userId);
     if (!await userEntity.exists()) return notFound(c, 'User not found');
     await userEntity.patch(userData);
-    return ok(c, await userEntity.getState());
+    const updatedUser = await userEntity.getState();
+
+    await WebhookService.triggerEvent(c.env, 'user.updated', updatedUser as unknown as Record<string, unknown>);
+
+    return ok(c, updatedUser);
   });
 
   app.delete('/api/users/:id', authenticate(), authorize('admin'), async (c) => {
@@ -199,7 +214,13 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
     if (warnings.length > 0) {
       return ok(c, { id: userId, deleted: false, warnings });
     }
+    const user = await new UserEntity(c.env, userId).getState();
     const deleted = await UserEntity.delete(c.env, userId);
+
+    if (deleted && user) {
+      await WebhookService.triggerEvent(c.env, 'user.deleted', { id: userId, role: user.role } as Record<string, unknown>);
+    }
+
     return ok(c, { id: userId, deleted, warnings: [] });
   });
 }
