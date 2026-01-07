@@ -28,7 +28,7 @@ export class GradeService {
       throw new Error(validation.error);
     }
 
-    await GradeEntity.create(env, newGrade as Grade);
+    await GradeEntity.createWithCompoundIndex(env, newGrade as Grade);
     return newGrade as Grade;
   }
 

@@ -1,6 +1,8 @@
 import { IndexedEntity, Index, SecondaryIndex, type Env } from "./core-utils";
 import type { SchoolUser, SchoolClass, Course, Grade, Announcement, ScheduleItem, SchoolData, UserRole, Student, WebhookConfig, WebhookEvent, WebhookDelivery } from "@shared/types";
 import { hashPassword } from "./password-utils";
+import { CompoundSecondaryIndex } from "./storage/CompoundSecondaryIndex";
+import { DateSortedSecondaryIndex } from "./storage/DateSortedSecondaryIndex";
 
 const now = new Date().toISOString();
 
@@ -241,10 +243,31 @@ export class GradeEntity extends IndexedEntity<Grade> {
   }
 
   static async getByStudentIdAndCourseId(env: Env, studentId: string, courseId: string): Promise<Grade | null> {
-    const index = new SecondaryIndex<string>(env, this.entityName, 'studentId');
-    const gradeIds = await index.getByValue(studentId);
+    const index = new CompoundSecondaryIndex(env, this.entityName, ['studentId', 'courseId']);
+    const gradeIds = await index.getByValues([studentId, courseId]);
+    if (gradeIds.length === 0) {
+      return null;
+    }
     const grades = await Promise.all(gradeIds.map(id => new this(env, id).getState()));
-    return grades.find(g => g && !g.deletedAt && g.courseId === courseId) ?? null;
+    const validGrade = grades.find(g => g && !g.deletedAt);
+    return validGrade || null;
+  }
+
+  static async createWithCompoundIndex(env: Env, state: Grade): Promise<Grade> {
+    const created = await super.create(env, state);
+    const compoundIndex = new CompoundSecondaryIndex(env, this.entityName, ['studentId', 'courseId']);
+    await compoundIndex.add([state.studentId, state.courseId], state.id);
+    return created;
+  }
+
+  static async deleteWithCompoundIndex(env: Env, id: string): Promise<boolean> {
+    const inst = new this(env, id);
+    const state = await inst.getState() as Grade | null;
+    if (!state) return false;
+
+    const compoundIndex = new CompoundSecondaryIndex(env, this.entityName, ['studentId', 'courseId']);
+    await compoundIndex.remove([state.studentId, state.courseId], id);
+    return await super.delete(env, id);
   }
 }
 export class AnnouncementEntity extends IndexedEntity<Announcement> {
@@ -258,6 +281,33 @@ export class AnnouncementEntity extends IndexedEntity<Announcement> {
     const announcementIds = await index.getByValue(authorId);
     const announcements = await Promise.all(announcementIds.map(id => new this(env, id).getState()));
     return announcements.filter(a => a && !a.deletedAt) as Announcement[];
+  }
+
+  static async getRecent(env: Env, limit: number): Promise<Announcement[]> {
+    const index = new DateSortedSecondaryIndex(env, this.entityName);
+    const recentIds = await index.getRecent(limit);
+    if (recentIds.length === 0) {
+      return [];
+    }
+    const announcements = await Promise.all(recentIds.map(id => new this(env, id).getState()));
+    return announcements.filter(a => a && !a.deletedAt) as Announcement[];
+  }
+
+  static async createWithDateIndex(env: Env, state: Announcement): Promise<Announcement> {
+    const created = await super.create(env, state);
+    const dateIndex = new DateSortedSecondaryIndex(env, this.entityName);
+    await dateIndex.add(state.date, state.id);
+    return created;
+  }
+
+  static async deleteWithDateIndex(env: Env, id: string): Promise<boolean> {
+    const inst = new this(env, id);
+    const state = await inst.getState() as Announcement | null;
+    if (!state) return false;
+
+    const dateIndex = new DateSortedSecondaryIndex(env, this.entityName);
+    await dateIndex.remove(state.date, id);
+    return await super.delete(env, id);
   }
 }
 
