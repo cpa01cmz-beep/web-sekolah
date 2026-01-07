@@ -31,15 +31,15 @@ export const queryClient = new QueryClient({
 // Core API Client Function
 // ====================
 
-/**
- * Generic API client function that handles requests and responses
- * @template T - The expected response data type
- * @param path - The API endpoint path
- * @param init - Request initialization options
- * @returns The response data
- * @throws Error if the request fails or returns an unsuccessful response
- */
-async function apiClient<T>(path: string, init?: RequestInit): Promise<T> {
+/**
+ * Generic API client function that handles requests and responses
+ * @template T - The expected response data type
+ * @param path - The API endpoint path
+ * @param init - Request initialization options
+ * @returns The response data
+ * @throws Error if the request fails or returns an unsuccessful response
+ */
+export async function apiClient<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(path, {
     headers: { 'Content-Type': 'application/json' },
     ...init,

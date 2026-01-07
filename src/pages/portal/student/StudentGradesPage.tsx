@@ -1,30 +1,77 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableFooter } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { AlertTriangle } from 'lucide-react';
 import { motion } from 'framer-motion';
-const mockGradesData = [
-  { subject: 'Pendidikan Agama', score: 92, grade: 'A', feedback: 'Sangat Baik' },
-  { subject: 'Bahasa Indonesia', score: 88, grade: 'B', feedback: 'Baik' },
-  { subject: 'Matematika', score: 95, grade: 'A', feedback: 'Sangat Baik' },
-  { subject: 'Ilmu Pengetahuan Alam', score: 85, grade: 'B', feedback: 'Baik' },
-  { subject: 'Ilmu Pengetahuan Sosial', score: 89, grade: 'B', feedback: 'Baik' },
-  { subject: 'Bahasa Inggris', score: 90, grade: 'A', feedback: 'Sangat Baik' },
-  { subject: 'Seni Budaya', score: 82, grade: 'B', feedback: 'Baik' },
-  { subject: 'Pendidikan Jasmani', score: 93, grade: 'A', feedback: 'Sangat Baik' },
-];
-const getGradeColor = (grade: string) => {
-  if (grade === 'A') return 'bg-green-500 hover:bg-green-600';
-  if (grade === 'B') return 'bg-blue-500 hover:bg-blue-600';
-  if (grade === 'C') return 'bg-yellow-500 hover:bg-yellow-600';
+import { useStudentGrades } from '@/hooks/useStudent';
+import { useAuthStore } from '@/lib/authStore';
+
+const getGradeColor = (score: number) => {
+  if (score >= 90) return 'bg-green-500 hover:bg-green-600';
+  if (score >= 80) return 'bg-blue-500 hover:bg-blue-600';
+  if (score >= 70) return 'bg-yellow-500 hover:bg-yellow-600';
   return 'bg-red-500 hover:bg-red-600';
 };
+
+const getGrade = (score: number) => {
+  if (score >= 90) return 'A';
+  if (score >= 80) return 'B';
+  if (score >= 70) return 'C';
+  return 'D';
+};
+
 const pageVariants = {
   initial: { opacity: 0, y: 20 },
   in: { opacity: 1, y: 0 },
   out: { opacity: 0, y: -20 },
 };
+
+function GradesSkeleton() {
+  return (
+    <Card className="overflow-hidden">
+      <CardHeader>
+        <Skeleton className="h-6 w-1/3" />
+        <Skeleton className="h-4 w-1/2 mt-2" />
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-3">
+          {[1, 2, 3, 4, 5].map((i) => (
+            <div key={i} className="flex items-center justify-between space-x-4">
+              <div className="flex-1 space-y-2">
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-3 w-2/3" />
+              </div>
+              <Skeleton className="h-8 w-8 rounded" />
+            </div>
+          ))}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 export function StudentGradesPage() {
-  const averageScore = (mockGradesData.reduce((acc, curr) => acc + curr.score, 0) / mockGradesData.length).toFixed(2);
+  const user = useAuthStore((state) => state.user);
+  const { data: grades = [], isLoading, error } = useStudentGrades(user?.id || '');
+
+  if (isLoading) return <GradesSkeleton />;
+
+  if (error) {
+    return (
+      <Alert variant="destructive">
+        <AlertTriangle className="h-4 w-4" />
+        <AlertTitle>Error</AlertTitle>
+        <AlertDescription>Failed to load grades data. Please try again later.</AlertDescription>
+      </Alert>
+    );
+  }
+
+  const averageScore = grades.length > 0
+    ? (grades.reduce((acc, curr) => acc + curr.score, 0) / grades.length).toFixed(2)
+    : '0.00';
+
   return (
     <motion.div
       initial="initial"
@@ -52,13 +99,15 @@ export function StudentGradesPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {mockGradesData.map((grade, index) => (
+              {grades.map((grade, index) => (
                 <TableRow key={index} className="hover:bg-muted/50">
                   <TableCell className="font-medium">{index + 1}</TableCell>
-                  <TableCell>{grade.subject}</TableCell>
+                  <TableCell>{grade.courseName}</TableCell>
                   <TableCell className="text-center font-semibold">{grade.score}</TableCell>
                   <TableCell className="text-center">
-                    <Badge className={`text-white ${getGradeColor(grade.grade)}`}>{grade.grade}</Badge>
+                    <Badge className={`text-white ${getGradeColor(grade.score)}`}>
+                      {getGrade(grade.score)}
+                    </Badge>
                   </TableCell>
                   <TableCell>{grade.feedback}</TableCell>
                 </TableRow>

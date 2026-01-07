@@ -104,7 +104,7 @@ akademia-pro/
 
 ### Components
 
-The frontend uses a component-based architecture with shadcn/ui components as the foundation. All components are built with React and TypeScript, following modern best practices.
+The frontend uses a component-based architecture with shadcn/ui components as foundation. All components are built with React and TypeScript, following modern best practices.
 
 Key component categories:
 - Layout components (Header, Sidebar, Footer)
@@ -112,6 +112,56 @@ Key component categories:
 - Data display components (Table, Card, Badge)
 - Feedback components (Alert, Toast, Modal)
 - Navigation components (Tabs, Breadcrumbs, Pagination)
+
+### Layered Architecture
+
+The frontend follows a clean, layered architecture with clear separation of concerns:
+
+```
+┌─────────────────────────────────────┐
+│         Presentation Layer          │  <- React Components (pages, ui)
+├─────────────────────────────────────┤
+│         Custom Hooks Layer         │  <- useStudent, useTeacher, etc.
+├─────────────────────────────────────┤
+│         Service Layer              │  <- studentService, teacherService, etc.
+├─────────────────────────────────────┤
+│         Data Access Layer          │  <- apiClient with React Query
+└─────────────────────────────────────┘
+```
+
+**Presentation Layer**: React components and pages that handle UI rendering and user interactions
+**Custom Hooks Layer**: Domain-specific hooks that encapsulate data fetching logic with React Query
+**Service Layer**: Business logic and API interaction abstraction following service contracts
+**Data Access Layer**: Generic API client with error handling and response parsing
+
+### Service Layer Pattern
+
+The service layer provides a clean abstraction between the UI and backend APIs:
+
+- **Service Contracts**: TypeScript interfaces defining the shape of each service (e.g., `StudentService`, `TeacherService`)
+- **Service Implementations**: Concrete implementations that make HTTP requests via the API client
+- **Custom Hooks**: React Query hooks that wrap service calls for automatic caching and loading states
+
+**Benefits**:
+- Separates business logic from UI components
+- Makes components easier to test by mocking services
+- Provides a single point of maintenance for API endpoints
+- Enables consistent error handling and data transformation
+- Facilitates code reusability across components
+
+**Example Usage**:
+```typescript
+// Custom hook wrapping service call
+const { data, isLoading, error } = useStudentDashboard(studentId);
+
+// Service implementation
+export const studentService: StudentService = {
+  async getDashboard(studentId: string): Promise<StudentDashboardData> {
+    return apiClient<StudentDashboardData>(`/api/students/${studentId}/dashboard`);
+  }
+  // ... other methods
+};
+```
 
 ### State Management
 
