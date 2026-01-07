@@ -2,6 +2,11 @@
 
 ## Authentication and Authorization
 
+### Current Implementation
+⚠️ **CRITICAL SECURITY WARNING**: The application currently uses mock authentication tokens for development purposes. This implementation MUST NOT be used in production environments as it provides no actual security.
+
+In a production environment, the following security measures should be implemented:
+
 ### JWT Implementation
 - Use strong, randomly generated secrets for JWT signing
 - Set short expiration times for tokens (15-30 minutes)
@@ -23,6 +28,8 @@
 ## Data Protection
 
 ### Data Encryption
+Currently, the application does not implement data encryption. In a production environment, the following measures should be implemented:
+
 - Encrypt sensitive data at rest (PII, grades, etc.)
 - Use TLS 1.3 for all data in transit
 - Implement field-level encryption for highly sensitive data
@@ -34,6 +41,8 @@
 - Prevent XSS attacks through proper escaping
 
 ### API Security
+Currently, the application does not implement rate limiting or API keys. In a production environment, the following measures should be implemented:
+
 - Implement rate limiting on all API endpoints
 - Use API keys for server-to-server communication
 - Log and monitor all API access
