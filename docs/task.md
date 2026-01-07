@@ -676,29 +676,50 @@ This document tracks architectural refactoring tasks for Akademia Pro.
 ### Critical Documentation Fixes - Completed ✅
 
 1. **Fixed JWT Authentication Documentation** - `docs/blueprint.md`
-   - Removed incorrect "Planned" status from JWT authentication section
-   - Updated documentation to reflect JWT is fully implemented and integrated
-   - Added implementation details showing JWT is active on all protected routes
-   - Removed JWT from "Planned Features" list (it's completed)
-   - Updated Monitoring section to mark structured logging with correlation IDs as implemented
+    - Removed incorrect "Planned" status from JWT authentication section
+    - Updated documentation to reflect JWT is fully implemented and integrated
+    - Added implementation details showing JWT is active on all protected routes
+    - Removed JWT from "Planned Features" list (it's completed)
+    - Updated Monitoring section to mark structured logging with correlation IDs as implemented
 
 2. **Critical README Fixes**
 
 1. **Fixed Clone URL** - Corrected generic placeholder to actual repository URL:
-   - Before: `https://github.com/your-username/akademia-pro.git`
-   - After: `https://github.com/cpa01cmz-beep/web-sekolah.git`
+    - Before: `https://github.com/your-username/akademia-pro.git`
+    - After: `https://github.com/cpa01cmz-beep/web-sekolah.git`
 
 2. **Fixed Project Directory** - Corrected directory name in installation instructions:
-   - Before: `cd akademia-pro`
-   - After: `cd web-sekolah`
+    - Before: `cd akademia-pro`
+    - After: `cd web-sekolah`
 
 3. **Fixed Wiki Links** - Corrected broken relative paths to proper GitHub URLs:
-   - Before: `../../wiki/Home` (broken relative paths)
-   - After: `https://github.com/cpa01cmz-beep/web-sekolah/wiki/Home` (working absolute URLs)
+    - Before: `../../wiki/Home` (broken relative paths)
+    - After: `https://github.com/cpa01cmz-beep/web-sekolah/wiki/Home` (working absolute URLs)
 
 4. **Added Environment Configuration** - Added step to configure `.env` file:
-   - Added instruction to copy `.env.example` to `.env`
-   - Documented required environment variables for development
+    - Added instruction to copy `.env.example` to `.env`
+    - Documented required environment variables for development
+
+3. **Critical DOCUMENTATION.md Fixes** - Fixed outdated installation instructions and project structure
+
+1. **Fixed Clone URL** - Corrected generic placeholder to actual repository URL:
+    - Before: `https://github.com/your-username/akademia-pro.git`
+    - After: `https://github.com/cpa01cmz-beep/web-sekolah.git`
+
+2. **Fixed Project Directory** - Corrected directory name in installation instructions:
+    - Before: `cd akademia-pro`
+    - After: `cd web-sekolah`
+
+3. **Fixed Project Structure Root** - Corrected directory name in structure diagram:
+    - Before: `akademia-pro/`
+    - After: `web-sekolah/`
+
+4. **Updated Blueprint Reference** - Corrected path to technical blueprint:
+    - Before: `BLUEPRINT.md`
+    - After: `docs/blueprint.md`
+
+5. **Added Task List Reference** - Added missing reference to architectural task list:
+    - Added: `docs/task.md` - Architectural task list
 
 **Benefits Achieved**:
 - ✅ Clone command now works with correct repository URL

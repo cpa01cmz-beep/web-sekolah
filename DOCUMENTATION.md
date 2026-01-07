@@ -37,14 +37,14 @@ Before you begin, ensure you have the following installed:
 ### Installation
 
 1. Clone the repository:
-   ```bash
-   git clone https://github.com/your-username/akademia-pro.git
-   ```
+    ```bash
+    git clone https://github.com/cpa01cmz-beep/web-sekolah.git
+    ```
 
 2. Navigate to the project directory:
-   ```bash
-   cd akademia-pro
-   ```
+    ```bash
+    cd web-sekolah
+    ```
 
 3. Install dependencies:
    ```bash
@@ -68,7 +68,7 @@ Before you begin, ensure you have the following installed:
 ## Project Structure
 
 ```
-akademia-pro/
+web-sekolah/
 ├── src/                  # Frontend application
 │   ├── components/       # Reusable UI components
 │   ├── hooks/            # Custom React hooks
@@ -91,7 +91,8 @@ akademia-pro/
 ├── tests/                # Test files
 ├── README.md             # Project overview
 ├── ROADMAP.md            # Development roadmap
-├── BLUEPRINT.md          # Technical blueprint
+├── docs/blueprint.md     # Technical blueprint
+├── docs/task.md         # Architectural task list
 ├── DOCUMENTATION.md      # Complete documentation
 ├── package.json          # Dependencies and scripts
 ├── vite.config.ts        # Vite configuration
