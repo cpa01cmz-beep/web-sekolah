@@ -33,6 +33,10 @@ This document tracks architectural refactoring tasks for Akademia Pro.
 | High | Replace Framer Motion in remaining pages | Medium | src/pages/*.tsx (13 pages) |
 | Medium | Extract role-specific user field access | Small | worker/auth-routes.ts |
 | Low | Refactor large page components | Medium | Multiple page files (>150 lines) |
+| High | Split large errorReporter.ts file | Medium | src/lib/errorReporter.ts (802 lines) |
+| Medium | Extract repeated Hono context access pattern | Small | worker/user-routes.ts (3 instances) |
+| Medium | Remove `as any` type casts for webhook events | Small | worker/user-routes.ts (2 instances) |
+| Low | Split large UI components | Medium | src/components/ui/sidebar.tsx (771 lines), chart.tsx (365 lines) |
 
 ### Active Focus Areas
 
@@ -2618,6 +2622,27 @@ Created comprehensive `docs/blueprint.md` with:
 - Issue: Five separate `useState` calls for form management (isModalOpen, editingUser, userName, userEmail, userRole) with complex reset logic scattered in multiple places, and form validation mixed with state management
 - Suggestion: Extract to a custom hook `src/hooks/useUserForm.ts` that manages form state, editing status, and provides reset/clear functions, or integrate with react-hook-form for comprehensive validation support
 - Priority: Medium
+- Effort: Medium
+
+## [REFACTOR] Extract Repeated Hono Context Access Pattern
+- Location: worker/user-routes.ts (lines 30-31, 51, 66-67)
+- Issue: Duplicated pattern of accessing Hono context: `const context = c as any; const userId = context.get('user').id;` appears 3 times, violating DRY principle and introducing potential type safety issues
+- Suggestion: Create utility function `getCurrentUserId(c: Context): string` in worker/middleware/auth.ts or worker/core-utils.ts that safely extracts user ID from Hono context, or extend existing authenticate middleware to include user ID in context type
+- Priority: Medium
+- Effort: Small
+
+## [REFACTOR] Remove `as any` Type Casts for Webhook Events
+- Location: worker/user-routes.ts (lines 90, 107)
+- Issue: Webhook event data cast to `any` type: `updatedGrade as any` and `newGrade as any`, losing type safety and potentially hiding type mismatches
+- Suggestion: Update WebhookService.triggerEvent to accept generic type parameter `<T>` and use proper type for webhook event data, or define union type for webhook event payloads (GradeCreatedPayload | GradeUpdatedPayload)
+- Priority: Medium
+- Effort: Small
+
+## [REFACTOR] Split Large UI Components
+- Location: src/components/ui/sidebar.tsx (771 lines), src/components/ui/chart.tsx (365 lines)
+- Issue: Large UI components with multiple responsibilities make them hard to maintain, test, and modify; sidebar.tsx handles navigation, menus, multiple sidebar states; chart.tsx includes chart rendering logic, data transformations, and responsive behavior
+- Suggestion: Split sidebar.tsx into: SidebarContainer, SidebarNavigation, SidebarMenu, SidebarHeader, SidebarFooter; split chart.tsx into: ChartContainer, ChartRenderer, ChartLegend, ChartTooltip; use composition to rebuild components
+- Priority: Low
 - Effort: Medium
 
 ## Documentation Fixes (2026-01-07)
