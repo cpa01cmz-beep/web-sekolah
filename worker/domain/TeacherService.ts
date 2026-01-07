@@ -32,11 +32,11 @@ export class TeacherService {
     const teacherCourseIds = new Set(teacherCourses.map(c => c.id));
     const students = await UserEntity.getByClassId(env, classId);
 
-    const allStudentGrades = await Promise.all(
-      students.map(s => GradeEntity.getByStudentId(env, s.id))
+    const allCourseGrades = await Promise.all(
+      Array.from(teacherCourseIds).map(courseId => GradeEntity.getByCourseId(env, courseId))
     );
     const gradesMap = new Map<string, Grade>();
-    allStudentGrades.flat().forEach(grade => {
+    allCourseGrades.flat().forEach(grade => {
       const key = `${grade.studentId}:${grade.courseId}`;
       gradesMap.set(key, grade);
     });
