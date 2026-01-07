@@ -10,6 +10,7 @@ import { motion } from 'framer-motion';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import { toast } from 'sonner';
+import { logger } from '@/lib/logger';
 
 function CardSkeleton() {
   return (
@@ -54,7 +55,7 @@ export function StudentCardPage() {
       setIsDownloading(false);
       toast.success('PDF downloaded successfully!');
     }).catch(err => {
-      console.error("Error generating PDF:", err);
+      logger.error("Error generating PDF", err, { userId: user?.id });
       toast.error('Failed to generate PDF.');
       setIsDownloading(false);
     });
