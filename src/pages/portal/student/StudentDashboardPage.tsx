@@ -2,10 +2,12 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Clock, BookOpen, Megaphone, AlertTriangle } from 'lucide-react';
+import { EmptyState } from '@/components/ui/empty-state';
+import { Clock, BookOpen, Megaphone, AlertTriangle, Inbox } from 'lucide-react';
 import { motion, Variants } from 'framer-motion';
 import { useStudentDashboard } from '@/hooks/useStudent';
 import { useAuthStore } from '@/lib/authStore';
+import { useReducedMotion } from '@/hooks/use-reduced-motion';
 import type { StudentDashboardData } from '@shared/types';
 const containerVariants: Variants = {
   hidden: { opacity: 0 },
@@ -32,7 +34,17 @@ function DashboardSkeleton() {
 }
 export function StudentDashboardPage() {
   const user = useAuthStore((state) => state.user);
+  const prefersReducedMotion = useReducedMotion();
   const { data, isLoading, error } = useStudentDashboard(user?.id || '');
+
+  const motionProps = prefersReducedMotion ? {} : {
+    variants: containerVariants,
+    initial: "hidden",
+    animate: "visible"
+  };
+
+  const itemProps = prefersReducedMotion ? {} : { variants: itemVariants };
+
   if (isLoading) return <DashboardSkeleton />;
   if (error) {
     return (
@@ -43,20 +55,27 @@ export function StudentDashboardPage() {
       </Alert>
     );
   }
-  if (!data) return <div>No data available.</div>;
+  if (!data) {
+    return (
+      <EmptyState
+        icon={Inbox}
+        title="No data available"
+        description="We couldn't find any data for your dashboard. Please try again later or contact support if the issue persists."
+      />
+    );
+  }
+
   return (
     <motion.div
       className="space-y-6"
-      variants={containerVariants}
-      initial="hidden"
-      animate="visible"
+      {...motionProps}
     >
-      <motion.div variants={itemVariants}>
+      <motion.div {...itemProps}>
         <h1 className="text-3xl font-bold">Student Dashboard</h1>
         <p className="text-muted-foreground">Here's a summary of your academic activities.</p>
       </motion.div>
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        <motion.div variants={itemVariants}>
+        <motion.div {...itemProps}>
           <Card className="h-full hover:shadow-lg transition-shadow duration-200">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Today's Schedule</CardTitle>
@@ -77,7 +96,7 @@ export function StudentDashboardPage() {
             </CardContent>
           </Card>
         </motion.div>
-        <motion.div variants={itemVariants}>
+        <motion.div {...itemProps}>
           <Card className="h-full hover:shadow-lg transition-shadow duration-200">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Recent Grades</CardTitle>
@@ -97,7 +116,7 @@ export function StudentDashboardPage() {
             </CardContent>
           </Card>
         </motion.div>
-        <motion.div variants={itemVariants}>
+        <motion.div {...itemProps}>
           <Card className="h-full hover:shadow-lg transition-shadow duration-200">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Announcements</CardTitle>

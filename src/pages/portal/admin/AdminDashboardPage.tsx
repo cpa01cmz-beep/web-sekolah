@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Users, GraduationCap, School, Megaphone, Activity } from 'lucide-react';
 import { motion, Variants } from 'framer-motion';
+import { useReducedMotion } from '@/hooks/use-reduced-motion';
 const mockAdminData = {
   stats: [
     { title: 'Total Students', value: '1,250', icon: <Users className="h-6 w-6 text-blue-500" /> },
@@ -69,12 +70,20 @@ function EnrollmentChart() {
 }
 
 export function AdminDashboardPage() {
+  const prefersReducedMotion = useReducedMotion();
+
+  const motionProps = prefersReducedMotion ? {} : {
+    variants: containerVariants,
+    initial: "hidden",
+    animate: "visible"
+  };
+
+  const itemProps = prefersReducedMotion ? {} : { variants: itemVariants };
+
   return (
     <motion.div
       className="space-y-6"
-      variants={containerVariants}
-      initial="hidden"
-      animate="visible"
+      {...motionProps}
     >
       <motion.div variants={itemVariants}>
         <h1 className="text-3xl font-bold">Admin Dashboard</h1>
@@ -82,7 +91,7 @@ export function AdminDashboardPage() {
       </motion.div>
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         {mockAdminData.stats.map((stat, index) => (
-          <motion.div key={index} variants={itemVariants}>
+          <motion.div key={index} {...itemProps}>
             <Card className="hover:shadow-lg transition-shadow duration-200">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">{stat.title}</CardTitle>
@@ -96,7 +105,7 @@ export function AdminDashboardPage() {
         ))}
       </div>
       <div className="grid gap-6 lg:grid-cols-5">
-        <motion.div variants={itemVariants} className="lg:col-span-3">
+        <motion.div {...itemProps} className="lg:col-span-3">
           <Card className="h-[400px] hover:shadow-lg transition-shadow duration-200">
             <CardHeader>
               <CardTitle>Student Enrollment by Grade</CardTitle>
@@ -106,7 +115,7 @@ export function AdminDashboardPage() {
             </CardContent>
           </Card>
         </motion.div>
-        <motion.div variants={itemVariants} className="lg:col-span-2">
+        <motion.div {...itemProps} className="lg:col-span-2">
           <Card className="h-[400px] hover:shadow-lg transition-shadow duration-200">
             <CardHeader>
               <CardTitle>Recent Activity</CardTitle>

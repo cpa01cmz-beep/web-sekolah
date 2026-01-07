@@ -330,13 +330,46 @@ This document tracks architectural refactoring tasks for Akademia Pro.
    - Applied to TeacherGradeManagementPage grades table
    - Maintains usability on all screen sizes
 
+7. **Accessibility - Reduced Motion Support** - Added `prefers-reduced-motion` support to all Framer Motion animations:
+   - Created `useReducedMotion` hook that detects user's motion preference
+   - Updated HomePage.tsx animations to respect reduced motion setting
+   - Updated LoginPage.tsx animations to respect reduced motion setting
+   - Updated StudentDashboardPage.tsx animations to respect reduced motion setting
+   - Updated AdminDashboardPage.tsx animations to respect reduced motion setting
+   - Benefits: Users with vestibular disorders can disable animations
+
+8. **Component Extraction - EmptyState Component** - Created reusable EmptyState component:
+   - Created `src/components/ui/empty-state.tsx` with icon, title, description, and action button
+   - Replaced plain empty state div in StudentDashboardPage with EmptyState component
+   - Added `role="status"` and `aria-live="polite"` for screen reader announcements
+   - Benefits: Consistent UX across all empty data states
+
+9. **Form Validation Enhancement - FormField Component** - Created reusable FormField component:
+   - Created `src/components/ui/form-field.tsx` for consistent form field structure
+   - Integrated with Input component for accessible error messages
+   - Added `role="alert"` and `aria-live="polite"` for error announcements
+   - Updated LoginPage.tsx to use FormField component with validation
+   - Benefits: Consistent form UX and accessible validation feedback
+
+10. **Accessibility - Skip to Main Content Link** - Created SkipLink component:
+    - Created `src/components/SkipLink.tsx` for keyboard users to skip navigation
+    - Added SkipLink to PortalLayout component pointing to main content
+    - Added `id="main-content"` to PortalLayout main element
+    - Hidden by default (sr-only), visible on focus with proper styling
+    - Benefits: Keyboard users can skip repetitive navigation to access main content
+
 **Benefits Achieved**:
 - ✅ Improved keyboard navigation throughout the application
 - ✅ Better screen reader support for all interactive elements
 - ✅ Form validation feedback accessible to all users
 - ✅ Tables usable on mobile devices
 - ✅ Color-blind users can distinguish roles via icons
-- ✅ Zero regression (all 120 tests passing)
+- ✅ Reduced motion support for users with vestibular disorders
+- ✅ Consistent empty state UX across application
+- ✅ Consistent form field structure with accessible validation
+- ✅ Skip to main content link for keyboard users
+- ✅ All existing focus indicators verified (Buttons, Inputs, etc.)
+- ✅ Zero regression (all 175 tests passing)
 
 ## Security Hardening (2026-01-07)
 
