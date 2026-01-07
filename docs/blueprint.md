@@ -298,22 +298,100 @@ Configurable per request:
 ### Retry
 
 Automatic retry with exponential backoff:
+
+**API Client (Frontend):**
 - Max retries: 3 (for queries), 2 (for mutations)
 - Base delay: 1000ms
 - Backoff factor: 2
 - Jitter: ±1000ms
 - Non-retryable errors: 404, validation, auth
 
+**ErrorReporter (Client-Side Error Reporting):**
+- Max retries: 3 attempts
+- Base delay: 1000ms
+- Backoff factor: 2
+- Jitter: ±1000ms
+- Request timeout: 10 seconds per attempt
+- Total time: Up to 5 seconds per error report
+
+**Webhook Delivery (Backend):**
+- Max retries: 6 attempts
+- Delays: 1min, 5min, 15min, 30min, 1hr, 2hr
+- Circuit breaker: Opens after 5 consecutive failures (60s timeout)
+- Request timeout: 30 seconds per attempt
+
 ### Circuit Breaker
 
-Threshold: 5 failures
-Timeout: 60 seconds
-Reset timeout: 30 seconds
+Prevents cascading failures by stopping calls to failing services.
 
-State can be monitored via:
+**Configuration:**
+- Failure threshold: 5 consecutive failures
+- Open timeout: 60 seconds (circuit stays open for this duration)
+- Reset timeout: 30 seconds (before attempting recovery)
+
+**Implementation:**
+
+The `CircuitBreaker` utility provides three states:
+
+1. **Closed**: Normal operation - all requests pass through
+2. **Open**: After failure threshold - rejects requests immediately
+3. **Half-Open**: After timeout - allows single request to test recovery
+
 ```typescript
-getCircuitBreakerState()
+import { CircuitBreaker } from './CircuitBreaker';
+
+const breaker = new CircuitBreaker('api-key', {
+  failureThreshold: 5,
+  timeoutMs: 60000
+});
+
+try {
+  const result = await breaker.execute(async () => {
+    return await fetchData();
+  });
+} catch (error) {
+  if (error.message.includes('Circuit breaker is open')) {
+    // Fast failure - service unavailable
+  }
+}
 ```
+
+**State Monitoring:**
+
+```typescript
+const state = breaker.getState();
+console.log({
+  isOpen: state.isOpen,
+  failureCount: state.failureCount,
+  lastFailureTime: new Date(state.lastFailureTime),
+  nextAttemptTime: new Date(state.nextAttemptTime)
+});
+```
+
+**Webhook Integration:**
+
+Webhook service uses per-URL circuit breakers:
+```typescript
+const webhookCircuitBreakers = new Map<string, CircuitBreaker>();
+
+let breaker = webhookCircuitBreakers.get(config.url);
+if (!breaker) {
+  breaker = CircuitBreaker.createWebhookBreaker(config.url);
+  webhookCircuitBreakers.set(config.url, breaker);
+}
+
+await breaker.execute(async () => {
+  return await fetch(config.url, webhookOptions);
+});
+```
+
+**Benefits:**
+
+- ✅ Fast failure when endpoint is degraded (no timeout wait)
+- ✅ Reduces unnecessary network calls to failing endpoints
+- ✅ Automatic recovery when endpoint comes back online
+- ✅ Independent isolation per webhook URL
+- ✅ Prevents cascading failures across system
 
 ---
 
@@ -748,6 +826,83 @@ Report client-side errors for monitoring.
 **Error Responses:**
 - 400 - Missing required fields (message)
 
+### Client-Side Error Reporting Resilience
+
+To ensure reliable error reporting from the client to the server, the ErrorReporter implements several resilience patterns:
+
+**Retry with Exponential Backoff:**
+
+Error reports are automatically retried with exponential backoff and jitter to handle temporary network issues:
+
+| Attempt | Base Delay | Jitter | Total Range |
+|---------|-------------|---------|--------------|
+| 1 | 1,000ms | ±1,000ms | 0-2,000ms |
+| 2 | 2,000ms | ±1,000ms | 1-3,000ms |
+| 3 | 4,000ms | ±1,000ms | 3-5,000ms |
+
+- Max retries: 3 attempts
+- Total timeout: Up to 5 seconds per error report
+- Jitter prevents thundering herd during network recovery
+
+**Timeout Protection:**
+
+Each error report request has a 10-second timeout to prevent hanging:
+```typescript
+const controller = new AbortController();
+const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+const response = await fetch('/api/client-errors', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify(error),
+  signal: controller.signal
+});
+```
+
+**Queue Management:**
+
+Error reports are queued to prevent loss:
+- Max queue size: 10 errors
+- Deduplication prevents duplicate reports
+- Failed reports remain in queue for retry
+- Queue processes sequentially (one report at a time)
+
+**Implementation:**
+
+```typescript
+class ErrorReporter {
+  private readonly maxRetries = 3;
+  private readonly baseRetryDelay = 1000;
+  private readonly requestTimeout = 10000;
+  
+  private async sendError(error: ErrorReport) {
+    for (let attempt = 0; attempt <= this.maxRetries; attempt++) {
+      try {
+        const response = await fetch(this.reportingEndpoint, {
+          signal: AbortSignal.timeout(this.requestTimeout),
+          // ... other options
+        });
+        return; // Success
+      } catch (err) {
+        if (attempt < this.maxRetries) {
+          const delay = this.baseRetryDelay * Math.pow(2, attempt) + Math.random() * 1000;
+          await new Promise(resolve => setTimeout(resolve, delay));
+        }
+      }
+    }
+    throw new Error('Failed after all retries');
+  }
+}
+```
+
+**Benefits:**
+
+- ✅ Handles temporary network failures automatically
+- ✅ Prevents error loss during brief outages
+- ✅ Timeout prevents hanging indefinitely
+- ✅ Jitter reduces server load during recovery
+- ✅ Queue prevents overwhelming the server
+
 ---
 
 ## Webhook Management
@@ -819,6 +974,52 @@ Webhooks are retried with exponential backoff on delivery failures:
 | 6 | 2 hours |
 
 After 6 failed attempts, the webhook delivery is marked as failed and will not be retried.
+
+### Circuit Breaker Pattern
+
+To prevent cascading failures and protect system resources, webhook HTTP calls use a circuit breaker pattern:
+
+**How It Works:**
+
+1. **Closed State**: Normal operation - all requests pass through
+2. **Open State**: After 5 consecutive failures, circuit opens and blocks requests for 60 seconds
+3. **Half-Open State**: After timeout, one request is allowed to test if service recovered
+4. **Closed State**: If test succeeds, circuit closes and normal operation resumes
+
+**Configuration:**
+
+| Setting | Value | Description |
+|---------|--------|-------------|
+| Failure Threshold | 5 consecutive failures | Opens circuit after N failures |
+| Timeout | 60 seconds | How long to keep circuit open |
+| Per-URL Breakers | Yes | Each webhook URL has independent circuit breaker |
+
+**Implementation:**
+
+```typescript
+// CircuitBreaker automatically wraps webhook HTTP calls
+const breaker = CircuitBreaker.createWebhookBreaker(webhookUrl);
+
+const response = await breaker.execute(async () => {
+  return await fetch(webhookUrl, options);
+});
+```
+
+**Benefits:**
+
+- ✅ Prevents cascading failures from persistently failing webhook endpoints
+- ✅ Reduces unnecessary network calls and resource consumption
+- ✅ Fast failure when endpoint is unavailable (no 30s timeout)
+- ✅ Automatic recovery when endpoint comes back online
+- ✅ Independent isolation per webhook URL
+
+**Monitoring:**
+
+Circuit breaker state is logged:
+- `Circuit opened due to failures` - When breaker opens
+- `Circuit half-open, attempting recovery` - When testing recovery
+- `Circuit closed after successful call` - When recovered
+- `Circuit is open, rejecting request` - When blocking requests
 
 ---
 

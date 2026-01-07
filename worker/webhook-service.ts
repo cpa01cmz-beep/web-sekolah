@@ -3,9 +3,12 @@ import { WebhookConfigEntity, WebhookEventEntity, WebhookDeliveryEntity } from '
 import type { WebhookConfig, WebhookEvent, WebhookDelivery } from '@shared/types';
 import { logger } from './logger';
 import { integrationMonitor } from './integration-monitor';
+import { CircuitBreaker } from './CircuitBreaker';
 
 const MAX_RETRIES = 6;
 const RETRY_DELAYS = [1, 5, 15, 30, 60, 120].map(minutes => minutes * 60 * 1000);
+
+const webhookCircuitBreakers = new Map<string, CircuitBreaker>();
 
 export class WebhookService {
   static async triggerEvent(env: Env, eventType: string, data: Record<string, unknown>): Promise<void> {
@@ -89,6 +92,12 @@ export class WebhookService {
       return;
     }
 
+    let breaker = webhookCircuitBreakers.get(config.url);
+    if (!breaker) {
+      breaker = CircuitBreaker.createWebhookBreaker(config.url);
+      webhookCircuitBreakers.set(config.url, breaker);
+    }
+
     const payload = {
       id: event.id,
       eventType: event.eventType,
@@ -100,17 +109,19 @@ export class WebhookService {
     const deliveryStartTime = Date.now();
 
     try {
-      const response = await fetch(config.url, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Webhook-Signature': signature,
-          'X-Webhook-ID': event.id,
-          'X-Webhook-Timestamp': event.createdAt,
-          'User-Agent': 'Akademia-Pro-Webhook/1.0'
-        },
-        body: JSON.stringify(payload),
-        signal: AbortSignal.timeout(30000)
+      const response = await breaker.execute(async () => {
+        return await fetch(config.url, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Webhook-Signature': signature,
+            'X-Webhook-ID': event.id,
+            'X-Webhook-Timestamp': event.createdAt,
+            'User-Agent': 'Akademia-Pro-Webhook/1.0'
+          },
+          body: JSON.stringify(payload),
+          signal: AbortSignal.timeout(30000)
+        });
       });
 
       if (response.ok) {
@@ -129,7 +140,18 @@ export class WebhookService {
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      await this.handleDeliveryError(env, delivery, 0, errorMessage);
+      
+      if (errorMessage.includes('Circuit breaker is open')) {
+        await this.markDeliveryFailed(env, delivery, `Circuit breaker open: ${errorMessage}`);
+        logger.warn('Webhook delivery skipped due to open circuit breaker', {
+          deliveryId: delivery.id,
+          webhookConfigId: config.id,
+          errorMessage
+        });
+      } else {
+        await this.handleDeliveryError(env, delivery, 0, errorMessage);
+      }
+      
       integrationMonitor.recordWebhookDelivery(false);
     }
   }

@@ -22,6 +22,9 @@ class ErrorReporter {
   private originalConsoleWarn: typeof console.warn | null = null;
   private originalConsoleError: typeof console.error | null = null;
   private isInitialized = false;
+  private readonly maxRetries = 3;
+  private readonly baseRetryDelay = 1000;
+  private readonly requestTimeout = 10000;
 
   constructor() {
     if (typeof window === "undefined") return;
@@ -276,35 +279,60 @@ class ErrorReporter {
   }
 
   private async sendError(error: ErrorReport) {
-    try {
-      const response = await fetch(this.reportingEndpoint, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(error),
-      });
+    let lastError: Error | unknown;
 
-      if (!response.ok) {
-        throw new Error(
-          `Failed to report error: ${response.status} ${response.statusText}`
-        );
+    for (let attempt = 0; attempt <= this.maxRetries; attempt++) {
+      let timeoutId: NodeJS.Timeout;
+      try {
+        const controller = new AbortController();
+        timeoutId = setTimeout(() => controller.abort(), this.requestTimeout);
+
+        const response = await fetch(this.reportingEndpoint, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(error),
+          signal: controller.signal,
+        });
+
+        clearTimeout(timeoutId);
+
+        if (!response.ok) {
+          throw new Error(
+            `Failed to report error: ${response.status} ${response.statusText}`
+          );
+        }
+
+        const result = (await response.json()) as {
+          success: boolean;
+          error?: string;
+        };
+
+        if (!result.success) {
+          throw new Error(result.error || "Unknown error occurred");
+        }
+
+        logger.debug("[ErrorReporter] Error reported successfully", { message: error.message });
+        return;
+      } catch (err) {
+        lastError = err;
+        clearTimeout(timeoutId);
+
+        if (attempt < this.maxRetries) {
+          const delay = this.baseRetryDelay * Math.pow(2, attempt) + Math.random() * 1000;
+          logger.debug("[ErrorReporter] Retrying error report", {
+            attempt: attempt + 1,
+            maxRetries: this.maxRetries,
+            delay: Math.round(delay),
+          });
+          await new Promise(resolve => setTimeout(resolve, delay));
+        }
       }
-
-      const result = (await response.json()) as {
-        success: boolean;
-        error?: string;
-      };
-
-      if (!result.success) {
-        throw new Error(result.error || "Unknown error occurred");
-      }
-
-      logger.debug("[ErrorReporter] Error reported successfully", { message: error.message });
-    } catch (err) {
-      logger.error("[ErrorReporter] Failed to send error", err);
-      throw err;
     }
+
+    logger.error("[ErrorReporter] Failed to send error after retries", lastError);
+    throw lastError;
   }
 
   public dispose(): void {
