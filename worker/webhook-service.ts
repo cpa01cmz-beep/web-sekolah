@@ -2,6 +2,7 @@ import type { Env } from './core-utils';
 import { WebhookConfigEntity, WebhookEventEntity, WebhookDeliveryEntity } from './entities';
 import type { WebhookConfig, WebhookEvent, WebhookDelivery } from '@shared/types';
 import { logger } from './logger';
+import { integrationMonitor } from './integration-monitor';
 
 const MAX_RETRIES = 6;
 const RETRY_DELAYS = [1, 5, 15, 30, 60, 120].map(minutes => minutes * 60 * 1000);
@@ -16,6 +17,10 @@ export class WebhookService {
       logger.debug('No active webhooks configured for event', { eventType });
       return;
     }
+
+    const allEvents = await WebhookEventEntity.list(env);
+    const pendingEvents = allEvents.items.filter((e: any) => !e.processed);
+    integrationMonitor.recordWebhookEvent(allEvents.items.length, pendingEvents.length);
 
     for (const config of activeConfigs) {
       const eventId = `event-${crypto.randomUUID()}`;
@@ -54,6 +59,7 @@ export class WebhookService {
     logger.info('Processing pending webhook deliveries');
 
     const pendingDeliveries = await WebhookDeliveryEntity.getPendingRetries(env);
+    integrationMonitor.updatePendingDeliveries(pendingDeliveries.length);
 
     logger.info(`Found ${pendingDeliveries.length} pending webhook deliveries`);
 
@@ -91,6 +97,7 @@ export class WebhookService {
     };
 
     const signature = await this.generateSignature(JSON.stringify(payload), config.secret);
+    const deliveryStartTime = Date.now();
 
     try {
       const response = await fetch(config.url, {
@@ -107,7 +114,9 @@ export class WebhookService {
       });
 
       if (response.ok) {
+        const deliveryTime = Date.now() - deliveryStartTime;
         await this.markDeliveryDelivered(env, delivery, response.status);
+        integrationMonitor.recordWebhookDelivery(true, deliveryTime);
         logger.info('Webhook delivered successfully', {
           deliveryId: delivery.id,
           webhookConfigId: config.id,
@@ -116,10 +125,12 @@ export class WebhookService {
       } else {
         const errorText = await response.text();
         await this.handleDeliveryError(env, delivery, response.status, errorText);
+        integrationMonitor.recordWebhookDelivery(false);
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       await this.handleDeliveryError(env, delivery, 0, errorMessage);
+      integrationMonitor.recordWebhookDelivery(false);
     }
   }
 

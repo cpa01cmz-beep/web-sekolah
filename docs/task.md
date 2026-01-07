@@ -489,6 +489,194 @@ This document tracks architectural refactoring tasks for Akademia Pro.
 - [x] Error responses standardized
 - [x] Zero breaking changes (all 303 tests passing)
 
+## Integration Monitoring System (2026-01-07)
+
+**Task**: Implement comprehensive monitoring and observability for all integration resilience patterns
+
+**Status**: Completed
+
+**Implementation**:
+
+1. **Created Integration Monitoring Service** - `worker/integration-monitor.ts`
+   - `IntegrationMonitor` class tracks all resilience pattern metrics
+   - Circuit breaker state tracking (client-side integration)
+   - Rate limiting statistics (total requests, blocked requests, block rate)
+   - Webhook delivery metrics (success rate, delivery times, pending retries)
+   - API error tracking (by code, by status, recent errors)
+   - Automatic metric aggregation and rate calculations
+   - Benefits: Single source of truth for integration health
+
+2. **Created Admin Monitoring Routes** - `worker/admin-monitoring-routes.ts`
+   - `GET /api/admin/monitoring/health`: Comprehensive health with all metrics
+   - `GET /api/admin/monitoring/circuit-breaker`: Circuit breaker state
+   - `POST /api/admin/monitoring/circuit-breaker/reset`: Request manual reset
+   - `GET /api/admin/monitoring/rate-limit`: Rate limiting statistics
+   - `GET /api/admin/monitoring/webhooks`: Webhook delivery statistics
+   - `GET /api/admin/monitoring/webhooks/deliveries`: Delivery history
+   - `GET /api/admin/monitoring/errors`: API error statistics
+   - `GET /api/admin/monitoring/summary`: Comprehensive integration summary
+   - `POST /api/admin/monitoring/reset-monitor`: Reset monitoring stats
+   - All endpoints protected by authentication, authorization, and rate limiting
+   - Benefits: Real-time visibility into integration health
+
+3. **Created Error Monitoring Middleware** - `worker/middleware/error-monitoring.ts`
+   - `errorMonitoring()`: Catches errors and records to monitoring system
+   - `responseErrorMonitoring()`: Records HTTP 4xx/5xx responses
+   - Automatic error code to status code mapping
+   - Endpoint tracking for error statistics
+   - Benefits: Automatic error tracking without manual instrumentation
+
+4. **Enhanced Health Check Endpoint** - `worker/index.ts`
+   - Updated `GET /api/health` with comprehensive integration metrics
+   - System health assessment (circuit breaker, webhook, rate limiting)
+   - Webhook success rate and delivery statistics
+   - Rate limiting block rate and request counts
+   - Public endpoint (no authentication required)
+   - Benefits: Quick health checks for load balancers and monitoring systems
+
+5. **Integrated Monitoring into Webhook Service** - `worker/webhook-service.ts`
+   - Track webhook delivery times for average calculation
+   - Record successful and failed deliveries to monitor
+   - Track pending deliveries count
+   - Track total events and processed events
+   - Benefits: Real-time webhook delivery observability
+
+6. **Integrated Monitoring into Rate Limit Middleware** - `worker/middleware/rate-limit.ts`
+   - Track total and blocked rate limit requests
+   - Record rate limit violations to monitoring system
+   - Track active rate limit entries
+   - Benefits: Visibility into rate limiting behavior and abuse patterns
+
+**Files Created**:
+- `worker/integration-monitor.ts` - Integration monitoring service (250 lines)
+- `worker/admin-monitoring-routes.ts` - Admin monitoring API endpoints (200 lines)
+- `worker/middleware/error-monitoring.ts` - Error monitoring middleware (60 lines)
+
+**Files Updated**:
+- `worker/index.ts` - Added admin monitoring routes, error monitoring middleware, enhanced health check
+- `worker/webhook-service.ts` - Integrated monitoring for delivery tracking
+- `worker/middleware/rate-limit.ts` - Integrated monitoring for rate limit statistics
+- `docs/blueprint.md` - Added comprehensive integration monitoring documentation
+
+**Metrics Tracked**:
+
+| Metric Type | Metrics | Healthy Thresholds |
+|--------------|----------|-------------------|
+| Circuit Breaker | isOpen, failureCount, lastFailureTime, nextAttemptTime | isOpen: false, failureCount: 0 |
+| Rate Limiting | totalRequests, blockedRequests, currentEntries, blockRate | blockRate: < 1% |
+| Webhook | totalEvents, pendingEvents, totalDeliveries, successfulDeliveries, failedDeliveries, averageDeliveryTime, successRate | successRate: ≥ 95% |
+| API Errors | totalErrors, errorsByCode, errorsByStatus, recentErrors | Low total errors, no spikes |
+
+**API Endpoints Added**:
+
+| Endpoint | Method | Auth | Description |
+|----------|--------|-------|-------------|
+| `/api/health` | GET | No | Public health check with integration metrics |
+| `/api/admin/monitoring/health` | GET | Admin | Comprehensive health with all metrics |
+| `/api/admin/monitoring/circuit-breaker` | GET | Admin | Circuit breaker state |
+| `/api/admin/monitoring/circuit-breaker/reset` | POST | Admin | Request circuit breaker reset |
+| `/api/admin/monitoring/rate-limit` | GET | Admin | Rate limiting statistics |
+| `/api/admin/monitoring/webhooks` | GET | Admin | Webhook delivery statistics |
+| `/api/admin/monitoring/webhooks/deliveries` | GET | Admin | Webhook delivery history |
+| `/api/admin/monitoring/errors` | GET | Admin | API error statistics |
+| `/api/admin/monitoring/summary` | GET | Admin | Comprehensive integration summary |
+| `/api/admin/monitoring/reset-monitor` | POST | Admin | Reset monitoring statistics |
+
+**Benefits Achieved**:
+- ✅ Comprehensive monitoring of all resilience patterns
+- ✅ Real-time visibility into integration health
+- ✅ Public health check endpoint for load balancers
+- ✅ Admin-only monitoring endpoints for detailed diagnostics
+- ✅ Automatic error tracking without manual instrumentation
+- ✅ Webhook delivery success rate monitoring
+- ✅ Rate limiting violation tracking
+- ✅ Circuit breaker state visibility
+- ✅ API error statistics and recent error history
+- ✅ All 345 tests passing (0 regressions)
+- ✅ Production-ready integration observability
+
+**Technical Details**:
+- Single `IntegrationMonitor` instance tracks all metrics in memory
+- Metrics reset via admin endpoint or service restart
+- Recent errors limited to last 100 entries to prevent memory issues
+- Delivery times averaged over last 1000 deliveries
+- All admin endpoints protected by authentication and authorization
+- All admin endpoints rate limited (strict limiter: 50 requests / 5 minutes)
+- Error monitoring middleware automatically tracks HTTP 4xx/5xx responses
+- Webhook service tracks delivery times for performance analysis
+- Rate limit middleware tracks violations for abuse detection
+
+**Use Cases**:
+
+1. **Production Monitoring**:
+   - Set up dashboard to display `/api/admin/monitoring/summary`
+   - Alert on webhook success rate < 95%
+   - Alert on rate limit block rate > 5%
+   - Alert on circuit breaker open state
+
+2. **Troubleshooting**:
+   - Check `/api/admin/monitoring/errors` for recent error patterns
+   - Review `/api/admin/monitoring/webhooks/deliveries` for failed webhooks
+   - Monitor circuit breaker state during incidents
+
+3. **Capacity Planning**:
+   - Track rate limiting trends to predict when limits need adjustment
+   - Monitor webhook delivery times to identify slow endpoints
+   - Analyze error rates to identify API bottlenecks
+
+4. **Incident Response**:
+   - Use `/api/health` for quick status check
+   - Review `/api/admin/monitoring/summary` for comprehensive health
+   - Reset monitoring after incident resolution for clean slate
+
+**Monitoring Dashboard Example**:
+
+```typescript
+import { apiClient } from '@/lib/api-client';
+
+// Update dashboard every 30 seconds
+setInterval(async () => {
+  const summary = await apiClient<IntegrationSummary>(
+    '/api/admin/monitoring/summary'
+  );
+
+  // Display metrics
+  console.log('Uptime:', summary.uptime);
+  console.log('Circuit Breaker:', summary.systemHealth.circuitBreaker);
+  console.log('Webhook Success Rate:', summary.webhook.successRate);
+  console.log('Rate Limit Block Rate:', summary.rateLimit.blockRate);
+  console.log('Total Errors:', summary.errors.total);
+}, 30000);
+```
+
+**Alerting Recommendations**:
+
+| Alert | Condition | Severity | Action |
+|-------|-----------|------------|---------|
+| Circuit Breaker Open | `circuitBreaker.isOpen === true` | Critical | Investigate backend health |
+| Low Webhook Success Rate | `webhook.successRate < 95%` | Warning | Check webhook URLs and receiver logs |
+| High Rate Limit Block Rate | `rateLimit.blockRate > 5%` | Warning | Review request patterns |
+| High Error Rate | `errors.total > 100/hour` | Warning | Review error codes and endpoints |
+| Failed Webhook Deliveries | `webhook.failedDeliveries > 10/hour` | Warning | Check webhook configuration |
+
+**Documentation**:
+- Added "Integration Monitoring System" section to `docs/blueprint.md`
+- Documented all monitoring endpoints with request/response examples
+- Provided monitoring dashboard example code
+- Included alerting recommendations
+- Explained metric tracking and health thresholds
+- Listed all files created and modified
+
+**Success Criteria**:
+- [x] All resilience patterns monitored (circuit breaker, rate limiting, webhooks)
+- [x] Comprehensive admin monitoring API with 10 new endpoints
+- [x] Enhanced public health check with integration metrics
+- [x] Automatic error tracking via middleware
+- [x] Webhook delivery success rate and timing monitoring
+- [x] Rate limiting violation tracking
+- [x] Zero breaking changes (all 345 tests passing)
+- [x] Production-ready monitoring and observability
+
 ## API Standardization (2026-01-07)
 
 **Task**: Standardize error response patterns across all API endpoints and middleware
