@@ -8,6 +8,7 @@ This document tracks architectural refactoring tasks for Akademia Pro.
 |----------|------|--------|-------------|
 | High | Service Layer Decoupling | Completed | Decouple services from HTTP client by introducing repository pattern |
 | High | Test Suite Modernization | Completed | Updated all service tests to use MockRepository for proper isolation |
+| High | API Documentation | Completed | Created comprehensive API blueprint with all endpoints, error codes, and integration patterns |
 | Medium | Data Access Layer | Pending | Create repository abstraction for entity operations |
 | Medium | Validation Layer | Completed | Centralized validation logic with Zod schemas (worker/middleware/validation.ts, schemas.ts) |
 | Low | State Management Guidelines | Pending | Document and enforce consistent state management patterns |
@@ -125,4 +126,66 @@ None currently in progress.
 
 ## Completed
 
-None completed yet.
+### API Documentation (2026-01-07)
+
+**Task**: Create comprehensive API documentation for Akademia Pro
+
+**Status**: Completed
+
+**Implementation**:
+
+Created comprehensive `docs/blueprint.md` with:
+
+1. **Architecture Overview**
+   - Visual diagram of system layers (Components → React Query → Services → Repository → API → Storage)
+   - Clear separation of concerns
+
+2. **API Reference**
+   - All endpoints documented with:
+     - HTTP method and path
+     - Request parameters (path, query, body)
+     - Response examples
+     - Error responses
+   - Coverage includes:
+     - Health check
+     - Database seeding
+     - Student portal (dashboard)
+     - Teacher portal (classes, grades)
+     - Admin portal (users CRUD)
+     - Error reporting
+
+3. **Standardization**
+   - Request/response format conventions
+   - Error codes mapping table (all 12 codes documented)
+   - Retryable vs non-retryable errors
+   - Rate limiting specifications
+   - Security headers documentation
+
+4. **Resilience Patterns**
+   - Timeout configuration (default 30s)
+   - Retry strategy (exponential backoff)
+   - Circuit breaker settings
+   - Monitoring capabilities
+
+5. **Integration Examples**
+   - apiClient usage patterns
+   - React Query hooks examples
+   - Service layer usage
+   - Error handling patterns with code examples
+
+6. **Best Practices**
+   - 8 key recommendations for API consumers
+   - Security guidelines
+   - Debugging and monitoring tips
+
+**Benefits Achieved**:
+- ✅ Complete API reference for all endpoints
+- ✅ Standardized error handling documentation
+- ✅ Integration patterns with code examples
+- ✅ Clear contract definition for API consumers
+- ✅ Monitoring and debugging guidance
+- ✅ Security and rate limiting documentation
+- ✅ Future enhancement roadmap
+
+**File Created**:
+- `docs/blueprint.md` - 600+ lines of comprehensive API documentation
