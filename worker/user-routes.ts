@@ -13,9 +13,10 @@ import {
 import { ReferentialIntegrity } from "./referential-integrity";
 import { rebuildAllIndexes } from "./index-rebuilder";
 import { authenticate, authorize } from './middleware/auth';
-import type { Grade, SchoolUser, Student, StudentDashboardData, Teacher, CreateUserData } from "@shared/types";
+import type { Grade, SchoolUser, Student, StudentDashboardData, Teacher, CreateUserData, UpdateUserData } from "@shared/types";
 import { logger } from './logger';
 import { WebhookService } from './webhook-service';
+import { hashPassword } from './password-utils';
 
 export function userRoutes(app: Hono<{ Bindings: Env }>) {
   app.post('/api/seed', async (c) => {
@@ -169,7 +170,9 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
   });
 
   app.get('/api/users', authenticate(), authorize('admin'), async (c) => {
-    return ok(c, (await UserEntity.list(c.env)).items);
+    const { items: users } = await UserEntity.list(c.env);
+    const usersWithoutPasswords = users.map(({ passwordHash: _, ...rest }) => rest);
+    return ok(c, usersWithoutPasswords);
   });
 
   app.post('/api/users', authenticate(), authorize('admin'), async (c) => {
@@ -177,15 +180,21 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
     const now = new Date().toISOString();
     const base = { id: crypto.randomUUID(), createdAt: now, updatedAt: now, avatarUrl: '' };
 
+    let passwordHash = null;
+    if (userData.password) {
+      const { hash } = await hashPassword(userData.password);
+      passwordHash = hash;
+    }
+
     let newUser: SchoolUser;
     if (userData.role === 'student') {
-      newUser = { ...base, ...userData, role: 'student', classId: userData.classId ?? '', studentIdNumber: userData.studentIdNumber ?? '' };
+      newUser = { ...base, ...userData, role: 'student', classId: userData.classId ?? '', studentIdNumber: userData.studentIdNumber ?? '', passwordHash };
     } else if (userData.role === 'teacher') {
-      newUser = { ...base, ...userData, role: 'teacher', classIds: userData.classIds ?? [] };
+      newUser = { ...base, ...userData, role: 'teacher', classIds: userData.classIds ?? [], passwordHash };
     } else if (userData.role === 'parent') {
-      newUser = { ...base, ...userData, role: 'parent', childId: userData.childId ?? '' };
+      newUser = { ...base, ...userData, role: 'parent', childId: userData.childId ?? '', passwordHash };
     } else {
-      newUser = { ...base, ...userData, role: 'admin' };
+      newUser = { ...base, ...userData, role: 'admin', passwordHash };
     }
 
     await UserEntity.create(c.env, newUser);
@@ -197,15 +206,25 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
 
   app.put('/api/users/:id', authenticate(), authorize('admin'), async (c) => {
     const userId = c.req.param('id');
-    const userData = await c.req.json<Partial<SchoolUser>>();
+    const userData = await c.req.json<UpdateUserData>();
     const userEntity = new UserEntity(c.env, userId);
     if (!await userEntity.exists()) return notFound(c, 'User not found');
-    await userEntity.patch(userData);
+
+    let updateData: Partial<SchoolUser> = userData;
+
+    if (userData.password) {
+      const { hash } = await hashPassword(userData.password);
+      updateData = { ...userData, passwordHash: hash };
+      delete (updateData as any).password;
+    }
+
+    await userEntity.patch(updateData);
     const updatedUser = await userEntity.getState();
 
     await WebhookService.triggerEvent(c.env, 'user.updated', updatedUser as unknown as Record<string, unknown>);
 
-    return ok(c, updatedUser);
+    const { passwordHash: _, ...userWithoutPassword } = updatedUser;
+    return ok(c, userWithoutPassword);
   });
 
   app.delete('/api/users/:id', authenticate(), authorize('admin'), async (c) => {

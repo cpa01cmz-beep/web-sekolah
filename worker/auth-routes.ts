@@ -5,6 +5,7 @@ import { UserEntity } from './entities';
 import { generateToken, verifyToken, optionalAuthenticate, AuthUser } from './middleware/auth';
 import { loginSchema } from './middleware/schemas';
 import { logger } from './logger';
+import { verifyPassword } from './password-utils';
 
 export function authRoutes(app: Hono<{ Bindings: Env }>) {
   app.get('/api/auth/verify', optionalAuthenticate(), async (c) => {
@@ -52,9 +53,16 @@ export function authRoutes(app: Hono<{ Bindings: Env }>) {
         return bad(c, 'Invalid email or role combination');
       }
 
-      if (password.length < 1) {
-        logger.warn('[AUTH] Login failed - empty password', { email, role });
-        return bad(c, 'Password is required');
+      if (!user.passwordHash) {
+        logger.warn('[AUTH] Login failed - user has no password hash set', { email, role });
+        return bad(c, 'User account not properly configured. Please contact administrator.');
+      }
+
+      const isPasswordValid = await verifyPassword(password, user.passwordHash);
+
+      if (!isPasswordValid) {
+        logger.warn('[AUTH] Login failed - invalid password', { email, role });
+        return bad(c, 'Invalid email, role, or password');
       }
 
       const secret = c.env.JWT_SECRET;
@@ -84,6 +92,8 @@ export function authRoutes(app: Hono<{ Bindings: Env }>) {
         childId: user.role === 'parent' ? (user as any).childId : undefined,
         studentIdNumber: user.role === 'student' ? (user as any).studentIdNumber : undefined,
       };
+
+      delete (userResponse as any).passwordHash;
 
       logger.info('[AUTH] User logged in successfully', { userId: user.id, email: user.email, role: user.role });
 

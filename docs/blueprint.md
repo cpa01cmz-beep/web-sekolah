@@ -94,16 +94,16 @@ Future versions will be prefixed: `/api/v2/...`
 
 ## Authentication
 
-JWT authentication is fully implemented and integrated into all protected API routes.
+Password authentication is fully implemented using PBKDF2 with 100,000 iterations and random salt per user.
 
-### JWT Authentication Flow
+### Password Authentication Flow
 
 ```typescript
 // Login request
 POST /api/auth/login
 {
   "email": "user@example.com",
-  "password": "securepassword",
+  "password": "password123",
   "role": "student"
 }
 
@@ -121,6 +121,15 @@ POST /api/auth/login
 Authorization: Bearer eyJhbGciOiJIUzI1NiIs...
 ```
 
+**Password Security**
+
+- **Hashing Algorithm**: PBKDF2 (Password-Based Key Derivation Function 2)
+- **Iterations**: 100,000 (OWASP recommendation)
+- **Hash Algorithm**: SHA-256
+- **Salt**: 16 bytes (128 bits) random salt per password
+- **Output**: 32 bytes (256 bits) hash
+- **Storage Format**: `salt:hash` (hex encoded)
+
 **Protected Routes**
 
 All protected routes require authentication via the `authenticate()` middleware and enforce role-based authorization using the `authorize()` middleware:
@@ -131,11 +140,13 @@ All protected routes require authentication via the `authenticate()` middleware 
 
 **Implementation Details**
 
-- JWT token generation and verification: `worker/middleware/auth.ts`
+- Password hashing: `worker/password-utils.ts` - PBKDF2 with 100,000 iterations
 - Login endpoint: `POST /api/auth/login` - `worker/auth-routes.ts`
+- Token generation and verification: `worker/middleware/auth.ts`
 - Token verification: `GET /api/auth/verify` - `worker/auth-routes.ts`
 - Token expiration: 24 hours (configurable)
 - Role-based authorization: All protected routes use `authorize(role)` middleware
+- Password change support: User creation and update routes handle password hashing
 
 ## Request/Response Format
 

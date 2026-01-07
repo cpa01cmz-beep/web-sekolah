@@ -1,5 +1,7 @@
 import type { Env } from './core-utils';
 import { logger } from './logger';
+import { UserEntity } from './entities';
+import { hashPassword } from './password-utils';
 
 const MIGRATION_STATE_KEY = 'sys:migration:state';
 
@@ -170,6 +172,50 @@ export const MigrationRegistry = {
     return [...this.migrations];
   }
 };
+
+/**
+ * Migration: Add password hash field to users
+ * This migration adds a passwordHash field to all existing users
+ * and sets a default password hash for each user
+ */
+export const AddPasswordHashMigration: Migration = {
+  id: '20260107_add_password_hash',
+  description: 'Add passwordHash field to all user entities and set default password',
+
+  async up(env: Env): Promise<void> {
+    MigrationHelpers.log('Starting AddPasswordHashMigration');
+
+    const { items: users } = await UserEntity.list(env);
+    const defaultPassword = 'password123';
+
+    for (const user of users) {
+      const userEntity = new UserEntity(env, user.id);
+
+      if (!user.passwordHash) {
+        const { hash } = await hashPassword(defaultPassword);
+        await userEntity.patch({ passwordHash: hash });
+        MigrationHelpers.log(`Set default password for user: ${user.email}`);
+      }
+    }
+
+    MigrationHelpers.log('AddPasswordHashMigration completed successfully');
+  },
+
+  async down(env: Env): Promise<void> {
+    MigrationHelpers.log('Rolling back AddPasswordHashMigration');
+
+    const { items: users } = await UserEntity.list(env);
+
+    for (const user of users) {
+      const userEntity = new UserEntity(env, user.id);
+      await userEntity.patch({ passwordHash: null });
+    }
+
+    MigrationHelpers.log('AddPasswordHashMigration rollback completed');
+  }
+};
+
+MigrationRegistry.register(AddPasswordHashMigration);
 
 /**
  * Helper utilities for common migration patterns
