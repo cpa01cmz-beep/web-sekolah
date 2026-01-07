@@ -5,6 +5,7 @@ import { SiteHeader } from '@/components/SiteHeader';
 import { SiteFooter } from '@/components/SiteFooter';
 import { CheckCircle, BookOpen, Users, BarChart, MapPin, Phone, Mail } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useReducedMotion } from '@/hooks/use-reduced-motion';
 const features = [
   {
     icon: <BookOpen className="h-8 w-8 text-white" />,
@@ -33,6 +34,14 @@ const contactInfo = [
   { icon: <Mail className="h-5 w-5" />, text: 'info@akademiapro.sch.id' },
 ];
 export function HomePage() {
+  const prefersReducedMotion = useReducedMotion();
+
+  const motionProps = (delay = 0) => ({
+    initial: prefersReducedMotion ? {} : { opacity: 0, y: 20 },
+    animate: prefersReducedMotion ? {} : { opacity: 1, y: 0 },
+    transition: prefersReducedMotion ? {} : { duration: 0.5, delay }
+  });
+
   return (
     <div className="flex flex-col min-h-screen bg-[#F5F7FA]">
       <SiteHeader />
@@ -41,28 +50,13 @@ export function HomePage() {
         <section className="relative bg-gradient-to-br from-[#0D47A1] to-[#00ACC1] text-white">
           <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 md:py-32 text-center relative">
-            <motion.h1 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-              className="text-4xl md:text-6xl font-bold tracking-tight"
-            >
+            <motion.h1 {...motionProps(0)} className="text-4xl md:text-6xl font-bold tracking-tight">
               Welcome to Akademia Pro
             </motion.h1>
-            <motion.p 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-              className="mt-4 max-w-2xl mx-auto text-lg md:text-xl text-blue-100"
-            >
+            <motion.p {...motionProps(0.2)} className="mt-4 max-w-2xl mx-auto text-lg md:text-xl text-blue-100">
               The all-in-one school management system designed for the modern educational era.
             </motion.p>
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.4 }}
-              className="mt-8 flex justify-center gap-4"
-            >
+            <motion.div {...motionProps(0.4)} className="mt-8 flex justify-center gap-4">
               <Button asChild size="lg" className="bg-white text-[#0D47A1] hover:bg-gray-100 transition-transform hover:scale-105">
                 <Link to="/login">Get Started</Link>
               </Button>
@@ -85,10 +79,10 @@ export function HomePage() {
               {features.map((feature, index) => (
                 <motion.div
                   key={feature.title}
-                  initial={{ opacity: 0, y: 50 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.5, delay: index * 0.1 }}
+                  initial={prefersReducedMotion ? {} : { opacity: 0, y: 50 }}
+                  animate={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
+                  viewport={prefersReducedMotion ? {} : { once: true }}
+                  transition={prefersReducedMotion ? {} : { duration: 0.5, delay: index * 0.1 }}
                 >
                   <Card className="text-center h-full hover:shadow-lg hover:-translate-y-1 transition-all duration-200">
                     <CardHeader>
@@ -144,10 +138,10 @@ export function HomePage() {
               {contactInfo.map((info, index) => (
                 <motion.div
                   key={info.text}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.5, delay: index * 0.1 }}
+                  initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }}
+                  whileInView={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
+                  viewport={prefersReducedMotion ? {} : { once: true }}
+                  transition={prefersReducedMotion ? {} : { duration: 0.5, delay: index * 0.1 }}
                   className="flex items-center justify-center gap-3 p-4 bg-card rounded-lg shadow-sm"
                 >
                   {info.icon}

@@ -7,30 +7,78 @@
 │   React     │────▶│  React   │────▶│   Service    │────▶│ Repository  │
 │ Components  │     │  Query   │     │   Layer      │     │   Layer     │
 └─────────────┘     └──────────┘     └──────────────┘     └─────────────┘
-                                                                │
-                                                                ▼
-                                                       ┌─────────────────┐
-                                                       │  apiClient      │
-                                                       │  (Resilience)   │
-                                                       └─────────────────┘
-                                                                │
-                                                                ▼
-                                                       ┌─────────────────┐
-                                                       │  Hono API       │
-                                                       │  (Worker)       │
-                                                       │                 │
-                                                       │  - Rate Limit   │
-                                                       │  - Timeout      │
-                                                       │  - CORS         │
-                                                       │  - Security     │
-                                                       └─────────────────┘
-                                                                │
-                                                                ▼
-                                                       ┌─────────────────┐
-                                                       │ Durable Objects│
-                                                       │   Storage       │
-                                                       └─────────────────┘
+                                                                  │
+                                                                  ▼
+                                                         ┌─────────────────┐
+                                                         │  apiClient      │
+                                                         │  (Resilience)   │
+                                                         └─────────────────┘
+                                                                  │
+                                                                  ▼
+                                                         ┌─────────────────┐
+                                                         │  Hono API       │
+                                                         │  (Worker)       │
+                                                         │                 │
+                                                         │  - Rate Limit   │
+                                                         │  - Timeout      │
+                                                         │  - CORS         │
+                                                         │  - Security     │
+                                                         └─────────────────┘
+                                                                  │
+                                                                  ▼
+                                                         ┌─────────────────┐
+                                                         │ Durable Objects│
+                                                         │   Storage       │
+                                                         │   + Indexes    │
+                                                         └─────────────────┘
 ```
+
+---
+
+## Data Architecture
+
+### Storage Layer
+
+The application uses **Cloudflare Workers Durable Objects** for persistent storage:
+
+- **Single GlobalDurableObject**: Stores all entity data with optimistic locking
+- **Primary Index**: Each entity type has a primary index for ID-based lookups
+- **Secondary Indexes**: Field-based indexes for efficient query patterns
+
+### Entities
+
+| Entity | Primary Index | Secondary Indexes |
+|---------|----------------|-------------------|
+| UserEntity | ID | role, classId |
+| ClassEntity | ID | teacherId |
+| CourseEntity | ID | teacherId |
+| GradeEntity | ID | studentId, courseId |
+| AnnouncementEntity | ID | authorId |
+| ScheduleEntity | ID | - |
+
+### Index Performance
+
+Before optimization, queries used full table scans:
+```typescript
+// Slow: Loads ALL users, then filters
+const allUsers = await UserEntity.list(env);
+const students = allUsers.items.filter(u => u.role === 'student');
+```
+
+After optimization, queries use indexed lookups:
+```typescript
+// Fast: Direct lookup by indexed field
+const students = await UserEntity.getByRole(env, 'student');
+```
+
+### Index Rebuild
+
+Secondary indexes can be rebuilt using:
+```
+POST /api/admin/rebuild-indexes
+```
+
+This clears and rebuilds all secondary indexes from existing data.
 
 ## Base URL
 

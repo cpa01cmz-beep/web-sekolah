@@ -8,6 +8,7 @@ import { Menu, Bell, GraduationCap, LayoutDashboard, Calendar, Award, User, Book
 import { Toaster } from 'sonner';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
+import { SkipLink } from '@/components/SkipLink';
 const studentLinks = [
   { to: 'dashboard', icon: <LayoutDashboard className="h-5 w-5" />, label: 'Dashboard' },
   { to: 'schedule', icon: <Calendar className="h-5 w-5" />, label: 'Schedule' },
@@ -45,6 +46,7 @@ export function PortalLayout() {
   const basePortalPath = `/portal/${user.role}`;
   return (
     <div className="flex h-screen bg-[#F5F7FA]">
+      <SkipLink targetId="main-content" />
       <PortalSidebar />
       <div className="flex-1 flex flex-col overflow-hidden">
         <header className="flex h-16 items-center justify-between border-b bg-card px-4 md:px-6">
@@ -98,7 +100,7 @@ export function PortalLayout() {
             </Avatar>
           </div>
         </header>
-        <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8">
+        <main id="main-content" className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8">
           <Outlet />
         </main>
       </div>

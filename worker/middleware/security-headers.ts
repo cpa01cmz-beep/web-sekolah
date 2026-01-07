@@ -11,6 +11,18 @@ interface SecurityHeadersConfig {
   hstsMaxAge?: number;
 }
 
+// CSP SECURITY NOTES:
+// - 'unsafe-inline' in script-src: Required for React runtime and inline event handlers
+// - 'unsafe-eval' in script-src: Required for some React libraries and eval() usage
+// - 'unsafe-inline' in style-src: Required for Tailwind CSS and inline styles
+//
+// PRODUCTION RECOMMENDATIONS:
+// - Implement nonce-based CSP for scripts instead of 'unsafe-inline'
+// - Remove 'unsafe-eval' if possible (refactor code to avoid eval())
+// - Use CSP hash-based approach for inline scripts
+// - Consider separating development and production CSP configurations
+// - For maximum security: Use strict CSP with server-rendered nonces
+
 const DEFAULT_SECURITY_HEADERS: SecurityHeadersConfig = {
   enableHSTS: true,
   enableCSP: true,

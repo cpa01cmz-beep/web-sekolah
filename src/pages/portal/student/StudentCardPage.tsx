@@ -7,8 +7,6 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { GraduationCap, QrCode, Download, AlertTriangle } from 'lucide-react';
 import { motion } from 'framer-motion';
-import html2canvas from 'html2canvas';
-import jsPDF from 'jspdf';
 import { toast } from 'sonner';
 import { logger } from '@/lib/logger';
 
@@ -35,30 +33,39 @@ export function StudentCardPage() {
   const cardRef = useRef<HTMLDivElement>(null);
   const [isDownloading, setIsDownloading] = useState(false);
 
-  const handleDownload = () => {
+  const handleDownload = async () => {
     if (!cardRef.current) return;
     setIsDownloading(true);
     toast.info('Generating PDF...');
-    html2canvas(cardRef.current, {
-      scale: 2,
-      useCORS: true,
-      backgroundColor: null,
-    }).then((canvas) => {
+    
+    try {
+      const [html2canvas, jsPDF] = await Promise.all([
+        import('html2canvas').then(m => m.default),
+        import('jspdf').then(m => m.default)
+      ]);
+
+      const canvas = await html2canvas(cardRef.current, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: null,
+      });
+      
       const imgData = canvas.toDataURL('image/png');
       const pdf = new jsPDF({
         orientation: 'landscape',
         unit: 'px',
         format: [canvas.width, canvas.height],
       });
+      
       pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
       pdf.save(`student-card-${user?.id || 'user'}.pdf`);
-      setIsDownloading(false);
       toast.success('PDF downloaded successfully!');
-    }).catch(err => {
+    } catch (err) {
       logger.error("Error generating PDF", err, { userId: user?.id });
       toast.error('Failed to generate PDF.');
+    } finally {
       setIsDownloading(false);
-    });
+    }
   };
 
   if (!user) return null;
@@ -92,7 +99,8 @@ export function StudentCardPage() {
   const studentData = cardData || {
     studentIdNumber: user.id,
     className: 'N/A',
-    validUntil: new Date().toISOString().split('T')[0]
+    validUntil: new Date().toISOString().split('T')[0],
+    photoUrl: user.avatarUrl || ''
   };
 
   return (

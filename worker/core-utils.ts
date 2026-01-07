@@ -443,23 +443,107 @@ export class Index<T extends string> extends Entity<unknown> {
     return { items: keys.map(k => k.slice(2) as T), next };
   }
 
-  /**
-   * Get all items from the index
-   * @returns An array of all items in the index
-   */
-  async list(): Promise<T[]> {
-    const { keys } = await this.stub.listPrefix('i:');
-    return keys.map(k => k.slice(2) as T);
-  }
-}
+  /**
+   * Get all items from the index
+   * @returns An array of all items in the index
+   */
+  async list(): Promise<T[]> {
+    const { keys } = await this.stub.listPrefix('i:');
+    return keys.map(k => k.slice(2) as T);
+  }
+}
+
+// ====================
+// Secondary Index Class
+// ====================
+
+/**
+ * Secondary index for entity field-based lookups
+ * Stores mappings of field values to entity IDs
+ * @template T - The type of entity IDs (constrained to string)
+ */
+export class SecondaryIndex<T extends string> extends Entity<unknown> {
+  static readonly entityName = "sys-secondary-index";
+
+  /**
+   * Create a new secondary index instance
+   * @param env - The environment context
+   * @param entityName - The name of the entity being indexed
+   * @param fieldName - The name of the field being indexed
+   */
+  constructor(env: Env, entityName: string, fieldName: string) {
+    super(env, `secondary-index:${entityName}:${fieldName}`);
+  }
+
+  /**
+   * Add an entity ID to the index for a specific field value
+   * @param fieldValue - The value of the field being indexed
+   * @param entityId - The ID of the entity to index
+   */
+  async add(fieldValue: string, entityId: T): Promise<void> {
+    const key = `field:${fieldValue}:entity:${entityId}`;
+    await this.stub.casPut(key, 0, { entityId });
+  }
+
+  /**
+   * Remove an entity ID from the index
+   * @param fieldValue - The value of the field being indexed
+   * @param entityId - The ID of the entity to remove
+   */
+  async remove(fieldValue: string, entityId: T): Promise<boolean> {
+    const key = `field:${fieldValue}:entity:${entityId}`;
+    return await this.stub.del(key);
+  }
+
+  /**
+   * Get all entity IDs for a specific field value
+   * @param fieldValue - The value to look up
+   * @returns Array of entity IDs with this field value
+   */
+  async getByValue(fieldValue: string): Promise<T[]> {
+    const prefix = `field:${fieldValue}:entity:`;
+    const { keys } = await this.stub.listPrefix(prefix);
+    const entityIds: T[] = [];
+    for (const key of keys) {
+      const doc = await this.stub.getDoc(key) as Doc<{ entityId: T }> | null;
+      if (doc && doc.data && doc.data.entityId) {
+        entityIds.push(doc.data.entityId);
+      }
+    }
+    return entityIds;
+  }
+
+  /**
+   * Clear all entries for a specific field value
+   * @param fieldValue - The value to clear
+   */
+  async clearValue(fieldValue: string): Promise<void> {
+    const prefix = `field:${fieldValue}:entity:`;
+    const { keys } = await this.stub.listPrefix(prefix);
+    await Promise.all(keys.map((key) => this.stub.del(key)));
+  }
+
+  /**
+   * Clear all entries in the index
+   */
+  async clear(): Promise<void> {
+    const { keys } = await this.stub.listPrefix('field:');
+    await Promise.all(keys.map((key) => this.stub.del(key)));
+  }
+}
 
 // ====================
 // Indexed Entity Types and Class
 // ====================
 
-type IS<T> = T extends new (env: Env, id: string) => IndexedEntity<infer S> ? S : never;
-type HS<TCtor> = TCtor & { indexName: string; keyOf(state: IS<TCtor>): string; seedData?: ReadonlyArray<IS<TCtor>> };
-type CtorAny = new (env: Env, id: string) => IndexedEntity<{ id: string }>;
+type IS<T> = T extends new (env: Env, id: string) => IndexedEntity<infer S> ? S : never;
+type HS<TCtor> = TCtor & { indexName: string; keyOf(state: IS<TCtor>): string; seedData?: ReadonlyArray<IS<TCtor>>; secondaryIndexes?: SecondaryIndexConfig[] };
+type CtorAny = new (env: Env, id: string) => IndexedEntity<{ id: string }>;
+
+interface SecondaryIndexConfig {
+  fieldName: string;
+  getValue: (state: IS<CtorAny>) => string;
+}
 
 /**
  * Extended Entity class that includes automatic indexing capabilities
@@ -473,7 +557,7 @@ export abstract class IndexedEntity<S extends { id: string }> extends Entity<S> 
   /**
    * Create a new indexed entity and add it to the index
    * @param env - The environment context
-   * @param state - The initial state of the entity
+   * @param state - The initial state of entity
    * @returns The created entity state
    */
   static async create<TCtor extends CtorAny>(this: HS<TCtor>, env: Env, state: IS<TCtor>): Promise<IS<TCtor>> {
@@ -483,6 +567,17 @@ export abstract class IndexedEntity<S extends { id: string }> extends Entity<S> 
     await inst.save(withTimestamps);
     const idx = new Index<string>(env, this.indexName);
     await idx.add(id);
+
+    const secondaryIndexes = this.secondaryIndexes;
+    if (secondaryIndexes) {
+      const entityName = inst.entityName;
+      for (const config of secondaryIndexes) {
+        const idx = new SecondaryIndex<string>(env, entityName, config.fieldName as string);
+        const fieldValue = config.getValue(withTimestamps);
+        await idx.add(fieldValue, id);
+      }
+    }
+
     return withTimestamps;
   }
 
@@ -530,19 +625,33 @@ export abstract class IndexedEntity<S extends { id: string }> extends Entity<S> 
     }
   }
 
-  /**
-   * Delete an entity document and remove its ID from the index
-   * @param env - The environment context
-   * @param id - The ID of the entity to delete
-   * @returns true if the entity existed and was deleted, false otherwise
-   */
-  static async delete<TCtor extends CtorAny>(this: HS<TCtor>, env: Env, id: string): Promise<boolean> {
-    const inst = new this(env, id);
-    const existed = await inst.delete();
-    const idx = new Index<string>(env, this.indexName);
-    await idx.remove(id);
-    return existed;
-  }
+  /**
+   * Delete an entity document and remove its ID from the index
+   * @param env - The environment context
+   * @param id - The ID of entity to delete
+   * @returns true if the entity existed and was deleted, false otherwise
+   */
+  static async delete<TCtor extends CtorAny>(this: HS<TCtor>, env: Env, id: string): Promise<boolean> {
+    const inst = new this(env, id);
+    const state = await inst.getState();
+    const existed = await inst.delete();
+    if (!existed) return false;
+
+    const idx = new Index<string>(env, this.indexName);
+    await idx.remove(id);
+
+    const secondaryIndexes = this.secondaryIndexes;
+    if (secondaryIndexes) {
+      const entityName = inst.entityName;
+      for (const config of secondaryIndexes) {
+        const idx = new SecondaryIndex<string>(env, entityName, config.fieldName as string);
+        const fieldValue = config.getValue(state);
+        await idx.remove(fieldValue, id);
+      }
+    }
+
+    return existed;
+  }
 
   /**
    * Delete multiple entities and remove their IDs from the index
@@ -558,15 +667,44 @@ export abstract class IndexedEntity<S extends { id: string }> extends Entity<S> 
     return results.filter(Boolean).length;
   }
 
-  /**
-   * Remove an entity ID from the index without deleting the entity document
-   * @param env - The environment context
-   * @param id - The ID to remove from the index
-   */
-  static async removeFromIndex<TCtor extends CtorAny>(this: HS<TCtor>, env: Env, id: string): Promise<void> {
-    const idx = new Index<string>(env, this.indexName);
-    await idx.remove(id);
-  }
+  /**
+   * Remove an entity ID from the index without deleting the entity document
+   * @param env - The environment context
+   * @param id - The ID to remove from the index
+   */
+  static async removeFromIndex<TCtor extends CtorAny>(this: HS<TCtor>, env: Env, id: string): Promise<void> {
+    const idx = new Index<string>(env, this.indexName);
+    await idx.remove(id);
+  }
+
+  /**
+   * Query entities by secondary index field value
+   * @param env - The environment context
+   * @param fieldName - The name of the indexed field
+   * @param value - The value to query
+   * @returns Array of entities matching the field value
+   */
+  static async getBySecondaryIndex<TCtor extends CtorAny>(
+    this: HS<TCtor>,
+    env: Env,
+    fieldName: string,
+    value: string
+  ): Promise<IS<TCtor>[]> {
+    const inst = new this(env, 'dummy');
+    const entityName = inst.entityName;
+    const idx = new SecondaryIndex<string>(env, entityName, fieldName);
+    const entityIds = await idx.getByValue(value);
+    const entities = await Promise.all(
+      entityIds.map(async (id) => {
+        try {
+          return await new this(env, id).getState();
+        } catch {
+          return null;
+        }
+      })
+    );
+    return entities.filter((e): e is IS<TCtor> => e !== null);
+  }
 
   /**
    * Override ensureState to ensure the entity's ID matches its instance ID
