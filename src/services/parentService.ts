@@ -1,16 +1,21 @@
-import { apiClient } from '@/lib/api-client';
 import type { ParentService } from './serviceContracts';
 import type {
   ParentDashboardData,
   ScheduleItem
 } from '@shared/types';
+import type { IRepository } from '@/repositories/IRepository';
+import { apiRepository } from '@/repositories/ApiRepository';
 
-export const parentService: ParentService = {
-  async getDashboard(parentId: string): Promise<ParentDashboardData> {
-    return apiClient<ParentDashboardData>(`/api/parents/${parentId}/dashboard`);
-  },
+export function createParentService(repository: IRepository = apiRepository): ParentService {
+  return {
+    async getDashboard(parentId: string): Promise<ParentDashboardData> {
+      return repository.get<ParentDashboardData>(`/api/parents/${parentId}/dashboard`);
+    },
 
-  async getChildSchedule(childId: string): Promise<ScheduleItem[]> {
-    return apiClient<ScheduleItem[]>(`/api/students/${childId}/schedule`);
-  }
-};
+    async getChildSchedule(childId: string): Promise<ScheduleItem[]> {
+      return repository.get<ScheduleItem[]>(`/api/students/${childId}/schedule`);
+    }
+  };
+}
+
+export const parentService = createParentService();

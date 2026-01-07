@@ -71,6 +71,56 @@ akademia-pro/
 └── tests/                # Test files
 ```
 
+## Architectural Patterns
+
+### Repository Pattern
+
+The application uses a Repository Pattern to decouple service layer logic from HTTP client implementation, promoting testability and adhering to the Dependency Inversion Principle.
+
+**Structure**:
+
+```
+src/
+├── repositories/
+│   ├── IRepository.ts         # Repository interface
+│   ├── ApiRepository.ts       # HTTP implementation
+│   └── index.ts              # Barrel export
+└── services/
+    ├── serviceContracts.ts     # Service interfaces
+    └── *[service].ts         # Service implementations
+```
+
+**Benefits**:
+- **Testability**: Services can be tested with mock repositories
+- **Flexibility**: HTTP client implementation can be swapped without modifying services
+- **SOLID Principles**: Follows Dependency Inversion Principle
+- **Maintainability**: Clear separation of concerns
+
+**Usage Example**:
+
+```typescript
+// Default usage (backward compatible)
+import { studentService } from '@/services/studentService';
+
+// With custom repository for testing
+import { createStudentService } from '@/services/studentService';
+import { MockRepository } from '@/test/mocks';
+
+const mockStudentService = createStudentService(new MockRepository());
+```
+
+**Repository Interface**:
+
+```typescript
+export interface IRepository {
+  get<T>(path: string, options?: ApiRequestOptions): Promise<T>;
+  post<T>(path: string, body?: unknown, options?: ApiRequestOptions): Promise<T>;
+  put<T>(path: string, body?: unknown, options?: ApiRequestOptions): Promise<T>;
+  delete<T>(path: string, options?: ApiRequestOptions): Promise<T>;
+  patch<T>(path: string, body?: unknown, options?: ApiRequestOptions): Promise<T>;
+}
+```
+
 ## Core Components
 
 ### 1. Authentication System
