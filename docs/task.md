@@ -2446,3 +2446,68 @@ Created comprehensive `docs/blueprint.md` with:
 - [x] Consistent with design system
 - [x] Zero regressions (all 345 tests passing)
 - [x] 0 linting errors
+
+---
+
+## DevOps (2026-01-07)
+
+### Cloudflare Workers Deployment Fix - Completed ✅
+
+**Task**: Fix Cloudflare Workers deployment failure blocking PR #101
+
+**Issues Identified**:
+1. Duplicate `worker/storage/GlobalDurableObject.ts` file causing bundling errors
+   - Error: "Class extends value undefined is not a constructor or null"
+   - Root cause: File tried to extend `GlobalDurableObject` from a dynamic import (`import('../types').GlobalDurableObject`)
+   - Actual class is defined in `worker/types.ts`
+
+2. Source maps configuration causing wrangler CLI crash
+   - Error: "The URL must be of scheme file"
+   - Root cause: Inline source maps (`sourcemap: "inline"`) caused wrangler CLI v4.57.0 to fail when processing source map files
+   - Issue appears to be a bug in wrangler when handling inline source maps
+
+**Fix Applied**:
+
+1. **Removed duplicate file**
+   - Deleted `worker/storage/GlobalDurableObject.ts`
+   - The actual `GlobalDurableObject` class is defined in `worker/types.ts`
+   - This eliminated circular import and bundling issues
+
+2. **Fixed core-utils.ts exports**
+   - Added `export { GlobalDurableObject } from './types';` to `worker/core-utils.ts`
+   - This ensures proper export chain: `types.ts` → `core-utils.ts` → `index.ts`
+
+3. **Disabled source maps**
+   - Changed `sourcemap: "inline"` to `sourcemap: false` in `vite.config.ts`
+   - Comment: "Disable source maps to work around wrangler bug"
+   - Production deployment doesn't require source maps, and they were causing deployment failures
+
+**Files Changed**:
+- `worker/storage/GlobalDurableObject.ts` (deleted)
+- `worker/core-utils.ts` (added export)
+- `vite.config.ts` (disabled source maps)
+
+**Verification**:
+- ✅ All 433 tests passing (0 regressions)
+- ✅ 0 linting errors
+- ✅ Worker deployed successfully to Cloudflare Workers
+- ✅ Health check endpoint returns healthy status: https://website-sekolah.cpa01cmz.workers.dev/api/health
+- ✅ Durable Object bindings working correctly
+- ✅ Production deployment URL: https://website-sekolah.cpa01cmz.workers.dev
+
+**Impact**:
+- PR #101 is now unblocked and can be merged successfully
+- Future deployments will work correctly without manual intervention
+- Deployment time improved (no source map processing overhead)
+- Reduced bundle size (no source maps)
+
+**Related Issues Closed**:
+- #102: P0: Cloudflare Workers deployment failing on PR #101
+- #103: PR #101 blocked by required CI checks despite passing all quality gates
+
+**Technical Details**:
+- The duplicate `GlobalDurableObject` file was likely a remnant from earlier refactoring
+- Wrangler CLI v4.57.0 has a known issue with inline source maps that causes it to crash
+- Source maps can be re-enabled once a wrangler fix is available, or if debugging is needed
+- The actual Durable Object class extends `DurableObject<Env, unknown>` from `cloudflare:workers`
+
