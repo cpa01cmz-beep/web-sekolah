@@ -1096,7 +1096,248 @@ Default fallback: `http://localhost:3000,http://localhost:4173`
 
 ---
 
-## Integration Patterns
+## Integration Architecture
+
+### Complete Resilience Stack
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                    Frontend (React App)                        │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  ┌──────────────────┐      ┌──────────────────┐              │
+│  │ React Components  │─────▶│ React Query      │              │
+│  └──────────────────┘      └──────────────────┘              │
+│                                      │                        │
+│                                      ▼                        │
+│                              ┌──────────────────┐              │
+│                              │ apiClient        │              │
+│                              ├──────────────────┤              │
+│                              │ • Circuit       │              │
+│                              │   Breaker      │              │
+│                              │ • Retry         │              │
+│                              │ • Timeout       │              │
+│                              └──────────────────┘              │
+└─────────────────────────────────┬───────────────────────────────┘
+                                  │ HTTP Request
+                                  │ (with timeout, retry, CB)
+                                  ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                    Backend (Cloudflare Worker)                  │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  ┌──────────────────┐      ┌──────────────────┐              │
+│  │ Rate Limiting    │─────▶│ Security        │              │
+│  │ Middleware      │      │ Middleware      │              │
+│  └──────────────────┘      └──────────────────┘              │
+│                                      │                        │
+│                                      ▼                        │
+│                              ┌──────────────────┐              │
+│                              │ Timeout         │              │
+│                              │ Middleware      │              │
+│                              └──────────────────┘              │
+│                                      │                        │
+│                                      ▼                        │
+│                              ┌──────────────────┐              │
+│                              │ Auth & Role     │              │
+│                              │ Middleware      │              │
+│                              └──────────────────┘              │
+│                                      │                        │
+│                                      ▼                        │
+│                              ┌──────────────────┐              │
+│                              │ API Routes      │              │
+│                              │ (Hono)         │              │
+│                              └──────────────────┘              │
+│                                      │                        │
+│                                      ▼                        │
+│                              ┌──────────────────┐              │
+│                              │ Durable Objects │              │
+│                              │ (Storage)       │              │
+│                              └──────────────────┘              │
+└─────────────────────────────────┬───────────────────────────────┘
+                                  │
+                                  ▼
+                          ┌──────────────────┐
+                          │ Webhook Queue   │
+                          │ (Retry System)  │
+                          └──────────────────┘
+```
+
+### Request Flow with Resilience
+
+**1. Frontend Request:**
+```
+React Component → React Query → apiClient → Circuit Breaker
+                                                    │
+                                                    ├─ Open? → Reject (503)
+                                                    └─ Closed? → Continue
+```
+
+**2. Circuit Breaker Checks:**
+- Check if circuit is open (5 consecutive failures)
+- If open, reject immediately with `CIRCUIT_BREAKER_OPEN` error
+- If closed, proceed with retry logic
+
+**3. Retry Logic:**
+```
+Execute Request → Success? → Return Response
+                    ↓
+                  Failure?
+                    ├─ Retryable? → Wait (exponential backoff) → Retry (max 3)
+                    └─ Non-retryable? → Throw Error
+```
+
+**4. Timeout Protection:**
+```
+Start Request → Timeout Timer (30s)
+                    │
+                    ├─ Complete before timeout? → Return Response
+                    └─ Timeout reached? → Abort & Throw TIMEOUT Error
+```
+
+**5. Backend Processing:**
+```
+Request → Rate Limit → Timeout → Auth → Route → DB
+            │           │         │       │      │
+            ▼           ▼         ▼       ▼      ▼
+          Check       30s      JWT    Role   DO
+         Limits     Max        Verify  Check   Op
+```
+
+**6. Response with Headers:**
+```
+Response → Rate Limit Headers + Request ID + Error Code
+          │
+          ├─ X-RateLimit-Limit: 100
+          ├─ X-RateLimit-Remaining: 95
+          ├─ X-RateLimit-Reset: 1234567890
+          ├─ X-Request-ID: uuid-v4
+          └─ X-Content-Type-Options: nosniff
+```
+
+### Failure Cascade Prevention
+
+**Circuit Breaker Pattern:**
+- **Prevents cascading failures** when backend is degraded
+- **Fast failure** (immediate 503 response) instead of hanging
+- **Automatic recovery** after reset timeout (30 seconds)
+
+**Implementation:**
+```typescript
+class CircuitBreaker {
+  private state: { isOpen: boolean; failureCount: number };
+  
+  async execute<T>(fn: () => Promise<T>): Promise<T> {
+    if (this.state.isOpen) {
+      throw new Error('Circuit breaker is open'); // Fast failure
+    }
+    try {
+      const result = await fn();
+      this.onSuccess(); // Reset failure count
+      return result;
+    } catch (error) {
+      this.onFailure(); // Increment failure count
+      throw error; // Propagate error
+    }
+  }
+}
+```
+
+**Exponential Backoff Retry:**
+- **Prevents thundering herd** when backend recovers
+- **Gradual retry** with increasing delays (1s, 2s, 4s)
+- **Jitter** to synchronize retries from multiple clients
+
+**Implementation:**
+```typescript
+async function fetchWithRetry<T>(
+  fn: () => Promise<T>,
+  maxRetries = 3,
+  baseDelay = 1000
+): Promise<T> {
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      return await fn();
+    } catch (error) {
+      if (attempt === maxRetries || !error.retryable) throw error;
+      const delay = baseDelay * Math.pow(2, attempt) + Math.random() * 1000;
+      await sleep(delay); // Exponential backoff + jitter
+    }
+  }
+}
+```
+
+**Rate Limiting:**
+- **Protects backend** from overload
+- **Fair resource allocation** across all clients
+- **Graceful degradation** with Retry-After header
+
+**Implementation:**
+```typescript
+export function rateLimit(options: RateLimitMiddlewareOptions) {
+  return async (c: Context, next: Next) => {
+    const entry = getOrCreateEntry(key, config);
+    
+    if (entry.count > config.maxRequests) {
+      c.header('Retry-After', Math.ceil((entry.resetTime - now) / 1000));
+      return c.json({ error: 'Rate limit exceeded' }, 429);
+    }
+    
+    await next();
+  };
+}
+```
+
+### Webhook Delivery Flow
+
+```
+┌─────────────────┐
+│  API Route     │ (e.g., POST /api/grades)
+│  (Create Grade)│
+└────────┬────────┘
+         │
+         ├─ Create Grade Entity
+         │
+         ├─ Trigger Webhook Event
+         │
+         ▼
+┌─────────────────┐
+│  Webhook       │ (WebhookEventEntity)
+│  Event Queue   │
+└────────┬────────┘
+         │
+         ▼
+┌─────────────────┐
+│  Webhook       │ (WebhookService.processPendingDeliveries)
+│  Processor    │ (Scheduled job: every 1 minute)
+└────────┬────────┘
+         │
+         ├─ For each active webhook config
+         ├─ For each pending event
+         │
+         ▼
+┌─────────────────┐
+│  Delivery      │ (WebhookDeliveryEntity)
+│  Attempt       │
+└────────┬────────┘
+         │
+         ├─ POST to webhook URL
+         ├─ With HMAC signature
+         ├─ Timeout: 30 seconds
+         │
+         ▼
+         ├─ Success? → Mark as "delivered"
+         └─ Failed? → Schedule retry (exponential backoff)
+                      │
+                      ├─ Attempt 1: 1 min
+                      ├─ Attempt 2: 5 min
+                      ├─ Attempt 3: 15 min
+                      ├─ Attempt 4: 30 min
+                      ├─ Attempt 5: 1 hour
+                      └─ Attempt 6: 2 hours → Mark as "failed"
+```
+
+### Integration Patterns
 
 ### Error Response Standardization
 
@@ -1323,6 +1564,245 @@ All requests include `X-Request-ID` header for tracing:
 11. **Verify webhook signatures** - Always verify `X-Webhook-Signature` header for incoming webhooks to prevent spoofing
 12. **Use retry logic for webhooks** - Webhook system automatically retries with exponential backoff, no need to implement retry logic
 13. **Process webhook deliveries regularly** - Use scheduled jobs to call `POST /api/admin/webhooks/process` for timely delivery
+
+---
+
+## Integration Monitoring & Troubleshooting
+
+### Circuit Breaker Monitoring
+
+Monitor circuit breaker state to detect service degradation:
+
+```typescript
+import { getCircuitBreakerState } from '@/lib/api-client';
+
+const state = getCircuitBreakerState();
+
+if (state.isOpen) {
+  console.warn('Circuit breaker is open', {
+    failureCount: state.failureCount,
+    lastFailureTime: new Date(state.lastFailureTime).toISOString(),
+    nextAttemptTime: new Date(state.nextAttemptTime).toISOString(),
+  });
+}
+```
+
+**Circuit Breaker States:**
+- **Closed**: Normal operation, requests flow through
+- **Open**: Threshold exceeded (5 failures), requests rejected immediately
+- **Half-Open**: Attempting to recover (automatic after reset timeout)
+
+**Manual Reset (Use with Caution):**
+```typescript
+import { resetCircuitBreaker } from '@/lib/api-client';
+resetCircuitBreaker();
+```
+
+### Rate Limit Monitoring
+
+Monitor rate limit headers to track API usage:
+
+```typescript
+import { apiClient } from '@/lib/api-client';
+
+const response = await fetch('/api/users', {
+  headers: { 'Authorization': 'Bearer token' }
+});
+
+const limit = response.headers.get('X-RateLimit-Limit');
+const remaining = response.headers.get('X-RateLimit-Remaining');
+const reset = response.headers.get('X-RateLimit-Reset');
+
+console.log(`Rate limit: ${remaining}/${limit}, resets at ${new Date(parseInt(reset) * 1000)}`);
+```
+
+### Request Tracing
+
+All requests include `X-Request-ID` header for distributed tracing:
+
+```typescript
+const requestId = crypto.randomUUID();
+const response = await fetch('/api/users', {
+  headers: { 'X-Request-ID': requestId }
+});
+
+const responseId = response.headers.get('X-Request-ID');
+console.log(`Request ${requestId} → Response ${responseId}`);
+```
+
+Log request IDs for debugging integration issues:
+```typescript
+import { logger } from '@/lib/logger';
+
+try {
+  const data = await apiClient<User>('/api/users/user-01');
+  logger.info('User fetched successfully', { userId: data.id });
+} catch (error) {
+  logger.error('Failed to fetch user', error, {
+    requestId: (error as ApiError).requestId,
+    endpoint: '/api/users/user-01'
+  });
+}
+```
+
+### Integration Testing Strategy
+
+**Unit Tests (Fast, Isolated):**
+- Mock apiClient with controlled responses
+- Test service layer business logic
+- Verify error handling with mock errors
+- Example: `src/services/__tests__/studentService.test.ts`
+
+**Integration Tests (Slower, Real API):**
+- Test against actual API endpoints
+- Verify resilience patterns (retry, circuit breaker, timeout)
+- Check rate limiting behavior
+- Example: `src/lib/__tests__/api-client.test.ts`
+
+**End-to-End Tests (Slowest, Full Flow):**
+- Test complete user journeys
+- Verify webhook delivery
+- Test failure scenarios
+- Use environment with mocked external services
+
+### Troubleshooting Common Issues
+
+**Problem: Requests failing with "Circuit breaker is open"**
+
+Diagnosis:
+```typescript
+const state = getCircuitBreakerState();
+console.log('Circuit breaker state:', state);
+```
+
+Solutions:
+1. Check if backend service is healthy: `GET /api/health`
+2. Review error logs for recurring failures
+3. Verify network connectivity to backend
+4. Wait for automatic reset (30 seconds after opening)
+5. Manual reset only if root cause is resolved (not recommended)
+
+**Problem: Rate limit exceeded (429 errors)**
+
+Diagnosis:
+- Check `X-RateLimit-Remaining` header
+- Review `X-RateLimit-Reset` timestamp
+
+Solutions:
+1. Implement backoff using `Retry-After` header
+2. Reduce request frequency
+3. Batch multiple operations into single request
+4. Cache responses using React Query
+5. Consider upgrading plan (if applicable)
+
+**Problem: Requests timing out (408 errors)**
+
+Diagnosis:
+- Check default timeout (30 seconds)
+- Review server-side timeout configuration
+
+Solutions:
+1. Increase timeout for long-running operations:
+   ```typescript
+   await apiClient('/api/users', { timeout: 60000 }); // 60 seconds
+   ```
+2. Optimize server-side queries (use indexes, N+1 fixes)
+3. Implement pagination for large datasets
+4. Use background processing for heavy operations
+
+**Problem: Webhook delivery failures**
+
+Diagnosis:
+```typescript
+// Check delivery history
+const deliveries = await apiClient<WebhookDelivery[]>('/api/webhooks/webhook-1/deliveries');
+
+// Filter failed deliveries
+const failed = deliveries.filter(d => d.status === 'failed');
+console.log('Failed webhook deliveries:', failed);
+```
+
+Solutions:
+1. Verify webhook endpoint is accessible
+2. Check webhook signature verification on receiver side
+3. Review webhook server logs for errors
+4. Manually trigger retry: `POST /api/admin/webhooks/process`
+5. Test webhook configuration: `POST /api/webhooks/test`
+
+### Health Check & Monitoring
+
+Implement periodic health checks:
+
+```typescript
+async function checkApiHealth(): Promise<boolean> {
+  try {
+    const response = await fetch('/api/health');
+    const data = await response.json();
+    return data.data.status === 'healthy';
+  } catch (error) {
+    logger.error('Health check failed', error);
+    return false;
+  }
+}
+
+setInterval(checkApiHealth, 60000); // Check every minute
+```
+
+Monitor key metrics:
+- Circuit breaker state (open/closed)
+- Rate limit usage (remaining/limit)
+- Request latency (p50, p95, p99)
+- Error rates (by status code, error type)
+- Webhook delivery success rate
+
+### Production Deployment Checklist
+
+Before deploying to production:
+
+1. **Environment Variables:**
+   - `ALLOWED_ORIGINS`: Set to production domains
+   - `LOG_LEVEL`: Set to `info` or `error`
+   - `VITE_LOG_LEVEL`: Set to `info` or `error`
+
+2. **Rate Limiting:**
+   - Verify rate limits are appropriate for production traffic
+   - Monitor rate limit headers during initial deployment
+   - Adjust limits if necessary
+
+3. **Timeout Configuration:**
+   - Review default timeout (30 seconds) for production workloads
+   - Set longer timeouts for known slow operations
+   - Monitor timeout errors during deployment
+
+4. **Circuit Breaker:**
+   - Verify threshold (5 failures) is appropriate
+   - Monitor circuit breaker state during deployment
+   - Alert on circuit breaker trips
+
+5. **Webhook Configuration:**
+   - Verify webhook URLs are accessible from production
+   - Test webhook signature verification
+   - Monitor webhook delivery success rate
+   - Set up alerts for failed webhook deliveries
+
+6. **Logging:**
+   - Ensure structured logging is enabled
+   - Log request IDs for tracing
+   - Monitor error rates and log volumes
+   - Set up log aggregation and alerting
+
+7. **Security:**
+   - Verify CORS configuration
+   - Check security headers are applied
+   - Audit webhook secrets are properly stored
+   - Review rate limiting on sensitive endpoints
+
+8. **Monitoring:**
+   - Set up health check monitoring
+   - Monitor circuit breaker state
+   - Track rate limit usage
+   - Monitor webhook delivery rates
+   - Set up alerts for error thresholds
 
 ---
 
