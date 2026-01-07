@@ -586,29 +586,53 @@ This document tracks architectural refactoring tasks for Akademia Pro.
    - Tests boundary logic for grade determination
    - All tests passing
 
+3. **Created Rate Limiting Middleware Tests** - `worker/middleware/__tests__/rate-limit.test.ts`
+   - 24 comprehensive tests for rate limiting middleware
+   - Tests basic rate limiting behavior (allow/block)
+   - Tests rate limit headers (X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset)
+   - Tests custom key generators for different rate limiting strategies
+   - Tests skip options (successful/failed requests)
+   - Tests custom handlers for rate limit exceeded
+   - Tests onLimitReached callback
+   - Tests predefined limiters (default, strict, loose, auth)
+   - Tests store management and cleanup
+   - Tests window reset and expiration
+   - Tests path-based and IP-based limiting
+   - Tests edge cases (concurrent requests, negative remaining)
+   - All tests passing
+
+**Bug Fixes**:
+- Fixed `worker/middleware/rate-limit.ts` to properly pass `windowMs` and `maxRequests` through middleware chain
+- Updated `RateLimitMiddlewareOptions` interface to include optional `windowMs` and `maxRequests` properties
+- Updated `rateLimit()` function to use options for timeout and limit with proper defaults
+
 **Test Coverage Improvements**:
-- Before: 175 tests across 12 test files
-- After: 215 tests across 14 test files
-- Added: 40 new tests (+23% increase)
+- Before: 303 tests across 18 test files
+- After: 327 tests across 19 test files
+- Added: 24 new tests for critical infrastructure (+8% increase)
 - All tests passing consistently
 
 **Files Created**:
 - `src/utils/__tests__/validation.test.ts` - 21 tests
 - `src/constants/__tests__/grades.test.ts` - 19 tests
+- `worker/middleware/__tests__/rate-limit.test.ts` - 24 tests
 
 **Test Coverage**:
 - ✅ Validation utilities (score validation)
 - ✅ Grade threshold constants and boundary logic
 - ✅ Type-safe predicates and constants
+- ✅ Rate limiting middleware (all features)
 - ✅ Edge case handling (null, undefined, NaN, Infinity)
 
 **Benefits Achieved**:
 - ✅ Critical business logic now fully tested
-- ✅ Prevents regressions in validation functions
-- ✅ Improves confidence in grade calculations
-- ✅ Better understanding of boundary conditions
-- ✅ All 215 tests passing consistently
-- ✅ Zero regressions
+- ✅ Critical infrastructure (rate limiting) now fully tested
+- ✅ Prevents regressions in validation and rate limiting functions
+- ✅ Improves confidence in grade calculations and rate limiting
+- ✅ Better understanding of boundary conditions and edge cases
+- ✅ All 327 tests passing consistently
+- ✅ Zero regressions from new tests
+- ✅ Rate limiting bug fixed (config options not being passed correctly)
 
 ## [REFACTOR] Remove Duplicate Code in authService - Completed ✅
 - Location: src/services/authService.ts
