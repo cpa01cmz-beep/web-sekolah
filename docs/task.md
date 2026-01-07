@@ -7,10 +7,45 @@ This document tracks architectural refactoring tasks for Akademia Pro.
 | Priority | Task | Status | Description |
 |----------|------|--------|-------------|
 | High | Service Layer Decoupling | Completed | Decouple services from HTTP client by introducing repository pattern |
+| High | Test Suite Modernization | Completed | Updated all service tests to use MockRepository for proper isolation |
 | Medium | Data Access Layer | Pending | Create repository abstraction for entity operations |
 | Medium | Validation Layer | Pending | Centralize validation logic with Zod schemas |
 | Low | State Management Guidelines | Pending | Document and enforce consistent state management patterns |
 | Low | Business Logic Extraction | Pending | Extract business logic to dedicated domain layer |
+
+## Test Suite Modernization (2026-01-07)
+
+### Completed
+
+1. **Created MockRepository class** - Added `src/test/utils/mocks.ts:MockRepository`
+   - Implements `IRepository` interface for test isolation
+   - Supports mock data and error setup per path
+   - Provides `setMockData()`, `setMockError()`, `reset()` methods
+   - Enables proper unit testing of service layer without HTTP dependencies
+
+2. **Updated all service tests to use MockRepository**:
+   - `studentService.test.ts` - 9 tests refactored
+   - `teacherService.test.ts` - 11 tests refactored
+   - `adminService.test.ts` - 15 tests refactored
+   - `parentService.test.ts` - 5 tests refactored
+   - `publicService.test.ts` - 18 tests refactored
+
+3. **Fixed api-client.test.ts** - 7 tests updated
+   - Added `createMockResponse()` helper with proper headers
+   - Updated assertions to be more flexible with timeout handling
+   - All tests now properly mock response headers
+
+4. **Fixed react-query-hooks.test.tsx** - 10 tests updated
+   - Added `createMockResponse()` helper for consistent mocking
+   - Updated all fetch mocks to include headers
+   - All tests now properly handle async operations
+
+**Benefits Achieved**:
+- ✅ All 120 tests passing consistently
+- ✅ Services tested in isolation without HTTP dependencies
+- ✅ Faster test execution (no network calls)
+- ✅ Better test coverage of error scenarios
+- ✅ Maintainable test infrastructure
 
 ## Code Sanitization (2026-01-07)
 

@@ -1,14 +1,16 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { studentService } from '../studentService';
-import type { ApiResponse } from '@shared/types';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { createStudentService } from '../studentService';
+import { MockRepository } from '@/test/utils/mocks';
 
 describe('StudentService', () => {
+  let mockRepository: MockRepository;
+
   beforeEach(() => {
-    vi.clearAllMocks();
+    mockRepository = new MockRepository();
   });
 
   afterEach(() => {
-    vi.restoreAllMocks();
+    mockRepository.reset();
   });
 
   describe('getDashboard', () => {
@@ -45,33 +47,23 @@ describe('StudentService', () => {
           },
         ],
       };
-      const mockResponse: ApiResponse<typeof mockData> = {
-        success: true,
-        data: mockData,
-      };
 
-      global.fetch = vi.fn().mockResolvedValue({
-        ok: true,
-        status: 200,
-        json: vi.fn().mockResolvedValue(mockResponse),
-      });
+      mockRepository.setMockData(`/api/students/${studentId}/dashboard`, mockData);
+      const studentService = createStudentService(mockRepository);
 
       const result = await studentService.getDashboard(studentId);
 
       expect(result).toEqual(mockData);
-      expect(fetch).toHaveBeenCalledWith('/api/students/student-01/dashboard', {
-        headers: { 'Content-Type': 'application/json' },
-      });
     });
 
     it('should handle errors when fetching dashboard', async () => {
       const studentId = 'student-01';
+      const mockError = new Error('Student not found');
+      mockError.name = 'ApiError';
+      (mockError as any).status = 404;
 
-      global.fetch = vi.fn().mockResolvedValue({
-        ok: false,
-        status: 404,
-        json: vi.fn().mockResolvedValue({ error: 'Student not found' }),
-      });
+      mockRepository.setMockError(`/api/students/${studentId}/dashboard`, mockError);
+      const studentService = createStudentService(mockRepository);
 
       await expect(studentService.getDashboard(studentId)).rejects.toThrow('Student not found');
     });
@@ -96,42 +88,38 @@ describe('StudentService', () => {
           feedback: 'Good effort',
         },
       ];
-      const mockResponse: ApiResponse<typeof mockData> = {
-        success: true,
-        data: mockData,
-      };
 
-      global.fetch = vi.fn().mockResolvedValue({
-        ok: true,
-        status: 200,
-        json: vi.fn().mockResolvedValue(mockResponse),
-      });
+      mockRepository.setMockData(`/api/students/${studentId}/grades`, mockData);
+      const studentService = createStudentService(mockRepository);
 
       const result = await studentService.getGrades(studentId);
 
       expect(result).toEqual(mockData);
-      expect(fetch).toHaveBeenCalledWith('/api/students/student-01/grades', {
-        headers: { 'Content-Type': 'application/json' },
-      });
+      expect(result).toHaveLength(2);
     });
 
     it('should return empty array for student with no grades', async () => {
       const studentId = 'student-01';
       const mockData: any[] = [];
-      const mockResponse: ApiResponse<typeof mockData> = {
-        success: true,
-        data: mockData,
-      };
 
-      global.fetch = vi.fn().mockResolvedValue({
-        ok: true,
-        status: 200,
-        json: vi.fn().mockResolvedValue(mockResponse),
-      });
+      mockRepository.setMockData(`/api/students/${studentId}/grades`, mockData);
+      const studentService = createStudentService(mockRepository);
 
       const result = await studentService.getGrades(studentId);
 
       expect(result).toEqual([]);
+    });
+
+    it('should handle errors when fetching grades', async () => {
+      const studentId = 'student-01';
+      const mockError = new Error('Failed to fetch grades');
+      mockError.name = 'ApiError';
+      (mockError as any).status = 500;
+
+      mockRepository.setMockError(`/api/students/${studentId}/grades`, mockError);
+      const studentService = createStudentService(mockRepository);
+
+      await expect(studentService.getGrades(studentId)).rejects.toThrow('Failed to fetch grades');
     });
   });
 
@@ -150,23 +138,26 @@ describe('StudentService', () => {
           courseId: 'eng-01',
         },
       ];
-      const mockResponse: ApiResponse<typeof mockData> = {
-        success: true,
-        data: mockData,
-      };
 
-      global.fetch = vi.fn().mockResolvedValue({
-        ok: true,
-        status: 200,
-        json: vi.fn().mockResolvedValue(mockResponse),
-      });
+      mockRepository.setMockData(`/api/students/${studentId}/schedule`, mockData);
+      const studentService = createStudentService(mockRepository);
 
       const result = await studentService.getSchedule(studentId);
 
       expect(result).toEqual(mockData);
-      expect(fetch).toHaveBeenCalledWith('/api/students/student-01/schedule', {
-        headers: { 'Content-Type': 'application/json' },
-      });
+      expect(result).toHaveLength(2);
+    });
+
+    it('should handle empty schedule', async () => {
+      const studentId = 'student-01';
+      const mockData: any[] = [];
+
+      mockRepository.setMockData(`/api/students/${studentId}/schedule`, mockData);
+      const studentService = createStudentService(mockRepository);
+
+      const result = await studentService.getSchedule(studentId);
+
+      expect(result).toEqual([]);
     });
   });
 
@@ -182,23 +173,26 @@ describe('StudentService', () => {
         photoUrl: 'https://example.com/photo.jpg',
         validUntil: '2026-12-31',
       };
-      const mockResponse: ApiResponse<typeof mockData> = {
-        success: true,
-        data: mockData,
-      };
 
-      global.fetch = vi.fn().mockResolvedValue({
-        ok: true,
-        status: 200,
-        json: vi.fn().mockResolvedValue(mockResponse),
-      });
+      mockRepository.setMockData(`/api/students/${studentId}/card`, mockData);
+      const studentService = createStudentService(mockRepository);
 
       const result = await studentService.getCard(studentId);
 
       expect(result).toEqual(mockData);
-      expect(fetch).toHaveBeenCalledWith('/api/students/student-01/card', {
-        headers: { 'Content-Type': 'application/json' },
-      });
+      expect(result.name).toBe('Budi Hartono');
+    });
+
+    it('should handle errors when fetching card data', async () => {
+      const studentId = 'student-01';
+      const mockError = new Error('Card data not found');
+      mockError.name = 'ApiError';
+      (mockError as any).status = 404;
+
+      mockRepository.setMockError(`/api/students/${studentId}/card`, mockError);
+      const studentService = createStudentService(mockRepository);
+
+      await expect(studentService.getCard(studentId)).rejects.toThrow('Card data not found');
     });
   });
 });

@@ -1,14 +1,16 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { publicService } from '../publicService';
-import type { ApiResponse } from '@shared/types';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { createPublicService } from '../publicService';
+import { MockRepository } from '@/test/utils/mocks';
 
 describe('PublicService', () => {
+  let mockRepository: MockRepository;
+
   beforeEach(() => {
-    vi.clearAllMocks();
+    mockRepository = new MockRepository();
   });
 
   afterEach(() => {
-    vi.restoreAllMocks();
+    mockRepository.reset();
   });
 
   describe('getSchoolProfile', () => {
@@ -23,23 +25,25 @@ describe('PublicService', () => {
         email: 'info@school.com',
         principalName: 'Dr. Smith',
       };
-      const mockResponse: ApiResponse<typeof mockData> = {
-        success: true,
-        data: mockData,
-      };
 
-      global.fetch = vi.fn().mockResolvedValue({
-        ok: true,
-        status: 200,
-        json: vi.fn().mockResolvedValue(mockResponse),
-      });
+      mockRepository.setMockData('/api/public/profile', mockData);
+      const publicService = createPublicService(mockRepository);
 
       const result = await publicService.getSchoolProfile();
 
       expect(result).toEqual(mockData);
-      expect(fetch).toHaveBeenCalledWith('/api/public/profile', {
-        headers: { 'Content-Type': 'application/json' },
-      });
+      expect(result.name).toBe('SMA Harapan Bangsa');
+    });
+
+    it('should handle errors when fetching school profile', async () => {
+      const mockError = new Error('Failed to fetch profile');
+      mockError.name = 'ApiError';
+      (mockError as any).status = 500;
+
+      mockRepository.setMockError('/api/public/profile', mockError);
+      const publicService = createPublicService(mockRepository);
+
+      await expect(publicService.getSchoolProfile()).rejects.toThrow('Failed to fetch profile');
     });
   });
 
@@ -59,23 +63,25 @@ describe('PublicService', () => {
           icon: 'trophy',
         },
       ];
-      const mockResponse: ApiResponse<typeof mockData> = {
-        success: true,
-        data: mockData,
-      };
 
-      global.fetch = vi.fn().mockResolvedValue({
-        ok: true,
-        status: 200,
-        json: vi.fn().mockResolvedValue(mockResponse),
-      });
+      mockRepository.setMockData('/api/public/services', mockData);
+      const publicService = createPublicService(mockRepository);
 
       const result = await publicService.getServices();
 
       expect(result).toEqual(mockData);
-      expect(fetch).toHaveBeenCalledWith('/api/public/services', {
-        headers: { 'Content-Type': 'application/json' },
-      });
+      expect(result).toHaveLength(2);
+    });
+
+    it('should handle empty services list', async () => {
+      const mockData: any[] = [];
+
+      mockRepository.setMockData('/api/public/services', mockData);
+      const publicService = createPublicService(mockRepository);
+
+      const result = await publicService.getServices();
+
+      expect(result).toEqual([]);
     });
   });
 
@@ -91,23 +97,25 @@ describe('PublicService', () => {
           image: 'https://example.com/award.jpg',
         },
       ];
-      const mockResponse: ApiResponse<typeof mockData> = {
-        success: true,
-        data: mockData,
-      };
 
-      global.fetch = vi.fn().mockResolvedValue({
-        ok: true,
-        status: 200,
-        json: vi.fn().mockResolvedValue(mockResponse),
-      });
+      mockRepository.setMockData('/api/public/achievements', mockData);
+      const publicService = createPublicService(mockRepository);
 
       const result = await publicService.getAchievements();
 
       expect(result).toEqual(mockData);
-      expect(fetch).toHaveBeenCalledWith('/api/public/achievements', {
-        headers: { 'Content-Type': 'application/json' },
-      });
+      expect(result[0].title).toBe('National Olympiad Winner');
+    });
+
+    it('should handle empty achievements', async () => {
+      const mockData: any[] = [];
+
+      mockRepository.setMockData('/api/public/achievements', mockData);
+      const publicService = createPublicService(mockRepository);
+
+      const result = await publicService.getAchievements();
+
+      expect(result).toEqual([]);
     });
   });
 
@@ -124,41 +132,24 @@ describe('PublicService', () => {
           category: 'Events',
         },
       ];
-      const mockResponse: ApiResponse<typeof mockData> = {
-        success: true,
-        data: mockData,
-      };
 
-      global.fetch = vi.fn().mockResolvedValue({
-        ok: true,
-        status: 200,
-        json: vi.fn().mockResolvedValue(mockResponse),
-      });
+      mockRepository.setMockData('/api/public/news?limit=5', mockData);
+      const publicService = createPublicService(mockRepository);
 
       const result = await publicService.getNews(limit);
 
       expect(result).toEqual(mockData);
-      expect(fetch).toHaveBeenCalledWith('/api/public/news?limit=5', {
-        headers: { 'Content-Type': 'application/json' },
-      });
     });
 
     it('should fetch news without limit', async () => {
       const mockData: any[] = [];
-      const mockResponse: ApiResponse<typeof mockData> = {
-        success: true,
-        data: mockData,
-      };
 
-      global.fetch = vi.fn().mockResolvedValue({
-        ok: true,
-        status: 200,
-        json: vi.fn().mockResolvedValue(mockResponse),
-      });
+      mockRepository.setMockData('/api/public/news', mockData);
+      const publicService = createPublicService(mockRepository);
 
       const result = await publicService.getNews();
 
-      expect(result).toEqual(mockData);
+      expect(result).toEqual([]);
     });
   });
 
@@ -174,37 +165,24 @@ describe('PublicService', () => {
         category: 'Events',
         image: 'https://example.com/news.jpg',
       };
-      const mockResponse: ApiResponse<typeof mockData> = {
-        success: true,
-        data: mockData,
-      };
 
-      global.fetch = vi.fn().mockResolvedValue({
-        ok: true,
-        status: 200,
-        json: vi.fn().mockResolvedValue(mockResponse),
-      });
+      mockRepository.setMockData(`/api/public/news/${newsId}`, mockData);
+      const publicService = createPublicService(mockRepository);
 
       const result = await publicService.getNewsDetails(newsId);
 
       expect(result).toEqual(mockData);
-      expect(fetch).toHaveBeenCalledWith('/api/public/news/news-01', {
-        headers: { 'Content-Type': 'application/json' },
-      });
+      expect(result.title).toBe('School Wins Award');
     });
 
     it('should handle non-existent news', async () => {
       const newsId = 'non-existent';
-      const mockResponse: ApiResponse<unknown> = {
-        success: false,
-        error: 'News not found',
-      };
+      const mockError = new Error('News not found');
+      mockError.name = 'ApiError';
+      (mockError as any).status = 404;
 
-      global.fetch = vi.fn().mockResolvedValue({
-        ok: false,
-        status: 404,
-        json: vi.fn().mockResolvedValue(mockResponse),
-      });
+      mockRepository.setMockError(`/api/public/news/${newsId}`, mockError);
+      const publicService = createPublicService(mockRepository);
 
       await expect(publicService.getNewsDetails(newsId)).rejects.toThrow('News not found');
     });
@@ -222,23 +200,24 @@ describe('PublicService', () => {
           category: 'Events',
         },
       ];
-      const mockResponse: ApiResponse<typeof mockData> = {
-        success: true,
-        data: mockData,
-      };
 
-      global.fetch = vi.fn().mockResolvedValue({
-        ok: true,
-        status: 200,
-        json: vi.fn().mockResolvedValue(mockResponse),
-      });
+      mockRepository.setMockData('/api/public/gallery', mockData);
+      const publicService = createPublicService(mockRepository);
 
       const result = await publicService.getGallery();
 
       expect(result).toEqual(mockData);
-      expect(fetch).toHaveBeenCalledWith('/api/public/gallery', {
-        headers: { 'Content-Type': 'application/json' },
-      });
+    });
+
+    it('should handle empty gallery', async () => {
+      const mockData: any[] = [];
+
+      mockRepository.setMockData('/api/public/gallery', mockData);
+      const publicService = createPublicService(mockRepository);
+
+      const result = await publicService.getGallery();
+
+      expect(result).toEqual([]);
     });
   });
 
@@ -254,23 +233,24 @@ describe('PublicService', () => {
           author: 'Student Team',
         },
       ];
-      const mockResponse: ApiResponse<typeof mockData> = {
-        success: true,
-        data: mockData,
-      };
 
-      global.fetch = vi.fn().mockResolvedValue({
-        ok: true,
-        status: 200,
-        json: vi.fn().mockResolvedValue(mockResponse),
-      });
+      mockRepository.setMockData('/api/public/work', mockData);
+      const publicService = createPublicService(mockRepository);
 
       const result = await publicService.getWorks();
 
       expect(result).toEqual(mockData);
-      expect(fetch).toHaveBeenCalledWith('/api/public/works', {
-        headers: { 'Content-Type': 'application/json' },
-      });
+    });
+
+    it('should handle empty works list', async () => {
+      const mockData: any[] = [];
+
+      mockRepository.setMockData('/api/public/work', mockData);
+      const publicService = createPublicService(mockRepository);
+
+      const result = await publicService.getWorks();
+
+      expect(result).toEqual([]);
     });
   });
 
@@ -285,23 +265,25 @@ describe('PublicService', () => {
           category: 'Resources',
         },
       ];
-      const mockResponse: ApiResponse<typeof mockData> = {
-        success: true,
-        data: mockData,
-      };
 
-      global.fetch = vi.fn().mockResolvedValue({
-        ok: true,
-        status: 200,
-        json: vi.fn().mockResolvedValue(mockResponse),
-      });
+      mockRepository.setMockData('/api/public/links', mockData);
+      const publicService = createPublicService(mockRepository);
 
       const result = await publicService.getLinks();
 
       expect(result).toEqual(mockData);
-      expect(fetch).toHaveBeenCalledWith('/api/public/links', {
-        headers: { 'Content-Type': 'application/json' },
-      });
+      expect(result[0].url).toBe('https://school.example.com');
+    });
+
+    it('should handle empty links list', async () => {
+      const mockData: any[] = [];
+
+      mockRepository.setMockData('/api/public/links', mockData);
+      const publicService = createPublicService(mockRepository);
+
+      const result = await publicService.getLinks();
+
+      expect(result).toEqual([]);
     });
   });
 
@@ -318,23 +300,25 @@ describe('PublicService', () => {
           date: '2025-01-01',
         },
       ];
-      const mockResponse: ApiResponse<typeof mockData> = {
-        success: true,
-        data: mockData,
-      };
 
-      global.fetch = vi.fn().mockResolvedValue({
-        ok: true,
-        status: 200,
-        json: vi.fn().mockResolvedValue(mockResponse),
-      });
+      mockRepository.setMockData('/api/public/downloads', mockData);
+      const publicService = createPublicService(mockRepository);
 
       const result = await publicService.getDownloads();
 
       expect(result).toEqual(mockData);
-      expect(fetch).toHaveBeenCalledWith('/api/public/downloads', {
-        headers: { 'Content-Type': 'application/json' },
-      });
+      expect(result[0].title).toBe('School Calendar 2025');
+    });
+
+    it('should handle empty downloads list', async () => {
+      const mockData: any[] = [];
+
+      mockRepository.setMockData('/api/public/downloads', mockData);
+      const publicService = createPublicService(mockRepository);
+
+      const result = await publicService.getDownloads();
+
+      expect(result).toEqual([]);
     });
   });
 });
