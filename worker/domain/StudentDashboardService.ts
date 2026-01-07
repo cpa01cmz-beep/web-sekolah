@@ -63,6 +63,8 @@ export class StudentDashboardService {
   }
 
   private static async getAnnouncements(env: Env, limit: number): Promise<(Announcement & { authorName: string })[]> {
+    // NOTE: Loading all announcements and sorting in-memory (O(n log n))
+    // Future optimization: Add secondary index on date field for O(1) lookup of recent announcements
     const allAnnouncements = (await AnnouncementEntity.list(env)).items.sort(
       (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
     );
