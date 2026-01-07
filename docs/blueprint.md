@@ -94,18 +94,17 @@ Future versions will be prefixed: `/api/v2/...`
 
 ## Authentication
 
-Currently using role-based access control via user entities.
+JWT authentication is fully implemented and integrated into all protected API routes.
 
-Planned JWT authentication is available in middleware (`worker/middleware/auth.ts`) but not yet integrated into routes.
-
-### JWT Authentication Flow (Planned)
+### JWT Authentication Flow
 
 ```typescript
 // Login request
 POST /api/auth/login
 {
   "email": "user@example.com",
-  "password": "securepassword"
+  "password": "securepassword",
+  "role": "student"
 }
 
 // Response
@@ -121,6 +120,22 @@ POST /api/auth/login
 // Subsequent requests include header
 Authorization: Bearer eyJhbGciOiJIUzI1NiIs...
 ```
+
+**Protected Routes**
+
+All protected routes require authentication via the `authenticate()` middleware and enforce role-based authorization using the `authorize()` middleware:
+
+- Student portal: `/api/students/*` (requires `student` role)
+- Teacher portal: `/api/teachers/*` and `/api/grades/*` (requires `teacher` role)
+- Admin portal: `/api/users/*` and `/api/admin/*` (requires `admin` role)
+
+**Implementation Details**
+
+- JWT token generation and verification: `worker/middleware/auth.ts`
+- Login endpoint: `POST /api/auth/login` - `worker/auth-routes.ts`
+- Token verification: `GET /api/auth/verify` - `worker/auth-routes.ts`
+- Token expiration: 24 hours (configurable)
+- Role-based authorization: All protected routes use `authorize(role)` middleware
 
 ## Request/Response Format
 
@@ -686,6 +701,30 @@ Default fallback: `http://localhost:3000,http://localhost:4173`
 
 ## Integration Patterns
 
+### Error Response Standardization
+
+All API endpoints use standardized error response helpers from `worker/core-utils.ts`:
+
+```typescript
+// Available error response helpers
+ok(c, data)              // 200 - Success
+bad(c, message, code)     // 400 - Bad request / validation error
+unauthorized(c, message)  // 401 - Authentication required
+forbidden(c, message)    // 403 - Authorization failed
+notFound(c, message)      // 404 - Resource not found
+conflict(c, message)     // 409 - Resource conflict
+rateLimitExceeded(c)     // 429 - Rate limit exceeded
+serverError(c, message)   // 500 - Internal server error
+serviceUnavailable(c)     // 503 - Service unavailable
+gatewayTimeout(c, message)// 504 - Gateway timeout
+```
+
+All error responses include:
+- `success: false`
+- `error`: Human-readable error message
+- `code`: Standardized error code (from `ErrorCode` enum)
+- `requestId`: UUID for request tracing
+
 ### Using apiClient (Frontend)
 
 ```typescript
@@ -883,6 +922,7 @@ All requests include `X-Request-ID` header for tracing:
 7. **Use service layer** - Abstract API calls behind services for testability
 8. **Validate inputs** - Use Zod schemas for request/response validation
 9. **Use centralized logger** - Import from `@/lib/logger` (frontend) or `../logger` (worker) for consistent logging
+10. **Use standardized error helpers** - Always use proper helper functions (unauthorized, forbidden, etc.) instead of manual JSON responses
 
 ---
 
@@ -890,19 +930,18 @@ All requests include `X-Request-ID` header for tracing:
 
 ### Planned Features
 
-1. **JWT Authentication** - Token-based auth middleware ready for integration
-2. **API Versioning** - Introduce `/api/v2/` for breaking changes
-3. **Pagination** - Add cursor-based pagination to list endpoints
-4. **Webhooks** - Event notifications for grade updates, announcements
-5. **Search** - Full-text search across users, classes, grades
-6. **Export** - CSV/PDF export for grades and schedules
-7. **Audit Log** - Track all CRUD operations for compliance
+1. **API Versioning** - Introduce `/api/v2/` for breaking changes
+2. **Pagination** - Add cursor-based pagination to list endpoints
+3. **Webhooks** - Event notifications for grade updates, announcements
+4. **Search** - Full-text search across users, classes, grades
+5. **Export** - CSV/PDF export for grades and schedules
+6. **Audit Log** - Track all CRUD operations for compliance (middleware exists but not yet integrated)
 
 ### Monitoring
 
 1. **Metrics** - Add Prometheus metrics for request latency, error rates
 2. **Tracing** - OpenTelemetry integration for distributed tracing
-3. **Logging** - Structured logging with correlation IDs
+3. **Logging** - ✅ Structured logging with correlation IDs (implemented using pino and X-Request-ID header)
 4. **Alerting** - Alert on circuit breaker trips, high error rates
 
 ---
