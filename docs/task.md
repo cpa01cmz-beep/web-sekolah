@@ -158,6 +158,34 @@ This document tracks architectural refactoring tasks for Akademia Pro.
 - Priority: Low
 - Effort: Medium
 
+## [REFACTOR] Extract Magic Numbers to Constants - Grade Thresholds
+- Location: src/pages/portal/student/StudentGradesPage.tsx (lines 11-22)
+- Issue: Grade thresholds (90, 80, 70) are hardcoded, making it difficult to maintain or change grading scales
+- Suggestion: Extract constants like GRADE_A_THRESHOLD, GRADE_B_THRESHOLD, GRADE_C_THRESHOLD to a shared constants file
+- Priority: Medium
+- Effort: Small
+
+## [REFACTOR] Create Entity Relationship Loader Utility
+- Location: worker/user-routes.ts (lines 29-68)
+- Issue: Repeated pattern of fetching entities, building maps, and transforming data across multiple endpoints
+- Suggestion: Create a utility function `loadRelatedEntities()` that handles common patterns of fetching related data and creating lookup maps
+- Priority: Medium
+- Effort: Medium
+
+## [REFACTOR] Consolidate Score Validation Logic
+- Location: src/pages/portal/teacher/TeacherGradeManagementPage.tsx (lines 61, 76)
+- Issue: Score validation logic (check if 0-100) is duplicated in two places and hardcoded
+- Suggestion: Extract to a shared validation utility `isValidScore(score)` with configurable min/max values
+- Priority: Medium
+- Effort: Small
+
+## [REFACTOR] Extract Error Response Builder in Worker
+- Location: worker/core-utils.ts and worker/user-routes.ts
+- Issue: Multiple places construct similar error response objects manually
+- Suggestion: Create helper functions `errorResponse(message, code, status)` to standardize error responses across worker
+- Priority: Low
+- Effort: Small
+
 ## [REFACTOR] Centralize Console Logging Strategy - Completed ✅
 - Location: Multiple files (57 occurrences across src/ and worker/)
 - Issue: Inconsistent use of console.log/error/warn; no centralized logging
