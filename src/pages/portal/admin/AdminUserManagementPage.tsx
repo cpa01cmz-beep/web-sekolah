@@ -24,6 +24,9 @@ const roleConfig: Record<UserRole, { color: string; icon: React.ReactNode; label
 export function AdminUserManagementPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<SchoolUser | null>(null);
+  const [userName, setUserName] = useState('');
+  const [userEmail, setUserEmail] = useState('');
+  const [userRole, setUserRole] = useState<UserRole>('student');
   const { data: users, isLoading, error } = useQuery<SchoolUser[]>(['users']);
   const createUserMutation = useMutation<SchoolUser, Error, Omit<SchoolUser, 'id'>>(['users'], {
     method: 'POST',
@@ -54,12 +57,11 @@ export function AdminUserManagementPage() {
   });
   const handleSaveUser = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const formData = new FormData(e.currentTarget);
     const userData = {
-      name: formData.get('name') as string,
-      email: formData.get('email') as string,
-      role: formData.get('role') as UserRole,
-      avatarUrl: getAvatarUrl(formData.get('email') as string),
+      name: userName,
+      email: userEmail,
+      role: userRole,
+      avatarUrl: getAvatarUrl(userEmail),
     };
     if (editingUser) {
       updateUserMutation.mutate({ id: editingUser.id, ...userData });
@@ -82,9 +84,22 @@ export function AdminUserManagementPage() {
           <h1 className="text-3xl font-bold">User Management</h1>
           <p className="text-muted-foreground">Manage all user accounts in the system.</p>
         </div>
-        <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+        <Dialog open={isModalOpen} onOpenChange={(open) => {
+          setIsModalOpen(open);
+          if (!open) {
+            setEditingUser(null);
+            setUserName('');
+            setUserEmail('');
+            setUserRole('student');
+          }
+        }}>
           <DialogTrigger asChild>
-            <Button onClick={() => setEditingUser(null)}>
+            <Button onClick={() => {
+              setEditingUser(null);
+              setUserName('');
+              setUserEmail('');
+              setUserRole('student');
+            }}>
               <PlusCircle className="mr-2 h-4 w-4" /> Add User
             </Button>
           </DialogTrigger>
@@ -102,7 +117,7 @@ export function AdminUserManagementPage() {
                     Name <span className="text-destructive" aria-label="required">*</span>
                   </Label>
                   <div className="col-span-3 space-y-2">
-                    <Input id="name" name="name" defaultValue={editingUser?.name} required aria-required="true" />
+                    <Input id="name" name="name" value={userName} onChange={(e) => setUserName(e.target.value)} required aria-required="true" />
                     <p className="text-xs text-muted-foreground">Full name of the user</p>
                   </div>
                 </div>
@@ -111,7 +126,7 @@ export function AdminUserManagementPage() {
                     Email <span className="text-destructive" aria-label="required">*</span>
                   </Label>
                   <div className="col-span-3 space-y-2">
-                    <Input id="email" name="email" type="email" defaultValue={editingUser?.email} required aria-required="true" placeholder="user@example.com" />
+                    <Input id="email" name="email" type="email" value={userEmail} onChange={(e) => setUserEmail(e.target.value)} required aria-required="true" placeholder="user@example.com" />
                     <p className="text-xs text-muted-foreground">Valid email address for account access</p>
                   </div>
                 </div>
@@ -120,7 +135,7 @@ export function AdminUserManagementPage() {
                     Role <span className="text-destructive" aria-label="required">*</span>
                   </Label>
                   <div className="col-span-3 space-y-2">
-                    <Select name="role" defaultValue={editingUser?.role} required aria-required="true">
+                    <Select name="role" value={userRole} onValueChange={(value: UserRole) => setUserRole(value)} required aria-required="true">
                       <SelectTrigger className="col-span-3"><SelectValue placeholder="Select a role" /></SelectTrigger>
                       <SelectContent>
                         <SelectItem value="student">Student</SelectItem>
@@ -178,7 +193,7 @@ export function AdminUserManagementPage() {
                         </Badge>
                       </TableCell>
                       <TableCell className="text-right space-x-2">
-                        <Button variant="outline" size="icon" onClick={() => { setEditingUser(user); setIsModalOpen(true); }} aria-label={`Edit user ${user.name}`}>
+                        <Button variant="outline" size="icon" onClick={() => { setEditingUser(user); setUserName(user.name); setUserEmail(user.email); setUserRole(user.role); setIsModalOpen(true); }} aria-label={`Edit user ${user.name}`}>
                           <Edit className="h-4 w-4" />
                         </Button>
                         <Button variant="destructive" size="icon" onClick={() => handleDeleteUser(user.id)} aria-label={`Delete user ${user.name}`}>

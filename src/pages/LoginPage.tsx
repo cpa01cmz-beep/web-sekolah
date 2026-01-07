@@ -70,7 +70,7 @@ export function LoginPage() {
                 required
                 disabled={!!isLoading}
                 aria-required="true"
-                aria-invalid={email !== '' && !email.includes('@')}
+                aria-invalid={email !== '' && !/^\S+@\S+\.\S+$/.test(email)}
               />
               <p className="text-xs text-muted-foreground">Enter your registered email address</p>
             </div>

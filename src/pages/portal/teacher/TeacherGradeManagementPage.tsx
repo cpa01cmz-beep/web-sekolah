@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -69,6 +69,12 @@ export function TeacherGradeManagementPage() {
     setCurrentScore(student.score?.toString() || '');
     setCurrentFeedback(student.feedback || '');
   };
+
+  const isScoreInvalid = useMemo(() => {
+    if (currentScore === '') return false;
+    const score = parseInt(currentScore, 10);
+    return isNaN(score) || score < 0 || score > 100;
+  }, [currentScore]);
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -157,10 +163,10 @@ export function TeacherGradeManagementPage() {
                                         min="0"
                                         max="100"
                                         step="1"
-                                        aria-invalid={currentScore !== '' && (isNaN(parseInt(currentScore, 10)) || parseInt(currentScore, 10) < 0 || parseInt(currentScore, 10) > 100)}
+                                        aria-invalid={isScoreInvalid}
                                       />
                                       <p className="text-xs text-muted-foreground">Enter a score between 0 and 100. Leave empty for no score.</p>
-                                      {currentScore !== '' && (isNaN(parseInt(currentScore, 10)) || parseInt(currentScore, 10) < 0 || parseInt(currentScore, 10) > 100) && (
+                                      {isScoreInvalid && (
                                         <p className="text-xs text-destructive" role="alert">
                                           Please enter a valid score between 0 and 100
                                         </p>
