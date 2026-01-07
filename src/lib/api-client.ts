@@ -151,12 +151,16 @@ async function fetchWithRetry<T>(
 
 /**
  * Centralized QueryClient instance with default configuration
- * Configures stale time and retry behavior for all queries
+ * Configures stale time, gc time, and retry behavior for all queries
  */
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 1000 * 60 * 5, // 5 minutes
+      staleTime: 1000 * 60 * 5, // 5 minutes - consider data fresh for 5 min
+      gcTime: 1000 * 60 * 60 * 24, // 24 hours - keep cached data for 24 hours
+      refetchOnWindowFocus: false, // Don't refetch when window regains focus
+      refetchOnMount: false, // Don't refetch on mount if data is fresh
+      refetchOnReconnect: true, // Refetch on network reconnection
       retry: (failureCount, error: ApiError) => {
         if (!error.retryable) return false;
         if (error.status === 404) return false;
