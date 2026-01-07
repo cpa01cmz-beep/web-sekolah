@@ -1,6 +1,6 @@
-import { useQuery as useTanstackQuery, UseQueryOptions } from '@tanstack/react-query';
+import { useQuery as useTanstackQuery, useMutation as useTanstackMutation, UseQueryOptions, UseMutationOptions } from '@tanstack/react-query';
 import { studentService } from '@/services/studentService';
-import type { StudentDashboardData, Grade, ScheduleItem, StudentCardData } from '@shared/types';
+import type { StudentDashboardData, Grade, ScheduleItem, StudentCardData, SubmitGradeData, CreateAnnouncementData } from '@shared/types';
 
 export function useStudentDashboard(studentId: string, options?: UseQueryOptions<StudentDashboardData>) {
   return useTanstackQuery({
