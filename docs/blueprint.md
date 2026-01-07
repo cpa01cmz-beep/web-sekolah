@@ -94,18 +94,17 @@ Future versions will be prefixed: `/api/v2/...`
 
 ## Authentication
 
-Currently using role-based access control via user entities.
+JWT authentication is fully implemented and integrated into all protected API routes.
 
-Planned JWT authentication is available in middleware (`worker/middleware/auth.ts`) but not yet integrated into routes.
-
-### JWT Authentication Flow (Planned)
+### JWT Authentication Flow
 
 ```typescript
 // Login request
 POST /api/auth/login
 {
   "email": "user@example.com",
-  "password": "securepassword"
+  "password": "securepassword",
+  "role": "student"
 }
 
 // Response
@@ -121,6 +120,22 @@ POST /api/auth/login
 // Subsequent requests include header
 Authorization: Bearer eyJhbGciOiJIUzI1NiIs...
 ```
+
+**Protected Routes**
+
+All protected routes require authentication via the `authenticate()` middleware and enforce role-based authorization using the `authorize()` middleware:
+
+- Student portal: `/api/students/*` (requires `student` role)
+- Teacher portal: `/api/teachers/*` and `/api/grades/*` (requires `teacher` role)
+- Admin portal: `/api/users/*` and `/api/admin/*` (requires `admin` role)
+
+**Implementation Details**
+
+- JWT token generation and verification: `worker/middleware/auth.ts`
+- Login endpoint: `POST /api/auth/login` - `worker/auth-routes.ts`
+- Token verification: `GET /api/auth/verify` - `worker/auth-routes.ts`
+- Token expiration: 24 hours (configurable)
+- Role-based authorization: All protected routes use `authorize(role)` middleware
 
 ## Request/Response Format
 
@@ -915,19 +930,18 @@ All requests include `X-Request-ID` header for tracing:
 
 ### Planned Features
 
-1. **JWT Authentication** - Token-based auth middleware ready for integration
-2. **API Versioning** - Introduce `/api/v2/` for breaking changes
-3. **Pagination** - Add cursor-based pagination to list endpoints
-4. **Webhooks** - Event notifications for grade updates, announcements
-5. **Search** - Full-text search across users, classes, grades
-6. **Export** - CSV/PDF export for grades and schedules
-7. **Audit Log** - Track all CRUD operations for compliance
+1. **API Versioning** - Introduce `/api/v2/` for breaking changes
+2. **Pagination** - Add cursor-based pagination to list endpoints
+3. **Webhooks** - Event notifications for grade updates, announcements
+4. **Search** - Full-text search across users, classes, grades
+5. **Export** - CSV/PDF export for grades and schedules
+6. **Audit Log** - Track all CRUD operations for compliance (middleware exists but not yet integrated)
 
 ### Monitoring
 
 1. **Metrics** - Add Prometheus metrics for request latency, error rates
 2. **Tracing** - OpenTelemetry integration for distributed tracing
-3. **Logging** - Structured logging with correlation IDs
+3. **Logging** - ✅ Structured logging with correlation IDs (implemented using pino and X-Request-ID header)
 4. **Alerting** - Alert on circuit breaker trips, high error rates
 
 ---
