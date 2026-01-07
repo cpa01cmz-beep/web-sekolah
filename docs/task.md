@@ -331,7 +331,7 @@ This document tracks architectural refactoring tasks for Akademia Pro.
 | High | Webhook Reliability | Completed | Implemented webhook system with queue, retry logic with exponential backoff, signature verification, and management APIs (2026-01-07) |
 | High | Integration Hardening | Completed | Verified all resilience patterns implemented (circuit breaker, retry, timeout, rate limiting). Added comprehensive integration monitoring and troubleshooting documentation (2026-01-07) |
 | High | Integration Documentation | Completed | Documented complete integration architecture with resilience stack diagrams, request flow, failure cascade prevention, webhook delivery flow, and production deployment checklist (2026-01-07) |
-| Low | State Management Guidelines | Pending | Document and enforce consistent state management patterns |
+| Low | State Management Guidelines | Completed | Documented comprehensive state management patterns with guidelines, examples, and best practices (2026-01-07) |
 | Low | Business Logic Extraction | Pending | Extract business logic to dedicated domain layer |
 
 ## Integration Hardening (2026-01-07)
@@ -834,6 +834,134 @@ This document tracks architectural refactoring tasks for Akademia Pro.
 - ✅ Better understanding of system behavior
 - ✅ Faster feedback loop for infrastructure changes
 - ✅ All 175 tests passing consistently
+
+## State Management Guidelines (2026-01-07)
+
+**Task**: Document and enforce consistent state management patterns
+
+**Status**: Completed
+
+**Implementation (2026-01-07)**:
+
+1. **Created Comprehensive State Management Documentation** - `docs/STATE_MANAGEMENT.md`
+    - Established three-layer state architecture (UI, Global, Server)
+    - Documented each layer's purpose, use cases, and anti-patterns
+    - Created decision tree for choosing the right state management approach
+    - Provided detailed guidelines for Zustand, React Query, and local state
+    - Included performance optimization strategies
+    - Added testing patterns for all three state layers
+    - Created migration guide for converting between patterns
+    - Provided checklist for new features
+
+2. **Created Practical Examples** - `docs/STATE_MANAGEMENT_EXAMPLES.md`
+    - Real-world examples of student grade management (all three layers)
+    - Complete theme management example (Zustand store)
+    - Student dashboard example (React Query with proper caching)
+    - Mutation examples with cache invalidation and optimistic updates
+    - Anti-patterns section showing common mistakes and solutions
+    - Complex component example demonstrating all state layers working together
+    - Testing examples for all three state types
+
+**Documentation Structure**:
+
+`STATE_MANAGEMENT.md` covers:
+- Three-Layer State Architecture (UI → Global → Server)
+- Layer 1: UI/Component State (useState, useReducer, useRef)
+- Layer 2: Global Application State (Zustand stores)
+- Layer 3: Server State (React Query)
+- Decision tree for choosing the right approach
+- Anti-patterns to avoid (5 common mistakes)
+- Performance optimization strategies
+- Testing state management (local, Zustand, React Query)
+- Monitoring and debugging (React Query DevTools, Zustand DevTools)
+- Migration guide (converting patterns)
+- Checklist for new features
+
+`STATE_MANAGEMENT_EXAMPLES.md` provides:
+- Example 1: Student Grade Management (all three layers)
+- Example 2: Theme Management (Zustand with persistence)
+- Example 3: Student Dashboard (React Query with caching)
+- Example 4: Mutation with Cache Invalidation (optimistic updates)
+- Example 5: Anti-Patterns (what NOT to do)
+- Example 6: Complex Component (all state layers together)
+- Example 7: Testing State Management (unit tests)
+
+**Current State Management Patterns Documented**:
+
+| State Type | Library | Current Usage |
+|------------|----------|---------------|
+| UI/Component State | React hooks | Form inputs, UI toggles, modals |
+| Global App State | Zustand | Auth store (`useAuthStore`), Theme store (`useTheme`) |
+| Server State | React Query | Student data, grades, schedule, classes, courses |
+| Derived State | useMemo | Calculated averages, filtered lists |
+
+**State Management Guidelines Summary**:
+
+1. **UI/Component State** (Local):
+   - Use `useState`/`useReducer` for form inputs, UI toggles, local flags
+   - DO NOT use for global state or API data
+
+2. **Global Application State** (Zustand):
+   - Use for auth, theme, user preferences, cross-component shared state
+   - Use selectors to prevent unnecessary re-renders
+   - DO NOT use for server data or business logic
+
+3. **Server State** (React Query):
+   - Use for all API data with caching, synchronization
+   - Set appropriate `staleTime` and `gcTime` per data type
+   - Handle loading, error, success, and empty states properly
+   - Invalidate cache on mutations with targeted queries
+
+4. **Derived State** (useMemo):
+   - Use for calculations from other state
+   - Prevents expensive recalculations on every render
+
+**Key Guidelines**:
+
+✅ **DO**:
+- Use descriptive query keys for React Query
+- Use selectors for Zustand stores (optimal re-renders)
+- Set appropriate cache times (dynamic: 1-5 min, semi-static: 15-30 min, static: 1-24h)
+- Invalidate cache on mutations with targeted queries
+- Handle all states (loading, error, success, empty)
+- Test state management code
+
+❌ **DO NOT**:
+- Store API data in Zustand (use React Query)
+- Use local state for global settings (use Zustand)
+- Duplicate state across multiple sources
+- Ignore loading/error states
+- Select entire Zustand store (causes re-renders)
+- Cache sensitive data in browser storage
+
+**Benefits Achieved**:
+- ✅ Clear separation of concerns across three state layers
+- ✅ Decision tree for choosing right approach for any scenario
+- ✅ Anti-patterns documented with solutions
+- ✅ Performance optimization strategies for each layer
+- ✅ Testing patterns for all state types
+- ✅ Migration guide for converting between patterns
+- ✅ Checklist for new features to ensure consistency
+- ✅ Real-world examples demonstrating all guidelines
+- ✅ Zero code changes required (documentation only)
+- ✅ Developers now have clear guidance for state management
+
+**Technical Details**:
+- Documentation builds on existing state management implementation
+- No breaking changes to existing code
+- Guidelines reflect current best practices in React ecosystem
+- Examples use actual application code (authStore, useStudent, etc.)
+- Covers both frontend (src/) and shared (shared/) patterns
+
+**Success Criteria**:
+- [x] State management patterns documented clearly
+- [x] Guidelines provided for choosing between patterns
+- [x] Best practices and anti-patterns documented
+- [x] Real-world examples provided
+- [x] Testing strategies documented
+- [x] Performance optimization covered
+- [x] Migration guide included
+- [x] Zero code changes (documentation only)
 
 ## Documentation Fixes (2026-01-07)
 

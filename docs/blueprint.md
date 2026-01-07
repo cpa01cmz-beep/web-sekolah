@@ -1857,6 +1857,8 @@ expect(response.status).toBe('healthy');
 - **GitHub Issues**: Report bugs and feature requests
 - **Wiki**: Additional documentation and guides
 - **Code**: Open source at https://github.com/cpa01cmz-beep/web-sekolah
+- **State Management Guidelines**: Comprehensive guide to frontend state patterns ([docs/STATE_MANAGEMENT.md](./STATE_MANAGEMENT.md))
+- **State Management Examples**: Real-world examples and best practices ([docs/STATE_MANAGEMENT_EXAMPLES.md](./STATE_MANAGEMENT_EXAMPLES.md))
 
 ---
 
