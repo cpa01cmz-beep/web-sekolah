@@ -98,8 +98,6 @@ export function StudentCardPage() {
     );
   }
 
-  const studentData = cardData;
-
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -129,7 +127,7 @@ export function StudentCardPage() {
         </header>
         <main className="flex items-center gap-6 z-10">
           <Avatar className="h-32 w-32 border-4 border-white/50">
-            <AvatarImage src={studentData.photoUrl || user.avatarUrl} alt={user.name} />
+            <AvatarImage src={cardData.photoUrl || user.avatarUrl} alt={user.name} />
             <AvatarFallback className="text-4xl bg-white/20">{user.name.charAt(0)}</AvatarFallback>
           </Avatar>
           <div className="space-y-2">
@@ -139,11 +137,11 @@ export function StudentCardPage() {
             </div>
             <div>
               <p className="text-sm opacity-80">Nomor Induk Siswa</p>
-              <p className="font-semibold text-lg">{studentData.studentIdNumber}</p>
+              <p className="font-semibold text-lg">{cardData.studentIdNumber}</p>
             </div>
              <div>
               <p className="text-sm opacity-80">Kelas</p>
-              <p className="font-semibold text-lg">{studentData.className}</p>
+              <p className="font-semibold text-lg">{cardData.className}</p>
             </div>
           </div>
         </main>
