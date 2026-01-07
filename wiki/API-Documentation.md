@@ -36,18 +36,20 @@ Seed the database with initial data.
 ### POST /api/client-errors
 Report client-side errors to the server.
 
+**Security Note:** All input data should be validated and sanitized before processing. Implement rate limiting to prevent abuse.
+
 **Request Body:**
 ```json
 {
   "message": "Error message",
-  "url": "https://example.com/page",
+  "url": "",
   "userAgent": "Mozilla/5.0...",
   "timestamp": "2023-01-01T00:00:00.000Z",
   "stack": "Error stack trace",
   "componentStack": "React component stack",
   "errorBoundary": true,
   "errorBoundaryProps": {},
-  "source": "https://example.com/script.js",
+  "source": "",
   "lineno": 10,
   "colno": 5,
   "error": {}
@@ -225,7 +227,7 @@ Create a new user (admin only).
 {
   "name": "New User",
   "email": "newuser@example.com",
-  "role": "student|teacher|parent|admin",
+  "role": "student",
   "avatarUrl": "https://example.com/avatar.jpg"
 }
 ```
@@ -238,7 +240,7 @@ Create a new user (admin only).
     "id": "new_user_id",
     "name": "New User",
     "email": "newuser@example.com",
-    "role": "student|teacher|parent|admin",
+    "role": "student",
     "avatarUrl": "https://example.com/avatar.jpg"
   }
 }
@@ -263,7 +265,7 @@ Update an existing user (admin only).
     "id": "user_id",
     "name": "Updated Name",
     "email": "updated@example.com",
-    "role": "student|teacher|parent|admin",
+    "role": "student",
     "avatarUrl": "https://example.com/avatar.jpg"
   }
 }

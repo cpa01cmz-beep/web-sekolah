@@ -3,7 +3,9 @@
 ## Authentication and Authorization
 
 ### Current Implementation
-The application currently uses mock authentication tokens for development purposes. In a production environment, the following security measures should be implemented:
+⚠️ **CRITICAL SECURITY WARNING**: The application currently uses mock authentication tokens for development purposes. This implementation MUST NOT be used in production environments as it provides no actual security.
+
+In a production environment, the following security measures should be implemented:
 
 ### JWT Implementation
 - Use strong, randomly generated secrets for JWT signing
