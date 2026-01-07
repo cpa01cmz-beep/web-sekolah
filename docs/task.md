@@ -113,7 +113,7 @@ This document tracks architectural refactoring tasks for Akademia Pro.
 - Removed extraneous @emnapi/runtime package
 
 **Known Issues:**
-- Linting errors in `worker/__tests__/logger.test.ts`: Uses `require()` imports (5 occurrences) instead of ES6 imports for dynamic module loading in tests. These are necessary for testing environment-based log level configuration and are test-only issues, not affecting production code.
+- Linting errors in `worker/__tests__/logger.test.ts`: RESOLVED (2026-01-07) - Added eslint-disable comments for 5 `require()` statements used for dynamic module loading in tests. These are necessary for testing environment-based log level configuration and are test-only issues, not affecting production code.
 
 ## Tasks
 
