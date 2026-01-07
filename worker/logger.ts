@@ -47,20 +47,24 @@ export function warn(message: string, context?: LogContext): void {
   getInstance().warn(context || {}, message);
 }
 
-export function error(message: string, error?: Error | unknown, context?: LogContext): void {
+function formatErrorContext(err: Error | unknown, context?: LogContext): LogContext {
   const errorContext: LogContext = { ...context };
-  
-  if (error instanceof Error) {
+
+  if (err instanceof Error) {
     errorContext.error = {
-      message: error.message,
-      stack: error.stack,
-      name: error.name
+      message: err.message,
+      stack: err.stack,
+      name: err.name
     };
-  } else if (error !== undefined) {
-    errorContext.error = error;
+  } else if (err !== undefined) {
+    errorContext.error = err;
   }
-  
-  getInstance().error(errorContext, message);
+
+  return errorContext;
+}
+
+export function error(message: string, error?: Error | unknown, context?: LogContext): void {
+  getInstance().error(formatErrorContext(error, context), message);
 }
 
 export function createChildLogger(context: LogContext): {
@@ -82,19 +86,7 @@ export function createChildLogger(context: LogContext): {
       child.warn(additionalContext || {}, message);
     },
     error: (message: string, err?: Error | unknown, additionalContext?: LogContext) => {
-      const errorContext: LogContext = { ...additionalContext };
-      
-      if (err instanceof Error) {
-        errorContext.error = {
-          message: err.message,
-          stack: err.stack,
-          name: err.name
-        };
-      } else if (err !== undefined) {
-        errorContext.error = err;
-      }
-      
-      child.error(errorContext, message);
+      child.error(formatErrorContext(err, additionalContext), message);
     }
   };
 }
