@@ -88,11 +88,17 @@ export function StudentCardPage() {
     );
   }
 
-  const studentData = cardData || {
-    studentIdNumber: user.id,
-    className: 'N/A',
-    validUntil: new Date().toISOString().split('T')[0]
-  };
+  if (!cardData) {
+    return (
+      <Alert variant="destructive">
+        <AlertTriangle className="h-4 w-4" />
+        <AlertTitle>No Card Data</AlertTitle>
+        <AlertDescription>Student card information is not available.</AlertDescription>
+      </Alert>
+    );
+  }
+
+  const studentData = cardData;
 
   return (
     <motion.div
