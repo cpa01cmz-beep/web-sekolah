@@ -74,14 +74,18 @@ export class AuthService {
     if (!token) return null;
     
     // Extract user role from token (simplified)
-    const roleMatch = token.match(/mock-jwt-token-(\w+)-\d+-/);
+    const roleMatch = token.match(/mock-jwt-token-([\w-]+)-\d+/);
     if (!roleMatch) return null;
     
     const userId = roleMatch[1];
-    // Map user ID to role
+    // Map user ID to role (supports both 'student01' and 'student-01' formats)
     const roleMap: Record<string, UserRole> = {
+      'student01': 'student',
+      'teacher01': 'teacher',
+      'parent01': 'parent',
+      'admin01': 'admin',
       'student-01': 'student',
-      'teacher-01': 'teacher', 
+      'teacher-01': 'teacher',
       'parent-01': 'parent',
       'admin-01': 'admin'
     };
@@ -89,33 +93,33 @@ export class AuthService {
     const role = roleMap[userId];
     if (!role) return null;
     const mockUsers: Record<UserRole, BaseUser> = {
-      student: { 
-        id: 'student-01', 
-        name: 'Budi Hartono', 
-        email: 'budi@example.com', 
-        role: 'student', 
-        avatarUrl: 'https://i.pravatar.cc/150?u=student01' 
+      student: {
+        id: 'student-01',
+        name: 'Budi Hartono',
+        email: 'budi@example.com',
+        role: 'student',
+        avatarUrl: 'https://i.pravatar.cc/150?u=student01'
       },
-      teacher: { 
-        id: 'teacher-01', 
-        name: 'Ibu Siti', 
-        email: 'siti@example.com', 
-        role: 'teacher', 
-        avatarUrl: 'https://i.pravatar.cc/150?u=teacher01' 
+      teacher: {
+        id: 'teacher-01',
+        name: 'Ibu Siti',
+        email: 'siti@example.com',
+        role: 'teacher',
+        avatarUrl: 'https://i.pravatar.cc/150?u=teacher01'
       },
-      parent: { 
-        id: 'parent-01', 
-        name: 'Ayah Budi', 
-        email: 'ayah.budi@example.com', 
-        role: 'parent', 
-        avatarUrl: 'https://i.pravatar.cc/150?u=parent01' 
+      parent: {
+        id: 'parent-01',
+        name: 'Ayah Budi',
+        email: 'ayah.budi@example.com',
+        role: 'parent',
+        avatarUrl: 'https://i.pravatar.cc/150?u=parent01'
       },
-      admin: { 
-        id: 'admin-01', 
-        name: 'Admin Sekolah', 
-        email: 'admin@example.com', 
-        role: 'admin', 
-        avatarUrl: 'https://i.pravatar.cc/150?u=admin01' 
+      admin: {
+        id: 'admin-01',
+        name: 'Admin Sekolah',
+        email: 'admin@example.com',
+        role: 'admin',
+        avatarUrl: 'https://i.pravatar.cc/150?u=admin01'
       },
     };
 

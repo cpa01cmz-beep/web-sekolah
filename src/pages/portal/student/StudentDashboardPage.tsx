@@ -4,7 +4,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Clock, BookOpen, Megaphone, AlertTriangle } from 'lucide-react';
 import { motion, Variants } from 'framer-motion';
-import { useQuery } from '@/lib/api-client';
+import { useStudentDashboard } from '@/hooks/useStudent';
 import { useAuthStore } from '@/lib/authStore';
 import type { StudentDashboardData } from '@shared/types';
 const containerVariants: Variants = {
@@ -32,10 +32,7 @@ function DashboardSkeleton() {
 }
 export function StudentDashboardPage() {
   const user = useAuthStore((state) => state.user);
-  const { data, isLoading, error } = useQuery<StudentDashboardData>(
-    ['students', user?.id || '', 'dashboard'],
-    { enabled: !!user }
-  );
+  const { data, isLoading, error } = useStudentDashboard(user?.id || '');
   if (isLoading) return <DashboardSkeleton />;
   if (error) {
     return (

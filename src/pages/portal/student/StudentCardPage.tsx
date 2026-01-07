@@ -1,23 +1,45 @@
 import { useRef, useState } from 'react';
 import { useAuthStore } from '@/lib/authStore';
+import { useStudentCard } from '@/hooks/useStudent';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { GraduationCap, QrCode, Download } from 'lucide-react';
+import { GraduationCap, QrCode, Download, AlertTriangle } from 'lucide-react';
 import { motion } from 'framer-motion';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import { toast } from 'sonner';
+
+function CardSkeleton() {
+  return (
+    <div className="w-[550px] h-[330px] bg-muted rounded-2xl p-6 flex flex-col justify-between">
+      <Skeleton className="h-10 w-1/2" />
+      <div className="flex items-center gap-6">
+        <Skeleton className="h-32 w-32 rounded-full" />
+        <div className="space-y-2 flex-1">
+          <Skeleton className="h-6 w-full" />
+          <Skeleton className="h-5 w-2/3" />
+          <Skeleton className="h-5 w-1/2" />
+        </div>
+      </div>
+      <Skeleton className="h-10 w-full" />
+    </div>
+  );
+}
+
 export function StudentCardPage() {
   const user = useAuthStore((state) => state.user);
+  const { data: cardData, isLoading, error } = useStudentCard(user?.id || '');
   const cardRef = useRef<HTMLDivElement>(null);
   const [isDownloading, setIsDownloading] = useState(false);
+
   const handleDownload = () => {
     if (!cardRef.current) return;
     setIsDownloading(true);
     toast.info('Generating PDF...');
     html2canvas(cardRef.current, {
-      scale: 2, // Higher scale for better quality
+      scale: 2,
       useCORS: true,
       backgroundColor: null,
     }).then((canvas) => {
@@ -37,7 +59,45 @@ export function StudentCardPage() {
       setIsDownloading(false);
     });
   };
+
   if (!user) return null;
+
+  if (isLoading) return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className="space-y-6 flex flex-col items-center"
+    >
+      <div className="text-center">
+        <Skeleton className="h-9 w-1/3 mx-auto mb-2" />
+        <Skeleton className="h-4 w-2/3 mx-auto" />
+      </div>
+      <CardSkeleton />
+      <Skeleton className="h-12 w-48" />
+    </motion.div>
+  );
+
+  if (error) {
+    return (
+      <Alert variant="destructive">
+        <AlertTriangle className="h-4 w-4" />
+        <AlertTitle>Error</AlertTitle>
+        <AlertDescription>Failed to load student card data. Please try again later.</AlertDescription>
+      </Alert>
+    );
+  }
+
+  if (!cardData) {
+    return (
+      <Alert variant="destructive">
+        <AlertTriangle className="h-4 w-4" />
+        <AlertTitle>No Card Data</AlertTitle>
+        <AlertDescription>Student card information is not available.</AlertDescription>
+      </Alert>
+    );
+  }
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -67,7 +127,7 @@ export function StudentCardPage() {
         </header>
         <main className="flex items-center gap-6 z-10">
           <Avatar className="h-32 w-32 border-4 border-white/50">
-            <AvatarImage src={user.avatarUrl} alt={user.name} />
+            <AvatarImage src={cardData.photoUrl || user.avatarUrl} alt={user.name} />
             <AvatarFallback className="text-4xl bg-white/20">{user.name.charAt(0)}</AvatarFallback>
           </Avatar>
           <div className="space-y-2">
@@ -77,11 +137,11 @@ export function StudentCardPage() {
             </div>
             <div>
               <p className="text-sm opacity-80">Nomor Induk Siswa</p>
-              <p className="font-semibold text-lg">1234567890</p>
+              <p className="font-semibold text-lg">{cardData.studentIdNumber}</p>
             </div>
              <div>
               <p className="text-sm opacity-80">Kelas</p>
-              <p className="font-semibold text-lg">11-A</p>
+              <p className="font-semibold text-lg">{cardData.className}</p>
             </div>
           </div>
         </main>
