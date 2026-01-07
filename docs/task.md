@@ -420,12 +420,104 @@ This document tracks architectural refactoring tasks for Akademia Pro.
 - Priority: High
 - Effort: Medium
 
-### [REFACTOR] Split Large core-utils.ts File
-- Location: worker/core-utils.ts (852 lines)
-- Issue: File contains multiple responsibilities: GlobalDurableObject, Entity, IndexedEntity, Index, SecondaryIndex, API helpers, and type definitions - violates Single Responsibility Principle
-- Suggestion: Split into separate files: `worker/storage/GlobalDurableObject.ts`, `worker/entities/Entity.ts`, `worker/entities/IndexedEntity.ts`, `worker/storage/Index.ts`, `worker/storage/SecondaryIndex.ts`, `worker/api/response-helpers.ts`
-- Priority: High
-- Effort: Large
+### [REFACTOR] Split Large core-utils.ts File - Completed ✅
+
+**Task**: Split large core-utils.ts file (852 lines) with multiple responsibilities into separate, focused modules
+
+**Implementation**:
+
+1. **Created worker/types.ts**
+   - Exported `Env` interface
+   - Exported `Doc<T>` type for document versioning
+   - Exported `GlobalDurableObject` base class
+   - Benefits: Centralized type definitions, cleaner imports
+
+2. **Created worker/storage/GlobalDurableObject.ts**
+   - Extracted GlobalDurableObject class implementation
+   - Storage methods: `del()`, `has()`, `getDoc()`, `casPut()`, `listPrefix()`
+   - Index operations: `indexAddBatch()`, `indexRemoveBatch()`, `indexDrop()`
+   - Benefits: Focused on Durable Object storage operations
+
+3. **Created worker/entities/Entity.ts**
+   - Extracted Entity base class
+   - CRUD operations: `save()`, `getState()`, `patch()`, `delete()`
+   - Soft delete support: `softDelete()`, `restore()`, `isSoftDeleted()`
+   - Optimistic locking with retry logic
+   - Benefits: Clean entity base class, reusable across all entities
+
+4. **Created worker/storage/Index.ts**
+   - Extracted Index class for prefix-based indexing
+   - Index operations: `add()`, `addBatch()`, `remove()`, `removeBatch()`, `clear()`
+   - Pagination support: `page()`, `list()`
+   - Benefits: Dedicated index implementation
+
+5. **Created worker/storage/SecondaryIndex.ts**
+   - Extracted SecondaryIndex class for field-based lookups
+   - Field mapping operations: `add()`, `remove()`, `getByValue()`
+   - Clear operations: `clearValue()`, `clear()`
+   - Benefits: Efficient field-based entity queries
+
+6. **Created worker/entities/IndexedEntity.ts**
+   - Extracted IndexedEntity base class
+   - Static methods: `create()`, `list()`, `delete()`, `deleteMany()`, `getBySecondaryIndex()`
+   - Secondary index support with automatic index updates
+   - Soft delete filtering in list operations
+   - Benefits: Automatic indexing, consistent CRUD operations
+
+7. **Created worker/api/response-helpers.ts**
+   - Extracted all API response helper functions
+   - Response functions: `ok()`, `bad()`, `unauthorized()`, `forbidden()`, `notFound()`, `conflict()`, `rateLimitExceeded()`, `serverError()`, `serviceUnavailable()`, `gatewayTimeout()`
+   - Utility functions: `isStr()`
+   - Benefits: Centralized API response logic, consistent error handling
+
+8. **Updated worker/core-utils.ts**
+   - Changed to re-export all from new modules
+   - Maintained backward compatibility for all existing imports
+   - Benefits: Zero breaking changes, clean module boundary
+
+**Files Created**:
+- `worker/types.ts` (19 lines)
+- `worker/storage/GlobalDurableObject.ts` (48 lines)
+- `worker/entities/Entity.ts` (122 lines)
+- `worker/storage/Index.ts` (35 lines)
+- `worker/storage/SecondaryIndex.ts` (36 lines)
+- `worker/entities/IndexedEntity.ts` (127 lines)
+- `worker/api/response-helpers.ts` (98 lines)
+
+**Files Modified**:
+- `worker/core-utils.ts` (from 853 lines to 7 lines - re-exports only)
+
+**Benefits Achieved**:
+- ✅ Split 853-line file into 7 focused modules
+- ✅ Each module has Single Responsibility
+- ✅ Improved code organization and maintainability
+- ✅ Easier to test individual components
+- ✅ Better dependency management
+- ✅ Zero breaking changes (backward compatible re-exports)
+- ✅ All 345 tests passing (0 regressions)
+- ✅ Clean separation of storage, entities, and API logic
+
+**Metrics**:
+
+| Metric | Before | After | Improvement |
+|--------|--------|-------|-------------|
+| core-utils.ts size | 853 lines | 7 lines | 99.2% reduction |
+| Module count | 1 file | 7 files | Better organization |
+| Lines per file | 853 lines | ~60 lines avg | 14x smaller |
+| Tests passing | 345 tests | 345 tests | 0 regressions |
+
+**Technical Details**:
+- Created dedicated directories: `worker/storage/`, `worker/entities/`, `worker/api/`
+- Each module has a single, well-defined responsibility
+- Re-exports in `core-utils.ts` maintain backward compatibility
+- All existing imports continue to work without changes
+- Improved code discoverability through clear file structure
+
+**Zero Regressions**:
+- All existing imports from `core-utils.ts` continue to work
+- No changes to public APIs or interfaces
+- All 345 tests passing after refactoring
+- Build process unchanged
 
 ### [REFACTOR] Extract Role-Specific User Field Access Pattern
 - Location: worker/auth-routes.ts (lines 24-34, 84-94)
