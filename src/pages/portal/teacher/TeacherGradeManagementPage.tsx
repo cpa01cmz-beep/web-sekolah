@@ -15,6 +15,7 @@ import { useAuthStore } from '@/lib/authStore';
 import type { SchoolClass } from '@shared/types';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { isValidScore, MIN_SCORE, MAX_SCORE } from '@/utils/validation';
 
 interface UpdateGradeData {
   score: number | null;
@@ -58,8 +59,8 @@ export function TeacherGradeManagementPage() {
         return;
     };
     const scoreValue = currentScore === '' ? null : parseInt(currentScore, 10);
-    if (scoreValue !== null && (isNaN(scoreValue) || scoreValue < 0 || scoreValue > 100)) {
-      toast.error('Please enter a valid score between 0 and 100.');
+    if (!isValidScore(scoreValue)) {
+      toast.error(`Please enter a valid score between ${MIN_SCORE} and ${MAX_SCORE}.`);
       return;
     }
     gradeMutation.mutate({ score: scoreValue, feedback: currentFeedback });
@@ -73,7 +74,7 @@ export function TeacherGradeManagementPage() {
   const isScoreInvalid = useMemo(() => {
     if (currentScore === '') return false;
     const score = parseInt(currentScore, 10);
-    return isNaN(score) || score < 0 || score > 100;
+    return !isValidScore(score);
   }, [currentScore]);
   return (
     <motion.div
@@ -128,77 +129,21 @@ export function TeacherGradeManagementPage() {
                       <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
-                  <TableBody>
+                      <TableBody>
                     {students.map(student => (
                       <TableRow key={student.id}>
                         <TableCell className="font-medium">{student.name}</TableCell>
                         <TableCell className="text-center">{student.score ?? 'N/A'}</TableCell>
                         <TableCell className="text-muted-foreground truncate max-w-xs">{student.feedback}</TableCell>
                         <TableCell className="text-right">
-                          <Dialog onOpenChange={(open) => !open && setEditingStudent(null)}>
-                            <DialogTrigger asChild>
-                              <Button variant="outline" size="icon" onClick={() => handleEditClick(student)} aria-label={`Edit grade for ${student.name}`}>
-                                <Edit className="h-4 w-4" />
-                              </Button>
-                            </DialogTrigger>
-                            {editingStudent?.id === student.id && (
-                              <DialogContent>
-                                <DialogHeader>
-                                  <DialogTitle>Edit Grade for {editingStudent.name}</DialogTitle>
-                                  <DialogDescription>Update the score and provide feedback.</DialogDescription>
-                                </DialogHeader>
-                                <div className="grid gap-6 py-4">
-                                  <div className="grid grid-cols-4 items-start gap-4">
-                                    <Label htmlFor="score" className="text-right pt-2">
-                                      Score
-                                    </Label>
-                                    <div className="col-span-3 space-y-2">
-                                      <Input
-                                        id="score"
-                                        type="number"
-                                        value={currentScore}
-                                        onChange={(e) => setCurrentScore(e.target.value)}
-                                        className="col-span-3"
-                                        placeholder="0-100"
-                                        min="0"
-                                        max="100"
-                                        step="1"
-                                        aria-invalid={isScoreInvalid}
-                                      />
-                                      <p className="text-xs text-muted-foreground">Enter a score between 0 and 100. Leave empty for no score.</p>
-                                      {isScoreInvalid && (
-                                        <p className="text-xs text-destructive" role="alert">
-                                          Please enter a valid score between 0 and 100
-                                        </p>
-                                      )}
-                                    </div>
-                                  </div>
-                                  <div className="grid grid-cols-4 items-start gap-4">
-                                    <Label htmlFor="feedback" className="text-right pt-2">
-                                      Feedback
-                                    </Label>
-                                    <div className="col-span-3 space-y-2">
-                                      <Textarea
-                                        id="feedback"
-                                        value={currentFeedback}
-                                        onChange={(e) => setCurrentFeedback(e.target.value)}
-                                        className="col-span-3"
-                                        placeholder="Enter feedback..."
-                                        rows={3}
-                                      />
-                                      <p className="text-xs text-muted-foreground">Provide constructive feedback to help student improve</p>
-                                    </div>
-                                  </div>
-                                </div>
-                                <DialogFooter>
-                                  <DialogClose asChild><Button type="button" variant="secondary">Cancel</Button></DialogClose>
-                                  <Button type="submit" onClick={handleSaveChanges} disabled={gradeMutation.isPending}>
-                                    {gradeMutation.isPending ? 'Saving...' : 'Save changes'}
-                                  </Button>
-                                </DialogFooter>
-                              </DialogContent>
-                            )}
-                          </Dialog>
+                          <Button 
+                            variant="outline" 
+                            size="icon" 
+                            onClick={() => handleEditClick(student)} 
+                            aria-label={`Edit grade for ${student.name}`}
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
                         </TableCell>
                       </TableRow>
                     ))}
@@ -210,6 +155,65 @@ export function TeacherGradeManagementPage() {
             )}
           </CardContent>
         </Card>
+      )}
+      {editingStudent && (
+        <Dialog open={!!editingStudent} onOpenChange={(open) => !open && setEditingStudent(null)}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Edit Grade for {editingStudent.name}</DialogTitle>
+              <DialogDescription>Update the score and provide feedback.</DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-6 py-4">
+              <div className="grid grid-cols-4 items-start gap-4">
+                <Label htmlFor="score" className="text-right pt-2">
+                  Score
+                </Label>
+                <div className="col-span-3 space-y-2">
+                  <Input
+                    id="score"
+                    type="number"
+                    value={currentScore}
+                    onChange={(e) => setCurrentScore(e.target.value)}
+                    className="col-span-3"
+                    placeholder="0-100"
+                    min="0"
+                    max="100"
+                    step="1"
+                    aria-invalid={isScoreInvalid}
+                  />
+                  <p className="text-xs text-muted-foreground">Enter a score between 0 and 100. Leave empty for no score.</p>
+                  {isScoreInvalid && (
+                    <p className="text-xs text-destructive" role="alert">
+                      Please enter a valid score between 0 and 100
+                    </p>
+                  )}
+                </div>
+              </div>
+              <div className="grid grid-cols-4 items-start gap-4">
+                <Label htmlFor="feedback" className="text-right pt-2">
+                  Feedback
+                </Label>
+                <div className="col-span-3 space-y-2">
+                  <Textarea
+                    id="feedback"
+                    value={currentFeedback}
+                    onChange={(e) => setCurrentFeedback(e.target.value)}
+                    className="col-span-3"
+                    placeholder="Enter feedback..."
+                    rows={3}
+                  />
+                  <p className="text-xs text-muted-foreground">Provide constructive feedback to help student improve</p>
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <DialogClose asChild><Button type="button" variant="secondary">Cancel</Button></DialogClose>
+              <Button type="submit" onClick={handleSaveChanges} disabled={gradeMutation.isPending}>
+                {gradeMutation.isPending ? 'Saving...' : 'Save changes'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       )}
     </motion.div>
   );

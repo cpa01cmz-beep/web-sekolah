@@ -4,6 +4,7 @@ import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { logger } from 'hono/logger';
 import { userRoutes } from './user-routes';
+import { authRoutes } from './auth-routes';
 import { Env, GlobalDurableObject, ok, notFound, serverError } from './core-utils';
 import { defaultRateLimiter, strictRateLimiter } from './middleware/rate-limit';
 import { defaultTimeout } from './middleware/timeout';
@@ -67,7 +68,9 @@ app.use('/api/grades', defaultRateLimiter());
 app.use('/api/students', defaultRateLimiter());
 app.use('/api/teachers', defaultRateLimiter());
 app.use('/api/classes', defaultRateLimiter());
+app.use('/api/auth', strictRateLimiter());
 
+authRoutes(app);
 userRoutes(app);
 
 app.get('/api/health', (c) => ok(c, { status: 'healthy', timestamp: new Date().toISOString() }));

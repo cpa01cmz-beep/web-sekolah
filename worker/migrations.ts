@@ -1,6 +1,13 @@
 import type { Env } from './core-utils';
 import { logger } from './logger';
 
+const MIGRATION_STATE_KEY = 'sys:migration:state';
+
+interface MigrationState {
+  appliedMigrations: string[];
+  version: number;
+}
+
 /**
  * Migration interface
  * All migrations must implement this interface
@@ -17,12 +24,34 @@ export interface Migration {
 }
 
 /**
- * Simple migration runner for applying and rolling back schema changes
- * Note: In production, migration state should be persisted. This is a simplified version
- * for demonstration. For production use, integrate with a persistence layer.
+ * Migration runner for applying and rolling back schema changes
+ * Uses persistent storage to track migration state across restarts
  */
 export class MigrationRunner {
-  private static appliedMigrations = new Set<string>();
+  private static async loadState(env: Env): Promise<Set<string>> {
+    try {
+      const stub = env.GlobalDurableObject.get(env.GlobalDurableObject.idFromName('sys-migration-state'));
+      const doc = await stub.getDoc(MIGRATION_STATE_KEY) as any;
+      return new Set(doc?.data?.appliedMigrations ?? []);
+    } catch (error) {
+      logger.error('[Migration] Failed to load migration state', error);
+      return new Set();
+    }
+  }
+
+  private static async saveState(env: Env, appliedMigrations: Set<string>): Promise<void> {
+    try {
+      const stub = env.GlobalDurableObject.get(env.GlobalDurableObject.idFromName('sys-migration-state'));
+      const state: MigrationState = {
+        appliedMigrations: Array.from(appliedMigrations),
+        version: appliedMigrations.size
+      };
+      await stub.casPut(MIGRATION_STATE_KEY, 0, state);
+    } catch (error) {
+      logger.error('[Migration] Failed to save migration state', error);
+      throw new Error(`Failed to save migration state: ${error}`);
+    }
+  }
 
   /**
    * Register and run pending migrations
@@ -30,7 +59,8 @@ export class MigrationRunner {
    * @param migrations - Array of migrations to apply
    */
   static async run(env: Env, migrations: Migration[]): Promise<void> {
-    const pending = migrations.filter(m => !this.appliedMigrations.has(m.id));
+    const appliedMigrations = await this.loadState(env);
+    const pending = migrations.filter(m => !appliedMigrations.has(m.id));
     
     if (pending.length === 0) {
       logger.info('[Migration] No pending migrations to apply');
@@ -43,7 +73,8 @@ export class MigrationRunner {
       try {
         logger.info('[Migration] Applying', { id: migration.id, description: migration.description });
         await migration.up(env);
-        this.appliedMigrations.add(migration.id);
+        appliedMigrations.add(migration.id);
+        await this.saveState(env, appliedMigrations);
         logger.info('[Migration] Successfully applied', { id: migration.id });
       } catch (error) {
         logger.error(`[Migration] Failed to apply ${migration.id}`, error);
@@ -61,8 +92,8 @@ export class MigrationRunner {
    * @param count - Number of migrations to rollback (default: 1)
    */
   static async rollback(env: Env, migrations: Migration[], count = 1): Promise<void> {
-    const migrationMap = new Map(migrations.map(m => [m.id, m]));
-    const toRollback = migrations.filter(m => this.appliedMigrations.has(m.id)).slice(-count);
+    const appliedMigrations = await this.loadState(env);
+    const toRollback = migrations.filter(m => appliedMigrations.has(m.id)).slice(-count);
     
     if (toRollback.length === 0) {
       logger.info('[Migration] No migrations to rollback');
@@ -73,7 +104,8 @@ export class MigrationRunner {
       try {
         logger.info('[Migration] Rolling back', { id: migration.id, description: migration.description });
         await migration.down(env);
-        this.appliedMigrations.delete(migration.id);
+        appliedMigrations.delete(migration.id);
+        await this.saveState(env, appliedMigrations);
         logger.info('[Migration] Successfully rolled back', { id: migration.id });
       } catch (error) {
         logger.error(`[Migration] Failed to rollback ${migration.id}`, error);
@@ -87,24 +119,40 @@ export class MigrationRunner {
   /**
    * Get current migration version
    */
-  static getCurrentVersion(): number {
-    return this.appliedMigrations.size;
+  static async getCurrentVersion(env: Env): Promise<number> {
+    const appliedMigrations = await this.loadState(env);
+    return appliedMigrations.size;
   }
 
   /**
    * Check if a specific migration has been applied
    */
-  static isApplied(migrationId: string): boolean {
-    return this.appliedMigrations.has(migrationId);
+  static async isApplied(env: Env, migrationId: string): Promise<boolean> {
+    const appliedMigrations = await this.loadState(env);
+    return appliedMigrations.has(migrationId);
   }
 
   /**
-   * Reset all migrations (USE WITH CAUTION - clears in-memory state)
+   * Reset all migrations (USE WITH CAUTION - clears persistent state)
    * This is useful for testing but should never be used in production
    */
-  static reset(): void {
-    this.appliedMigrations.clear();
-    logger.warn('[Migration] Migration history has been reset');
+  static async reset(env: Env): Promise<void> {
+    try {
+      const stub = env.GlobalDurableObject.get(env.GlobalDurableObject.idFromName('sys-migration-state'));
+      await stub.del(MIGRATION_STATE_KEY);
+      logger.warn('[Migration] Migration history has been reset');
+    } catch (error) {
+      logger.error('[Migration] Failed to reset migration state', error);
+      throw new Error(`Failed to reset migration state: ${error}`);
+    }
+  }
+
+  /**
+   * Get list of applied migrations
+   */
+  static async getAppliedMigrations(env: Env): Promise<string[]> {
+    const appliedMigrations = await this.loadState(env);
+    return Array.from(appliedMigrations);
   }
 }
 

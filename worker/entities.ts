@@ -37,13 +37,17 @@ export class UserEntity extends IndexedEntity<SchoolUser> {
   static seedData = seedData.users;
 
   static async getByRole(env: Env, role: UserRole): Promise<SchoolUser[]> {
-    const allUsers = await this.list(env);
-    return allUsers.items.filter(u => u.role === role && !u.deletedAt);
+    const index = new SecondaryIndex<string>(env, this.entityName, 'role');
+    const userIds = await index.getByValue(role);
+    const users = await Promise.all(userIds.map(id => new this(env, id).getState()));
+    return users.filter(u => u && !u.deletedAt) as SchoolUser[];
   }
 
   static async getByClassId(env: Env, classId: string): Promise<Student[]> {
-    const allUsers = await this.list(env);
-    return allUsers.items.filter((u): u is Student => u.role === 'student' && u.classId === classId && !u.deletedAt);
+    const index = new SecondaryIndex<string>(env, this.entityName, 'classId');
+    const userIds = await index.getByValue(classId);
+    const users = await Promise.all(userIds.map(id => new this(env, id).getState()));
+    return users.filter((u): u is Student => u && u.role === 'student' && u.classId === classId && !u.deletedAt);
   }
 }
 export class ClassEntity extends IndexedEntity<SchoolClass> {

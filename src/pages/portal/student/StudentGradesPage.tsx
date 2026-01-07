@@ -7,18 +7,19 @@ import { AlertTriangle } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useStudentGrades } from '@/hooks/useStudent';
 import { useAuthStore } from '@/lib/authStore';
+import { GRADE_A_THRESHOLD, GRADE_B_THRESHOLD, GRADE_C_THRESHOLD } from '@/constants/grades';
 
 const getGradeColor = (score: number) => {
-  if (score >= 90) return 'bg-green-500 hover:bg-green-600';
-  if (score >= 80) return 'bg-blue-500 hover:bg-blue-600';
-  if (score >= 70) return 'bg-yellow-500 hover:bg-yellow-600';
+  if (score >= GRADE_A_THRESHOLD) return 'bg-green-500 hover:bg-green-600';
+  if (score >= GRADE_B_THRESHOLD) return 'bg-blue-500 hover:bg-blue-600';
+  if (score >= GRADE_C_THRESHOLD) return 'bg-yellow-500 hover:bg-yellow-600';
   return 'bg-red-500 hover:bg-red-600';
 };
 
 const getGrade = (score: number) => {
-  if (score >= 90) return 'A';
-  if (score >= 80) return 'B';
-  if (score >= 70) return 'C';
+  if (score >= GRADE_A_THRESHOLD) return 'A';
+  if (score >= GRADE_B_THRESHOLD) return 'B';
+  if (score >= GRADE_C_THRESHOLD) return 'C';
   return 'D';
 };
 

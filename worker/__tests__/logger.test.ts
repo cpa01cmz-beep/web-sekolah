@@ -273,6 +273,7 @@ describe('Logger (Worker)', () => {
 
       vi.mocked(pino).mockClear();
 
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
       const { debug: debug2 } = require('../logger');
       debug2('Test');
 
@@ -286,6 +287,7 @@ describe('Logger (Worker)', () => {
 
       vi.mocked(pino).mockClear();
 
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
       const { debug: debug2 } = require('../logger');
       debug2('Test');
 
@@ -299,6 +301,7 @@ describe('Logger (Worker)', () => {
 
       vi.mocked(pino).mockClear();
 
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
       const { debug: debug2 } = require('../logger');
       debug2('Test');
 
@@ -312,6 +315,7 @@ describe('Logger (Worker)', () => {
 
       vi.mocked(pino).mockClear();
 
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
       const { debug: debug2 } = require('../logger');
       debug2('Test');
 
@@ -331,6 +335,7 @@ describe('Logger (Worker)', () => {
 
       vi.mocked(pino).mockClear();
 
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
       const { debug: debug2 } = require('../logger');
       debug2('Test');
 

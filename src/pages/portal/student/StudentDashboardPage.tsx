@@ -9,14 +9,17 @@ import { useStudentDashboard } from '@/hooks/useStudent';
 import { useAuthStore } from '@/lib/authStore';
 import { useReducedMotion } from '@/hooks/use-reduced-motion';
 import type { StudentDashboardData } from '@shared/types';
+
 const containerVariants: Variants = {
   hidden: { opacity: 0 },
   visible: { opacity: 1, transition: { staggerChildren: 0.1 } },
 };
+
 const itemVariants: Variants = {
   hidden: { y: 20, opacity: 0 },
   visible: { y: 0, opacity: 1, transition: { type: 'spring' as const, stiffness: 100 } },
 };
+
 function DashboardSkeleton() {
   return (
     <div className="space-y-6">
