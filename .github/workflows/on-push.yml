@@ -15,7 +15,6 @@ jobs:
   analyze:
     name: on-push
     runs-on: ubuntu-24.04-arm
-    timeout-minutes: 60
     env:
       GH_TOKEN: ${{ secrets.GH_TOKEN }}
       IFLOW_API_KEY: ${{ secrets.IFLOW_API_KEY }}
@@ -72,8 +71,8 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
 
-      - name: 00
-        if: steps.check_issues.outputs.open_issue_count == '0'
+      - name: 00 flow
+        timeout-minutes: 30
         run: |
           max_retries=2
           retry_count=0
@@ -97,7 +96,8 @@ jobs:
             fi
           done
 
-      - name: 01
+      - name: 01 flow
+        timeout-minutes: 30
         run: |
           max_retries=2
           retry_count=0
@@ -121,7 +121,8 @@ jobs:
             fi
           done
 
-      - name: 02
+      - name: 02 flow
+        timeout-minutes: 30
         run: |
           max_retries=2
           retry_count=0
@@ -145,7 +146,8 @@ jobs:
             fi
           done
 
-      - name: 03
+      - name: 03 flow
+        timeout-minutes: 30
         run: |
           max_retries=2
           retry_count=0
@@ -169,7 +171,8 @@ jobs:
             fi
           done
 
-      - name: 04
+      - name: 04 flow
+        timeout-minutes: 30
         run: |
           max_retries=2
           retry_count=0
@@ -193,7 +196,8 @@ jobs:
             fi
           done
 
-      - name: 05
+      - name: 05 flow
+        timeout-minutes: 30
         run: |
           max_retries=2
           retry_count=0
@@ -217,7 +221,8 @@ jobs:
             fi
           done
 
-      - name: 06
+      - name: 06 flow
+        timeout-minutes: 30
         run: |
           max_retries=2
           retry_count=0
@@ -241,7 +246,8 @@ jobs:
             fi
           done
 
-      - name: 07
+      - name: 07 flow
+        timeout-minutes: 30
         run: |
           max_retries=2
           retry_count=0
@@ -265,7 +271,8 @@ jobs:
             fi
           done
 
-      - name: 08
+      - name: 08 flow
+        timeout-minutes: 30
         run: |
           max_retries=2
           retry_count=0
@@ -289,7 +296,8 @@ jobs:
             fi
           done
 
-      - name: 09
+      - name: 09 flow
+        timeout-minutes: 30
         run: |
           max_retries=2
           retry_count=0
@@ -313,7 +321,8 @@ jobs:
             fi
           done
 
-      - name: 10
+      - name: 10 flow
+        timeout-minutes: 30
         run: |
           max_retries=2
           retry_count=0
@@ -337,7 +346,8 @@ jobs:
             fi
           done
 
-      - name: 11
+      - name: 11 flow
+        timeout-minutes: 30
         run: |
           max_retries=2
           retry_count=0
@@ -362,6 +372,8 @@ jobs:
           done
 
       - name: on-push
+        if: steps.check_issues.outputs.open_issue_count == '0'
+        timeout-minutes: 30
         run: |
           opencode run "$(cat <<'PROMPT'
           YOU ARE AN AUTONOMOUS SOFTWARE ENGINEERING AGENT.
