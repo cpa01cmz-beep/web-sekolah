@@ -3,22 +3,24 @@
 ## Table of Contents
 1. [Introduction](#introduction)
 2. [Getting Started](#getting-started)
-   - [Prerequisites](#prerequisites)
-   - [Installation](#installation)
-   - [Development Setup](#development-setup)
+    - [Prerequisites](#prerequisites)
+    - [Installation](#installation)
+    - [Development Setup](#development-setup)
 3. [Project Structure](#project-structure)
 4. [Frontend Architecture](#frontend-architecture)
-   - [Components](#components)
-   - [State Management](#state-management)
-   - [Routing](#routing)
+    - [Components](#components)
+    - [State Management](#state-management)
+    - [Routing](#routing)
 5. [Backend Architecture](#backend-architecture)
-   - [API Endpoints](#api-endpoints)
-   - [Authentication](#authentication)
+    - [API Endpoints](#api-endpoints)
+    - [Authentication](#authentication)
+    - [Webhook System](#webhook-system)
 6. [Data Layer](#data-layer)
-7. [Deployment](#deployment)
-8. [Testing](#testing)
-9. [Contributing](#contributing)
-10. [License](#license)
+7. [Resilience & Performance](#resilience--performance)
+8. [Deployment](#deployment)
+9. [Testing](#testing)
+10. [Contributing](#contributing)
+11. [License](#license)
 
 ## Introduction
 
@@ -31,7 +33,6 @@ Akademia Pro is a modern, all-in-one school management portal designed to stream
 Before you begin, ensure you have the following installed:
 - [Bun](https://bun.sh/) (package manager and runtime)
 - [Wrangler CLI](https://developers.cloudflare.com/workers/wrangler/install-and-update/) (Cloudflare Workers CLI)
-- Node.js (for some development tools)
 - Git
 
 ### Installation
@@ -47,56 +48,62 @@ Before you begin, ensure you have the following installed:
     ```
 
 3. Install dependencies:
-   ```bash
-   bun install
-   ```
+    ```bash
+    bun install
+    ```
+
+4. Configure environment variables:
+    ```bash
+    cp .env.example .env
+    ```
+    
+    Update the `.env` file with your configuration. For local development, the defaults in `.env.example` should work. For production deployment, ensure you update the `ALLOWED_ORIGINS` and `JWT_SECRET` values.
 
 ### Development Setup
 
 1. Start the development server:
-   ```bash
-   bun dev
-   ```
+    ```bash
+    bun dev
+    ```
 
 2. The application will be available at `http://localhost:3000` (or the port specified in your environment).
 
-3. For backend development, you can also run the worker separately:
-   ```bash
-   wrangler dev worker/index.ts
-   ```
+3. For backend-only development, you can also run the worker separately:
+    ```bash
+    wrangler dev worker/index.ts
+    ```
 
 ## Project Structure
 
 ```
 web-sekolah/
-├── src/                  # Frontend application
-│   ├── components/       # Reusable UI components
-│   ├── hooks/            # Custom React hooks
-│   ├── lib/              # Utility functions and helpers
-│   ├── pages/            # Page components for routing
-│   │   ├── student/      # Student portal pages
-│   │   ├── teacher/      # Teacher portal pages
-│   │   ├── parent/       # Parent portal pages
-│   │   ├── admin/        # Admin portal pages
-│   │   └── public/       # Public pages (landing, login)
-│   ├── store/            # Zustand stores for state management
-│   └── App.tsx           # Main application component
-├── worker/               # Backend application
-│   ├── api/              # API route handlers
-│   ├── lib/              # Backend utility functions
-│   ├── middleware/       # Authentication and validation middleware
-│   └── index.ts          # Worker entry point
-├── shared/               # Shared types and interfaces
+├── src/                    # Frontend application
+│   ├── components/         # Reusable UI components
+│   ├── config/             # Configuration files (navigation, etc.)
+│   ├── constants/          # Shared constants (grades, avatars)
+│   ├── hooks/             # Custom React hooks
+│   ├── lib/               # Utility functions and helpers (api-client, logger, authStore)
+│   ├── pages/             # Page components for routing
+│   ├── repositories/       # Data access layer (repository pattern)
+│   ├── services/          # Service layer (business logic)
+│   ├── test/              # Test utilities
+│   └── utils/            # Helper functions
+├── worker/                # Backend application
+│   ├── __tests__/         # Worker tests
+│   ├── middleware/         # Authentication, validation, rate limiting
+│   ├── index.ts           # Worker entry point
+│   ├── webhook-routes.ts   # Webhook API endpoints
+│   ├── webhook-service.ts   # Webhook delivery service
+│   └── entities.ts        # Durable Object entities
+├── shared/                # Shared types and interfaces
+├── docs/                 # Documentation (blueprint.md, task.md)
+├── wiki/                 # GitHub Wiki documentation
 ├── public/               # Static assets
-├── tests/                # Test files
 ├── README.md             # Project overview
-├── ROADMAP.md            # Development roadmap
-├── docs/blueprint.md     # Technical blueprint
-├── docs/task.md         # Architectural task list
 ├── DOCUMENTATION.md      # Complete documentation
 ├── package.json          # Dependencies and scripts
 ├── vite.config.ts        # Vite configuration
-├── wrangler.jsonc        # Wrangler configuration
+├── wrangler.jsonc       # Wrangler configuration
 ├── tailwind.config.js    # Tailwind CSS configuration
 └── tsconfig.json         # TypeScript configuration
 ```
@@ -108,11 +115,12 @@ web-sekolah/
 The frontend uses a component-based architecture with shadcn/ui components as foundation. All components are built with React and TypeScript, following modern best practices.
 
 Key component categories:
-- Layout components (Header, Sidebar, Footer)
-- Form components (Input, Select, Button)
-- Data display components (Table, Card, Badge)
+- Layout components (PortalLayout, PortalSidebar, SiteHeader)
+- Form components (Input, Select, Button, Dialog)
+- Data display components (Table, Card, Badge, EmptyState)
 - Feedback components (Alert, Toast, Modal)
 - Navigation components (Tabs, Breadcrumbs, Pagination)
+- Animation components (FadeIn, SlideUp, SlideLeft, SlideRight)
 
 ### Layered Architecture
 
@@ -126,26 +134,30 @@ The frontend follows a clean, layered architecture with clear separation of conc
 ├─────────────────────────────────────┤
 │         Service Layer              │  <- studentService, teacherService, etc.
 ├─────────────────────────────────────┤
-│         Data Access Layer          │  <- apiClient with React Query
+│         Repository Layer           │  <- ApiRepository (data access)
+├─────────────────────────────────────┤
+│         API Client Layer           │  <- apiClient (React Query + resilience)
 └─────────────────────────────────────┘
 ```
 
 **Presentation Layer**: React components and pages that handle UI rendering and user interactions
 **Custom Hooks Layer**: Domain-specific hooks that encapsulate data fetching logic with React Query
 **Service Layer**: Business logic and API interaction abstraction following service contracts
-**Data Access Layer**: Generic API client with error handling and response parsing
+**Repository Layer**: Clean abstraction over API client for testability
+**API Client Layer**: Generic API client with error handling, caching, and resilience patterns
 
 ### Service Layer Pattern
 
-The service layer provides a clean abstraction between the UI and backend APIs:
+The service layer provides a clean abstraction between UI and backend APIs:
 
-- **Service Contracts**: TypeScript interfaces defining the shape of each service (e.g., `StudentService`, `TeacherService`)
-- **Service Implementations**: Concrete implementations that make HTTP requests via the API client
+- **Service Contracts**: TypeScript interfaces defining shape of each service (e.g., `StudentService`, `TeacherService`)
+- **Service Implementations**: Concrete implementations that use repository pattern for data access
 - **Custom Hooks**: React Query hooks that wrap service calls for automatic caching and loading states
+- **Repository Pattern**: `IRepository` interface with `ApiRepository` implementation for testability
 
 **Benefits**:
 - Separates business logic from UI components
-- Makes components easier to test by mocking services
+- Makes components easier to test by mocking repositories
 - Provides a single point of maintenance for API endpoints
 - Enables consistent error handling and data transformation
 - Facilitates code reusability across components
@@ -158,10 +170,14 @@ const { data, isLoading, error } = useStudentDashboard(studentId);
 // Service implementation
 export const studentService: StudentService = {
   async getDashboard(studentId: string): Promise<StudentDashboardData> {
-    return apiClient<StudentDashboardData>(`/api/students/${studentId}/dashboard`);
+    return repository.get<StudentDashboardData>(`/api/students/${studentId}/dashboard`);
   }
   // ... other methods
 };
+
+// With custom repository for testing
+const mockRepo = new MockRepository();
+const testStudentService = createStudentService(mockRepo);
 ```
 
 ### State Management
@@ -169,44 +185,95 @@ export const studentService: StudentService = {
 Zustand is used for state management, providing a simple and performant solution. The state is organized into domain-specific stores:
 
 - `authStore`: Authentication and user session
-- `uiStore`: UI state (loading, modals, theme)
-- `dataStore`: Application data (users, classes, grades)
+- UI state is managed through React Query's built-in state management
 
 ### Routing
 
 React Router v6 is used for client-side routing. Routes are organized by user role:
 
-- Public routes: Landing page, login
-- Student routes: Dashboard, schedule, grades
-- Teacher routes: Class management, grade submission
-- Parent routes: Progress tracking, communication
-- Admin routes: User management, system configuration
+- Public routes: Landing page, login, news, about, contact
+- Student routes: Dashboard, schedule, grades, student card
+- Teacher routes: Dashboard, classes, grades, announcements
+- Parent routes: Dashboard, child's schedule
+- Admin routes: Dashboard, user management, announcements, settings
 
 ## Backend Architecture
 
 ### API Endpoints
 
-The backend is built with Hono.js and runs on Cloudflare Workers. API endpoints follow RESTful conventions:
+The backend is built with Hono.js and runs on Cloudflare Workers. API endpoints follow RESTful conventions with comprehensive documentation available in `docs/blueprint.md`.
 
-Authentication:
-- `POST /api/auth/login` - User login
+**Authentication**:
+- `POST /api/auth/login` - User login with JWT token generation
 - `POST /api/auth/logout` - User logout
+- `GET /api/auth/verify` - Verify JWT token
 
-User Management:
-- `GET /api/users/profile` - Get current user profile
-- `PUT /api/users/profile` - Update user profile
-- `GET /api/users/:id` - Get specific user (admin only)
+**Student Portal**:
+- `GET /api/students/:id/dashboard` - Get student dashboard (schedule, grades, announcements)
 
-Role-specific endpoints are organized under `/api/student`, `/api/teacher`, `/api/parent`, and `/api/admin`.
+**Teacher Portal**:
+- `GET /api/teachers/:id/classes` - Get teacher's classes
+- `GET /api/classes/:id/students` - Get students in a class with grades
+- `POST /api/grades` - Create a new grade
+- `PUT /api/grades/:id` - Update an existing grade
+
+**Admin Portal**:
+- `GET /api/users` - Get all users (with filtering)
+- `POST /api/users` - Create a new user
+- `PUT /api/users/:id` - Update a user
+- `DELETE /api/users/:id` - Delete a user (with referential integrity)
+
+**Webhooks**:
+- `GET /api/webhooks` - List webhook configurations
+- `POST /api/webhooks` - Create webhook configuration
+- `PUT /api/webhooks/:id` - Update webhook configuration
+- `DELETE /api/webhooks/:id` - Delete webhook configuration
+- `POST /api/webhooks/test` - Test webhook configuration
+- `GET /api/webhooks/:id/deliveries` - Get webhook delivery history
+
+For complete API documentation with request/response examples, see [docs/blueprint.md](./docs/blueprint.md).
 
 ### Authentication
 
-Authentication is implemented with JWT tokens:
-1. User logs in with email/password
-2. Server validates credentials and generates JWT
-3. Client stores JWT in localStorage
-4. JWT is included in Authorization header for all subsequent requests
-5. Server validates JWT on protected routes
+Authentication is fully implemented using JWT (JSON Web Tokens) with role-based authorization:
+
+1. User logs in with email, password, and role (student, teacher, parent, admin)
+2. Server validates credentials and generates JWT token (24 hour expiration)
+3. Client stores JWT token in localStorage
+4. JWT is included in `Authorization: Bearer <token>` header for all subsequent requests
+5. Server validates JWT on protected routes using `authenticate()` middleware
+6. Role-based authorization is enforced using `authorize()` middleware
+
+**Protected Routes**:
+- Student portal: `/api/students/*` (requires `student` role)
+- Teacher portal: `/api/teachers/*` and `/api/grades/*` (requires `teacher` role)
+- Admin portal: `/api/users/*` and `/api/admin/*` (requires `admin` role)
+
+For detailed authentication implementation, see [docs/blueprint.md](./docs/blueprint.md#authentication).
+
+### Webhook System
+
+The application includes a comprehensive webhook system for real-time notifications:
+
+**Features**:
+- Event-based triggers (grade created/updated, user created/updated/deleted, announcements)
+- Queue system for reliable delivery
+- Exponential backoff retry logic (1m, 5m, 15m, 30m, 1h, 2h)
+- HMAC SHA-256 signature verification
+- Webhook management API for CRUD operations
+- Delivery history tracking
+- Test endpoint for debugging
+
+**Supported Events**:
+- `grade.created` - New grade submitted
+- `grade.updated` - Grade modified
+- `user.created` - New user account created
+- `user.updated` - User information updated
+- `user.deleted` - User account deleted
+- `announcement.created` - New announcement posted
+- `announcement.updated` - Announcement modified
+
+For complete webhook documentation, see [docs/blueprint.md](./docs/blueprint.md#webhook-management).
 
 ## Data Layer
 
@@ -216,57 +283,129 @@ Data is stored using Cloudflare Durable Objects, which provide:
 - Global distribution
 - Automatic scaling
 
-Each entity type has its own Durable Object class:
-- `UserDO`: User accounts and profiles
-- `ClassDO`: Class information and enrollment
-- `GradeDO`: Student grades and assessments
-- `AnnouncementDO`: School announcements
+Each entity type has its own Durable Object class with secondary indexes for efficient queries:
+- `UserEntity` - User accounts and profiles (indexes: role, classId)
+- `ClassEntity` - Class information (index: teacherId)
+- `CourseEntity` - Course information (index: teacherId)
+- `GradeEntity` - Student grades (indexes: studentId, courseId)
+- `AnnouncementEntity` - School announcements (index: authorId)
+- `ScheduleEntity` - Class schedules
+- `WebhookConfigEntity` - Webhook configurations
+- `WebhookEventEntity` - Webhook event queue
+- `WebhookDeliveryEntity` - Webhook delivery tracking
+
+For detailed data architecture and query optimization, see [docs/blueprint.md](./docs/blueprint.md#data-architecture).
+
+## Resilience & Performance
+
+The application implements multiple resilience patterns for reliability and performance:
+
+### Resilience Patterns
+
+**Circuit Breaker**:
+- Threshold: 5 consecutive failures
+- Timeout: 60 seconds
+- Reset timeout: 30 seconds
+- Prevents cascading failures and enables fast recovery
+
+**Retry Logic**:
+- Max retries: 3 (queries), 2 (mutations)
+- Exponential backoff with jitter
+- Non-retryable errors: 404, validation, auth errors
+
+**Timeout Protection**:
+- Default: 30 seconds (configurable)
+- Applied on both client and server
+- Prevents hanging requests
+
+**Rate Limiting**:
+- Standard: 100 requests / 15 minutes
+- Strict: 50 requests / 5 minutes (seed, errors)
+- Loose: 1000 requests / 1 hour
+- Auth: 5 requests / 15 minutes
+
+### Performance Optimizations
+
+**Caching Strategy**:
+- Intelligent caching with React Query
+- Cache duration by data type (dynamic: 5min, semi-static: 30min-1h, static: 24h)
+- 82% reduction in API calls per session
+- Automatic cache invalidation on mutations
+
+**Asset Optimization**:
+- CSS animations instead of Framer Motion for simple transitions
+- 4-5x faster page load performance
+- Reduced JavaScript execution overhead
+
+**Bundle Optimization**:
+- Lazy loading of heavy libraries (PDF, charts)
+- Code splitting with manual chunks
+- 99%+ reduction in initial page load for affected pages
+
+For detailed resilience patterns and monitoring, see [docs/blueprint.md](./docs/blueprint.md#resilience-patterns).
 
 ## Deployment
 
 ### Production Deployment
 
 1. Build the application:
-   ```bash
-   bun run build
-   ```
+    ```bash
+    bun run build
+    ```
 
 2. Deploy to Cloudflare:
-   ```bash
-   bun deploy
-   ```
+    ```bash
+    bun deploy
+    ```
 
-Alternatively, you can use the one-click deployment button in the README.
+Alternatively, use the one-click deployment button in the README.
 
 ### Environment Variables
 
-The following environment variables are required:
-- `JWT_SECRET`: Secret key for JWT signing
-- `CLOUDFLARE_ACCOUNT_ID`: Cloudflare account ID
-- `CLOUDFLARE_API_TOKEN`: API token with Workers permissions
+The following environment variables are available:
+
+**Required for Production**:
+- `JWT_SECRET`: Secret key for JWT signing (generate strong random string for production)
+- `ALLOWED_ORIGINS`: Comma-separated list of allowed origins (e.g., `https://yourdomain.com`)
+
+**Optional**:
+- `VITE_LOG_LEVEL` / `LOG_LEVEL`: Logging level (debug, info, warn, error) - default: debug (dev), info (prod)
+- `PORT`: Development server port (default: 3000)
+
+**For Local Development**:
+- Use defaults from `.env.example` - no changes required
+
+### Health Monitoring
+
+Health check endpoint available at `GET /api/health` for monitoring application status.
 
 ## Testing
 
-### Frontend Testing
+The application uses Vitest for testing with comprehensive test coverage:
 
-Frontend components are tested with React Testing Library:
 ```bash
-bun test:frontend
+# Run all tests
+bun test
+
+# Run tests once (non-watch mode)
+bun test:run
+
+# Run tests with coverage
+bun test:coverage
+
+# Run tests with UI
+bun test:ui
+
+# Run linting
+bun run lint
 ```
 
-### Backend Testing
+**Test Statistics** (as of 2026-01-07):
+- Total tests: 303
+- Test files: 18
+- Coverage: Critical infrastructure, services, hooks, utilities, validation
 
-Backend API endpoints are tested with Jest:
-```bash
-bun test:backend
-```
-
-### End-to-End Testing
-
-E2E tests are implemented with Playwright:
-```bash
-bun test:e2e
-```
+For detailed testing strategy, see [docs/task.md](./docs/task.md#critical-path-testing).
 
 ## Contributing
 
@@ -275,11 +414,30 @@ We welcome contributions to Akademia Pro! Please follow these steps:
 1. Fork the repository
 2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
 3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a pull request
+4. Run tests (`bun test:run`)
+5. Run linting (`bun run lint`)
+6. Push to the branch (`git push origin feature/AmazingFeature`)
+7. Open a pull request
 
 Please ensure your code follows the project's coding standards and includes appropriate tests.
+
+**Code Style Guidelines**:
+- Use TypeScript for all new code
+- Follow existing naming conventions
+- Add comments for complex/non-obvious logic
+- Write tests for new features
+- Run tests and linting before committing
 
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Additional Documentation
+
+- [API Blueprint](./docs/blueprint.md) - Complete API reference with endpoints, error codes, and integration patterns
+- [Architectural Task List](./docs/task.md) - Implementation status and roadmap
+- [User Guides](./wiki/User-Guides.md) - Instructions for students, teachers, parents, and admins
+- [Security Assessment](./SECURITY_ASSESSMENT.md) - Comprehensive security audit results
+- [Caching Optimization](./CACHING_OPTIMIZATION.md) - Performance optimization details
+- [Security Implementation](./worker/SECURITY_IMPLEMENTATION.md) - Security features and best practices
+- [GitHub Wiki](https://github.com/cpa01cmz-beep/web-sekolah/wiki) - Additional documentation and guides

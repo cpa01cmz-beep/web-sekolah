@@ -1,5 +1,18 @@
 # API Documentation
 
+> **⚠️ DEPRECATED: This documentation is outdated and superseded by [docs/blueprint.md](../../docs/blueprint.md)**
+>
+> Please refer to the comprehensive [API Blueprint](../../docs/blueprint.md) for the most current and complete API documentation including:
+> - All API endpoints with examples
+> - JWT authentication implementation
+> - Webhook system documentation
+> - Error codes and resilience patterns
+> - Security headers and CORS configuration
+> - Rate limiting specifications
+> - Integration examples and best practices
+>
+> This file is kept for historical reference only and may not reflect the current implementation.
+
 ## Health Endpoint
 
 ### GET /api/health
