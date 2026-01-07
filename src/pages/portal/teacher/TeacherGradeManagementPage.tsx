@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Edit, AlertTriangle } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { SlideUp } from '@/components/animations';
 import { toast } from 'sonner';
 import { useQuery, useMutation, queryClient } from '@/lib/api-client';
 import { useAuthStore } from '@/lib/authStore';
@@ -78,12 +78,7 @@ export function TeacherGradeManagementPage() {
     return !isValidScore(score);
   }, [currentScore]);
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-      className="space-y-6"
-    >
+    <SlideUp className="space-y-6">
       <h1 className="text-3xl font-bold">Grade Management</h1>
       <Card>
         <CardHeader>
@@ -177,10 +172,11 @@ export function TeacherGradeManagementPage() {
                     max="100"
                     step="1"
                     aria-invalid={isScoreInvalid}
+                    aria-describedby="score-helper score-error"
                   />
-                  <p className="text-xs text-muted-foreground">Enter a score between 0 and 100. Leave empty for no score.</p>
+                  <p id="score-helper" className="text-xs text-muted-foreground">Enter a score between 0 and 100. Leave empty for no score.</p>
                   {isScoreInvalid && (
-                    <p className="text-xs text-destructive" role="alert">
+                    <p id="score-error" className="text-xs text-destructive" role="alert">
                       Please enter a valid score between 0 and 100
                     </p>
                   )}
@@ -198,20 +194,21 @@ export function TeacherGradeManagementPage() {
                     className="col-span-3"
                     placeholder="Enter feedback..."
                     rows={3}
+                    aria-describedby="feedback-helper"
                   />
-                  <p className="text-xs text-muted-foreground">Provide constructive feedback to help student improve</p>
+                  <p id="feedback-helper" className="text-xs text-muted-foreground">Provide constructive feedback to help student improve</p>
                 </div>
               </div>
             </div>
             <DialogFooter>
               <DialogClose asChild><Button type="button" variant="secondary">Cancel</Button></DialogClose>
-              <Button type="submit" onClick={handleSaveChanges} disabled={gradeMutation.isPending}>
+              <Button type="submit" onClick={handleSaveChanges} disabled={gradeMutation.isPending} aria-busy={gradeMutation.isPending}>
                 {gradeMutation.isPending ? 'Saving...' : 'Save changes'}
               </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
       )}
-    </motion.div>
+    </SlideUp>
   );
 }

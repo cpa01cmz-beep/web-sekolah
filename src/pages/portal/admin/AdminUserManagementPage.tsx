@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Edit, Trash2, PlusCircle, AlertTriangle, GraduationCap, Users, UserCog, Shield } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { SlideUp } from '@/components/animations';
 import { toast } from 'sonner';
 import { UserRole, SchoolUser } from '@shared/types';
 import { useQuery, useMutation, queryClient } from '@/lib/api-client';
@@ -83,12 +83,7 @@ export function AdminUserManagementPage() {
     deleteUserMutation.mutate(userId);
   };
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-      className="space-y-6"
-    >
+    <SlideUp className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">User Management</h1>
@@ -216,6 +211,6 @@ export function AdminUserManagementPage() {
           )}
         </CardContent>
       </Card>
-    </motion.div>
+    </SlideUp>
   );
 }

@@ -94,16 +94,16 @@ Future versions will be prefixed: `/api/v2/...`
 
 ## Authentication
 
-JWT authentication is fully implemented and integrated into all protected API routes.
+Password authentication is fully implemented using PBKDF2 with 100,000 iterations and random salt per user.
 
-### JWT Authentication Flow
+### Password Authentication Flow
 
 ```typescript
 // Login request
 POST /api/auth/login
 {
   "email": "user@example.com",
-  "password": "securepassword",
+  "password": "password123",
   "role": "student"
 }
 
@@ -121,6 +121,15 @@ POST /api/auth/login
 Authorization: Bearer eyJhbGciOiJIUzI1NiIs...
 ```
 
+**Password Security**
+
+- **Hashing Algorithm**: PBKDF2 (Password-Based Key Derivation Function 2)
+- **Iterations**: 100,000 (OWASP recommendation)
+- **Hash Algorithm**: SHA-256
+- **Salt**: 16 bytes (128 bits) random salt per password
+- **Output**: 32 bytes (256 bits) hash
+- **Storage Format**: `salt:hash` (hex encoded)
+
 **Protected Routes**
 
 All protected routes require authentication via the `authenticate()` middleware and enforce role-based authorization using the `authorize()` middleware:
@@ -131,11 +140,13 @@ All protected routes require authentication via the `authenticate()` middleware 
 
 **Implementation Details**
 
-- JWT token generation and verification: `worker/middleware/auth.ts`
+- Password hashing: `worker/password-utils.ts` - PBKDF2 with 100,000 iterations
 - Login endpoint: `POST /api/auth/login` - `worker/auth-routes.ts`
+- Token generation and verification: `worker/middleware/auth.ts`
 - Token verification: `GET /api/auth/verify` - `worker/auth-routes.ts`
 - Token expiration: 24 hours (configurable)
 - Role-based authorization: All protected routes use `authorize(role)` middleware
+- Password change support: User creation and update routes handle password hashing
 
 ## Request/Response Format
 
@@ -1754,6 +1765,464 @@ Monitor key metrics:
 - Request latency (p50, p95, p99)
 - Error rates (by status code, error type)
 - Webhook delivery success rate
+
+---
+
+## Integration Monitoring System
+
+The integration monitoring system provides comprehensive observability for all resilience patterns and integration endpoints. It automatically tracks circuit breaker state, rate limiting statistics, webhook delivery metrics, and API error rates.
+
+### Enhanced Health Check Endpoint
+
+#### GET /api/health
+
+Provides comprehensive system health with resilience pattern states.
+
+**Public Endpoint** (no authentication required)
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "status": "healthy",
+    "timestamp": "2026-01-07T12:00:00.000Z",
+    "uptime": "86400.50s",
+    "systemHealth": {
+      "circuitBreaker": "CLOSED (healthy)",
+      "webhook": "healthy",
+      "rateLimiting": "healthy"
+    },
+    "webhook": {
+      "successRate": "98.50%",
+      "totalDeliveries": 1250,
+      "successfulDeliveries": 1232,
+      "failedDeliveries": 18,
+      "pendingDeliveries": 3
+    },
+    "rateLimit": {
+      "blockRate": "0.25%",
+      "totalRequests": 50000,
+      "blockedRequests": 125,
+      "currentEntries": 450
+    }
+  },
+  "requestId": "uuid"
+}
+```
+
+**System Health States:**
+- **Circuit Breaker:**
+  - `CLOSED (healthy)`: Normal operation
+  - `OPEN (degraded)`: Circuit breaker has opened, requests are being rejected
+- **Webhook:**
+  - `healthy`: Success rate ≥ 95%
+  - `degraded`: Success rate ≥ 80% and < 95%
+  - `unhealthy`: Success rate < 80%
+- **Rate Limiting:**
+  - `healthy`: Block rate < 1%
+  - `elevated`: Block rate ≥ 1% and < 5%
+  - `high`: Block rate ≥ 5%
+
+### Admin Monitoring Endpoints
+
+All monitoring endpoints require admin authentication and are protected by rate limiting.
+
+#### GET /api/admin/monitoring/health
+
+Get comprehensive integration health metrics including all resilience pattern states.
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "status": "healthy",
+    "metrics": {
+      "timestamp": "2026-01-07T12:00:00.000Z",
+      "uptime": 86400500,
+      "circuitBreaker": {
+        "isOpen": false,
+        "failureCount": 0,
+        "lastFailureTime": 0,
+        "nextAttemptTime": 0
+      },
+      "rateLimit": {
+        "totalRequests": 50000,
+        "blockedRequests": 125,
+        "currentEntries": 450,
+        "windowMs": 900000
+      },
+      "webhook": {
+        "totalEvents": 1500,
+        "pendingEvents": 5,
+        "totalDeliveries": 1250,
+        "successfulDeliveries": 1232,
+        "failedDeliveries": 18,
+        "pendingDeliveries": 3,
+        "averageDeliveryTime": 450
+      },
+      "errors": {
+        "totalErrors": 75,
+        "errorsByCode": {
+          "VALIDATION_ERROR": 25,
+          "NOT_FOUND": 30,
+          "UNAUTHORIZED": 10,
+          "RATE_LIMIT_EXCEEDED": 10
+        },
+        "errorsByStatus": {
+          "400": 25,
+          "404": 30,
+          "401": 10,
+          "429": 10
+        },
+        "recentErrors": [
+          {
+            "code": "NOT_FOUND",
+            "status": 404,
+            "timestamp": 1736246400000,
+            "endpoint": "/api/users/non-existent"
+          }
+        ]
+      }
+    }
+  },
+  "requestId": "uuid"
+}
+```
+
+#### GET /api/admin/monitoring/circuit-breaker
+
+Get circuit breaker state (note: this tracks client-side circuit breaker).
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "circuitBreaker": {
+      "isOpen": false,
+      "failureCount": 0,
+      "lastFailureTime": 0,
+      "nextAttemptTime": 0
+    }
+  },
+  "requestId": "uuid"
+}
+```
+
+#### POST /api/admin/monitoring/circuit-breaker/reset
+
+Request manual circuit breaker reset (client-side action required).
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "message": "Circuit breaker reset requested. This action must be performed on client side.",
+    "action": "Call resetCircuitBreaker() from client-side api-client module"
+  },
+  "requestId": "uuid"
+}
+```
+
+**Client-Side Reset:**
+```typescript
+import { resetCircuitBreaker } from '@/lib/api-client';
+resetCircuitBreaker();
+```
+
+#### GET /api/admin/monitoring/rate-limit
+
+Get rate limiting statistics.
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "stats": {
+      "totalRequests": 50000,
+      "blockedRequests": 125,
+      "currentEntries": 450,
+      "windowMs": 900000
+    },
+    "blockRate": "0.25%"
+  },
+  "requestId": "uuid"
+}
+```
+
+#### GET /api/admin/monitoring/webhooks
+
+Get webhook delivery statistics.
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "stats": {
+      "totalEvents": 1500,
+      "pendingEvents": 5,
+      "totalDeliveries": 1250,
+      "successfulDeliveries": 1232,
+      "failedDeliveries": 18,
+      "pendingDeliveries": 3,
+      "averageDeliveryTime": 450
+    },
+    "successRate": "98.50%"
+  },
+  "requestId": "uuid"
+}
+```
+
+#### GET /api/admin/monitoring/webhooks/deliveries
+
+Get webhook delivery history and pending retries.
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "pending": [
+      {
+        "id": "delivery-123",
+        "webhookConfigId": "webhook-1",
+        "attempts": 2,
+        "nextAttemptAt": "2026-01-07T12:15:00.000Z"
+      }
+    ],
+    "total": 1250,
+    "recent": [
+      {
+        "id": "delivery-1250",
+        "eventId": "event-1250",
+        "webhookConfigId": "webhook-1",
+        "status": "delivered",
+        "statusCode": 200,
+        "attempts": 1,
+        "createdAt": "2026-01-07T12:00:00.000Z",
+        "updatedAt": "2026-01-07T12:00:01.000Z"
+      }
+    ]
+  },
+  "requestId": "uuid"
+}
+```
+
+#### GET /api/admin/monitoring/errors
+
+Get API error statistics and recent error history.
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "totalErrors": 75,
+    "errorsByCode": {
+      "VALIDATION_ERROR": 25,
+      "NOT_FOUND": 30,
+      "UNAUTHORIZED": 10,
+      "RATE_LIMIT_EXCEEDED": 10
+    },
+    "errorsByStatus": {
+      "400": 25,
+      "404": 30,
+      "401": 10,
+      "429": 10
+    },
+    "recentErrors": [
+      {
+        "code": "NOT_FOUND",
+        "status": 404,
+        "timestamp": 1736246400000,
+        "endpoint": "/api/users/non-existent"
+      }
+    ]
+  },
+  "requestId": "uuid"
+}
+```
+
+#### GET /api/admin/monitoring/summary
+
+Get comprehensive integration summary with system health assessment.
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "timestamp": "2026-01-07T12:00:00.000Z",
+    "uptime": "86400.50s",
+    "systemHealth": {
+      "circuitBreaker": "CLOSED (healthy)",
+      "webhook": "healthy",
+      "rateLimiting": "healthy"
+    },
+    "circuitBreaker": {
+      "isOpen": false,
+      "failureCount": 0,
+      "lastFailureTime": 0,
+      "nextAttemptTime": 0
+    },
+    "rateLimit": {
+      "totalRequests": 50000,
+      "blockedRequests": 125,
+      "currentEntries": 450,
+      "windowMs": 900000,
+      "blockRate": "0.25%"
+    },
+    "webhook": {
+      "totalEvents": 1500,
+      "pendingEvents": 5,
+      "totalDeliveries": 1250,
+      "successfulDeliveries": 1232,
+      "failedDeliveries": 18,
+      "pendingDeliveries": 3,
+      "averageDeliveryTime": 450,
+      "successRate": "98.50%"
+    },
+    "errors": {
+      "total": 75,
+      "byCode": {
+        "VALIDATION_ERROR": 25,
+        "NOT_FOUND": 30,
+        "UNAUTHORIZED": 10,
+        "RATE_LIMIT_EXCEEDED": 10
+      },
+      "byStatus": {
+        "400": 25,
+        "404": 30,
+        "401": 10,
+        "429": 10
+      }
+    }
+  },
+  "requestId": "uuid"
+}
+```
+
+#### POST /api/admin/monitoring/reset-monitor
+
+Reset integration monitoring statistics (useful for testing or after incident resolution).
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "message": "Integration monitor reset successfully"
+  },
+  "requestId": "uuid"
+}
+```
+
+### Monitoring Metrics Explained
+
+#### Circuit Breaker Metrics
+
+| Metric | Description | Healthy State |
+|---------|-------------|---------------|
+| `isOpen` | Whether circuit breaker is currently open | `false` |
+| `failureCount` | Number of consecutive failures | `0` or low |
+| `lastFailureTime` | Timestamp of most recent failure | N/A |
+| `nextAttemptTime` | When circuit breaker will attempt to recover | N/A |
+
+#### Rate Limit Metrics
+
+| Metric | Description | Healthy State |
+|---------|-------------|---------------|
+| `totalRequests` | Total requests processed | N/A |
+| `blockedRequests` | Total requests blocked by rate limiting | Low |
+| `currentEntries` | Active rate limit entries | N/A |
+| `blockRate` | Percentage of requests blocked | `< 1%` |
+
+#### Webhook Metrics
+
+| Metric | Description | Healthy State |
+|---------|-------------|---------------|
+| `totalEvents` | Total webhook events triggered | N/A |
+| `pendingEvents` | Events not yet processed | Low |
+| `totalDeliveries` | Total delivery attempts | N/A |
+| `successfulDeliveries` | Successful deliveries | High |
+| `failedDeliveries` | Failed deliveries (after retries) | Low |
+| `pendingDeliveries` | Deliveries pending retry | Low |
+| `averageDeliveryTime` | Average time for successful delivery (ms) | Low |
+| `successRate` | Percentage of successful deliveries | `≥ 95%` |
+
+#### API Error Metrics
+
+| Metric | Description |
+|---------|-------------|
+| `totalErrors` | Total API errors tracked |
+| `errorsByCode` | Errors grouped by error code (e.g., NOT_FOUND, VALIDATION_ERROR) |
+| `errorsByStatus` | Errors grouped by HTTP status code (e.g., 404, 400) |
+| `recentErrors` | Last 100 errors with timestamp and endpoint |
+
+### Setting Up Monitoring Dashboard
+
+Create a monitoring dashboard to visualize integration health:
+
+```typescript
+import { apiClient } from '@/lib/api-client';
+
+async function updateMonitoringDashboard() {
+  // Get comprehensive summary
+  const summary = await apiClient<IntegrationSummary>(
+    '/api/admin/monitoring/summary'
+  );
+
+  // Update UI
+  document.getElementById('uptime').textContent = summary.uptime;
+  document.getElementById('circuit-breaker-status').textContent =
+    summary.systemHealth.circuitBreaker;
+  document.getElementById('webhook-success-rate').textContent =
+    summary.webhook.successRate;
+  document.getElementById('rate-limit-block-rate').textContent =
+    summary.rateLimit.blockRate;
+  document.getElementById('total-errors').textContent =
+    summary.errors.total.toString();
+}
+
+// Update every 30 seconds
+setInterval(updateMonitoringDashboard, 30000);
+```
+
+### Alerting Recommendations
+
+Set up alerts for the following conditions:
+
+1. **Circuit Breaker Open**
+   - Trigger: Circuit breaker `isOpen` is `true`
+   - Severity: Critical
+   - Action: Investigate backend health
+
+2. **Low Webhook Success Rate**
+   - Trigger: Webhook success rate < 95%
+   - Severity: Warning
+   - Action: Check webhook URLs and receiver logs
+
+3. **High Rate Limit Block Rate**
+   - Trigger: Rate limit block rate > 5%
+   - Severity: Warning
+   - Action: Review request patterns, consider rate limit increases
+
+4. **High Error Rate**
+   - Trigger: Total errors > 100 in last hour
+   - Severity: Warning
+   - Action: Review error codes and endpoints
+
+5. **Webhook Delivery Failures**
+   - Trigger: Failed webhook deliveries > 10 in last hour
+   - Severity: Warning
+   - Action: Check webhook configuration and endpoint health
+
+---
 
 ### Production Deployment Checklist
 

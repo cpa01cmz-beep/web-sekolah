@@ -3,21 +3,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { AlertTriangle } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { SlideUp } from '@/components/animations';
 import { useStudentSchedule } from '@/hooks/useStudent';
 import { useAuthStore } from '@/lib/authStore';
 import { useMemo } from 'react';
-
-const pageVariants = {
-  initial: { opacity: 0, y: 20 },
-  in: { opacity: 1, y: 0 },
-  out: { opacity: 0, y: -20 },
-};
-
-const cardVariants = {
-  initial: { opacity: 0, scale: 0.95 },
-  in: { opacity: 1, scale: 1 },
-};
 
 function ScheduleSkeleton() {
   const days = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat'];
@@ -68,10 +57,10 @@ export function StudentSchedulePage() {
   }, [schedule]);
 
   if (isLoading) return (
-    <motion.div className="space-y-6">
+    <SlideUp className="space-y-6">
       <Skeleton className="h-9 w-1/3" />
       <ScheduleSkeleton />
-    </motion.div>
+    </SlideUp>
   );
 
   if (error) {
@@ -85,22 +74,11 @@ export function StudentSchedulePage() {
   }
 
   return (
-    <motion.div
-      initial="initial"
-      animate="in"
-      exit="out"
-      variants={pageVariants}
-      transition={{ type: 'tween', ease: 'anticipate', duration: 0.5 }}
-      className="space-y-6"
-    >
+    <SlideUp className="space-y-6">
       <h1 className="text-3xl font-bold">Jadwal Pelajaran</h1>
       <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
         {Object.entries(scheduleByDay).map(([day, lessons], index) => (
-          <motion.div
-            key={day}
-            variants={cardVariants}
-            transition={{ duration: 0.5, delay: index * 0.1 }}
-          >
+          <SlideUp key={day} delay={index * 0.1}>
             <Card className="h-full hover:shadow-lg transition-shadow duration-200">
               <CardHeader>
                 <CardTitle>{day}</CardTitle>
@@ -131,9 +109,9 @@ export function StudentSchedulePage() {
                 )}
               </CardContent>
             </Card>
-          </motion.div>
+          </SlideUp>
         ))}
       </div>
-    </motion.div>
+    </SlideUp>
   );
 }

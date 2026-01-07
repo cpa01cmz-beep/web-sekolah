@@ -1,4 +1,5 @@
 import type { Context, Next } from 'hono';
+import { integrationMonitor } from '../integration-monitor';
 
 interface RateLimitStore {
   count: number;
@@ -73,6 +74,7 @@ function getOrCreateEntry(key: string, config: RateLimitConfig): RateLimitStore 
   };
   
   store.set(key, entry);
+  integrationMonitor.updateRateLimitEntries(store.size);
   return entry;
 }
 
@@ -92,6 +94,8 @@ export function rateLimit(options: RateLimitMiddlewareOptions = {}) {
     const now = Date.now();
     
     entry.count++;
+    const blocked = entry.count > config.maxRequests;
+    integrationMonitor.recordRateLimitRequest(blocked);
     
     const info: RateLimitInfo = {
       limit: config.maxRequests,
@@ -180,5 +184,6 @@ export function clearRateLimitStore(): void {
 
 export function getRateLimitStore(): Map<string, RateLimitStore> {
   cleanupExpiredEntries();
+  integrationMonitor.updateRateLimitEntries(store.size);
   return new Map(store);
 }

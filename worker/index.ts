@@ -6,10 +6,12 @@ import { logger } from 'hono/logger';
 import { userRoutes } from './user-routes';
 import { authRoutes } from './auth-routes';
 import { webhookRoutes } from './webhook-routes';
+import { adminMonitoringRoutes } from './admin-monitoring-routes';
 import { Env, GlobalDurableObject, ok, notFound, serverError } from './core-utils';
 import { defaultRateLimiter, strictRateLimiter } from './middleware/rate-limit';
 import { defaultTimeout } from './middleware/timeout';
 import { securityHeaders } from './middleware/security-headers';
+import { responseErrorMonitoring } from './middleware/error-monitoring';
 
 // Need to export GlobalDurableObject to make it available in wrangler
 export { GlobalDurableObject };
@@ -62,6 +64,8 @@ app.use('/api/*', securityHeaders());
 
 app.use('/api/*', defaultTimeout());
 
+app.use('/api/*', responseErrorMonitoring());
+
 app.use('/api/client-errors', strictRateLimiter());
 app.use('/api/seed', strictRateLimiter());
 app.use('/api/users', defaultRateLimiter());
@@ -76,8 +80,38 @@ app.use('/api/admin/webhooks', strictRateLimiter());
 authRoutes(app);
 userRoutes(app);
 webhookRoutes(app);
+adminMonitoringRoutes(app);
 
-app.get('/api/health', (c) => ok(c, { status: 'healthy', timestamp: new Date().toISOString() }));
+app.get('/api/health', async (c) => {
+  const { integrationMonitor } = await import('./integration-monitor');
+  const metrics = integrationMonitor.getHealthMetrics();
+  const webhookSuccessRate = integrationMonitor.getWebhookSuccessRate();
+  const rateLimitBlockRate = integrationMonitor.getRateLimitBlockRate();
+
+  return ok(c, {
+    status: 'healthy',
+    timestamp: new Date().toISOString(),
+    uptime: `${(metrics.uptime / 1000).toFixed(2)}s`,
+    systemHealth: {
+      circuitBreaker: metrics.circuitBreaker?.isOpen ? 'OPEN (degraded)' : 'CLOSED (healthy)',
+      webhook: webhookSuccessRate >= 95 ? 'healthy' : webhookSuccessRate >= 80 ? 'degraded' : 'unhealthy',
+      rateLimiting: rateLimitBlockRate < 1 ? 'healthy' : rateLimitBlockRate < 5 ? 'elevated' : 'high',
+    },
+    webhook: {
+      successRate: `${webhookSuccessRate.toFixed(2)}%`,
+      totalDeliveries: metrics.webhook.totalDeliveries,
+      successfulDeliveries: metrics.webhook.successfulDeliveries,
+      failedDeliveries: metrics.webhook.failedDeliveries,
+      pendingDeliveries: metrics.webhook.pendingDeliveries,
+    },
+    rateLimit: {
+      blockRate: `${rateLimitBlockRate.toFixed(2)}%`,
+      totalRequests: metrics.rateLimit.totalRequests,
+      blockedRequests: metrics.rateLimit.blockedRequests,
+      currentEntries: metrics.rateLimit.currentEntries,
+    },
+  });
+});
 
 app.post('/api/client-errors', async (c) => {
   try {

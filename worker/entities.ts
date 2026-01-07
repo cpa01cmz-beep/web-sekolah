@@ -1,5 +1,6 @@
 import { IndexedEntity, Index, SecondaryIndex, type Env } from "./core-utils";
 import type { SchoolUser, SchoolClass, Course, Grade, Announcement, ScheduleItem, SchoolData, UserRole, Student, WebhookConfig, WebhookEvent, WebhookDelivery } from "@shared/types";
+import { hashPassword } from "./password-utils";
 
 const now = new Date().toISOString();
 
@@ -186,7 +187,7 @@ const seedData: SchoolData = {
 export class UserEntity extends IndexedEntity<SchoolUser> {
   static readonly entityName = "user";
   static readonly indexName = "users";
-  static readonly initialState: SchoolUser = { id: "", name: "", email: "", role: 'student', avatarUrl: '', classId: '', studentIdNumber: '', createdAt: '', updatedAt: '', deletedAt: null };
+  static readonly initialState: SchoolUser = { id: "", name: "", email: "", role: 'student', avatarUrl: '', classId: '', studentIdNumber: '', passwordHash: null, createdAt: '', updatedAt: '', deletedAt: null };
   static seedData = seedData.users;
 
   static async getByRole(env: Env, role: UserRole): Promise<SchoolUser[]> {
@@ -198,6 +199,7 @@ export class UserEntity extends IndexedEntity<SchoolUser> {
     return users.filter((u): u is Student => u.role === 'student' && u.classId === classId);
   }
 }
+
 export class ClassEntity extends IndexedEntity<SchoolClass> {
   static readonly entityName = "class";
   static readonly indexName = "classes";
@@ -271,14 +273,23 @@ export class ScheduleEntity extends IndexedEntity<ClassScheduleState> {
 }
 
 export async function ensureAllSeedData(env: Env) {
-  await Promise.all([
-  UserEntity.ensureSeed(env),
-  ClassEntity.ensureSeed(env),
-  CourseEntity.ensureSeed(env),
-  GradeEntity.ensureSeed(env),
-  AnnouncementEntity.ensureSeed(env),
-  ScheduleEntity.ensureSeed(env)]
-  );
+  await UserEntity.ensureSeed(env);
+  await ClassEntity.ensureSeed(env);
+  await CourseEntity.ensureSeed(env);
+  await GradeEntity.ensureSeed(env);
+  await AnnouncementEntity.ensureSeed(env);
+  await ScheduleEntity.ensureSeed(env);
+
+  const { items: users } = await UserEntity.list(env);
+  const defaultPassword = 'password123';
+
+  for (const user of users) {
+    if (!user.passwordHash) {
+      const { hash } = await hashPassword(defaultPassword);
+      const entity = new UserEntity(env, user.id);
+      await entity.patch({ passwordHash: hash });
+    }
+  }
 }
 
 export class WebhookConfigEntity extends IndexedEntity<WebhookConfig> {

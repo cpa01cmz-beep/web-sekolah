@@ -32,6 +32,7 @@ export interface BaseUser extends TimestampedEntity {
   email: string;
   role: UserRole;
   avatarUrl: string;
+  passwordHash?: string | null;
 }
 export interface Student extends BaseUser {
   role: 'student';
@@ -152,6 +153,7 @@ export interface CreateUserData {
   name: string;
   email: string;
   role: UserRole;
+  password?: string;
   classId?: string;
   studentIdNumber?: string;
   classIds?: string[];
@@ -161,6 +163,7 @@ export interface CreateUserData {
 export interface UpdateUserData {
   name?: string;
   email?: string;
+  password?: string;
   classId?: string;
   studentIdNumber?: string;
   classIds?: string[];
