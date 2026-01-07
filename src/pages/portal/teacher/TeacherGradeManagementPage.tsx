@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -21,11 +21,11 @@ interface UpdateGradeData {
   feedback: string;
 }
 type StudentGrade = {
-  id: string; // studentId
+  id: string;
   name: string;
   score: number | null;
   feedback: string;
-  gradeId: string | null; // This is the actual ID of the grade record
+  gradeId: string | null;
 };
 export function TeacherGradeManagementPage() {
   const user = useAuthStore((state) => state.user);
@@ -41,7 +41,7 @@ export function TeacherGradeManagementPage() {
     ['classes', selectedClass || '', 'students'],
     { enabled: !!selectedClass }
   );
-  const gradeMutation = useMutation<UpdateGradeData>(['grades', editingStudent?.gradeId || ''], {
+  const gradeMutation = useMutation<UpdateGradeData, Error, UpdateGradeData>(['grades', editingStudent?.gradeId || ''], {
     method: 'PUT',
     onSuccess: () => {
       toast.success(`Grade for ${editingStudent?.name} updated successfully.`);
@@ -69,6 +69,12 @@ export function TeacherGradeManagementPage() {
     setCurrentScore(student.score?.toString() || '');
     setCurrentFeedback(student.feedback || '');
   };
+
+  const isScoreInvalid = useMemo(() => {
+    if (currentScore === '') return false;
+    const score = parseInt(currentScore, 10);
+    return isNaN(score) || score < 0 || score > 100;
+  }, [currentScore]);
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -112,58 +118,93 @@ export function TeacherGradeManagementPage() {
                 <Skeleton className="h-10 w-full" />
               </div>
             ) : students && students.length > 0 ? (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Student Name</TableHead>
-                    <TableHead className="text-center">Score</TableHead>
-                    <TableHead>Feedback</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {students.map(student => (
-                    <TableRow key={student.id}>
-                      <TableCell className="font-medium">{student.name}</TableCell>
-                      <TableCell className="text-center">{student.score ?? 'N/A'}</TableCell>
-                      <TableCell className="text-muted-foreground truncate max-w-xs">{student.feedback}</TableCell>
-                      <TableCell className="text-right">
-                        <Dialog onOpenChange={(open) => !open && setEditingStudent(null)}>
-                          <DialogTrigger asChild>
-                            <Button variant="outline" size="icon" onClick={() => handleEditClick(student)}>
-                              <Edit className="h-4 w-4" />
-                            </Button>
-                          </DialogTrigger>
-                          {editingStudent?.id === student.id && (
-                            <DialogContent>
-                              <DialogHeader>
-                                <DialogTitle>Edit Grade for {editingStudent.name}</DialogTitle>
-                                <DialogDescription>Update the score and provide feedback.</DialogDescription>
-                              </DialogHeader>
-                              <div className="grid gap-4 py-4">
-                                <div className="grid grid-cols-4 items-center gap-4">
-                                  <Label htmlFor="score" className="text-right">Score</Label>
-                                  <Input id="score" type="number" value={currentScore} onChange={(e) => setCurrentScore(e.target.value)} className="col-span-3" placeholder="0-100" />
-                                </div>
-                                <div className="grid grid-cols-4 items-center gap-4">
-                                  <Label htmlFor="feedback" className="text-right">Feedback</Label>
-                                  <Textarea id="feedback" value={currentFeedback} onChange={(e) => setCurrentFeedback(e.target.value)} className="col-span-3" placeholder="Enter feedback..." />
-                                </div>
-                              </div>
-                              <DialogFooter>
-                                <DialogClose asChild><Button type="button" variant="secondary">Cancel</Button></DialogClose>
-                                <Button type="submit" onClick={handleSaveChanges} disabled={gradeMutation.isPending}>
-                                  {gradeMutation.isPending ? 'Saving...' : 'Save changes'}
-                                </Button>
-                              </DialogFooter>
-                            </DialogContent>
-                          )}
-                        </Dialog>
-                      </TableCell>
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Student Name</TableHead>
+                      <TableHead className="text-center">Score</TableHead>
+                      <TableHead>Feedback</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {students.map(student => (
+                      <TableRow key={student.id}>
+                        <TableCell className="font-medium">{student.name}</TableCell>
+                        <TableCell className="text-center">{student.score ?? 'N/A'}</TableCell>
+                        <TableCell className="text-muted-foreground truncate max-w-xs">{student.feedback}</TableCell>
+                        <TableCell className="text-right">
+                          <Dialog onOpenChange={(open) => !open && setEditingStudent(null)}>
+                            <DialogTrigger asChild>
+                              <Button variant="outline" size="icon" onClick={() => handleEditClick(student)} aria-label={`Edit grade for ${student.name}`}>
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                            </DialogTrigger>
+                            {editingStudent?.id === student.id && (
+                              <DialogContent>
+                                <DialogHeader>
+                                  <DialogTitle>Edit Grade for {editingStudent.name}</DialogTitle>
+                                  <DialogDescription>Update the score and provide feedback.</DialogDescription>
+                                </DialogHeader>
+                                <div className="grid gap-6 py-4">
+                                  <div className="grid grid-cols-4 items-start gap-4">
+                                    <Label htmlFor="score" className="text-right pt-2">
+                                      Score
+                                    </Label>
+                                    <div className="col-span-3 space-y-2">
+                                      <Input
+                                        id="score"
+                                        type="number"
+                                        value={currentScore}
+                                        onChange={(e) => setCurrentScore(e.target.value)}
+                                        className="col-span-3"
+                                        placeholder="0-100"
+                                        min="0"
+                                        max="100"
+                                        step="1"
+                                        aria-invalid={isScoreInvalid}
+                                      />
+                                      <p className="text-xs text-muted-foreground">Enter a score between 0 and 100. Leave empty for no score.</p>
+                                      {isScoreInvalid && (
+                                        <p className="text-xs text-destructive" role="alert">
+                                          Please enter a valid score between 0 and 100
+                                        </p>
+                                      )}
+                                    </div>
+                                  </div>
+                                  <div className="grid grid-cols-4 items-start gap-4">
+                                    <Label htmlFor="feedback" className="text-right pt-2">
+                                      Feedback
+                                    </Label>
+                                    <div className="col-span-3 space-y-2">
+                                      <Textarea
+                                        id="feedback"
+                                        value={currentFeedback}
+                                        onChange={(e) => setCurrentFeedback(e.target.value)}
+                                        className="col-span-3"
+                                        placeholder="Enter feedback..."
+                                        rows={3}
+                                      />
+                                      <p className="text-xs text-muted-foreground">Provide constructive feedback to help student improve</p>
+                                    </div>
+                                  </div>
+                                </div>
+                                <DialogFooter>
+                                  <DialogClose asChild><Button type="button" variant="secondary">Cancel</Button></DialogClose>
+                                  <Button type="submit" onClick={handleSaveChanges} disabled={gradeMutation.isPending}>
+                                    {gradeMutation.isPending ? 'Saving...' : 'Save changes'}
+                                  </Button>
+                                </DialogFooter>
+                              </DialogContent>
+                            )}
+                          </Dialog>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
             ) : (
               <p className="text-muted-foreground text-center py-4">No students found in this class.</p>
             )}

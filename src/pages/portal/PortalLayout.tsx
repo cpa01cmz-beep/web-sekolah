@@ -51,7 +51,7 @@ export function PortalLayout() {
           <div className="md:hidden">
             <Sheet open={isMobileMenuOpen} onOpenChange={setMobileMenuOpen}>
               <SheetTrigger asChild>
-                <Button variant="outline" size="icon">
+                <Button variant="outline" size="icon" aria-label="Open navigation menu">
                   <Menu className="h-6 w-6" />
                 </Button>
               </SheetTrigger>
@@ -89,7 +89,7 @@ export function PortalLayout() {
             <h1 className="text-lg font-semibold">Welcome, {user.name}!</h1>
           </div>
           <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon" className="rounded-full">
+            <Button variant="ghost" size="icon" className="rounded-full" aria-label="View notifications">
               <Bell className="h-5 w-5" />
             </Button>
             <Avatar>

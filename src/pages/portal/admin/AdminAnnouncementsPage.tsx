@@ -96,10 +96,10 @@ export function AdminAnnouncementsPage() {
                         </p>
                       </div>
                       <div className="flex space-x-2">
-                        <Button variant="outline" size="icon" className="h-8 w-8">
+                        <Button variant="outline" size="icon" className="h-8 w-8" aria-label={`Edit announcement: ${ann.title}`}>
                           <Edit className="h-4 w-4" />
                         </Button>
-                        <Button variant="destructive" size="icon" className="h-8 w-8" onClick={() => handleDelete(ann.id)}>
+                        <Button variant="destructive" size="icon" className="h-8 w-8" onClick={() => handleDelete(ann.id)} aria-label={`Delete announcement: ${ann.title}`}>
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>

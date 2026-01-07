@@ -462,7 +462,7 @@ class ErrorReporter {
     return {
       ...baseData,
       level: (data.level ?? "error") as "error" | "warning" | "info",
-      category: categorize(data.message),
+      category: categorizeError(data.message),
       ...data,
     };
   }
@@ -677,7 +677,7 @@ const createImmediateErrorPayload = (
   url: window.location.href,
   timestamp: new Date().toISOString(),
   level,
-  category: categorize(message),
+  category: categorizeError(message),
 });
 
 // Shared filtering logic for immediate interceptors

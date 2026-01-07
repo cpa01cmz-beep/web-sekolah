@@ -14,6 +14,83 @@ This document tracks architectural refactoring tasks for Akademia Pro.
 | Low | State Management Guidelines | Pending | Document and enforce consistent state management patterns |
 | Low | Business Logic Extraction | Pending | Extract business logic to dedicated domain layer |
 
+## Documentation Fixes (2026-01-07)
+
+### Critical README Fixes
+
+1. **Fixed Clone URL** - Corrected generic placeholder to actual repository URL:
+   - Before: `https://github.com/your-username/akademia-pro.git`
+   - After: `https://github.com/cpa01cmz-beep/web-sekolah.git`
+
+2. **Fixed Project Directory** - Corrected directory name in installation instructions:
+   - Before: `cd akademia-pro`
+   - After: `cd web-sekolah`
+
+3. **Fixed Wiki Links** - Corrected broken relative paths to proper GitHub URLs:
+   - Before: `../../wiki/Home` (broken relative paths)
+   - After: `https://github.com/cpa01cmz-beep/web-sekolah/wiki/Home` (working absolute URLs)
+
+4. **Added Environment Configuration** - Added step to configure `.env` file:
+   - Added instruction to copy `.env.example` to `.env`
+   - Documented required environment variables for development
+
+**Benefits Achieved**:
+- ✅ Clone command now works with correct repository URL
+- ✅ Installation instructions match actual project directory name
+- ✅ Wiki links now function correctly
+- ✅ Developers are informed about required environment configuration
+
+## UI/UX Improvements (2026-01-07)
+
+### Completed
+
+1. **Accessibility - ARIA Labels** - Added descriptive `aria-label` attributes to all icon-only buttons:
+   - PortalLayout: Navigation menu button, notification bell
+   - PortalSidebar: Collapse/expand button
+   - SiteHeader: Mobile menu button
+   - AdminUserManagementPage: Edit and delete user buttons
+   - AdminAnnouncementsPage: Edit and delete announcement buttons
+   - TeacherGradeManagementPage: Edit grade button
+
+2. **Accessibility - Focus Management** - Verified Radix UI Dialog components provide:
+   - Focus trapping within dialogs
+   - Focus restoration to trigger element
+   - Proper initial focus on first interactive element
+   - Keyboard navigation support (Escape to close)
+
+3. **Accessibility - Color Independence** - Enhanced role badges in AdminUserManagementPage:
+   - Added icons (GraduationCap, Users, UserCog, Shield) to complement colors
+   - Icons marked with `aria-hidden="true"` to prevent duplicate screen reader announcements
+   - Visual labels preserved for all users
+
+4. **Form Improvements** - Enhanced accessibility of forms across the application:
+   - Added helper text below all form fields explaining expected input
+   - Added visual required field indicators using asterisks with `aria-label="required"`
+   - Added `aria-required` attributes to required fields
+   - Added `aria-invalid` attributes for real-time validation feedback
+   - Added inline error messages with `role="alert"` for validation failures
+   - Improved loading states on submit buttons
+
+5. **Accessibility - Aria-live Regions** - Verified Sonner toast library provides:
+   - Proper `aria-live` regions for announcements
+   - `role="alert"` for error toasts
+   - `role="status"` for info toasts
+   - Screen reader announcements for all notifications
+
+6. **Responsive Tables** - Made data tables mobile-friendly:
+   - Added `overflow-x-auto` wrapper to enable horizontal scrolling on mobile
+   - Applied to AdminUserManagementPage user table
+   - Applied to TeacherGradeManagementPage grades table
+   - Maintains usability on all screen sizes
+
+**Benefits Achieved**:
+- ✅ Improved keyboard navigation throughout the application
+- ✅ Better screen reader support for all interactive elements
+- ✅ Form validation feedback accessible to all users
+- ✅ Tables usable on mobile devices
+- ✅ Color-blind users can distinguish roles via icons
+- ✅ Zero regression (all 120 tests passing)
+
 ## Security Hardening (2026-01-07)
 
 ### Completed

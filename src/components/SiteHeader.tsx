@@ -90,9 +90,8 @@ export function SiteHeader() {
             </Button>
             <Sheet open={isMobileMenuOpen} onOpenChange={setMobileMenuOpen}>
               <SheetTrigger asChild className="md:hidden">
-                <Button variant="outline" size="icon">
+                <Button variant="outline" size="icon" aria-label="Open navigation menu">
                   <Menu className="h-6 w-6" />
-                  <span className="sr-only">Open menu</span>
                 </Button>
               </SheetTrigger>
               <SheetContent side="left">
