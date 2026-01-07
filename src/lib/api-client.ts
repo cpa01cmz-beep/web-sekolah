@@ -4,6 +4,7 @@
 
 import { QueryClient, useQuery as useTanstackQuery, useMutation as useTanstackMutation, UseQueryOptions, UseMutationOptions } from '@tanstack/react-query';
 import { ApiResponse, ErrorCode } from "../../shared/types";
+import { CachingTime } from '../config/time';
 
 const getAuthToken = () => localStorage.getItem('authToken');
 
@@ -156,11 +157,11 @@ async function fetchWithRetry<T>(
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 1000 * 60 * 5, // 5 minutes - consider data fresh for 5 min
-      gcTime: 1000 * 60 * 60 * 24, // 24 hours - keep cached data for 24 hours
-      refetchOnWindowFocus: false, // Don't refetch when window regains focus
-      refetchOnMount: false, // Don't refetch on mount if data is fresh
-      refetchOnReconnect: true, // Refetch on network reconnection
+      staleTime: CachingTime.FIVE_MINUTES,
+      gcTime: CachingTime.TWENTY_FOUR_HOURS,
+      refetchOnWindowFocus: false,
+      refetchOnMount: false,
+      refetchOnReconnect: true,
       retry: (failureCount, error: ApiError) => {
         if (!error.retryable) return false;
         if (error.status === 404) return false;

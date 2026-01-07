@@ -24,14 +24,16 @@ export const queryClient = new QueryClient({
 
 **After:**
 ```typescript
+import { CachingTime } from '@/config/time';
+
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 1000 * 60 * 5, // 5 minutes
-      gcTime: 1000 * 60 * 60 * 24, // 24 hours - NEW
-      refetchOnWindowFocus: false, // NEW
-      refetchOnMount: false, // NEW
-      refetchOnReconnect: true, // NEW
+      staleTime: CachingTime.FIVE_MINUTES,
+      gcTime: CachingTime.TWENTY_FOUR_HOURS,
+      refetchOnWindowFocus: false,
+      refetchOnMount: false,
+      refetchOnReconnect: true,
       retry: (failureCount, error: ApiError) => { /* ... */ },
       retryDelay: (attemptIndex) => Math.min(1000 * Math.pow(2, attemptIndex), 30000),
     },
@@ -41,7 +43,7 @@ export const queryClient = new QueryClient({
 
 ### 2. Data-Type Specific Caching (src/hooks/useStudent.ts)
 
-Different data types now have appropriate caching strategies:
+Different data types now have appropriate caching strategies with named constants:
 
 | Data Type | staleTime | gcTime | refetchOnWindowFocus | refetchOnMount | refetchOnReconnect |
 |-----------|-----------|---------|----------------------|----------------|-------------------|
@@ -94,13 +96,13 @@ Different data types now have appropriate caching strategies:
 
 **Before:**
 - All queries refetch on reconnection regardless of freshness
-- 10 active queries = 10 API calls on reconnect
+- 3 active queries = 3 API calls on reconnect
 
 **After:**
 - `refetchOnReconnect: true` for dynamic data (dashboard, grades, schedule)
 - `refetchOnReconnect: false` for static data (student card)
-- Only dynamic data refetches, static data preserved
-- **Savings: 30% fewer API calls on reconnect (7 vs 10)**
+- Only 2 of 3 queries refetch on reconnect
+- **Savings: 33% fewer API calls on reconnect (2 vs 3)**
 
 ## Quantified Benefits
 
@@ -125,11 +127,11 @@ Total per session (30 min): 45 API calls
 ```
 Tab switches: 10 switches × 0 refetches = 0 API calls/hour
 Mount refetches: 20 navigations × 0 refetches (stale) = ~5 API calls/hour (stale data only)
-Reconnects: 1 reconnect × 3 queries = 3 API calls/session
-Total per session (30 min): ~8 API calls
+Reconnects: 1 reconnect × 2 queries = 2 API calls/session (student card static)
+Total per session (30 min): ~7 API calls
 ```
 
-**Reduction: 45 → 8 API calls = 82% reduction**
+**Reduction: 45 → 7 API calls = 84% reduction**
 
 ### Bandwidth Savings
 
