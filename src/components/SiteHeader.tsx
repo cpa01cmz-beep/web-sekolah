@@ -52,7 +52,7 @@ export function SiteHeader() {
             <GraduationCap className="h-8 w-8 text-[#0D47A1]" />
             <span className="text-xl font-bold text-foreground">Akademia Pro</span>
           </Link>
-          <nav className="hidden md:flex items-center space-x-6">
+          <nav className="hidden md:flex items-center space-x-6" aria-label="Main navigation" role="navigation">
             {navLinks.map((link) => (
               link.submenu ? (
                 <DropdownMenu key={link.name}>
@@ -94,50 +94,52 @@ export function SiteHeader() {
                   <Menu className="h-6 w-6" />
                 </Button>
               </SheetTrigger>
-              <SheetContent side="left">
-                <div className="flex flex-col space-y-6 p-4">
-                  <Link to="/" className="flex items-center gap-2 mb-4" onClick={() => setMobileMenuOpen(false)}>
-                    <GraduationCap className="h-8 w-8 text-[#0D47A1]" />
-                    <span className="text-xl font-bold text-foreground">Akademia Pro</span>
-                  </Link>
-                  {navLinks.map((link) => (
-                    link.submenu ? (
-                      <div key={link.name} className="flex flex-col space-y-2">
-                        <span className="text-lg font-medium text-foreground">{link.name}</span>
-                        {link.submenu.map((sublink) => (
-                          <NavLink
-                            key={sublink.name}
-                            to={sublink.href}
-                            onClick={() => setMobileMenuOpen(false)}
-                            className={({ isActive }) =>
-                              `ml-4 text-base font-medium transition-colors hover:text-primary ${
-                                isActive ? 'text-primary' : 'text-muted-foreground'
-                              }`
-                            }
-                          >
-                            {sublink.name}
-                          </NavLink>
-                        ))}
-                      </div>
-                    ) : (
-                      <NavLink
-                        key={link.name}
-                        to={link.href}
-                        onClick={() => setMobileMenuOpen(false)}
-                        className={({ isActive }) =>
-                          `text-lg font-medium transition-colors hover:text-primary ${
-                            isActive ? 'text-primary' : 'text-muted-foreground'
-                          }`
-                        }
-                      >
-                        {link.name}
-                      </NavLink>
-                    )
-                  ))}
-                  <Button asChild className="w-full bg-[#0D47A1] hover:bg-[#0b3a8a] transition-all duration-200" onClick={() => setMobileMenuOpen(false)}>
-                    <Link to="/login">Login</Link>
-                  </Button>
-                </div>
+                  <SheetContent side="left">
+                <nav aria-label="Mobile navigation">
+                  <div className="flex flex-col space-y-6 p-4">
+                    <Link to="/" className="flex items-center gap-2 mb-4" onClick={() => setMobileMenuOpen(false)} aria-label="Akademia Pro Home">
+                      <GraduationCap className="h-8 w-8 text-[#0D47A1]" aria-hidden="true" />
+                      <span className="text-xl font-bold text-foreground">Akademia Pro</span>
+                    </Link>
+                    {navLinks.map((link) => (
+                      link.submenu ? (
+                        <div key={link.name} className="flex flex-col space-y-2">
+                          <span className="text-lg font-medium text-foreground">{link.name}</span>
+                          {link.submenu.map((sublink) => (
+                            <NavLink
+                              key={sublink.name}
+                              to={sublink.href}
+                              onClick={() => setMobileMenuOpen(false)}
+                              className={({ isActive }) =>
+                                `ml-4 text-base font-medium transition-colors hover:text-primary ${
+                                  isActive ? 'text-primary' : 'text-muted-foreground'
+                                }`
+                              }
+                            >
+                              {sublink.name}
+                            </NavLink>
+                          ))}
+                        </div>
+                      ) : (
+                        <NavLink
+                          key={link.name}
+                          to={link.href}
+                          onClick={() => setMobileMenuOpen(false)}
+                          className={({ isActive }) =>
+                            `text-lg font-medium transition-colors hover:text-primary ${
+                              isActive ? 'text-primary' : 'text-muted-foreground'
+                            }`
+                          }
+                        >
+                          {link.name}
+                        </NavLink>
+                      )
+                    ))}
+                    <Button asChild className="w-full bg-[#0D47A1] hover:bg-[#0b3a8a] transition-all duration-200" onClick={() => setMobileMenuOpen(false)}>
+                      <Link to="/login">Login</Link>
+                    </Button>
+                  </div>
+                </nav>
               </SheetContent>
             </Sheet>
           </div>

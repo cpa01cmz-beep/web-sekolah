@@ -2,10 +2,12 @@ import { Hono } from 'hono';
 import type { Env } from './core-utils';
 import { ok, bad, unauthorized, notFound, serverError } from './core-utils';
 import { UserEntity } from './entities';
-import { generateToken, verifyToken, optionalAuthenticate, AuthUser } from './middleware/auth';
+import { generateToken, optionalAuthenticate, AuthUser } from './middleware/auth';
 import { loginSchema } from './middleware/schemas';
 import { logger } from './logger';
 import { verifyPassword } from './password-utils';
+import { UserService } from './domain';
+import { getRoleSpecificFields } from './type-guards';
 
 export function authRoutes(app: Hono<{ Bindings: Env }>) {
   app.get('/api/auth/verify', optionalAuthenticate(), async (c) => {
@@ -16,10 +18,12 @@ export function authRoutes(app: Hono<{ Bindings: Env }>) {
       return unauthorized(c, 'Invalid or expired token');
     }
 
-    const dbUser = await new UserEntity(c.env, user.id).getState();
+    const dbUser = await UserService.getUserWithoutPassword(c.env, user.id);
     if (!dbUser) {
       return notFound(c, 'User not found');
     }
+
+    const roleFields = getRoleSpecificFields(dbUser);
 
     return ok(c, {
       id: dbUser.id,
@@ -27,10 +31,10 @@ export function authRoutes(app: Hono<{ Bindings: Env }>) {
       email: dbUser.email,
       role: dbUser.role,
       avatarUrl: dbUser.avatarUrl,
-      classId: dbUser.role === 'student' ? (dbUser as any).classId : undefined,
-      classIds: dbUser.role === 'teacher' ? (dbUser as any).classIds : undefined,
-      childId: dbUser.role === 'parent' ? (dbUser as any).childId : undefined,
-      studentIdNumber: dbUser.role === 'student' ? (dbUser as any).studentIdNumber : undefined,
+      classId: roleFields.classId,
+      classIds: roleFields.classIds,
+      childId: roleFields.childId,
+      studentIdNumber: roleFields.studentIdNumber,
     });
   });
 
@@ -81,19 +85,19 @@ export function authRoutes(app: Hono<{ Bindings: Env }>) {
         '24h'
       );
 
+      const roleFields = getRoleSpecificFields(user);
+
       const userResponse = {
         id: user.id,
         name: user.name,
         email: user.email,
         role: user.role,
         avatarUrl: user.avatarUrl,
-        classId: user.role === 'student' ? (user as any).classId : undefined,
-        classIds: user.role === 'teacher' ? (user as any).classIds : undefined,
-        childId: user.role === 'parent' ? (user as any).childId : undefined,
-        studentIdNumber: user.role === 'student' ? (user as any).studentIdNumber : undefined,
+        classId: roleFields.classId,
+        classIds: roleFields.classIds,
+        childId: roleFields.childId,
+        studentIdNumber: roleFields.studentIdNumber,
       };
-
-      delete (userResponse as any).passwordHash;
 
       logger.info('[AUTH] User logged in successfully', { userId: user.id, email: user.email, role: user.role });
 

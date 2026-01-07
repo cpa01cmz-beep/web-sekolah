@@ -1,6 +1,6 @@
 import { SiteHeader } from '@/components/SiteHeader';
 import { SiteFooter } from '@/components/SiteFooter';
-import { motion } from 'framer-motion';
+import { SlideUp, SlideLeft, SlideRight } from '@/components/animations';
 
 export function LinksDownloadPage() {
   return (
@@ -9,32 +9,21 @@ export function LinksDownloadPage() {
       <main className="flex-grow">
         <div className="bg-primary/5">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24 text-center">
-            <motion.h1
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-              className="text-4xl md:text-5xl font-bold text-primary"
-            >
-              Download
-            </motion.h1>
-            <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-              className="mt-4 max-w-3xl mx-auto text-lg text-muted-foreground"
-            >
-              Unduh berbagai dokumen dan materi penting dari sekolah kami.
-            </motion.p>
+            <SlideUp>
+              <h1 className="text-4xl md:text-5xl font-bold text-primary">
+                Download
+              </h1>
+            </SlideUp>
+            <SlideUp delay={0.2}>
+              <p className="mt-4 max-w-3xl mx-auto text-lg text-muted-foreground">
+                Unduh berbagai dokumen dan materi penting dari sekolah kami.
+              </p>
+            </SlideUp>
           </div>
         </div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
           <div className="grid md:grid-cols-2 gap-12">
-            <motion.div
-              initial={{ opacity: 0, x: -30 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5 }}
-            >
+            <SlideLeft>
               <h2 className="text-3xl font-bold text-foreground mb-6">Dokumen Akademik</h2>
               <div className="space-y-4">
                 <div className="flex items-center justify-between p-4 bg-card rounded-lg shadow-sm">
@@ -46,7 +35,7 @@ export function LinksDownloadPage() {
                     Download
                   </button>
                 </div>
-                
+
                 <div className="flex items-center justify-between p-4 bg-card rounded-lg shadow-sm">
                   <div>
                     <h3 className="font-bold">Jadwal Pelajaran Semester Ganjil</h3>
@@ -56,7 +45,7 @@ export function LinksDownloadPage() {
                     Download
                   </button>
                 </div>
-                
+
                 <div className="flex items-center justify-between p-4 bg-card rounded-lg shadow-sm">
                   <div>
                     <h3 className="font-bold">Kurikulum Sekolah</h3>
@@ -67,14 +56,9 @@ export function LinksDownloadPage() {
                   </button>
                 </div>
               </div>
-            </motion.div>
-            
-            <motion.div
-              initial={{ opacity: 0, x: 30 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: 0.1 }}
-            >
+            </SlideLeft>
+
+            <SlideRight delay={0.1}>
               <h2 className="text-3xl font-bold text-foreground mb-6">Formulir & Pengumuman</h2>
               <div className="space-y-4">
                 <div className="flex items-center justify-between p-4 bg-card rounded-lg shadow-sm">
@@ -86,7 +70,7 @@ export function LinksDownloadPage() {
                     Download
                   </button>
                 </div>
-                
+
                 <div className="flex items-center justify-between p-4 bg-card rounded-lg shadow-sm">
                   <div>
                     <h3 className="font-bold">Panduan PPDB</h3>
@@ -96,7 +80,7 @@ export function LinksDownloadPage() {
                     Download
                   </button>
                 </div>
-                
+
                 <div className="flex items-center justify-between p-4 bg-card rounded-lg shadow-sm">
                   <div>
                     <h3 className="font-bold">Surat Izin Orang Tua</h3>
@@ -107,52 +91,48 @@ export function LinksDownloadPage() {
                   </button>
                 </div>
               </div>
-            </motion.div>
+            </SlideRight>
           </div>
-          
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5 }}
-            className="mt-16"
-          >
-            <h2 className="text-3xl font-bold text-foreground mb-6">Materi Pembelajaran</h2>
-            <div className="grid md:grid-cols-3 gap-6">
-              <div className="bg-card rounded-lg shadow-sm p-6">
-                <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
-                  <span className="text-blue-600 font-bold">PDF</span>
+
+          <SlideUp>
+            <div className="mt-16">
+              <h2 className="text-3xl font-bold text-foreground mb-6">Materi Pembelajaran</h2>
+              <div className="grid md:grid-cols-3 gap-6">
+                <div className="bg-card rounded-lg shadow-sm p-6">
+                  <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
+                    <span className="text-blue-600 font-bold">PDF</span>
+                  </div>
+                  <h3 className="font-bold mb-2">Modul Matematika Kelas X</h3>
+                  <p className="text-sm text-muted-foreground mb-4">Materi lengkap semester ganjil</p>
+                  <button className="w-full px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm hover:bg-primary/90 transition-colors">
+                    Download
+                  </button>
                 </div>
-                <h3 className="font-bold mb-2">Modul Matematika Kelas X</h3>
-                <p className="text-sm text-muted-foreground mb-4">Materi lengkap semester ganjil</p>
-                <button className="w-full px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm hover:bg-primary/90 transition-colors">
-                  Download
-                </button>
-              </div>
-              
-              <div className="bg-card rounded-lg shadow-sm p-6">
-                <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
-                  <span className="text-green-600 font-bold">PDF</span>
+
+                <div className="bg-card rounded-lg shadow-sm p-6">
+                  <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
+                    <span className="text-green-600 font-bold">PDF</span>
+                  </div>
+                  <h3 className="font-bold mb-2">Modul Bahasa Indonesia Kelas XI</h3>
+                  <p className="text-sm text-muted-foreground mb-4">Materi lengkap semester ganjil</p>
+                  <button className="w-full px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm hover:bg-primary/90 transition-colors">
+                    Download
+                  </button>
                 </div>
-                <h3 className="font-bold mb-2">Modul Bahasa Indonesia Kelas XI</h3>
-                <p className="text-sm text-muted-foreground mb-4">Materi lengkap semester ganjil</p>
-                <button className="w-full px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm hover:bg-primary/90 transition-colors">
-                  Download
-                </button>
-              </div>
-              
-              <div className="bg-card rounded-lg shadow-sm p-6">
-                <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-4">
-                  <span className="text-purple-600 font-bold">PDF</span>
+
+                <div className="bg-card rounded-lg shadow-sm p-6">
+                  <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-4">
+                    <span className="text-purple-600 font-bold">PDF</span>
+                  </div>
+                  <h3 className="font-bold mb-2">Modul IPA Kelas XII</h3>
+                  <p className="text-sm text-muted-foreground mb-4">Materi lengkap semester ganjil</p>
+                  <button className="w-full px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm hover:bg-primary/90 transition-colors">
+                    Download
+                  </button>
                 </div>
-                <h3 className="font-bold mb-2">Modul IPA Kelas XII</h3>
-                <p className="text-sm text-muted-foreground mb-4">Materi lengkap semester ganjil</p>
-                <button className="w-full px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm hover:bg-primary/90 transition-colors">
-                  Download
-                </button>
               </div>
             </div>
-          </motion.div>
+          </SlideUp>
         </div>
       </main>
       <SiteFooter />

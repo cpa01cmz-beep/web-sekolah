@@ -63,6 +63,9 @@ akademia-pro/
 │   └── App.tsx           # Main application component
 ├── worker/               # Backend application
 │   ├── api/              # API route handlers
+│   ├── domain/           # Domain layer (business logic services)
+│   ├── entities/         # Entity classes and data access
+│   ├── storage/          # Storage abstractions (Durable Objects, Indexes)
 │   ├── lib/              # Backend utility functions
 │   ├── middleware/       # Authentication and validation middleware
 │   └── index.ts          # Worker entry point
@@ -72,6 +75,88 @@ akademia-pro/
 ```
 
 ## Architectural Patterns
+
+### Domain Layer
+
+The application implements a Domain Layer to separate business logic from HTTP concerns, following the Single Responsibility Principle and improving testability.
+
+**Structure**:
+
+```
+worker/domain/
+├── index.ts              # Barrel export for all services
+├── StudentDashboardService.ts  # Student dashboard aggregation logic
+├── TeacherService.ts     # Teacher class and grade management
+├── GradeService.ts       # Grade CRUD and validation
+└── UserService.ts        # User CRUD and role-specific logic
+```
+
+**Services**:
+
+```typescript
+// StudentDashboardService
+- getDashboardData(env, studentId): Aggregates schedule, grades, announcements
+
+// TeacherService
+- getClasses(env, teacherId): Gets teacher's assigned classes
+- getClassStudentsWithGrades(env, classId, teacherId): Gets students with grades for a class
+
+// GradeService
+- createGrade(env, gradeData): Creates grade with validation
+- updateGrade(env, gradeId, updates): Updates grade
+- getGradeByStudentAndCourse(env, studentId, courseId): Gets specific grade
+- getStudentGrades(env, studentId): Gets all student grades
+- getCourseGrades(env, courseId): Gets all course grades
+
+// UserService
+- createUser(env, userData): Creates user with role-specific logic
+- updateUser(env, userId, userData): Updates user with password handling
+- deleteUser(env, userId): Deletes user with referential integrity checks
+- getAllUsers(env): Gets all users without passwords
+- getUserById(env, userId): Gets single user without password
+- checkDependents(env, userId): Checks for dependent records
+```
+
+**Benefits**:
+- **Testability**: Business logic can be tested independently of HTTP layer
+- **Maintainability**: Clear separation of concerns
+- **Reusability**: Business logic can be reused across different API endpoints
+- **Single Responsibility**: Routes handle HTTP concerns only
+- **Better Error Handling**: Domain services throw business errors, routes translate to HTTP responses
+
+**Usage Example**:
+
+```typescript
+// Route handler (worker/user-routes.ts)
+app.get('/api/students/:id/dashboard', authenticate(), authorize('student'), async (c) => {
+  const studentId = c.req.param('id');
+  
+  // Domain service handles all business logic
+  const dashboardData = await StudentDashboardService.getDashboardData(c.env, studentId);
+  
+  return ok(c, dashboardData);
+});
+
+// Domain service (worker/domain/StudentDashboardService.ts)
+export class StudentDashboardService {
+  static async getDashboardData(env: Env, studentId: string): Promise<StudentDashboardData> {
+    const student = await new UserEntity(env, studentId).getState();
+    // ... business logic for aggregating data
+    return { schedule, recentGrades, announcements };
+  }
+}
+```
+
+**Data Flow**:
+
+```
+HTTP Request → Route Handler → Domain Service → Entity/Storage → Database
+                        ↓
+                   Business Logic
+                   (validation, aggregation, transformations)
+                        ↓
+HTTP Response ← Route Handler ← Domain Service
+```
 
 ### Repository Pattern
 
