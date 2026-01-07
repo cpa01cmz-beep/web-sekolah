@@ -103,6 +103,20 @@ describe('apiClient', () => {
       await expect(apiClient('/api/test')).rejects.toThrow('API error');
     });
 
+    it('should throw error when data is undefined', async () => {
+      const mockResponse: ApiResponse<unknown> = {
+        success: true,
+      };
+
+      global.fetch = vi.fn().mockResolvedValue({
+        ok: true,
+        status: 200,
+        json: vi.fn().mockResolvedValue(mockResponse),
+      });
+
+      await expect(apiClient('/api/test')).rejects.toThrow('API request failed');
+    });
+
     it('should handle JSON parse errors', async () => {
       global.fetch = vi.fn().mockResolvedValue({
         ok: false,
