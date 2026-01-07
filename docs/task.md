@@ -897,3 +897,24 @@ Created comprehensive `docs/blueprint.md` with:
 
 **File Created**:
 - `docs/blueprint.md` - 600+ lines of comprehensive API documentation
+
+## [REFACTOR] Consolidate Duplicate ErrorCode Enums
+- Location: src/lib/api-client.ts (lines 35-46) and worker/core-utils.ts (lines 729-742)
+- Issue: ErrorCode enum is defined twice with identical values in both frontend and backend, violating DRY principle and risking inconsistency
+- Suggestion: Move ErrorCode enum to shared/types.ts so both frontend and backend import from the same source of truth
+- Priority: Medium
+- Effort: Small
+
+## [REFACTOR] Format Seed Data Properly in worker/entities.ts
+- Location: worker/entities.ts (line 2)
+- Issue: All seed data is defined on a single unreadable line, making it difficult to maintain or modify
+- Suggestion: Format the seedData object across multiple lines with proper indentation for better readability and maintainability
+- Priority: Medium
+- Effort: Small
+
+## [REFACTOR] Extract Secondary Index Query Pattern to Base Class
+- Location: worker/entities.ts (UserEntity, ClassEntity, CourseEntity, GradeEntity classes)
+- Issue: Multiple entity classes have identical query methods (getByRole, getByClassId, getByTeacherId) that all follow the same pattern: create SecondaryIndex, get IDs, fetch entities, filter deleted
+- Suggestion: Add a generic static method to IndexedEntity base class: `async getByField(fieldName: string, value: string): Promise<T[]>` that encapsulates the common secondary index query pattern
+- Priority: Medium
+- Effort: Medium
