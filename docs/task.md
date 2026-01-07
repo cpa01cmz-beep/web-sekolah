@@ -635,7 +635,6 @@ This document tracks architectural refactoring tasks for Akademia Pro.
 | High | Type Guards Testing | Completed | Created comprehensive tests for type-guards.ts covering isStudent, isTeacher, isParent, isAdmin type guards and getRoleSpecificFields utility (28 tests) |
 | Medium | Validation Middleware Testing | Completed | Created tests for validation.ts covering sanitizeHtml and sanitizeString utility functions (27 tests) |
 | Medium | Referential Integrity Testing | Pending | Create tests for referential-integrity.ts - skipped due to Cloudflare Workers entity instantiation complexity, requires advanced mocking setup |
-<<<<<<< HEAD
 | Medium | Timeout Middleware Testing | Completed | Created comprehensive tests for timeout middleware (worker/middleware/timeout.ts) covering timeout behavior, custom timeouts, predefined middlewares, Hono integration, and edge cases (25 tests) |
 | Medium | Error Monitoring Testing | Completed | Created comprehensive tests for error monitoring middleware (worker/middleware/error-monitoring.ts) covering error monitoring, response error monitoring, all HTTP status codes, and edge cases (30 tests) |
 
@@ -652,18 +651,6 @@ This document tracks architectural refactoring tasks for Akademia Pro.
 **Flaky Test Fix (2026-01-07):**
 - ✅ Fixed flaky test in worker/__tests__/integration-monitor.test.ts by excluding timestamp and uptime from object equality check
 - ✅ Tests now consistently pass without timing-based race conditions
-=======
-| Medium | Timeout Middleware Testing | Pending | Create tests for middleware/timeout.ts covering timeout middleware and custom timeout configurations |
-| Medium | Error Monitoring Testing | Pending | Create tests for middleware/error-monitoring.ts covering error tracking and response error monitoring |
-
-**Testing Summary:**
-- ✅ Added 88 new tests across 3 test files (integration-monitor, type-guards, validation middleware)
-- ✅ All 433 tests passing (up from 345 before testing work)
-- ✅ Critical monitoring logic now fully tested (circuit breaker, rate limiting, webhook stats, API error tracking)
-- ✅ Type safety utilities fully tested with edge cases
-- ✅ Validation utilities fully tested with security scenarios
-- ⚠️  Referential integrity, timeout middleware, and error monitoring tests deferred due to Cloudflare Workers complexity
->>>>>>> 149b46939c29ff87d47decaeb6ba1b3ec3384518
 
 
 ## New Refactoring Tasks (2026-01-07)
@@ -871,7 +858,6 @@ This document tracks architectural refactoring tasks for Akademia Pro.
 - Priority: Medium
 - Effort: Small
 
-<<<<<<< HEAD
 ### [REFACTOR] Replace Console Statements with Logger in Worker - Completed ✅
 
 **Task**: Replace console statements with centralized pino logger in worker code
@@ -927,14 +913,6 @@ This document tracks architectural refactoring tasks for Akademia Pro.
 | Log level filtering | No | Yes | Production-ready |
 | Test status | 433 passing | 433 passing | 0 regressions |
 | Lint status | Pass | Pass | No new errors |
-=======
-### [REFACTOR] Replace Console Statements with Logger in Worker
-- Location: worker/migrations.ts (1 instance), worker/webhook-service.ts (1 instance), worker/index-rebuilder.ts (1 instance), worker/webhook-routes.ts (1 instance)
-- Issue: 4 console.log/error statements exist in non-test worker code instead of using the centralized pino logger. This bypasses structured logging, log level filtering, and production monitoring
-- Suggestion: Replace all console statements with `logger.info()`, `logger.error()`, or `logger.warn()` to maintain consistent logging patterns and proper log level filtering
-- Priority: Medium
-- Effort: Small
->>>>>>> 149b46939c29ff87d47decaeb6ba1b3ec3384518
 
 ### [REFACTOR] Extract Validation Logic from LoginPage
 - Location: src/pages/LoginPage.tsx (lines 21-31)
