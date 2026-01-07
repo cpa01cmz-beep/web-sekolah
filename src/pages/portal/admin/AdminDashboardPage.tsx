@@ -1,7 +1,7 @@
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Users, GraduationCap, School, Megaphone, Activity } from 'lucide-react';
 import { motion, Variants } from 'framer-motion';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 const mockAdminData = {
   stats: [
     { title: 'Total Students', value: '1,250', icon: <Users className="h-6 w-6 text-blue-500" /> },
@@ -27,8 +27,47 @@ const containerVariants: Variants = {
 };
 const itemVariants: Variants = {
   hidden: { y: 20, opacity: 0 },
-  visible: { y: 0, opacity: 1, transition: { type: 'spring', stiffness: 100 } },
+  visible: { y: 0, opacity: 1, transition: { type: 'spring' as const, stiffness: 100 } },
 };
+
+function EnrollmentChart() {
+  const [Chart, setChart] = useState<{ BarChart: any, Bar: any, XAxis: any, YAxis: any, CartesianGrid: any, Tooltip: any, Legend: any, ResponsiveContainer: any } | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    import('recharts').then((recharts) => {
+      setChart({
+        BarChart: recharts.BarChart,
+        Bar: recharts.Bar,
+        XAxis: recharts.XAxis,
+        YAxis: recharts.YAxis,
+        CartesianGrid: recharts.CartesianGrid,
+        Tooltip: recharts.Tooltip,
+        Legend: recharts.Legend,
+        ResponsiveContainer: recharts.ResponsiveContainer,
+      });
+      setIsLoading(false);
+    });
+  }, []);
+
+  if (isLoading || !Chart) {
+    return <div className="h-[300px] animate-pulse bg-muted rounded-lg" />;
+  }
+
+  return (
+    <Chart.ResponsiveContainer width="100%" height={300}>
+      <Chart.BarChart data={mockAdminData.enrollmentData}>
+        <Chart.CartesianGrid strokeDasharray="3 3" />
+        <Chart.XAxis dataKey="name" />
+        <Chart.YAxis />
+        <Chart.Tooltip />
+        <Chart.Legend />
+        <Chart.Bar dataKey="students" fill="#0D47A1" />
+      </Chart.BarChart>
+    </Chart.ResponsiveContainer>
+  );
+}
+
 export function AdminDashboardPage() {
   return (
     <motion.div
@@ -63,16 +102,7 @@ export function AdminDashboardPage() {
               <CardTitle>Student Enrollment by Grade</CardTitle>
             </CardHeader>
             <CardContent>
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={mockAdminData.enrollmentData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="name" />
-                  <YAxis />
-                  <Tooltip />
-                  <Legend />
-                  <Bar dataKey="students" fill="#0D47A1" />
-                </BarChart>
-              </ResponsiveContainer>
+              <EnrollmentChart />
             </CardContent>
           </Card>
         </motion.div>
