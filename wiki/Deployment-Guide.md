@@ -91,8 +91,6 @@ NODE_ENV=staging
 CLOUDFLARE_ACCOUNT_ID=your_staging_account_id
 ```
 
-Note: Currently, the application uses mock authentication tokens for development purposes. In a production environment, you would also need to set JWT-related environment variables.
-
 ## Monitoring and Logging
 
 ### Cloudflare Analytics

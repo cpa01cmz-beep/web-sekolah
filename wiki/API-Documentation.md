@@ -210,7 +210,7 @@ Get all users (admin only).
       "id": "user_id",
       "name": "User Name",
       "email": "user@example.com",
-      "role": "student|teacher|parent|admin",
+      "role": "student",
       "avatarUrl": "https://example.com/avatar.jpg"
     }
   ]
