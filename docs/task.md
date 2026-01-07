@@ -10,6 +10,7 @@ This document tracks architectural refactoring tasks for Akademia Pro.
 | High | Test Suite Modernization | Completed | Updated all service tests to use MockRepository for proper isolation |
 | High | API Documentation | Completed | Created comprehensive API blueprint with all endpoints, error codes, and integration patterns |
 | High | Centralized Console Logging | Completed | Implemented pino-based logger utilities with environment-based filtering (2026-01-07) |
+| High | Critical Infrastructure Testing | Completed | Added comprehensive tests for repository pattern and logger utilities (2026-01-07) |
 | Medium | Data Access Layer | Pending | Create repository abstraction for entity operations |
 | Medium | Validation Layer | Completed | Centralized validation logic with Zod schemas (worker/middleware/validation.ts, schemas.ts) |
 | Low | State Management Guidelines | Pending | Document and enforce consistent state management patterns |
@@ -88,6 +89,63 @@ This document tracks architectural refactoring tasks for Akademia Pro.
 - ✅ Zero regressions
 
 **Note**: worker/index.ts console statements (lines 79, 82, 88, 90) were NOT updated due to strict prohibition comment at top of file.
+
+## Critical Infrastructure Testing (2026-01-07)
+
+**Task**: Add comprehensive tests for untested critical infrastructure
+
+**Status**: Completed
+
+**Implementation**:
+
+1. **Created Repository Pattern Tests** - `src/repositories/__tests__/ApiRepository.test.ts`
+   - 23 comprehensive tests covering all CRUD operations
+   - Tests GET, POST, PUT, DELETE, PATCH methods
+   - Verifies proper delegation to apiClient
+   - Tests options passing (headers, timeout, circuit breaker)
+   - Error handling for all methods
+   - Type safety verification with generic types
+   - All tests isolated with proper mocking
+
+2. **Created Frontend Logger Tests** - `src/lib/__tests__/logger.test.ts`
+   - 32 comprehensive tests covering all logging functionality
+   - Tests all log levels (debug, info, warn, error)
+   - Child logger functionality with request-scoped context
+   - Error handling (Error objects, plain values, null, undefined)
+   - Edge cases (empty context, nested objects, long messages)
+   - Error subclass handling
+   - Logger reset functionality
+   - Browser integration verification
+
+**Test Coverage Improvements**:
+- Before: 120 tests across 10 test files
+- After: 175 tests across 12 test files
+- Added: 55 new tests (+46% increase)
+- All tests passing consistently
+
+**Files Created**:
+- `src/repositories/__tests__/ApiRepository.test.ts` - 23 tests
+- `src/lib/__tests__/logger.test.ts` - 32 tests
+
+**Test Coverage**:
+- ✅ Repository pattern (API delegation)
+- ✅ All HTTP methods (GET, POST, PUT, DELETE, PATCH)
+- ✅ Options passing (headers, timeout, circuit breaker)
+- ✅ Error handling and propagation
+- ✅ Type safety with generics
+- ✅ All logger levels (debug, info, warn, error)
+- ✅ Child logger functionality
+- ✅ Error object handling
+- ✅ Edge cases and boundary conditions
+- ✅ Logger reset and instance management
+
+**Benefits Achieved**:
+- ✅ Critical infrastructure now fully tested
+- ✅ Prevents regressions in core utilities
+- ✅ Improves confidence in logging and data access layers
+- ✅ Better understanding of system behavior
+- ✅ Faster feedback loop for infrastructure changes
+- ✅ All 175 tests passing consistently
 
 ## Documentation Fixes (2026-01-07)
 
