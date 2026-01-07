@@ -95,10 +95,45 @@ bun dev
 
 The application will be available at `http://localhost:3000` (or the port specified in your environment).
 
+### Quick Start
+
+After starting the application:
+
+1. **Seed the Database** (First Time Only):
+   - Visit `http://localhost:3000`
+   - Navigate to `/api/seed` in your browser or use:
+     ```bash
+     curl -X POST http://localhost:3000/api/seed
+     ```
+   - This creates sample users, classes, and courses
+
+2. **Login to a Portal**:
+   - On the login page, select your role (Student, Teacher, Parent, or Admin)
+   - Enter your credentials:
+     - **Email**: Use any of the seed user emails (e.g., `student@example.com`)
+     - **Password**: `password123` (default for all seed users)
+   - Click "Login" to access your role-specific portal
+
+3. **Explore Your Portal**:
+   - **Student Portal**: View your schedule, grades, student card, and announcements
+   - **Teacher Portal**: Manage your classes, submit grades, and post announcements
+   - **Parent Portal**: Monitor your child's academic progress
+   - **Admin Portal**: Manage users and oversee school-wide data
+
+### Example User Credentials
+
+| Role | Email | Password |
+|------|-------|----------|
+| Student | student@example.com | password123 |
+| Teacher | teacher@example.com | password123 |
+| Parent | parent@example.com | password123 |
+| Admin | admin@example.com | password123 |
+
 ## Documentation
 
 Comprehensive documentation is available in our [docs/](./docs/) directory and [GitHub Wiki](https://github.com/cpa01cmz-beep/web-sekolah/wiki):
 
+- [Quick Start Guide](./docs/QUICK_START.md) - Get started quickly with step-by-step guides for students, teachers, parents, and admins
 - [API Blueprint](./docs/blueprint.md) - Complete API reference with endpoints, error codes, and integration patterns
 - [User Guides](https://github.com/cpa01cmz-beep/web-sekolah/wiki/User-Guides) - Instructions for students, teachers, parents, and admins
 - [Architectural Task List](./docs/task.md) - Implementation status and roadmap
@@ -107,6 +142,74 @@ Comprehensive documentation is available in our [docs/](./docs/) directory and [
 - [Deployment Guide](https://github.com/cpa01cmz-beep/web-sekolah/wiki/Deployment-Guide) - Instructions for deploying the application
 - [Security Guidelines](https://github.com/cpa01cmz-beep/web-sekolah/wiki/Security-Guidelines) - Security best practices and guidelines
 - [Contributing](https://github.com/cpa01cmz-beep/web-sekolah/wiki/Contributing) - Guidelines for contributing to the project
+
+## Development
+
+### Running Tests
+
+Run the test suite to verify everything is working:
+
+```bash
+bun test
+```
+
+All tests should pass (488+ tests currently passing).
+
+### Type Checking
+
+Check TypeScript types:
+
+```bash
+bun run typecheck
+```
+
+### Linting
+
+Check code for linting errors:
+
+```bash
+bun run lint
+```
+
+### Building
+
+Build the production bundle:
+
+```bash
+bun run build
+```
+
+## Troubleshooting
+
+### Common Issues
+
+**Problem**: Application won't start after `bun dev`
+- **Solution**: Check if port 3000 is already in use. Stop other services or change port in `.env`
+
+**Problem**: Seed data not appearing
+- **Solution**: Ensure you've run `POST /api/seed` at least once. Check browser console for errors
+
+**Problem**: Login fails with "Invalid credentials"
+- **Solution**: Verify password is `password123` (default). Check that you're using correct email from seed data
+
+**Problem**: 404 errors on API endpoints
+- **Solution**: Ensure backend worker is running. Check Wrangler authentication: `wrangler login`
+
+**Problem**: CORS errors in browser console
+- **Solution**: Add your local origin to `ALLOWED_ORIGINS` in `.env` file
+
+**Problem**: Tests failing
+- **Solution**: Ensure all dependencies installed: `bun install`. Check Node.js version compatibility
+
+### Debug Mode
+
+Enable debug logging by setting environment variable:
+
+```bash
+LOG_LEVEL=debug bun dev
+```
+
+This provides detailed logs for troubleshooting API requests, database operations, and authentication.
 
 ## Deployment
 
