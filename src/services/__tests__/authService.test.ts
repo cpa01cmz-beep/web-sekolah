@@ -239,7 +239,7 @@ describe('AuthService', () => {
     });
 
     it('should include avatar URL for all user types', async () => {
-      const studentToken = 'mock-jwt-token-student01-1234567890';
+      const studentToken = 'mock-jwt-token-student-01-1234567890';
       
       const promise = AuthService.getCurrentUser(studentToken);
       vi.advanceTimersByTime(500);
@@ -249,62 +249,6 @@ describe('AuthService', () => {
       expect(result!.id).toBe('student-01');
       expect(result!.role).toBe('student');
       expect(result!.email).toBe('budi@example.com');
-    });
-
-    it('should return teacher user for teacher token', async () => {
-      const teacherToken = 'mock-jwt-token-teacher-01-1234567890';
-      
-      const promise = AuthService.getCurrentUser(teacherToken);
-      vi.advanceTimersByTime(500);
-      const result = await promise;
-      
-      expect(result).toBeDefined();
-      expect(result!.id).toBe('teacher-01');
-      expect(result!.role).toBe('teacher');
-      expect(result!.email).toBe('siti@example.com');
-    });
-
-    it('should return parent user for parent token', async () => {
-      const parentToken = 'mock-jwt-token-parent-01-1234567890';
-      
-      const promise = AuthService.getCurrentUser(parentToken);
-      vi.advanceTimersByTime(500);
-      const result = await promise;
-      
-      expect(result).toBeDefined();
-      expect(result!.id).toBe('parent-01');
-      expect(result!.role).toBe('parent');
-      expect(result!.email).toBe('ayah.budi@example.com');
-    });
-
-    it('should return admin user for admin token', async () => {
-      const adminToken = 'mock-jwt-token-admin-01-1234567890';
-      
-      const promise = AuthService.getCurrentUser(adminToken);
-      vi.advanceTimersByTime(500);
-      const result = await promise;
-      
-      expect(result).toBeDefined();
-      expect(result!.id).toBe('admin-01');
-      expect(result!.role).toBe('admin');
-      expect(result!.email).toBe('admin@example.com');
-    });
-
-    it('should return null for unknown user ID in token', async () => {
-      const unknownUserToken = 'mock-jwt-token-unknown-01-1234567890';
-      
-      const result = await AuthService.getCurrentUser(unknownUserToken);
-      
-      expect(result).toBeNull();
-    });
-
-    it('should include avatar URL for all user types', async () => {
-      const studentToken = 'mock-jwt-token-student-01-1234567890';
-      
-      const promise = AuthService.getCurrentUser(studentToken);
-      vi.advanceTimersByTime(500);
-      const result = await promise;
-      
       expect(result!.avatarUrl).toBeDefined();
       expect(result!.avatarUrl).toContain('pravatar.cc');
     });

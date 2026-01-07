@@ -72,11 +72,11 @@ export async function apiClient<T>(path: string, init?: RequestInit): Promise<T>
   
   // Parse and validate API response
   const json = (await res.json()) as ApiResponse<T>;
-  if (!json.success && json.data === undefined) {
+  if (!json.success) {
     throw new Error(json.error || 'API request failed');
   }
-  
-  return json.data;
+
+  return json.data;
 }
 
 // ====================
