@@ -60,12 +60,14 @@ const LoadingFallback = () => (
 );
 
 // Helper function to wrap components with Suspense and LoadingFallback
-function withSuspense<T extends React.ComponentType<any>>(Component: T) {
-  return (
-    <Suspense fallback={<LoadingFallback />}>
-      <Component />
-    </Suspense>
-  );
+function withSuspense<T extends React.ComponentType<any>>(Component: T): React.ComponentType {
+  return function SuspenseWrapper(props: React.ComponentProps<T>) {
+    return (
+      <Suspense fallback={<LoadingFallback />}>
+        <Component {...props} />
+      </Suspense>
+    );
+  };
 }
 
 const router = createBrowserRouter([
