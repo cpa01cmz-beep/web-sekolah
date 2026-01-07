@@ -4,7 +4,9 @@ import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { logger } from 'hono/logger';
 import { userRoutes } from './user-routes';
-import { Env, GlobalDurableObject } from './core-utils';
+import { Env, GlobalDurableObject, ok, notFound, serverError } from './core-utils';
+import { defaultRateLimiter, strictRateLimiter } from './middleware/rate-limit';
+import { defaultTimeout } from './middleware/timeout';
 
 // Need to export GlobalDurableObject to make it available in wrangler
 export { GlobalDurableObject };
@@ -28,24 +30,39 @@ app.use('*', logger());
 
 app.use('/api/*', cors({ origin: '*', allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], allowHeaders: ['Content-Type', 'Authorization'] }));
 
+app.use('/api/*', async (c, next) => {
+  c.header('X-Request-ID', crypto.randomUUID());
+  await next();
+});
+
+app.use('/api/*', defaultTimeout());
+
+app.use('/api/client-errors', strictRateLimiter());
+app.use('/api/seed', strictRateLimiter());
+app.use('/api/users', defaultRateLimiter());
+app.use('/api/grades', defaultRateLimiter());
+app.use('/api/students', defaultRateLimiter());
+app.use('/api/teachers', defaultRateLimiter());
+app.use('/api/classes', defaultRateLimiter());
+
 userRoutes(app);
 
-app.get('/api/health', (c) => c.json({ success: true, data: { status: 'healthy', timestamp: new Date().toISOString() }}));
+app.get('/api/health', (c) => ok(c, { status: 'healthy', timestamp: new Date().toISOString() }));
 
 app.post('/api/client-errors', async (c) => {
   try {
     const e = await c.req.json<ClientErrorReport>();
-    if (!e.message) return c.json({ success: false, error: 'Missing required fields' }, 400);
+    if (!e.message) return c.json({ success: false, error: 'Missing required fields', code: 'VALIDATION_ERROR' }, 400);
     console.error('[CLIENT ERROR]', JSON.stringify(e, null, 2));
     return c.json({ success: true });
   } catch (error) {
     console.error('[CLIENT ERROR HANDLER] Failed:', error);
-    return c.json({ success: false, error: 'Failed to process' }, 500);
+    return serverError(c, 'Failed to process error report');
   }
 });
 
-app.notFound((c) => c.json({ success: false, error: 'Not Found' }, 404));
-app.onError((err, c) => { console.error(`[ERROR] ${err}`); return c.json({ success: false, error: 'Internal Server Error' }, 500); });
+app.notFound((c) => notFound(c));
+app.onError((err, c) => { console.error(`[ERROR] ${err}`); return serverError(c, err instanceof Error ? err.message : 'Internal Server Error'); });
 
 console.log(`Server is running`)
 
