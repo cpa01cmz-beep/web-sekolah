@@ -52,10 +52,15 @@ export const queryClient = new QueryClient({
  * @throws Error if the request fails or returns an unsuccessful response
  */
 export async function apiClient<T>(path: string, init?: RequestInit): Promise<T> {
-  const res = await fetch(path, {
-    headers: { 'Content-Type': 'application/json' },
-    ...init,
-  });
+  const { headers: initHeaders, ...restInit } = init || {};
+  
+  const res = await fetch(path, {
+    headers: {
+      'Content-Type': 'application/json',
+      ...initHeaders,
+    },
+    ...restInit,
+  });
   
   // Handle HTTP errors
   if (!res.ok) {
@@ -65,11 +70,11 @@ export async function apiClient<T>(path: string, init?: RequestInit): Promise<T>
     throw error;
   }
   
-  // Parse and validate API response
-  const json = (await res.json()) as ApiResponse<T>;
-  if (!json.success || json.data === undefined) {
-    throw new Error(json.error || 'API request failed');
-  }
+  // Parse and validate API response
+  const json = (await res.json()) as ApiResponse<T>;
+  if (!json.success && json.data === undefined) {
+    throw new Error(json.error || 'API request failed');
+  }
   
   return json.data;
 }
