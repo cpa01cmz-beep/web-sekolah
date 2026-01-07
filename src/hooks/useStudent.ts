@@ -7,6 +7,11 @@ export function useStudentDashboard(studentId: string, options?: UseQueryOptions
     queryKey: ['students', studentId, 'dashboard'],
     queryFn: () => studentService.getDashboard(studentId),
     enabled: !!studentId,
+    staleTime: 1000 * 60 * 5,
+    gcTime: 1000 * 60 * 60 * 24,
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+    refetchOnReconnect: true,
     ...options,
   });
 }
@@ -16,6 +21,11 @@ export function useStudentGrades(studentId: string, options?: UseQueryOptions<Gr
     queryKey: ['students', studentId, 'grades'],
     queryFn: () => studentService.getGrades(studentId),
     enabled: !!studentId,
+    staleTime: 1000 * 60 * 30,
+    gcTime: 1000 * 60 * 60 * 24,
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+    refetchOnReconnect: true,
     ...options,
   });
 }
@@ -25,6 +35,11 @@ export function useStudentSchedule(studentId: string, options?: UseQueryOptions<
     queryKey: ['students', studentId, 'schedule'],
     queryFn: () => studentService.getSchedule(studentId),
     enabled: !!studentId,
+    staleTime: 1000 * 60 * 60,
+    gcTime: 1000 * 60 * 60 * 24,
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+    refetchOnReconnect: true,
     ...options,
   });
 }
@@ -34,6 +49,11 @@ export function useStudentCard(studentId: string, options?: UseQueryOptions<Stud
     queryKey: ['students', studentId, 'card'],
     queryFn: () => studentService.getCard(studentId),
     enabled: !!studentId,
+    staleTime: 1000 * 60 * 60 * 24,
+    gcTime: 1000 * 60 * 60 * 24 * 7,
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+    refetchOnReconnect: false,
     ...options,
   });
 }
