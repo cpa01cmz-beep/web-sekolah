@@ -5,8 +5,9 @@
 import { QueryClient, useQuery as useTanstackQuery, useMutation as useTanstackMutation, UseQueryOptions, UseMutationOptions } from '@tanstack/react-query';
 import { ApiResponse, ErrorCode } from "../../shared/types";
 import { CachingTime } from '../config/time';
+import { STORAGE_KEYS } from '../constants/storage-keys';
 
-const getAuthToken = () => localStorage.getItem('authToken');
+const getAuthToken = () => localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN);
 
 // ====================
 // Type Definitions

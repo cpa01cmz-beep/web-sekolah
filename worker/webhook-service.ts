@@ -19,7 +19,7 @@ export class WebhookService {
     }
 
     const allEvents = await WebhookEventEntity.list(env);
-    const pendingEvents = allEvents.items.filter((e: any) => !e.processed);
+    const pendingEvents = allEvents.items.filter((e: WebhookEvent) => !e.processed);
     integrationMonitor.recordWebhookEvent(allEvents.items.length, pendingEvents.length);
 
     for (const config of activeConfigs) {
