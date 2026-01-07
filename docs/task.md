@@ -134,6 +134,50 @@ This document tracks architectural refactoring tasks for Akademia Pro.
 | Low | State Management Guidelines | Pending | Document and enforce consistent state management patterns |
 | Low | Business Logic Extraction | Pending | Extract business logic to dedicated domain layer |
 
+## Critical Path Testing (2026-01-07)
+
+**Status**: Completed
+
+**Implementation**:
+
+1. **Created Validation Utility Tests** - `src/utils/__tests__/validation.test.ts`
+   - 21 comprehensive tests for score validation logic
+   - Tests valid scores (0-100), invalid scores (<0, >100, null, undefined)
+   - Tests edge cases (NaN, Infinity, decimal values)
+   - Tests type predicate behavior
+   - All tests passing
+
+2. **Created Grade Threshold Tests** - `src/constants/__tests__/grades.test.ts`
+   - 19 comprehensive tests for grade threshold constants
+   - Tests constant definitions and values (GRADE_A=90, GRADE_B=80, GRADE_C=70)
+   - Tests threshold hierarchy (A > B > C)
+   - Tests boundary logic for grade determination
+   - All tests passing
+
+**Test Coverage Improvements**:
+- Before: 175 tests across 12 test files
+- After: 215 tests across 14 test files
+- Added: 40 new tests (+23% increase)
+- All tests passing consistently
+
+**Files Created**:
+- `src/utils/__tests__/validation.test.ts` - 21 tests
+- `src/constants/__tests__/grades.test.ts` - 19 tests
+
+**Test Coverage**:
+- ✅ Validation utilities (score validation)
+- ✅ Grade threshold constants and boundary logic
+- ✅ Type-safe predicates and constants
+- ✅ Edge case handling (null, undefined, NaN, Infinity)
+
+**Benefits Achieved**:
+- ✅ Critical business logic now fully tested
+- ✅ Prevents regressions in validation functions
+- ✅ Improves confidence in grade calculations
+- ✅ Better understanding of boundary conditions
+- ✅ All 215 tests passing consistently
+- ✅ Zero regressions
+
 ## [REFACTOR] Remove Duplicate Code in authService - Completed ✅
 - Location: src/services/authService.ts
 - Issue: `mockUsers` object is defined twice (lines 26-55 and 96-125) with identical data, violating DRY principle
