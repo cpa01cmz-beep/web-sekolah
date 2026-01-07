@@ -13,7 +13,7 @@ import { motion } from 'framer-motion';
 import { toast } from 'sonner';
 import { UserRole, SchoolUser } from '@shared/types';
 import { useQuery, useMutation, queryClient } from '@/lib/api-client';
-import { Skeleton } from '@/components/ui/skeleton';
+import { TableSkeleton } from '@/components/ui/loading-skeletons';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { getAvatarUrl } from '@/constants/avatars';
 
@@ -171,9 +171,7 @@ export function AdminUserManagementPage() {
       <Card>
         <CardContent className="pt-6">
           {isLoading ? (
-            <div className="space-y-2">
-              {[...Array(5)].map((_, i) => <Skeleton key={i} className="h-12 w-full" />)}
-            </div>
+            <TableSkeleton columns={4} rows={5} />
           ) : error ? (
             <Alert variant="destructive">
               <AlertTriangle className="h-4 w-4" />

@@ -2,6 +2,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableFooter } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import { CardSkeleton } from '@/components/ui/loading-skeletons';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { AlertTriangle } from 'lucide-react';
 import { motion } from 'framer-motion';
@@ -29,35 +30,11 @@ const pageVariants = {
   out: { opacity: 0, y: -20 },
 };
 
-function GradesSkeleton() {
-  return (
-    <Card className="overflow-hidden">
-      <CardHeader>
-        <Skeleton className="h-6 w-1/3" />
-        <Skeleton className="h-4 w-1/2 mt-2" />
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-3">
-          {[1, 2, 3, 4, 5].map((i) => (
-            <div key={i} className="flex items-center justify-between space-x-4">
-              <div className="flex-1 space-y-2">
-                <Skeleton className="h-4 w-full" />
-                <Skeleton className="h-3 w-2/3" />
-              </div>
-              <Skeleton className="h-8 w-8 rounded" />
-            </div>
-          ))}
-        </div>
-      </CardContent>
-    </Card>
-  );
-}
-
 export function StudentGradesPage() {
   const user = useAuthStore((state) => state.user);
   const { data: grades = [], isLoading, error } = useStudentGrades(user?.id || '');
 
-  if (isLoading) return <GradesSkeleton />;
+  if (isLoading) return <CardSkeleton lines={5} showHeader />;
 
   if (error) {
     return (

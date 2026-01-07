@@ -14,6 +14,7 @@ import { useQuery, useMutation, queryClient } from '@/lib/api-client';
 import { useAuthStore } from '@/lib/authStore';
 import type { SchoolClass } from '@shared/types';
 import { Skeleton } from '@/components/ui/skeleton';
+import { TableSkeleton } from '@/components/ui/loading-skeletons';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { isValidScore, MIN_SCORE, MAX_SCORE } from '@/utils/validation';
 
@@ -113,11 +114,7 @@ export function TeacherGradeManagementPage() {
           </CardHeader>
           <CardContent>
             {isLoadingStudents ? (
-              <div className="space-y-2">
-                <Skeleton className="h-10 w-full" />
-                <Skeleton className="h-10 w-full" />
-                <Skeleton className="h-10 w-full" />
-              </div>
+              <TableSkeleton columns={4} rows={3} />
             ) : students && students.length > 0 ? (
               <div className="overflow-x-auto">
                 <Table>
