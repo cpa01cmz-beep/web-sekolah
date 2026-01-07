@@ -11,12 +11,19 @@ import {
   ensureAllSeedData
 } from "./entities";
 import { ReferentialIntegrity } from "./referential-integrity";
+import { rebuildAllIndexes } from "./index-rebuilder";
 import type { Grade, SchoolUser, Student, StudentDashboardData, Teacher, CreateUserData } from "@shared/types";
 export function userRoutes(app: Hono<{ Bindings: Env }>) {
   // --- SEED ENDPOINT ---
   app.post('/api/seed', async (c) => {
     await ensureAllSeedData(c.env);
     return ok(c, { message: 'Database seeded successfully.' });
+  });
+
+  // --- INDEX REBUILD ENDPOINT ---
+  app.post('/api/admin/rebuild-indexes', async (c) => {
+    await rebuildAllIndexes(c.env);
+    return ok(c, { message: 'All secondary indexes rebuilt successfully.' });
   });
   // --- STUDENT PORTAL ---
   app.get('/api/students/:id/dashboard', async (c) => {
@@ -63,7 +70,7 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
   // --- TEACHER PORTAL ---
   app.get('/api/teachers/:id/classes', async (c) => {
     const teacherId = c.req.param('id');
-    const classes = (await ClassEntity.list(c.env)).items.filter(c => c.teacherId === teacherId);
+    const classes = await ClassEntity.getByTeacherId(c.env, teacherId);
     return ok(c, classes);
   });
   app.get('/api/classes/:id/students', async (c) => {
@@ -72,23 +79,26 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
     const classState = await classEntity.getState();
     if (!classState) return notFound(c, 'Class not found');
     const teacher = await new UserEntity(c.env, classState.teacherId).getState() as Teacher;
-    const teacherCourses = (await CourseEntity.list(c.env)).items.filter(course => teacher.classIds.includes(classId) && course.teacherId === teacher.id);
+    const teacherCourses = (await CourseEntity.getByTeacherId(c.env, teacher.id)).filter(course => teacher.classIds.includes(classId));
     const teacherCourseIds = new Set(teacherCourses.map(c => c.id));
-    const allUsers = (await UserEntity.list(c.env)).items;
-    const students = allUsers.filter(u => u.role === 'student' && (u as Student).classId === classId);
-    const allGrades = (await GradeEntity.list(c.env)).items;
-    const studentsWithGrades = students.map(s => {
-      const studentGrades = allGrades.filter(g => g.studentId === s.id && teacherCourseIds.has(g.courseId));
-      // For simplicity, we'll just show the first grade found for a relevant course.
+    const students = await UserEntity.getByClassId(c.env, classId);
+
+    const studentsWithGrades = await Promise.all(students.map(async (s) => {
+      const studentGrades = [];
+      for (const courseId of teacherCourseIds) {
+        const grade = await GradeEntity.getByStudentIdAndCourseId(c.env, s.id, courseId);
+        if (grade) studentGrades.push(grade);
+      }
       const relevantGrade = studentGrades[0];
       return {
         id: s.id,
         name: s.name,
         score: relevantGrade?.score ?? null,
         feedback: relevantGrade?.feedback ?? '',
-        gradeId: relevantGrade?.id ?? null, // Pass the gradeId to the frontend
+        gradeId: relevantGrade?.id ?? null,
       };
-    });
+    }));
+
     return ok(c, studentsWithGrades);
   });
   app.put('/api/grades/:id', async (c) => {

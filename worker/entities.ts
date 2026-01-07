@@ -1,4 +1,4 @@
-import { IndexedEntity, Index, type Env } from "./core-utils";
+import { IndexedEntity, Index, SecondaryIndex, type Env } from "./core-utils";
 import type { SchoolUser, SchoolClass, Course, Grade, Announcement, ScheduleItem, SchoolData, UserRole, Student } from "@shared/types";const now = new Date().toISOString();
 
 const seedData: SchoolData = { users: [{ id: 'student-01', name: 'Budi Hartono', email: 'budi@example.com', role: 'student', avatarUrl: 'https://i.pravatar.cc/150?u=student01', classId: '11-A', studentIdNumber: '12345', createdAt: now, updatedAt: now }, { id: 'student-02', name: 'Ani Suryani', email: 'ani@example.com', role: 'student', avatarUrl: 'https://i.pravatar.cc/150?u=student02', classId: '11-A', studentIdNumber: '12346', createdAt: now, updatedAt: now }, { id: 'teacher-01', name: 'Ibu Siti', email: 'siti@example.com', role: 'teacher', avatarUrl: 'https://i.pravatar.cc/150?u=teacher01', classIds: ['11-A'], createdAt: now, updatedAt: now }, { id: 'teacher-02', name: 'Bapak Agus', email: 'agus@example.com', role: 'teacher', avatarUrl: 'https://i.pravatar.cc/150?u=teacher02', classIds: ['12-B'], createdAt: now, updatedAt: now },
@@ -51,12 +51,26 @@ export class ClassEntity extends IndexedEntity<SchoolClass> {
   static readonly indexName = "classes";
   static readonly initialState: SchoolClass = { id: "", name: "", teacherId: "", createdAt: "", updatedAt: "", deletedAt: null };
   static seedData = seedData.classes;
+
+  static async getByTeacherId(env: Env, teacherId: string): Promise<SchoolClass[]> {
+    const index = new SecondaryIndex<string>(env, this.entityName, 'teacherId');
+    const classIds = await index.getByValue(teacherId);
+    const classes = await Promise.all(classIds.map(id => new this(env, id).getState()));
+    return classes.filter(c => c && !c.deletedAt) as SchoolClass[];
+  }
 }
 export class CourseEntity extends IndexedEntity<Course> {
   static readonly entityName = "course";
   static readonly indexName = "courses";
   static readonly initialState: Course = { id: "", name: "", teacherId: "", createdAt: "", updatedAt: "", deletedAt: null };
   static seedData = seedData.courses;
+
+  static async getByTeacherId(env: Env, teacherId: string): Promise<Course[]> {
+    const index = new SecondaryIndex<string>(env, this.entityName, 'teacherId');
+    const courseIds = await index.getByValue(teacherId);
+    const courses = await Promise.all(courseIds.map(id => new this(env, id).getState()));
+    return courses.filter(c => c && !c.deletedAt) as Course[];
+  }
 }
 export class GradeEntity extends IndexedEntity<Grade> {
   static readonly entityName = "grade";
@@ -65,18 +79,24 @@ export class GradeEntity extends IndexedEntity<Grade> {
   static seedData = seedData.grades;
 
   static async getByStudentId(env: Env, studentId: string): Promise<Grade[]> {
-    const allGrades = await this.list(env);
-    return allGrades.items.filter(g => g.studentId === studentId && !g.deletedAt);
+    const index = new SecondaryIndex<string>(env, this.entityName, 'studentId');
+    const gradeIds = await index.getByValue(studentId);
+    const grades = await Promise.all(gradeIds.map(id => new this(env, id).getState()));
+    return grades.filter(g => g && !g.deletedAt) as Grade[];
   }
 
   static async getByCourseId(env: Env, courseId: string): Promise<Grade[]> {
-    const allGrades = await this.list(env);
-    return allGrades.items.filter(g => g.courseId === courseId && !g.deletedAt);
+    const index = new SecondaryIndex<string>(env, this.entityName, 'courseId');
+    const gradeIds = await index.getByValue(courseId);
+    const grades = await Promise.all(gradeIds.map(id => new this(env, id).getState()));
+    return grades.filter(g => g && !g.deletedAt) as Grade[];
   }
 
   static async getByStudentIdAndCourseId(env: Env, studentId: string, courseId: string): Promise<Grade | null> {
-    const allGrades = await this.list(env);
-    return allGrades.items.find(g => g.studentId === studentId && g.courseId === courseId && !g.deletedAt) ?? null;
+    const index = new SecondaryIndex<string>(env, this.entityName, 'studentId');
+    const gradeIds = await index.getByValue(studentId);
+    const grades = await Promise.all(gradeIds.map(id => new this(env, id).getState()));
+    return grades.find(g => g && !g.deletedAt && g.courseId === courseId) ?? null;
   }
 }
 export class AnnouncementEntity extends IndexedEntity<Announcement> {
@@ -84,6 +104,13 @@ export class AnnouncementEntity extends IndexedEntity<Announcement> {
   static readonly indexName = "announcements";
   static readonly initialState: Announcement = { id: "", title: "", content: "", date: "", authorId: "", createdAt: "", updatedAt: "", deletedAt: null };
   static seedData = seedData.announcements;
+
+  static async getByAuthorId(env: Env, authorId: string): Promise<Announcement[]> {
+    const index = new SecondaryIndex<string>(env, this.entityName, 'authorId');
+    const announcementIds = await index.getByValue(authorId);
+    const announcements = await Promise.all(announcementIds.map(id => new this(env, id).getState()));
+    return announcements.filter(a => a && !a.deletedAt) as Announcement[];
+  }
 }
 
 export type ClassScheduleState = {id: string;items: ScheduleItem[];};
