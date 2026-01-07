@@ -7,7 +7,7 @@
 // Imports
 // ====================
 
-import type { ApiResponse } from "@shared/types";
+import { ApiResponse, ErrorCode } from "@shared/types";
 import { DurableObject } from "cloudflare:workers";
 import type { Context } from "hono";
 
@@ -677,34 +677,46 @@ export abstract class IndexedEntity<S extends { id: string }> extends Entity<S> 
     await idx.remove(id);
   }
 
-  /**
-   * Query entities by secondary index field value
-   * @param env - The environment context
-   * @param fieldName - The name of the indexed field
-   * @param value - The value to query
-   * @returns Array of entities matching the field value
-   */
-  static async getBySecondaryIndex<TCtor extends CtorAny>(
-    this: HS<TCtor>,
-    env: Env,
-    fieldName: string,
-    value: string
-  ): Promise<IS<TCtor>[]> {
-    const inst = new this(env, 'dummy');
-    const entityName = inst.entityName;
-    const idx = new SecondaryIndex<string>(env, entityName, fieldName);
-    const entityIds = await idx.getByValue(value);
-    const entities = await Promise.all(
-      entityIds.map(async (id) => {
-        try {
-          return await new this(env, id).getState();
-        } catch {
-          return null;
-        }
-      })
-    );
-    return entities.filter((e): e is IS<TCtor> => e !== null);
-  }
+   /**
+    * Query entities by secondary index field value
+    * @param env - The environment context
+    * @param fieldName - The name of the indexed field
+    * @param value - The value to query
+    * @param includeDeleted - Whether to include soft-deleted records (default: false)
+    * @returns Array of entities matching the field value
+    */
+   static async getBySecondaryIndex<TCtor extends CtorAny>(
+     this: HS<TCtor>,
+     env: Env,
+     fieldName: string,
+     value: string,
+     includeDeleted = false
+   ): Promise<IS<TCtor>[]> {
+     const inst = new this(env, 'dummy');
+     const entityName = inst.entityName;
+     const idx = new SecondaryIndex<string>(env, entityName, fieldName);
+     const entityIds = await idx.getByValue(value);
+     const entities = await Promise.all(
+       entityIds.map(async (id) => {
+         try {
+           return await new this(env, id).getState();
+         } catch {
+           return null;
+         }
+       })
+     );
+
+     const nonNullEntities = entities.filter((e): e is IS<TCtor> => e !== null);
+
+     if (!includeDeleted) {
+       return nonNullEntities.filter((row) => {
+         const r = row as Record<string, unknown>;
+         return !('deletedAt' in r) || r.deletedAt === null || r.deletedAt === undefined;
+       });
+     }
+
+     return nonNullEntities;
+   }
 
   /**
    * Override ensureState to ensure the entity's ID matches its instance ID
@@ -726,24 +738,10 @@ export abstract class IndexedEntity<S extends { id: string }> extends Entity<S> 
 // Error Codes
 // ====================
 
-export enum ErrorCode {
-  NETWORK_ERROR = 'NETWORK_ERROR',
-  TIMEOUT = 'TIMEOUT',
-  RATE_LIMIT_EXCEEDED = 'RATE_LIMIT_EXCEEDED',
-  SERVICE_UNAVAILABLE = 'SERVICE_UNAVAILABLE',
-  CIRCUIT_BREAKER_OPEN = 'CIRCUIT_BREAKER_OPEN',
-  UNAUTHORIZED = 'UNAUTHORIZED',
-  FORBIDDEN = 'FORBIDDEN',
-  NOT_FOUND = 'NOT_FOUND',
-  VALIDATION_ERROR = 'VALIDATION_ERROR',
-  CONFLICT = 'CONFLICT',
-  INTERNAL_SERVER_ERROR = 'INTERNAL_SERVER_ERROR',
-  BAD_REQUEST = 'BAD_REQUEST',
-}
-
 // ====================
 // API Helper Functions
 // ====================
+
 
 interface ApiErrorResponse {
   success: false;
