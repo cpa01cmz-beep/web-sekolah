@@ -357,8 +357,7 @@ export class WebhookConfigEntity extends IndexedEntity<WebhookConfig> {
   };
 
   static async getActive(env: Env): Promise<WebhookConfig[]> {
-    const configs = await this.list(env);
-    return configs.items.filter(c => c.active && !c.deletedAt);
+    return this.getBySecondaryIndex(env, 'active', 'true');
   }
 
   static async getByEventType(env: Env, eventType: string): Promise<WebhookConfig[]> {
@@ -381,8 +380,7 @@ export class WebhookEventEntity extends IndexedEntity<WebhookEvent> {
   };
 
   static async getPending(env: Env): Promise<WebhookEvent[]> {
-    const events = await this.list(env);
-    return events.items.filter(e => !e.processed && !e.deletedAt);
+    return this.getBySecondaryIndex(env, 'processed', 'false');
   }
 
   static async getByEventType(env: Env, eventType: string): Promise<WebhookEvent[]> {
@@ -406,13 +404,10 @@ export class WebhookDeliveryEntity extends IndexedEntity<WebhookDelivery> {
   };
 
   static async getPendingRetries(env: Env): Promise<WebhookDelivery[]> {
-    const deliveries = await this.list(env);
+    const pendingDeliveries = await this.getBySecondaryIndex(env, 'status', 'pending');
     const now = new Date().toISOString();
-    return deliveries.items.filter(
-      d => d.status === 'pending' &&
-      !d.deletedAt &&
-      d.nextAttemptAt &&
-      d.nextAttemptAt <= now
+    return pendingDeliveries.filter(
+      d => d.nextAttemptAt && d.nextAttemptAt <= now
     );
   }
 
