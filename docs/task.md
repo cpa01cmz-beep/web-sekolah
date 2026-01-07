@@ -35,6 +35,10 @@ This document tracks architectural refactoring tasks for Akademia Pro.
 | Priority | Task | Effort | Location |
 |----------|------|--------|----------|
 | Low | Refactor large page components | Medium | Multiple page files (>150 lines) |
+| Medium | Extract PageHeader component | Small | Multiple portal pages with duplicate heading patterns |
+| Medium | Centralize theme color constants | Small | 18+ hardcoded color references (#0D47A1, #00ACC1) |
+| Medium | Extract router configuration to separate module | Medium | src/App.tsx (161 lines with route definitions) |
+| Low | Consolidate time constants across error reporter | Small | src/lib/error-reporter/ErrorReporter.ts (1000, 10000, 300000 magic numbers) |
 
 ---
 
@@ -3064,6 +3068,34 @@ Created comprehensive `docs/blueprint.md` with:
 - Suggestion: Split sidebar.tsx into: SidebarContainer, SidebarNavigation, SidebarMenu, SidebarHeader, SidebarFooter; split chart.tsx into: ChartContainer, ChartRenderer, ChartLegend, ChartTooltip; use composition to rebuild components
 - Priority: Low
 - Effort: Medium
+
+### [REFACTOR] Extract PageHeader Component
+- Location: src/pages/portal/**/*.tsx (12 portal pages: StudentDashboardPage, StudentGradesPage, StudentSchedulePage, StudentCardPage, TeacherDashboardPage, TeacherGradeManagementPage, TeacherAnnouncementsPage, ParentDashboardPage, ParentStudentSchedulePage, AdminDashboardPage, AdminUserManagementPage, AdminSettingsPage)
+- Issue: Duplicate heading pattern `text-3xl font-bold` repeated across all portal pages, making it hard to maintain consistent heading styling
+- Suggestion: Extract reusable `PageHeader` component with title, description, and optional subtitle props to eliminate duplication and centralize heading styles
+- Priority: Medium
+- Effort: Small
+
+### [REFACTOR] Centralize Theme Color Constants
+- Location: src/pages/*.tsx, src/components/*.tsx (18+ occurrences of #0D47A1, #00ACC1, and gradient patterns)
+- Issue: Theme colors (#0D47A1, #00ACC1) are hardcoded throughout the codebase, making it difficult to change the color scheme or maintain consistent branding
+- Suggestion: Extract color constants to `src/constants/theme.ts` (e.g., PRIMARY_COLOR, SECONDARY_COLOR, GRADIENT_FROM, GRADIENT_TO) and replace all hardcoded values
+- Priority: Medium
+- Effort: Small
+
+### [REFACTOR] Extract Router Configuration to Separate Module
+- Location: src/App.tsx (lines 62-144, 83 lines of route definitions)
+- Issue: Route configuration is mixed with React component setup, making App.tsx hard to navigate and maintain. With 23 lazy-loaded routes and nested portal routes, the file is becoming unwieldy
+- Suggestion: Extract route configuration to separate `src/config/routes.ts` file, grouping routes by feature (public, student, teacher, parent, admin) and importing into App.tsx for cleaner separation of concerns
+- Priority: Medium
+- Effort: Medium
+
+### [REFACTOR] Consolidate Time Constants Across Error Reporter
+- Location: src/lib/error-reporter/ErrorReporter.ts (lines 26, 27, 323), src/lib/error-reporter/deduplication.ts (lines 9, 127)
+- Issue: Time-related magic numbers (1000, 10000, 60000, 300000) are hardcoded in error reporter despite having `src/config/time.ts` for caching times
+- Suggestion: Import and use constants from `CachingTime` where applicable, or create a separate `src/constants/time.ts` for all application-wide time constants (RETRY_DELAY_MS, REQUEST_TIMEOUT_MS, CLEANUP_INTERVAL_MS, DEDUP_CUTOFF_MS)
+- Priority: Low
+- Effort: Small
 
 ## Documentation Fixes (2026-01-07)
 
