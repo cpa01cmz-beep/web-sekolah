@@ -7,12 +7,11 @@ import { loginSchema } from './middleware/schemas';
 import { logger } from './logger';
 import { verifyPassword } from './password-utils';
 import { UserService } from './domain';
-import { getRoleSpecificFields } from './type-guards';
+import { getRoleSpecificFields, getAuthUser } from './type-guards';
 
 export function authRoutes(app: Hono<{ Bindings: Env }>) {
   app.get('/api/auth/verify', optionalAuthenticate(), async (c) => {
-    const context = c as any;
-    const user = context.get('user') as AuthUser | undefined;
+    const user = getAuthUser(c);
 
     if (!user) {
       return unauthorized(c, 'Invalid or expired token');

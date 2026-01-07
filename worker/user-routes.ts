@@ -14,6 +14,7 @@ import { StudentDashboardService } from './domain';
 import { TeacherService } from './domain';
 import { GradeService } from './domain';
 import { UserService } from './domain';
+import { getAuthUser } from './type-guards';
 
 export function userRoutes(app: Hono<{ Bindings: Env }>) {
   app.post('/api/seed', async (c) => {
@@ -27,8 +28,8 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
   });
 
   app.get('/api/students/:id/dashboard', authenticate(), authorize('student'), async (c) => {
-    const context = c as any;
-    const userId = context.get('user').id;
+    const user = getAuthUser(c);
+    const userId = user!.id;
     const requestedStudentId = c.req.param('id');
 
     if (userId !== requestedStudentId) {
@@ -48,8 +49,8 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
   });
 
   app.get('/api/teachers/:id/classes', authenticate(), authorize('teacher'), async (c) => {
-    const context = c as any;
-    const userId = context.get('user').id;
+    const user = getAuthUser(c);
+    const userId = user!.id;
     const requestedTeacherId = c.req.param('id');
 
     if (userId !== requestedTeacherId) {
@@ -63,8 +64,8 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
 
   app.get('/api/classes/:id/students', authenticate(), authorize('teacher'), async (c) => {
     const classId = c.req.param('id');
-    const context = c as any;
-    const teacherId = context.get('user').id;
+    const user = getAuthUser(c);
+    const teacherId = user!.id;
 
     try {
       const studentsWithGrades = await TeacherService.getClassStudentsWithGrades(c.env, classId, teacherId);
@@ -87,7 +88,7 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
     try {
       const updatedGrade = await GradeService.updateGrade(c.env, gradeId, { score, feedback });
 
-      await WebhookService.triggerEvent(c.env, 'grade.updated', updatedGrade as any);
+      await WebhookService.triggerEvent(c.env, 'grade.updated', updatedGrade as unknown as Record<string, unknown>);
 
       return ok(c, updatedGrade);
     } catch (error) {
@@ -104,7 +105,7 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
     try {
       const newGrade = await GradeService.createGrade(c.env, gradeData);
 
-      await WebhookService.triggerEvent(c.env, 'grade.created', newGrade as any);
+      await WebhookService.triggerEvent(c.env, 'grade.created', newGrade as unknown as Record<string, unknown>);
 
       return ok(c, newGrade);
     } catch (error) {

@@ -2,6 +2,7 @@ import type { Context, Next, Env as HonoEnv } from 'hono';
 import { jwtVerify, SignJWT } from 'jose';
 import type { JWTPayload } from 'jose';
 import { logger } from '../logger';
+import { getAuthUser, setAuthUser } from '../type-guards';
 
 export interface AuthUser {
   id: string;
@@ -83,8 +84,7 @@ export function authenticate(secretEnvVar: string = 'JWT_SECRET') {
       return unauthorized(c, 'Invalid or expired token');
     }
 
-    const context = c as any;
-    context.set('user', {
+    setAuthUser(c, {
       id: payload.sub,
       email: payload.email,
       role: payload.role,
@@ -97,8 +97,7 @@ export function authenticate(secretEnvVar: string = 'JWT_SECRET') {
 export function authorize(...allowedRoles: ('student' | 'teacher' | 'parent' | 'admin')[]) {
   return async (c: Context, next: Next) => {
     const { unauthorized, forbidden } = await import('../core-utils');
-    const context = c as any;
-    const user = context.get('user');
+    const user = getAuthUser(c);
 
     if (!user) {
       return unauthorized(c, 'Authentication required');
@@ -137,8 +136,7 @@ export function optionalAuthenticate(secretEnvVar: string = 'JWT_SECRET') {
 
     const payload = await verifyToken(token, secret);
     if (payload) {
-      const context = c as any;
-      context.set('user', {
+      setAuthUser(c, {
         id: payload.sub,
         email: payload.email,
         role: payload.role,

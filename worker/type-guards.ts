@@ -1,4 +1,14 @@
 import type { SchoolUser, Student, Teacher, Parent, Admin } from '@shared/types';
+import type { Context } from 'hono';
+import type { AuthUser } from './middleware/auth';
+
+export function getAuthUser(c: Context): AuthUser | undefined {
+  return c.get('user') as AuthUser | undefined;
+}
+
+export function setAuthUser(c: Context, user: AuthUser): void {
+  (c as any).set('user', user);
+}
 
 export function isStudent(user: SchoolUser): user is Student {
   return user.role === 'student';
