@@ -56,30 +56,40 @@ export function LoginPage() {
             <CardTitle className="text-2xl">Unified Login</CardTitle>
             <CardDescription>Enter your credentials to access your portal.</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-6">
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input 
-                id="email" 
-                type="email" 
-                placeholder="user@example.com" 
-                value={email} 
-                onChange={(e) => setEmail(e.target.value)} 
-                required 
+              <Label htmlFor="email">
+                Email <span className="text-destructive" aria-label="required">*</span>
+              </Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="user@example.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
                 disabled={!!isLoading}
+                aria-required="true"
+                aria-invalid={email !== '' && !email.includes('@')}
               />
+              <p className="text-xs text-muted-foreground">Enter your registered email address</p>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <Input 
-                id="password" 
-                type="password" 
-                placeholder="••••••••" 
-                value={password} 
-                onChange={(e) => setPassword(e.target.value)} 
-                required 
+              <Label htmlFor="password">
+                Password <span className="text-destructive" aria-label="required">*</span>
+              </Label>
+              <Input
+                id="password"
+                type="password"
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
                 disabled={!!isLoading}
+                aria-required="true"
+                aria-invalid={password !== '' && password.length < 6}
               />
+              <p className="text-xs text-muted-foreground">Enter your password</p>
             </div>
           </CardContent>
           <CardFooter className="flex flex-col gap-4">

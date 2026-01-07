@@ -72,7 +72,7 @@ export function PortalSidebar() {
               <span className="text-lg font-bold">Akademia Pro</span>
             </div>
           )}
-          <Button variant="ghost" size="icon" onClick={() => setIsCollapsed(!isCollapsed)} className="ml-auto">
+          <Button variant="ghost" size="icon" onClick={() => setIsCollapsed(!isCollapsed)} className="ml-auto" aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}>
             {isCollapsed ? <ChevronRight className="h-5 w-5" /> : <ChevronLeft className="h-5 w-5" />}
           </Button>
         </div>
