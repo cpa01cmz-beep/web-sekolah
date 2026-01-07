@@ -635,7 +635,6 @@ This document tracks architectural refactoring tasks for Akademia Pro.
 | High | Type Guards Testing | Completed | Created comprehensive tests for type-guards.ts covering isStudent, isTeacher, isParent, isAdmin type guards and getRoleSpecificFields utility (28 tests) |
 | Medium | Validation Middleware Testing | Completed | Created tests for validation.ts covering sanitizeHtml and sanitizeString utility functions (27 tests) |
 | Medium | Referential Integrity Testing | Pending | Create tests for referential-integrity.ts - skipped due to Cloudflare Workers entity instantiation complexity, requires advanced mocking setup |
-<<<<<<< HEAD
 | Medium | Timeout Middleware Testing | Completed | Created comprehensive tests for timeout middleware (worker/middleware/timeout.ts) covering timeout behavior, custom timeouts, predefined middlewares, Hono integration, and edge cases (25 tests) |
 | Medium | Error Monitoring Testing | Completed | Created comprehensive tests for error monitoring middleware (worker/middleware/error-monitoring.ts) covering error monitoring, response error monitoring, all HTTP status codes, and edge cases (30 tests) |
 
@@ -859,7 +858,6 @@ This document tracks architectural refactoring tasks for Akademia Pro.
 - Priority: Medium
 - Effort: Small
 
-<<<<<<< HEAD
 ### [REFACTOR] Replace Console Statements with Logger in Worker - Completed ✅
 
 **Task**: Replace console statements with centralized pino logger in worker code
