@@ -183,7 +183,6 @@ This document tracks architectural refactoring tasks for Akademia Pro.
 | Low | State Management Guidelines | Pending | Document and enforce consistent state management patterns |
 | Low | Business Logic Extraction | Pending | Extract business logic to dedicated domain layer |
 
-<<<<<<< HEAD
 ## API Standardization (2026-01-07)
 
 **Task**: Standardize error response patterns across all API endpoints and middleware
