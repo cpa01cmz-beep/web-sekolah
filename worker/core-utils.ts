@@ -582,18 +582,134 @@ export abstract class IndexedEntity<S extends { id: string }> extends Entity<S> 
   }
 }
 
-// ====================
-// API Helper Functions
-// ====================
-
-/** Success response helper */
-export const ok = <T>(c: Context, data: T) => c.json({ success: true, data } as ApiResponse<T>);
-
-/** Bad request response helper */
-export const bad = (c: Context, error: string) => c.json({ success: false, error } as ApiResponse, 400);
-
-/** Not found response helper */
-export const notFound = (c: Context, error = 'not found') => c.json({ success: false, error } as ApiResponse, 404);
-
-/** String type guard helper */
+// ====================
+// Error Codes
+// ====================
+
+export enum ErrorCode {
+  NETWORK_ERROR = 'NETWORK_ERROR',
+  TIMEOUT = 'TIMEOUT',
+  RATE_LIMIT_EXCEEDED = 'RATE_LIMIT_EXCEEDED',
+  SERVICE_UNAVAILABLE = 'SERVICE_UNAVAILABLE',
+  CIRCUIT_BREAKER_OPEN = 'CIRCUIT_BREAKER_OPEN',
+  UNAUTHORIZED = 'UNAUTHORIZED',
+  FORBIDDEN = 'FORBIDDEN',
+  NOT_FOUND = 'NOT_FOUND',
+  VALIDATION_ERROR = 'VALIDATION_ERROR',
+  CONFLICT = 'CONFLICT',
+  INTERNAL_SERVER_ERROR = 'INTERNAL_SERVER_ERROR',
+  BAD_REQUEST = 'BAD_REQUEST',
+}
+
+// ====================
+// API Helper Functions
+// ====================
+
+interface ApiErrorResponse {
+  success: false;
+  error: string;
+  code: string;
+  requestId?: string;
+  details?: Record<string, unknown>;
+}
+
+interface ApiSuccessResponse<T> {
+  success: true;
+  data: T;
+  requestId?: string;
+}
+
+type ApiStandardResponse<T = unknown> = ApiSuccessResponse<T> | ApiErrorResponse;
+
+/** Success response helper */
+export const ok = <T>(c: Context, data: T, requestId?: string) => 
+  c.json({ success: true, data, requestId: requestId || c.req.header('X-Request-ID') || crypto.randomUUID() } as ApiSuccessResponse<T>);
+
+/** Bad request response helper */
+export const bad = (c: Context, error: string, code = ErrorCode.VALIDATION_ERROR, details?: Record<string, unknown>) => 
+  c.json({ 
+    success: false, 
+    error, 
+    code,
+    requestId: c.req.header('X-Request-ID') || crypto.randomUUID(),
+    details 
+  } as ApiErrorResponse, 400);
+
+/** Unauthorized response helper */
+export const unauthorized = (c: Context, error = 'Unauthorized') => 
+  c.json({ 
+    success: false, 
+    error, 
+    code: ErrorCode.UNAUTHORIZED,
+    requestId: c.req.header('X-Request-ID') || crypto.randomUUID()
+  } as ApiErrorResponse, 401);
+
+/** Forbidden response helper */
+export const forbidden = (c: Context, error = 'Forbidden') => 
+  c.json({ 
+    success: false, 
+    error, 
+    code: ErrorCode.FORBIDDEN,
+    requestId: c.req.header('X-Request-ID') || crypto.randomUUID()
+  } as ApiErrorResponse, 403);
+
+/** Not found response helper */
+export const notFound = (c: Context, error = 'not found') => 
+  c.json({ 
+    success: false, 
+    error, 
+    code: ErrorCode.NOT_FOUND,
+    requestId: c.req.header('X-Request-ID') || crypto.randomUUID()
+  } as ApiErrorResponse, 404);
+
+/** Conflict response helper */
+export const conflict = (c: Context, error = 'Conflict') => 
+  c.json({ 
+    success: false, 
+    error, 
+    code: ErrorCode.CONFLICT,
+    requestId: c.req.header('X-Request-ID') || crypto.randomUUID()
+  } as ApiErrorResponse, 409);
+
+/** Rate limit exceeded response helper */
+export const rateLimitExceeded = (c: Context, retryAfter?: number) => {
+  if (retryAfter) {
+    c.header('Retry-After', retryAfter.toString());
+  }
+  return c.json({ 
+    success: false, 
+    error: 'Rate limit exceeded', 
+    code: ErrorCode.RATE_LIMIT_EXCEEDED,
+    requestId: c.req.header('X-Request-ID') || crypto.randomUUID()
+  } as ApiErrorResponse, 429);
+};
+
+/** Internal server error response helper */
+export const serverError = (c: Context, error = 'Internal server error') => 
+  c.json({ 
+    success: false, 
+    error, 
+    code: ErrorCode.INTERNAL_SERVER_ERROR,
+    requestId: c.req.header('X-Request-ID') || crypto.randomUUID()
+  } as ApiErrorResponse, 500);
+
+/** Service unavailable response helper */
+export const serviceUnavailable = (c: Context, error = 'Service unavailable') => 
+  c.json({ 
+    success: false, 
+    error, 
+    code: ErrorCode.SERVICE_UNAVAILABLE,
+    requestId: c.req.header('X-Request-ID') || crypto.randomUUID()
+  } as ApiErrorResponse, 503);
+
+/** Gateway timeout response helper */
+export const gatewayTimeout = (c: Context, error = 'Gateway timeout') => 
+  c.json({ 
+    success: false, 
+    error, 
+    code: ErrorCode.TIMEOUT,
+    requestId: c.req.header('X-Request-ID') || crypto.randomUUID()
+  } as ApiErrorResponse, 504);
+
+/** String type guard helper */
 export const isStr = (s: unknown): s is string => typeof s === 'string' && s.length > 0;
