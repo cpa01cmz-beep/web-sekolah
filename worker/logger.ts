@@ -97,3 +97,7 @@ export const logger = {
   warn,
   error
 };
+
+export function resetForTesting(): void {
+  instance = null;
+}

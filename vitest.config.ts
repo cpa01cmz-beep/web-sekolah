@@ -20,7 +20,7 @@ export default defineConfig({
         '**/types.ts',
       ],
     },
-    include: ['src/**/*.{test,spec}.{ts,tsx}', 'worker/**/*.{test,spec}.{ts}'],
+    include: ['src/**/*.{test,spec}.{ts,tsx}', 'worker/**/*.{test,spec}.{ts,tsx}'],
     exclude: ['node_modules/', 'dist/'],
   },
   resolve: {
