@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { SiteHeader } from '@/components/SiteHeader';
 import { SiteFooter } from '@/components/SiteFooter';
 import { CheckCircle, BookOpen, Users, BarChart, MapPin, Phone, Mail } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { SlideUp } from '@/components/animations';
 import { useReducedMotion } from '@/hooks/use-reduced-motion';
 const features = [
   {
@@ -36,12 +36,6 @@ const contactInfo = [
 export function HomePage() {
   const prefersReducedMotion = useReducedMotion();
 
-  const motionProps = (delay = 0) => ({
-    initial: prefersReducedMotion ? {} : { opacity: 0, y: 20 },
-    animate: prefersReducedMotion ? {} : { opacity: 1, y: 0 },
-    transition: prefersReducedMotion ? {} : { duration: 0.5, delay }
-  });
-
   return (
     <div className="flex flex-col min-h-screen bg-[#F5F7FA]">
       <SiteHeader />
@@ -50,20 +44,26 @@ export function HomePage() {
         <section className="relative bg-gradient-to-br from-[#0D47A1] to-[#00ACC1] text-white">
           <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 md:py-32 text-center relative">
-            <motion.h1 {...motionProps(0)} className="text-4xl md:text-6xl font-bold tracking-tight">
-              Welcome to Akademia Pro
-            </motion.h1>
-            <motion.p {...motionProps(0.2)} className="mt-4 max-w-2xl mx-auto text-lg md:text-xl text-blue-100">
-              The all-in-one school management system designed for the modern educational era.
-            </motion.p>
-            <motion.div {...motionProps(0.4)} className="mt-8 flex justify-center gap-4">
-              <Button asChild size="lg" className="bg-white text-[#0D47A1] hover:bg-gray-100 transition-transform hover:scale-105">
-                <Link to="/login">Get Started</Link>
-              </Button>
-              <Button asChild size="lg" variant="outline" className="text-white border-white hover:bg-white/10 transition-transform hover:scale-105">
-                <Link to="/about">Learn More</Link>
-              </Button>
-            </motion.div>
+            <SlideUp>
+              <h1 className="text-4xl md:text-6xl font-bold tracking-tight">
+                Welcome to Akademia Pro
+              </h1>
+            </SlideUp>
+            <SlideUp delay={0.2}>
+              <p className="mt-4 max-w-2xl mx-auto text-lg md:text-xl text-blue-100">
+                The all-in-one school management system designed for modern educational era.
+              </p>
+            </SlideUp>
+            <SlideUp delay={0.4}>
+              <div className="mt-8 flex justify-center gap-4">
+                <Button asChild size="lg" className="bg-white text-[#0D47A1] hover:bg-gray-100 transition-transform hover:scale-105">
+                  <Link to="/login">Get Started</Link>
+                </Button>
+                <Button asChild size="lg" variant="outline" className="text-white border-white hover:bg-white/10 transition-transform hover:scale-105">
+                  <Link to="/about">Learn More</Link>
+                </Button>
+              </div>
+            </SlideUp>
           </div>
         </section>
         {/* Features Section */}
@@ -77,13 +77,7 @@ export function HomePage() {
             </div>
             <div className="mt-12 grid gap-8 md:grid-cols-3">
               {features.map((feature, index) => (
-                <motion.div
-                  key={feature.title}
-                  initial={prefersReducedMotion ? {} : { opacity: 0, y: 50 }}
-                  animate={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
-                  viewport={prefersReducedMotion ? {} : { once: true }}
-                  transition={prefersReducedMotion ? {} : { duration: 0.5, delay: index * 0.1 }}
-                >
+                <SlideUp key={feature.title} delay={prefersReducedMotion ? 0 : index * 0.1}>
                   <Card className="text-center h-full hover:shadow-lg hover:-translate-y-1 transition-all duration-200">
                     <CardHeader>
                       <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-[#00ACC1]">
@@ -95,7 +89,7 @@ export function HomePage() {
                       <p className="text-muted-foreground">{feature.description}</p>
                     </CardContent>
                   </Card>
-                </motion.div>
+                </SlideUp>
               ))}
             </div>
           </div>
@@ -136,17 +130,12 @@ export function HomePage() {
             </div>
             <div className="mt-12 grid gap-6 md:grid-cols-3">
               {contactInfo.map((info, index) => (
-                <motion.div
-                  key={info.text}
-                  initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }}
-                  whileInView={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
-                  viewport={prefersReducedMotion ? {} : { once: true }}
-                  transition={prefersReducedMotion ? {} : { duration: 0.5, delay: index * 0.1 }}
-                  className="flex items-center justify-center gap-3 p-4 bg-card rounded-lg shadow-sm"
-                >
-                  {info.icon}
-                  <span className="text-muted-foreground">{info.text}</span>
-                </motion.div>
+                <SlideUp key={info.text} delay={prefersReducedMotion ? 0 : index * 0.1}>
+                  <div className="flex items-center justify-center gap-3 p-4 bg-card rounded-lg shadow-sm">
+                    {info.icon}
+                    <span className="text-muted-foreground">{info.text}</span>
+                  </div>
+                </SlideUp>
               ))}
             </div>
           </div>

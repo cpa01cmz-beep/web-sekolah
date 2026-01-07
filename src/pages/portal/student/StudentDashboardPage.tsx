@@ -3,6 +3,7 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { EmptyState } from '@/components/ui/empty-state';
+import { DashboardSkeleton } from '@/components/ui/loading-skeletons';
 import { Clock, BookOpen, Megaphone, AlertTriangle, Inbox } from 'lucide-react';
 import { motion, Variants } from 'framer-motion';
 import { useStudentDashboard } from '@/hooks/useStudent';
@@ -19,22 +20,6 @@ const itemVariants: Variants = {
   hidden: { y: 20, opacity: 0 },
   visible: { y: 0, opacity: 1, transition: { type: 'spring' as const, stiffness: 100 } },
 };
-
-function DashboardSkeleton() {
-  return (
-    <div className="space-y-6">
-      <div>
-        <Skeleton className="h-8 w-1/2" />
-        <Skeleton className="h-4 w-3/4 mt-2" />
-      </div>
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        <Card><CardHeader><Skeleton className="h-4 w-1/3" /></CardHeader><CardContent className="space-y-4"><Skeleton className="h-16 w-full" /><Skeleton className="h-16 w-full" /></CardContent></Card>
-        <Card><CardHeader><Skeleton className="h-4 w-1/3" /></CardHeader><CardContent className="space-y-4"><Skeleton className="h-8 w-full" /><Skeleton className="h-8 w-full" /></CardContent></Card>
-        <Card><CardHeader><Skeleton className="h-4 w-1/3" /></CardHeader><CardContent className="space-y-4"><Skeleton className="h-8 w-full" /><Skeleton className="h-8 w-full" /></CardContent></Card>
-      </div>
-    </div>
-  );
-}
 export function StudentDashboardPage() {
   const user = useAuthStore((state) => state.user);
   const prefersReducedMotion = useReducedMotion();
