@@ -466,12 +466,19 @@ This document tracks architectural refactoring tasks for Akademia Pro.
 - Both `login()` and `getCurrentUser()` methods now reference same constant
 - Maintained backward compatibility with email override in `login()` method
 
-## [REFACTOR] Eliminate Repetitive Suspense Wrappers in App.tsx
+## [REFACTOR] Eliminate Repetitive Suspense Wrappers in App.tsx - Completed ✅
 - Location: src/App.tsx (lines 62-134)
 - Issue: Every route uses identical `<Suspense fallback={<LoadingFallback />}>` wrapper, creating code duplication
 - Suggestion: Create a helper function `withSuspense(component)` or use a wrapper component to reduce repetition
 - Priority: Medium
 - Effort: Small
+
+**Implementation (2026-01-07)**:
+- Created `withSuspense<T extends React.ComponentType<any>>(Component: T)` helper function
+- Function wraps component with `<Suspense fallback={<LoadingFallback />}>`
+- Updated all 29 route elements to use `withSuspense(Component)` instead of manual Suspense wrapping
+- Reduced route definition lines from 72 to 59 (18% reduction)
+- Benefits: Eliminated code duplication, easier to modify loading behavior globally
 
 ## [REFACTOR] Consolidate Error Filtering Logic in errorReporter - Completed ✅
 - Location: src/lib/errorReporter.ts

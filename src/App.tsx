@@ -59,78 +59,87 @@ const LoadingFallback = () => (
   </div>
 );
 
+// Helper function to wrap components with Suspense and LoadingFallback
+function withSuspense<T extends React.ComponentType<any>>(Component: T) {
+  return (
+    <Suspense fallback={<LoadingFallback />}>
+      <Component />
+    </Suspense>
+  );
+}
+
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <Suspense fallback={<LoadingFallback />}><HomePage /></Suspense>,
+    element: withSuspense(HomePage),
     errorElement: <RouteErrorBoundary />,
   },
   {
     path: "/login",
-    element: <Suspense fallback={<LoadingFallback />}><LoginPage /></Suspense>,
+    element: withSuspense(LoginPage),
   },
   {
     path: "/portal",
-    element: <Suspense fallback={<LoadingFallback />}><PortalLayout /></Suspense>,
+    element: withSuspense(PortalLayout),
     errorElement: <RouteErrorBoundary />,
     children: [
-      { index: true, element: <Suspense fallback={<LoadingFallback />}><LoginPage /></Suspense> },
+      { index: true, element: withSuspense(LoginPage) },
       {
         path: "student",
         children: [
-          { index: true, element: <Suspense fallback={<LoadingFallback />}><StudentDashboardPage /></Suspense> },
-          { path: "dashboard", element: <Suspense fallback={<LoadingFallback />}><StudentDashboardPage /></Suspense> },
-          { path: "grades", element: <Suspense fallback={<LoadingFallback />}><StudentGradesPage /></Suspense> },
-          { path: "schedule", element: <Suspense fallback={<LoadingFallback />}><StudentSchedulePage /></Suspense> },
-          { path: "card", element: <Suspense fallback={<LoadingFallback />}><StudentCardPage /></Suspense> },
+          { index: true, element: withSuspense(StudentDashboardPage) },
+          { path: "dashboard", element: withSuspense(StudentDashboardPage) },
+          { path: "grades", element: withSuspense(StudentGradesPage) },
+          { path: "schedule", element: withSuspense(StudentSchedulePage) },
+          { path: "card", element: withSuspense(StudentCardPage) },
         ],
       },
       {
         path: "teacher",
         children: [
-          { index: true, element: <Suspense fallback={<LoadingFallback />}><TeacherDashboardPage /></Suspense> },
-          { path: "dashboard", element: <Suspense fallback={<LoadingFallback />}><TeacherDashboardPage /></Suspense> },
-          { path: "grades", element: <Suspense fallback={<LoadingFallback />}><TeacherGradeManagementPage /></Suspense> },
-          { path: "announcements", element: <Suspense fallback={<LoadingFallback />}><TeacherAnnouncementsPage /></Suspense> },
+          { index: true, element: withSuspense(TeacherDashboardPage) },
+          { path: "dashboard", element: withSuspense(TeacherDashboardPage) },
+          { path: "grades", element: withSuspense(TeacherGradeManagementPage) },
+          { path: "announcements", element: withSuspense(TeacherAnnouncementsPage) },
         ],
       },
       {
         path: "parent",
         children: [
-          { index: true, element: <Suspense fallback={<LoadingFallback />}><ParentDashboardPage /></Suspense> },
-          { path: "dashboard", element: <Suspense fallback={<LoadingFallback />}><ParentDashboardPage /></Suspense> },
-          { path: "schedule", element: <Suspense fallback={<LoadingFallback />}><ParentStudentSchedulePage /></Suspense> },
+          { index: true, element: withSuspense(ParentDashboardPage) },
+          { path: "dashboard", element: withSuspense(ParentDashboardPage) },
+          { path: "schedule", element: withSuspense(ParentStudentSchedulePage) },
         ],
       },
       {
         path: "admin",
         children: [
-          { index: true, element: <Suspense fallback={<LoadingFallback />}><AdminDashboardPage /></Suspense> },
-          { path: "dashboard", element: <Suspense fallback={<LoadingFallback />}><AdminDashboardPage /></Suspense> },
-          { path: "users", element: <Suspense fallback={<LoadingFallback />}><AdminUserManagementPage /></Suspense> },
-          { path: "announcements", element: <Suspense fallback={<LoadingFallback />}><AdminAnnouncementsPage /></Suspense> },
-          { path: "settings", element: <Suspense fallback={<LoadingFallback />}><AdminSettingsPage /></Suspense> },
+          { index: true, element: withSuspense(AdminDashboardPage) },
+          { path: "dashboard", element: withSuspense(AdminDashboardPage) },
+          { path: "users", element: withSuspense(AdminUserManagementPage) },
+          { path: "announcements", element: withSuspense(AdminAnnouncementsPage) },
+          { path: "settings", element: withSuspense(AdminSettingsPage) },
         ],
       },
     ],
   },
-  { path: "/about", element: <Suspense fallback={<LoadingFallback />}><AboutPage /></Suspense> },
-  { path: "/contact", element: <Suspense fallback={<LoadingFallback />}><ContactPage /></Suspense> },
-  { path: "/privacy", element: <Suspense fallback={<LoadingFallback />}><PrivacyPolicyPage /></Suspense> },
+  { path: "/about", element: withSuspense(AboutPage) },
+  { path: "/contact", element: withSuspense(ContactPage) },
+  { path: "/privacy", element: withSuspense(PrivacyPolicyPage) },
   // New routes for Issue #11
-  { path: "/news/update", element: <Suspense fallback={<LoadingFallback />}><NewsUpdatePage /></Suspense> },
-  { path: "/news/announcements", element: <Suspense fallback={<LoadingFallback />}><NewsAnnouncementsPage /></Suspense> },
-  { path: "/news/index", element: <Suspense fallback={<LoadingFallback />}><NewsIndexPage /></Suspense> },
-  { path: "/profile/school", element: <Suspense fallback={<LoadingFallback />}><ProfileSchoolPage /></Suspense> },
-  { path: "/profile/services", element: <Suspense fallback={<LoadingFallback />}><ProfileServicesPage /></Suspense> },
-  { path: "/profile/achievements", element: <Suspense fallback={<LoadingFallback />}><ProfileAchievementsPage /></Suspense> },
-  { path: "/profile/extracurricular", element: <Suspense fallback={<LoadingFallback />}><ProfileExtracurricularPage /></Suspense> },
-  { path: "/profile/facilities", element: <Suspense fallback={<LoadingFallback />}><ProfileFacilitiesPage /></Suspense> },
-  { path: "/works", element: <Suspense fallback={<LoadingFallback />}><WorksPage /></Suspense> },
-  { path: "/gallery", element: <Suspense fallback={<LoadingFallback />}><GalleryPage /></Suspense> },
-  { path: "/links/related", element: <Suspense fallback={<LoadingFallback />}><LinksRelatedPage /></Suspense> },
-  { path: "/links/download", element: <Suspense fallback={<LoadingFallback />}><LinksDownloadPage /></Suspense> },
-  { path: "/ppdb", element: <Suspense fallback={<LoadingFallback />}><PPDBPage /></Suspense> },
+  { path: "/news/update", element: withSuspense(NewsUpdatePage) },
+  { path: "/news/announcements", element: withSuspense(NewsAnnouncementsPage) },
+  { path: "/news/index", element: withSuspense(NewsIndexPage) },
+  { path: "/profile/school", element: withSuspense(ProfileSchoolPage) },
+  { path: "/profile/services", element: withSuspense(ProfileServicesPage) },
+  { path: "/profile/achievements", element: withSuspense(ProfileAchievementsPage) },
+  { path: "/profile/extracurricular", element: withSuspense(ProfileExtracurricularPage) },
+  { path: "/profile/facilities", element: withSuspense(ProfileFacilitiesPage) },
+  { path: "/works", element: withSuspense(WorksPage) },
+  { path: "/gallery", element: withSuspense(GalleryPage) },
+  { path: "/links/related", element: withSuspense(LinksRelatedPage) },
+  { path: "/links/download", element: withSuspense(LinksDownloadPage) },
+  { path: "/ppdb", element: withSuspense(PPDBPage) },
 ]);
 
 export function App() {
