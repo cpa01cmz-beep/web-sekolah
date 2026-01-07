@@ -38,7 +38,7 @@ export function PortalSidebar() {
             {isCollapsed ? <ChevronRight className="h-5 w-5" /> : <ChevronLeft className="h-5 w-5" />}
           </Button>
         </div>
-        <div className="flex-grow p-2 space-y-2">
+        <nav className="flex-grow p-2 space-y-2" aria-label={`${user.role} portal navigation`} role="navigation">
           {navLinks.map((link: NavLinkType) => (
             <Tooltip key={link.to}>
               <TooltipTrigger asChild>
@@ -54,14 +54,14 @@ export function PortalSidebar() {
                     )
                   }
                 >
-                  {React.createElement(link.icon, { className: 'h-5 w-5' })}
+                  <span aria-hidden="true">{React.createElement(link.icon, { className: 'h-5 w-5' })}</span>
                   {!isCollapsed && <span>{link.label}</span>}
                 </NavLink>
               </TooltipTrigger>
               {isCollapsed && <TooltipContent side="right">{link.label}</TooltipContent>}
             </Tooltip>
           ))}
-        </div>
+        </nav>
         <div className="p-2 border-t">
           <Tooltip>
             <TooltipTrigger asChild>

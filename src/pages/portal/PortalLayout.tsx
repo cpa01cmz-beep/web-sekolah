@@ -35,10 +35,10 @@ export function PortalLayout() {
               <SheetContent side="left" className="p-0 w-64">
                 <div className="flex flex-col h-full">
                   <div className="flex items-center h-16 border-b px-4">
-                    <GraduationCap className="h-7 w-7 text-[#0D47A1]" />
+                    <GraduationCap className="h-7 w-7 text-[#0D47A1]" aria-hidden="true" />
                     <span className="ml-2 text-lg font-bold">Akademia Pro</span>
                   </div>
-                  <nav className="flex-grow p-4 space-y-2">
+                  <nav className="flex-grow p-4 space-y-2" aria-label={`${user.role} portal mobile navigation`} role="navigation">
                     {navLinks.map((link: NavLinkType) => (
                       <NavLink
                         key={link.to}
@@ -53,7 +53,7 @@ export function PortalLayout() {
                           )
                         }
                       >
-                        {React.createElement(link.icon, { className: 'h-5 w-5' })}
+                        <span aria-hidden="true">{React.createElement(link.icon, { className: 'h-5 w-5' })}</span>
                         <span>{link.label}</span>
                       </NavLink>
                     ))}

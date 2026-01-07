@@ -1,6 +1,66 @@
 # Architectural Task List
-
+ 
 This document tracks architectural refactoring tasks for Akademia Pro.
+ 
+## UI/UX Improvements (2026-01-07)
+
+### Accessibility Enhancement - Completed ✅
+
+**Task**: Implement comprehensive accessibility improvements across the application
+
+**Implementation**:
+
+1. **Created PublicLayout Component** - `src/components/PublicLayout.tsx`
+   - Reusable layout wrapper for public pages
+   - Includes SkipLink for keyboard navigation
+   - Consistent header/footer structure
+   - Benefits: Centralized layout management, consistent accessibility
+
+2. **Updated Navigation ARIA Attributes**
+   - Added `role="navigation"` to all nav elements in SiteHeader, SiteFooter, PortalSidebar
+   - Added `aria-label` to navigation menus for screen reader clarity
+   - Benefits: Better screen reader support, clearer navigation structure
+
+3. **Enhanced ContactPage Accessibility**
+   - Added semantic `<address>` element for contact information
+   - Added clickable phone and email links with proper protocols
+   - Improved form accessibility with unique IDs and labels
+   - Benefits: Better keyboard navigation, screen reader support
+
+4. **Improved Social Media Links**
+   - Added `aria-label` to all social media icons in SiteFooter
+   - Decorative icons marked with `aria-hidden="true"`
+   - Benefits: Screen readers announce link purpose, not just "Twitter" icon
+
+5. **Enhanced Section Structure**
+   - Added `aria-labelledby` to all major sections
+   - Added proper heading hierarchy with matching IDs
+   - Decorative elements marked with `aria-hidden`
+   - Benefits: Better landmark navigation, semantic document structure
+
+**Benefits Achieved**:
+- ✅ SkipLink now available on all public pages
+- ✅ All navigation menus have proper ARIA labels and roles
+- ✅ Form inputs have accessible labels and requirements
+- ✅ Social media links have descriptive labels
+- ✅ Proper landmark structure with semantic HTML
+- ✅ Decorative icons properly hidden from screen readers
+- ✅ All 433 tests passing (0 regression)
+- ✅ Zero linting errors
+
+**Technical Details**:
+- SkipLink: Uses `sr-only` Tailwind class, visible on focus
+- ARIA labels: Describe purpose, not just content
+- Semantic HTML: `<nav>`, `<address>`, `<main>`, `<section>`
+- Icon handling: Decorative icons marked with `aria-hidden="true"`
+- Form accessibility: Labels properly associated with inputs via `htmlFor` and `id`
+
+**Accessibility Improvements**:
+- **Keyboard Navigation**: Skip to main content available on all pages
+- **Screen Reader Support**: All navigation menus properly labeled
+- **Form Accessibility**: All inputs have associated labels
+- **Landmark Regions**: Clear navigation, main, and footer regions
+- **Decorative Elements**: Non-informative icons hidden from assistive tech
 
 ## Performance Optimization (2026-01-07)
 
