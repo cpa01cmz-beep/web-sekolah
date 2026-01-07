@@ -9,9 +9,24 @@ This document tracks architectural refactoring tasks for Akademia Pro.
 | High | Service Layer Decoupling | Completed | Decouple services from HTTP client by introducing repository pattern |
 | High | Test Suite Modernization | Completed | Updated all service tests to use MockRepository for proper isolation |
 | Medium | Data Access Layer | Pending | Create repository abstraction for entity operations |
-| Medium | Validation Layer | Pending | Centralize validation logic with Zod schemas |
+| Medium | Validation Layer | Completed | Centralized validation logic with Zod schemas (worker/middleware/validation.ts, schemas.ts) |
 | Low | State Management Guidelines | Pending | Document and enforce consistent state management patterns |
 | Low | Business Logic Extraction | Pending | Extract business logic to dedicated domain layer |
+
+## Security Hardening (2026-01-07)
+
+### Completed
+
+1. **CORS Restriction** - Modified worker/index.ts to use environment-based CORS configuration
+2. **Security Headers** - Created worker/middleware/security-headers.ts with CSP, HSTS, X-Frame-Options, etc.
+3. **JWT Authentication** - Created worker/middleware/auth.ts with token generation and verification
+4. **Role-Based Authorization** - Implemented authenticate() and authorize() middleware functions
+5. **Input Validation** - Created worker/middleware/validation.ts and schemas.ts with Zod validation
+6. **Audit Logging** - Created worker/middleware/audit-log.ts for sensitive operation tracking
+7. **Environment Variables** - Added .env.example for secure configuration management
+8. **Documentation** - Created worker/SECURITY_IMPLEMENTATION.md with usage examples
+
+**Details**: See CHANGELOG-security-hardening.md for complete security implementation details.
 
 ## Test Suite Modernization (2026-01-07)
 

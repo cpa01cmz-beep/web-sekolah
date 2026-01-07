@@ -15,9 +15,11 @@ import type { Context } from "hono";
 // Type Definitions
 // ====================
 
-export interface Env {
-  GlobalDurableObject: DurableObjectNamespace<GlobalDurableObject>;
-}
+export interface Env {
+  GlobalDurableObject: DurableObjectNamespace<GlobalDurableObject>;
+  ALLOWED_ORIGINS?: string;
+  JWT_SECRET?: string;
+}
 
 /** 
  * Document type with version for optimistic locking

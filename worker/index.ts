@@ -7,6 +7,7 @@ import { userRoutes } from './user-routes';
 import { Env, GlobalDurableObject, ok, notFound, serverError } from './core-utils';
 import { defaultRateLimiter, strictRateLimiter } from './middleware/rate-limit';
 import { defaultTimeout } from './middleware/timeout';
+import { securityHeaders } from './middleware/security-headers';
 
 // Need to export GlobalDurableObject to make it available in wrangler
 export { GlobalDurableObject };
@@ -28,12 +29,34 @@ const app = new Hono<{ Bindings: Env }>();
 
 app.use('*', logger());
 
-app.use('/api/*', cors({ origin: '*', allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], allowHeaders: ['Content-Type', 'Authorization'] }));
+app.use('/api/*', async (c, next) => {
+  const allowedOrigins = c.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:3000', 'http://localhost:4173'];
+  const origin = c.req.header('Origin');
+  
+  if (origin && allowedOrigins.includes(origin)) {
+    c.header('Access-Control-Allow-Origin', origin);
+  } else if (allowedOrigins.length > 0) {
+    c.header('Access-Control-Allow-Origin', allowedOrigins[0]);
+  }
+  
+  c.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  c.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  c.header('Access-Control-Allow-Credentials', 'true');
+  c.header('Access-Control-Max-Age', '86400');
+  
+  if (c.req.method === 'OPTIONS') {
+    return new Response(null, { status: 204 });
+  }
+  
+  await next();
+});
 
 app.use('/api/*', async (c, next) => {
   c.header('X-Request-ID', crypto.randomUUID());
   await next();
 });
+
+app.use('/api/*', securityHeaders());
 
 app.use('/api/*', defaultTimeout());
 
