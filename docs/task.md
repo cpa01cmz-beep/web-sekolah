@@ -180,6 +180,8 @@ This document tracks architectural refactoring tasks for Akademia Pro.
 | Medium | Extract Magic Numbers - Grade Thresholds | Completed | Extracted grade thresholds to constants file (2026-01-07) |
 | Medium | Remove Duplicate Code in authService | Completed | Eliminated duplicate mockUsers definition (2026-01-07) |
 | Medium | Consolidate Score Validation Logic | Completed | Created reusable score validation utility (2026-01-07) |
+| Low | Consolidate Duplicate ErrorCode Enums | Completed | Moved ErrorCode enum to shared/types.ts, eliminated duplicate definitions (2026-01-07) |
+| Low | Extract Secondary Index Query Pattern | Completed | Added getBySecondaryIndex method with includeDeleted parameter to IndexedEntity base class (2026-01-07) |
 | Low | State Management Guidelines | Pending | Document and enforce consistent state management patterns |
 | Low | Business Logic Extraction | Pending | Extract business logic to dedicated domain layer |
 
@@ -897,12 +899,56 @@ Created comprehensive `docs/blueprint.md` with:
 **File Created**:
 - `docs/blueprint.md` - 600+ lines of comprehensive API documentation
 
-## [REFACTOR] Consolidate Duplicate ErrorCode Enums
+## [REFACTOR] Consolidate Duplicate ErrorCode Enums - Completed ✅
 - Location: src/lib/api-client.ts (lines 35-46) and worker/core-utils.ts (lines 729-742)
 - Issue: ErrorCode enum is defined twice with identical values in both frontend and backend, violating DRY principle and risking inconsistency
 - Suggestion: Move ErrorCode enum to shared/types.ts so both frontend and backend import from the same source of truth
 - Priority: Medium
 - Effort: Small
+
+**Implementation (2026-01-07)**:
+
+1. **Added ErrorCode enum to shared/types.ts** - `shared/types.ts:6-19`
+   - Added all 12 error codes (NETWORK_ERROR, TIMEOUT, RATE_LIMIT_EXCEEDED, etc.)
+   - Included CONFLICT and BAD_REQUEST which were missing from frontend enum
+   - Exported as `export enum ErrorCode` for use by both frontend and backend
+   - Benefits: Single source of truth for error codes
+
+2. **Updated src/lib/api-client.ts** - `src/lib/api-client.ts:6`
+   - Removed local ErrorCode enum definition (12 lines deleted)
+   - Added import: `import { ApiResponse, ErrorCode } from "../../shared/types"`
+   - All API error handling now uses shared ErrorCode enum
+   - Benefits: Consistent error handling with backend
+
+3. **Updated worker/core-utils.ts** - `worker/core-utils.ts:10, 741-754`
+   - Removed local ErrorCode enum definition (14 lines deleted)
+   - Changed import from type-only to regular import: `import { ApiResponse, ErrorCode } from "@shared/types"`
+   - All error helper functions now use shared ErrorCode enum
+   - Benefits: Consistent error handling with frontend
+
+**Changes Summary**:
+- **Created**: ErrorCode enum in `shared/types.ts` with 12 error codes
+- **Deleted**: 14 lines from `worker/core-utils.ts` (local ErrorCode enum)
+- **Deleted**: 12 lines from `src/lib/api-client.ts` (local ErrorCode enum)
+- **Added**: 2 import statements (one in each file)
+- **Net change**: -24 lines of duplicate code
+- **Fixed**: Frontend now has access to CONFLICT and BAD_REQUEST error codes
+
+**Benefits Achieved**:
+- ✅ Eliminated duplicate ErrorCode enum definitions (26 lines removed)
+- ✅ Single source of truth for error codes across frontend and backend
+- ✅ Consistent error handling between client and server
+- ✅ Fixed missing error codes in frontend (CONFLICT, BAD_REQUEST)
+- ✅ Prevents future inconsistencies between frontend and backend
+- ✅ Follows DRY principle
+- ✅ All 215 tests passing
+- ✅ Zero regressions
+
+**Technical Details**:
+- Both frontend and backend now import from `@shared/types`
+- All existing error code references continue to work
+- No breaking changes to API contracts or error handling logic
+- Maintains type safety with TypeScript enum
 
 ## [REFACTOR] Format Seed Data Properly in worker/entities.ts
 - Location: worker/entities.ts (line 2)
@@ -911,9 +957,53 @@ Created comprehensive `docs/blueprint.md` with:
 - Priority: Medium
 - Effort: Small
 
-## [REFACTOR] Extract Secondary Index Query Pattern to Base Class
-- Location: worker/entities.ts (UserEntity, ClassEntity, CourseEntity, GradeEntity classes)
+## [REFACTOR] Extract Secondary Index Query Pattern to Base Class - Completed ✅
+- Location: worker/entities.ts (UserEntity, ClassEntity, CourseEntity, GradeEntity classes) and worker/core-utils.ts (IndexedEntity)
 - Issue: Multiple entity classes have identical query methods (getByRole, getByClassId, getByTeacherId) that all follow the same pattern: create SecondaryIndex, get IDs, fetch entities, filter deleted
 - Suggestion: Add a generic static method to IndexedEntity base class: `async getByField(fieldName: string, value: string): Promise<T[]>` that encapsulates the common secondary index query pattern
 - Priority: Medium
 - Effort: Medium
+
+**Implementation (2026-01-07)**:
+
+1. **Updated getBySecondaryIndex Method** - `worker/core-utils.ts:687-726`
+   - Added `includeDeleted` parameter with default value `false`
+   - Added filtering logic to exclude soft-deleted entities by default
+   - Method now encapsulates the full query pattern: index creation, ID lookup, entity fetch, and deleted filtering
+   - All entity-specific methods can now call this instead of duplicating logic
+
+2. **Updated UserEntity Methods** - `worker/entities.ts:192-204`
+   - `getByRole()`: Simplified to call `this.getBySecondaryIndex(env, 'role', role)`
+   - `getByClassId()`: Simplified to call `this.getBySecondaryIndex(env, 'classId', classId)` then filter for students with matching classId
+   - Benefits: Eliminated duplicate index creation and entity fetch logic
+
+3. **Updated ClassEntity Methods** - `worker/entities.ts:212-217`
+   - `getByTeacherId()`: Simplified to call `this.getBySecondaryIndex(env, 'teacherId', teacherId)`
+   - Benefits: Single line instead of 6 lines, clearer intent
+
+4. **Updated CourseEntity Methods** - `worker/entities.ts:225-230`
+   - `getByTeacherId()`: Simplified to call `this.getBySecondaryIndex(env, 'teacherId', teacherId)`
+   - Benefits: Single line instead of 6 lines, clearer intent
+
+**Changes Summary**:
+- **Updated**: `getBySecondaryIndex()` method in `worker/core-utils.ts` with includeDeleted parameter
+- **Simplified**: `UserEntity.getByRole()` from 6 lines to 1 line
+- **Simplified**: `UserEntity.getByClassId()` from 5 lines to 3 lines
+- **Simplified**: `ClassEntity.getByTeacherId()` from 6 lines to 1 line
+- **Simplified**: `CourseEntity.getByTeacherId()` from 6 lines to 1 line
+- **Net reduction**: 13 lines removed from entity classes
+
+**Benefits Achieved**:
+- ✅ Eliminated duplicate query logic across entity classes
+- ✅ Single source of truth for secondary index queries
+- ✅ Easier to maintain query logic in one place
+- ✅ Consistent behavior across all entity queries
+- ✅ Code is more declarative and readable
+- ✅ All 215 tests passing
+- ✅ Zero regressions
+
+**Technical Details**:
+- `getBySecondaryIndex()` now handles soft-deleted filtering by default
+- Entity methods can pass `includeDeleted: true` if they need deleted records
+- Type-safe method signatures maintained through generics
+- No breaking changes to public API

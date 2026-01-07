@@ -1,32 +1,185 @@
 import { IndexedEntity, Index, SecondaryIndex, type Env } from "./core-utils";
-import type { SchoolUser, SchoolClass, Course, Grade, Announcement, ScheduleItem, SchoolData, UserRole, Student } from "@shared/types";const now = new Date().toISOString();
+import type { SchoolUser, SchoolClass, Course, Grade, Announcement, ScheduleItem, SchoolData, UserRole, Student } from "@shared/types";
 
-const seedData: SchoolData = { users: [{ id: 'student-01', name: 'Budi Hartono', email: 'budi@example.com', role: 'student', avatarUrl: 'https://i.pravatar.cc/150?u=student01', classId: '11-A', studentIdNumber: '12345', createdAt: now, updatedAt: now }, { id: 'student-02', name: 'Ani Suryani', email: 'ani@example.com', role: 'student', avatarUrl: 'https://i.pravatar.cc/150?u=student02', classId: '11-A', studentIdNumber: '12346', createdAt: now, updatedAt: now }, { id: 'teacher-01', name: 'Ibu Siti', email: 'siti@example.com', role: 'teacher', avatarUrl: 'https://i.pravatar.cc/150?u=teacher01', classIds: ['11-A'], createdAt: now, updatedAt: now }, { id: 'teacher-02', name: 'Bapak Agus', email: 'agus@example.com', role: 'teacher', avatarUrl: 'https://i.pravatar.cc/150?u=teacher02', classIds: ['12-B'], createdAt: now, updatedAt: now },
-  { id: 'parent-01', name: 'Ayah Budi', email: 'ayah.budi@example.com', role: 'parent', avatarUrl: 'https://i.pravatar.cc/150?u=parent01', childId: 'student-01', createdAt: now, updatedAt: now },
-  { id: 'admin-01', name: 'Admin Sekolah', email: 'admin@example.com', role: 'admin', avatarUrl: 'https://i.pravatar.cc/150?u=admin01', createdAt: now, updatedAt: now }],
+const now = new Date().toISOString();
+
+const seedData: SchoolData = {
+  users: [
+    {
+      id: 'student-01',
+      name: 'Budi Hartono',
+      email: 'budi@example.com',
+      role: 'student',
+      avatarUrl: 'https://i.pravatar.cc/150?u=student01',
+      classId: '11-A',
+      studentIdNumber: '12345',
+      createdAt: now,
+      updatedAt: now
+    },
+    {
+      id: 'student-02',
+      name: 'Ani Suryani',
+      email: 'ani@example.com',
+      role: 'student',
+      avatarUrl: 'https://i.pravatar.cc/150?u=student02',
+      classId: '11-A',
+      studentIdNumber: '12346',
+      createdAt: now,
+      updatedAt: now
+    },
+    {
+      id: 'teacher-01',
+      name: 'Ibu Siti',
+      email: 'siti@example.com',
+      role: 'teacher',
+      avatarUrl: 'https://i.pravatar.cc/150?u=teacher01',
+      classIds: ['11-A'],
+      createdAt: now,
+      updatedAt: now
+    },
+    {
+      id: 'teacher-02',
+      name: 'Bapak Agus',
+      email: 'agus@example.com',
+      role: 'teacher',
+      avatarUrl: 'https://i.pravatar.cc/150?u=teacher02',
+      classIds: ['12-B'],
+      createdAt: now,
+      updatedAt: now
+    },
+    {
+      id: 'parent-01',
+      name: 'Ayah Budi',
+      email: 'ayah.budi@example.com',
+      role: 'parent',
+      avatarUrl: 'https://i.pravatar.cc/150?u=parent01',
+      childId: 'student-01',
+      createdAt: now,
+      updatedAt: now
+    },
+    {
+      id: 'admin-01',
+      name: 'Admin Sekolah',
+      email: 'admin@example.com',
+      role: 'admin',
+      avatarUrl: 'https://i.pravatar.cc/150?u=admin01',
+      createdAt: now,
+      updatedAt: now
+    }
+  ],
 
   classes: [
-  { id: '11-A', name: 'Class 11-A', teacherId: 'teacher-01', createdAt: now, updatedAt: now },
-  { id: '12-B', name: 'Class 12-B', teacherId: 'teacher-02', createdAt: now, updatedAt: now }],
+    {
+      id: '11-A',
+      name: 'Class 11-A',
+      teacherId: 'teacher-01',
+      createdAt: now,
+      updatedAt: now
+    },
+    {
+      id: '12-B',
+      name: 'Class 12-B',
+      teacherId: 'teacher-02',
+      createdAt: now,
+      updatedAt: now
+    }
+  ],
 
   courses: [
-  { id: 'math-11', name: 'Mathematics', teacherId: 'teacher-01', createdAt: now, updatedAt: now },
-  { id: 'phys-12', name: 'Physics', teacherId: 'teacher-02', createdAt: now, updatedAt: now },
-  { id: 'hist-11', name: 'History', teacherId: 'teacher-01', createdAt: now, updatedAt: now }],
+    {
+      id: 'math-11',
+      name: 'Mathematics',
+      teacherId: 'teacher-01',
+      createdAt: now,
+      updatedAt: now
+    },
+    {
+      id: 'phys-12',
+      name: 'Physics',
+      teacherId: 'teacher-02',
+      createdAt: now,
+      updatedAt: now
+    },
+    {
+      id: 'hist-11',
+      name: 'History',
+      teacherId: 'teacher-01',
+      createdAt: now,
+      updatedAt: now
+    }
+  ],
 
   grades: [
-  { id: 'g-01', studentId: 'student-01', courseId: 'math-11', score: 95, feedback: 'Excellent work!', createdAt: now, updatedAt: now },
-  { id: 'g-02', studentId: 'student-01', courseId: 'hist-11', score: 88, feedback: 'Good understanding of the material.', createdAt: now, updatedAt: now },
-  { id: 'g-03', studentId: 'student-02', courseId: 'math-11', score: 82, feedback: 'Consistent effort.', createdAt: now, updatedAt: now }],
+    {
+      id: 'g-01',
+      studentId: 'student-01',
+      courseId: 'math-11',
+      score: 95,
+      feedback: 'Excellent work!',
+      createdAt: now,
+      updatedAt: now
+    },
+    {
+      id: 'g-02',
+      studentId: 'student-01',
+      courseId: 'hist-11',
+      score: 88,
+      feedback: 'Good understanding of the material.',
+      createdAt: now,
+      updatedAt: now
+    },
+    {
+      id: 'g-03',
+      studentId: 'student-02',
+      courseId: 'math-11',
+      score: 82,
+      feedback: 'Consistent effort.',
+      createdAt: now,
+      updatedAt: now
+    }
+  ],
 
   announcements: [
-  { id: 'ann-01', title: 'Parent-Teacher Meeting', content: 'The meeting will be held next Saturday.', date: new Date().toISOString(), authorId: 'admin-01', createdAt: now, updatedAt: now },
-  { id: 'ann-02', title: 'Math Project Deadline', content: 'The deadline for the math project is this Friday.', date: new Date().toISOString(), authorId: 'teacher-01', createdAt: now, updatedAt: now }],
+    {
+      id: 'ann-01',
+      title: 'Parent-Teacher Meeting',
+      content: 'The meeting will be held next Saturday.',
+      date: new Date().toISOString(),
+      authorId: 'admin-01',
+      createdAt: now,
+      updatedAt: now
+    },
+    {
+      id: 'ann-02',
+      title: 'Math Project Deadline',
+      content: 'The deadline for the math project is this Friday.',
+      date: new Date().toISOString(),
+      authorId: 'teacher-01',
+      createdAt: now,
+      updatedAt: now
+    }
+  ],
 
   schedules: [
-  { classId: '11-A', day: 'Senin', time: '08:00 - 09:30', courseId: 'math-11' },
-  { classId: '11-A', day: 'Selasa', time: '10:00 - 11:30', courseId: 'hist-11' },
-  { classId: '12-B', day: 'Senin', time: '08:00 - 09:30', courseId: 'phys-12' }]
+    {
+      classId: '11-A',
+      day: 'Senin',
+      time: '08:00 - 09:30',
+      courseId: 'math-11'
+    },
+    {
+      classId: '11-A',
+      day: 'Selasa',
+      time: '10:00 - 11:30',
+      courseId: 'hist-11'
+    },
+    {
+      classId: '12-B',
+      day: 'Senin',
+      time: '08:00 - 09:30',
+      courseId: 'phys-12'
+    }
+  ]
 
 };
 
@@ -37,17 +190,12 @@ export class UserEntity extends IndexedEntity<SchoolUser> {
   static seedData = seedData.users;
 
   static async getByRole(env: Env, role: UserRole): Promise<SchoolUser[]> {
-    const index = new SecondaryIndex<string>(env, this.entityName, 'role');
-    const userIds = await index.getByValue(role);
-    const users = await Promise.all(userIds.map(id => new this(env, id).getState()));
-    return users.filter(u => u && !u.deletedAt) as SchoolUser[];
+    return this.getBySecondaryIndex(env, 'role', role);
   }
 
   static async getByClassId(env: Env, classId: string): Promise<Student[]> {
-    const index = new SecondaryIndex<string>(env, this.entityName, 'classId');
-    const userIds = await index.getByValue(classId);
-    const users = await Promise.all(userIds.map(id => new this(env, id).getState()));
-    return users.filter((u): u is Student => u && u.role === 'student' && u.classId === classId && !u.deletedAt);
+    const users = await this.getBySecondaryIndex(env, 'classId', classId);
+    return users.filter((u): u is Student => u.role === 'student' && u.classId === classId);
   }
 }
 export class ClassEntity extends IndexedEntity<SchoolClass> {
@@ -55,12 +203,9 @@ export class ClassEntity extends IndexedEntity<SchoolClass> {
   static readonly indexName = "classes";
   static readonly initialState: SchoolClass = { id: "", name: "", teacherId: "", createdAt: "", updatedAt: "", deletedAt: null };
   static seedData = seedData.classes;
-
+  
   static async getByTeacherId(env: Env, teacherId: string): Promise<SchoolClass[]> {
-    const index = new SecondaryIndex<string>(env, this.entityName, 'teacherId');
-    const classIds = await index.getByValue(teacherId);
-    const classes = await Promise.all(classIds.map(id => new this(env, id).getState()));
-    return classes.filter(c => c && !c.deletedAt) as SchoolClass[];
+    return this.getBySecondaryIndex(env, 'teacherId', teacherId);
   }
 }
 export class CourseEntity extends IndexedEntity<Course> {
@@ -68,12 +213,9 @@ export class CourseEntity extends IndexedEntity<Course> {
   static readonly indexName = "courses";
   static readonly initialState: Course = { id: "", name: "", teacherId: "", createdAt: "", updatedAt: "", deletedAt: null };
   static seedData = seedData.courses;
-
+  
   static async getByTeacherId(env: Env, teacherId: string): Promise<Course[]> {
-    const index = new SecondaryIndex<string>(env, this.entityName, 'teacherId');
-    const courseIds = await index.getByValue(teacherId);
-    const courses = await Promise.all(courseIds.map(id => new this(env, id).getState()));
-    return courses.filter(c => c && !c.deletedAt) as Course[];
+    return this.getBySecondaryIndex(env, 'teacherId', teacherId);
   }
 }
 export class GradeEntity extends IndexedEntity<Grade> {

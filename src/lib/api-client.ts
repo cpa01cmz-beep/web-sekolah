@@ -3,7 +3,7 @@
 // ====================
 
 import { QueryClient, useQuery as useTanstackQuery, useMutation as useTanstackMutation, UseQueryOptions, UseMutationOptions } from '@tanstack/react-query';
-import { ApiResponse } from "../../shared/types";
+import { ApiResponse, ErrorCode } from "../../shared/types";
 
 const getAuthToken = () => localStorage.getItem('authToken');
 
@@ -26,23 +26,6 @@ interface MutationOptions<TData, TError, TVariables> extends Omit<UseMutationOpt
 interface RequestOptions extends RequestInit {
   timeout?: number;
   circuitBreaker?: boolean;
-}
-
-// ====================
-// Error Codes
-// ====================
-
-enum ErrorCode {
-  NETWORK_ERROR = 'NETWORK_ERROR',
-  TIMEOUT = 'TIMEOUT',
-  RATE_LIMIT_EXCEEDED = 'RATE_LIMIT_EXCEEDED',
-  SERVICE_UNAVAILABLE = 'SERVICE_UNAVAILABLE',
-  CIRCUIT_BREAKER_OPEN = 'CIRCUIT_BREAKER_OPEN',
-  UNAUTHORIZED = 'UNAUTHORIZED',
-  FORBIDDEN = 'FORBIDDEN',
-  NOT_FOUND = 'NOT_FOUND',
-  VALIDATION_ERROR = 'VALIDATION_ERROR',
-  INTERNAL_SERVER_ERROR = 'INTERNAL_SERVER_ERROR',
 }
 
 // ====================
