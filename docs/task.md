@@ -1559,6 +1559,27 @@ Created comprehensive `docs/blueprint.md` with:
 - Priority: Low
 - Effort: Small
 
+## [REFACTOR] Extract Duplicate Caching Configuration Pattern
+- Location: src/hooks/useStudent.ts (useStudentDashboard, useStudentGrades, useStudentSchedule, useStudentCard hooks)
+- Issue: All hooks repeat identical caching configuration (staleTime, gcTime, refetchOnWindowFocus, refetchOnMount, refetchOnReconnect), violating DRY principle and making future caching strategy changes error-prone
+- Suggestion: Create a reusable hook configuration utility in `src/config/query-config.ts` with `createQueryOptions<T>(options)` function that provides sensible defaults and allows overrides, then update all hooks to use this utility
+- Priority: Medium
+- Effort: Small
+
+## [REFACTOR] Refactor errorReporter.ts God Object
+- Location: src/lib/errorReporter.ts (802 lines)
+- Issue: Single file handles multiple responsibilities: error deduplication (~150 lines), console interception (~100 lines), global error handlers (~80 lines), error reporting/queueing (~200 lines), stack parsing/filtering (~150 lines). This god object anti-pattern makes testing, modification, and understanding difficult
+- Suggestion: Split into focused modules: `src/lib/error-deduplication.ts` (GlobalErrorDeduplication class), `src/lib/console-interceptor.ts` (interceptor logic), `src/lib/error-handler.ts` (global handlers), `src/lib/error-queue.ts` (queue/reporting), `src/lib/error-parser.ts` (stack parsing/filtering), and keep `src/lib/errorReporter.ts` as main orchestrator
+- Priority: High
+- Effort: Large
+
+## [REFACTOR] Consolidate Form State in AdminUserManagementPage
+- Location: src/pages/portal/admin/AdminUserManagementPage.tsx (lines 35-39, 68-84)
+- Issue: Five separate `useState` calls for form management (isModalOpen, editingUser, userName, userEmail, userRole) with complex reset logic scattered in multiple places, and form validation mixed with state management
+- Suggestion: Extract to a custom hook `src/hooks/useUserForm.ts` that manages form state, editing status, and provides reset/clear functions, or integrate with react-hook-form for comprehensive validation support
+- Priority: Medium
+- Effort: Medium
+
 ## Documentation Fixes (2026-01-07)
 
 ### Completed
