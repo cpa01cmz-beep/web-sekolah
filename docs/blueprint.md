@@ -686,6 +686,30 @@ Default fallback: `http://localhost:3000,http://localhost:4173`
 
 ## Integration Patterns
 
+### Error Response Standardization
+
+All API endpoints use standardized error response helpers from `worker/core-utils.ts`:
+
+```typescript
+// Available error response helpers
+ok(c, data)              // 200 - Success
+bad(c, message, code)     // 400 - Bad request / validation error
+unauthorized(c, message)  // 401 - Authentication required
+forbidden(c, message)    // 403 - Authorization failed
+notFound(c, message)      // 404 - Resource not found
+conflict(c, message)     // 409 - Resource conflict
+rateLimitExceeded(c)     // 429 - Rate limit exceeded
+serverError(c, message)   // 500 - Internal server error
+serviceUnavailable(c)     // 503 - Service unavailable
+gatewayTimeout(c, message)// 504 - Gateway timeout
+```
+
+All error responses include:
+- `success: false`
+- `error`: Human-readable error message
+- `code`: Standardized error code (from `ErrorCode` enum)
+- `requestId`: UUID for request tracing
+
 ### Using apiClient (Frontend)
 
 ```typescript
@@ -883,6 +907,7 @@ All requests include `X-Request-ID` header for tracing:
 7. **Use service layer** - Abstract API calls behind services for testability
 8. **Validate inputs** - Use Zod schemas for request/response validation
 9. **Use centralized logger** - Import from `@/lib/logger` (frontend) or `../logger` (worker) for consistent logging
+10. **Use standardized error helpers** - Always use proper helper functions (unauthorized, forbidden, etc.) instead of manual JSON responses
 
 ---
 

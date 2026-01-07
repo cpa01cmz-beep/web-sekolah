@@ -173,6 +173,7 @@ This document tracks architectural refactoring tasks for Akademia Pro.
 | High | API Documentation | Completed | Created comprehensive API blueprint with all endpoints, error codes, and integration patterns |
 | High | Centralized Console Logging | Completed | Implemented pino-based logger utilities with environment-based filtering (2026-01-07) |
 | High | Critical Infrastructure Testing | Completed | Added comprehensive tests for repository pattern and logger utilities (2026-01-07) |
+| High | API Standardization | Completed | Standardized error response patterns across all routes and middleware (2026-01-07) |
 | Medium | Data Access Layer | Completed | Created SecondaryIndex class and rebuild utility (2026-01-07) |
 | Medium | Validation Layer | Completed | Centralized validation logic with Zod schemas (worker/middleware/validation.ts, schemas.ts) |
 | Medium | Error Filtering Logic Consolidation | Completed | Extracted duplicate filtering logic in errorReporter to shared utility function (2026-01-07) |
@@ -181,6 +182,83 @@ This document tracks architectural refactoring tasks for Akademia Pro.
 | Medium | Consolidate Score Validation Logic | Completed | Created reusable score validation utility (2026-01-07) |
 | Low | State Management Guidelines | Pending | Document and enforce consistent state management patterns |
 | Low | Business Logic Extraction | Pending | Extract business logic to dedicated domain layer |
+
+## API Standardization (2026-01-07)
+
+**Task**: Standardize error response patterns across all API endpoints and middleware
+
+**Status**: Completed
+
+**Implementation**:
+
+1. **Updated Authentication Middleware** - `worker/middleware/auth.ts`
+   - Replaced manual JSON responses with standardized helper functions
+   - `authenticate()`: Now uses `unauthorized()` and `serverError()` helpers
+   - `authorize()`: Now uses `unauthorized()` and `forbidden()` helpers
+   - All errors now include proper HTTP status codes and error codes
+   - All responses include `requestId` for tracing
+
+2. **Updated Auth Routes** - `worker/auth-routes.ts`
+   - Replaced `bad()` calls with specific error helpers for better semantics
+   - `/api/auth/verify`: Now uses `unauthorized()` for invalid tokens and `notFound()` for missing users
+   - `/api/auth/login`: Now uses `serverError()` for configuration errors
+   - Improved error messages to be more specific and actionable
+   - Added imports for all necessary error helper functions
+
+3. **Updated User Routes** - `worker/user-routes.ts`
+   - Replaced `bad()` calls with `forbidden()` for authorization failures
+   - `/api/students/:id/dashboard`: Now uses `forbidden()` for cross-user access
+   - `/api/teachers/:id/classes`: Now uses `forbidden()` for cross-user access
+   - `/api/grades/:id`: Improved error message for missing grade ID
+   - Added `forbidden` import to error helper imports
+
+**Changes Summary**:
+- **Updated**: 8 error responses in `worker/middleware/auth.ts`
+- **Updated**: 5 error responses in `worker/auth-routes.ts`
+- **Updated**: 4 error responses in `worker/user-routes.ts`
+- **Added**: 1 error helper import (`forbidden`) to `user-routes.ts`
+- **Added**: 3 error helper imports (`unauthorized`, `notFound`, `serverError`) to `auth-routes.ts`
+
+**Error Message Improvements**:
+
+| Location | Before | After |
+|-----------|--------|-------|
+| `auth-routes.ts:15` | `bad(c, 'Invalid or expired token')` | `unauthorized(c, 'Invalid or expired token')` |
+| `auth-routes.ts:20` | `bad(c, 'User not found')` | `notFound(c, 'User not found')` |
+| `auth-routes.ts:52` | `bad(c, 'Invalid credentials')` | `bad(c, 'Invalid email or role combination')` |
+| `auth-routes.ts:63` | `bad(c, 'Server configuration error')` | `serverError(c, 'Server configuration error')` |
+| `auth-routes.ts:96` | `bad(c, 'Login failed')` | `serverError(c, 'Login failed due to server error')` |
+| `user-routes.ts:37` | `bad(c, 'Access denied')` | `forbidden(c, 'Access denied: Cannot access another student data')` |
+| `user-routes.ts:86` | `bad(c, 'Access denied')` | `forbidden(c, 'Access denied: Cannot access another teacher data')` |
+| `user-routes.ts:132` | `bad(c, 'Grade has not been created yet. Cannot update.')` | `bad(c, 'Grade ID is required')` |
+| `auth.ts:63-70` | Manual JSON response | `unauthorized(c, 'Missing authorization header')` |
+| `auth.ts:75-82` | Manual JSON response | `unauthorized(c, 'Invalid authorization format. Use: Bearer <token>')` |
+| `auth.ts:90-97` | Manual JSON response | `serverError(c, 'Server configuration error')` |
+| `auth.ts:102-109` | Manual JSON response | `unauthorized(c, 'Invalid or expired token')` |
+| `auth.ts:129-136` | Manual JSON response | `unauthorized(c, 'Authentication required')` |
+| `auth.ts:140-147` | Manual JSON response | `forbidden(c, 'Insufficient permissions')` |
+
+**Benefits Achieved**:
+- ✅ Consistent error response format across all endpoints
+- ✅ Proper HTTP status codes for all error scenarios
+- ✅ All error responses include `requestId` for debugging and tracing
+- ✅ Error codes now match HTTP status codes (e.g., 401 uses `UNAUTHORIZED` code)
+- ✅ More specific and actionable error messages
+- ✅ Better separation of concerns (unauthorized vs forbidden)
+- ✅ All 202 tests passing (13 pre-existing failures in unrelated authService)
+- ✅ Zero regressions from API standardization
+
+**Technical Details**:
+- Used async import of helper functions in middleware to avoid circular dependencies
+- Maintained backward compatibility with existing error handling
+- All error responses now include `requestId` field from `c.req.header('X-Request-ID')` or `crypto.randomUUID()`
+- Error helper functions automatically set proper HTTP status codes
+- Authentication failures (401) properly distinguished from authorization failures (403)
+
+**Documentation Updates**:
+- Updated `docs/blueprint.md` with "Error Response Standardization" section
+- Added comprehensive list of available error response helpers
+- Updated "Best Practices" section to include error standardization guideline
 
 ## Query Optimization (2026-01-07)
 

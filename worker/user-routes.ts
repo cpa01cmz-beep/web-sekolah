@@ -1,6 +1,6 @@
 import { Hono } from "hono";
 import type { Env } from './core-utils';
-import { ok, bad, notFound, isStr } from './core-utils';
+import { ok, bad, notFound, forbidden, isStr } from './core-utils';
 import {
   UserEntity,
   ClassEntity,
@@ -34,7 +34,7 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
 
     if (userId !== requestedStudentId) {
       logger.warn('[AUTH] Student accessing another student dashboard', { userId, requestedStudentId });
-      return bad(c, 'Access denied');
+      return forbidden(c, 'Access denied: Cannot access another student data');
     }
 
     const studentId = c.req.param('id');
@@ -83,7 +83,7 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
 
     if (userId !== requestedTeacherId) {
       logger.warn('[AUTH] Teacher accessing another teacher data', { userId, requestedTeacherId });
-      return bad(c, 'Access denied');
+      return forbidden(c, 'Access denied: Cannot access another teacher data');
     }
 
     const teacherId = c.req.param('id');
@@ -129,7 +129,7 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
   app.put('/api/grades/:id', authenticate(), authorize('teacher'), async (c) => {
     const gradeId = c.req.param('id');
     const { score, feedback } = await c.req.json<{ score: number; feedback: string }>();
-    if (gradeId === 'null' || !gradeId) return bad(c, 'Grade has not been created yet. Cannot update.');
+    if (gradeId === 'null' || !gradeId) return bad(c, 'Grade ID is required');
     const gradeEntity = new GradeEntity(c.env, gradeId);
     if (!await gradeEntity.exists()) return notFound(c, 'Grade not found');
     await gradeEntity.patch({ score, feedback });

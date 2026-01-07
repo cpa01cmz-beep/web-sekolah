@@ -1,6 +1,6 @@
 import { Hono } from 'hono';
 import type { Env } from './core-utils';
-import { ok, bad } from './core-utils';
+import { ok, bad, unauthorized, notFound, serverError } from './core-utils';
 import { UserEntity } from './entities';
 import { generateToken, verifyToken, optionalAuthenticate, AuthUser } from './middleware/auth';
 import { loginSchema } from './middleware/schemas';
@@ -12,12 +12,12 @@ export function authRoutes(app: Hono<{ Bindings: Env }>) {
     const user = context.get('user') as AuthUser | undefined;
 
     if (!user) {
-      return bad(c, 'Invalid or expired token');
+      return unauthorized(c, 'Invalid or expired token');
     }
 
     const dbUser = await new UserEntity(c.env, user.id).getState();
     if (!dbUser) {
-      return bad(c, 'User not found');
+      return notFound(c, 'User not found');
     }
 
     return ok(c, {
@@ -49,7 +49,7 @@ export function authRoutes(app: Hono<{ Bindings: Env }>) {
 
       if (!user) {
         logger.warn('[AUTH] Login failed - user not found', { email, role });
-        return bad(c, 'Invalid credentials');
+        return bad(c, 'Invalid email or role combination');
       }
 
       if (password.length < 1) {
@@ -60,7 +60,7 @@ export function authRoutes(app: Hono<{ Bindings: Env }>) {
       const secret = c.env.JWT_SECRET;
       if (!secret) {
         logger.error('[AUTH] JWT_SECRET not configured');
-        return bad(c, 'Server configuration error');
+        return serverError(c, 'Server configuration error');
       }
 
       const token = await generateToken(
@@ -93,7 +93,7 @@ export function authRoutes(app: Hono<{ Bindings: Env }>) {
       });
     } catch (error) {
       logger.error('[AUTH] Login error', error);
-      return bad(c, 'Login failed');
+      return serverError(c, 'Login failed due to server error');
     }
   });
 }

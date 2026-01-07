@@ -57,29 +57,17 @@ export async function verifyToken(
 
 export function authenticate(secretEnvVar: string = 'JWT_SECRET') {
   return async (c: Context<{ Bindings: { [key: string]: string } }>, next: Next) => {
+    const { unauthorized, serverError, notFound } = await import('../core-utils');
+    
     const authHeader = c.req.header('Authorization');
     
     if (!authHeader) {
-      return c.json(
-        {
-          success: false,
-          error: 'Missing authorization header',
-          code: 'UNAUTHORIZED',
-        },
-        401
-      );
+      return unauthorized(c, 'Missing authorization header');
     }
 
     const parts = authHeader.split(' ');
     if (parts.length !== 2 || parts[0] !== 'Bearer') {
-      return c.json(
-        {
-          success: false,
-          error: 'Invalid authorization format',
-          code: 'UNAUTHORIZED',
-        },
-        401
-      );
+      return unauthorized(c, 'Invalid authorization format. Use: Bearer <token>');
     }
 
     const token = parts[1];
@@ -87,26 +75,12 @@ export function authenticate(secretEnvVar: string = 'JWT_SECRET') {
 
     if (!secret) {
       logger.error('[AUTH] JWT_SECRET not configured');
-      return c.json(
-        {
-          success: false,
-          error: 'Server configuration error',
-          code: 'INTERNAL_SERVER_ERROR',
-        },
-        500
-      );
+      return serverError(c, 'Server configuration error');
     }
 
     const payload = await verifyToken(token, secret);
     if (!payload) {
-      return c.json(
-        {
-          success: false,
-          error: 'Invalid or expired token',
-          code: 'UNAUTHORIZED',
-        },
-        401
-      );
+      return unauthorized(c, 'Invalid or expired token');
     }
 
     const context = c as any;
@@ -122,29 +96,17 @@ export function authenticate(secretEnvVar: string = 'JWT_SECRET') {
 
 export function authorize(...allowedRoles: ('student' | 'teacher' | 'parent' | 'admin')[]) {
   return async (c: Context, next: Next) => {
+    const { unauthorized, forbidden } = await import('../core-utils');
+    
     const context = c as any;
     const user = context.get('user');
 
     if (!user) {
-      return c.json(
-        {
-          success: false,
-          error: 'Authentication required',
-          code: 'UNAUTHORIZED',
-        },
-        401
-      );
+      return unauthorized(c, 'Authentication required');
     }
 
     if (!allowedRoles.includes(user.role)) {
-      return c.json(
-        {
-          success: false,
-          error: 'Insufficient permissions',
-          code: 'FORBIDDEN',
-        },
-        403
-      );
+      return forbidden(c, 'Insufficient permissions');
     }
 
     await next();
