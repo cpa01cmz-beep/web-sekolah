@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Edit, Trash2, PlusCircle, AlertTriangle, GraduationCap, Users, UserCog, Shield } from 'lucide-react';
+import { PageHeader } from '@/components/PageHeader';
 import { SlideUp } from '@/components/animations';
 import { toast } from 'sonner';
 import { UserRole, SchoolUser } from '@shared/types';
@@ -84,11 +85,10 @@ export function AdminUserManagementPage() {
   };
   return (
     <SlideUp className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">User Management</h1>
-          <p className="text-muted-foreground">Manage all user accounts in the system.</p>
-        </div>
+      <PageHeader 
+        title="User Management" 
+        description="Manage all user accounts in the system."
+      >
         <Dialog open={isModalOpen} onOpenChange={(open) => {
           setIsModalOpen(open);
           if (!open) {
@@ -162,7 +162,7 @@ export function AdminUserManagementPage() {
             </form>
           </DialogContent>
         </Dialog>
-      </div>
+      </PageHeader>
       <Card>
         <CardContent className="pt-6">
           {isLoading ? (

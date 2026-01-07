@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Edit, AlertTriangle } from 'lucide-react';
+import { PageHeader } from '@/components/PageHeader';
 import { SlideUp } from '@/components/animations';
 import { toast } from 'sonner';
 import { useQuery, useMutation, queryClient } from '@/lib/api-client';
@@ -79,7 +80,7 @@ export function TeacherGradeManagementPage() {
   }, [currentScore]);
   return (
     <SlideUp className="space-y-6">
-      <h1 className="text-3xl font-bold">Grade Management</h1>
+      <PageHeader title="Grade Management" />
       <Card>
         <CardHeader>
           <CardTitle>Select a Class</CardTitle>

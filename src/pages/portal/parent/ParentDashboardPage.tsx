@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Award, CalendarCheck, Megaphone, UserCheck } from 'lucide-react';
+import { PageHeader } from '@/components/PageHeader';
 import { SlideUp } from '@/components/animations';
 import { useAuthStore } from '@/lib/authStore';
 const mockParentData = {
@@ -25,12 +26,12 @@ export function ParentDashboardPage() {
   const user = useAuthStore((state) => state.user);
   return (
     <SlideUp className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold">Parent Dashboard</h1>
-        <p className="text-muted-foreground">
-          Monitoring academic progress for <span className="font-semibold">{mockParentData.childName}</span>.
-        </p>
-      </div>
+      <PageHeader 
+        title="Parent Dashboard" 
+        description={
+          <>Monitoring academic progress for <span className="font-semibold">{mockParentData.childName}</span>.</>
+        } 
+      />
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         <SlideUp delay={0.1}>
           <Card className="h-full hover:shadow-lg transition-shadow duration-200">
