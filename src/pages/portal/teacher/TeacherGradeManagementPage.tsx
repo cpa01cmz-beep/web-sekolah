@@ -15,6 +15,11 @@ import { useAuthStore } from '@/lib/authStore';
 import type { SchoolClass } from '@shared/types';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+
+interface UpdateGradeData {
+  score: number | null;
+  feedback: string;
+}
 type StudentGrade = {
   id: string; // studentId
   name: string;
@@ -36,7 +41,7 @@ export function TeacherGradeManagementPage() {
     ['classes', selectedClass || '', 'students'],
     { enabled: !!selectedClass }
   );
-  const gradeMutation = useMutation(['grades', editingStudent?.gradeId || ''], {
+  const gradeMutation = useMutation<UpdateGradeData>(['grades', editingStudent?.gradeId || ''], {
     method: 'PUT',
     onSuccess: () => {
       toast.success(`Grade for ${editingStudent?.name} updated successfully.`);
@@ -57,7 +62,7 @@ export function TeacherGradeManagementPage() {
       toast.error('Please enter a valid score between 0 and 100.');
       return;
     }
-    gradeMutation.mutate({ score: scoreValue, feedback: currentFeedback } as any);
+    gradeMutation.mutate({ score: scoreValue, feedback: currentFeedback });
   };
   const handleEditClick = (student: StudentGrade) => {
     setEditingStudent(student);

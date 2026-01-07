@@ -6,11 +6,20 @@ This document tracks architectural refactoring tasks for Akademia Pro.
 
 | Priority | Task | Status | Description |
 |----------|------|--------|-------------|
-| High | Service Layer Decoupling | In Progress | Decouple services from HTTP client by introducing repository pattern |
+| High | Service Layer Decoupling | Completed | Decouple services from HTTP client by introducing repository pattern |
 | Medium | Data Access Layer | Pending | Create repository abstraction for entity operations |
 | Medium | Validation Layer | Pending | Centralize validation logic with Zod schemas |
 | Low | State Management Guidelines | Pending | Document and enforce consistent state management patterns |
 | Low | Business Logic Extraction | Pending | Extract business logic to dedicated domain layer |
+
+## Code Sanitization (2026-01-07)
+
+### Completed
+
+1. **Fixed any type usage in TeacherGradeManagementPage.tsx** - Replaced `as any` with proper `UpdateGradeData` interface
+2. **Extracted hardcoded avatar URLs** - Created `src/constants/avatars.ts` with reusable avatar utilities
+3. **Extracted hardcoded avatar URL in AdminUserManagementPage.tsx** - Updated to use `getAvatarUrl()` helper function
+4. **Replaced magic number with named constant** - Updated `errorReporter.ts` to use `ERROR_DEDUPLICATION_WINDOW_MS` and `CLEANUP_INTERVAL_MS` constants
 
 ## Completed
 

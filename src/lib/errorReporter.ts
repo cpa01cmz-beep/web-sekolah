@@ -135,8 +135,8 @@ class GlobalErrorDeduplication {
     string,
     { timestamp: number; precedence: ErrorPrecedence; reported: boolean }
   >();
-  private readonly deduplicationWindow = 5000; // 5 seconds
-  private readonly cleanupInterval = 60000; // 1 minute
+  private readonly ERROR_DEDUPLICATION_WINDOW_MS = 5000;
+  private readonly CLEANUP_INTERVAL_MS = 60000;
   private lastCleanup = Date.now();
 
   private calculateErrorPrecedence(context: ErrorContext): ErrorPrecedence {
@@ -253,7 +253,7 @@ class GlobalErrorDeduplication {
     }
 
     // Check deduplication window
-    if (now - existing.timestamp < this.deduplicationWindow) {
+    if (now - existing.timestamp < this.ERROR_DEDUPLICATION_WINDOW_MS) {
       return { shouldReport: false, reason: "duplicate_in_window" };
     }
 
@@ -273,7 +273,7 @@ class GlobalErrorDeduplication {
 
   private maybeCleanup() {
     const now = Date.now();
-    if (now - this.lastCleanup > this.cleanupInterval) {
+    if (now - this.lastCleanup > this.CLEANUP_INTERVAL_MS) {
       const cutoff = now - 300000; // 5 minutes
       for (const [signature, data] of this.reportedErrors.entries()) {
         if (data.timestamp < cutoff) {
