@@ -1,50 +1,12 @@
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/lib/authStore';
 import { Button } from '@/components/ui/button';
-import {
-  LayoutDashboard,
-  Calendar,
-  Award,
-  User,
-  LogOut,
-  GraduationCap,
-  ChevronLeft,
-  ChevronRight,
-  BookCopy,
-  Megaphone,
-  Users,
-  Settings,
-} from 'lucide-react';
+import { LogOut, GraduationCap, ChevronLeft, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-const studentLinks = [
-  { to: 'dashboard', icon: <LayoutDashboard className="h-5 w-5" />, label: 'Dashboard' },
-  { to: 'schedule', icon: <Calendar className="h-5 w-5" />, label: 'Schedule' },
-  { to: 'grades', icon: <Award className="h-5 w-5" />, label: 'Grades' },
-  { to: 'card', icon: <User className="h-5 w-5" />, label: 'Student Card' },
-];
-const teacherLinks = [
-  { to: 'dashboard', icon: <LayoutDashboard className="h-5 w-5" />, label: 'Dashboard' },
-  { to: 'grades', icon: <BookCopy className="h-5 w-5" />, label: 'Grade Management' },
-  { to: 'announcements', icon: <Megaphone className="h-5 w-5" />, label: 'Announcements' },
-];
-const parentLinks = [
-  { to: 'dashboard', icon: <LayoutDashboard className="h-5 w-5" />, label: 'Dashboard' },
-  { to: 'schedule', icon: <Calendar className="h-5 w-5" />, label: 'Student Schedule' },
-];
-const adminLinks = [
-  { to: 'dashboard', icon: <LayoutDashboard className="h-5 w-5" />, label: 'Dashboard' },
-  { to: 'users', icon: <Users className="h-5 w-5" />, label: 'User Management' },
-  { to: 'announcements', icon: <Megaphone className="h-5 w-5" />, label: 'Announcements' },
-  { to: 'settings', icon: <Settings className="h-5 w-5" />, label: 'Settings' },
-];
-const navLinksMap = {
-  student: studentLinks,
-  teacher: teacherLinks,
-  parent: parentLinks,
-  admin: adminLinks,
-};
+import { navLinksMap, NavLink as NavLinkType } from '@/config/navigation';
+import React from 'react';
 export function PortalSidebar() {
   const user = useAuthStore((state) => state.user);
   const logout = useAuthStore((state) => state.logout);
@@ -55,7 +17,7 @@ export function PortalSidebar() {
     navigate('/login');
   };
   if (!user) return null;
-  const navLinks = navLinksMap[user.role] || [];
+  const navLinks = navLinksMap[user.role as keyof typeof navLinksMap] || [];
   const basePortalPath = `/portal/${user.role}`;
   return (
     <TooltipProvider delayDuration={0}>
@@ -77,7 +39,7 @@ export function PortalSidebar() {
           </Button>
         </div>
         <div className="flex-grow p-2 space-y-2">
-          {navLinks.map((link) => (
+          {navLinks.map((link: NavLinkType) => (
             <Tooltip key={link.to}>
               <TooltipTrigger asChild>
                 <NavLink
@@ -92,7 +54,7 @@ export function PortalSidebar() {
                     )
                   }
                 >
-                  {link.icon}
+                  {React.createElement(link.icon, { className: 'h-5 w-5' })}
                   {!isCollapsed && <span>{link.label}</span>}
                 </NavLink>
               </TooltipTrigger>

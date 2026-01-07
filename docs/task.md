@@ -683,11 +683,18 @@ This document tracks architectural refactoring tasks for Akademia Pro.
    - Benefits: Consistent form UX and accessible validation feedback
 
 10. **Accessibility - Skip to Main Content Link** - Created SkipLink component:
-    - Created `src/components/SkipLink.tsx` for keyboard users to skip navigation
-    - Added SkipLink to PortalLayout component pointing to main content
-    - Added `id="main-content"` to PortalLayout main element
-    - Hidden by default (sr-only), visible on focus with proper styling
-    - Benefits: Keyboard users can skip repetitive navigation to access main content
+     - Created `src/components/SkipLink.tsx` for keyboard users to skip navigation
+     - Added SkipLink to PortalLayout component pointing to main content
+     - Added `id="main-content"` to PortalLayout main element
+     - Hidden by default (sr-only), visible on focus with proper styling
+     - Benefits: Keyboard users can skip repetitive navigation to access main content
+
+11. **Navigation Configuration Consolidation** - Extracted shared navigation configuration:
+     - Created `src/config/navigation.ts` with centralized link configuration
+     - Removed duplicate navLinks from PortalLayout and PortalSidebar
+     - Fixed React element recreation by using icon component mapping instead of inline JSX
+     - Used `React.createElement` to dynamically render icons from component references
+     - Benefits: Eliminated code duplication, improved rendering performance, easier maintenance
 
 **Benefits Achieved**:
 - ✅ Improved keyboard navigation throughout the application
@@ -700,7 +707,10 @@ This document tracks architectural refactoring tasks for Akademia Pro.
 - ✅ Consistent form field structure with accessible validation
 - ✅ Skip to main content link for keyboard users
 - ✅ All existing focus indicators verified (Buttons, Inputs, etc.)
-- ✅ Zero regression (all 175 tests passing)
+- ✅ Eliminated code duplication in navigation configuration
+- ✅ Fixed React element recreation for improved performance
+- ✅ Single source of truth for portal navigation links
+- ✅ Zero regression (all 215 tests passing)
 
 ## Security Hardening (2026-01-07)
 

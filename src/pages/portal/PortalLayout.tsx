@@ -4,45 +4,20 @@ import { PortalSidebar } from '@/components/portal/PortalSidebar';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { Menu, Bell, GraduationCap, LayoutDashboard, Calendar, Award, User, BookCopy, Megaphone, Users, Settings } from 'lucide-react';
+import { Menu, Bell, GraduationCap } from 'lucide-react';
 import { Toaster } from 'sonner';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
 import { SkipLink } from '@/components/SkipLink';
-const studentLinks = [
-  { to: 'dashboard', icon: <LayoutDashboard className="h-5 w-5" />, label: 'Dashboard' },
-  { to: 'schedule', icon: <Calendar className="h-5 w-5" />, label: 'Schedule' },
-  { to: 'grades', icon: <Award className="h-5 w-5" />, label: 'Grades' },
-  { to: 'card', icon: <User className="h-5 w-5" />, label: 'Student Card' },
-];
-const teacherLinks = [
-  { to: 'dashboard', icon: <LayoutDashboard className="h-5 w-5" />, label: 'Dashboard' },
-  { to: 'grades', icon: <BookCopy className="h-5 w-5" />, label: 'Grade Management' },
-  { to: 'announcements', icon: <Megaphone className="h-5 w-5" />, label: 'Announcements' },
-];
-const parentLinks = [
-  { to: 'dashboard', icon: <LayoutDashboard className="h-5 w-5" />, label: 'Dashboard' },
-  { to: 'schedule', icon: <Calendar className="h-5 w-5" />, label: 'Student Schedule' },
-];
-const adminLinks = [
-  { to: 'dashboard', icon: <LayoutDashboard className="h-5 w-5" />, label: 'Dashboard' },
-  { to: 'users', icon: <Users className="h-5 w-5" />, label: 'User Management' },
-  { to: 'announcements', icon: <Megaphone className="h-5 w-5" />, label: 'Announcements' },
-  { to: 'settings', icon: <Settings className="h-5 w-5" />, label: 'Settings' },
-];
-const navLinksMap = {
-  student: studentLinks,
-  teacher: teacherLinks,
-  parent: parentLinks,
-  admin: adminLinks,
-};
+import { navLinksMap, NavLink as NavLinkType } from '@/config/navigation';
+import React from 'react';
 export function PortalLayout() {
   const user = useAuthStore((state) => state.user);
   const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
   if (!user) {
     return <Navigate to="/login" replace />;
   }
-  const navLinks = navLinksMap[user.role] || [];
+  const navLinks = navLinksMap[user.role as keyof typeof navLinksMap] || [];
   const basePortalPath = `/portal/${user.role}`;
   return (
     <div className="flex h-screen bg-[#F5F7FA]">
@@ -64,7 +39,7 @@ export function PortalLayout() {
                     <span className="ml-2 text-lg font-bold">Akademia Pro</span>
                   </div>
                   <nav className="flex-grow p-4 space-y-2">
-                    {navLinks.map((link) => (
+                    {navLinks.map((link: NavLinkType) => (
                       <NavLink
                         key={link.to}
                         to={`${basePortalPath}/${link.to}`}
@@ -78,7 +53,7 @@ export function PortalLayout() {
                           )
                         }
                       >
-                        {link.icon}
+                        {React.createElement(link.icon, { className: 'h-5 w-5' })}
                         <span>{link.label}</span>
                       </NavLink>
                     ))}
