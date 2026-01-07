@@ -15,6 +15,7 @@ import { useAuthStore } from '@/lib/authStore';
 import type { SchoolClass } from '@shared/types';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { isValidScore, MIN_SCORE, MAX_SCORE } from '@/utils/validation';
 
 interface UpdateGradeData {
   score: number | null;
@@ -58,8 +59,8 @@ export function TeacherGradeManagementPage() {
         return;
     };
     const scoreValue = currentScore === '' ? null : parseInt(currentScore, 10);
-    if (scoreValue !== null && (isNaN(scoreValue) || scoreValue < 0 || scoreValue > 100)) {
-      toast.error('Please enter a valid score between 0 and 100.');
+    if (!isValidScore(scoreValue)) {
+      toast.error(`Please enter a valid score between ${MIN_SCORE} and ${MAX_SCORE}.`);
       return;
     }
     gradeMutation.mutate({ score: scoreValue, feedback: currentFeedback });
@@ -73,7 +74,7 @@ export function TeacherGradeManagementPage() {
   const isScoreInvalid = useMemo(() => {
     if (currentScore === '') return false;
     const score = parseInt(currentScore, 10);
-    return isNaN(score) || score < 0 || score > 100;
+    return !isValidScore(score);
   }, [currentScore]);
   return (
     <motion.div

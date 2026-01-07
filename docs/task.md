@@ -127,15 +127,25 @@ This document tracks architectural refactoring tasks for Akademia Pro.
 | High | Critical Infrastructure Testing | Completed | Added comprehensive tests for repository pattern and logger utilities (2026-01-07) |
 | Medium | Data Access Layer | Completed | Created SecondaryIndex class and rebuild utility (2026-01-07) |
 | Medium | Validation Layer | Completed | Centralized validation logic with Zod schemas (worker/middleware/validation.ts, schemas.ts) |
+| Medium | Error Filtering Logic Consolidation | Completed | Extracted duplicate filtering logic in errorReporter to shared utility function (2026-01-07) |
+| Medium | Extract Magic Numbers - Grade Thresholds | Completed | Extracted grade thresholds to constants file (2026-01-07) |
+| Medium | Remove Duplicate Code in authService | Completed | Eliminated duplicate mockUsers definition (2026-01-07) |
+| Medium | Consolidate Score Validation Logic | Completed | Created reusable score validation utility (2026-01-07) |
 | Low | State Management Guidelines | Pending | Document and enforce consistent state management patterns |
 | Low | Business Logic Extraction | Pending | Extract business logic to dedicated domain layer |
 
-## [REFACTOR] Remove Duplicate Code in authService
+## [REFACTOR] Remove Duplicate Code in authService - Completed ✅
 - Location: src/services/authService.ts
 - Issue: `mockUsers` object is defined twice (lines 26-55 and 96-125) with identical data, violating DRY principle
 - Suggestion: Extract `mockUsers` to a constant or separate file, reference it in both `login()` and `getCurrentUser()` methods
 - Priority: Medium
 - Effort: Small
+
+**Implementation (2026-01-07)**:
+- Extracted `MOCK_USERS` to module-level constant
+- Eliminated 30 lines of duplicate code (lines 96-125)
+- Both `login()` and `getCurrentUser()` methods now reference same constant
+- Maintained backward compatibility with email override in `login()` method
 
 ## [REFACTOR] Eliminate Repetitive Suspense Wrappers in App.tsx
 - Location: src/App.tsx (lines 62-134)
@@ -144,12 +154,53 @@ This document tracks architectural refactoring tasks for Akademia Pro.
 - Priority: Medium
 - Effort: Small
 
-## [REFACTOR] Consolidate Error Filtering Logic in errorReporter
-- Location: src/lib/errorReporter.ts (lines 470-516, 684-733)
+## [REFACTOR] Consolidate Error Filtering Logic in errorReporter - Completed ✅
+- Location: src/lib/errorReporter.ts
 - Issue: `filterError()` method and `shouldReportImmediate()` function contain duplicate filtering logic
 - Suggestion: Extract common filtering logic to shared utility function, reuse in both locations
 - Priority: Medium
 - Effort: Small
+
+**Implementation (2026-01-07)**:
+
+1. **Created Shared Filtering Function** - `shouldReportErrorCore()`
+   - Consolidated all common error filtering logic
+   - Takes `ErrorContext` and `ShouldReportErrorOptions` parameters
+   - Returns `ErrorFilterResult` with detailed reason for filtering decisions
+   - Uses existing helper functions: `isReactRouterFutureFlagMessage()`, `isDeprecatedReactWarningMessage()`, `hasRelevantSourceInStack()`
+   - Supports configurable options: `immediate` flag and `checkVendorOnlyErrors` flag
+
+2. **Updated `filterError()` Method** (lines 537-542)
+   - Simplified to single function call to `shouldReportErrorCore()`
+   - Reduced from 47 lines to 5 lines (89% reduction)
+   - Configuration: `immediate: false`, `checkVendorOnlyErrors: true`
+
+3. **Updated `shouldReportImmediate()` Function** (lines 706-712)
+   - Simplified to single function call to `shouldReportErrorCore()`
+   - Reduced from 49 lines to 6 lines (88% reduction)
+   - Configuration: `immediate: true`, `checkVendorOnlyErrors: false`
+   - "Maximum update depth exceeded" check now handled in shared function
+
+**Changes Summary**:
+- **Created**: `shouldReportErrorCore()` function with 54 lines of consolidated filtering logic
+- **Refactored**: `filterError()` from 47 lines to 5 lines
+- **Refactored**: `shouldReportImmediate()` from 49 lines to 6 lines
+- **Net change**: +1 lines (54 + 5 + 6 = 65 vs 47 + 49 = 96, reduction of 31 lines)
+
+**Benefits Achieved**:
+- ✅ Eliminated 31 lines of duplicate code (32% reduction)
+- ✅ Single source of truth for error filtering logic
+- ✅ Easier to maintain and modify filtering rules
+- ✅ Consistent behavior across both filtering mechanisms
+- ✅ Preserved all existing functionality
+- ✅ Maintained detailed filtering reason tracking
+- ✅ Properly separated concerns with options parameter
+
+**Technical Details**:
+- Shared function uses existing helper functions to avoid further duplication
+- Options pattern allows customization without code branching
+- Maintained backward compatibility with existing error reporting behavior
+- All filtering reasons preserved for debugging and monitoring
 
 ## [REFACTOR] Modularize Route Configuration in App.tsx
 - Location: src/App.tsx (lines 62-134)
@@ -158,12 +209,18 @@ This document tracks architectural refactoring tasks for Akademia Pro.
 - Priority: Low
 - Effort: Medium
 
-## [REFACTOR] Extract Magic Numbers to Constants - Grade Thresholds
+## [REFACTOR] Extract Magic Numbers to Constants - Grade Thresholds - Completed ✅
 - Location: src/pages/portal/student/StudentGradesPage.tsx (lines 11-22)
 - Issue: Grade thresholds (90, 80, 70) are hardcoded, making it difficult to maintain or change grading scales
 - Suggestion: Extract constants like GRADE_A_THRESHOLD, GRADE_B_THRESHOLD, GRADE_C_THRESHOLD to a shared constants file
 - Priority: Medium
 - Effort: Small
+
+**Implementation (2026-01-07)**:
+- Created `src/constants/grades.ts` with grade threshold constants
+- Updated `getGradeColor()` and `getGrade()` functions to use constants
+- Eliminated 3 instances of hardcoded magic numbers
+- Improved maintainability and consistency
 
 ## [REFACTOR] Create Entity Relationship Loader Utility
 - Location: worker/user-routes.ts (lines 29-68)
@@ -172,12 +229,18 @@ This document tracks architectural refactoring tasks for Akademia Pro.
 - Priority: Medium
 - Effort: Medium
 
-## [REFACTOR] Consolidate Score Validation Logic
+## [REFACTOR] Consolidate Score Validation Logic - Completed ✅
 - Location: src/pages/portal/teacher/TeacherGradeManagementPage.tsx (lines 61, 76)
 - Issue: Score validation logic (check if 0-100) is duplicated in two places and hardcoded
 - Suggestion: Extract to a shared validation utility `isValidScore(score)` with configurable min/max values
 - Priority: Medium
 - Effort: Small
+
+**Implementation (2026-01-07)**:
+- Created `src/utils/validation.ts` with `isValidScore()` function
+- Added `MIN_SCORE` and `MAX_SCORE` constants
+- Replaced duplicate validation logic in `handleSaveChanges()` and `isScoreInvalid` useMemo
+- Improved type safety with type predicate function
 
 ## [REFACTOR] Extract Error Response Builder in Worker
 - Location: worker/core-utils.ts and worker/user-routes.ts

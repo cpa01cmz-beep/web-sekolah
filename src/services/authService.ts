@@ -15,6 +15,37 @@ interface AuthResponse {
   token: string;
 }
 
+const MOCK_USERS: Record<UserRole, BaseUser> = {
+  student: {
+    id: 'student-01',
+    name: 'Budi Hartono',
+    email: 'budi@example.com',
+    role: 'student',
+    avatarUrl: DEFAULT_AVATARS.student01
+  },
+  teacher: {
+    id: 'teacher-01',
+    name: 'Ibu Siti',
+    email: 'siti@example.com',
+    role: 'teacher',
+    avatarUrl: DEFAULT_AVATARS.teacher01
+  },
+  parent: {
+    id: 'parent-01',
+    name: 'Ayah Budi',
+    email: 'ayah.budi@example.com',
+    role: 'parent',
+    avatarUrl: DEFAULT_AVATARS.parent01
+  },
+  admin: {
+    id: 'admin-01',
+    name: 'Admin Sekolah',
+    email: 'admin@example.com',
+    role: 'admin',
+    avatarUrl: DEFAULT_AVATARS.admin01
+  },
+};
+
 export class AuthService {
   // Simulate API call delay
   private static async simulateApiCall<T>(data: T, delay = 500): Promise<T> {
@@ -22,44 +53,12 @@ export class AuthService {
   }
 
   static async login(credentials: LoginCredentials): Promise<AuthResponse> {
-    // In a real app, this would make an API call to authenticate the user
-    const mockUsers: Record<UserRole, BaseUser> = {
-      student: {
-        id: 'student-01',
-        name: 'Budi Hartono',
-        email: credentials.email || 'budi@example.com',
-        role: 'student',
-        avatarUrl: DEFAULT_AVATARS.student01
-      },
-      teacher: {
-        id: 'teacher-01',
-        name: 'Ibu Siti',
-        email: credentials.email || 'siti@example.com',
-        role: 'teacher',
-        avatarUrl: DEFAULT_AVATARS.teacher01
-      },
-      parent: {
-        id: 'parent-01',
-        name: 'Ayah Budi',
-        email: credentials.email || 'ayah.budi@example.com',
-        role: 'parent',
-        avatarUrl: DEFAULT_AVATARS.parent01
-      },
-      admin: {
-        id: 'admin-01',
-        name: 'Admin Sekolah',
-        email: credentials.email || 'admin@example.com',
-        role: 'admin',
-        avatarUrl: DEFAULT_AVATARS.admin01
-      },
-    };
-
     // Simulate authentication check
     if (!credentials.email || !credentials.password) {
       throw new Error('Email and password are required');
     }
 
-    const user = mockUsers[credentials.role];
+    const user = { ...MOCK_USERS[credentials.role], email: credentials.email || MOCK_USERS[credentials.role].email };
     const token = `mock-jwt-token-${user.id}-${Date.now()}`;
 
     return this.simulateApiCall({ user, token });
@@ -93,37 +92,7 @@ export class AuthService {
     
     const role = roleMap[userId];
     if (!role) return null;
-    const mockUsers: Record<UserRole, BaseUser> = {
-      student: {
-        id: 'student-01',
-        name: 'Budi Hartono',
-        email: 'budi@example.com',
-        role: 'student',
-        avatarUrl: DEFAULT_AVATARS.student01
-      },
-      teacher: {
-        id: 'teacher-01',
-        name: 'Ibu Siti',
-        email: 'siti@example.com',
-        role: 'teacher',
-        avatarUrl: DEFAULT_AVATARS.teacher01
-      },
-      parent: {
-        id: 'parent-01',
-        name: 'Ayah Budi',
-        email: 'ayah.budi@example.com',
-        role: 'parent',
-        avatarUrl: DEFAULT_AVATARS.parent01
-      },
-      admin: {
-        id: 'admin-01',
-        name: 'Admin Sekolah',
-        email: 'admin@example.com',
-        role: 'admin',
-        avatarUrl: DEFAULT_AVATARS.admin01
-      },
-    };
 
-    return this.simulateApiCall(mockUsers[role] || null);
+    return this.simulateApiCall(MOCK_USERS[role] || null);
   }
 }
