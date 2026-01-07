@@ -68,16 +68,22 @@ Make sure you have the following installed:
 
 1.  Clone the repository:
     ```bash
-    git clone https://github.com/your-username/akademia-pro.git
+    git clone https://github.com/cpa01cmz-beep/web-sekolah.git
     ```
 2.  Navigate to the project directory:
     ```bash
-    cd akademia-pro
+    cd web-sekolah
     ```
 3.  Install dependencies:
     ```bash
     bun install
     ```
+4.  Configure environment variables:
+    ```bash
+    cp .env.example .env
+    ```
+    
+    Update the `.env` file with your configuration. For local development, the defaults in `.env.example` should work. For production deployment, ensure you update the `ALLOWED_ORIGINS` and `JWT_SECRET` values.
 
 ## Usage
 
@@ -91,18 +97,16 @@ The application will be available at `http://localhost:3000` (or the port specif
 
 ## Documentation
 
-Comprehensive documentation is available in our [wiki](../../wiki/Home):
+Comprehensive documentation is available in our [docs/](./docs/) directory and [GitHub Wiki](https://github.com/cpa01cmz-beep/web-sekolah/wiki):
 
-- [Home](../../wiki/Home) - Main documentation hub
-- [Technical Blueprint](../../wiki/Technical-Blueprint) - Detailed technical documentation
-- [Development Roadmap](../../wiki/Development-Roadmap) - Project development roadmap
-- [API Documentation](../../wiki/API-Documentation) - API endpoints and usage
-- [User Guides](../../wiki/User-Guides) - Instructions for using the application
-- [Deployment Guide](../../wiki/Deployment-Guide) - Instructions for deploying the application
-- [Security Guidelines](../../wiki/Security-Guidelines) - Security best practices and guidelines
-- [iFlow CLI Automation](../../wiki/iFlow-CLI-Automation) - Documentation for iFlow CLI automation features
-- [Contributing](../../wiki/Contributing) - Guidelines for contributing to the project
-- [iFlow CLI Automation](../../wiki/iFlow-CLI-Automation) - Documentation for iFlow CLI automation features
+- [API Blueprint](./docs/blueprint.md) - Complete API reference with endpoints, error codes, and integration patterns
+- [Architectural Task List](./docs/task.md) - Implementation status and roadmap
+- [Technical Blueprint](https://github.com/cpa01cmz-beep/web-sekolah/wiki/Technical-Blueprint) - Detailed technical documentation
+- [Development Roadmap](https://github.com/cpa01cmz-beep/web-sekolah/wiki/Development-Roadmap) - Project development roadmap
+- [User Guides](https://github.com/cpa01cmz-beep/web-sekolah/wiki/User-Guides) - Instructions for using the application
+- [Deployment Guide](https://github.com/cpa01cmz-beep/web-sekolah/wiki/Deployment-Guide) - Instructions for deploying the application
+- [Security Guidelines](https://github.com/cpa01cmz-beep/web-sekolah/wiki/Security-Guidelines) - Security best practices and guidelines
+- [Contributing](https://github.com/cpa01cmz-beep/web-sekolah/wiki/Contributing) - Guidelines for contributing to the project
 
 ## Deployment
 

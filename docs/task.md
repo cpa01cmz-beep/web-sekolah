@@ -14,6 +14,32 @@ This document tracks architectural refactoring tasks for Akademia Pro.
 | Low | State Management Guidelines | Pending | Document and enforce consistent state management patterns |
 | Low | Business Logic Extraction | Pending | Extract business logic to dedicated domain layer |
 
+## Documentation Fixes (2026-01-07)
+
+### Critical README Fixes
+
+1. **Fixed Clone URL** - Corrected generic placeholder to actual repository URL:
+   - Before: `https://github.com/your-username/akademia-pro.git`
+   - After: `https://github.com/cpa01cmz-beep/web-sekolah.git`
+
+2. **Fixed Project Directory** - Corrected directory name in installation instructions:
+   - Before: `cd akademia-pro`
+   - After: `cd web-sekolah`
+
+3. **Fixed Wiki Links** - Corrected broken relative paths to proper GitHub URLs:
+   - Before: `../../wiki/Home` (broken relative paths)
+   - After: `https://github.com/cpa01cmz-beep/web-sekolah/wiki/Home` (working absolute URLs)
+
+4. **Added Environment Configuration** - Added step to configure `.env` file:
+   - Added instruction to copy `.env.example` to `.env`
+   - Documented required environment variables for development
+
+**Benefits Achieved**:
+- ✅ Clone command now works with correct repository URL
+- ✅ Installation instructions match actual project directory name
+- ✅ Wiki links now function correctly
+- ✅ Developers are informed about required environment configuration
+
 ## UI/UX Improvements (2026-01-07)
 
 ### Completed
