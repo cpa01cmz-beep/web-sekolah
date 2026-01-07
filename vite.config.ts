@@ -92,10 +92,9 @@ export default ({ mode }: { mode: string }) => {
     plugins: [react(), cloudflare(), watchDependenciesPlugin()],
     build: {
       minify: true,
-      sourcemap: "inline", // Use inline source maps for better error reporting
+      sourcemap: false, // Disable source maps to work around wrangler bug
       rollupOptions: {
         output: {
-          sourcemapExcludeSources: false, // Include original source in source maps
           manualChunks: {
             vendor: ['react', 'react-dom', 'react-router-dom'],
             ui: ['@radix-ui/react-dialog', '@radix-ui/react-select', '@radix-ui/react-dropdown-menu', 'sonner'],
