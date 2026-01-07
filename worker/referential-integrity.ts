@@ -38,7 +38,7 @@ export class ReferentialIntegrity {
     const studentUser = student as SchoolUser & { classId: string };
     const classEntity = await new ClassEntity(env, studentUser.classId).getState();
     if (classEntity) {
-      const classCourses = (await CourseEntity.list(env)).items.filter(c => c.teacherId === classEntity.teacherId);
+      const classCourses = await CourseEntity.getByTeacherId(env, classEntity.teacherId);
       if (!classCourses.some(c => c.id === grade.courseId)) {
         return { valid: false, error: 'Student is not enrolled in a class that offers this course' };
       }
@@ -151,24 +151,24 @@ export class ReferentialIntegrity {
       }
 
       if (user.role === 'teacher') {
-        const classes = (await ClassEntity.list(env)).items.filter(c => c.teacherId === id);
+        const classes = await ClassEntity.getByTeacherId(env, id);
         if (classes.length > 0) {
           warnings.push(`This teacher is assigned to ${classes.length} class(es)`);
         }
 
-        const courses = (await CourseEntity.list(env)).items.filter(c => c.teacherId === id);
+        const courses = await CourseEntity.getByTeacherId(env, id);
         if (courses.length > 0) {
           warnings.push(`This teacher teaches ${courses.length} course(s)`);
         }
 
-        const announcements = (await AnnouncementEntity.list(env)).items.filter(a => a.authorId === id);
+        const announcements = await AnnouncementEntity.getByAuthorId(env, id);
         if (announcements.length > 0) {
           warnings.push(`This teacher created ${announcements.length} announcement(s)`);
         }
       }
 
       if (user.role === 'parent') {
-        const students = (await UserEntity.list(env)).items.filter(u => u.role === 'student');
+        const students = await UserEntity.getByRole(env, 'student');
         const children = students.filter((s): s is typeof s & { parentId: string } => 'parentId' in s && s.parentId === id);
         if (children.length > 0) {
           warnings.push(`This parent has ${children.length} child(ren) linked`);
