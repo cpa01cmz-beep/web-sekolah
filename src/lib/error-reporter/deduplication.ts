@@ -1,13 +1,14 @@
 import type { ErrorContext, ErrorPrecedence } from './types';
+import { ErrorReportingTime } from '@/config/time';
 
 class GlobalErrorDeduplication {
   private reportedErrors = new Map<
     string,
     { timestamp: number; precedence: ErrorPrecedence; reported: boolean }
   >();
-  private readonly ERROR_DEDUPLICATION_WINDOW_MS = 5000;
-  private readonly CLEANUP_INTERVAL_MS = 60000;
-  private readonly ERROR_RETENTION_MS = 300000;
+  private readonly ERROR_DEDUPLICATION_WINDOW_MS = ErrorReportingTime.FIVE_SECONDS;
+  private readonly CLEANUP_INTERVAL_MS = ErrorReportingTime.ONE_MINUTE;
+  private readonly ERROR_RETENTION_MS = ErrorReportingTime.FIVE_MINUTES;
   private lastCleanup = Date.now();
 
   private calculateErrorPrecedence(context: ErrorContext): ErrorPrecedence {
