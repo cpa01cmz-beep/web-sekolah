@@ -9,7 +9,7 @@ import { PageHeader } from '@/components/PageHeader';
 import { SlideUp } from '@/components/animations';
 import { toast } from 'sonner';
 import { formatDateLong } from '@/utils/date';
-import { Trash2, Edit } from 'lucide-react';
+import { Trash2, Edit, AlertCircle } from 'lucide-react';
 import { useAuthStore } from '@/lib/authStore';
 type Announcement = {
   id: string;
@@ -54,22 +54,57 @@ export function AdminAnnouncementsPage() {
   const [announcements, setAnnouncements] = useState<Announcement[]>(initialAnnouncements);
   const [newTitle, setNewTitle] = useState('');
   const [newContent, setNewContent] = useState('');
+  const [titleError, setTitleError] = useState('');
+  const [contentError, setContentError] = useState('');
+
+  const validateForm = () => {
+    let isValid = true;
+    setTitleError('');
+    setContentError('');
+
+    if (!newTitle.trim()) {
+      setTitleError('Title is required');
+      isValid = false;
+    } else if (newTitle.trim().length < 5) {
+      setTitleError('Title must be at least 5 characters');
+      isValid = false;
+    }
+
+    if (!newContent.trim()) {
+      setContentError('Content is required');
+      isValid = false;
+    } else if (newContent.trim().length < 10) {
+      setContentError('Content must be at least 10 characters');
+      isValid = false;
+    }
+
+    return isValid;
+  };
+
   const handlePostAnnouncement = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newTitle.trim() || !newContent.trim() || !user) {
-      toast.error('Title and content cannot be empty.');
+    if (!user) {
+      toast.error('You must be logged in to post announcements.');
       return;
     }
+
+    if (!validateForm()) {
+      toast.error('Please fix the errors before submitting.');
+      return;
+    }
+
     const newAnnouncement: Announcement = {
       id: `ann-${Date.now()}`,
-      title: newTitle,
-      content: newContent,
+      title: newTitle.trim(),
+      content: newContent.trim(),
       author: user.name,
       date: new Date().toISOString(),
     };
     setAnnouncements([newAnnouncement, ...announcements]);
     setNewTitle('');
     setNewContent('');
+    setTitleError('');
+    setContentError('');
     toast.success('Announcement posted successfully!');
   };
   const handleDelete = (id: string) => {
@@ -87,16 +122,61 @@ export function AdminAnnouncementsPage() {
               <CardDescription>Post a new school-wide announcement.</CardDescription>
             </CardHeader>
             <CardContent>
-              <form onSubmit={handlePostAnnouncement} className="space-y-4">
+              <form onSubmit={handlePostAnnouncement} className="space-y-4" aria-label="Create new announcement form">
                 <div className="space-y-2">
-                  <Label htmlFor="title">Title</Label>
-                  <Input id="title" value={newTitle} onChange={(e) => setNewTitle(e.target.value)} placeholder="Announcement Title" />
+                  <Label htmlFor="announcement-title" className="flex items-center gap-2">
+                    Title
+                    <span className="text-destructive" aria-label="required">*</span>
+                  </Label>
+                  <Input
+                    id="announcement-title"
+                    value={newTitle}
+                    onChange={(e) => {
+                      setNewTitle(e.target.value);
+                      if (titleError) setTitleError('');
+                    }}
+                    placeholder="Announcement Title"
+                    aria-required="true"
+                    aria-invalid={!!titleError}
+                    aria-describedby={titleError ? 'title-error' : 'title-helper'}
+                  />
+                  <p id="title-helper" className="text-xs text-muted-foreground">Enter a descriptive title (minimum 5 characters)</p>
+                  {titleError && (
+                    <p id="title-error" className="text-xs text-destructive flex items-center gap-1" role="alert" aria-live="polite">
+                      <AlertCircle className="h-3 w-3" aria-hidden="true" />
+                      {titleError}
+                    </p>
+                  )}
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="content">Content</Label>
-                  <Textarea id="content" value={newContent} onChange={(e) => setNewContent(e.target.value)} placeholder="Write your announcement here..." rows={5} />
+                  <Label htmlFor="announcement-content" className="flex items-center gap-2">
+                    Content
+                    <span className="text-destructive" aria-label="required">*</span>
+                  </Label>
+                  <Textarea
+                    id="announcement-content"
+                    value={newContent}
+                    onChange={(e) => {
+                      setNewContent(e.target.value);
+                      if (contentError) setContentError('');
+                    }}
+                    placeholder="Write your announcement here..."
+                    rows={5}
+                    aria-required="true"
+                    aria-invalid={!!contentError}
+                    aria-describedby={contentError ? 'content-error' : 'content-helper'}
+                  />
+                  <p id="content-helper" className="text-xs text-muted-foreground">Provide detailed information (minimum 10 characters)</p>
+                  {contentError && (
+                    <p id="content-error" className="text-xs text-destructive flex items-center gap-1" role="alert" aria-live="polite">
+                      <AlertCircle className="h-3 w-3" aria-hidden="true" />
+                      {contentError}
+                    </p>
+                  )}
                 </div>
-                <Button type="submit" className="w-full">Post Announcement</Button>
+                <Button type="submit" className="w-full" aria-label="Post new announcement">
+                  Post Announcement
+                </Button>
               </form>
             </CardContent>
           </Card>
