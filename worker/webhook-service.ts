@@ -6,6 +6,7 @@ import { integrationMonitor } from './integration-monitor';
 import { CircuitBreaker } from './CircuitBreaker';
 import { WEBHOOK_CONFIG, RETRY_DELAYS_MS } from './webhook-constants';
 import { generateSignature, verifySignature } from './webhook-crypto';
+import type { WebhookEventPayload } from './webhook-types';
 
 const webhookCircuitBreakers = new Map<string, CircuitBreaker>();
 

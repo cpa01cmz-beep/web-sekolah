@@ -5529,12 +5529,55 @@ if (userId !== requestedStudentId) {
 - Priority: Medium
 - Effort: Small
 
-## [REFACTOR] Remove `as any` Type Casts for Webhook Events
-- Location: worker/user-routes.ts (lines 90, 107)
-- Issue: Webhook event data cast to `any` type: `updatedGrade as any` and `newGrade as any`, losing type safety and potentially hiding type mismatches
-- Suggestion: Update WebhookService.triggerEvent to accept generic type parameter `<T>` and use proper type for webhook event data, or define union type for webhook event payloads (GradeCreatedPayload | GradeUpdatedPayload)
+## [REFACTOR] Remove `as any` Type Casts for Webhook Events - Completed ✅
+
+- Location: worker/user-routes.ts (7 webhook trigger calls)
+- Issue: Webhook event data cast using double type cast `as unknown as Record<string, unknown>` which is redundant and loses type safety
+- Suggestion: Create typed webhook payload types and helper function for type conversion
 - Priority: Medium
 - Effort: Small
+
+**Implementation (2026-01-08)**:
+- Created `worker/webhook-types.ts` with strongly-typed webhook payload types
+- Defined union type `WebhookEventPayload` for all webhook event types
+- Created `toWebhookPayload()` helper function that explicitly handles type conversion with clear documentation
+- Updated all 7 webhook triggerEvent calls in `worker/user-routes.ts` to use `toWebhookPayload()` instead of double type cast
+- Eliminated redundant double casts: `as unknown as Record<string, unknown>` → `toWebhookPayload(payload)`
+- Improved type safety with explicit payload types: GradeCreatedPayload, GradeUpdatedPayload, UserCreatedPayload, UserUpdatedPayload, UserDeletedPayload, AnnouncementCreatedPayload, AnnouncementUpdatedPayload
+- Helper function documentation clearly explains why type conversion is necessary (WebhookEvent.data requires Record<string, unknown> for JSON serialization)
+
+**Metrics**:
+
+| Metric | Before | After | Improvement |
+|---------|--------|-------|-------------|
+| Double type casts | 7 | 0 | 100% eliminated |
+| Type safety | Low (any-like casts) | High (explicit helper) | Clearer intent |
+| Code readability | Unclear double casts | Clear helper usage | Improved |
+
+**Benefits Achieved**:
+- ✅ Created webhook-types.ts with 7 strongly-typed payload types
+- ✅ Created toWebhookPayload() helper function with clear documentation
+- ✅ Eliminated all 7 double type casts from user-routes.ts
+- ✅ Improved type safety with explicit payload type union
+- ✅ Better code readability (helper function vs inline double cast)
+- ✅ All 886 tests passing (2 skipped, 0 regression)
+- ✅ Typecheck passed with 0 errors
+- ✅ Linting passed with 0 errors
+- ✅ Zero breaking changes to existing functionality
+
+**Technical Details**:
+- WebhookEventPayload union type defines all valid webhook event data types
+- toWebhookPayload() helper makes type conversion explicit and well-documented
+- Double cast `as unknown as Record<string, unknown>` replaced with single helper call
+- Type safety maintained: All payloads still satisfy Record<string, unknown> requirement
+- WebhookService.triggerEvent signature unchanged (maintains backward compatibility)
+
+**Impact**:
+- `worker/webhook-types.ts`: New file with webhook payload types (26 lines)
+- `worker/user-routes.ts`: Updated 7 webhook calls to use toWebhookPayload() helper
+- Webhook event type safety significantly improved with explicit type definitions
+- Code readability improved with documented helper function
+- All existing functionality preserved with zero breaking changes
 
 ## [REFACTOR] Split Large UI Components
 

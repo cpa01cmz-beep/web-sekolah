@@ -26,6 +26,7 @@ import type {
 } from "@shared/types";
 import { logger } from './logger';
 import { WebhookService } from './webhook-service';
+import { toWebhookPayload } from './webhook-types';
 import { StudentDashboardService, TeacherService, GradeService, UserService, ParentDashboardService, CommonDataService } from './domain';
 import { getAuthUser, getRoleSpecificFields } from './type-guards';
 import type { Context } from 'hono';
@@ -189,7 +190,7 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
 
     try {
       const newGrade = await GradeService.createGrade(c.env, gradeData);
-      await WebhookService.triggerEvent(c.env, 'grade.created', newGrade as unknown as Record<string, unknown>);
+      await WebhookService.triggerEvent(c.env, 'grade.created', toWebhookPayload(newGrade));
       return ok(c, newGrade);
     } catch (error) {
       if (error instanceof Error) {
@@ -217,7 +218,7 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
     };
 
     await AnnouncementEntity.create(c.env, newAnnouncement.id, newAnnouncement);
-    await WebhookService.triggerEvent(c.env, 'announcement.created', newAnnouncement as unknown as Record<string, unknown>);
+    await WebhookService.triggerEvent(c.env, 'announcement.created', toWebhookPayload(newAnnouncement));
 
     return ok(c, newAnnouncement);
   });
@@ -275,7 +276,7 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
     try {
       const updatedGrade = await GradeService.updateGrade(c.env, gradeId, { score, feedback });
 
-      await WebhookService.triggerEvent(c.env, 'grade.updated', updatedGrade as unknown as Record<string, unknown>);
+      await WebhookService.triggerEvent(c.env, 'grade.updated', toWebhookPayload(updatedGrade));
 
       return ok(c, updatedGrade);
     } catch (error) {
@@ -292,7 +293,7 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
     try {
       const newGrade = await GradeService.createGrade(c.env, gradeData);
 
-      await WebhookService.triggerEvent(c.env, 'grade.created', newGrade as unknown as Record<string, unknown>);
+      await WebhookService.triggerEvent(c.env, 'grade.created', toWebhookPayload(newGrade));
 
       return ok(c, newGrade);
     } catch (error) {
@@ -313,7 +314,7 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
 
     const newUser = await UserService.createUser(c.env, userData);
 
-    await WebhookService.triggerEvent(c.env, 'user.created', newUser as unknown as Record<string, unknown>);
+    await WebhookService.triggerEvent(c.env, 'user.created', toWebhookPayload(newUser));
 
     return ok(c, newUser);
   });
@@ -325,7 +326,7 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
     try {
       const updatedUser = await UserService.updateUser(c.env, userId, userData);
 
-      await WebhookService.triggerEvent(c.env, 'user.updated', updatedUser as unknown as Record<string, unknown>);
+      await WebhookService.triggerEvent(c.env, 'user.updated', toWebhookPayload(updatedUser));
 
       const { passwordHash: _, ...userWithoutPassword } = updatedUser;
       return ok(c, userWithoutPassword);
@@ -344,7 +345,7 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
     const result = await UserService.deleteUser(c.env, userId);
 
     if (result.deleted && user) {
-      await WebhookService.triggerEvent(c.env, 'user.deleted', { id: userId, role: user.role } as Record<string, unknown>);
+      await WebhookService.triggerEvent(c.env, 'user.deleted', toWebhookPayload({ id: userId, role: user.role }));
     }
 
     return ok(c, result);
@@ -429,7 +430,7 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
     };
 
     await AnnouncementEntity.create(c.env, newAnnouncement.id, newAnnouncement);
-    await WebhookService.triggerEvent(c.env, 'announcement.created', newAnnouncement as unknown as Record<string, unknown>);
+    await WebhookService.triggerEvent(c.env, 'announcement.created', toWebhookPayload(newAnnouncement));
 
     return ok(c, newAnnouncement);
   });
