@@ -1,12 +1,12 @@
 import type { Env } from '../core-utils';
-import { UserEntity, ClassEntity, AnnouncementEntity, ScheduleEntity } from '../entities';
+import { UserEntity, ClassEntity, AnnouncementEntity, ScheduleEntity, ClassScheduleState } from '../entities';
 import type { SchoolUser, SchoolClass, Announcement } from '@shared/types';
 
 export class CommonDataService {
   static async getStudentWithClassAndSchedule(env: Env, studentId: string): Promise<{
     student: SchoolUser | null;
     classData: SchoolClass | null;
-    schedule: { items: unknown[] } | null;
+    schedule: ClassScheduleState | null;
   }> {
     const studentEntity = new UserEntity(env, studentId);
     const student = await studentEntity.getState() as SchoolUser | null;
@@ -19,7 +19,7 @@ export class CommonDataService {
     const classData = await classEntity.getState() as SchoolClass | null;
 
     const scheduleEntity = new ScheduleEntity(env, student.classId);
-    const schedule = await scheduleEntity.getState() as { items: unknown[] } | null;
+    const schedule = await scheduleEntity.getState() as ClassScheduleState | null;
 
     return { student, classData, schedule };
   }
