@@ -1712,8 +1712,10 @@ Test a webhook configuration without saving it.
 
 **Resilience:**
 - ✅ Circuit breaker protection (per-URL isolation)
-- ✅ 30-second timeout
+- ✅ 30-second timeout per attempt
 - ✅ Fast failure on open circuit
+- ✅ Retry logic with exponential backoff (3 retries, 1s/2s/3s delays)
+- ✅ Handles temporary network blips during manual testing
 
 **Request Body:**
 ```json
