@@ -17,7 +17,8 @@ This guide helps you get started with Akademia Pro for common use cases. For com
 
 ### Prerequisites
 
-- Bun installed (runtime and package manager)
+- Node.js installed (recommended: v18 or later)
+- npm (comes with Node.js)
 - Wrangler CLI (for Cloudflare Workers)
 
 ### Installation
@@ -29,22 +30,22 @@ This guide helps you get started with Akademia Pro for common use cases. For com
    ```
 
 2. **Install dependencies:**
-   ```bash
-   bun install
-   ```
+    ```bash
+    npm install
+    ```
 
 3. **Configure environment:**
-   ```bash
-   cp .env.example .env
-   ```
+    ```bash
+    cp .env.example .env
+    ```
 
-   For local development, the defaults in `.env.example` work fine.
+    For local development, the defaults in `.env.example` work fine.
 
 4. **Seed the database:**
-   ```bash
-   bun dev
-   ```
-   Then visit `http://localhost:3000/api/seed` to create sample data.
+    ```bash
+    npm run dev
+    ```
+    Then visit `http://localhost:3000/api/seed` to create sample data.
 
 ### Default Login Credentials
 

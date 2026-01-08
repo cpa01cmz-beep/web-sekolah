@@ -18,7 +18,8 @@ This guide helps developers contribute to Akademia Pro. For API documentation, s
 
 ### Prerequisites
 
-- [Bun](https://bun.sh/) (package manager and runtime)
+- [Node.js](https://nodejs.org/) (recommended: v18 or later)
+- [npm](https://www.npmjs.com/) (comes with Node.js)
 - [Wrangler CLI](https://developers.cloudflare.com/workers/wrangler/install-and-update/)
 - Git
 
@@ -30,13 +31,13 @@ git clone https://github.com/cpa01cmz-beep/web-sekolah.git
 cd web-sekolah
 
 # Install dependencies
-bun install
+npm install
 
 # Configure environment
 cp .env.example .env
 
 # Start development server
-bun dev
+npm run dev
 ```
 
 The application will be available at `http://localhost:3000`.
@@ -45,19 +46,19 @@ The application will be available at `http://localhost:3000`.
 
 ```bash
 # Development
-bun dev                    # Start dev server (frontend + worker)
-bun run build              # Build for production
-bun deploy                 # Deploy to Cloudflare
+npm run dev              # Start dev server (frontend + worker)
+npm run build            # Build for production
+npm run deploy           # Deploy to Cloudflare
 
 # Testing
-bun test                   # Run tests in watch mode
-bun test:run              # Run tests once
-bun test:coverage         # Run with coverage
-bun test:ui              # Run tests with UI
+npm test                # Run tests in watch mode
+npm run test:run        # Run tests once
+npm run test:coverage   # Run with coverage
+npm run test:ui         # Run tests with UI
 
 # Quality
-bun run typecheck         # Check TypeScript types
-bun run lint             # Run ESLint
+npm run typecheck       # Check TypeScript types
+npm run lint           # Run ESLint
 ```
 
 ---
@@ -504,12 +505,12 @@ curl http://localhost:3000/api/health
 ### Common Issues
 
 **Tests failing?**
-- Run `bun install` to update dependencies
-- Check TypeScript compilation: `bun run typecheck`
+- Run `npm install` to update dependencies
+- Check TypeScript compilation: `npm run typecheck`
 
 **Build failing?**
-- Check for linting errors: `bun run lint`
-- Verify TypeScript types: `bun run typecheck`
+- Check for linting errors: `npm run lint`
+- Verify TypeScript types: `npm run typecheck`
 
 **API requests failing?**
 - Check worker is running
@@ -522,8 +523,8 @@ curl http://localhost:3000/api/health
 
 1. Create feature branch: `git checkout -b feature/my-feature`
 2. Make changes and write tests
-3. Run tests: `bun test:run`
-4. Run linting: `bun run lint`
+3. Run tests: `npm run test:run`
+4. Run linting: `npm run lint`
 5. Commit changes: `git commit -m 'Add feature'`
 6. Push and create pull request
 

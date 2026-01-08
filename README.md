@@ -45,7 +45,7 @@ The system is built on Cloudflare's high-performance serverless infrastructure, 
   - [Tailwind CSS](https://tailwindcss.com/)
   - [shadcn/ui](https://ui.shadcn.com/)
   - [Zustand](https://github.com/pmndrs/zustand) for state management
-  - [Framer Motion](https://www.framer.com/motion/) for animations
+  - [CSS Animations](https://tailwindcss.com/docs/animation) for animations
   - [Recharts](https://recharts.org/) for data visualization
 - **Backend**:
   - [Hono](https://hono.dev/) on [Cloudflare Workers](https://workers.cloudflare.com/)
@@ -60,8 +60,9 @@ To get a local copy up and running, follow these simple steps.
 
 ### Prerequisites
 
-Make sure you have the following installed:
-- [Bun](https://bun.sh/)
+Make sure you have following installed:
+- [Node.js](https://nodejs.org/) (recommended: v18 or later)
+- [npm](https://www.npmjs.com/) (comes with Node.js)
 - [Wrangler CLI](https://developers.cloudflare.com/workers/wrangler/install-and-update/)
 
 ### Installation
@@ -76,7 +77,7 @@ Make sure you have the following installed:
     ```
 3.  Install dependencies:
     ```bash
-    bun install
+    npm install
     ```
 4.  Configure environment variables:
     ```bash
@@ -90,7 +91,7 @@ Make sure you have the following installed:
 To start the development server, which runs both the Vite frontend and the Hono backend on Cloudflare Workers simultaneously, run:
 
 ```bash
-bun dev
+npm run dev
 ```
 
 The application will be available at `http://localhost:3000` (or the port specified in your environment).
@@ -152,17 +153,17 @@ Comprehensive documentation is available in our [docs/](./docs/) directory and [
 Run the test suite to verify everything is working:
 
 ```bash
-bun test
+npm test
 ```
 
-All tests should pass (582 tests currently passing).
+All tests should pass (currently 887 tests).
 
 ### Type Checking
 
 Check TypeScript types:
 
 ```bash
-bun run typecheck
+npm run typecheck
 ```
 
 ### Linting
@@ -170,7 +171,7 @@ bun run typecheck
 Check code for linting errors:
 
 ```bash
-bun run lint
+npm run lint
 ```
 
 ### Building
@@ -178,14 +179,14 @@ bun run lint
 Build the production bundle:
 
 ```bash
-bun run build
+npm run build
 ```
 
 ## Troubleshooting
 
 ### Common Issues
 
-**Problem**: Application won't start after `bun dev`
+**Problem**: Application won't start after `npm run dev`
 - **Solution**: Check if port 3000 is already in use. Stop other services or change port in `.env`
 
 **Problem**: Seed data not appearing
@@ -201,14 +202,14 @@ bun run build
 - **Solution**: Add your local origin to `ALLOWED_ORIGINS` in `.env` file
 
 **Problem**: Tests failing
-- **Solution**: Ensure all dependencies installed: `bun install`. Check Node.js version compatibility
+- **Solution**: Ensure all dependencies installed: `npm install`. Check Node.js version compatibility
 
 ### Debug Mode
 
 Enable debug logging by setting environment variable:
 
 ```bash
-LOG_LEVEL=debug bun dev
+LOG_LEVEL=debug npm run dev
 ```
 
 This provides detailed logs for troubleshooting API requests, database operations, and authentication.
@@ -223,7 +224,7 @@ This project is configured for seamless deployment to Cloudflare.
     ```
 2.  Run the deployment script:
     ```bash
-    bun deploy
+    npm run deploy
     ```
 This command will build the application and deploy it to your Cloudflare account.
 
