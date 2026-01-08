@@ -12,8 +12,26 @@ vi.mock('../logger', () => ({
 }));
 
 describe('Migration System - Data Integrity', () => {
+  let mockEnv: any;
+  let mockStub: any;
+
   beforeEach(() => {
     vi.clearAllMocks();
+    
+    mockStub = {
+      casPut: vi.fn().mockResolvedValue({ ok: true, v: 1 }),
+      del: vi.fn().mockResolvedValue(true),
+      getDoc: vi.fn().mockResolvedValue({ v: 1, data: null }),
+    };
+
+    mockEnv = {
+      GlobalDurableObject: {
+        idFromName: vi.fn().mockReturnValue('test-id'),
+        get: vi.fn().mockReturnValue(mockStub),
+      },
+    };
+
+    MigrationRegistry.migrations = [];
   });
 
   describe('MigrationRegistry', () => {
@@ -109,7 +127,8 @@ describe('Migration System - Data Integrity', () => {
       );
 
       expect(logger.error).toHaveBeenCalledWith(
-        '[Migration] Integrity check failed',
+        '[Migration] Integrity check error',
+        new Error('Index corrupted'),
         { name: 'Check indexes' }
       );
     });
@@ -138,7 +157,8 @@ describe('Migration System - Data Integrity', () => {
 
       expect(logger.error).toHaveBeenCalledWith(
         '[Migration] Integrity check error',
-        expect.any(Error)
+        new Error('Unexpected error'),
+        { name: 'Check 1' }
       );
     });
   });
@@ -155,18 +175,18 @@ describe('Migration System - Data Integrity', () => {
       MigrationRegistry.register(mockMigration);
       logger.info = vi.fn();
 
-      await MigrationRunner.run({}, [mockMigration]);
+      await MigrationRunner.run(mockEnv, [mockMigration]);
 
       expect(mockMigration.up).toHaveBeenCalled();
       expect(logger.info).toHaveBeenCalledWith(
-        expect.stringContaining('Applying'),
+        '[Migration] Applying',
         expect.objectContaining({
           id: '20260107_add_password_hash',
           description: 'Add password hash',
         })
       );
       expect(logger.info).toHaveBeenCalledWith(
-        expect.stringContaining('Successfully applied'),
+        '[Migration] Successfully applied',
         expect.objectContaining({
           id: '20260107_add_password_hash',
         })
@@ -187,7 +207,7 @@ describe('Migration System - Data Integrity', () => {
       MigrationRegistry.register(mockMigration);
 
       await expect(
-        MigrationRunner.run({}, [mockMigration])
+        MigrationRunner.run(mockEnv, [mockMigration])
       ).rejects.toThrow('Migration 20260107_add_password_hash failed: Error: Database connection failed');
 
       expect(logger.error).toHaveBeenCalledWith(
@@ -206,18 +226,23 @@ describe('Migration System - Data Integrity', () => {
 
       MigrationRegistry.register(mockMigration);
       logger.info = vi.fn();
+      
+      mockStub.getDoc = vi.fn().mockResolvedValue({ 
+        v: 1, 
+        data: { appliedMigrations: ['20260107_add_password_hash'], version: 1 } 
+      });
 
-      await MigrationRunner.rollback({}, [mockMigration]);
+      await MigrationRunner.rollback(mockEnv, [mockMigration]);
 
       expect(mockMigration.down).toHaveBeenCalled();
       expect(logger.info).toHaveBeenCalledWith(
-        expect.stringContaining('Rolling back'),
+        '[Migration] Rolling back',
         expect.objectContaining({
           id: '20260107_add_password_hash',
         })
       );
       expect(logger.info).toHaveBeenCalledWith(
-        expect.stringContaining('Successfully rolled back'),
+        '[Migration] Successfully rolled back',
         expect.objectContaining({
           id: '20260107_add_password_hash',
         })
@@ -233,9 +258,14 @@ describe('Migration System - Data Integrity', () => {
       };
 
       MigrationRegistry.register(mockMigration);
+      
+      mockStub.getDoc = vi.fn().mockResolvedValue({ 
+        v: 1, 
+        data: { appliedMigrations: ['20260107_add_password_hash'], version: 1 } 
+      });
 
       await expect(
-        MigrationRunner.rollback({}, [mockMigration])
+        MigrationRunner.rollback(mockEnv, [mockMigration])
       ).rejects.toThrow('Rollback of 20260107_add_password_hash failed: Error: Rollback failed');
 
       expect(logger.error).toHaveBeenCalledWith(
@@ -263,19 +293,19 @@ describe('Migration System - Data Integrity', () => {
       MigrationRegistry.register(mockMigration2);
       logger.info = vi.fn();
 
-      await MigrationRunner.run({}, [mockMigration1, mockMigration2]);
+      await MigrationRunner.run(mockEnv, [mockMigration1, mockMigration2]);
 
       expect(mockMigration1.up).toHaveBeenCalled();
       expect(mockMigration2.up).toHaveBeenCalled();
-      expect(logger.info).toHaveBeenCalledWith('[Migration] Found 2 pending migrations');
+      expect(logger.info).toHaveBeenCalledWith('[Migration] Found pending migrations', { count: 2 });
       expect(logger.info).toHaveBeenCalledWith(
-        expect.stringContaining('Successfully applied'),
+        '[Migration] Successfully applied',
         expect.objectContaining({
           id: '20260107_add_password_hash',
         })
       );
       expect(logger.info).toHaveBeenCalledWith(
-        expect.stringContaining('Successfully applied'),
+        '[Migration] Successfully applied',
         expect.objectContaining({
           id: '20260108_add_timestamps',
         })
@@ -296,8 +326,13 @@ describe('Migration System - Data Integrity', () => {
       };
 
       MigrationRegistry.register(mockMigration);
+      
+      mockStub.getDoc = vi.fn().mockResolvedValue({ 
+        v: 1, 
+        data: { appliedMigrations: ['20260107_add_password_hash'], version: 1 } 
+      });
 
-      await MigrationRunner.run({ ENVIRONMENT: 'development' }, [mockMigration]);
+      await MigrationRunner.run({ ...mockEnv, ENVIRONMENT: 'development' }, [mockMigration]);
 
       expect(logger.info).toHaveBeenCalledWith('[Migration] No pending migrations to apply');
     });
@@ -313,13 +348,13 @@ describe('Migration System - Data Integrity', () => {
       MigrationRegistry.register(mockMigration);
 
       await expect(
-        MigrationRunner.run({ ENVIRONMENT: 'production' }, [mockMigration])
+        MigrationRunner.run({ ...mockEnv, ENVIRONMENT: 'production' }, [mockMigration])
       ).rejects.toThrow(
         'Migration 20260107_add_password_hash failed: Error: Cannot set passwords in production'
       );
 
       expect(logger.error).toHaveBeenCalledWith(
-        expect.stringContaining('Migration 20260107_add_password_hash failed'),
+        expect.stringContaining('Failed to apply 20260107_add_password_hash'),
         expect.any(Error)
       );
     });
@@ -336,10 +371,10 @@ describe('Migration System - Data Integrity', () => {
 
       MigrationRegistry.register(mockMigration);
 
-      await MigrationRunner.run({}, [mockMigration]);
+      await MigrationRunner.run(mockEnv, [mockMigration]);
 
       expect(mockMigration.up).toHaveBeenCalled();
-      expect(logger.info).toHaveBeenCalledWith('[Migration] No pending migrations to apply');
+      expect(logger.info).toHaveBeenCalledWith('[Migration] All migrations applied successfully');
     });
 
     it('should handle migration up returning void', async () => {
@@ -352,7 +387,7 @@ describe('Migration System - Data Integrity', () => {
 
       MigrationRegistry.register(mockMigration);
 
-      await MigrationRunner.run({}, [mockMigration]);
+      await MigrationRunner.run(mockEnv, [mockMigration]);
 
       expect(mockMigration.up).toHaveBeenCalled();
       expect(logger.info).toHaveBeenCalledWith('[Migration] All migrations applied successfully');
@@ -369,15 +404,13 @@ describe('Migration System - Data Integrity', () => {
       MigrationRegistry.register(mockMigration);
 
       const promises = [
-        MigrationRunner.run({}, [mockMigration]),
-        MigrationRunner.run({}, [mockMigration]),
+        MigrationRunner.run(mockEnv, [mockMigration]),
+        MigrationRunner.run(mockEnv, [mockMigration]),
       ];
 
       await Promise.allSettled(promises);
 
-      expect(logger.info).toHaveBeenCalledWith(
-        '[Migration] All migrations applied successfully'
-      );
+      expect(logger.info).toHaveBeenCalledWith('[Migration] All migrations applied successfully');
       expect(mockMigration.up).toHaveBeenCalledTimes(2);
     });
   });
