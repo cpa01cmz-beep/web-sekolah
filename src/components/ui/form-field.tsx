@@ -21,6 +21,9 @@ export function FormField({
   children,
   className,
 }: FormFieldProps) {
+  const errorId = `${id}-error`;
+  const helperId = `${id}-helper`;
+
   return (
     <div className={cn('space-y-2', className)}>
       <Label htmlFor={id} className="text-sm font-medium">
@@ -30,6 +33,7 @@ export function FormField({
       {children}
       {error ? (
         <p
+          id={errorId}
           className="text-xs text-destructive flex items-center gap-1"
           role="alert"
           aria-live="polite"
@@ -37,7 +41,7 @@ export function FormField({
           {error}
         </p>
       ) : helperText ? (
-        <p className="text-xs text-muted-foreground">{helperText}</p>
+        <p id={helperId} className="text-xs text-muted-foreground">{helperText}</p>
       ) : null}
     </div>
   );
