@@ -7,7 +7,7 @@ import { useState } from 'react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { navLinksMap, NavLink as NavLinkType } from '@/config/navigation';
 import { THEME_COLORS } from '@/theme/colors';
-import React from 'react';
+
 export function PortalSidebar() {
   const user = useAuthStore((state) => state.user);
   const logout = useAuthStore((state) => state.logout);
@@ -56,7 +56,7 @@ export function PortalSidebar() {
                     )
                   }
                 >
-                  <span aria-hidden="true">{React.createElement(link.icon, { className: 'h-5 w-5' })}</span>
+                  <span aria-hidden="true"><link.icon className="h-5 w-5" /></span>
                   {!isCollapsed && <span>{link.label}</span>}
                 </NavLink>
               </TooltipTrigger>

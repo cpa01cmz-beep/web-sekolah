@@ -8,7 +8,6 @@ import { Menu, Bell, GraduationCap } from 'lucide-react';
 import { Toaster } from 'sonner';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
-import React from 'react';
 import { SkipLink } from '@/components/SkipLink';
 import { navLinksMap, NavLink as NavLinkType } from '@/config/navigation';
 import { THEME_COLORS } from '@/theme/colors';
@@ -55,7 +54,7 @@ export function PortalLayout() {
                           )
                         }
                       >
-                        <span aria-hidden="true">{React.createElement(link.icon, { className: 'h-5 w-5' })}</span>
+                        <span aria-hidden="true"><link.icon className="h-5 w-5" /></span>
                         <span>{link.label}</span>
                       </NavLink>
                     ))}
