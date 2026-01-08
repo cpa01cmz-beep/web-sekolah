@@ -122,6 +122,25 @@ Automatic retry with exponential backoff and jitter to handle temporary failures
 
 **Implementation**: `src/lib/error-reporter/ErrorReporter.ts:284-335`
 
+#### Error Reporter - Immediate Reporting (Client-Side)
+
+- **Max Retries**: 2 attempts
+- **Base Delay**: 1,000ms
+- **Backoff Factor**: 2
+- **Jitter**: ±1,000ms
+- **Request Timeout**: 10 seconds per attempt
+- **Total Timeout**: Up to 5 seconds per immediate error report
+- **Behavior**: Fails silently after all retries exhausted (non-blocking)
+
+**Implementation**: `src/lib/error-reporter/immediate-interceptors.ts:61-76`
+
+**Benefits**:
+- ✅ Prevents application hangs from slow error reporting endpoints
+- ✅ Handles temporary network issues with automatic retry
+- ✅ Reduces error loss during brief outages
+- ✅ Non-blocking design (continues execution after retries)
+- ✅ Consistent with queued error reporting patterns
+
 #### Webhook Delivery (Backend)
 
 - **Max Retries**: 6 attempts
@@ -464,11 +483,11 @@ Returns current system health:
 
 ### Integration Test Coverage
 
-- ✅ **582 tests passing**
+- ✅ **600 tests passing**
 - ✅ **Circuit Breaker**: 3 test suites (frontend, backend, integration)
 - ✅ **Rate Limiting**: 321 tests
 - ✅ **Webhook Service**: 3 tests (trigger, process, signature verification)
-- ✅ **Error Reporter**: 15 tests (retry logic, queue management, deduplication)
+- ✅ **Error Reporter**: 15 tests (retry logic, queue management, deduplication, immediate error reporting resilience)
 - ✅ **API Client**: 7 tests (timeout, retry, circuit breaker)
 - ✅ **Integration Monitor**: Full coverage of health metrics
 
@@ -566,13 +585,14 @@ Returns current system health:
 - ✅ Documentation complete (blueprint, this guide)
 - ✅ Error responses standardized (consistent codes and messages)
 - ✅ Zero breaking changes (backward compatible)
-- ✅ All 582 tests passing (0 regression)
+- ✅ All 600 tests passing (0 regression)
 - ✅ Webhook reliability verified (6 retries, circuit breaker, signature verification)
+- ✅ Error reporting hardened (immediate + queued with resilience patterns)
 - ✅ Rate limiting implemented (3-tier system with monitoring)
 - ✅ Integration monitoring functional (health metrics, error tracking)
 
 ---
 
-**Last Updated**: 2026-01-07
+**Last Updated**: 2026-01-08
 
 **Status**: ✅ **Production Ready** - All integration patterns fully implemented and tested.

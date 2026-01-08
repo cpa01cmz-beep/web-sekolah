@@ -59,13 +59,42 @@ const shouldReportImmediate = (context: ErrorContext): boolean => {
 };
 
 const sendImmediateError = async (payload: ImmediatePayload): Promise<void> => {
-  try {
-    await fetch("/api/client-errors", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
-  } catch { // Fail silently
+  const maxRetries = 2;
+  const baseRetryDelay = 1000;
+  const requestTimeout = 10000;
+  let lastError: Error | unknown;
+
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    let timeoutId: NodeJS.Timeout;
+    try {
+      const controller = new AbortController();
+      timeoutId = setTimeout(() => controller.abort(), requestTimeout);
+
+      const response = await fetch("/api/client-errors", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+        signal: controller.signal,
+      });
+
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        throw new Error(
+          `Failed to report immediate error: ${response.status} ${response.statusText}`
+        );
+      }
+
+      return;
+    } catch (err) {
+      lastError = err;
+      clearTimeout(timeoutId);
+
+      if (attempt < maxRetries) {
+        const delay = baseRetryDelay * Math.pow(2, attempt) + Math.random() * 1000;
+        await new Promise(resolve => setTimeout(resolve, delay));
+      }
+    }
   }
 };
 
