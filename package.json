@@ -62,7 +62,6 @@
     "lucide-react": "^0.562.0",
     "next-themes": "^0.4.6",
     "pino": "^10.1.0",
-    "postcss": "^8.5.6",
     "react": "^19.2.3",
     "react-day-picker": "^9.8.0",
     "react-dom": "^19.2.3",
@@ -78,7 +77,7 @@
     "zustand": "^5.0.6"
   },
   "devDependencies": {
-    "@cloudflare/vite-plugin": "^1.9.4",
+    "@cloudflare/vite-plugin": "1.9.4",
     "@cloudflare/workers-types": "^4.20250807.0",
     "@eslint/js": "^9.39.1",
     "@tailwindcss/postcss": "^4.1.18",
@@ -95,7 +94,8 @@
     "globals": "^16.0.0",
     "happy-dom": "^20.0.11",
     "jsdom": "^27.4.0",
-    "tailwindcss": "^4.1.18",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^3.4.19",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.26.1",
     "vite": "^7.3.1",
