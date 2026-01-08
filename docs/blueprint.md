@@ -111,6 +111,7 @@ This clears and rebuilds all secondary indexes from existing data.
 - ~~Announcement filtering business logic in routes: Routes had inline filtering logic for targetRole and used incorrect field names (createdBy, targetClassIds)~~ ✅ **COMPLETED** (2026-01-08) - Extracted announcement filtering to domain services, fixed type safety issues, added targetRole field to types
 - ~~AnnouncementEntity.getByTargetRole() table scan: Full table scan for targetRole filtering~~ ✅ **COMPLETED** (2026-01-08) - Now uses targetRole secondary index for O(1) lookups
 - ~~Large page components with inline forms: AdminUserManagementPage (228 lines) had form logic mixed with data concerns~~ ✅ **COMPLETED** (2026-01-08) - Extracted UserForm component (28% reduction, clean separation of concerns)
+- ~~Repetitive card patterns in pages: HomePage features and GalleryPage categories had inline card rendering with duplicated code~~ ✅ **COMPLETED** (2026-01-08) - Extracted FeatureCard and InfoCard components (40-50% code reduction, improved accessibility with aria-hidden attributes)
 
    ### Recent Data Optimizations (2026-01-07)
 

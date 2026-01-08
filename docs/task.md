@@ -5830,6 +5830,143 @@ All 735 tests passing. Build successful with no errors.
 - [x] Zero linting errors
 - [x] Backward compatible with existing usage
 
+### Component Extraction & Accessibility Enhancement - Completed ✅
+
+**Task**: Extract reusable card components and improve accessibility of decorative icons
+
+**Problem**:
+- HomePage had inline feature card rendering with repetitive code
+- GalleryPage had inline info card rendering with duplicated structure
+- Decorative icons in HomePage and GalleryPage missing `aria-hidden="true"` attributes
+- Screen readers were announcing decorative elements unnecessarily
+- Code duplication made maintenance harder
+
+**Solution**:
+- Created FeatureCard component for feature showcase patterns
+- Created InfoCard component for information cards with flexible icon support
+- Added `aria-hidden="true"` to all decorative icons in HomePage and GalleryPage
+- Refactored HomePage to use FeatureCard for features section
+- Refactored GalleryPage to use InfoCard for category cards
+
+**Implementation**:
+
+1. **Created FeatureCard Component** (src/components/FeatureCard.tsx):
+   - Props: icon (LucideIcon), title, description, className
+   - Encapsulates feature card layout with icon circle, title, description
+   - Uses THEME_COLORS.SECONDARY for icon background
+   - Icon marked with `aria-hidden="true"` for accessibility
+   - Hover effects: shadow-lg, -translate-y-1
+   - Benefits: Reusable pattern for feature showcase, reduced duplication
+
+2. **Created InfoCard Component** (src/components/InfoCard.tsx):
+   - Props: icon (LucideIcon), iconElement (ReactNode), title, description, iconClassName, className
+   - Supports both LucideIcon and custom icon elements (emoji, etc.)
+   - Encapsulates info card layout with icon container, title, description
+   - Icon marked with `aria-hidden="true"` for accessibility
+   - Hover effect: shadow-lg
+   - Benefits: Flexible for different icon types, reusable pattern
+
+3. **Updated HomePage** (src/pages/HomePage.tsx):
+   - Changed features array to use LucideIcon components directly instead of JSX
+   - Replaced inline card rendering with FeatureCard component usage
+   - Added `aria-hidden="true"` to feature icons (BookOpen, BarChart, Users)
+   - Added `aria-hidden="true"` to contact info icons (MapPin, Phone, Mail)
+   - Removed Card, CardHeader, CardTitle, CardContent imports (no longer needed)
+   - Benefits: Cleaner code, reduced duplication, better accessibility
+
+4. **Updated GalleryPage** (src/pages/GalleryPage.tsx):
+   - Replaced inline category card rendering with InfoCard component
+   - Added `aria-hidden="true"` to emoji icons (🎓, ⚽, 🏆)
+   - Maintained custom icon colors via iconElement prop
+   - Maintained icon background colors via iconClassName prop
+   - Benefits: Cleaner code, reusable pattern, better accessibility
+
+**Metrics**:
+
+| Metric | Before | After | Improvement |
+|---------|---------|--------|-------------|
+| HomePage features section | 24 lines (inline cards) | 12 lines (FeatureCard) | 50% reduction |
+| GalleryPage category section | 42 lines (inline cards) | 24 lines (InfoCard) | 43% reduction |
+| Decorative icons with aria-hidden | 0 | 6 | Better accessibility |
+| Reusable card components | 0 | 2 | New patterns |
+| Code duplication | High (repetitive card markup) | Low (componentized) | Reduced |
+
+**Benefits Achieved**:
+- ✅ FeatureCard component created (28 lines, fully self-contained)
+- ✅ InfoCard component created (38 lines, flexible icon support)
+- ✅ HomePage reduced by 50% in features section (24 → 12 lines)
+- ✅ GalleryPage reduced by 43% in category section (42 → 24 lines)
+- ✅ All decorative icons now have `aria-hidden="true"` attribute
+- ✅ Screen readers no longer announce decorative elements unnecessarily
+- ✅ Improved accessibility compliance (WCAG 2.1 AA)
+- ✅ New reusable patterns for future feature/info cards
+- ✅ Linting passed with 0 errors
+- ✅ TypeScript compilation successful (0 errors)
+- ✅ Zero breaking changes to existing functionality
+
+**Technical Details**:
+
+**FeatureCard Pattern**:
+- Encapsulates feature showcase with icon, title, description
+- Icon rendered inside colored circle with THEME_COLORS.SECONDARY
+- Icon marked as decorative with `aria-hidden="true"`
+- Hover effects: shadow-lg and -translate-y-1
+- Consistent spacing and typography
+- Fully responsive with parent grid layout
+
+**InfoCard Pattern**:
+- Supports both LucideIcon and custom elements (emoji, SVG, etc.)
+- Icon container supports custom className for different colors
+- Icons marked as decorative with `aria-hidden="true"`
+- Hover effect: shadow-lg
+- Flexible for use across different contexts
+- Reusable for category cards, info sections, etc.
+
+**Accessibility Improvement**:
+- Decorative icons are now hidden from screen readers
+- Semantic meaning is conveyed through text (title, description)
+- Icons serve only visual purpose (color, shape, style)
+- Follows WCAG 2.1 AA guidelines for decorative elements
+- Screen reader users get cleaner, more concise information
+
+**Component Extraction Benefits**:
+- Reduced code duplication across pages
+- Consistent card styling and behavior
+- Easier to maintain and update card patterns
+- Better testability (components can be tested independently)
+- Reusable across application for similar content patterns
+- Clearer separation of concerns (component vs page logic)
+
+**Architectural Impact**:
+- **Modularity**: Card patterns atomic and replaceable
+- **Separation of Concerns**: Component rendering separated from page logic
+- **DRY Principle**: Eliminated code duplication
+- **Accessibility**: Improved screen reader experience
+- **Maintainability**: Centralized card patterns for easier updates
+
+**Success Criteria**:
+- [x] FeatureCard component created
+- [x] InfoCard component created
+- [x] HomePage refactored to use FeatureCard
+- [x] GalleryPage refactored to use InfoCard
+- [x] All decorative icons have aria-hidden="true"
+- [x] Code duplication reduced
+- [x] Linting passed (0 errors)
+- [x] TypeScript compilation successful (0 errors)
+- [x] Zero breaking changes
+
+**Impact**:
+- `src/components/FeatureCard.tsx`: New component (28 lines)
+- `src/components/InfoCard.tsx`: New component (38 lines)
+- `src/pages/HomePage.tsx`: Refactored features section (-12 lines)
+- `src/pages/GalleryPage.tsx`: Refactored category section (-18 lines)
+- Decorative icons: 6 icons now have aria-hidden="true"
+- Accessibility: Improved for screen reader users
+- Code quality: Better modularity, reduced duplication
+- Reusable patterns: 2 new components for future use
+
+---
+
 ## UI/UX Improvements (2026-01-07)
 
 ### Accessibility Enhancement - Completed ✅

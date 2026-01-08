@@ -1,24 +1,25 @@
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { PublicLayout } from '@/components/PublicLayout';
 import { CheckCircle, BookOpen, Users, BarChart, MapPin, Phone, Mail } from 'lucide-react';
 import { SlideUp } from '@/components/animations';
 import { useReducedMotion } from '@/hooks/use-reduced-motion';
+import { FeatureCard } from '@/components/FeatureCard';
 import { THEME_COLORS } from '@/theme/colors';
+
 const features = [
   {
-    icon: <BookOpen className="h-8 w-8 text-white" />,
+    icon: BookOpen,
     title: 'Unified Portal',
     description: 'One platform for students, teachers, parents, and admins.',
   },
   {
-    icon: <BarChart className="h-8 w-8 text-white" />,
+    icon: BarChart,
     title: 'RDM Integration',
     description: 'Seamlessly connect with Rapor Digital Madrasah for grade reporting.',
   },
   {
-    icon: <Users className="h-8 w-8 text-white" />,
+    icon: Users,
     title: 'Digital Student Cards',
     description: 'Generate and manage official digital student identification cards.',
   },
@@ -29,9 +30,9 @@ const values = [
   { title: 'Innovation', description: 'Continuously improving the educational experience with modern tools.' },
 ];
 const contactInfo = [
-  { icon: <MapPin className="h-5 w-5" />, text: 'Jl. Raya No. 123, Jakarta, Indonesia' },
-  { icon: <Phone className="h-5 w-5" />, text: '(021) 123-4567' },
-  { icon: <Mail className="h-5 w-5" />, text: 'info@akademiapro.sch.id' },
+  { icon: <MapPin className="h-5 w-5" aria-hidden="true" />, text: 'Jl. Raya No. 123, Jakarta, Indonesia' },
+  { icon: <Phone className="h-5 w-5" aria-hidden="true" />, text: '(021) 123-4567' },
+  { icon: <Mail className="h-5 w-5" aria-hidden="true" />, text: 'info@akademiapro.sch.id' },
 ];
 export function HomePage() {
   const prefersReducedMotion = useReducedMotion();
@@ -78,17 +79,11 @@ export function HomePage() {
           <div className="mt-12 grid gap-8 md:grid-cols-3">
             {features.map((feature, index) => (
               <SlideUp key={feature.title} delay={prefersReducedMotion ? 0 : index * 0.1}>
-                <Card className="text-center h-full hover:shadow-lg hover:-translate-y-1 transition-all duration-200">
-                  <CardHeader>
-                    <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full" style={{ backgroundColor: THEME_COLORS.SECONDARY }}>
-                      {feature.icon}
-                    </div>
-                    <CardTitle className="mt-4">{feature.title}</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-muted-foreground">{feature.description}</p>
-                  </CardContent>
-                </Card>
+                <FeatureCard
+                  icon={feature.icon}
+                  title={feature.title}
+                  description={feature.description}
+                />
               </SlideUp>
             ))}
           </div>
