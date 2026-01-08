@@ -30,16 +30,48 @@ Akademia Pro is a modern, all-in-one school management portal designed to stream
 
 ### Prerequisites
 
-Before you begin, ensure you have the following installed:
-- [Bun](https://bun.sh/) (package manager and runtime)
+Before you begin, ensure you have following installed:
+- [Node.js](https://nodejs.org/) (recommended: v18 or later)
+- [npm](https://www.npmjs.com/) (comes with Node.js)
 - [Wrangler CLI](https://developers.cloudflare.com/workers/wrangler/install-and-update/) (Cloudflare Workers CLI)
 - Git
 
 ### Installation
 
-1. Clone the repository:
+1. Clone repository:
     ```bash
     git clone https://github.com/cpa01cmz-beep/web-sekolah.git
+    ```
+
+2. Navigate to project directory:
+    ```bash
+    cd web-sekolah
+    ```
+
+3. Install dependencies:
+    ```bash
+    npm install
+    ```
+
+4. Configure environment variables:
+    ```bash
+    cp .env.example .env
+    ```
+
+    Update `.env` file with your configuration. For local development, defaults in `.env.example` should work. For production deployment, ensure you update `ALLOWED_ORIGINS` and `JWT_SECRET` values.
+
+### Development Setup
+
+1. Start development server:
+    ```bash
+    npm run dev
+    ```
+
+2. The application will be available at `http://localhost:3000` (or port specified in your environment).
+
+3. For backend-only development, you can also run worker separately:
+    ```bash
+    wrangler dev worker/index.ts
     ```
 
 2. Navigate to the project directory:
@@ -348,14 +380,14 @@ For detailed resilience patterns and monitoring, see [docs/blueprint.md](./docs/
 
 ### Production Deployment
 
-1. Build the application:
+1. Build application:
     ```bash
-    bun run build
+    npm run build
     ```
 
 2. Deploy to Cloudflare:
     ```bash
-    bun deploy
+    npm run deploy
     ```
 
 Alternatively, use the one-click deployment button in the README.
@@ -385,27 +417,27 @@ The application uses Vitest for testing with comprehensive test coverage:
 
 ```bash
 # Run all tests
-bun test
+npm test
 
 # Run tests once (non-watch mode)
-bun test:run
+npm run test:run
 
 # Run tests with coverage
-bun test:coverage
+npm run test:coverage
 
 # Run tests with UI
-bun test:ui
+npm run test:ui
 
 # Run linting
-bun run lint
+npm run lint
 ```
 
 **Test Statistics** (as of 2026-01-08):
-- Total tests: 582
-- Test files: 29
-- Coverage: Critical infrastructure, services, hooks, utilities, validation
+- Total tests: 960
+- Test files: 40+
+- Coverage: Critical infrastructure, services, hooks, utilities, validation, domain services
 
-For detailed testing strategy, see [docs/task.md](./docs/task.md#critical-path-testing).
+For detailed testing strategy, see [docs/task.md](./docs/task.md).
 
 ## Contributing
 
@@ -414,9 +446,9 @@ We welcome contributions to Akademia Pro! Please follow these steps:
 1. Fork the repository
 2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
 3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Run tests (`bun test:run`)
-5. Run linting (`bun run lint`)
-6. Push to the branch (`git push origin feature/AmazingFeature`)
+4. Run tests (`npm run test:run`)
+5. Run linting (`npm run lint`)
+6. Push to branch (`git push origin feature/AmazingFeature`)
 7. Open a pull request
 
 Please ensure your code follows the project's coding standards and includes appropriate tests.
