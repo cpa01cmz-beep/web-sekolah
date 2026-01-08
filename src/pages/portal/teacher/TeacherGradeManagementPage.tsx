@@ -14,7 +14,7 @@ import { toast } from 'sonner';
 import { useQuery } from '@tanstack/react-query';
 import { useAuthStore } from '@/lib/authStore';
 import { useMutation, queryClient } from '@/lib/api-client';
-import { useTeacherClasses } from '@/hooks/useTeacher';
+import { useTeacherClasses, useTeacherClassStudents } from '@/hooks/useTeacher';
 import type { SchoolClass } from '@shared/types';
 import { Skeleton } from '@/components/ui/skeleton';
 import { TableSkeleton } from '@/components/ui/loading-skeletons';
@@ -39,15 +39,12 @@ export function TeacherGradeManagementPage() {
   const [currentScore, setCurrentScore] = useState<string>('');
   const [currentFeedback, setCurrentFeedback] = useState<string>('');
   const { data: classes, isLoading: isLoadingClasses } = useTeacherClasses(user?.id || '');
-  const { data: students, isLoading: isLoadingStudents } = useQuery<StudentGrade[]>(
-    ['classes', selectedClass || '', 'students'],
-    { enabled: !!selectedClass }
-  );
+  const { data: students, isLoading: isLoadingStudents } = useTeacherClassStudents(selectedClass || '');
   const gradeMutation = useMutation<UpdateGradeData, Error, UpdateGradeData>(['grades', editingStudent?.gradeId || ''], {
     method: 'PUT',
     onSuccess: () => {
       toast.success(`Grade for ${editingStudent?.name} updated successfully.`);
-      queryClient.invalidateQueries({ queryKey: ['classes', selectedClass, 'students'] });
+      queryClient.invalidateQueries({ queryKey: ['classes', selectedClass || '', 'students'] });
       setEditingStudent(null);
     },
     onError: (error) => {
@@ -77,6 +74,10 @@ export function TeacherGradeManagementPage() {
     const score = parseInt(currentScore, 10);
     return !isValidScore(score);
   }, [currentScore]);
+
+  const selectedClassName = useMemo(() => {
+    return classes?.find(c => c.id === selectedClass)?.name || '';
+  }, [classes, selectedClass]);
   return (
     <SlideUp className="space-y-6">
       <PageHeader title="Grade Management" />
@@ -105,7 +106,7 @@ export function TeacherGradeManagementPage() {
       {selectedClass && (
         <Card>
           <CardHeader>
-            <CardTitle>Students in {classes?.find(c => c.id === selectedClass)?.name}</CardTitle>
+            <CardTitle>Students in {selectedClassName}</CardTitle>
           </CardHeader>
           <CardContent>
             {isLoadingStudents ? (

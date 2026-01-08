@@ -40,6 +40,13 @@ export interface TeacherService {
   submitGrade(gradeData: SubmitGradeData): Promise<Grade>;
   getAnnouncements(teacherId: string): Promise<Announcement[]>;
   createAnnouncement(announcement: CreateAnnouncementData): Promise<Announcement>;
+  getClassStudentsWithGrades(classId: string): Promise<Array<{
+    id: string;
+    name: string;
+    score: number | null;
+    feedback: string;
+    gradeId: string | null;
+  }>>;
 }
 
 export interface ParentService {

@@ -2,6 +2,7 @@ import type { Env } from '../core-utils';
 import { UserEntity } from '../entities';
 import type { SchoolUser, Student, Teacher, Parent, Admin, CreateUserData, UpdateUserData } from '@shared/types';
 import { hashPassword } from '../password-utils';
+import { ReferentialIntegrity } from '../referential-integrity';
 
 export class UserService {
   static async createUser(env: Env, userData: CreateUserData): Promise<SchoolUser> {
@@ -86,7 +87,6 @@ export class UserService {
   }
 
   static async checkDependents(env: Env, userId: string): Promise<string[]> {
-    const { ReferentialIntegrity } = await import('../referential-integrity');
     return await ReferentialIntegrity.checkDependents(env, 'user', userId);
   }
 

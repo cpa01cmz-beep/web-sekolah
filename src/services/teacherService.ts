@@ -30,6 +30,22 @@ export function createTeacherService(repository: IRepository = apiRepository): T
 
     async createAnnouncement(announcement: CreateAnnouncementData): Promise<Announcement> {
       return repository.post<Announcement>(`/api/teachers/announcements`, announcement);
+    },
+
+    async getClassStudentsWithGrades(classId: string): Promise<Array<{
+      id: string;
+      name: string;
+      score: number | null;
+      feedback: string;
+      gradeId: string | null;
+    }>> {
+      return repository.get<Array<{
+        id: string;
+        name: string;
+        score: number | null;
+        feedback: string;
+        gradeId: string | null;
+      }>>(`/api/classes/${classId}/students`);
     }
   };
 }

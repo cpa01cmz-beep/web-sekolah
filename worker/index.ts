@@ -13,6 +13,7 @@ import { defaultRateLimiter, strictRateLimiter } from './middleware/rate-limit';
 import { defaultTimeout } from './middleware/timeout';
 import { securityHeaders } from './middleware/security-headers';
 import { responseErrorMonitoring } from './middleware/error-monitoring';
+import { integrationMonitor } from './integration-monitor';
 
 // Need to export GlobalDurableObject to make it available in wrangler
 export { GlobalDurableObject };
@@ -84,7 +85,6 @@ webhookRoutes(app);
 adminMonitoringRoutes(app);
 
 app.get('/api/health', async (c) => {
-  const { integrationMonitor } = await import('./integration-monitor');
   const metrics = integrationMonitor.getHealthMetrics();
   const webhookSuccessRate = integrationMonitor.getWebhookSuccessRate();
   const rateLimitBlockRate = integrationMonitor.getRateLimitBlockRate();

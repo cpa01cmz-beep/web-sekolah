@@ -3,6 +3,7 @@ import { teacherService } from '@/services/teacherService';
 import type {
   TeacherDashboardData,
   SchoolClass,
+  Grade,
   SubmitGradeData,
   Announcement,
   CreateAnnouncementData
@@ -61,6 +62,26 @@ export function useTeacherAnnouncements(teacherId: string, options?: UseQueryOpt
 export function useCreateAnnouncement(options?: UseMutationOptions<Announcement, Error, CreateAnnouncementData>) {
   return useTanstackMutation({
     mutationFn: (announcement: CreateAnnouncementData) => teacherService.createAnnouncement(announcement),
+    ...options,
+  });
+}
+
+export function useTeacherClassStudents(classId: string, options?: UseQueryOptions<Array<{
+  id: string;
+  name: string;
+  score: number | null;
+  feedback: string;
+  gradeId: string | null;
+}>>) {
+  return useTanstackQuery({
+    queryKey: ['classes', classId, 'students'],
+    queryFn: () => teacherService.getClassStudentsWithGrades(classId),
+    enabled: !!classId,
+    staleTime: CachingTime.FIVE_MINUTES,
+    gcTime: CachingTime.TWENTY_FOUR_HOURS,
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+    refetchOnReconnect: true,
     ...options,
   });
 }
