@@ -138,6 +138,7 @@ Comprehensive documentation is available in our [docs/](./docs/) directory:
 - [Quick Start Guide](./docs/QUICK_START.md) - Get started quickly with step-by-step guides for students, teachers, parents, and admins
 - [API Blueprint](./docs/blueprint.md) - Complete API reference with endpoints, error codes, and integration patterns
 - [Security Guide](./docs/SECURITY.md) - Security controls, best practices, and deployment checklist
+- [Security Assessment](./docs/SECURITY_ASSESSMENT_2026-01-08.md) - Current security status (95/100, Production Ready ✅)
 - [Architectural Task List](./docs/task.md) - Implementation status and roadmap
 - [Integration Architecture](./docs/INTEGRATION_ARCHITECTURE.md) - Enterprise-grade resilience patterns, circuit breakers, retries, and webhook reliability
 - [State Management](./docs/STATE_MANAGEMENT.md) - Zustand state management patterns and examples
@@ -152,7 +153,7 @@ Run the test suite to verify everything is working:
 npm test
 ```
 
-All tests should pass (currently 886 tests, 2 skipped).
+All tests should pass (currently 960 tests, 2 skipped).
 
 ### Type Checking
 
