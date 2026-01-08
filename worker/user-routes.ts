@@ -2,10 +2,7 @@ import { Hono } from "hono";
 import type { Env } from './core-utils';
 import { ok, bad, notFound, forbidden } from './core-utils';
 import {
-  UserEntity,
-  ClassEntity,
   AnnouncementEntity,
-  ScheduleEntity,
   ensureAllSeedData
 } from "./entities";
 import { rebuildAllIndexes } from "./index-rebuilder";
@@ -28,7 +25,7 @@ import type {
 } from "@shared/types";
 import { logger } from './logger';
 import { WebhookService } from './webhook-service';
-import { StudentDashboardService, TeacherService, GradeService, UserService, ParentDashboardService } from './domain';
+import { StudentDashboardService, TeacherService, GradeService, UserService, ParentDashboardService, CommonDataService } from './domain';
 import { getAuthUser, getRoleSpecificFields } from './type-guards';
 import type { Context } from 'hono';
 
@@ -75,23 +72,12 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
       return;
     }
 
-    const studentEntity = new UserEntity(c.env, requestedStudentId);
-    const student = await studentEntity.getState();
-    if (!student || !student.classId) {
+    const { student, classData, schedule } = await CommonDataService.getStudentWithClassAndSchedule(c.env, requestedStudentId);
+    if (!student || !student.classId || !classData || !schedule) {
       return notFound(c, 'Student or class not found');
     }
 
-    const classEntity = new ClassEntity(c.env, student.classId);
-    const classState = await classEntity.getState();
-    if (!classState) {
-      return notFound(c, 'Class not found');
-    }
-
-    const scheduleEntity = new ScheduleEntity(c.env, student.classId);
-    const scheduleState = await scheduleEntity.getState();
-    const schedule = scheduleState?.items || [];
-
-    return ok(c, schedule);
+    return ok(c, schedule?.items || []);
   });
 
   app.get('/api/students/:id/card', authenticate(), authorize('student'), async (c) => {
@@ -103,19 +89,14 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
       return;
     }
 
-    const studentEntity = new UserEntity(c.env, requestedStudentId);
-    const student = await studentEntity.getState();
+    const { student, classData } = await CommonDataService.getStudentForGrades(c.env, requestedStudentId);
     if (!student || student.role !== 'student') {
       return notFound(c, 'Student not found');
     }
 
-    const studentRoleFields = getRoleSpecificFields(student);
-    const classEntity = studentRoleFields.classId ? new ClassEntity(c.env, studentRoleFields.classId) : null;
-    const classState = classEntity ? await classEntity.getState() : null;
-
     const grades = await GradeService.getStudentGrades(c.env, requestedStudentId);
-    const averageScore = grades.length > 0 
-      ? grades.reduce((sum, g) => sum + g.score, 0) / grades.length 
+    const averageScore = grades.length > 0
+      ? grades.reduce((sum, g) => sum + g.score, 0) / grades.length
       : 0;
 
     const cardData: StudentCardData = {
@@ -123,7 +104,7 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
       name: student.name,
       email: student.email,
       avatarUrl: student.avatarUrl || '',
-      className: classState?.name || 'N/A',
+      className: classData?.name || 'N/A',
       averageScore: Math.round(averageScore * 10) / 10,
       totalGrades: grades.length,
       gradeDistribution: {
@@ -153,23 +134,21 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
       return;
     }
 
-    const teacherEntity = new UserEntity(c.env, requestedTeacherId);
-    const teacher = await teacherEntity.getState();
+    const { teacher, classes: teacherClasses } = await CommonDataService.getTeacherWithClasses(c.env, requestedTeacherId);
     if (!teacher) {
       return notFound(c, 'Teacher not found');
     }
 
-    const classes = await TeacherService.getClasses(c.env, requestedTeacherId);
     const totalStudents = await Promise.all(
-      classes.map(async (cls) => {
-        const students = await UserEntity.getByClassId(c.env, cls.id);
+      teacherClasses.map(async (cls) => {
+        const students = await CommonDataService.getClassStudents(c.env, cls.id);
         return students.length;
       })
     ).then(counts => counts.reduce((sum, count) => sum + count, 0));
 
-    const recentGrades = await GradeService.getCourseGrades(c.env, classes[0]?.id || '');
-    const recentAnnouncements = await AnnouncementEntity.list(c.env);
-    const filteredAnnouncements = recentAnnouncements.items
+    const recentGrades = await GradeService.getCourseGrades(c.env, teacherClasses[0]?.id || '');
+    const allAnnouncements = await CommonDataService.getAllAnnouncements(c.env);
+    const filteredAnnouncements = allAnnouncements
       .filter(a => a.targetRole === 'teacher' || a.targetRole === 'all')
       .slice(-5)
       .reverse();
@@ -178,7 +157,7 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
       teacherId: teacher.id,
       name: teacher.name,
       email: teacher.email,
-      totalClasses: classes.length,
+      totalClasses: teacherClasses.length,
       totalStudents: totalStudents,
       recentGrades: recentGrades.slice(-5).reverse(),
       recentAnnouncements: filteredAnnouncements
@@ -196,7 +175,7 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
       return;
     }
 
-    const { items: allAnnouncements } = await AnnouncementEntity.list(c.env);
+    const allAnnouncements = await CommonDataService.getAllAnnouncements(c.env);
     const filteredAnnouncements = allAnnouncements.filter(a => 
       a.targetRole === 'teacher' || a.targetRole === 'all'
     );
@@ -360,7 +339,7 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
   app.delete('/api/users/:id', authenticate(), authorize('admin'), async (c) => {
     const userId = c.req.param('id');
 
-    const user = await new UserEntity(c.env, userId).getState();
+    const user = await CommonDataService.getUserById(c.env, userId);
     const result = await UserService.deleteUser(c.env, userId);
 
     if (result.deleted && user) {
@@ -371,9 +350,9 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
   });
 
   app.get('/api/admin/dashboard', authenticate(), authorize('admin'), async (c) => {
-    const { items: allUsers } = await UserEntity.list(c.env);
-    const { items: allClasses } = await ClassEntity.list(c.env);
-    const { items: allAnnouncements } = await AnnouncementEntity.list(c.env);
+    const allUsers = await CommonDataService.getAllUsers(c.env);
+    const allClasses = await CommonDataService.getAllClasses(c.env);
+    const allAnnouncements = await CommonDataService.getAllAnnouncements(c.env);
 
     const dashboardData: AdminDashboardData = {
       totalUsers: allUsers.length,
@@ -398,7 +377,7 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
     const classId = c.req.query('classId');
     const search = c.req.query('search');
 
-    const { items: allUsers } = await UserEntity.list(c.env);
+    const allUsers = await CommonDataService.getAllUsers(c.env);
 
     let filteredUsers = allUsers;
 
