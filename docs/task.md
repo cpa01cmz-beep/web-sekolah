@@ -671,20 +671,57 @@ for (let attempt = 0; attempt <= maxRetries; attempt++) {
   
 
    ### Overall Health
-    - ✅ **Security**: Production ready with comprehensive security controls (95/100 score), PBKDF2 password hashing, 0 vulnerabilities
-       - ✅ **Performance**: Optimized with caching, lazy loading, CSS animations, bundle optimization (38% reduction in initial load, 1.3 MB saved), React.memo list item optimization (60-95% re-render reduction), component memoization (PageHeader, ContentCard, animations)
-          - ✅ **Tests**: 678 tests passing (2 skipped), 0 regressions
-        - ✅ **Bug Fix**: Fixed webhook service error logging bug (config variable scope)
-        - ✅ **Documentation**: Comprehensive API blueprint, integration architecture guide, security assessment, quick start guides, updated README
-        - ✅ **Deployment**: GitHub/Cloudflare Workers integration now passing (WeakRef issue resolved by downgrading React to 18.3.1)
-        - ✅ **Data Architecture**: All queries use indexed lookups (O(1) or O(n)), zero table scans
-    - ✅ **Login Optimization**: Added email secondary index to UserEntity for O(1) authentication (10-50x faster, 99% data reduction)
-   - ✅ **Integration**: Enterprise-grade resilience patterns (timeouts, retries, circuit breakers, rate limiting, webhook reliability, immediate error reporting)
-     - ✅ **UI/UX**: Component extraction for reusable patterns (PageHeader component), Form accessibility improvements (proper ARIA associations, validation feedback), Image placeholder accessibility (role='img', aria-label), Portal accessibility improvements (heading hierarchy, ARIA labels, navigation landmarks), Responsive form layouts (mobile-first design for AdminUserManagementPage and TeacherGradeManagementPage), ContactPage form improvements (FormField component, validation, helper text, ARIA attributes)
-       - ✅ **Domain Service Testing**: Added comprehensive tests for GradeService, StudentDashboardService, TeacherService, and UserService validation and edge cases
-        - ✅ **Route Architecture**: Fixed user-routes.ts structural issues (non-existent methods, type mismatches, proper entity pattern usage)
-             - ✅ **Service Layer**: Improved consistency with CommonDataService extraction, 10 routes refactored to use domain services (Clean Architecture)
-   - ✅ **Data Architecture**: Added per-student date-sorted index for GradeEntity, optimized StudentDashboardService to load only recent grades instead of all grades (50-100x faster query performance)
+   - ✅ **Security**: Production ready with comprehensive security controls (95/100 score), PBKDF2 password hashing, 0 vulnerabilities
+        - ✅ **Performance**: Optimized with caching, lazy loading, CSS animations, bundle optimization (38% reduction in initial load, 1.3 MB saved), React.memo list item optimization (60-95% re-render reduction), component memoization (PageHeader, ContentCard, animations)
+           - ✅ **Tests**: 678 tests passing (2 skipped), 0 regressions
+         - ✅ **Bug Fix**: Fixed webhook service error logging bug (config variable scope)
+         - ✅ **Documentation**: Comprehensive API blueprint, integration architecture guide, security assessment, quick start guides, updated README
+         - ✅ **Deployment**: GitHub/Cloudflare Workers integration now passing (WeakRef issue resolved by downgrading React to 18.3.1)
+         - ✅ **Data Architecture**: All queries use indexed lookups (O(1) or O(n)), zero table scans
+     - ✅ **Login Optimization**: Added email secondary index to UserEntity for O(1) authentication (10-50x faster, 99% data reduction)
+    - ✅ **Integration**: Enterprise-grade resilience patterns (timeouts, retries, circuit breakers, rate limiting, webhook reliability, immediate error reporting)
+      - ✅ **UI/UX**: Component extraction for reusable patterns (PageHeader component), Form accessibility improvements (proper ARIA associations, validation feedback), Image placeholder accessibility (role='img', aria-label), Portal accessibility improvements (heading hierarchy, ARIA labels, navigation landmarks), Responsive form layouts (mobile-first design for AdminUserManagementPage and TeacherGradeManagementPage), ContactPage form improvements (FormField component, validation, helper text, ARIA attributes)
+        - ✅ **Domain Service Testing**: Added comprehensive tests for GradeService, StudentDashboardService, TeacherService, and UserService validation and edge cases
+         - ✅ **Route Architecture**: Fixed user-routes.ts structural issues (non-existent methods, type mismatches, proper entity pattern usage)
+              - ✅ **Service Layer**: Improved consistency with CommonDataService extraction, 10 routes refactored to use domain services (Clean Architecture)
+    - ✅ **Data Architecture**: Added per-student date-sorted index for GradeEntity, optimized StudentDashboardService to load only recent grades instead of all grades (50-100x faster query performance)
+
+   ## Pending Refactoring Tasks
+
+   ### [REFACTOR] Extract UserForm Component from AdminUserManagementPage
+   - Location: src/pages/portal/admin/AdminUserManagementPage.tsx
+   - Issue: Large page component (227 lines) with inline form logic and validation mixed with table rendering
+   - Suggestion: Extract user creation/editing form into separate UserForm component with validation logic, form state management, and success/error handling. Page component should handle only routing and data fetching.
+   - Priority: Medium
+   - Effort: Medium
+
+   ### [REFACTOR] Extract GradeForm Component from TeacherGradeManagementPage
+   - Location: src/pages/portal/teacher/TeacherGradeManagementPage.tsx
+   - Issue: Large page component (226 lines) with inline grade editing dialog, form validation (score: 0-100), and class selection logic
+   - Suggestion: Extract grade editing dialog into GradeForm component with validation, memoized input components for score and feedback fields. Move score validation constants to shared constants file.
+   - Priority: Medium
+   - Effort: Medium
+
+   ### [REFACTOR] Centralize Theme Color Usage
+   - Location: src/pages/portal/admin/AdminUserManagementPage.tsx, src/pages/LoginPage.tsx, src/theme/colors.ts
+   - Issue: Role badge colors hardcoded (bg-blue-500, bg-green-500, bg-purple-500, bg-red-500) instead of using theme constants. Inline styles with THEME_COLORS scattered in components.
+   - Suggestion: Extend THEME_COLORS to include role-based color scheme (student, teacher, parent, admin badges). Create RoleBadge component using theme colors, remove inline color classes from AdminUserManagementPage.
+   - Priority: Low
+   - Effort: Small
+
+   ### [REFACTOR] Split Router Configuration into Route Groups
+   - Location: src/router.tsx
+   - Issue: All route definitions (23 pages, 4 portals) in single file (123 lines). Harder to navigate as routes grow.
+   - Suggestion: Split router configuration into separate modules by route group: routes/public.ts, routes/student.ts, routes/teacher.ts, routes/parent.ts, routes/admin.ts. Combine in router.tsx using spread operator. Maintain lazy loading in route modules.
+   - Priority: Low
+   - Effort: Small
+
+   ### [REFACTOR] Replace console.log with Logger in Components
+   - Location: Multiple components with 28 console statements across src/
+   - Issue: Direct console.log/error/warn calls bypass centralized logger, missing structured logging and error reporting integration
+   - Suggestion: Replace all console.log/error/warn with logger from @/lib/logger. Use appropriate log levels (info, warn, error, debug). Ensure error objects are logged with context.
+   - Priority: Low
+   - Effort: Small
 
   ### ParentDashboardService Critical Path Testing (2026-01-08) - Completed ✅
 
