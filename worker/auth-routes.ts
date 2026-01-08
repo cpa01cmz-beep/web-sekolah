@@ -48,10 +48,9 @@ export function authRoutes(app: Hono<{ Bindings: Env }>) {
 
       const { email, password, role } = validationResult.data;
 
-      const allUsers = (await UserEntity.list(c.env)).items;
-      const user = allUsers.find(u => u.email === email && u.role === role);
+      const user = await UserEntity.getByEmail(c.env, email);
 
-      if (!user) {
+      if (!user || user.role !== role) {
         logger.warn('[AUTH] Login failed - user not found', { email, role });
         return bad(c, 'Invalid email or role combination');
       }

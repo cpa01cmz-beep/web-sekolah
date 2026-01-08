@@ -20,6 +20,11 @@ export class UserEntity extends IndexedEntity<SchoolUser> {
     const users = await this.getBySecondaryIndex(env, 'classId', classId);
     return users.filter((u): u is Student => u.role === 'student' && u.classId === classId);
   }
+
+  static async getByEmail(env: Env, email: string): Promise<SchoolUser | null> {
+    const users = await this.getBySecondaryIndex(env, 'email', email);
+    return users.length > 0 ? users[0] : null;
+  }
 }
 
 export class ClassEntity extends IndexedEntity<SchoolClass> {

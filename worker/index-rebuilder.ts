@@ -19,9 +19,11 @@ export async function rebuildAllIndexes(env: Env): Promise<void> {
 async function rebuildUserIndexes(env: Env): Promise<void> {
   const roleIndex = new SecondaryIndex<string>(env, UserEntity.entityName, 'role');
   const classIdIndex = new SecondaryIndex<string>(env, UserEntity.entityName, 'classId');
+  const emailIndex = new SecondaryIndex<string>(env, UserEntity.entityName, 'email');
   
   await roleIndex.clear();
   await classIdIndex.clear();
+  await emailIndex.clear();
   
   const { items: users } = await UserEntity.list(env);
   for (const user of users) {
@@ -30,6 +32,7 @@ async function rebuildUserIndexes(env: Env): Promise<void> {
     if (isStudent(user)) {
       await classIdIndex.add(user.classId, user.id);
     }
+    await emailIndex.add(user.email, user.id);
   }
 }
 
