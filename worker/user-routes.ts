@@ -28,7 +28,7 @@ import { logger } from './logger';
 import { WebhookService } from './webhook-service';
 import { toWebhookPayload } from './webhook-types';
 import { StudentDashboardService, TeacherService, GradeService, UserService, ParentDashboardService, CommonDataService } from './domain';
-import { getAuthUser, getRoleSpecificFields } from './type-guards';
+import { getRoleSpecificFields, getCurrentUserId } from './type-guards';
 import type { Context } from 'hono';
 
 function validateUserAccess(
@@ -53,8 +53,7 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
   });
 
   app.get('/api/students/:id/grades', authenticate(), authorize('student'), async (c) => {
-    const user = getAuthUser(c);
-    const userId = user!.id;
+    const userId = getCurrentUserId(c);
     const requestedStudentId = c.req.param('id');
 
     if (!validateUserAccess(c, userId, requestedStudentId, 'student', 'grades')) {
@@ -66,8 +65,7 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
   });
 
   app.get('/api/students/:id/schedule', authenticate(), authorize('student'), async (c) => {
-    const user = getAuthUser(c);
-    const userId = user!.id;
+    const userId = getCurrentUserId(c);
     const requestedStudentId = c.req.param('id');
 
     if (!validateUserAccess(c, userId, requestedStudentId, 'student', 'schedule')) {
@@ -83,8 +81,7 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
   });
 
   app.get('/api/students/:id/card', authenticate(), authorize('student'), async (c) => {
-    const user = getAuthUser(c);
-    const userId = user!.id;
+    const userId = getCurrentUserId(c);
     const requestedStudentId = c.req.param('id');
 
     if (!validateUserAccess(c, userId, requestedStudentId, 'student', 'card')) {
@@ -128,8 +125,7 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
   });
 
   app.get('/api/teachers/:id/dashboard', authenticate(), authorize('teacher'), async (c) => {
-    const user = getAuthUser(c);
-    const userId = user!.id;
+    const userId = getCurrentUserId(c);
     const requestedTeacherId = c.req.param('id');
 
     if (!validateUserAccess(c, userId, requestedTeacherId, 'teacher', 'dashboard')) {
@@ -165,8 +161,7 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
   });
 
   app.get('/api/teachers/:id/announcements', authenticate(), authorize('teacher'), async (c) => {
-    const user = getAuthUser(c);
-    const userId = user!.id;
+    const userId = getCurrentUserId(c);
     const requestedTeacherId = c.req.param('id');
 
     if (!validateUserAccess(c, userId, requestedTeacherId, 'teacher', 'announcements')) {
@@ -195,7 +190,7 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
 
   app.post('/api/teachers/announcements', authenticate(), authorize('teacher'), async (c) => {
     const announcementData = await c.req.json<CreateAnnouncementData>();
-    const user = getAuthUser(c);
+    const authorId = getCurrentUserId(c);
 
     const now = new Date().toISOString();
     const newAnnouncement: Announcement = {
@@ -204,7 +199,7 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
       content: announcementData.content,
       date: now,
       targetRole: announcementData.targetRole || 'all',
-      authorId: user!.id,
+      authorId,
       createdAt: now,
       updatedAt: now
     };
@@ -216,8 +211,7 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
   });
 
   app.get('/api/students/:id/dashboard', authenticate(), authorize('student'), async (c) => {
-    const user = getAuthUser(c);
-    const userId = user!.id;
+    const userId = getCurrentUserId(c);
     const requestedStudentId = c.req.param('id');
 
     if (!validateUserAccess(c, userId, requestedStudentId, 'student', 'dashboard')) {
@@ -236,8 +230,7 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
   });
 
   app.get('/api/parents/:id/dashboard', authenticate(), authorize('parent'), async (c) => {
-    const user = getAuthUser(c);
-    const userId = user!.id;
+    const userId = getCurrentUserId(c);
     const requestedParentId = c.req.param('id');
 
     if (!validateUserAccess(c, userId, requestedParentId, 'parent', 'dashboard')) {
@@ -406,7 +399,7 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
 
   app.post('/api/admin/announcements', authenticate(), authorize('admin'), async (c) => {
     const announcementData = await c.req.json<CreateAnnouncementData>();
-    const user = getAuthUser(c);
+    const authorId = getCurrentUserId(c);
 
     const now = new Date().toISOString();
     const newAnnouncement: Announcement = {
@@ -415,7 +408,7 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
       content: announcementData.content,
       date: now,
       targetRole: announcementData.targetRole || 'all',
-      authorId: user!.id,
+      authorId,
       createdAt: now,
       updatedAt: now
     };

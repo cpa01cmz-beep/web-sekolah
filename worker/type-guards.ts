@@ -10,6 +10,14 @@ export function getAuthUser(c: Context): AuthUser | undefined {
   return c.get('user') as AuthUser | undefined;
 }
 
+export function getCurrentUserId(c: Context): string {
+  const user = getAuthUser(c);
+  if (!user) {
+    throw new Error('User not authenticated');
+  }
+  return user.id;
+}
+
 export function setAuthUser(c: Context, user: AuthUser): void {
   (c as ExtendedContext).set('user', user);
 }
