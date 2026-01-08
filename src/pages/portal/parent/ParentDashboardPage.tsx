@@ -11,6 +11,7 @@ import { useParentDashboard } from '@/hooks/useParent';
 import { useAuthStore } from '@/lib/authStore';
 import type { Grade } from '@shared/types';
 import { formatDate } from '@/utils/date';
+import { GRADE_A_THRESHOLD, GRADE_B_THRESHOLD, GRADE_C_THRESHOLD, PASSING_SCORE_THRESHOLD } from '@/constants/grades';
 
 export function ParentDashboardPage() {
   const user = useAuthStore((state) => state.user);
@@ -38,17 +39,17 @@ export function ParentDashboardPage() {
   }
 
   const getGradeBadgeVariant = (score: number) => {
-    if (score >= 90) return 'default';
-    if (score >= 80) return 'secondary';
-    if (score >= 70) return 'outline';
+    if (score >= GRADE_A_THRESHOLD) return 'default';
+    if (score >= GRADE_B_THRESHOLD) return 'secondary';
+    if (score >= GRADE_C_THRESHOLD) return 'outline';
     return 'destructive';
   };
 
   const getGradeLetter = (score: number) => {
-    if (score >= 90) return 'A';
-    if (score >= 80) return 'B';
-    if (score >= 70) return 'C';
-    if (score >= 60) return 'D';
+    if (score >= GRADE_A_THRESHOLD) return 'A';
+    if (score >= GRADE_B_THRESHOLD) return 'B';
+    if (score >= GRADE_C_THRESHOLD) return 'C';
+    if (score >= PASSING_SCORE_THRESHOLD) return 'D';
     return 'F';
   };
 

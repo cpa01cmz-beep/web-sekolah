@@ -7,6 +7,7 @@ import {
 } from "./entities";
 import { rebuildAllIndexes } from "./index-rebuilder";
 import { authenticate, authorize } from './middleware/auth';
+import { GRADE_A_THRESHOLD, GRADE_B_THRESHOLD, GRADE_C_THRESHOLD, PASSING_SCORE_THRESHOLD } from './constants';
 import type { 
   Grade, 
   CreateUserData, 
@@ -108,11 +109,11 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
       averageScore: Math.round(averageScore * 10) / 10,
       totalGrades: grades.length,
       gradeDistribution: {
-        A: grades.filter(g => g.score >= 90).length,
-        B: grades.filter(g => g.score >= 80 && g.score < 90).length,
-        C: grades.filter(g => g.score >= 70 && g.score < 80).length,
-        D: grades.filter(g => g.score >= 60 && g.score < 70).length,
-        F: grades.filter(g => g.score < 60).length,
+        A: grades.filter(g => g.score >= GRADE_A_THRESHOLD).length,
+        B: grades.filter(g => g.score >= GRADE_B_THRESHOLD && g.score < GRADE_A_THRESHOLD).length,
+        C: grades.filter(g => g.score >= GRADE_C_THRESHOLD && g.score < GRADE_B_THRESHOLD).length,
+        D: grades.filter(g => g.score >= PASSING_SCORE_THRESHOLD && g.score < GRADE_C_THRESHOLD).length,
+        F: grades.filter(g => g.score < PASSING_SCORE_THRESHOLD).length,
       },
       recentGrades: grades.slice(-5).reverse()
     };
