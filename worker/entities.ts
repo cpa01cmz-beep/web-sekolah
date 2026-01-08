@@ -124,7 +124,7 @@ export class GradeEntity extends IndexedEntity<Grade> {
 export class AnnouncementEntity extends IndexedEntity<Announcement> {
   static readonly entityName = "announcement";
   static readonly indexName = "announcements";
-  static readonly initialState: Announcement = { id: "", title: "", content: "", date: "", authorId: "", createdAt: "", updatedAt: "", deletedAt: null };
+  static readonly initialState: Announcement = { id: "", title: "", content: "", date: "", authorId: "", targetRole: "all", createdAt: "", updatedAt: "", deletedAt: null };
   static seedData = seedData.announcements;
 
   static async getByAuthorId(env: Env, authorId: string): Promise<Announcement[]> {
@@ -132,6 +132,13 @@ export class AnnouncementEntity extends IndexedEntity<Announcement> {
     const announcementIds = await index.getByValue(authorId);
     const announcements = await Promise.all(announcementIds.map(id => new this(env, id).getState()));
     return announcements.filter(a => a && !a.deletedAt) as Announcement[];
+  }
+
+  static async getByTargetRole(env: Env, targetRole: string): Promise<Announcement[]> {
+    const allAnnouncements = await this.list(env);
+    return allAnnouncements.items.filter(a => 
+      a.targetRole === targetRole || a.targetRole === 'all'
+    );
   }
 
   static async getRecent(env: Env, limit: number): Promise<Announcement[]> {

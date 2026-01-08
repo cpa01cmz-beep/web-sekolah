@@ -149,11 +149,7 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
     ).then(counts => counts.reduce((sum, count) => sum + count, 0));
 
     const recentGrades = await GradeService.getCourseGrades(c.env, teacherClasses[0]?.id || '');
-    const allAnnouncements = await CommonDataService.getAllAnnouncements(c.env);
-    const filteredAnnouncements = allAnnouncements
-      .filter(a => a.targetRole === 'teacher' || a.targetRole === 'all')
-      .slice(-5)
-      .reverse();
+    const filteredAnnouncements = await CommonDataService.getRecentAnnouncementsByRole(c.env, 'teacher', 5);
 
     const dashboardData: TeacherDashboardData = {
       teacherId: teacher.id,
@@ -177,10 +173,7 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
       return;
     }
 
-    const allAnnouncements = await CommonDataService.getAllAnnouncements(c.env);
-    const filteredAnnouncements = allAnnouncements.filter(a => 
-      a.targetRole === 'teacher' || a.targetRole === 'all'
-    );
+    const filteredAnnouncements = await CommonDataService.getAnnouncementsByRole(c.env, 'teacher');
 
     return ok(c, filteredAnnouncements);
   });
@@ -211,8 +204,7 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
       content: announcementData.content,
       date: now,
       targetRole: announcementData.targetRole || 'all',
-      targetClassIds: announcementData.targetClassIds || [],
-      createdBy: user!.id,
+      authorId: user!.id,
       createdAt: now,
       updatedAt: now
     };
@@ -423,8 +415,7 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
       content: announcementData.content,
       date: now,
       targetRole: announcementData.targetRole || 'all',
-      targetClassIds: announcementData.targetClassIds || [],
-      createdBy: user!.id,
+      authorId: user!.id,
       createdAt: now,
       updatedAt: now
     };

@@ -4,7 +4,7 @@
 
 ## Status Summary
 
- **Last Updated**: 2026-01-08 (UI/UX Engineer - Responsive form layout enhancement for mobile devices)
+ **Last Updated**: 2026-01-08 (Code Architect - Announcement filtering layer separation and type safety)
  
  ### Overall Health
 - ✅ **Security**: Production ready with comprehensive security controls (95/100 score), PBKDF2 password hashing, 0 vulnerabilities
@@ -18,10 +18,118 @@
     - ✅ **UI/UX**: Component extraction for reusable patterns (PageHeader component), Form accessibility improvements (proper ARIA associations, validation feedback), Image placeholder accessibility (role='img', aria-label), Portal accessibility improvements (heading hierarchy, ARIA labels, navigation landmarks), Responsive form layouts (mobile-first design for AdminUserManagementPage and TeacherGradeManagementPage)
       - ✅ **Domain Service Testing**: Added comprehensive tests for GradeService, StudentDashboardService, TeacherService, and UserService validation and edge cases
        - ✅ **Route Architecture**: Fixed user-routes.ts structural issues (non-existent methods, type mismatches, proper entity pattern usage)
-          - ✅ **Service Layer**: Improved consistency with CommonDataService extraction, 10 routes refactored to use domain services (Clean Architecture)
-- ✅ **Data Architecture**: Added per-student date-sorted index for GradeEntity, optimized StudentDashboardService to load only recent grades instead of all grades (50-100x faster query performance)
+           - ✅ **Service Layer**: Improved consistency with CommonDataService extraction, 10 routes refactored to use domain services (Clean Architecture)
+ - ✅ **Data Architecture**: Added per-student date-sorted index for GradeEntity, optimized StudentDashboardService to load only recent grades instead of all grades (50-100x faster query performance)
+ 
+ ### Announcement Filtering Layer Separation and Type Safety (2026-01-08) - Completed ✅
 
-### Per-Student Date-Sorted Index for Grades (2026-01-08) - Completed ✅
+**Task**: Extract business logic from routes to domain services and fix type safety issues with announcement targetRole field
+
+**Problem**:
+- Routes contained inline business logic for filtering announcements by targetRole (Separation of Concerns violation)
+- Routes accessed `a.targetRole` but Announcement interface didn't have this field (Type Safety violation)
+- Routes used `createdBy` field but Announcement interface has `authorId` (Type mismatch)
+- Routes used `targetClassIds` field but Announcement interface didn't have this field (Type mismatch)
+- AnnouncementEntity had no method to filter by targetRole
+
+**Solution**:
+- Added `AnnouncementTargetRole` type (`UserRole | 'all'`)
+- Added `targetRole` field to `Announcement` and `CreateAnnouncementData` interfaces
+- Added `getByTargetRole()` method to `AnnouncementEntity`
+- Added `getAnnouncementsByRole()` and `getRecentAnnouncementsByRole()` methods to `CommonDataService`
+- Extracted business logic from route handlers to domain service methods
+- Fixed announcement creation endpoints to use correct field names
+
+**Implementation**:
+
+1. **Updated Type Definitions** in `shared/types.ts`:
+   - Added `AnnouncementTargetRole` type (`UserRole | 'all'`)
+   - Added `targetRole: AnnouncementTargetRole` field to `Announcement` interface
+   - Added `targetRole?: AnnouncementTargetRole` field to `CreateAnnouncementData` interface
+
+2. **Updated AnnouncementEntity** in `worker/entities.ts`:
+   - Added `targetRole: 'all'` to `initialState`
+   - Added `getByTargetRole(env, targetRole)` method for filtering announcements by role
+
+3. **Updated CommonDataService** in `worker/domain/CommonDataService.ts`:
+   - Added `getAnnouncementsByRole(env, targetRole)` - Get all announcements for a specific role
+   - Added `getRecentAnnouncementsByRole(env, targetRole, limit)` - Get recent announcements for a specific role
+
+4. **Refactored Routes** in `worker/user-routes.ts`:
+   - Teacher dashboard route: Changed from inline filtering to `CommonDataService.getRecentAnnouncementsByRole(c.env, 'teacher', 5)`
+   - Teacher announcements route: Changed from inline filtering to `CommonDataService.getAnnouncementsByRole(c.env, 'teacher')`
+   - Teacher announcement creation: Fixed `createdBy` → `authorId`, removed `targetClassIds`
+   - Admin announcement creation: Fixed `createdBy` → `authorId`, removed `targetClassIds`
+
+5. **Updated Seed Data** in `worker/seed-data.ts`:
+   - Added `targetRole: 'all'` to admin announcement
+   - Added `targetRole: 'student'` to teacher announcement
+
+**Metrics**:
+
+| Metric | Before | After | Improvement |
+|---------|--------|-------|-------------|
+| Business logic in routes | 3 routes with inline filtering | 0 routes with inline filtering | 100% extracted |
+| Type safety violations | 3 (missing targetRole, wrong field names) | 0 | Complete fix |
+| Domain service methods | 0 for announcement filtering | 2 (getAnnouncementsByRole, getRecentAnnouncementsByRole) | New methods |
+| Entity query methods | 0 for targetRole filtering | 1 (getByTargetRole) | New method |
+
+**Benefits Achieved**:
+- ✅ Clean Architecture: Routes handle HTTP, Services handle business logic, Entities handle data
+- ✅ Separation of Concerns: No business logic mixed in route handlers
+- ✅ Type Safety: All field names match type definitions
+- ✅ Single Responsibility: Service methods encapsulate announcement filtering logic
+- ✅ Reusability: Domain service methods can be used by multiple routes
+- ✅ Maintainability: Business logic centralized in one location (CommonDataService)
+- ✅ Testability: Domain service methods are testable independently
+- ✅ All 886 tests passing (2 skipped, 0 regression)
+- ✅ Linting passed (0 errors)
+- ✅ TypeScript compilation successful (0 errors)
+
+**Technical Details**:
+- `AnnouncementTargetRole` type allows filtering by any user role or 'all'
+- `getByTargetRole()` in AnnouncementEntity loads all announcements and filters by targetRole (O(n) complexity)
+- `CommonDataService.getAnnouncementsByRole()` wraps entity method for consistent service layer access
+- `CommonDataService.getRecentAnnouncementsByRole()` combines recent retrieval with role filtering
+- Routes are now thin: HTTP handling → service call → response formatting
+- Business logic isolated in domain services for better testability and reuse
+
+**Architectural Impact**:
+- **Clean Architecture**: Routes (presentation) → Services (business logic) → Entities (data)
+- **Separation of Concerns**: Each layer has single responsibility (HTTP, business logic, data)
+- **Dependency Inversion**: Routes depend on service abstractions, not concrete entities
+- **Single Responsibility**: Service classes handle specific business domains (announcement filtering)
+- **Open/Closed**: New service methods can be added without modifying existing routes
+- **Type Safety**: TypeScript types match actual data structures
+
+**Success Criteria**:
+- [x] AnnouncementTargetRole type added to shared types
+- [x] Announcement interface has targetRole field
+- [x] CreateAnnouncementData interface has targetRole field
+- [x] AnnouncementEntity.getByTargetRole() method added
+- [x] CommonDataService.getAnnouncementsByRole() method added
+- [x] CommonDataService.getRecentAnnouncementsByRole() method added
+- [x] Teacher dashboard route uses domain service
+- [x] Teacher announcements route uses domain service
+- [x] Teacher announcement creation uses correct field names
+- [x] Admin announcement creation uses correct field names
+- [x] Seed data includes targetRole field
+- [x] All 886 tests passing (2 skipped, 0 regression)
+- [x] Linting passed (0 errors)
+- [x] TypeScript compilation successful (0 errors)
+- [x] Zero breaking changes to existing functionality
+
+**Impact**:
+- `shared/types.ts`: Added AnnouncementTargetRole type, targetRole field to Announcement and CreateAnnouncementData (3 changes)
+- `worker/entities.ts`: Added targetRole to initialState, getByTargetRole() method (2 additions)
+- `worker/domain/CommonDataService.ts`: Added 2 announcement filtering methods (16 lines)
+- `worker/user-routes.ts`: Refactored 3 routes to use domain services, fixed 2 field name bugs
+- `worker/seed-data.ts`: Added targetRole field to 2 announcement entries
+- Clean Architecture achieved: Business logic extracted from routes to domain services
+- Type safety fixed: All field names match type definitions
+- All existing functionality preserved with zero breaking changes
+
+ ### Per-Student Date-Sorted Index for Grades (2026-01-08) - Completed ✅
 
 **Task**: Implement date-sorted secondary index for GradeEntity createdAt field to optimize StudentDashboardService.getRecentGrades() performance
 

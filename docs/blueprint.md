@@ -105,8 +105,9 @@ This clears and rebuilds all secondary indexes from existing data.
 - ~~Index rebuilder incomplete: rebuildAllIndexes() was missing rebuild functions for CompoundSecondaryIndex, DateSortedSecondaryIndex, and all webhook entity indexes~~ ✅ **COMPLETED** (2026-01-08) - Added complete index rebuild coverage for all entities (GradeEntity compound index, AnnouncementEntity date-sorted index, WebhookConfigEntity/EventEntity/DeliveryEntity secondary indexes)
 - ~~Service layer inconsistency: user-routes.ts had direct entity access mixed with domain service calls~~ ✅ **COMPLETED** (2026-01-08) - Extracted CommonDataService for shared data access patterns, all GET routes now use domain services
 - ~~StudentDashboardService.getRecentGrades() loaded ALL grades for student~~ ✅ **COMPLETED** (2026-01-08) - Now uses per-student date-sorted index for O(n) retrieval
-
-### Recent Data Optimizations (2026-01-07)
+- ~~Announcement filtering business logic in routes: Routes had inline filtering logic for targetRole and used incorrect field names (createdBy, targetClassIds)~~ ✅ **COMPLETED** (2026-01-08) - Extracted announcement filtering to domain services, fixed type safety issues, added targetRole field to types
+ 
+ ### Recent Data Optimizations (2026-01-07)
 
 #### Compound Secondary Index for Grades
 **Problem**: `GradeEntity.getByStudentIdAndCourseId()` loaded all grades for a student and filtered in-memory for courseId (O(n) complexity)

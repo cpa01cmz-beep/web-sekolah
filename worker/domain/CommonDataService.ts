@@ -63,6 +63,17 @@ export class CommonDataService {
     return allAnnouncements;
   }
 
+  static async getAnnouncementsByRole(env: Env, targetRole: string): Promise<Announcement[]> {
+    return await AnnouncementEntity.getByTargetRole(env, targetRole);
+  }
+
+  static async getRecentAnnouncementsByRole(env: Env, targetRole: string, limit: number): Promise<Announcement[]> {
+    const allAnnouncements = await AnnouncementEntity.getRecent(env, limit);
+    return allAnnouncements.filter(a => 
+      a.targetRole === targetRole || a.targetRole === 'all'
+    );
+  }
+
   static async getClassStudents(env: Env, classId: string): Promise<SchoolUser[]> {
     return await UserEntity.getByClassId(env, classId);
   }
