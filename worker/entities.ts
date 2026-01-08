@@ -389,8 +389,7 @@ export class WebhookEventEntity extends IndexedEntity<WebhookEvent> {
   }
 
   static async getByEventType(env: Env, eventType: string): Promise<WebhookEvent[]> {
-    const events = await this.list(env);
-    return events.items.filter(e => e.eventType === eventType && !e.deletedAt);
+    return this.getBySecondaryIndex(env, 'eventType', eventType);
   }
 }
 
