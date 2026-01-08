@@ -8,7 +8,7 @@ import { Separator } from '@/components/ui/separator';
 import { PageHeader } from '@/components/PageHeader';
 import { SlideUp } from '@/components/animations';
 import { toast } from 'sonner';
-import { format } from 'date-fns';
+import { formatDateLong } from '@/utils/date';
 import { Trash2, Edit } from 'lucide-react';
 import { useAuthStore } from '@/lib/authStore';
 type Announcement = {
@@ -31,7 +31,7 @@ const AnnouncementItem = memo(({ ann, index, total, onDelete }: { ann: Announcem
         <div>
           <h3 className="font-semibold">{ann.title}</h3>
           <p className="text-sm text-muted-foreground">
-            By {ann.author} on {format(new Date(ann.date), 'PPP')}
+            By {ann.author} on {formatDateLong(ann.date)}
           </p>
         </div>
         <div className="flex space-x-2">
