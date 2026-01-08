@@ -1,6 +1,6 @@
 import type { SchoolUser, Student, Teacher, Parent, Admin } from '@shared/types';
 import type { Context } from 'hono';
-import type { AuthUser } from './middleware/auth';
+import type { AuthUser } from './types';
 
 type ExtendedContext = Context & {
   set(key: string, value: unknown): void;

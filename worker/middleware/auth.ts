@@ -3,12 +3,7 @@ import { jwtVerify, SignJWT } from 'jose';
 import type { JWTPayload } from 'jose';
 import { logger } from '../logger';
 import { getAuthUser, setAuthUser } from '../type-guards';
-
-export interface AuthUser {
-  id: string;
-  email: string;
-  role: 'student' | 'teacher' | 'parent' | 'admin';
-}
+import type { AuthUser } from '../types';
 
 export interface JwtPayload extends JWTPayload {
   sub: string;
