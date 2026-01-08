@@ -101,6 +101,7 @@ This clears and rebuilds all secondary indexes from existing data.
 - ~~Large UI components (sidebar.tsx - 822 lines): Single large component difficult to maintain~~ ✅ **COMPLETED** (2026-01-08) - Extracted into focused modules: sidebar-provider.tsx, sidebar-layout.tsx, sidebar-containers.tsx, sidebar-menu.tsx, sidebar-inputs.tsx, sidebar-trigger.tsx
 - ~~TypeScript type safety: UserService.test.ts used unsafe `as any` type casts (12+ instances)~~ ✅ **COMPLETED** (2026-01-08) - All `as any` replaced with proper types (Env, CreateUserData, UpdateUserData, UserRole)
 - ~~WebhookEventEntity.getByEventType(): Full table scan + in-memory filter for event type lookups~~ ✅ **COMPLETED** (2026-01-08) - Now uses eventType secondary index for O(1) lookups
+- ~~Seed data mixed with entity definitions: entities.ts had 157 lines of seed data (lines 9-165) mixed with entity classes~~ ✅ **COMPLETED** (2026-01-08) - Extracted to dedicated `worker/seed-data.ts` module for clear separation of concerns
 
 ### Recent Data Optimizations (2026-01-07)
 

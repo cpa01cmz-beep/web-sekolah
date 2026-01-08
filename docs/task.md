@@ -857,10 +857,70 @@ logger.error('Webhook delivery failed after max retries', {
 | Medium | Consolidate retry configuration constants | Small | worker/webhook-service.ts (MAX_RETRIES, RETRY_DELAYS) |
 | Low | Extract WebhookService signature verification to separate utility | Small | worker/webhook-service.ts:240 (verifySignature function) |
 | Medium | Split user-routes.ts into domain-specific route files | Medium | worker/user-routes.ts (512 lines, 24 routes) |
-| Medium | Separate seed data from entities.ts | Small | worker/entities.ts (lines 9-165 contain seed data mixed with entity classes) |
 | Low | Extract chart.tsx into smaller focused components | Medium | src/components/ui/chart.tsx (365 lines, complex Recharts wrapper) |
 | Medium | Create route middleware wrapper to reduce authenticate/authorize duplication | Small | worker/user-routes.ts (24 authenticate + 24 authorize calls follow same pattern) |
 | Low | Extract route handler pattern into reusable builder function | Small | worker/user-routes.ts (24 routes follow identical structure: app.get/post + authenticate + authorize + async handler) |
+
+### Seed Data Extraction (2026-01-08) - Completed ✅
+
+**Task**: Separate seed data from entity definitions for better code organization
+
+**Problem**:
+- Seed data (lines 9-165 in entities.ts) was mixed with entity class definitions
+- This violated separation of concerns principle
+- Made entities.ts harder to navigate and maintain (157 lines of seed data before entity classes)
+- Mixed concerns: data initialization vs data model definition
+
+**Solution Applied**:
+1. ✅ **Created seed-data.ts module** - `worker/seed-data.ts`
+    - Extracted `seedData` constant to dedicated module
+    - Imports `SchoolData` type from `@shared/types`
+    - Maintains same structure and data as original
+    - Benefits: Single responsibility - seed data module only handles data initialization
+
+2. ✅ **Updated entities.ts imports** - `worker/entities.ts:6`
+    - Removed inline `const seedData` definition (lines 9-165)
+    - Added import: `import { seedData } from "./seed-data"`
+    - All entity classes still reference `seedData.users`, `seedData.classes`, etc.
+    - Benefits: entities.ts now focused on entity definitions only
+
+**Metrics**:
+
+| Metric | Before | After | Improvement |
+|---------|--------|-------|-------------|
+| entities.ts lines | 521 | 354 | 32% reduction |
+| Seed data location | Mixed with entities | Dedicated module | Clear separation |
+| Responsibilities per file | 2 (entities + seed) | 1 (entities only) | Single responsibility |
+| Code navigation | 157 lines before entities | Entities at line 8 | Better structure |
+
+**Benefits Achieved**:
+- ✅ **Layer Separation**: Seed data separated from entity class definitions
+- ✅ **Single Responsibility**: entities.ts only defines entities, seed-data.ts only handles seed data
+- ✅ **Better Navigation**: Entity classes now start at line 8 instead of line 189
+- ✅ **Maintainability**: Clear separation makes it easier to modify seed data or entity definitions independently
+- ✅ **Zero Regressions**: All 750 tests passing (0 regression)
+- ✅ **Zero Linting Errors**: Linting passed with 0 errors
+- ✅ **Zero Breaking Changes**: All functionality preserved
+
+**Technical Details**:
+- `worker/seed-data.ts`: New module exporting `seedData: SchoolData` constant
+- `worker/entities.ts`: Imports seedData instead of defining it inline
+- Entity classes maintain existing API: `static seedData = seedData.users`, `seedData.classes`, etc.
+- No changes to IndexedEntity, migration system, or seed route (`/api/seed`)
+
+**Architectural Impact**:
+- `worker/seed-data.ts`: New dedicated module for data initialization (157 lines)
+- `worker/entities.ts`: Now focused solely on entity class definitions (354 lines, reduced from 521)
+- Clear separation of concerns: Data initialization vs data model definition
+- Follows SOLID Single Responsibility Principle
+
+**Success Criteria**:
+- [x] Seed data extracted to dedicated worker/seed-data.ts module
+- [x] entities.ts no longer contains inline seed data definition
+- [x] All entity classes still reference seedData correctly
+- [x] All 750 tests passing (0 regression)
+- [x] Linting passed with 0 errors
+- [x] Zero breaking changes to existing functionality
 
 ### user-routes.ts Structural Refactoring (2026-01-08) - Completed ✅
 
