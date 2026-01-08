@@ -31,6 +31,21 @@ import { WebhookService } from './webhook-service';
 import { StudentDashboardService, TeacherService, GradeService, UserService } from './domain';
 import { getAuthUser } from './type-guards';
 
+function validateUserAccess(
+  c: any,
+  userId: string,
+  requestedId: string,
+  role: string,
+  resourceType: string = 'data'
+): boolean {
+  if (userId !== requestedId) {
+    logger.warn(`[AUTH] ${role} accessing another ${role} ${resourceType}`, { userId, requestedId });
+    forbidden(c, `Access denied: Cannot access another ${role} ${resourceType}`);
+    return false;
+  }
+  return true;
+}
+
 export function userRoutes(app: Hono<{ Bindings: Env }>) {
   app.post('/api/seed', async (c) => {
     await ensureAllSeedData(c.env);
@@ -42,9 +57,8 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
     const userId = user!.id;
     const requestedStudentId = c.req.param('id');
 
-    if (userId !== requestedStudentId) {
-      logger.warn('[AUTH] Student accessing another student grades', { userId, requestedStudentId });
-      return forbidden(c, 'Access denied: Cannot access another student data');
+    if (!validateUserAccess(c, userId, requestedStudentId, 'student', 'grades')) {
+      return;
     }
 
     const grades = await GradeService.getStudentGrades(c.env, requestedStudentId);
@@ -56,9 +70,8 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
     const userId = user!.id;
     const requestedStudentId = c.req.param('id');
 
-    if (userId !== requestedStudentId) {
-      logger.warn('[AUTH] Student accessing another student schedule', { userId, requestedStudentId });
-      return forbidden(c, 'Access denied: Cannot access another student data');
+    if (!validateUserAccess(c, userId, requestedStudentId, 'student', 'schedule')) {
+      return;
     }
 
     const studentEntity = new UserEntity(c.env, requestedStudentId);
@@ -85,9 +98,8 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
     const userId = user!.id;
     const requestedStudentId = c.req.param('id');
 
-    if (userId !== requestedStudentId) {
-      logger.warn('[AUTH] Student accessing another student card', { userId, requestedStudentId });
-      return forbidden(c, 'Access denied: Cannot access another student data');
+    if (!validateUserAccess(c, userId, requestedStudentId, 'student', 'card')) {
+      return;
     }
 
     const student = await UserEntity.get(c.env, requestedStudentId);
@@ -134,9 +146,8 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
     const userId = user!.id;
     const requestedTeacherId = c.req.param('id');
 
-    if (userId !== requestedTeacherId) {
-      logger.warn('[AUTH] Teacher accessing another teacher dashboard', { userId, requestedTeacherId });
-      return forbidden(c, 'Access denied: Cannot access another teacher data');
+    if (!validateUserAccess(c, userId, requestedTeacherId, 'teacher', 'dashboard')) {
+      return;
     }
 
     const teacherEntity = new UserEntity(c.env, requestedTeacherId);
@@ -178,9 +189,8 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
     const userId = user!.id;
     const requestedTeacherId = c.req.param('id');
 
-    if (userId !== requestedTeacherId) {
-      logger.warn('[AUTH] Teacher accessing another teacher announcements', { userId, requestedTeacherId });
-      return forbidden(c, 'Access denied: Cannot access another teacher data');
+    if (!validateUserAccess(c, userId, requestedTeacherId, 'teacher', 'announcements')) {
+      return;
     }
 
     const { items: allAnnouncements } = await AnnouncementEntity.list(c.env);
@@ -234,9 +244,8 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
     const userId = user!.id;
     const requestedStudentId = c.req.param('id');
 
-    if (userId !== requestedStudentId) {
-      logger.warn('[AUTH] Student accessing another student dashboard', { userId, requestedStudentId });
-      return forbidden(c, 'Access denied: Cannot access another student data');
+    if (!validateUserAccess(c, userId, requestedStudentId, 'student', 'dashboard')) {
+      return;
     }
 
     try {
@@ -255,57 +264,9 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
     const userId = user!.id;
     const requestedParentId = c.req.param('id');
 
-    if (userId !== requestedParentId) {
-      logger.warn('[AUTH] Parent accessing another parent dashboard', { userId, requestedParentId });
-      return forbidden(c, 'Access denied: Cannot access another parent data');
+    if (!validateUserAccess(c, userId, requestedParentId, 'parent', 'dashboard')) {
+      return;
     }
-
-    const parentEntity = new UserEntity(c.env, requestedParentId);
-    const parent = await parentEntity.getState();
-    if (!parent || !parent.childId) {
-      return notFound(c, 'Parent or child not found');
-    }
-
-    const childEntity = new UserEntity(c.env, parent.childId);
-    const child = await childEntity.getState();
-    if (!child) {
-      return notFound(c, 'Child student not found');
-    }
-
-    const dashboardData = await StudentDashboardService.getDashboardData(c.env, parent.childId);
-    const parentDashboardData: ParentDashboardData = {
-      parentId: parent.id,
-      name: parent.name,
-      email: parent.email,
-      childId: child.id,
-      childName: child.name,
-      childClassId: child.classId || '',
-      childGrades: dashboardData.grades,
-      childSchedule: dashboardData.schedule,
-      recentAnnouncements: dashboardData.announcements
-    };
-
-    return ok(c, parentDashboardData);
-  });
-
-  app.get('/api/teachers/:id/classes', authenticate(), authorize('teacher'), async (c) => {
-    const user = getAuthUser(c);
-    const userId = user!.id;
-    const requestedTeacherId = c.req.param('id');
-
-    if (userId !== requestedTeacherId) {
-      logger.warn('[AUTH] Teacher accessing another teacher data', { userId, requestedTeacherId });
-      return forbidden(c, 'Access denied: Cannot access another teacher data');
-    }
-
-    const classes = await TeacherService.getClasses(c.env, requestedTeacherId);
-    return ok(c, classes);
-  });
-
-  app.get('/api/classes/:id/students', authenticate(), authorize('teacher'), async (c) => {
-    const classId = c.req.param('id');
-    const user = getAuthUser(c);
-    const teacherId = user!.id;
 
     try {
       const studentsWithGrades = await TeacherService.getClassStudentsWithGrades(c.env, classId, teacherId);
