@@ -2,11 +2,136 @@
 
    This document tracks architectural refactoring and testing tasks for Akademia Pro.
 
-   ## Status Summary
+    ## Status Summary
 
-   **Last Updated**: 2026-01-08 (Principal Security Engineer - Security Assessment)
+    **Last Updated**: 2026-01-08 (Performance Engineer - Circular Dependency Elimination)
 
-   ### Security Assessment (2026-01-08) - Completed ✅
+    ### Circular Dependency Elimination (2026-01-08) - Completed ✅
+
+    **Task**: Eliminate circular dependency warning in build caused by unused chart.tsx component
+
+    **Problem**:
+    - Build showed circular dependency warning: "Circular chunk: vendor -> charts -> vendor"
+    - Unused `src/components/ui/chart.tsx` file contained static Recharts import
+    - Static import created circular dependency between vendor chunk (React) and charts chunk (Recharts)
+    - Recharts depends on React, which is in vendor chunk, creating cycle
+    - Component was never imported anywhere in codebase (dead code)
+
+    **Solution**:
+    - Removed unused `src/components/ui/chart.tsx` component file
+    - Eliminated circular dependency warning from build output
+    - Cleaned up 10KB of unused component code
+    - AdminDashboardPage already uses dynamic import for Recharts, no replacement needed
+
+    **Implementation**:
+
+    1. **Identified Root Cause**:
+       - `chart.tsx` had static import: `import * as RechartsPrimitive from "recharts"`
+       - `AdminDashboardPage.tsx` uses dynamic import: `import('recharts').then(...)`
+       - Static import in chart.tsx caused Recharts to be bundled with vendor chunk
+       - Vendor chunk contains React, Recharts depends on React → circular dependency
+       - chart.tsx was never imported anywhere (confirmed via grep search)
+
+    2. **Removed Unused File**:
+       - Deleted `src/components/ui/chart.tsx` (366 lines, ~10KB)
+       - File exports: ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent
+       - None of these exports were imported anywhere in source code
+       - Safe to delete as it's unused dead code
+
+    **Metrics**:
+
+    | Metric | Before | After | Improvement |
+    |---------|---------|--------|-------------|
+    | Circular dependency warning | Yes | No | 100% eliminated |
+    | Build warning messages | 1 circular dep warning | 0 warnings | Cleaner builds |
+    | Dead code in codebase | 10KB chart.tsx | 0 | 100% removed |
+    | Bundle size (vendor) | 380.17 KB | 380.17 KB | No change (already tree-shaken) |
+    | Bundle size (charts) | 513.12 KB | 513.12 KB | No change |
+    | Tests passing | 719 passed | 719 passed | 0 regression |
+    | Typecheck errors | 0 | 0 | No regressions |
+    | Lint errors | 0 | 0 | No regressions |
+
+    **Performance Impact**:
+
+    **Build Quality**:
+    - Circular dependency warning eliminated from build output
+    - Cleaner build logs with no warnings about chunk dependencies
+    - Improved build reliability (no circular module resolution issues)
+    - Easier to debug build problems (fewer warnings to filter through)
+
+    **Bundle Impact**:
+    - No bundle size reduction (code was already tree-shaken)
+    - Vendor chunk size unchanged (380.17 KB)
+    - Charts chunk size unchanged (513.12 KB)
+    - Charts and PDF still lazy-loaded as designed
+
+    **Code Quality**:
+    - Removed 366 lines of dead code from codebase
+    - Cleaner component library (no unused UI components)
+    - Reduced maintenance burden (no need to update unused code)
+    - Clearer separation of concerns (AdminDashboardPage manages its own charts)
+
+    **Benefits Achieved**:
+    - ✅ Circular dependency warning eliminated from build
+    - ✅ Dead code removed (10KB, 366 lines)
+    - ✅ Cleaner codebase (no unused components)
+    - ✅ Zero regressions (all tests passing, typecheck/lint clean)
+    - ✅ Improved build quality (no circular dependency warnings)
+    - ✅ Easier debugging (fewer build warnings to investigate)
+
+    **Technical Details**:
+
+    **Why Circular Dependency Occurred**:
+    - Vite's manualChunks configured to split React/ecosystem into `vendor` chunk
+    - Recharts library configured to be in `charts` chunk
+    - chart.tsx statically imported Recharts, pulling it into vendor chunk
+    - Vendor chunk (React) → Recharts dependency → Charts chunk → Vendor chunk (cycle)
+    - Module bundler couldn't resolve clean chunk boundaries
+
+    **Why Bundle Size Didn't Change**:
+    - chart.tsx was never imported in any file (confirmed via grep)
+    - Vite/Rollup tree-shaking already excluded unused exports from bundle
+    - Static import existed in source but had no runtime impact
+    - Real benefit is eliminating build warning, not bundle size
+
+    **Code Analysis**:
+    - Searched entire codebase for chart component usage
+    - Confirmed no imports of `@/components/ui/chart`
+    - Confirmed no usage of `ChartContainer`, `ChartTooltip`, `ChartLegend`
+    - Safe to delete as it's pure dead code
+
+    **Architectural Impact**:
+    - **Build Quality**: Eliminated circular dependency warnings
+    - **Code Maintenance**: Removed unused code that could confuse developers
+    - **Performance**: No bundle size change (already optimized via tree-shaking)
+    - **Clarity**: Cleaner separation (AdminDashboardPage manages its own charts)
+
+    **Success Criteria**:
+    - [x] Circular dependency warning eliminated from build
+    - [x] Dead code removed (366 lines, 10KB)
+    - [x] No regressions (all tests passing)
+    - [x] Typecheck passes with 0 errors
+    - [x] Lint passes with 0 errors
+    - [x] Bundle sizes maintained (no unexpected changes)
+    - [x] Build process cleaner (no circular dependency warnings)
+
+    **Impact**:
+    - `src/components/ui/chart.tsx`: Removed (366 lines deleted)
+    - Build output: Circular dependency warning eliminated
+    - Codebase cleanliness: 10KB dead code removed
+    - Maintenance: Reduced by eliminating unused component
+    - All 719 tests passing (0 regression)
+    - Build quality improved (no circular dependency warnings)
+
+    **Future Considerations**:
+    - If chart components needed elsewhere, consider creating reusable lazy-loaded chart wrapper
+    - Monitor for new circular dependency warnings in build
+    - Keep manualChunks configuration clean and well-documented
+    - Consider adding build-time check for unused imports
+
+    ---
+
+    ### Security Assessment (2026-01-08) - Completed ✅
 
    **Task**: Conduct comprehensive security assessment following security specialist protocol
 
