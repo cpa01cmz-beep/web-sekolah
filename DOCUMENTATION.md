@@ -400,9 +400,9 @@ bun test:ui
 bun run lint
 ```
 
-**Test Statistics** (as of 2026-01-07):
-- Total tests: 303
-- Test files: 18
+**Test Statistics** (as of 2026-01-08):
+- Total tests: 582
+- Test files: 29
 - Coverage: Critical infrastructure, services, hooks, utilities, validation
 
 For detailed testing strategy, see [docs/task.md](./docs/task.md#critical-path-testing).

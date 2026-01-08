@@ -133,6 +133,7 @@ After starting the application:
 
 Comprehensive documentation is available in our [docs/](./docs/) directory and [GitHub Wiki](https://github.com/cpa01cmz-beep/web-sekolah/wiki):
 
+- [Technical Documentation](./DOCUMENTATION.md) - Complete developer guide with architecture, patterns, and implementation details
 - [Quick Start Guide](./docs/QUICK_START.md) - Get started quickly with step-by-step guides for students, teachers, parents, and admins
 - [API Blueprint](./docs/blueprint.md) - Complete API reference with endpoints, error codes, and integration patterns
 - [User Guides](https://github.com/cpa01cmz-beep/web-sekolah/wiki/User-Guides) - Instructions for students, teachers, parents, and admins
@@ -153,7 +154,7 @@ Run the test suite to verify everything is working:
 bun test
 ```
 
-All tests should pass (488+ tests currently passing).
+All tests should pass (582 tests currently passing).
 
 ### Type Checking
 
