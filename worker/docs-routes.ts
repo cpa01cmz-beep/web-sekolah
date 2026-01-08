@@ -1,6 +1,7 @@
 import { Hono } from 'hono';
 import type { Env } from './core-utils';
 import { CircuitBreaker } from './CircuitBreaker';
+import { serverError } from './core-utils';
 
 const DOCS_TIMEOUT_MS = 30000;
 const DOCS_MAX_RETRIES = 3;
@@ -52,11 +53,7 @@ export function docsRoutes(app: Hono<{ Bindings: Env }>) {
         'Content-Type': 'application/x-yaml',
       });
     } catch (error) {
-      return c.json({
-        success: false,
-        error: error instanceof Error ? error.message : 'Failed to load OpenAPI specification',
-        code: 'INTERNAL_SERVER_ERROR',
-      }, 500);
+      return serverError(c, error instanceof Error ? error.message : 'Failed to load OpenAPI specification');
     }
   });
 
@@ -71,11 +68,7 @@ export function docsRoutes(app: Hono<{ Bindings: Env }>) {
         'Content-Type': 'application/x-yaml',
       });
     } catch (error) {
-      return c.json({
-        success: false,
-        error: error instanceof Error ? error.message : 'Failed to load OpenAPI specification',
-        code: 'INTERNAL_SERVER_ERROR',
-      }, 500);
+      return serverError(c, error instanceof Error ? error.message : 'Failed to load OpenAPI specification');
     }
   });
 
