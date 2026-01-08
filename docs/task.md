@@ -2,9 +2,9 @@
      
      This document tracks architectural refactoring and testing tasks for Akademia Pro.
      
-     ## Status Summary
-      
-       **Last Updated**: 2026-01-08 (Technical Writer - README Documentation Fix)
+      ## Status Summary
+
+        **Last Updated**: 2026-01-08 (Code Reviewer - New Refactoring Tasks Identified)
 
      ### README Documentation Fix (2026-01-08) - Completed ✅
 
@@ -9407,3 +9407,98 @@ Excluded tests follow existing skip pattern from service tests:
 - Consider implementing card view pattern for mobile tables (optional future enhancement)
 - Add dark mode color palette verification when dark mode is implemented
 - Continue to audit new components for accessibility compliance
+
+---
+
+## [REFACTOR] Consolidate Grade Utility Functions
+
+- Location: src/pages/portal/student/StudentGradesPage.tsx (lines 13-25), src/pages/portal/parent/ParentDashboardPage.tsx (lines 41-54)
+- Issue: Grade-related utility functions are duplicated across multiple components with inconsistent implementations
+  - `getGradeColor` in StudentGradesPage returns Tailwind color classes
+  - `getGrade` in StudentGradesPage returns letter grades (A, B, C, D)
+  - `getGradeBadgeVariant` in ParentDashboardPage returns Badge variant strings
+  - `getGradeLetter` in ParentDashboardPage returns letter grades (A, B, C, D, F)
+- Suggestion: Extract all grade-related utilities to a shared `src/utils/grades.ts` module
+  - Create `getGradeLetter(score: number): 'A' | 'B' | 'C' | 'D' | 'F'` function
+  - Create `getGradeColorClass(score: number): string` function for Tailwind classes
+  - Create `getGradeBadgeVariant(score: number): BadgeVariant` function
+  - Use `GRADE_A_THRESHOLD`, `GRADE_B_THRESHOLD`, `GRADE_C_THRESHOLD`, `PASSING_SCORE_THRESHOLD` from `@/constants/grades`
+  - Update StudentGradesPage and ParentDashboardPage to import from shared utility
+- Priority: High
+- Effort: Small
+
+---
+
+## [REFACTOR] Extract Average Score Calculation Utility
+
+- Location: src/pages/portal/student/StudentGradesPage.tsx (line 43-45)
+- Issue: Average score calculation logic is inline and duplicated across components
+  - Formula: `(grades.reduce((acc, curr) => acc + curr.score, 0) / grades.length).toFixed(2)`
+  - This pattern is repeated in multiple grade-related components
+  - Error-prone due to manual implementation
+- Suggestion: Extract to shared utility function in `src/utils/grades.ts`
+  - Create `calculateAverageScore(grades: { score: number }[]): string` function
+  - Handle empty array case (return '0.00')
+  - Return formatted string with 2 decimal places
+  - Update StudentGradesPage to use utility function
+- Priority: Medium
+- Effort: Small
+
+---
+
+## [REFACTOR] Centralize Hardcoded Mock Data
+
+- Location: src/pages/portal/admin/AdminAnnouncementsPage.tsx (lines 21-25), src/pages/portal/teacher/TeacherAnnouncementsPage.tsx (lines 19-24)
+- Issue: Duplicate mock data defined in multiple announcement pages
+  - `initialAnnouncements` array duplicated in both AdminAnnouncementsPage and TeacherAnnouncementsPage
+  - Similar data structure with slightly different content
+  - Violates DRY principle and makes maintenance difficult
+- Suggestion: Create centralized mock data file
+  - Create `src/mock-data/announcements.ts` module
+  - Export `initialAnnouncements` array with shared mock data
+  - Optionally export `getInitialAnnouncements(role: UserRole)` for role-specific variations
+  - Update AdminAnnouncementsPage and TeacherAnnouncementsPage to import from shared file
+- Priority: Medium
+- Effort: Small
+
+---
+
+## [REFACTOR] Split API Client into Focused Modules
+
+- Location: src/lib/api-client.ts (408 lines)
+- Issue: API client file is too large with multiple responsibilities
+  - Contains CircuitBreaker class implementation (45+ lines)
+  - Contains fetch wrapper with retry logic (100+ lines)
+  - Contains React Query hooks (useQuery, useMutation) (100+ lines)
+  - Contains error handling and type definitions (50+ lines)
+  - Violates Single Responsibility Principle
+- Suggestion: Split into smaller focused modules
+  - `src/lib/api-client/circuit-breaker.ts` - CircuitBreaker class
+  - `src/lib/api-client/fetch-wrapper.ts` - Fetch with retry/timeout
+  - `src/lib/api-client/query-hooks.ts` - React Query hooks (useQuery, useMutation)
+  - `src/lib/api-client/types.ts` - Type definitions (ApiError, RequestOptions, etc.)
+  - `src/lib/api-client/index.ts` - Main exports for backward compatibility
+  - Maintain existing API: Re-export all functions from index.ts
+- Priority: Medium
+- Effort: Medium
+
+---
+
+## [REFACTOR] Consolidate Duplicate CircuitBreaker Implementations
+
+- Location: src/lib/api-client.ts (lines 45-100), worker/CircuitBreaker.ts
+- Issue: Two different CircuitBreaker implementations exist with similar functionality
+  - Frontend: `src/lib/api-client.ts` has CircuitBreaker class for API resilience
+  - Backend: `worker/CircuitBreaker.ts` has CircuitBreaker class for webhook resilience
+  - Similar interface: `execute()`, `onSuccess()`, `onFailure()`
+  - Different configuration: Frontend uses QueryClient timeouts, backend uses webhook config
+  - Code duplication increases maintenance burden
+- Suggestion: Extract shared CircuitBreaker logic to common package or consolidate pattern
+  - Option 1: Create shared `@shared/circuit-breaker` module
+  - Option 2: Document that implementations are intentionally separate (frontend vs backend context)
+  - Ensure both implementations have consistent interface and behavior
+  - Add JSDoc comments explaining when to use each implementation
+- Priority: Low
+- Effort: Medium
+
+---
