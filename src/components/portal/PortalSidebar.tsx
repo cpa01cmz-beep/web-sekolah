@@ -7,6 +7,7 @@ import { useState } from 'react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { navLinksMap, NavLink as NavLinkType } from '@/config/navigation';
 import { THEME_COLORS } from '@/theme/colors';
+import React from 'react';
 export function PortalSidebar() {
   const user = useAuthStore((state) => state.user);
   const logout = useAuthStore((state) => state.logout);
@@ -38,7 +39,8 @@ export function PortalSidebar() {
             {isCollapsed ? <ChevronRight className="h-5 w-5" /> : <ChevronLeft className="h-5 w-5" />}
           </Button>
         </div>
-        <nav className="flex-grow p-2 space-y-2" aria-label={`${user.role} portal navigation`} role="navigation">
+        <nav className="flex-grow p-2 space-y-2" role="navigation" aria-label={`${user.role} portal navigation`}>
+          <h2 className="sr-only">Navigation Menu</h2>
           {navLinks.map((link: NavLinkType) => (
             <Tooltip key={link.to}>
               <TooltipTrigger asChild>
@@ -65,8 +67,8 @@ export function PortalSidebar() {
         <div className="p-2 border-t">
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button variant="ghost" className={cn('w-full justify-start gap-3', isCollapsed && 'justify-center')} onClick={handleLogout}>
-                <LogOut className="h-5 w-5" />
+              <Button variant="ghost" className={cn('w-full justify-start gap-3', isCollapsed && 'justify-center')} onClick={handleLogout} aria-label={isCollapsed ? 'Logout' : undefined}>
+                <LogOut className="h-5 w-5" aria-hidden="true" />
                 {!isCollapsed && <span>Logout</span>}
               </Button>
             </TooltipTrigger>
