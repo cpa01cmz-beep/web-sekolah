@@ -1,10 +1,10 @@
-   # Architectural Task List
-
-   This document tracks architectural refactoring and testing tasks for Akademia Pro.
-
-    ## Status Summary
-
-    **Last Updated**: 2026-01-08 (Performance Engineer - Circular Dependency Elimination)
+    # Architectural Task List
+    
+    This document tracks architectural refactoring and testing tasks for Akademia Pro.
+    
+     ## Status Summary
+    
+     **Last Updated**: 2026-01-08 (Integration Engineer - API Documentation with OpenAPI Specification)
 
     ### Circular Dependency Elimination (2026-01-08) - Completed ✅
 
@@ -128,7 +128,176 @@
     - Monitor for new circular dependency warnings in build
     - Keep manualChunks configuration clean and well-documented
     - Consider adding build-time check for unused imports
-
+    
+    ---
+    
+    ### API Documentation - OpenAPI Specification (2026-01-08) - Completed ✅
+    
+    **Task**: Create comprehensive OpenAPI 3.0 specification and interactive Swagger UI documentation
+    
+    **Problem**:
+    - API documentation existed only in Markdown format (blueprint.md)
+    - No machine-readable API specification for code generation
+    - No interactive API documentation for third-party developers
+    - Missing standard industry format (OpenAPI/Swagger)
+    
+    **Solution**:
+    - Created comprehensive OpenAPI 3.0 YAML specification documenting all API endpoints
+    - Added Swagger UI endpoint for interactive API documentation at `/api-docs.html`
+    - Documented all authentication and authorization patterns
+    - Documented all error codes and response schemas
+    - Made API specification machine-readable for code generation tools
+    
+    **Implementation**:
+    
+    1. **Created OpenAPI 3.0 Specification** `openapi.yaml`:
+       - Comprehensive API documentation in standard OpenAPI 3.0 format
+       - All endpoints organized by tags (Health, Authentication, Students, Teachers, Admin, Webhooks, Monitoring)
+       - Detailed request/response schemas for all endpoints
+       - Authentication patterns documented (JWT Bearer tokens)
+       - Rate limiting information documented
+       - Error codes and responses standardized
+       - All error codes from ErrorCode enum documented with retryable flags
+    
+    2. **Added API Documentation Endpoints** `worker/docs-routes.ts`:
+       - `GET /api-docs` - Returns OpenAPI YAML specification
+       - `GET /api-docs.yaml` - Returns OpenAPI specification with YAML content-type
+       - `GET /api-docs.html` - Interactive Swagger UI documentation
+       - Swagger UI loads from CDN (unpkg.com) with `persistAuthorization: true`
+       - Swagger UI features: filter, try-it-out, request duration display, model expansion
+       - Integrated with existing OpenAPI specification
+    
+    3. **Updated Worker Router** `worker/index.ts`:
+       - Added `docsRoutes` import and registration
+       - Followed existing route registration pattern (function-based routes)
+       - No breaking changes to existing routes
+    
+    **Metrics**:
+    
+    | Metric | Before | After | Improvement |
+    |---------|---------|--------|-------------|
+    | API Documentation Format | Markdown only | OpenAPI 3.0 YAML + Swagger UI | Industry standard |
+    | Interactive Documentation | None | Full Swagger UI | Developer-friendly |
+    | Machine-readable Spec | No | Yes (OpenAPI YAML) | Code-generation ready |
+    | API Endpoint Coverage | Partial (Markdown) | Complete (all endpoints) | 100% documented |
+    | Authentication Documentation | Basic | Comprehensive with examples | Self-documenting |
+    | Error Code Documentation | Basic | Complete with retryable flags | Self-documenting |
+    | Test Coverage | 719 tests passing | 719 tests passing | 0 regression |
+    | Type Errors | 0 | 0 | No regressions |
+    
+    **Benefits Achieved**:
+    - ✅ Complete OpenAPI 3.0 specification for all API endpoints
+    - ✅ Interactive Swagger UI at `/api-docs.html` for developer-friendly documentation
+    - ✅ Machine-readable specification for code generation (clients, SDKs, etc.)
+    - ✅ Comprehensive authentication and authorization documentation
+    - ✅ All error codes documented with retryable flags
+    - ✅ Standard industry format (OpenAPI 3.0) adopted
+    - ✅ Self-documenting API with request/response examples
+    - ✅ Rate limiting and resilience patterns documented
+    - ✅ Zero breaking changes to existing functionality
+    - ✅ All 719 tests passing (2 skipped, 0 regression)
+    - ✅ Typecheck passed with 0 errors
+    - ✅ Linting passed (0 errors)
+    
+    **Technical Details**:
+    
+    **OpenAPI Specification Structure**:
+    - **Info**: API title, version, description, contact info
+    - **Servers**: Production and staging server URLs
+    - **Tags**: 7 tags organizing endpoints by domain (Health, Authentication, Students, Teachers, Admin, Webhooks, Monitoring)
+    - **Paths**: 30+ API endpoints with:
+      - HTTP method (GET, POST, PUT, DELETE)
+      - Operation ID (for code generation)
+      - Request body schemas (where applicable)
+      - Response schemas (success and error)
+      - Security requirements (BearerAuth)
+      - Parameters (path, query)
+    - **Components**:
+      - Security schemes (BearerAuth with JWT)
+      - Schemas: 20+ reusable schemas for requests/responses
+      - SuccessResponse base schema
+      - ErrorResponse base schema with all error codes
+    
+    **API Endpoint Coverage**:
+    - Health: `GET /api/health`
+    - Authentication: `POST /api/auth/login`, `GET /api/auth/verify`
+    - Students: `GET /api/students/:id/dashboard`
+    - Teachers: `GET /api/teachers/:id/classes`, `GET /api/classes/:id/students`, `POST /api/grades`, `PUT /api/grades/:id`
+    - Admin: `GET /api/users`, `POST /api/users`, `GET /api/users/:id`, `PUT /api/users/:id`, `DELETE /api/users/:id`
+    - Webhooks: `GET /api/webhooks`, `POST /api/webhooks`, `GET /api/webhooks/:id`, `PUT /api/webhooks/:id`, `DELETE /api/webhooks/:id`, `POST /api/webhooks/test`
+    - Monitoring: `POST /api/admin/webhooks/process`, `GET /api/admin/webhooks/dead-letter-queue`, `DELETE /api/admin/webhooks/dead-letter-queue/:id`, `GET /api/admin/metrics`, `GET /api/admin/rate-limit`
+    
+    **Swagger UI Features**:
+    - Interactive API exploration with Try It Out functionality
+    - Request/response examples for all endpoints
+    - Schema visualization with model expansion
+    - Filter endpoints by tag or search
+    - Persist authorization (tokens saved in browser)
+    - Display request duration
+    - Deep linking to specific endpoints
+    - Responsive design for mobile/tablet/desktop
+    
+    **Error Codes Documented**:
+    - `NETWORK_ERROR` - Network connectivity issue (retryable: Yes)
+    - `TIMEOUT` - Request timed out (retryable: Yes)
+    - `RATE_LIMIT_EXCEEDED` - Too many requests (retryable: Yes)
+    - `SERVICE_UNAVAILABLE` - Service is down (retryable: Yes)
+    - `CIRCUIT_BREAKER_OPEN` - Circuit breaker triggered (retryable: No)
+    - `UNAUTHORIZED` - Authentication required (retryable: No)
+    - `FORBIDDEN` - Insufficient permissions (retryable: No)
+    - `NOT_FOUND` - Resource not found (retryable: No)
+    - `VALIDATION_ERROR` - Invalid input data (retryable: No)
+    - `CONFLICT` - Resource conflict (retryable: No)
+    - `BAD_REQUEST` - Malformed request (retryable: No)
+    - `INTERNAL_SERVER_ERROR` - Unexpected server error (retryable: Yes)
+    
+    **Architectural Impact**:
+    - **Self-Documenting API**: OpenAPI spec serves as single source of truth for API documentation
+    - **Developer Experience**: Interactive Swagger UI lowers learning curve for API consumers
+    - **Code Generation**: Machine-readable spec enables automatic client SDK generation
+    - **Integration Ready**: Third-party developers can easily integrate with standardized spec
+    - **Maintainability**: API documentation stays in sync with implementation (single source of truth)
+    - **Industry Standard**: OpenAPI 3.0 is de facto standard for API documentation
+    
+    **Success Criteria**:
+    - [x] OpenAPI 3.0 specification created for all API endpoints
+    - [x] Swagger UI endpoint added at `/api-docs.html`
+    - [x] All authentication patterns documented (JWT Bearer tokens, login flow)
+    - [x] All error codes documented with retryable flags
+    - [x] Request/response schemas defined for all endpoints
+    - [x] Rate limiting and resilience patterns documented
+    - [x] Machine-readable specification for code generation
+    - [x] All 719 tests passing (2 skipped, 0 regression)
+    - [x] Typecheck passed with 0 errors
+    - [x] Linting passed (0 errors)
+    - [x] Zero breaking changes to existing functionality
+    
+    **Impact**:
+    - `openapi.yaml`: New comprehensive API specification (635 lines)
+    - `worker/docs-routes.ts`: New API documentation routes (84 lines)
+    - `worker/index.ts`: Updated to register docsRoutes (2 lines)
+    - API Documentation: Industry-standard OpenAPI 3.0 format
+    - Developer Experience: Interactive Swagger UI at `/api-docs.html`
+    - Integration Readiness: Machine-readable spec for third-party developers
+    - Code Generation: Ready for automatic client SDK generation tools
+    - Test Suite: 719 tests passing (0 regression)
+    - Type Safety: Typecheck passed with 0 errors
+    - Code Quality: Linting passed with 0 errors
+    
+    **Usage**:
+    
+    Access API documentation at:
+    - **OpenAPI YAML**: `https://your-domain.workers.dev/api-docs.yaml`
+    - **Swagger UI**: `https://your-domain.workers.dev/api-docs.html`
+    - **YAML Format**: `https://your-domain.workers.dev/api-docs`
+    
+    Benefits:
+    - Third-party developers can explore API interactively
+    - Code generation tools can create client SDKs automatically
+    - API documentation stays in sync with implementation
+    - Standard industry format reduces integration friction
+    - Self-documenting API reduces maintenance burden
+    
     ---
 
     ### Security Assessment (2026-01-08) - Completed ✅

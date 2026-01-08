@@ -7,6 +7,7 @@ import { userRoutes } from './user-routes';
 import { authRoutes } from './auth-routes';
 import { webhookRoutes } from './webhook-routes';
 import { adminMonitoringRoutes } from './admin-monitoring-routes';
+import { docsRoutes } from './docs-routes';
 import { Env, GlobalDurableObject, ok, notFound, serverError } from './core-utils';
 import { logger as pinoLogger } from './logger';
 import { defaultRateLimiter, strictRateLimiter } from './middleware/rate-limit';
@@ -83,6 +84,7 @@ authRoutes(app);
 userRoutes(app);
 webhookRoutes(app);
 adminMonitoringRoutes(app);
+docsRoutes(app);
 
 app.get('/api/health', async (c) => {
   const metrics = integrationMonitor.getHealthMetrics();
