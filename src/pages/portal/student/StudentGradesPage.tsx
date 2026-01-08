@@ -1,28 +1,13 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableFooter } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Skeleton } from '@/components/ui/skeleton';
 import { CardSkeleton } from '@/components/ui/loading-skeletons';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { AlertTriangle } from 'lucide-react';
 import { SlideUp } from '@/components/animations';
 import { useStudentGrades } from '@/hooks/useStudent';
 import { useAuthStore } from '@/lib/authStore';
-import { GRADE_A_THRESHOLD, GRADE_B_THRESHOLD, GRADE_C_THRESHOLD } from '@/constants/grades';
-
-const getGradeColor = (score: number) => {
-  if (score >= GRADE_A_THRESHOLD) return 'bg-green-500 hover:bg-green-600';
-  if (score >= GRADE_B_THRESHOLD) return 'bg-blue-500 hover:bg-blue-600';
-  if (score >= GRADE_C_THRESHOLD) return 'bg-yellow-500 hover:bg-yellow-600';
-  return 'bg-red-500 hover:bg-red-600';
-};
-
-const getGrade = (score: number) => {
-  if (score >= GRADE_A_THRESHOLD) return 'A';
-  if (score >= GRADE_B_THRESHOLD) return 'B';
-  if (score >= GRADE_C_THRESHOLD) return 'C';
-  return 'D';
-};
+import { getGradeColorClass, getGradeLetter, calculateAverageScore } from '@/utils/grades';
 
 export function StudentGradesPage() {
   const user = useAuthStore((state) => state.user);
@@ -40,9 +25,7 @@ export function StudentGradesPage() {
     );
   }
 
-  const averageScore = grades.length > 0
-    ? (grades.reduce((acc, curr) => acc + curr.score, 0) / grades.length).toFixed(2)
-    : '0.00';
+  const averageScore = calculateAverageScore(grades);
 
   return (
     <SlideUp className="space-y-6">
@@ -70,8 +53,8 @@ export function StudentGradesPage() {
                   <TableCell>{grade.courseName}</TableCell>
                   <TableCell className="text-center font-semibold">{grade.score}</TableCell>
                   <TableCell className="text-center">
-                    <Badge className={`text-white ${getGradeColor(grade.score)}`}>
-                      {getGrade(grade.score)}
+                    <Badge className={`text-white ${getGradeColorClass(grade.score)}`}>
+                      {getGradeLetter(grade.score)}
                     </Badge>
                   </TableCell>
                   <TableCell>{grade.feedback}</TableCell>
