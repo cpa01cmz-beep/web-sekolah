@@ -28,11 +28,12 @@ import type {
 } from "@shared/types";
 import { logger } from './logger';
 import { WebhookService } from './webhook-service';
-import { StudentDashboardService, TeacherService, GradeService, UserService } from './domain';
-import { getAuthUser } from './type-guards';
+import { StudentDashboardService, TeacherService, GradeService, UserService, ParentDashboardService } from './domain';
+import { getAuthUser, getRoleSpecificFields } from './type-guards';
+import type { Context } from 'hono';
 
 function validateUserAccess(
-  c: any,
+  c: Context,
   userId: string,
   requestedId: string,
   role: string,
@@ -102,12 +103,14 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
       return;
     }
 
-    const student = await UserEntity.get(c.env, requestedStudentId);
-    if (!student) {
+    const studentEntity = new UserEntity(c.env, requestedStudentId);
+    const student = await studentEntity.getState();
+    if (!student || student.role !== 'student') {
       return notFound(c, 'Student not found');
     }
 
-    const classEntity = student.classId ? new ClassEntity(c.env, student.classId) : null;
+    const studentRoleFields = getRoleSpecificFields(student);
+    const classEntity = studentRoleFields.classId ? new ClassEntity(c.env, studentRoleFields.classId) : null;
     const classState = classEntity ? await classEntity.getState() : null;
 
     const grades = await GradeService.getStudentGrades(c.env, requestedStudentId);
@@ -269,14 +272,17 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
     }
 
     try {
-      const studentsWithGrades = await TeacherService.getClassStudentsWithGrades(c.env, classId, teacherId);
-      return ok(c, studentsWithGrades);
+      const dashboardData = await ParentDashboardService.getDashboardData(c.env, requestedParentId);
+      return ok(c, dashboardData);
     } catch (error) {
-      if (error instanceof Error && error.message === 'Class not found') {
-        return notFound(c, 'Class not found');
+      if (error instanceof Error && error.message === 'Parent not found') {
+        return notFound(c, 'Parent not found');
       }
-      if (error instanceof Error && error.message === 'Teacher not assigned to this class') {
-        return forbidden(c, 'Access denied: Teacher not assigned to this class');
+      if (error instanceof Error && error.message === 'Child not found') {
+        return notFound(c, 'Child not found');
+      }
+      if (error instanceof Error && error.message === 'Parent has no associated child') {
+        return notFound(c, 'Parent has no associated child');
       }
       throw error;
     }
