@@ -874,57 +874,6 @@ Retrieve student dashboard data including schedule, grades, and announcements.
 
 ### Teacher Portal
 
-#### GET /api/teachers/:id/classes
-
-Get all classes taught by a teacher.
-
-**Path Parameters:**
-- `id` (string) - Teacher ID
-
-**Response:**
-```json
-{
-  "success": true,
-  "data": [
-    {
-      "id": "11-A",
-      "name": "Class 11-A",
-      "teacherId": "teacher-01",
-      "createdAt": "2026-01-07T08:00:00.000Z",
-      "updatedAt": "2026-01-07T08:00:00.000Z"
-    }
-  ],
-  "requestId": "uuid"
-}
-```
-
-#### GET /api/classes/:id/students
-
-Get students in a class with their grades.
-
-**Path Parameters:**
-- `id` (string) - Class ID
-
-**Response:**
-```json
-{
-  "success": true,
-  "data": [
-    {
-      "id": "student-01",
-      "name": "Budi Hartono",
-      "score": 95,
-      "feedback": "Excellent work!",
-      "gradeId": "g-01"
-    }
-  ],
-  "requestId": "uuid"
-}
-```
-
-**Error Responses:**
-- 404 - Class not found
-
 #### POST /api/grades
 
 Create a new grade.
