@@ -1,10 +1,3 @@
-import { clsx, type ClassValue } from "clsx"
-import { twMerge } from "tailwind-merge"
-
-export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs))
-}
-
 export const cardInteractions = {
   hover: 'hover:shadow-lg transition-shadow duration-200',
   hoverWithTransform: 'hover:shadow-lg hover:-translate-y-1 transition-all duration-200',

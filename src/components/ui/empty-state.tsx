@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { LucideIcon, Info, AlertTriangle, AlertCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -47,7 +48,7 @@ const variantIcons: Record<EmptyStateVariant, LucideIcon | undefined> = {
   error: AlertCircle,
 };
 
-export function EmptyState({
+export const EmptyState = memo(function EmptyState({
   icon: Icon,
   title,
   description,
@@ -94,4 +95,5 @@ export function EmptyState({
       )}
     </div>
   );
-}
+});
+EmptyState.displayName = 'EmptyState';
