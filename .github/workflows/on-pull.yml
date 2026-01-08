@@ -67,6 +67,9 @@ jobs:
         continue-on-error: true
         run: npm ci
 
+      - name: TypeScript Type Check
+        run: npm run typecheck
+
       - name: Install OpenCode CLI
         run: |
           curl -fsSL https://opencode.ai/install | bash -s -- --version 1.1.6
