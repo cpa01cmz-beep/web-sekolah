@@ -2,12 +2,16 @@ import type { SchoolUser, Student, Teacher, Parent, Admin } from '@shared/types'
 import type { Context } from 'hono';
 import type { AuthUser } from './middleware/auth';
 
+type ExtendedContext = Context & {
+  set(key: string, value: unknown): void;
+};
+
 export function getAuthUser(c: Context): AuthUser | undefined {
   return c.get('user') as AuthUser | undefined;
 }
 
 export function setAuthUser(c: Context, user: AuthUser): void {
-  (c as any).set('user', user);
+  (c as ExtendedContext).set('user', user);
 }
 
 export function isStudent(user: SchoolUser): user is Student {

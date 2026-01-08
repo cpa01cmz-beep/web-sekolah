@@ -24,8 +24,9 @@ export class AuthService {
         token: response.token,
         user: response.user,
       };
-    } catch (error: any) {
-      throw new Error(error.message || 'Login failed');
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error && error.message ? error.message : 'Login failed';
+      throw new Error(errorMessage);
     }
   }
 
