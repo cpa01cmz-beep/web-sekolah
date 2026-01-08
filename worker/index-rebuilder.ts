@@ -96,15 +96,18 @@ async function rebuildGradeIndexes(env: Env): Promise<void> {
 
 async function rebuildAnnouncementIndexes(env: Env): Promise<void> {
   const authorIdIndex = new SecondaryIndex<string>(env, AnnouncementEntity.entityName, 'authorId');
+  const targetRoleIndex = new SecondaryIndex<string>(env, AnnouncementEntity.entityName, 'targetRole');
   const dateIndex = new DateSortedSecondaryIndex(env, AnnouncementEntity.entityName);
 
   await authorIdIndex.clear();
+  await targetRoleIndex.clear();
   await dateIndex.clear();
 
   const { items: announcements } = await AnnouncementEntity.list(env);
   for (const announcement of announcements) {
     if (announcement.deletedAt) continue;
     await authorIdIndex.add(announcement.authorId, announcement.id);
+    await targetRoleIndex.add(announcement.targetRole, announcement.id);
     await dateIndex.add(announcement.date, announcement.id);
   }
 }
