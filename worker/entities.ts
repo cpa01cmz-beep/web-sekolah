@@ -331,6 +331,11 @@ export async function ensureAllSeedData(env: Env) {
   await ScheduleEntity.ensureSeed(env);
 
   const { items: users } = await UserEntity.list(env);
+
+  if (env.ENVIRONMENT === 'production') {
+    throw new Error('Cannot set default passwords in production environment. Users must set passwords through the password reset flow.');
+  }
+
   const defaultPassword = 'password123';
 
   for (const user of users) {
