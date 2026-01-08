@@ -98,7 +98,19 @@ export default ({ mode }: { mode: string }) => {
               if (id.includes('lucide-react')) {
                 return 'icons';
               }
-              if (/\/node_modules\/(@radix-ui|react|react-dom|react-router-dom)\//.test(id)) {
+              if (id.includes('zod') || id.includes('react-hook-form')) {
+                return 'forms';
+              }
+              if (id.includes('immer')) {
+                return 'state';
+              }
+              if (id.includes('embla-carousel')) {
+                return 'carousel';
+              }
+              if (id.includes('dompurify')) {
+                return 'sanitization';
+              }
+              if (id.includes('@radix-ui') || id.includes('react') || id.includes('react-dom') || id.includes('react-router-dom')) {
                 return 'vendor';
               }
             }
