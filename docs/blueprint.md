@@ -107,8 +107,9 @@ This clears and rebuilds all secondary indexes from existing data.
 - ~~StudentDashboardService.getRecentGrades() loaded ALL grades for student~~ ✅ **COMPLETED** (2026-01-08) - Now uses per-student date-sorted index for O(n) retrieval
 - ~~Announcement filtering business logic in routes: Routes had inline filtering logic for targetRole and used incorrect field names (createdBy, targetClassIds)~~ ✅ **COMPLETED** (2026-01-08) - Extracted announcement filtering to domain services, fixed type safety issues, added targetRole field to types
 - ~~AnnouncementEntity.getByTargetRole() table scan: Full table scan for targetRole filtering~~ ✅ **COMPLETED** (2026-01-08) - Now uses targetRole secondary index for O(1) lookups
-  
- ### Recent Data Optimizations (2026-01-07)
+- ~~Large page components with inline forms: AdminUserManagementPage (228 lines) had form logic mixed with data concerns~~ ✅ **COMPLETED** (2026-01-08) - Extracted UserForm component (28% reduction, clean separation of concerns)
+
+   ### Recent Data Optimizations (2026-01-07)
 
 #### Compound Secondary Index for Grades
 **Problem**: `GradeEntity.getByStudentIdAndCourseId()` loaded all grades for a student and filtered in-memory for courseId (O(n) complexity)
@@ -420,8 +421,100 @@ This clears and rebuilds all secondary indexes from existing data.
 - ✅ TargetRole index included in index rebuild process
 - ✅ Data architecture now fully optimized: zero table scans, all queries indexed
 - ✅ Consistent with architectural principles: Indexes support usage patterns, Query efficiency optimized
- 
-  ## Base URL
+
+   #### UserForm Component Extraction (2026-01-08)
+
+**Problem**: AdminUserManagementPage had 228 lines with inline form logic mixed with table rendering, violating Separation of Concerns and Single Responsibility Principle
+
+**Solution**: Extracted UserForm component with encapsulated form logic, reducing page size by 28% and achieving clean separation between UI (form) and data (page)
+
+**Implementation**:
+
+1. **Created UserForm Component** at `src/components/forms/UserForm.tsx`:
+   - Props: `open`, `onClose`, `editingUser`, `onSave`, `isLoading`
+   - Form state: `userName`, `userEmail`, `userRole` (managed internally)
+   - `useEffect` to sync form with editingUser prop for editing mode
+   - `handleSubmit` function for form submission
+   - Encapsulated Dialog with form fields (name, email, role)
+   - Form validation with required fields
+
+2. **Refactored AdminUserManagementPage** at `src/pages/portal/admin/AdminUserManagementPage.tsx`:
+   - Removed form state (userName, userEmail, userRole)
+   - Removed inline form JSX (Dialog with form fields, 63 lines)
+   - Added UserForm import
+   - Simplified `handleSaveUser` to accept `Omit<SchoolUser, 'id'>` data
+   - Added `handleCloseModal` helper function
+   - Page now only manages: modal open state, editing user, mutations
+
+**Metrics**:
+
+| Metric | Before | After | Improvement |
+|---------|---------|--------|-------------|
+| AdminUserManagementPage lines | 228 | 165 | 28% reduction |
+| UserForm component | 0 | 86 | New reusable component |
+| Form logic in page | Inline (63 lines) | Extracted to component | 100% separated |
+| Form state in page | 3 state variables | 0 | 100% extracted |
+| Separation of Concerns | Mixed | Clean | Complete separation |
+| Reusability | Single use | Reusable component | New capability |
+
+**Benefits**:
+- ✅ UserForm component created (86 lines, fully self-contained)
+- ✅ AdminUserManagementPage reduced by 28% (228 → 165 lines)
+- ✅ Form logic extracted (validation, state management, submission)
+- ✅ Separation of Concerns (UI vs data concerns)
+- ✅ Single Responsibility (UserForm: form, Page: data)
+- ✅ UserForm is reusable for other user management contexts
+- ✅ TypeScript compilation passed (0 errors)
+- ✅ Zero breaking changes to existing functionality
+
+**Technical Details**:
+
+**UserForm Component Features**:
+- Controlled form with React state (userName, userEmail, userRole)
+- useEffect to sync form with editingUser prop for editing mode
+- Form validation with HTML5 required attributes
+- Role selection with dropdown (student, teacher, parent, admin)
+- Loading state handling during mutation
+- Avatar URL generation using getAvatarUrl utility
+- Accessibility: ARIA labels, required field indicators
+- Responsive layout (grid system for labels and inputs)
+
+**AdminUserManagementPage Simplifications**:
+- Removed 3 form state variables
+- Removed 63 lines of inline form JSX
+- Removed 7 unused imports (Dialog, Input, Label, Select, etc.)
+- Added React import for createElement in RoleIcon
+- Simplified handleSaveUser signature
+- Added handleCloseModal helper
+- Clearer data flow: Page → UserForm → onSave → Mutations
+
+**Architectural Impact**:
+- **Modularity**: Form logic is atomic and replaceable
+- **Separation of Concerns**: UI (UserForm) separated from data (Page component)
+- **Clean Architecture**: Dependencies flow correctly (Page → UserForm)
+- **Single Responsibility**: UserForm handles form concerns, Page handles data concerns
+- **Open/Closed**: UserForm can be extended without modifying Page component
+
+**Success Criteria**:
+- [x] UserForm component created at src/components/forms/UserForm.tsx
+- [x] AdminUserManagementPage reduced from 228 to 165 lines (28% reduction)
+- [x] Form state extracted to UserForm (userName, userEmail, userRole)
+- [x] Form validation logic encapsulated in UserForm
+- [x] Page component only handles data fetching and mutations
+- [x] UserForm is reusable and atomic
+- [x] TypeScript compilation passed (0 errors)
+- [x] Zero breaking changes to existing functionality
+
+**Impact**:
+- `src/components/forms/UserForm.tsx`: New component (86 lines)
+- `src/pages/portal/admin/AdminUserManagementPage.tsx`: Reduced 228 → 165 lines (63 lines removed)
+- `src/components/forms/`: New directory for form components (modularity foundation)
+- Component reusability: UserForm can be used in other user management contexts
+- Maintainability: Form logic centralized in one component
+- Testability: UserForm can be tested independently of page component
+- Future refactoring: Similar pattern applies to GradeForm extraction
+
+   ## Base URL
 
 ```
 https://your-domain.workers.dev/api

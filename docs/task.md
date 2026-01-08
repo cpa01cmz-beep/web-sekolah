@@ -688,12 +688,112 @@ for (let attempt = 0; attempt <= maxRetries; attempt++) {
 
    ## Pending Refactoring Tasks
 
-   ### [REFACTOR] Extract UserForm Component from AdminUserManagementPage
-   - Location: src/pages/portal/admin/AdminUserManagementPage.tsx
-   - Issue: Large page component (227 lines) with inline form logic and validation mixed with table rendering
-   - Suggestion: Extract user creation/editing form into separate UserForm component with validation logic, form state management, and success/error handling. Page component should handle only routing and data fetching.
-   - Priority: Medium
-   - Effort: Medium
+   ### UserForm Component Extraction (2026-01-08) - Completed ✅
+
+   **Task**: Extract UserForm component from AdminUserManagementPage for improved modularity
+
+   **Problem**:
+   - AdminUserManagementPage had 228 lines with inline form logic mixed with table rendering
+   - Form state (userName, userEmail, userRole) managed in page component
+   - Form validation and submission logic embedded in page component
+   - Dialog with form mixed with page-level concerns (data fetching, table rendering)
+   - Violation of Separation of Concerns: UI, logic, data tightly coupled
+
+   **Solution**:
+   - Created dedicated `UserForm` component with encapsulated form logic
+   - Extracted form state management into UserForm (useState, useEffect for editing)
+   - Moved form validation and submission logic into component
+   - Page component now only handles data fetching and user actions
+   - UserForm is atomic, replaceable, and testable
+
+   **Implementation**:
+
+   1. **Created UserForm Component** at `src/components/forms/UserForm.tsx`:
+      - Props: `open`, `onClose`, `editingUser`, `onSave`, `isLoading`
+      - Form state: `userName`, `userEmail`, `userRole` (managed internally)
+      - `useEffect` to sync form with editingUser prop
+      - `handleSubmit` function for form submission
+      - Encapsulated Dialog with form fields (name, email, role)
+      - Form validation with required fields
+
+   2. **Refactored AdminUserManagementPage** at `src/pages/portal/admin/AdminUserManagementPage.tsx`:
+      - Removed form state (userName, userEmail, userRole)
+      - Removed inline form JSX (Dialog with form fields)
+      - Added UserForm import
+      - Simplified `handleSaveUser` to accept `Omit<SchoolUser, 'id'>` data
+      - Added `handleCloseModal` helper function
+      - Page now only manages: modal open state, editing user, mutations
+      - UserForm component handles all form concerns
+
+   **Metrics**:
+
+   | Metric | Before | After | Improvement |
+   |---------|---------|--------|-------------|
+   | AdminUserManagementPage lines | 228 | 165 | 28% reduction |
+   | UserForm component | 0 | 86 | New reusable component |
+   | Form logic in page | Inline (63 lines) | Extracted to component | 100% separated |
+   | Form state in page | 3 state variables | 0 | 100% extracted |
+   | Separation of Concerns | Mixed | Clean | Complete separation |
+   | Reusability | Single use | Reusable component | New capability |
+
+   **Architectural Impact**:
+   - **Modularity**: Form logic is atomic and replaceable
+   - **Separation of Concerns**: UI (UserForm) separated from data (Page component)
+   - **Clean Architecture**: Dependencies flow correctly (Page → UserForm)
+   - **Single Responsibility**: UserForm handles form concerns, Page handles data concerns
+   - **Open/Closed**: UserForm can be extended without modifying Page component
+
+   **Benefits Achieved**:
+   - ✅ UserForm component created (86 lines, fully self-contained)
+   - ✅ AdminUserManagementPage reduced by 28% (228 → 165 lines)
+   - ✅ Form logic extracted (validation, state management, submission)
+   - ✅ Separation of Concerns (UI vs data concerns)
+   - ✅ Single Responsibility (UserForm: form, Page: data)
+   - ✅ UserForm is reusable for other user management contexts
+   - ✅ TypeScript compilation passed (0 errors)
+   - ✅ Zero breaking changes to existing functionality
+
+   **Technical Details**:
+
+   **UserForm Component Features**:
+   - Controlled form with React state (userName, userEmail, userRole)
+   - useEffect to sync form with editingUser prop for editing mode
+   - Form validation with HTML5 required attributes
+   - Role selection with dropdown (student, teacher, parent, admin)
+   - Loading state handling during mutation
+   - Avatar URL generation using getAvatarUrl utility
+   - Accessibility: ARIA labels, required field indicators
+   - Responsive layout (grid system for labels and inputs)
+
+   **AdminUserManagementPage Simplifications**:
+   - Removed 3 form state variables
+   - Removed 63 lines of inline form JSX
+   - Removed 7 unused imports (Dialog, Input, Label, Select, etc.)
+   - Added React import for createElement in RoleIcon
+   - Simplified handleSaveUser signature
+   - Added handleCloseModal helper
+   - Clearer data flow: Page → UserForm → onSave → Mutations
+
+   **Success Criteria**:
+   - [x] UserForm component created at src/components/forms/UserForm.tsx
+   - [x] AdminUserManagementPage reduced from 228 to 165 lines (28% reduction)
+   - [x] Form state extracted to UserForm (userName, userEmail, userRole)
+   - [x] Form validation logic encapsulated in UserForm
+   - [x] Page component only handles data fetching and mutations
+   - [x] UserForm is reusable and atomic
+   - [x] TypeScript compilation passed (0 errors)
+   - [x] Zero breaking changes to existing functionality
+   - [x] Separation of Concerns achieved (UI vs data)
+   - [x] Single Responsibility Principle applied
+
+   **Impact**:
+   - `src/components/forms/UserForm.tsx`: New component (86 lines)
+   - `src/pages/portal/admin/AdminUserManagementPage.tsx`: Reduced 228 → 165 lines (63 lines removed)
+   - `src/components/forms/`: New directory for form components (modularity foundation)
+   - Component reusability: UserForm can be used in other user management contexts
+   - Maintainability: Form logic centralized in one component
+   - Testability: UserForm can be tested independently of page component
+   - Future refactoring: Similar pattern applies to GradeForm extraction
 
    ### [REFACTOR] Extract GradeForm Component from TeacherGradeManagementPage
    - Location: src/pages/portal/teacher/TeacherGradeManagementPage.tsx
