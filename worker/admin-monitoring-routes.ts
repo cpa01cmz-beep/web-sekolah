@@ -4,6 +4,7 @@ import { integrationMonitor } from './integration-monitor';
 import { authenticate, authorize } from './middleware/auth';
 import { strictRateLimiter } from './middleware/rate-limit';
 import { logger } from './logger';
+import type { WebhookDelivery } from '@shared/types';
 import { WebhookEventEntity, WebhookDeliveryEntity, WebhookConfigEntity } from './entities';
 
 export function adminMonitoringRoutes(app: Hono<{ Bindings: Env }>) {
