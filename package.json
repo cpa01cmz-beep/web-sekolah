@@ -78,7 +78,7 @@
     "zustand": "^5.0.6"
   },
   "devDependencies": {
-    "@cloudflare/vite-plugin": "^1.20.0",
+    "@cloudflare/vite-plugin": "^1.9.4",
     "@cloudflare/workers-types": "^4.20250807.0",
     "@eslint/js": "^9.39.1",
     "@testing-library/jest-dom": "^6.9.1",

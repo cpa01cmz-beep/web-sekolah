@@ -78,34 +78,10 @@ function watchDependenciesPlugin() {
   };
 }
 
-function weakRefPolyfillPlugin() {
-  return {
-    name: "weakref-polyfill",
-    renderChunk(code: string) {
-      const polyfill = `
-if('WeakRef'in this===!1){
-  this.WeakRef=class{
-    constructor(e){
-      this._target=e
-    }
-    deref(){
-      return this._target
-    }
-  }
-}
-`;
-      return {
-        code: polyfill + code,
-        map: null,
-      };
-    },
-  };
-}
-
 export default ({ mode }: { mode: string }) => {
   const env = loadEnv(mode, process.cwd());
   return defineConfig({
-    plugins: [react(), cloudflare(), watchDependenciesPlugin(), weakRefPolyfillPlugin()],
+    plugins: [react(), cloudflare(), watchDependenciesPlugin()],
     build: {
       minify: true,
       sourcemap: false,
