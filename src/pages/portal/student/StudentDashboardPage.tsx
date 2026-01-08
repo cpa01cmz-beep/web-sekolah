@@ -31,6 +31,7 @@ export function StudentDashboardPage() {
         icon={Inbox}
         title="No data available"
         description="We couldn't find any data for your dashboard. Please try again later or contact support if issue persists."
+        variant="error"
       />
     );
   }
