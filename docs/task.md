@@ -523,8 +523,13 @@ logger.error('Webhook delivery failed after max retries', {
 | Low | Refactor large UI components | Medium | src/components/ui/sidebar.tsx (771 lines) |
 | Medium | Consolidate retry configuration constants | Small | worker/webhook-service.ts (MAX_RETRIES, RETRY_DELAYS) |
 | Medium | Replace `any` types with proper interfaces in tests | Small | worker/domain/__tests__/UserService.test.ts (12+ instances) |
-| Medium | Abstract localStorage usage into storage utility | Medium | src/lib/authStore.ts (direct localStorage access) |
 | Low | Extract WebhookService signature verification to separate utility | Small | worker/webhook-service.ts:240 (verifySignature function) |
+| Medium | Split user-routes.ts into domain-specific route files | Medium | worker/user-routes.ts (512 lines, 24 routes) |
+| High | Replace unsafe `as any` type casts with proper typing | Small | worker/user-routes.ts (3 instances), error-monitoring.ts, migrations.ts, type-guards.ts |
+| Medium | Separate seed data from entities.ts | Small | worker/entities.ts (lines 9-165 contain seed data mixed with entity classes) |
+| Low | Extract chart.tsx into smaller focused components | Medium | src/components/ui/chart.tsx (365 lines, complex Recharts wrapper) |
+| Medium | Create route middleware wrapper to reduce authenticate/authorize duplication | Small | worker/user-routes.ts (24 authenticate + 24 authorize calls follow same pattern) |
+| Low | Extract route handler pattern into reusable builder function | Small | worker/user-routes.ts (24 routes follow identical structure: app.get/post + authenticate + authorize + async handler) |
 
 ### Interface Definition and Layer Separation (2026-01-08) - Completed ✅
 
