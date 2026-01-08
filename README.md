@@ -132,19 +132,15 @@ After starting the application:
 
 ## Documentation
 
-Comprehensive documentation is available in our [docs/](./docs/) directory and [GitHub Wiki](https://github.com/cpa01cmz-beep/web-sekolah/wiki):
+Comprehensive documentation is available in our [docs/](./docs/) directory:
 
 - [Developer Guide](./docs/DEVELOPER_GUIDE.md) - Start here! Developer onboarding, architecture patterns, component creation, testing, and contribution guidelines
-- [Technical Documentation](./DOCUMENTATION.md) - Complete developer guide with architecture, patterns, and implementation details
 - [Quick Start Guide](./docs/QUICK_START.md) - Get started quickly with step-by-step guides for students, teachers, parents, and admins
 - [API Blueprint](./docs/blueprint.md) - Complete API reference with endpoints, error codes, and integration patterns
-- [User Guides](https://github.com/cpa01cmz-beep/web-sekolah/wiki/User-Guides) - Instructions for students, teachers, parents, and admins
+- [Security Guide](./docs/SECURITY.md) - Security controls, best practices, and deployment checklist
 - [Architectural Task List](./docs/task.md) - Implementation status and roadmap
-- [Technical Blueprint](https://github.com/cpa01cmz-beep/web-sekolah/wiki/Technical-Blueprint) - Detailed technical documentation
-- [Development Roadmap](https://github.com/cpa01cmz-beep/web-sekolah/wiki/Development-Roadmap) - Project development roadmap
-- [Deployment Guide](https://github.com/cpa01cmz-beep/web-sekolah/wiki/Deployment-Guide) - Instructions for deploying the application
-- [Security Guidelines](https://github.com/cpa01cmz-beep/web-sekolah/wiki/Security-Guidelines) - Security best practices and guidelines
-- [Contributing](https://github.com/cpa01cmz-beep/web-sekolah/wiki/Contributing) - Guidelines for contributing to the project
+- [Integration Architecture](./docs/INTEGRATION_ARCHITECTURE.md) - Enterprise-grade resilience patterns, circuit breakers, retries, and webhook reliability
+- [State Management](./docs/STATE_MANAGEMENT.md) - Zustand state management patterns and examples
 
 ## Development
 
@@ -156,14 +152,14 @@ Run the test suite to verify everything is working:
 npm test
 ```
 
-All tests should pass (currently 887 tests).
+All tests should pass (currently 750 tests).
 
 ### Type Checking
 
 Check TypeScript types:
 
 ```bash
-npm run typecheck
+npx tsc --noEmit
 ```
 
 ### Linting

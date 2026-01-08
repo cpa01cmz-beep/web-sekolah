@@ -190,7 +190,7 @@ This document tracks architectural refactoring tasks for Akademia Pro.
 
 **Problem**:
 - README listed Framer Motion in Technology Stack, but it was replaced with CSS animations
-- Test count outdated (582 vs 887 actual tests)
+- Test count outdated (582 vs 750 actual tests)
 - Deployment commands referenced `bun deploy` but package.json uses `npm run deploy`
 - Prerequisites listed Bun instead of Node.js/npm
 - Inconsistent command references across documentation (bun vs npm)
@@ -202,9 +202,10 @@ This document tracks architectural refactoring tasks for Akademia Pro.
     - Added tailwindcss animation documentation link
     - Benefits: Accurate reflection of current implementation
 
-2. ✅ **Updated Test Count** - Changed from 582 to 887
+2. ✅ **Updated Test Count** - Changed from 582 to 750
     - Updated README.md:159
-    - Reflects actual test coverage (352 test files, 887 test cases)
+    - Updated docs/task.md to correct test count from 887 to 750
+    - Reflects actual test coverage (34 test files, 750 test cases)
     - Benefits: Accurate baseline for developers
 
 3. ✅ **Updated Deployment Commands** - Changed from bun to npm
@@ -250,7 +251,7 @@ This document tracks architectural refactoring tasks for Akademia Pro.
 
 **Success Criteria**:
 - [x] Technology stack accurately reflects implementation
-- [x] Test count is current (887 tests)
+- [x] Test count is current (750 tests)
 - [x] All commands use npm (not bun)
 - [x] Prerequisites list Node.js/npm (not Bun)
 - [x] All documentation files consistent
