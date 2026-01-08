@@ -52,25 +52,29 @@ class CircuitBreaker {
   private readonly threshold: number;
   private readonly timeout: number;
   private readonly resetTimeout: number;
+  private readonly halfOpenMaxCalls: number;
+  private halfOpenCalls = 0;
 
-  constructor(threshold = CircuitBreakerConfig.FAILURE_THRESHOLD, timeout = CircuitBreakerConfig.TIMEOUT_MS, resetTimeout = CircuitBreakerConfig.RESET_TIMEOUT_MS) {
+  constructor(threshold = CircuitBreakerConfig.FAILURE_THRESHOLD, timeout = CircuitBreakerConfig.TIMEOUT_MS, resetTimeout = CircuitBreakerConfig.RESET_TIMEOUT_MS, halfOpenMaxCalls = 3) {
     this.threshold = threshold;
     this.timeout = timeout;
     this.resetTimeout = resetTimeout;
+    this.halfOpenMaxCalls = halfOpenMaxCalls;
   }
 
   async execute<T>(fn: () => Promise<T>): Promise<T> {
     if (this.state.isOpen) {
-      if (Date.now() > this.state.nextAttemptTime) {
-        this.state.isOpen = false;
-        this.state.failureCount = 0;
-      } else {
+      const now = Date.now();
+      
+      if (now < this.state.nextAttemptTime) {
         const error = new Error('Circuit breaker is open') as ApiError;
         error.code = ErrorCode.CIRCUIT_BREAKER_OPEN;
         error.status = 503;
         error.retryable = false;
         throw error;
       }
+
+      this.halfOpenCalls = 0;
     }
 
     try {
@@ -84,17 +88,30 @@ class CircuitBreaker {
   }
 
   private onSuccess(): void {
-    this.state.failureCount = 0;
-    this.state.isOpen = false;
+    if (this.state.isOpen) {
+      this.halfOpenCalls++;
+      
+      if (this.halfOpenCalls >= this.halfOpenMaxCalls) {
+        this.state.isOpen = false;
+        this.state.failureCount = 0;
+        this.halfOpenCalls = 0;
+      }
+    } else {
+      this.state.failureCount = 0;
+    }
   }
 
   private onFailure(): void {
+    const now = Date.now();
     this.state.failureCount++;
-    this.state.lastFailureTime = Date.now();
+    this.state.lastFailureTime = now;
     
-    if (this.state.failureCount >= this.threshold) {
+    if (this.state.isOpen) {
+      this.halfOpenCalls = 0;
+      this.state.nextAttemptTime = now + this.timeout;
+    } else if (this.state.failureCount >= this.threshold) {
       this.state.isOpen = true;
-      this.state.nextAttemptTime = Date.now() + this.resetTimeout;
+      this.state.nextAttemptTime = now + this.timeout;
     }
   }
 
@@ -109,6 +126,7 @@ class CircuitBreaker {
       lastFailureTime: 0,
       nextAttemptTime: 0,
     };
+    this.halfOpenCalls = 0;
   }
 }
 

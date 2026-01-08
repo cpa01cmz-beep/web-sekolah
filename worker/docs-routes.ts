@@ -32,7 +32,7 @@ async function fetchWithRetry(url: string, maxRetries = DOCS_MAX_RETRIES): Promi
       lastError = error instanceof Error ? error : new Error(String(error));
 
       if (attempt < maxRetries) {
-        const delay = DOCS_RETRY_DELAY_MS * (attempt + 1);
+        const delay = DOCS_RETRY_DELAY_MS * Math.pow(2, attempt) + Math.random() * 1000;
         await new Promise(resolve => setTimeout(resolve, delay));
       }
     }
