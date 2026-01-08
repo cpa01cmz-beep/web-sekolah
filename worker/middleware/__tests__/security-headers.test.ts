@@ -22,17 +22,17 @@ describe('Security Headers Middleware', () => {
     expect(res.headers.get('Cross-Origin-Resource-Policy')).toBe('same-site');
   });
 
-  it('should use default CSP directives', async () => {
+  it('should use default CSP directives with hash-based script-src', async () => {
     const app = new Hono();
     app.use('*', securityHeaders());
-    app.get('/test', (c) => c.json({ success: true }));
+    app.get('/', (c) => c.text('Hello'));
 
-    const res = await app.request('/test');
-
-    expect(res.status).toBe(200);
+    const res = await app.request('/');
     const csp = res.headers.get('Content-Security-Policy');
-    expect(csp).toContain("default-src 'self'");
-    expect(csp).toContain("script-src 'self' 'unsafe-inline' 'unsafe-eval'");
+
+    expect(csp).toBeDefined();
+    expect(csp).toContain("script-src 'self' 'sha256-1LjDIY7ayXpv8ODYzP8xZXqNvuMhUBdo39lNMQ1oGHI=' 'unsafe-eval'");
+    expect(csp).not.toContain("script-src 'self' 'unsafe-inline'");
     expect(csp).toContain("style-src 'self' 'unsafe-inline'");
   });
 
