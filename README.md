@@ -133,6 +133,7 @@ After starting the application:
 
 Comprehensive documentation is available in our [docs/](./docs/) directory and [GitHub Wiki](https://github.com/cpa01cmz-beep/web-sekolah/wiki):
 
+- [Developer Guide](./docs/DEVELOPER_GUIDE.md) - Start here! Developer onboarding, architecture patterns, component creation, testing, and contribution guidelines
 - [Technical Documentation](./DOCUMENTATION.md) - Complete developer guide with architecture, patterns, and implementation details
 - [Quick Start Guide](./docs/QUICK_START.md) - Get started quickly with step-by-step guides for students, teachers, parents, and admins
 - [API Blueprint](./docs/blueprint.md) - Complete API reference with endpoints, error codes, and integration patterns

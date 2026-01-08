@@ -434,6 +434,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## Additional Documentation
 
+- [Developer Guide](./docs/DEVELOPER_GUIDE.md) - Developer onboarding, architecture patterns, component creation, testing, and contribution guidelines
 - [API Blueprint](./docs/blueprint.md) - Complete API reference with endpoints, error codes, and integration patterns
 - [Architectural Task List](./docs/task.md) - Implementation status and roadmap
 - [User Guides](./wiki/User-Guides.md) - Instructions for students, teachers, parents, and admins
