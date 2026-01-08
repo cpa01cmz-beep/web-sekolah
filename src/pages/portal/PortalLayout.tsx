@@ -10,7 +10,6 @@ import { cn } from '@/lib/utils';
 import { useState } from 'react';
 import { SkipLink } from '@/components/SkipLink';
 import { navLinksMap, NavLink as NavLinkType } from '@/config/navigation';
-import React from 'react';
 import { THEME_COLORS } from '@/theme/colors';
 export function PortalLayout() {
   const user = useAuthStore((state) => state.user);

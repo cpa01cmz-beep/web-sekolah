@@ -6,7 +6,6 @@ import { cn } from '@/lib/utils';
 import { useState } from 'react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { navLinksMap, NavLink as NavLinkType } from '@/config/navigation';
-import React from 'react';
 import { THEME_COLORS } from '@/theme/colors';
 export function PortalSidebar() {
   const user = useAuthStore((state) => state.user);

@@ -28,10 +28,7 @@ import type {
 } from "@shared/types";
 import { logger } from './logger';
 import { WebhookService } from './webhook-service';
-import { StudentDashboardService } from './domain';
-import { TeacherService } from './domain';
-import { GradeService } from './domain';
-import { UserService } from './domain';
+import { StudentDashboardService, TeacherService, GradeService, UserService } from './domain';
 import { getAuthUser } from './type-guards';
 
 export function userRoutes(app: Hono<{ Bindings: Env }>) {

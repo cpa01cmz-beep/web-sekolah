@@ -8,9 +8,8 @@ import type {
   ConsoleNative,
   WrappedConsoleFn
 } from './types';
-import { REACT_WARNING_PATTERN, WARNING_PREFIX, CONSOLE_ERROR_PREFIX, ERROR_REPORTER_CONFIG } from './constants';
+import { REACT_WARNING_PATTERN, WARNING_PREFIX, CONSOLE_ERROR_PREFIX, ERROR_REPORTER_CONFIG, VENDOR_PATTERNS } from './constants';
 import { categorizeError, isReactRouterFutureFlagMessage, isDeprecatedReactWarningMessage, hasRelevantSourceInStack, parseStackTrace } from './utils';
-import { VENDOR_PATTERNS } from './constants';
 import { globalDeduplication } from './deduplication';
 import { ConsoleArgs } from './types';
 
