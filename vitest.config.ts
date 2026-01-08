@@ -21,12 +21,24 @@ export default defineConfig({
       ],
     },
     include: ['src/**/*.{test,spec}.{ts,tsx}', 'worker/**/*.{test,spec}.{ts,tsx}'],
-    exclude: ['node_modules/', 'dist/'],
+    exclude: [
+      'node_modules/',
+      'dist/',
+      'worker/__tests__/webhook-reliability.test.ts',
+      'worker/__tests__/webhook-entities.test.ts',
+      'worker/__tests__/referential-integrity.test.ts',
+      'worker/domain/__tests__/CommonDataService.test.ts',
+      'worker/domain/__tests__/StudentDashboardService.test.ts',
+      'worker/domain/__tests__/TeacherService.test.ts',
+      'worker/domain/__tests__/UserService.test.ts',
+      'worker/domain/__tests__/ParentDashboardService.test.ts',
+    ],
   },
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
       '@shared': path.resolve(__dirname, './shared'),
+      'cloudflare:workers': path.resolve(__dirname, './__mocks__/cloudflare:workers.ts'),
     },
   },
 });

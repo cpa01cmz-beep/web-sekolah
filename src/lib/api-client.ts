@@ -4,7 +4,7 @@
 
 import { QueryClient, useQuery as useTanstackQuery, useMutation as useTanstackMutation, UseQueryOptions, UseMutationOptions } from '@tanstack/react-query';
 import { ApiResponse, ErrorCode } from "../../shared/types";
-import { CachingTime } from '../config/time';
+import { CachingTime, ApiTimeout, RetryDelay, RetryCount, CircuitBreakerConfig } from '../config/time';
 import { STORAGE_KEYS } from '../constants/storage-keys';
 import { storage } from '../lib/storage';
 
@@ -53,7 +53,7 @@ class CircuitBreaker {
   private readonly timeout: number;
   private readonly resetTimeout: number;
 
-  constructor(threshold = 5, timeout = 60000, resetTimeout = 30000) {
+  constructor(threshold = CircuitBreakerConfig.FAILURE_THRESHOLD, timeout = CircuitBreakerConfig.TIMEOUT_MS, resetTimeout = CircuitBreakerConfig.RESET_TIMEOUT_MS) {
     this.threshold = threshold;
     this.timeout = timeout;
     this.resetTimeout = resetTimeout;
@@ -112,7 +112,7 @@ class CircuitBreaker {
   }
 }
 
-const circuitBreaker = new CircuitBreaker(5, 60000, 30000);
+const circuitBreaker = new CircuitBreaker(CircuitBreakerConfig.FAILURE_THRESHOLD, CircuitBreakerConfig.TIMEOUT_MS, CircuitBreakerConfig.RESET_TIMEOUT_MS);
 
 // ====================
 // Exponential Backoff Retry
@@ -172,7 +172,7 @@ export const queryClient = new QueryClient({
         if (error.code === ErrorCode.FORBIDDEN) return false;
         return failureCount < 3;
       },
-      retryDelay: (attemptIndex) => Math.min(1000 * Math.pow(2, attemptIndex), 30000),
+      retryDelay: (attemptIndex) => Math.min(RetryDelay.ONE_SECOND * Math.pow(2, attemptIndex), RetryDelay.THIRTY_SECONDS),
     },
     mutations: {
       retry: (failureCount, error: ApiError) => {
@@ -196,7 +196,7 @@ export const queryClient = new QueryClient({
  * @throws Error if the request times out
  */
 async function fetchWithTimeout(url: string, options: RequestOptions = {}): Promise<Response> {
-  const { timeout = 30000, ...restOptions } = options;
+  const { timeout = ApiTimeout.THIRTY_SECONDS, ...restOptions } = options;
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), timeout);
 
@@ -230,7 +230,7 @@ async function fetchWithTimeout(url: string, options: RequestOptions = {}): Prom
  * @throws Error if the request fails or returns an unsuccessful response
  */
 export async function apiClient<T>(path: string, init?: RequestInit & { timeout?: number; circuitBreaker?: boolean }): Promise<T> {
-  const { headers: initHeaders, timeout = 30000, circuitBreaker: useCircuitBreaker = true, ...restInit } = init || {};
+  const { headers: initHeaders, timeout = ApiTimeout.THIRTY_SECONDS, circuitBreaker: useCircuitBreaker = true, ...restInit } = init || {};
   const requestId = crypto.randomUUID();
 
   const executeRequest = async (): Promise<T> => {
@@ -292,11 +292,11 @@ export async function apiClient<T>(path: string, init?: RequestInit & { timeout?
 
   if (useCircuitBreaker) {
     return circuitBreaker.execute(() => 
-      fetchWithRetry(executeRequest, 3, 1000)
+      fetchWithRetry(executeRequest, RetryCount.THREE, RetryDelay.ONE_SECOND)
     );
   }
 
-  return fetchWithRetry(executeRequest, 3, 1000);
+  return fetchWithRetry(executeRequest, RetryCount.THREE, RetryDelay.ONE_SECOND);
 }
 
 function mapStatusToErrorCode(status: number): string {
@@ -360,7 +360,7 @@ export function useQuery<TData, TError = Error>(
   queryKey: QueryKey,
   options?: QueryOptions<TData, TError>
 ) {
-  const { timeout = 30000, circuitBreaker = true, ...restOptions } = options || {};
+  const { timeout = ApiTimeout.THIRTY_SECONDS, circuitBreaker = true, ...restOptions } = options || {};
   
   const queryFn = () => apiClient<TData>(`/api/${queryKey.join('/')}`, {
     timeout,
@@ -388,7 +388,7 @@ export function useMutation<TData, TError = Error, TVariables = void>(
   options?: ExtendedMutationOptions<TData, TError, TVariables>
 ) {
   const { 
-    timeout = 30000, 
+    timeout = ApiTimeout.THIRTY_SECONDS, 
     circuitBreaker = true, 
     method = 'POST', 
     ...restOptions 

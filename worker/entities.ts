@@ -1,9 +1,10 @@
 import { IndexedEntity, Index, SecondaryIndex, type Env } from "./core-utils";
-import type { SchoolUser, SchoolClass, Course, Grade, Announcement, ScheduleItem, SchoolData, UserRole, Student, WebhookConfig, WebhookEvent, WebhookDelivery } from "@shared/types";
+import type { SchoolUser, SchoolClass, Course, Grade, Announcement, ScheduleItem, SchoolData, UserRole, Student, WebhookConfig, WebhookEvent, WebhookDelivery, DeadLetterQueueWebhook } from "@shared/types";
 import { hashPassword } from "./password-utils";
 import { CompoundSecondaryIndex } from "./storage/CompoundSecondaryIndex";
 import { DateSortedSecondaryIndex } from "./storage/DateSortedSecondaryIndex";
 import { seedData } from "./seed-data";
+import { StudentDateSortedIndex } from "./storage/StudentDateSortedIndex";
 
 export class UserEntity extends IndexedEntity<SchoolUser> {
   static readonly entityName = "user";
@@ -18,6 +19,11 @@ export class UserEntity extends IndexedEntity<SchoolUser> {
   static async getByClassId(env: Env, classId: string): Promise<Student[]> {
     const users = await this.getBySecondaryIndex(env, 'classId', classId);
     return users.filter((u): u is Student => u.role === 'student' && u.classId === classId);
+  }
+
+  static async getByEmail(env: Env, email: string): Promise<SchoolUser | null> {
+    const users = await this.getBySecondaryIndex(env, 'email', email);
+    return users.length > 0 ? users[0] : null;
   }
 }
 
@@ -88,11 +94,42 @@ export class GradeEntity extends IndexedEntity<Grade> {
     await compoundIndex.remove([state.studentId, state.courseId], id);
     return await super.delete(env, id);
   }
+
+  static async getRecentForStudent(env: Env, studentId: string, limit: number): Promise<Grade[]> {
+    const dateIndex = new StudentDateSortedIndex(env, this.entityName, studentId);
+    const recentGradeIds = await dateIndex.getRecent(limit);
+    if (recentGradeIds.length === 0) {
+      return [];
+    }
+    const grades = await Promise.all(recentGradeIds.map(id => new this(env, id).getState()));
+    return grades.filter(g => g && !g.deletedAt) as Grade[];
+  }
+
+  static async createWithAllIndexes(env: Env, state: Grade): Promise<Grade> {
+    const created = await super.create(env, state);
+    const compoundIndex = new CompoundSecondaryIndex(env, this.entityName, ['studentId', 'courseId']);
+    await compoundIndex.add([state.studentId, state.courseId], state.id);
+    const dateIndex = new StudentDateSortedIndex(env, this.entityName, state.studentId);
+    await dateIndex.add(state.createdAt, state.id);
+    return created;
+  }
+
+  static async deleteWithAllIndexes(env: Env, id: string): Promise<boolean> {
+    const inst = new this(env, id);
+    const state = await inst.getState() as Grade | null;
+    if (!state) return false;
+
+    const compoundIndex = new CompoundSecondaryIndex(env, this.entityName, ['studentId', 'courseId']);
+    await compoundIndex.remove([state.studentId, state.courseId], id);
+    const dateIndex = new StudentDateSortedIndex(env, this.entityName, state.studentId);
+    await dateIndex.remove(state.createdAt, id);
+    return await super.delete(env, id);
+  }
 }
 export class AnnouncementEntity extends IndexedEntity<Announcement> {
   static readonly entityName = "announcement";
   static readonly indexName = "announcements";
-  static readonly initialState: Announcement = { id: "", title: "", content: "", date: "", authorId: "", createdAt: "", updatedAt: "", deletedAt: null };
+  static readonly initialState: Announcement = { id: "", title: "", content: "", date: "", authorId: "", targetRole: "all", createdAt: "", updatedAt: "", deletedAt: null };
   static seedData = seedData.announcements;
 
   static async getByAuthorId(env: Env, authorId: string): Promise<Announcement[]> {
@@ -100,6 +137,12 @@ export class AnnouncementEntity extends IndexedEntity<Announcement> {
     const announcementIds = await index.getByValue(authorId);
     const announcements = await Promise.all(announcementIds.map(id => new this(env, id).getState()));
     return announcements.filter(a => a && !a.deletedAt) as Announcement[];
+  }
+
+  static async getByTargetRole(env: Env, targetRole: string): Promise<Announcement[]> {
+    const specificRoleAnnouncements = await this.getBySecondaryIndex(env, 'targetRole', targetRole);
+    const allAnnouncements = await this.getBySecondaryIndex(env, 'targetRole', 'all');
+    return [...specificRoleAnnouncements, ...allAnnouncements];
   }
 
   static async getRecent(env: Env, limit: number): Promise<Announcement[]> {
@@ -223,7 +266,8 @@ export class WebhookDeliveryEntity extends IndexedEntity<WebhookDelivery> {
     attempts: 0,
     createdAt: "",
     updatedAt: "",
-    deletedAt: null
+    deletedAt: null,
+    idempotencyKey: undefined
   };
 
   static async getPendingRetries(env: Env): Promise<WebhookDelivery[]> {
@@ -232,6 +276,15 @@ export class WebhookDeliveryEntity extends IndexedEntity<WebhookDelivery> {
     return pendingDeliveries.filter(
       d => d.nextAttemptAt && d.nextAttemptAt <= now
     );
+  }
+
+  static async getByIdempotencyKey(env: Env, idempotencyKey: string): Promise<WebhookDelivery | null> {
+    const index = new SecondaryIndex<string>(env, this.entityName, 'idempotencyKey');
+    const deliveryIds = await index.getByValue(idempotencyKey);
+    if (deliveryIds.length === 0) return null;
+    const deliveries = await Promise.all(deliveryIds.map(id => new this(env, id).getState()));
+    const validDelivery = deliveries.find(d => d && !d.deletedAt);
+    return validDelivery || null;
   }
 
   static async getByEventId(env: Env, eventId: string): Promise<WebhookDelivery[]> {
@@ -246,5 +299,44 @@ export class WebhookDeliveryEntity extends IndexedEntity<WebhookDelivery> {
     const deliveryIds = await index.getByValue(webhookConfigId);
     const deliveries = await Promise.all(deliveryIds.map(id => new this(env, id).getState()));
     return deliveries.filter(d => d && !d.deletedAt) as WebhookDelivery[];
+  }
+}
+
+export class DeadLetterQueueWebhookEntity extends IndexedEntity<DeadLetterQueueWebhook> {
+  static readonly entityName = "deadLetterQueueWebhook";
+  static readonly indexName = "deadLetterQueueWebhooks";
+  static readonly initialState: DeadLetterQueueWebhook = {
+    id: "",
+    eventId: "",
+    webhookConfigId: "",
+    eventType: "",
+    url: "",
+    payload: {},
+    status: 0,
+    attempts: 0,
+    errorMessage: "",
+    failedAt: "",
+    createdAt: "",
+    updatedAt: "",
+    deletedAt: null
+  };
+
+  static async getAllFailed(env: Env): Promise<DeadLetterQueueWebhook[]> {
+    const result = await this.list(env);
+    return result.items;
+  }
+
+  static async getByWebhookConfigId(env: Env, webhookConfigId: string): Promise<DeadLetterQueueWebhook[]> {
+    const index = new SecondaryIndex<string>(env, this.entityName, 'webhookConfigId');
+    const dlqIds = await index.getByValue(webhookConfigId);
+    const dlqItems = await Promise.all(dlqIds.map(id => new this(env, id).getState()));
+    return dlqItems.filter(d => d && !d.deletedAt) as DeadLetterQueueWebhook[];
+  }
+
+  static async getByEventType(env: Env, eventType: string): Promise<DeadLetterQueueWebhook[]> {
+    const index = new SecondaryIndex<string>(env, this.entityName, 'eventType');
+    const dlqIds = await index.getByValue(eventType);
+    const dlqItems = await Promise.all(dlqIds.map(id => new this(env, id).getState()));
+    return dlqItems.filter(d => d && !d.deletedAt) as DeadLetterQueueWebhook[];
   }
 }

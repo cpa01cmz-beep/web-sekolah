@@ -1,14 +1,14 @@
 import { describe, it, expect } from 'vitest';
-import { WEBHOOK_CONFIG, RETRY_DELAYS_MS } from '../webhook-constants';
+import { WEBHOOK_CONFIG } from '../webhook-constants';
 
 describe('Webhook Retry Logic', () => {
   it('should schedule retries with exponential backoff', () => {
-    expect(RETRY_DELAYS_MS[0]).toBe(60000);
-    expect(RETRY_DELAYS_MS[1]).toBe(300000);
-    expect(RETRY_DELAYS_MS[2]).toBe(900000);
-    expect(RETRY_DELAYS_MS[3]).toBe(1800000);
-    expect(RETRY_DELAYS_MS[4]).toBe(3600000);
-    expect(RETRY_DELAYS_MS[5]).toBe(7200000);
+    expect(WEBHOOK_CONFIG.RETRY_DELAYS_MS[0]).toBe(60000);
+    expect(WEBHOOK_CONFIG.RETRY_DELAYS_MS[1]).toBe(300000);
+    expect(WEBHOOK_CONFIG.RETRY_DELAYS_MS[2]).toBe(900000);
+    expect(WEBHOOK_CONFIG.RETRY_DELAYS_MS[3]).toBe(1800000);
+    expect(WEBHOOK_CONFIG.RETRY_DELAYS_MS[4]).toBe(3600000);
+    expect(WEBHOOK_CONFIG.RETRY_DELAYS_MS[5]).toBe(7200000);
   });
 
   it('should stop retrying after max retries', () => {

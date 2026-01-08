@@ -7,7 +7,8 @@ import { userRoutes } from './user-routes';
 import { authRoutes } from './auth-routes';
 import { webhookRoutes } from './webhook-routes';
 import { adminMonitoringRoutes } from './admin-monitoring-routes';
-import { Env, GlobalDurableObject, ok, notFound, serverError } from './core-utils';
+import { docsRoutes } from './docs-routes';
+import { Env, GlobalDurableObject, ok, notFound, serverError, bad } from './core-utils';
 import { logger as pinoLogger } from './logger';
 import { defaultRateLimiter, strictRateLimiter } from './middleware/rate-limit';
 import { defaultTimeout } from './middleware/timeout';
@@ -83,6 +84,7 @@ authRoutes(app);
 userRoutes(app);
 webhookRoutes(app);
 adminMonitoringRoutes(app);
+docsRoutes(app);
 
 app.get('/api/health', async (c) => {
   const metrics = integrationMonitor.getHealthMetrics();
@@ -117,9 +119,9 @@ app.get('/api/health', async (c) => {
 app.post('/api/client-errors', async (c) => {
   try {
     const e = await c.req.json<ClientErrorReport>();
-    if (!e.message) return c.json({ success: false, error: 'Missing required fields', code: 'VALIDATION_ERROR' }, 400);
+    if (!e.message) return bad(c, 'Missing required fields');
     pinoLogger.error('[CLIENT ERROR]', { errorReport: e });
-    return c.json({ success: true });
+    return ok(c, {});
   } catch (error) {
     pinoLogger.error('[CLIENT ERROR HANDLER] Failed', error);
     return serverError(c, 'Failed to process error report');

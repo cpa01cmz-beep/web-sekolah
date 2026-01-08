@@ -8,7 +8,7 @@ import { Separator } from '@/components/ui/separator';
 import { useAuthStore } from '@/lib/authStore';
 import { SlideUp } from '@/components/animations';
 import { toast } from 'sonner';
-import { format } from 'date-fns';
+import { formatDateLong } from '@/utils/date';
 type Announcement = {
   id: string;
   title: string;
@@ -80,7 +80,7 @@ export function TeacherAnnouncementsPage() {
                     <div>
                       <h3 className="font-semibold">{ann.title}</h3>
                       <p className="text-sm text-muted-foreground">
-                        By {ann.author} on {format(new Date(ann.date), 'PPP')}
+                        By {ann.author} on {formatDateLong(ann.date)}
                       </p>
                       <p className="mt-2 text-sm">{ann.content}</p>
                     </div>

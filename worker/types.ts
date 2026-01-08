@@ -14,3 +14,9 @@ export class GlobalDurableObject extends DurableObject<Env, unknown> {
 }
 
 export type Doc<T> = { v: number; data: T };
+
+export interface AuthUser {
+  id: string;
+  email: string;
+  role: 'student' | 'teacher' | 'parent' | 'admin';
+}

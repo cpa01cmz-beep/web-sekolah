@@ -1,17 +1,15 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { EmptyState } from '@/components/ui/empty-state';
 import { DashboardSkeleton } from '@/components/ui/loading-skeletons';
 import { PageHeader } from '@/components/PageHeader';
-import { Award, CalendarCheck, Megaphone, UserCheck, AlertTriangle, Inbox } from 'lucide-react';
+import { Award, CalendarCheck, Megaphone, AlertTriangle, Inbox } from 'lucide-react';
 import { SlideUp } from '@/components/animations';
 import { useParentDashboard } from '@/hooks/useParent';
 import { useAuthStore } from '@/lib/authStore';
-import type { Grade } from '@shared/types';
 import { formatDate } from '@/utils/date';
-import { GRADE_A_THRESHOLD, GRADE_B_THRESHOLD, GRADE_C_THRESHOLD, PASSING_SCORE_THRESHOLD } from '@/constants/grades';
+import { getGradeBadgeVariant, getGradeLetter } from '@/utils/grades';
 
 export function ParentDashboardPage() {
   const user = useAuthStore((state) => state.user);
@@ -37,21 +35,6 @@ export function ParentDashboardPage() {
       />
     );
   }
-
-  const getGradeBadgeVariant = (score: number) => {
-    if (score >= GRADE_A_THRESHOLD) return 'default';
-    if (score >= GRADE_B_THRESHOLD) return 'secondary';
-    if (score >= GRADE_C_THRESHOLD) return 'outline';
-    return 'destructive';
-  };
-
-  const getGradeLetter = (score: number) => {
-    if (score >= GRADE_A_THRESHOLD) return 'A';
-    if (score >= GRADE_B_THRESHOLD) return 'B';
-    if (score >= GRADE_C_THRESHOLD) return 'C';
-    if (score >= PASSING_SCORE_THRESHOLD) return 'D';
-    return 'F';
-  };
 
   return (
     <SlideUp delay={0} className="space-y-6">

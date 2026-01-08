@@ -1,11 +1,12 @@
 import type { Env } from './core-utils';
-import { WebhookConfigEntity, WebhookEventEntity, WebhookDeliveryEntity } from './entities';
+import { WebhookConfigEntity, WebhookEventEntity, WebhookDeliveryEntity, DeadLetterQueueWebhookEntity } from './entities';
 import type { WebhookConfig, WebhookEvent, WebhookDelivery } from '@shared/types';
 import { logger } from './logger';
 import { integrationMonitor } from './integration-monitor';
 import { CircuitBreaker } from './CircuitBreaker';
-import { WEBHOOK_CONFIG, RETRY_DELAYS_MS } from './webhook-constants';
+import { WEBHOOK_CONFIG } from './webhook-constants';
 import { generateSignature, verifySignature } from './webhook-crypto';
+import type { WebhookEventPayload } from './webhook-types';
 
 const webhookCircuitBreakers = new Map<string, CircuitBreaker>();
 
@@ -20,21 +21,29 @@ export class WebhookService {
       return;
     }
 
+    const now = new Date().toISOString();
+    const eventId = `event-${crypto.randomUUID()}`;
+
+    const event: WebhookEvent = {
+      id: eventId,
+      eventType,
+      data,
+      processed: false,
+      createdAt: now,
+      updatedAt: now
+    };
+
+    await new WebhookEventEntity(env, eventId).save(event);
+    integrationMonitor.recordWebhookEventCreated();
+
     for (const config of activeConfigs) {
-      const eventId = `event-${crypto.randomUUID()}`;
-      const now = new Date().toISOString();
-
-      const event: WebhookEvent = {
-        id: eventId,
-        eventType,
-        data,
-        processed: false,
-        createdAt: now,
-        updatedAt: now
-      };
-
-      await new WebhookEventEntity(env, eventId).save(event);
-      integrationMonitor.recordWebhookEventCreated();
+      const idempotencyKey = `${eventId}:${config.id}`;
+      
+      const existingDelivery = await WebhookDeliveryEntity.getByIdempotencyKey(env, idempotencyKey);
+      if (existingDelivery) {
+        logger.debug('Webhook delivery already exists with idempotency key', { idempotencyKey });
+        continue;
+      }
 
       const deliveryId = `delivery-${crypto.randomUUID()}`;
       const delivery: WebhookDelivery = {
@@ -45,12 +54,13 @@ export class WebhookService {
         attempts: 0,
         nextAttemptAt: now,
         createdAt: now,
-        updatedAt: now
+        updatedAt: now,
+        idempotencyKey
       };
 
       await new WebhookDeliveryEntity(env, deliveryId).save(delivery);
 
-      logger.info('Webhook event created', { eventId, webhookConfigId: config.id, eventType });
+      logger.info('Webhook delivery created', { deliveryId, eventId, webhookConfigId: config.id, eventType, idempotencyKey });
     }
   }
 
@@ -62,8 +72,11 @@ export class WebhookService {
 
     logger.info(`Found ${pendingDeliveries.length} pending webhook deliveries`);
 
-    for (const delivery of pendingDeliveries) {
-      await this.attemptDelivery(env, delivery);
+    const concurrencyLimit = WEBHOOK_CONFIG.CONCURRENCY_LIMIT;
+    
+    for (let i = 0; i < pendingDeliveries.length; i += concurrencyLimit) {
+      const batch = pendingDeliveries.slice(i, i + concurrencyLimit);
+      await Promise.all(batch.map(delivery => this.attemptDelivery(env, delivery)));
     }
   }
 
@@ -179,6 +192,7 @@ export class WebhookService {
     const newAttempt = delivery.attempts + 1;
 
     if (newAttempt >= WEBHOOK_CONFIG.MAX_RETRIES) {
+      await this.archiveToDeadLetterQueue(env, delivery, config, statusCode, errorMessage);
       await this.markDeliveryFailed(env, delivery, `Max retries exceeded: ${errorMessage}`);
       logger.error('Webhook delivery failed after max retries', {
         deliveryId: delivery.id,
@@ -189,7 +203,7 @@ export class WebhookService {
       return;
     }
 
-    const retryDelay = RETRY_DELAYS_MS[Math.min(newAttempt, RETRY_DELAYS_MS.length - 1)];
+    const retryDelay = WEBHOOK_CONFIG.RETRY_DELAYS_MS[Math.min(newAttempt, WEBHOOK_CONFIG.RETRY_DELAYS_MS.length - 1)];
     const nextAttemptAt = new Date(Date.now() + retryDelay).toISOString();
 
     const deliveryEntity = new WebhookDeliveryEntity(env, delivery.id);
@@ -205,7 +219,7 @@ export class WebhookService {
 
     logger.warn('Webhook delivery failed, scheduling retry', {
       deliveryId: delivery.id,
-      webhookConfigId: delivery.webhookConfigId,
+      webhookConfigId: config.id,
       statusCode,
       errorMessage,
       attempt: newAttempt,
@@ -221,6 +235,33 @@ export class WebhookService {
       errorMessage,
       updatedAt: new Date().toISOString()
     });
+  }
+
+  private static async archiveToDeadLetterQueue(env: Env, delivery: WebhookDelivery, config: WebhookConfig, statusCode: number, errorMessage: string): Promise<void> {
+    const event = await new WebhookEventEntity(env, delivery.eventId).getState();
+    if (!event) return;
+
+    const dlqId = `dlq-${crypto.randomUUID()}`;
+    const now = new Date().toISOString();
+
+    const dlqEntry = {
+      id: dlqId,
+      eventId: delivery.eventId,
+      webhookConfigId: config.id,
+      eventType: event.eventType,
+      url: config.url,
+      payload: event.data,
+      status: statusCode,
+      attempts: delivery.attempts,
+      errorMessage,
+      failedAt: now,
+      createdAt: now,
+      updatedAt: now
+    };
+
+    await new DeadLetterQueueWebhookEntity(env, dlqId).save(dlqEntry);
+    logger.info('Webhook archived to dead letter queue', { dlqId, deliveryId: delivery.id });
+    integrationMonitor.recordWebhookDelivery(false);
   }
 }
 

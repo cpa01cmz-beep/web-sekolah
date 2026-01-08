@@ -26,8 +26,9 @@ import type {
 } from "@shared/types";
 import { logger } from './logger';
 import { WebhookService } from './webhook-service';
+import { toWebhookPayload } from './webhook-types';
 import { StudentDashboardService, TeacherService, GradeService, UserService, ParentDashboardService, CommonDataService } from './domain';
-import { getAuthUser, getRoleSpecificFields } from './type-guards';
+import { getRoleSpecificFields, getCurrentUserId } from './type-guards';
 import type { Context } from 'hono';
 
 function validateUserAccess(
@@ -52,8 +53,7 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
   });
 
   app.get('/api/students/:id/grades', authenticate(), authorize('student'), async (c) => {
-    const user = getAuthUser(c);
-    const userId = user!.id;
+    const userId = getCurrentUserId(c);
     const requestedStudentId = c.req.param('id');
 
     if (!validateUserAccess(c, userId, requestedStudentId, 'student', 'grades')) {
@@ -65,8 +65,7 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
   });
 
   app.get('/api/students/:id/schedule', authenticate(), authorize('student'), async (c) => {
-    const user = getAuthUser(c);
-    const userId = user!.id;
+    const userId = getCurrentUserId(c);
     const requestedStudentId = c.req.param('id');
 
     if (!validateUserAccess(c, userId, requestedStudentId, 'student', 'schedule')) {
@@ -82,8 +81,7 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
   });
 
   app.get('/api/students/:id/card', authenticate(), authorize('student'), async (c) => {
-    const user = getAuthUser(c);
-    const userId = user!.id;
+    const userId = getCurrentUserId(c);
     const requestedStudentId = c.req.param('id');
 
     if (!validateUserAccess(c, userId, requestedStudentId, 'student', 'card')) {
@@ -127,8 +125,7 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
   });
 
   app.get('/api/teachers/:id/dashboard', authenticate(), authorize('teacher'), async (c) => {
-    const user = getAuthUser(c);
-    const userId = user!.id;
+    const userId = getCurrentUserId(c);
     const requestedTeacherId = c.req.param('id');
 
     if (!validateUserAccess(c, userId, requestedTeacherId, 'teacher', 'dashboard')) {
@@ -148,11 +145,7 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
     ).then(counts => counts.reduce((sum, count) => sum + count, 0));
 
     const recentGrades = await GradeService.getCourseGrades(c.env, teacherClasses[0]?.id || '');
-    const allAnnouncements = await CommonDataService.getAllAnnouncements(c.env);
-    const filteredAnnouncements = allAnnouncements
-      .filter(a => a.targetRole === 'teacher' || a.targetRole === 'all')
-      .slice(-5)
-      .reverse();
+    const filteredAnnouncements = await CommonDataService.getRecentAnnouncementsByRole(c.env, 'teacher', 5);
 
     const dashboardData: TeacherDashboardData = {
       teacherId: teacher.id,
@@ -168,18 +161,14 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
   });
 
   app.get('/api/teachers/:id/announcements', authenticate(), authorize('teacher'), async (c) => {
-    const user = getAuthUser(c);
-    const userId = user!.id;
+    const userId = getCurrentUserId(c);
     const requestedTeacherId = c.req.param('id');
 
     if (!validateUserAccess(c, userId, requestedTeacherId, 'teacher', 'announcements')) {
       return;
     }
 
-    const allAnnouncements = await CommonDataService.getAllAnnouncements(c.env);
-    const filteredAnnouncements = allAnnouncements.filter(a => 
-      a.targetRole === 'teacher' || a.targetRole === 'all'
-    );
+    const filteredAnnouncements = await CommonDataService.getAnnouncementsByRole(c.env, 'teacher');
 
     return ok(c, filteredAnnouncements);
   });
@@ -189,7 +178,7 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
 
     try {
       const newGrade = await GradeService.createGrade(c.env, gradeData);
-      await WebhookService.triggerEvent(c.env, 'grade.created', newGrade as unknown as Record<string, unknown>);
+      await WebhookService.triggerEvent(c.env, 'grade.created', toWebhookPayload(newGrade));
       return ok(c, newGrade);
     } catch (error) {
       if (error instanceof Error) {
@@ -201,7 +190,7 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
 
   app.post('/api/teachers/announcements', authenticate(), authorize('teacher'), async (c) => {
     const announcementData = await c.req.json<CreateAnnouncementData>();
-    const user = getAuthUser(c);
+    const authorId = getCurrentUserId(c);
 
     const now = new Date().toISOString();
     const newAnnouncement: Announcement = {
@@ -210,21 +199,19 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
       content: announcementData.content,
       date: now,
       targetRole: announcementData.targetRole || 'all',
-      targetClassIds: announcementData.targetClassIds || [],
-      createdBy: user!.id,
+      authorId,
       createdAt: now,
       updatedAt: now
     };
 
     await AnnouncementEntity.create(c.env, newAnnouncement.id, newAnnouncement);
-    await WebhookService.triggerEvent(c.env, 'announcement.created', newAnnouncement as unknown as Record<string, unknown>);
+    await WebhookService.triggerEvent(c.env, 'announcement.created', toWebhookPayload(newAnnouncement));
 
     return ok(c, newAnnouncement);
   });
 
   app.get('/api/students/:id/dashboard', authenticate(), authorize('student'), async (c) => {
-    const user = getAuthUser(c);
-    const userId = user!.id;
+    const userId = getCurrentUserId(c);
     const requestedStudentId = c.req.param('id');
 
     if (!validateUserAccess(c, userId, requestedStudentId, 'student', 'dashboard')) {
@@ -243,8 +230,7 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
   });
 
   app.get('/api/parents/:id/dashboard', authenticate(), authorize('parent'), async (c) => {
-    const user = getAuthUser(c);
-    const userId = user!.id;
+    const userId = getCurrentUserId(c);
     const requestedParentId = c.req.param('id');
 
     if (!validateUserAccess(c, userId, requestedParentId, 'parent', 'dashboard')) {
@@ -275,7 +261,7 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
     try {
       const updatedGrade = await GradeService.updateGrade(c.env, gradeId, { score, feedback });
 
-      await WebhookService.triggerEvent(c.env, 'grade.updated', updatedGrade as unknown as Record<string, unknown>);
+      await WebhookService.triggerEvent(c.env, 'grade.updated', toWebhookPayload(updatedGrade));
 
       return ok(c, updatedGrade);
     } catch (error) {
@@ -292,7 +278,7 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
     try {
       const newGrade = await GradeService.createGrade(c.env, gradeData);
 
-      await WebhookService.triggerEvent(c.env, 'grade.created', newGrade as unknown as Record<string, unknown>);
+      await WebhookService.triggerEvent(c.env, 'grade.created', toWebhookPayload(newGrade));
 
       return ok(c, newGrade);
     } catch (error) {
@@ -313,7 +299,7 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
 
     const newUser = await UserService.createUser(c.env, userData);
 
-    await WebhookService.triggerEvent(c.env, 'user.created', newUser as unknown as Record<string, unknown>);
+    await WebhookService.triggerEvent(c.env, 'user.created', toWebhookPayload(newUser));
 
     return ok(c, newUser);
   });
@@ -325,7 +311,7 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
     try {
       const updatedUser = await UserService.updateUser(c.env, userId, userData);
 
-      await WebhookService.triggerEvent(c.env, 'user.updated', updatedUser as unknown as Record<string, unknown>);
+      await WebhookService.triggerEvent(c.env, 'user.updated', toWebhookPayload(updatedUser));
 
       const { passwordHash: _, ...userWithoutPassword } = updatedUser;
       return ok(c, userWithoutPassword);
@@ -344,7 +330,7 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
     const result = await UserService.deleteUser(c.env, userId);
 
     if (result.deleted && user) {
-      await WebhookService.triggerEvent(c.env, 'user.deleted', { id: userId, role: user.role } as Record<string, unknown>);
+      await WebhookService.triggerEvent(c.env, 'user.deleted', toWebhookPayload({ id: userId, role: user.role }));
     }
 
     return ok(c, result);
@@ -413,7 +399,7 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
 
   app.post('/api/admin/announcements', authenticate(), authorize('admin'), async (c) => {
     const announcementData = await c.req.json<CreateAnnouncementData>();
-    const user = getAuthUser(c);
+    const authorId = getCurrentUserId(c);
 
     const now = new Date().toISOString();
     const newAnnouncement: Announcement = {
@@ -422,14 +408,13 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
       content: announcementData.content,
       date: now,
       targetRole: announcementData.targetRole || 'all',
-      targetClassIds: announcementData.targetClassIds || [],
-      createdBy: user!.id,
+      authorId,
       createdAt: now,
       updatedAt: now
     };
 
     await AnnouncementEntity.create(c.env, newAnnouncement.id, newAnnouncement);
-    await WebhookService.triggerEvent(c.env, 'announcement.created', newAnnouncement as unknown as Record<string, unknown>);
+    await WebhookService.triggerEvent(c.env, 'announcement.created', toWebhookPayload(newAnnouncement));
 
     return ok(c, newAnnouncement);
   });

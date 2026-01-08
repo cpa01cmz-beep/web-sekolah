@@ -134,13 +134,27 @@ After starting the application:
 
 Comprehensive documentation is available in our [docs/](./docs/) directory:
 
+**Getting Started**
 - [Developer Guide](./docs/DEVELOPER_GUIDE.md) - Start here! Developer onboarding, architecture patterns, component creation, testing, and contribution guidelines
 - [Quick Start Guide](./docs/QUICK_START.md) - Get started quickly with step-by-step guides for students, teachers, parents, and admins
+
+**Architecture & API**
 - [API Blueprint](./docs/blueprint.md) - Complete API reference with endpoints, error codes, and integration patterns
-- [Security Guide](./docs/SECURITY.md) - Security controls, best practices, and deployment checklist
-- [Architectural Task List](./docs/task.md) - Implementation status and roadmap
 - [Integration Architecture](./docs/INTEGRATION_ARCHITECTURE.md) - Enterprise-grade resilience patterns, circuit breakers, retries, and webhook reliability
 - [State Management](./docs/STATE_MANAGEMENT.md) - Zustand state management patterns and examples
+
+**Security**
+- [Security Guide](./docs/SECURITY.md) - Security controls, best practices, and deployment checklist
+- [Security Assessment](./docs/SECURITY_ASSESSMENT_2026-01-08.md) - Current security status (95/100, Production Ready ✅)
+
+**Development Guides**
+- [Architectural Task List](./docs/task.md) - Implementation status and roadmap
+- [Validation Guide](./docs/VALIDATION_GUIDE.md) - Input validation patterns with Zod schemas
+
+**Accessibility & UI/UX**
+- [UI/UX Best Practices](./docs/UI_UX_BEST_PRACTICES.md) - Accessibility (WCAG AA), keyboard shortcuts, design system patterns, and responsive design
+- [Color Contrast Verification](./docs/COLOR_CONTRAST_VERIFICATION.md) - WCAG AA compliance verification for theme colors
+- [Table Responsiveness Verification](./docs/TABLE_RESPONSIVENESS_VERIFICATION.md) - Table design patterns and responsive behavior
 
 ## Development
 
@@ -152,7 +166,7 @@ Run the test suite to verify everything is working:
 npm test
 ```
 
-All tests should pass (currently 837 tests, 2 skipped).
+All tests should pass (currently 983 tests, 2 skipped).
 
 ### Type Checking
 

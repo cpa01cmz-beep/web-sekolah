@@ -1,18 +1,51 @@
 import { PublicLayout } from '@/components/PublicLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent } from '@/components/ui/card';
 import { SlideUp, SlideLeft, SlideRight } from '@/components/animations';
 import { Phone, Mail, MapPin } from 'lucide-react';
 import { toast } from 'sonner';
+import { FormField } from '@/components/ui/form-field';
+import { useState } from 'react';
+
 export function ContactPage() {
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [message, setMessage] = useState('');
+  const [showValidationErrors, setShowValidationErrors] = useState(false);
+
+  const getNameError = () => {
+    if (name === '') return showValidationErrors ? 'Name is required' : undefined;
+    if (name.length < 2) return 'Name must be at least 2 characters';
+    return undefined;
+  };
+
+  const getEmailError = () => {
+    if (email === '') return showValidationErrors ? 'Email is required' : undefined;
+    if (!/^\S+@\S+\.\S+$/.test(email)) return 'Please enter a valid email address';
+    return undefined;
+  };
+
+  const getMessageError = () => {
+    if (message === '') return showValidationErrors ? 'Message is required' : undefined;
+    if (message.length < 10) return 'Message must be at least 10 characters';
+    return undefined;
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    setShowValidationErrors(true);
+    if (getNameError() || getEmailError() || getMessageError()) {
+      return;
+    }
     toast.success("Thank you for your message! We'll get back to you soon.");
-    (e.target as HTMLFormElement).reset();
+    setName('');
+    setEmail('');
+    setMessage('');
+    setShowValidationErrors(false);
   };
+
   return (
     <PublicLayout>
       <div className="bg-primary/5">
@@ -57,19 +90,66 @@ export function ContactPage() {
             <Card>
               <CardContent className="p-6">
                 <form onSubmit={handleSubmit} className="space-y-6" noValidate>
-                  <div className="space-y-2">
-                    <Label htmlFor="contact-name">Full Name</Label>
-                    <Input id="contact-name" name="name" placeholder="John Doe" required aria-required="true" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="contact-email">Email</Label>
-                    <Input id="contact-email" name="email" type="email" placeholder="john.doe@example.com" required aria-required="true" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="contact-message">Message</Label>
-                    <Textarea id="contact-message" name="message" placeholder="Your message..." rows={5} required aria-required="true" />
-                  </div>
-                  <Button type="submit" className="w-full">Send Message</Button>
+                  <FormField
+                    id="contact-name"
+                    label="Full Name"
+                    error={getNameError()}
+                    helperText="Enter your full name"
+                    required
+                  >
+                    <Input
+                      id="contact-name"
+                      type="text"
+                      placeholder="John Doe"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      required
+                      aria-required="true"
+                      aria-invalid={!!getNameError()}
+                      aria-describedby={getNameError() ? 'contact-name-error' : 'contact-name-helper'}
+                    />
+                  </FormField>
+                  <FormField
+                    id="contact-email"
+                    label="Email"
+                    error={getEmailError()}
+                    helperText="We'll never share your email with anyone else"
+                    required
+                  >
+                    <Input
+                      id="contact-email"
+                      type="email"
+                      placeholder="john.doe@example.com"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      required
+                      aria-required="true"
+                      aria-invalid={!!getEmailError()}
+                      aria-describedby={getEmailError() ? 'contact-email-error' : 'contact-email-helper'}
+                    />
+                  </FormField>
+                  <FormField
+                    id="contact-message"
+                    label="Message"
+                    error={getMessageError()}
+                    helperText="How can we help you? Provide as much detail as possible"
+                    required
+                  >
+                    <Textarea
+                      id="contact-message"
+                      placeholder="Your message..."
+                      rows={5}
+                      value={message}
+                      onChange={(e) => setMessage(e.target.value)}
+                      required
+                      aria-required="true"
+                      aria-invalid={!!getMessageError()}
+                      aria-describedby={getMessageError() ? 'contact-message-error' : 'contact-message-helper'}
+                    />
+                  </FormField>
+                  <Button type="submit" className="w-full">
+                    Send Message
+                  </Button>
                 </form>
               </CardContent>
             </Card>

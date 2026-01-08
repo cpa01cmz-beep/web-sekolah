@@ -1,8 +1,9 @@
 import { LayoutDashboard, Calendar, Award, User, BookCopy, Megaphone, Users, Settings } from 'lucide-react';
+import type { ComponentType } from 'react';
 
 export interface NavLink {
   to: string;
-  icon: React.ComponentType<{ className?: string }>;
+  icon: ComponentType<{ className?: string }>;
   label: string;
 }
 

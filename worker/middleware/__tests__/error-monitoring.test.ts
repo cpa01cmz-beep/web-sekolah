@@ -1,6 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { Hono } from 'hono';
-import { Context, Next } from 'hono';
+import { Hono, Context, Next } from 'hono';
 
 let recordedErrors: Array<{ code: string; status: number; endpoint: string }> = [];
 let recordedDebugLogs: Array<{ status: number; code: string; endpoint: string }> = [];

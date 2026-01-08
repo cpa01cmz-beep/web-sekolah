@@ -3,23 +3,16 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter, DialogTrigger, DialogClose } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Edit, AlertTriangle } from 'lucide-react';
+import { Edit } from 'lucide-react';
 import { PageHeader } from '@/components/PageHeader';
 import { SlideUp } from '@/components/animations';
 import { toast } from 'sonner';
-import { useQuery } from '@tanstack/react-query';
 import { useAuthStore } from '@/lib/authStore';
 import { useMutation, queryClient } from '@/lib/api-client';
 import { useTeacherClasses, useTeacherClassStudents } from '@/hooks/useTeacher';
-import type { SchoolClass } from '@shared/types';
 import { Skeleton } from '@/components/ui/skeleton';
 import { TableSkeleton } from '@/components/ui/loading-skeletons';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { isValidScore, MIN_SCORE, MAX_SCORE } from '@/utils/validation';
+import { GradeForm } from '@/components/forms/GradeForm';
 
 interface UpdateGradeData {
   score: number | null;
@@ -57,8 +50,6 @@ export function TeacherGradeManagementPage() {
   const user = useAuthStore((state) => state.user);
   const [selectedClass, setSelectedClass] = useState<string | null>(null);
   const [editingStudent, setEditingStudent] = useState<StudentGrade | null>(null);
-  const [currentScore, setCurrentScore] = useState<string>('');
-  const [currentFeedback, setCurrentFeedback] = useState<string>('');
   const { data: classes, isLoading: isLoadingClasses } = useTeacherClasses(user?.id || '');
   const { data: students, isLoading: isLoadingStudents } = useTeacherClassStudents(selectedClass || '');
   const gradeMutation = useMutation<UpdateGradeData, Error, UpdateGradeData>(['grades', editingStudent?.gradeId || ''], {
@@ -72,29 +63,18 @@ export function TeacherGradeManagementPage() {
       toast.error(`Failed to update grade: ${error.message}`);
     },
   });
-  const handleSaveChanges = () => {
+
+  const handleSaveGrade = (data: UpdateGradeData) => {
     if (!editingStudent || !editingStudent.gradeId) {
-        toast.error("Cannot save changes. No grade record exists for this student yet.");
-        return;
-    };
-    const scoreValue = currentScore === '' ? null : parseInt(currentScore, 10);
-    if (!isValidScore(scoreValue)) {
-      toast.error(`Please enter a valid score between ${MIN_SCORE} and ${MAX_SCORE}.`);
+      toast.error("Cannot save changes. No grade record exists for this student yet.");
       return;
     }
-    gradeMutation.mutate({ score: scoreValue, feedback: currentFeedback });
-  };
-  const handleEditClick = (student: StudentGrade) => {
-    setEditingStudent(student);
-    setCurrentScore(student.score?.toString() || '');
-    setCurrentFeedback(student.feedback || '');
+    gradeMutation.mutate(data);
   };
 
-  const isScoreInvalid = useMemo(() => {
-    if (currentScore === '') return false;
-    const score = parseInt(currentScore, 10);
-    return !isValidScore(score);
-  }, [currentScore]);
+  const handleCloseModal = () => {
+    setEditingStudent(null);
+  };
 
   const selectedClassName = useMemo(() => {
     return classes?.find(c => c.id === selectedClass)?.name || '';
@@ -148,7 +128,7 @@ export function TeacherGradeManagementPage() {
                       <StudentGradeRow
                         key={student.id}
                         student={student}
-                        onEdit={handleEditClick}
+                        onEdit={(student) => setEditingStudent(student)}
                       />
                     ))}
                   </TableBody>
@@ -160,67 +140,13 @@ export function TeacherGradeManagementPage() {
           </CardContent>
         </Card>
       )}
-      {editingStudent && (
-        <Dialog open={!!editingStudent} onOpenChange={(open) => !open && setEditingStudent(null)}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Edit Grade for {editingStudent.name}</DialogTitle>
-              <DialogDescription>Update the score and provide feedback.</DialogDescription>
-            </DialogHeader>
-            <div className="grid gap-6 py-4">
-              <div className="grid grid-cols-4 items-start gap-4">
-                <Label htmlFor="score" className="text-right pt-2">
-                  Score
-                </Label>
-                <div className="col-span-3 space-y-2">
-                  <Input
-                    id="score"
-                    type="number"
-                    value={currentScore}
-                    onChange={(e) => setCurrentScore(e.target.value)}
-                    className="col-span-3"
-                    placeholder="0-100"
-                    min="0"
-                    max="100"
-                    step="1"
-                    aria-invalid={isScoreInvalid}
-                    aria-describedby="score-helper score-error"
-                  />
-                  <p id="score-helper" className="text-xs text-muted-foreground">Enter a score between 0 and 100. Leave empty for no score.</p>
-                  {isScoreInvalid && (
-                    <p id="score-error" className="text-xs text-destructive" role="alert">
-                      Please enter a valid score between 0 and 100
-                    </p>
-                  )}
-                </div>
-              </div>
-              <div className="grid grid-cols-4 items-start gap-4">
-                <Label htmlFor="feedback" className="text-right pt-2">
-                  Feedback
-                </Label>
-                <div className="col-span-3 space-y-2">
-                  <Textarea
-                    id="feedback"
-                    value={currentFeedback}
-                    onChange={(e) => setCurrentFeedback(e.target.value)}
-                    className="col-span-3"
-                    placeholder="Enter feedback..."
-                    rows={3}
-                    aria-describedby="feedback-helper"
-                  />
-                  <p id="feedback-helper" className="text-xs text-muted-foreground">Provide constructive feedback to help student improve</p>
-                </div>
-              </div>
-            </div>
-            <DialogFooter>
-              <DialogClose asChild><Button type="button" variant="secondary">Cancel</Button></DialogClose>
-              <Button type="submit" onClick={handleSaveChanges} disabled={gradeMutation.isPending} aria-busy={gradeMutation.isPending}>
-                {gradeMutation.isPending ? 'Saving...' : 'Save changes'}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-      )}
+      <GradeForm
+        open={!!editingStudent}
+        onClose={handleCloseModal}
+        editingStudent={editingStudent}
+        onSave={handleSaveGrade}
+        isLoading={gradeMutation.isPending}
+      />
     </SlideUp>
   );
 }

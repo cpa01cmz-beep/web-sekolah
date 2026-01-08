@@ -1,7 +1,7 @@
 import { Hono } from 'hono';
 import type { Env } from './core-utils';
 import { ok, bad, notFound, unauthorized, serverError, forbidden } from './core-utils';
-import { WebhookConfigEntity, WebhookEventEntity, WebhookDeliveryEntity } from './entities';
+import { WebhookConfigEntity, WebhookEventEntity, WebhookDeliveryEntity, DeadLetterQueueWebhookEntity } from './entities';
 import { WebhookService } from './webhook-service';
 import { logger } from './logger';
 import { CircuitBreaker } from './CircuitBreaker';
@@ -203,49 +203,83 @@ export const webhookRoutes = (app: Hono<{ Bindings: Env }>) => {
 
       const breaker = CircuitBreaker.createWebhookBreaker(body.url);
 
-      const response = await breaker.execute(async () => {
-        return await fetch(body.url, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-Webhook-Signature': signatureHeader,
-            'X-Webhook-ID': testPayload.id,
-            'X-Webhook-Timestamp': testPayload.timestamp,
-            'User-Agent': 'Akademia-Pro-Webhook/1.0'
-          },
-          body: JSON.stringify(testPayload),
-          signal: AbortSignal.timeout(30000)
-        });
-      });
+      let lastError: Error | unknown;
+      const maxRetries = 3;
+      const retryDelaysMs = [1000, 2000, 3000];
+      
+      for (let attempt = 0; attempt <= maxRetries; attempt++) {
+        try {
+          const response = await breaker.execute(async () => {
+            return await fetch(body.url, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'X-Webhook-Signature': signatureHeader,
+                'X-Webhook-ID': testPayload.id,
+                'X-Webhook-Timestamp': testPayload.timestamp,
+                'User-Agent': 'Akademia-Pro-Webhook/1.0'
+              },
+              body: JSON.stringify(testPayload),
+              signal: AbortSignal.timeout(30000)
+            });
+          });
 
-      const responseText = await response.text();
+          const responseText = await response.text();
 
-      logger.info('Webhook test sent', { url: body.url, status: response.status });
+          if (attempt > 0) {
+            logger.info('Webhook test succeeded after retry', {
+              url: body.url,
+              status: response.status,
+              attempt: attempt + 1,
+              retries: attempt
+            });
+          } else {
+            logger.info('Webhook test sent', { url: body.url, status: response.status });
+          }
 
+          return ok(c, {
+            success: response.ok,
+            status: response.status,
+            response: responseText
+          });
+        } catch (error) {
+          lastError = error;
+          const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+
+          if (errorMessage.includes('Circuit breaker is open')) {
+            logger.warn('Webhook test skipped due to open circuit breaker', {
+              url: body?.url,
+              errorMessage
+            });
+            return ok(c, {
+              success: false,
+              error: 'Circuit breaker is open for this webhook URL. Please wait before retrying.'
+            });
+          }
+
+          if (attempt < maxRetries) {
+            const delay = retryDelaysMs[attempt];
+            logger.info('Webhook test retrying', {
+              url: body.url,
+              attempt: attempt + 1,
+              maxRetries: maxRetries + 1,
+              delayMs: delay
+            });
+            await new Promise(resolve => setTimeout(resolve, delay));
+          }
+        }
+      }
+
+      const finalErrorMessage = lastError instanceof Error ? lastError.message : 'Unknown error';
+      logger.error('Webhook test failed after all retries', finalErrorMessage);
       return ok(c, {
-        success: response.ok,
-        status: response.status,
-        response: responseText
+        success: false,
+        error: finalErrorMessage
       });
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      
-      if (errorMessage.includes('Circuit breaker is open')) {
-        logger.warn('Webhook test skipped due to open circuit breaker', {
-          url: body?.url,
-          errorMessage
-        });
-        return ok(c, {
-          success: false,
-          error: 'Circuit breaker is open for this webhook URL. Please wait before retrying.'
-        });
-      }
-      
-      logger.error('Webhook test failed', error);
-      return ok(c, {
-        success: false,
-        error: errorMessage
-      });
+      logger.error('Webhook test failed with error', errorMessage);
+      return serverError(c, 'Failed to test webhook');
     }
   });
 
@@ -256,6 +290,58 @@ export const webhookRoutes = (app: Hono<{ Bindings: Env }>) => {
     } catch (error) {
       logger.error('Failed to process webhook deliveries', error);
       return serverError(c, 'Failed to process webhook deliveries');
+    }
+  });
+
+  app.get('/api/admin/webhooks/dead-letter-queue', async (c) => {
+    try {
+      const failedWebhooks = await DeadLetterQueueWebhookEntity.getAllFailed(c.env);
+      return ok(c, failedWebhooks);
+    } catch (error) {
+      logger.error('Failed to get dead letter queue', error);
+      return serverError(c, 'Failed to get dead letter queue');
+    }
+  });
+
+  app.get('/api/admin/webhooks/dead-letter-queue/:id', async (c) => {
+    try {
+      const id = c.req.param('id');
+      const dlqEntry = await new DeadLetterQueueWebhookEntity(c.env, id).getState();
+
+      if (!dlqEntry || dlqEntry.deletedAt) {
+        return notFound(c, 'Dead letter queue entry not found');
+      }
+
+      return ok(c, dlqEntry);
+    } catch (error) {
+      logger.error('Failed to get dead letter queue entry', error);
+      return serverError(c, 'Failed to get dead letter queue entry');
+    }
+  });
+
+  app.delete('/api/admin/webhooks/dead-letter-queue/:id', async (c) => {
+    try {
+      const id = c.req.param('id');
+      const existing = await new DeadLetterQueueWebhookEntity(c.env, id).getState();
+
+      if (!existing || existing.deletedAt) {
+        return notFound(c, 'Dead letter queue entry not found');
+      }
+
+      const updated = {
+        ...existing,
+        deletedAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+
+      await new DeadLetterQueueWebhookEntity(c.env, id).save(updated);
+
+      logger.info('Dead letter queue entry deleted', { id });
+
+      return ok(c, { id, deleted: true });
+    } catch (error) {
+      logger.error('Failed to delete dead letter queue entry', error);
+      return serverError(c, 'Failed to delete dead letter queue entry');
     }
   });
 };

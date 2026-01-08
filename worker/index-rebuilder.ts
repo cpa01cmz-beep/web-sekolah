@@ -1,8 +1,9 @@
 import { SecondaryIndex, Index, type Env } from "./core-utils";
-import { UserEntity, ClassEntity, CourseEntity, GradeEntity, AnnouncementEntity, WebhookConfigEntity, WebhookEventEntity, WebhookDeliveryEntity } from "./entities";
+import { UserEntity, ClassEntity, CourseEntity, GradeEntity, AnnouncementEntity, WebhookConfigEntity, WebhookEventEntity, WebhookDeliveryEntity, DeadLetterQueueWebhookEntity } from "./entities";
 import { isStudent } from './type-guards';
 import { CompoundSecondaryIndex } from "./storage/CompoundSecondaryIndex";
 import { DateSortedSecondaryIndex } from "./storage/DateSortedSecondaryIndex";
+import { StudentDateSortedIndex } from "./storage/StudentDateSortedIndex";
 
 export async function rebuildAllIndexes(env: Env): Promise<void> {
   await rebuildUserIndexes(env);
@@ -13,14 +14,17 @@ export async function rebuildAllIndexes(env: Env): Promise<void> {
   await rebuildWebhookConfigIndexes(env);
   await rebuildWebhookEventIndexes(env);
   await rebuildWebhookDeliveryIndexes(env);
+  await rebuildDeadLetterQueueIndexes(env);
 }
 
 async function rebuildUserIndexes(env: Env): Promise<void> {
   const roleIndex = new SecondaryIndex<string>(env, UserEntity.entityName, 'role');
   const classIdIndex = new SecondaryIndex<string>(env, UserEntity.entityName, 'classId');
+  const emailIndex = new SecondaryIndex<string>(env, UserEntity.entityName, 'email');
   
   await roleIndex.clear();
   await classIdIndex.clear();
+  await emailIndex.clear();
   
   const { items: users } = await UserEntity.list(env);
   for (const user of users) {
@@ -29,6 +33,7 @@ async function rebuildUserIndexes(env: Env): Promise<void> {
     if (isStudent(user)) {
       await classIdIndex.add(user.classId, user.id);
     }
+    await emailIndex.add(user.email, user.id);
   }
 }
 
@@ -72,19 +77,38 @@ async function rebuildGradeIndexes(env: Env): Promise<void> {
     await courseIdIndex.add(grade.courseId, grade.id);
     await compoundIndex.add([grade.studentId, grade.courseId], grade.id);
   }
+
+  const gradesByStudent = new Map<string, typeof grades>();
+  for (const grade of grades) {
+    if (grade.deletedAt) continue;
+    const studentGrades = gradesByStudent.get(grade.studentId) || [];
+    studentGrades.push(grade);
+    gradesByStudent.set(grade.studentId, studentGrades);
+  }
+
+  for (const [studentId, studentGrades] of gradesByStudent) {
+    const studentDateIndex = new StudentDateSortedIndex(env, GradeEntity.entityName, studentId);
+    await studentDateIndex.clear();
+    for (const grade of studentGrades) {
+      await studentDateIndex.add(grade.createdAt, grade.id);
+    }
+  }
 }
 
 async function rebuildAnnouncementIndexes(env: Env): Promise<void> {
   const authorIdIndex = new SecondaryIndex<string>(env, AnnouncementEntity.entityName, 'authorId');
+  const targetRoleIndex = new SecondaryIndex<string>(env, AnnouncementEntity.entityName, 'targetRole');
   const dateIndex = new DateSortedSecondaryIndex(env, AnnouncementEntity.entityName);
 
   await authorIdIndex.clear();
+  await targetRoleIndex.clear();
   await dateIndex.clear();
 
   const { items: announcements } = await AnnouncementEntity.list(env);
   for (const announcement of announcements) {
     if (announcement.deletedAt) continue;
     await authorIdIndex.add(announcement.authorId, announcement.id);
+    await targetRoleIndex.add(announcement.targetRole, announcement.id);
     await dateIndex.add(announcement.date, announcement.id);
   }
 }
@@ -120,10 +144,12 @@ async function rebuildWebhookDeliveryIndexes(env: Env): Promise<void> {
   const statusIndex = new SecondaryIndex<string>(env, WebhookDeliveryEntity.entityName, 'status');
   const eventIdIndex = new SecondaryIndex<string>(env, WebhookDeliveryEntity.entityName, 'eventId');
   const webhookConfigIdIndex = new SecondaryIndex<string>(env, WebhookDeliveryEntity.entityName, 'webhookConfigId');
+  const idempotencyKeyIndex = new SecondaryIndex<string>(env, WebhookDeliveryEntity.entityName, 'idempotencyKey');
 
   await statusIndex.clear();
   await eventIdIndex.clear();
   await webhookConfigIdIndex.clear();
+  await idempotencyKeyIndex.clear();
 
   const { items: deliveries } = await WebhookDeliveryEntity.list(env);
   for (const delivery of deliveries) {
@@ -131,5 +157,23 @@ async function rebuildWebhookDeliveryIndexes(env: Env): Promise<void> {
     await statusIndex.add(delivery.status, delivery.id);
     await eventIdIndex.add(delivery.eventId, delivery.id);
     await webhookConfigIdIndex.add(delivery.webhookConfigId, delivery.id);
+    if (delivery.idempotencyKey) {
+      await idempotencyKeyIndex.add(delivery.idempotencyKey, delivery.id);
+    }
+  }
+}
+
+async function rebuildDeadLetterQueueIndexes(env: Env): Promise<void> {
+  const webhookConfigIdIndex = new SecondaryIndex<string>(env, DeadLetterQueueWebhookEntity.entityName, 'webhookConfigId');
+  const eventTypeIndex = new SecondaryIndex<string>(env, DeadLetterQueueWebhookEntity.entityName, 'eventType');
+
+  await webhookConfigIdIndex.clear();
+  await eventTypeIndex.clear();
+
+  const { items: dlqItems } = await DeadLetterQueueWebhookEntity.list(env);
+  for (const item of dlqItems) {
+    if (item.deletedAt) continue;
+    await webhookConfigIdIndex.add(item.webhookConfigId, item.id);
+    await eventTypeIndex.add(item.eventType, item.id);
   }
 }

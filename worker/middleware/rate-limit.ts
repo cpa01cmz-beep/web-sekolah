@@ -1,5 +1,6 @@
 import type { Context, Next } from 'hono';
 import { integrationMonitor } from '../integration-monitor';
+import { rateLimitExceeded } from '../core-utils';
 
 interface RateLimitStore {
   count: number;
@@ -119,14 +120,7 @@ export function rateLimit(options: RateLimitMiddlewareOptions = {}) {
       }
       
       c.header('Retry-After', Math.ceil((entry.resetTime - now) / 1000).toString());
-      return c.json(
-        {
-          success: false,
-          error: 'Rate limit exceeded',
-          code: 'RATE_LIMIT_EXCEEDED',
-        },
-        429
-      );
+      return rateLimitExceeded(c, Math.ceil((entry.resetTime - now) / 1000));
     }
     
     await next();

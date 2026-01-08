@@ -1,6 +1,7 @@
 import type { ImmediatePayload, ErrorContext, ConsoleNative, WrappedConsoleFn } from './types';
 import { categorizeError, formatConsoleArgs } from './utils';
 import { globalDeduplication } from './deduplication';
+import { ApiTimeout, RetryDelay, RetryCount } from '../../config/time';
 
 const createImmediateErrorPayload = (
   message: string,
@@ -59,9 +60,9 @@ const shouldReportImmediate = (context: ErrorContext): boolean => {
 };
 
 const sendImmediateError = async (payload: ImmediatePayload): Promise<void> => {
-  const maxRetries = 2;
-  const baseRetryDelay = 1000;
-  const requestTimeout = 10000;
+  const maxRetries = RetryCount.TWO;
+  const baseRetryDelay = RetryDelay.ONE_SECOND;
+  const requestTimeout = ApiTimeout.ONE_MINUTE * 10;
   let lastError: Error | unknown;
 
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
@@ -91,7 +92,8 @@ const sendImmediateError = async (payload: ImmediatePayload): Promise<void> => {
       clearTimeout(timeoutId);
 
       if (attempt < maxRetries) {
-        const delay = baseRetryDelay * Math.pow(2, attempt) + Math.random() * 1000;
+        const jitter = Math.random() * RetryDelay.ONE_SECOND;
+        const delay = baseRetryDelay * Math.pow(2, attempt) + jitter;
         await new Promise(resolve => setTimeout(resolve, delay));
       }
     }

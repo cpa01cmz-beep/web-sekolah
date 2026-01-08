@@ -145,6 +145,7 @@ export const seedData: SchoolData = {
       content: 'The meeting will be held next Saturday.',
       date: new Date().toISOString(),
       authorId: 'admin-01',
+      targetRole: 'all',
       createdAt: now,
       updatedAt: now
     },
@@ -154,6 +155,7 @@ export const seedData: SchoolData = {
       content: 'The deadline for math project is this Friday.',
       date: new Date().toISOString(),
       authorId: 'teacher-01',
+      targetRole: 'student',
       createdAt: now,
       updatedAt: now
     }

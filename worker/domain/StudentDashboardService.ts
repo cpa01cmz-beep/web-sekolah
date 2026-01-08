@@ -45,18 +45,17 @@ export class StudentDashboardService {
   }
 
   private static async getRecentGrades(env: Env, studentId: string, limit: number): Promise<(Grade & { courseName: string })[]> {
-    const studentGrades = await GradeEntity.getByStudentId(env, studentId);
-    const limitedGrades = studentGrades.slice(0, limit);
-    
-    if (limitedGrades.length === 0) {
+    const studentGrades = await GradeEntity.getRecentForStudent(env, studentId, limit);
+
+    if (studentGrades.length === 0) {
       return [];
     }
 
-    const gradeCourseIds = limitedGrades.map(g => g.courseId);
+    const gradeCourseIds = studentGrades.map(g => g.courseId);
     const gradeCourses = await Promise.all(gradeCourseIds.map(id => new CourseEntity(env, id).getState()));
     const gradeCoursesMap = new Map(gradeCourses.filter(c => c).map(c => [c!.id, c!]));
 
-    return limitedGrades.map(grade => ({
+    return studentGrades.map(grade => ({
       ...grade,
       courseName: gradeCoursesMap.get(grade.courseId)?.name || 'Unknown Course',
     }));

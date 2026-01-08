@@ -1,6 +1,6 @@
 import type { SchoolUser, Student, Teacher, Parent, Admin } from '@shared/types';
 import type { Context } from 'hono';
-import type { AuthUser } from './middleware/auth';
+import type { AuthUser } from './types';
 
 type ExtendedContext = Context & {
   set(key: string, value: unknown): void;
@@ -8,6 +8,14 @@ type ExtendedContext = Context & {
 
 export function getAuthUser(c: Context): AuthUser | undefined {
   return c.get('user') as AuthUser | undefined;
+}
+
+export function getCurrentUserId(c: Context): string {
+  const user = getAuthUser(c);
+  if (!user) {
+    throw new Error('User not authenticated');
+  }
+  return user.id;
 }
 
 export function setAuthUser(c: Context, user: AuthUser): void {

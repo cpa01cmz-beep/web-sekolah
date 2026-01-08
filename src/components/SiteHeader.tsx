@@ -54,10 +54,14 @@ export function SiteHeader() {
             <span className="text-xl font-bold text-foreground">Akademia Pro</span>
           </Link>
           <nav className="hidden md:flex items-center space-x-6" aria-label="Main navigation" role="navigation">
-            {navLinks.map((link) => (
+              {navLinks.map((link) => (
               link.submenu ? (
                 <DropdownMenu key={link.name}>
-                  <DropdownMenuTrigger className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
+                  <DropdownMenuTrigger
+                    className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+                    aria-haspopup="true"
+                    aria-expanded={undefined}
+                  >
                     {link.name}
                   </DropdownMenuTrigger>
                   <DropdownMenuContent>
@@ -95,16 +99,21 @@ export function SiteHeader() {
                   <Menu className="h-6 w-6" />
                 </Button>
               </SheetTrigger>
-                  <SheetContent side="left">
-                <nav aria-label="Mobile navigation">
+                  <SheetContent side="left" role="dialog" aria-modal="true" aria-label="Mobile navigation menu">
+                  <nav aria-label="Mobile navigation">
                   <div className="flex flex-col space-y-6 p-4">
-                    <Link to="/" className="flex items-center gap-2 mb-4" onClick={() => setMobileMenuOpen(false)} aria-label="Akademia Pro Home">
+                    <Link
+                      to="/"
+                      className="flex items-center gap-2 mb-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 rounded-md"
+                      onClick={() => setMobileMenuOpen(false)}
+                      aria-label="Akademia Pro Home"
+                    >
                       <GraduationCap className="h-8 w-8" style={{ color: THEME_COLORS.PRIMARY }} aria-hidden="true" />
                       <span className="text-xl font-bold text-foreground">Akademia Pro</span>
                     </Link>
                     {navLinks.map((link) => (
                       link.submenu ? (
-                        <div key={link.name} className="flex flex-col space-y-2">
+                        <div key={link.name} className="flex flex-col space-y-2" role="group" aria-label={`${link.name} submenu`}>
                           <span className="text-lg font-medium text-foreground">{link.name}</span>
                           {link.submenu.map((sublink) => (
                             <NavLink
@@ -112,7 +121,7 @@ export function SiteHeader() {
                               to={sublink.href}
                               onClick={() => setMobileMenuOpen(false)}
                               className={({ isActive }) =>
-                                `ml-4 text-base font-medium transition-colors hover:text-primary ${
+                                `ml-4 text-base font-medium transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 rounded-md ${
                                   isActive ? 'text-primary' : 'text-muted-foreground'
                                 }`
                               }
@@ -127,7 +136,7 @@ export function SiteHeader() {
                           to={link.href}
                           onClick={() => setMobileMenuOpen(false)}
                           className={({ isActive }) =>
-                            `text-lg font-medium transition-colors hover:text-primary ${
+                            `text-lg font-medium transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 rounded-md ${
                               isActive ? 'text-primary' : 'text-muted-foreground'
                             }`
                           }

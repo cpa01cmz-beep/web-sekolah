@@ -20,6 +20,7 @@ export enum ErrorCode {
 }
 // --- Akademia Pro Types ---
 export type UserRole = 'student' | 'teacher' | 'parent' | 'admin';
+export type AnnouncementTargetRole = UserRole | 'all';
 export interface TimestampedEntity {
   createdAt: string;
   updatedAt: string;
@@ -74,6 +75,7 @@ export interface Announcement extends TimestampedEntity {
   content: string;
   date: string; // ISO 8601 format
   authorId: string;
+  targetRole: AnnouncementTargetRole;
 }
 export interface ScheduleItem {
   day: 'Senin' | 'Selasa' | 'Rabu' | 'Kamis' | 'Jumat';
@@ -124,6 +126,7 @@ export interface SubmitGradeData {
 export interface CreateAnnouncementData {
   title: string;
   content: string;
+  targetRole?: AnnouncementTargetRole;
 }
 
 // --- Parent Service Types ---
@@ -285,6 +288,20 @@ export interface WebhookDelivery extends TimestampedEntity {
   attempts: number;
   nextAttemptAt?: string;
   errorMessage?: string;
+  idempotencyKey?: string;
+}
+
+export interface DeadLetterQueueWebhook extends TimestampedEntity {
+  id: string;
+  eventId: string;
+  webhookConfigId: string;
+  eventType: string;
+  url: string;
+  payload: Record<string, unknown>;
+  status: number;
+  attempts: number;
+  errorMessage: string;
+  failedAt: string;
 }
 
 export type WebhookEventType =

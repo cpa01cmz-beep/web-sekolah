@@ -232,43 +232,123 @@ export interface StudentService {
 
 ```typescript
 // src/repositories/ApiRepository.ts
-export class ApiRepository implements IRepository {
-  constructor(private apiClient: ApiClient) {}
+import { apiClient } from '@/lib/api-client';
+import type { IRepository, ApiRequestOptions } from './IRepository';
 
-  async get<T>(path: string): Promise<T> {
-    return this.apiClient.request<T>('GET', path)
+export class ApiRepository implements IRepository {
+  async get<T>(path: string, options?: ApiRequestOptions): Promise<T> {
+    return apiClient<T>(path, { method: 'GET', ...options });
   }
 
-  async post<T>(path: string, body: unknown): Promise<T> {
-    return this.apiClient.request<T>('POST', path, body)
+  async post<T>(path: string, body?: unknown, options?: ApiRequestOptions): Promise<T> {
+    return apiClient<T>(path, {
+      method: 'POST',
+      body: body ? JSON.stringify(body) : undefined,
+      ...options
+    });
+  }
+
+  async put<T>(path: string, body?: unknown, options?: ApiRequestOptions): Promise<T> {
+    return apiClient<T>(path, {
+      method: 'PUT',
+      body: body ? JSON.stringify(body) : undefined,
+      ...options
+    });
+  }
+
+  async delete<T>(path: string, options?: ApiRequestOptions): Promise<T> {
+    return apiClient<T>(path, { method: 'DELETE', ...options });
+  }
+
+  async patch<T>(path: string, body?: unknown, options?: ApiRequestOptions): Promise<T> {
+    return apiClient<T>(path, {
+      method: 'PATCH',
+      body: body ? JSON.stringify(body) : undefined,
+      ...options
+    });
   }
 }
+
+export const apiRepository = new ApiRepository();
 
 // src/services/studentService.ts
-export const studentService: StudentService = {
-  async getDashboard(studentId: string): Promise<StudentDashboardData> {
-    return repository.get<StudentDashboardData>(
-      `/api/students/${studentId}/dashboard`
-    )
-  }
+import type { StudentService } from './serviceContracts';
+import type { StudentDashboardData, Grade, ScheduleItem, StudentCardData } from '@shared/types';
+import type { IRepository } from '@/repositories/IRepository';
+import { apiRepository } from '@/repositories/ApiRepository';
+
+export function createStudentService(repository: IRepository = apiRepository): StudentService {
+  return {
+    async getDashboard(studentId: string): Promise<StudentDashboardData> {
+      return repository.get<StudentDashboardData>(`/api/students/${studentId}/dashboard`);
+    },
+
+    async getGrades(studentId: string): Promise<Grade[]> {
+      return repository.get<Grade[]>(`/api/students/${studentId}/grades`);
+    },
+
+    async getSchedule(studentId: string): Promise<ScheduleItem[]> {
+      return repository.get<ScheduleItem[]>(`/api/students/${studentId}/schedule`);
+    },
+
+    async getCard(studentId: string): Promise<StudentCardData> {
+      return repository.get<StudentCardData>(`/api/students/${studentId}/card`);
+    }
+  };
 }
+
+export const studentService = createStudentService();
 ```
 
 ### Step 3: Create Custom Hook
 
 ```typescript
 // src/hooks/useStudent.ts
-import { useTanstackQuery } from '@/lib/api-client'
-import { CachingTime } from '@/lib/api-client/constants'
+import { useQuery as useTanstackQuery, UseQueryOptions } from '@tanstack/react-query';
+import { studentService } from '@/services/studentService';
+import type { StudentDashboardData, Grade, ScheduleItem, StudentCardData } from '@shared/types';
+import { CachingTime } from '@/config/time';
+import { createQueryOptions } from '@/config/query-config';
 
-export function useStudentDashboard(studentId: string) {
+export function useStudentDashboard(studentId: string, options?: UseQueryOptions<StudentDashboardData>) {
   return useTanstackQuery({
-    queryKey: ['student-dashboard', studentId],
+    queryKey: ['students', studentId, 'dashboard'],
     queryFn: () => studentService.getDashboard(studentId),
-    enabled: !!studentId,
-    staleTime: CachingTime.FIVE_MINUTES,
-    gcTime: CachingTime.TWENTY_FOUR_HOURS,
-  })
+    ...createQueryOptions<StudentDashboardData>({ enabled: !!studentId, staleTime: CachingTime.FIVE_MINUTES }),
+    ...options,
+  });
+}
+
+export function useStudentGrades(studentId: string, options?: UseQueryOptions<Grade[]>) {
+  return useTanstackQuery({
+    queryKey: ['students', studentId, 'grades'],
+    queryFn: () => studentService.getGrades(studentId),
+    ...createQueryOptions<Grade[]>({ enabled: !!studentId, staleTime: CachingTime.THIRTY_MINUTES }),
+    ...options,
+  });
+}
+
+export function useStudentSchedule(studentId: string, options?: UseQueryOptions<ScheduleItem[]>) {
+  return useTanstackQuery({
+    queryKey: ['students', studentId, 'schedule'],
+    queryFn: () => studentService.getSchedule(studentId),
+    ...createQueryOptions<ScheduleItem[]>({ enabled: !!studentId, staleTime: CachingTime.ONE_HOUR }),
+    ...options,
+  });
+}
+
+export function useStudentCard(studentId: string, options?: UseQueryOptions<StudentCardData>) {
+  return useTanstackQuery({
+    queryKey: ['students', studentId, 'card'],
+    queryFn: () => studentService.getCard(studentId),
+    ...createQueryOptions<StudentCardData>({ 
+      enabled: !!studentId,
+      staleTime: CachingTime.TWENTY_FOUR_HOURS,
+      gcTime: CachingTime.SEVEN_DAYS,
+      refetchOnReconnect: false,
+    }),
+    ...options,
+  });
 }
 ```
 
@@ -276,6 +356,9 @@ export function useStudentDashboard(studentId: string) {
 
 ```typescript
 // src/pages/portal/student/StudentDashboardPage.tsx
+import { useStudentDashboard } from '@/hooks/useStudent';
+import { useAuth } from '@/hooks/useAuth';
+
 export function StudentDashboardPage() {
   const { user } = useAuth()
   const { data, isLoading, error } = useStudentDashboard(user?.id || '')
@@ -483,7 +566,7 @@ const VITE_LOG_LEVEL = 'debug'
 
 ```typescript
 // Enable debug logging
-LOG_LEVEL=debug bun dev
+LOG_LEVEL=debug npm run dev
 
 // Check worker logs
 wrangler tail
