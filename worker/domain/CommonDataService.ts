@@ -1,6 +1,6 @@
 import type { Env } from '../core-utils';
 import { UserEntity, ClassEntity, AnnouncementEntity, ScheduleEntity } from '../entities';
-import type { SchoolUser, SchoolClass, Announcement, Student } from '@shared/types';
+import type { SchoolUser, SchoolClass, Announcement } from '@shared/types';
 
 export class CommonDataService {
   static async getStudentWithClassAndSchedule(env: Env, studentId: string): Promise<{
@@ -11,15 +11,14 @@ export class CommonDataService {
     const studentEntity = new UserEntity(env, studentId);
     const student = await studentEntity.getState() as SchoolUser | null;
 
-    if (!student || student.role !== 'student') {
+    if (!student) {
       return { student: null, classData: null, schedule: null };
     }
 
-    const studentClassId = (student as Student).classId;
-    const classEntity = new ClassEntity(env, studentClassId);
+    const classEntity = new ClassEntity(env, student.classId);
     const classData = await classEntity.getState() as SchoolClass | null;
 
-    const scheduleEntity = new ScheduleEntity(env, studentClassId);
+    const scheduleEntity = new ScheduleEntity(env, student.classId);
     const schedule = await scheduleEntity.getState() as { items: unknown[] } | null;
 
     return { student, classData, schedule };
@@ -32,12 +31,11 @@ export class CommonDataService {
     const studentEntity = new UserEntity(env, studentId);
     const student = await studentEntity.getState() as SchoolUser | null;
 
-    if (!student || student.role !== 'student') {
+    if (!student) {
       return { student: null, classData: null };
     }
 
-    const studentClassId = (student as Student).classId;
-    const classEntity = studentClassId ? new ClassEntity(env, studentClassId) : null;
+    const classEntity = student.classId ? new ClassEntity(env, student.classId) : null;
     const classData = classEntity ? await classEntity.getState() as SchoolClass | null : null;
 
     return { student, classData };
