@@ -33,5 +33,4 @@ tsconfig.tsbuildinfo
 Thumbs.db
 
 # Package manager
-package-lock.json
 yarn.lock
