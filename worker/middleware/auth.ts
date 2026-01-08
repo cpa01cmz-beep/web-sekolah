@@ -4,6 +4,7 @@ import type { JWTPayload } from 'jose';
 import { logger } from '../logger';
 import { getAuthUser, setAuthUser } from '../type-guards';
 import type { AuthUser } from '../types';
+import { unauthorized, serverError, notFound, forbidden } from '../core-utils';
 
 export interface JwtPayload extends JWTPayload {
   sub: string;
@@ -53,8 +54,6 @@ export async function verifyToken(
 
 export function authenticate(secretEnvVar: string = 'JWT_SECRET') {
   return async (c: Context<{ Bindings: { [key: string]: string } }>, next: Next) => {
-    const { unauthorized, serverError, notFound } = await import('../core-utils');
-    
     const authHeader = c.req.header('Authorization');
     
     if (!authHeader) {
@@ -91,7 +90,6 @@ export function authenticate(secretEnvVar: string = 'JWT_SECRET') {
 
 export function authorize(...allowedRoles: ('student' | 'teacher' | 'parent' | 'admin')[]) {
   return async (c: Context, next: Next) => {
-    const { unauthorized, forbidden } = await import('../core-utils');
     const user = getAuthUser(c);
 
     if (!user) {
