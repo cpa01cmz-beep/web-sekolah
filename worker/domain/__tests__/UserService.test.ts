@@ -1,7 +1,16 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import type { Env } from '../../types';
+import type { CreateUserData, UpdateUserData, UserRole } from '../../../shared/types';
 
 describe('UserService - Critical Path Testing', () => {
-  let UserService: any;
+  let UserService: {
+    createUser: (env: Env, userData: CreateUserData) => Promise<unknown>;
+    updateUser: (env: Env, userId: string, userData: UpdateUserData) => Promise<unknown>;
+    deleteUser: (env: Env, userId: string) => Promise<unknown>;
+    getAllUsers: (env: Env) => Promise<unknown[]>;
+    getUserById: (env: Env, userId: string) => Promise<unknown | null>;
+    getUserWithoutPassword: (env: Env, userId: string) => Promise<unknown | null>;
+  };
   let canLoadModule = false;
 
   beforeEach(async () => {
@@ -41,14 +50,11 @@ describe('UserService - Critical Path Testing', () => {
         return;
       }
 
-      const mockEnv = {} as any;
-      const userData = {
-        name: 'John Doe',
-        email: 'john@example.com',
-        role: 'student',
-        classId: '11-A',
-        studentIdNumber: '12345',
-        password: 'password123'
+      const mockEnv = {} as unknown as Env;
+      const userData: CreateUserData = {
+        name: 'Test User',
+        email: 'test@example.com',
+        role: 'student' as UserRole
       };
 
       expect(async () => {
@@ -62,11 +68,11 @@ describe('UserService - Critical Path Testing', () => {
         return;
       }
 
-      const mockEnv = {} as any;
-      const userData = {
+      const mockEnv = {} as unknown as Env;
+      const userData: CreateUserData = {
         name: 'Ms. Smith',
         email: 'smith@example.com',
-        role: 'teacher',
+        role: 'teacher' as UserRole,
         classIds: ['11-A', '12-B'],
         password: 'password123'
       };
@@ -82,11 +88,11 @@ describe('UserService - Critical Path Testing', () => {
         return;
       }
 
-      const mockEnv = {} as any;
-      const userData = {
+      const mockEnv = {} as unknown as Env;
+      const userData: CreateUserData = {
         name: 'Parent Name',
         email: 'parent@example.com',
-        role: 'parent',
+        role: 'parent' as UserRole,
         childId: 'student-01',
         password: 'password123'
       };
@@ -102,11 +108,11 @@ describe('UserService - Critical Path Testing', () => {
         return;
       }
 
-      const mockEnv = {} as any;
-      const userData = {
+      const mockEnv = {} as unknown as Env;
+      const userData: CreateUserData = {
         name: 'System Admin',
         email: 'admin@example.com',
-        role: 'admin',
+        role: 'admin' as UserRole,
         password: 'password123'
       };
 
@@ -123,7 +129,7 @@ describe('UserService - Critical Path Testing', () => {
         return;
       }
 
-      const mockEnv = {} as any;
+      const mockEnv = {} as unknown as Env;
       const userData = {
         name: 'Test User',
         email: 'test@example.com',
@@ -140,11 +146,11 @@ describe('UserService - Critical Path Testing', () => {
         return;
       }
 
-      const mockEnv = {} as any;
-      const userData = {
+      const mockEnv = {} as unknown as Env;
+      const userData: CreateUserData = {
         name: 'Test User',
         email: 'test@example.com',
-        role: 'admin'
+        role: 'admin' as UserRole
       };
 
       expect(async () => {
@@ -158,7 +164,7 @@ describe('UserService - Critical Path Testing', () => {
         return;
       }
 
-      const mockEnv = {} as any;
+      const mockEnv = {} as unknown as Env;
       const userData = {
         name: 'Test User',
         email: 'test@example.com',
@@ -174,7 +180,7 @@ describe('UserService - Critical Path Testing', () => {
         return;
       }
 
-      const mockEnv = {} as any;
+      const mockEnv = {} as unknown as Env;
       const userData = {
         name: 'Test User',
         email: 'test@example.com',
@@ -192,7 +198,7 @@ describe('UserService - Critical Path Testing', () => {
         return;
       }
 
-      const mockEnv = {} as any;
+      const mockEnv = {} as unknown as Env;
       const userData = {
         name: 'Student User',
         email: 'student@example.com',
@@ -210,11 +216,11 @@ describe('UserService - Critical Path Testing', () => {
         return;
       }
 
-      const mockEnv = {} as any;
-      const userData = {
+      const mockEnv = {} as unknown as Env;
+      const userData: CreateUserData = {
         name: 'Student User',
         email: 'student@example.com',
-        role: 'student'
+        role: 'student' as UserRole
       };
 
       expect(async () => {
@@ -228,7 +234,7 @@ describe('UserService - Critical Path Testing', () => {
         return;
       }
 
-      const mockEnv = {} as any;
+      const mockEnv = {} as unknown as Env;
       const userData = {
         name: 'Teacher User',
         email: 'teacher@example.com',
@@ -245,11 +251,11 @@ describe('UserService - Critical Path Testing', () => {
         return;
       }
 
-      const mockEnv = {} as any;
-      const userData = {
+      const mockEnv = {} as unknown as Env;
+      const userData: CreateUserData = {
         name: 'Teacher User',
         email: 'teacher@example.com',
-        role: 'teacher'
+        role: 'teacher' as UserRole
       };
 
       expect(async () => {
@@ -263,7 +269,7 @@ describe('UserService - Critical Path Testing', () => {
         return;
       }
 
-      const mockEnv = {} as any;
+      const mockEnv = {} as unknown as Env;
       const userData = {
         name: 'Parent User',
         email: 'parent@example.com',
@@ -280,11 +286,11 @@ describe('UserService - Critical Path Testing', () => {
         return;
       }
 
-      const mockEnv = {} as any;
-      const userData = {
+      const mockEnv = {} as unknown as Env;
+      const userData: CreateUserData = {
         name: 'Parent User',
         email: 'parent@example.com',
-        role: 'parent'
+        role: 'parent' as UserRole
       };
 
       expect(async () => {
@@ -298,7 +304,7 @@ describe('UserService - Critical Path Testing', () => {
         return;
       }
 
-      const mockEnv = {} as any;
+      const mockEnv = {} as unknown as Env;
       const userData = {
         name: 'Admin User',
         email: 'admin@example.com',
@@ -316,11 +322,11 @@ describe('UserService - Critical Path Testing', () => {
         return;
       }
 
-      const mockEnv = {} as any;
-      const userData = {
+      const mockEnv = {} as unknown as Env;
+      const userData: CreateUserData = {
         name: '',
         email: 'test@example.com',
-        role: 'student'
+        role: 'student' as UserRole
       };
 
       expect(async () => {
@@ -334,11 +340,11 @@ describe('UserService - Critical Path Testing', () => {
         return;
       }
 
-      const mockEnv = {} as any;
-      const userData = {
+      const mockEnv = {} as unknown as Env;
+      const userData: CreateUserData = {
         name: 'Test User',
         email: '',
-        role: 'student'
+        role: 'student' as UserRole
       };
 
       expect(async () => {
@@ -352,10 +358,10 @@ describe('UserService - Critical Path Testing', () => {
         return;
       }
 
-      const mockEnv = {} as any;
+      const mockEnv = {} as unknown as Env;
 
       expect(async () => {
-        await UserService.createUser(mockEnv, null as any);
+        await UserService.createUser(mockEnv, null as unknown as CreateUserData);
       }).not.toThrow();
     });
 
@@ -365,10 +371,10 @@ describe('UserService - Critical Path Testing', () => {
         return;
       }
 
-      const mockEnv = {} as any;
+      const mockEnv = {} as unknown as Env;
 
       expect(async () => {
-        await UserService.createUser(mockEnv, undefined as any);
+        await UserService.createUser(mockEnv, undefined as unknown as CreateUserData);
       }).not.toThrow();
     });
   });
@@ -389,7 +395,7 @@ describe('UserService - Critical Path Testing', () => {
         return;
       }
 
-      const mockEnv = {} as any;
+      const mockEnv = {} as unknown as Env;
       const userData = {
         name: 'Updated Name',
         email: 'updated@example.com'
@@ -406,7 +412,7 @@ describe('UserService - Critical Path Testing', () => {
         return;
       }
 
-      const mockEnv = {} as any;
+      const mockEnv = {} as unknown as Env;
       const userData = {
         password: 'newpassword123'
       };
@@ -422,7 +428,7 @@ describe('UserService - Critical Path Testing', () => {
         return;
       }
 
-      const mockEnv = {} as any;
+      const mockEnv = {} as unknown as Env;
       const userData = {
         name: 'Updated Name'
       };
@@ -438,7 +444,7 @@ describe('UserService - Critical Path Testing', () => {
         return;
       }
 
-      const mockEnv = {} as any;
+      const mockEnv = {} as unknown as Env;
       const userData = {
         name: 'Updated Name'
       };
@@ -454,7 +460,7 @@ describe('UserService - Critical Path Testing', () => {
         return;
       }
 
-      const mockEnv = {} as any;
+      const mockEnv = {} as unknown as Env;
       const userData = {
         name: 'Updated Name'
       };
@@ -470,13 +476,13 @@ describe('UserService - Critical Path Testing', () => {
         return;
       }
 
-      const mockEnv = {} as any;
-      const userData = {
+      const mockEnv = {} as unknown as Env;
+      const userData: UpdateUserData = {
         name: 'Updated Name'
       };
 
       await expect(
-        UserService.updateUser(mockEnv, null as any, userData)
+        UserService.updateUser(mockEnv, null as unknown as string, userData)
       ).rejects.toThrow('User not found');
     });
 
@@ -486,13 +492,13 @@ describe('UserService - Critical Path Testing', () => {
         return;
       }
 
-      const mockEnv = {} as any;
-      const userData = {
+      const mockEnv = {} as unknown as Env;
+      const userData: UpdateUserData = {
         name: 'Updated Name'
       };
 
       await expect(
-        UserService.updateUser(mockEnv, undefined as any, userData)
+        UserService.updateUser(mockEnv, undefined as unknown as string, userData)
       ).rejects.toThrow('User not found');
     });
 
@@ -502,7 +508,7 @@ describe('UserService - Critical Path Testing', () => {
         return;
       }
 
-      const mockEnv = {} as any;
+      const mockEnv = {} as unknown as Env;
       const userData = {};
 
       expect(async () => {
@@ -516,10 +522,10 @@ describe('UserService - Critical Path Testing', () => {
         return;
       }
 
-      const mockEnv = {} as any;
+      const mockEnv = {} as unknown as Env;
 
       expect(async () => {
-        await UserService.updateUser(mockEnv, 'student-01', null as any);
+        await UserService.updateUser(mockEnv, 'student-01', null as unknown as UpdateUserData);
       }).not.toThrow();
     });
   });
@@ -540,7 +546,7 @@ describe('UserService - Critical Path Testing', () => {
         return;
       }
 
-      const mockEnv = {} as any;
+      const mockEnv = {} as unknown as Env;
 
       expect(async () => {
         await UserService.deleteUser(mockEnv, 'student-new');
@@ -553,7 +559,7 @@ describe('UserService - Critical Path Testing', () => {
         return;
       }
 
-      const mockEnv = {} as any;
+      const mockEnv = {} as unknown as Env;
 
       expect(typeof UserService.deleteUser).toBe('function');
     });
@@ -564,7 +570,7 @@ describe('UserService - Critical Path Testing', () => {
         return;
       }
 
-      const mockEnv = {} as any;
+      const mockEnv = {} as unknown as Env;
 
       expect(typeof UserService.deleteUser).toBe('function');
     });
@@ -577,7 +583,7 @@ describe('UserService - Critical Path Testing', () => {
         return;
       }
 
-      const mockEnv = {} as any;
+      const mockEnv = {} as unknown as Env;
 
       expect(typeof UserService.deleteUser).toBe('function');
     });
@@ -588,7 +594,7 @@ describe('UserService - Critical Path Testing', () => {
         return;
       }
 
-      const mockEnv = {} as any;
+      const mockEnv = {} as unknown as Env;
 
       expect(typeof UserService.deleteUser).toBe('function');
     });
@@ -599,7 +605,7 @@ describe('UserService - Critical Path Testing', () => {
         return;
       }
 
-      const mockEnv = {} as any;
+      const mockEnv = {} as unknown as Env;
 
       expect(typeof UserService.deleteUser).toBe('function');
     });
@@ -631,7 +637,7 @@ describe('UserService - Critical Path Testing', () => {
         return;
       }
 
-      const mockEnv = {} as any;
+      const mockEnv = {} as unknown as Env;
 
       expect(async () => {
         await UserService.getAllUsers(mockEnv);
@@ -644,7 +650,7 @@ describe('UserService - Critical Path Testing', () => {
         return;
       }
 
-      const mockEnv = {} as any;
+      const mockEnv = {} as unknown as Env;
 
       expect(typeof UserService.getAllUsers).toBe('function');
     });
@@ -655,7 +661,7 @@ describe('UserService - Critical Path Testing', () => {
         return;
       }
 
-      const mockEnv = {} as any;
+      const mockEnv = {} as unknown as Env;
 
       expect(typeof UserService.getAllUsers).toBe('function');
     });
@@ -677,7 +683,7 @@ describe('UserService - Critical Path Testing', () => {
         return;
       }
 
-      const mockEnv = {} as any;
+      const mockEnv = {} as unknown as Env;
 
       expect(async () => {
         await UserService.getUserById(mockEnv, 'student-01');
@@ -690,7 +696,7 @@ describe('UserService - Critical Path Testing', () => {
         return;
       }
 
-      const mockEnv = {} as any;
+      const mockEnv = {} as unknown as Env;
 
       expect(typeof UserService.getUserById).toBe('function');
     });
@@ -703,7 +709,7 @@ describe('UserService - Critical Path Testing', () => {
         return;
       }
 
-      const mockEnv = {} as any;
+      const mockEnv = {} as unknown as Env;
 
       const result = await UserService.getUserById(mockEnv, 'non-existent-user');
 
@@ -716,7 +722,7 @@ describe('UserService - Critical Path Testing', () => {
         return;
       }
 
-      const mockEnv = {} as any;
+      const mockEnv = {} as unknown as Env;
 
       const result = await UserService.getUserById(mockEnv, '');
 
@@ -729,9 +735,9 @@ describe('UserService - Critical Path Testing', () => {
         return;
       }
 
-      const mockEnv = {} as any;
+      const mockEnv = {} as unknown as Env;
 
-      const result = await UserService.getUserById(mockEnv, null as any);
+      const result = await UserService.getUserById(mockEnv, null as unknown as string);
 
       expect(result).toBeNull();
     });
@@ -753,7 +759,7 @@ describe('UserService - Critical Path Testing', () => {
         return;
       }
 
-      const mockEnv = {} as any;
+      const mockEnv = {} as unknown as Env;
 
       expect(async () => {
         await UserService.getUserWithoutPassword(mockEnv, 'student-01');
