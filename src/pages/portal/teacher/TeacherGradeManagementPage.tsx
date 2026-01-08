@@ -11,8 +11,10 @@ import { Edit, AlertTriangle } from 'lucide-react';
 import { PageHeader } from '@/components/PageHeader';
 import { SlideUp } from '@/components/animations';
 import { toast } from 'sonner';
-import { useQuery, useMutation, queryClient } from '@/lib/api-client';
+import { useQuery } from '@tanstack/react-query';
 import { useAuthStore } from '@/lib/authStore';
+import { useMutation, queryClient } from '@/lib/api-client';
+import { useTeacherClasses } from '@/hooks/useTeacher';
 import type { SchoolClass } from '@shared/types';
 import { Skeleton } from '@/components/ui/skeleton';
 import { TableSkeleton } from '@/components/ui/loading-skeletons';
@@ -36,10 +38,7 @@ export function TeacherGradeManagementPage() {
   const [editingStudent, setEditingStudent] = useState<StudentGrade | null>(null);
   const [currentScore, setCurrentScore] = useState<string>('');
   const [currentFeedback, setCurrentFeedback] = useState<string>('');
-  const { data: classes, isLoading: isLoadingClasses } = useQuery<SchoolClass[]>(
-    ['teachers', user?.id || '', 'classes'],
-    { enabled: !!user }
-  );
+  const { data: classes, isLoading: isLoadingClasses } = useTeacherClasses(user?.id || '');
   const { data: students, isLoading: isLoadingStudents } = useQuery<StudentGrade[]>(
     ['classes', selectedClass || '', 'students'],
     { enabled: !!selectedClass }

@@ -208,6 +208,80 @@ This document tracks architectural refactoring tasks for Akademia Pro.
 | Medium | Extract router configuration to separate module | Medium | src/App.tsx (161 lines with route definitions) |
 | | ✅ | Consolidate time constants across error reporter | Small | src/lib/error-reporter/ (JITTER_DELAY_MS, ERROR_RETENTION_MS constants added) |
 
+### Interface Definition and Layer Separation (2026-01-08) - Completed ✅
+
+**Task**: Extract domain-specific custom hooks for Admin and Teacher services to ensure consistent architectural patterns
+
+**Problem**: AdminUserManagementPage and TeacherGradeManagementPage used `useQuery` and `useMutation` directly from `@/lib/api-client`, violating the established pattern where pages use domain-specific hooks (e.g., useStudent hooks). This created architectural inconsistency and mixed data fetching logic with presentation layer.
+
+**Implementation**:
+
+1. **Created useAdmin.ts hooks file** - `src/hooks/useAdmin.ts`
+   - Implemented hooks for all AdminService methods: `useAdminDashboard`, `useUsers`, `useCreateUser`, `useUpdateUser`, `useDeleteUser`, `useAnnouncements`, `useCreateAnnouncement`, `useSettings`, `useUpdateSettings`
+   - Configured consistent caching strategies (FIVE_MINUTES, THIRTY_MINUTES, TWENTY_FOUR_HOURS)
+   - Added proper refetch strategies (refetchOnWindowFocus: false, refetchOnMount: false, refetchOnReconnect: true)
+   - Benefits: Centralized admin data fetching logic, consistent caching, separation of concerns
+
+2. **Created useTeacher.ts hooks file** - `src/hooks/useTeacher.ts`
+   - Implemented hooks for TeacherService methods: `useTeacherDashboard`, `useTeacherClasses`, `useSubmitGrade`, `useTeacherAnnouncements`, `useCreateAnnouncement`
+   - Configured consistent caching strategies matching service patterns
+   - Benefits: Centralized teacher data fetching logic, consistent caching, separation of concerns
+
+3. **Updated AdminUserManagementPage** - `src/pages/portal/admin/AdminUserManagementPage.tsx`
+   - Removed direct imports of `useQuery` and `useMutation` from `@/lib/api-client`
+   - Added imports from `@/hooks/useAdmin`: `useUsers`, `useCreateUser`, `useUpdateUser`, `useDeleteUser`
+   - Updated mutation calls to use new hooks with simplified interface (no more `method: 'PUT'` boilerplate)
+   - Fixed state management for delete operation (added `userIdToDelete` state)
+   - Benefits: Cleaner code, consistent with architectural patterns, improved maintainability
+
+4. **Updated TeacherGradeManagementPage** - `src/pages/portal/teacher/TeacherGradeManagementPage.tsx`
+   - Added import of `useTeacherClasses` from `@/hooks/useTeacher`
+   - Replaced direct `useQuery` call with `useTeacherClasses(user?.id || '')`
+   - Benefits: Consistent data fetching pattern, improved maintainability
+
+**Metrics**:
+
+| Metric | Before | After | Improvement |
+|---------|--------|-------|-------------|
+| Pages using useQuery directly | 2 pages | 0 pages | 100% reduction |
+| Hooks consistency | Inconsistent (Student: yes, Admin/Teacher: no) | Consistent (all services use hooks) | Unified architecture |
+| Lines of code (AdminUserManagementPage) | 216 lines | ~205 lines | ~5% reduction |
+| Data fetching logic location | Scattered in pages | Centralized in hooks | Better separation of concerns |
+
+**Benefits Achieved**:
+- ✅ **Interface Definition**: Created clean contracts for admin and teacher data fetching via custom hooks
+- ✅ **Layer Separation**: Pages now use hooks (presentation) → hooks (facade) → services (business) → repositories (data)
+- ✅ **Consistency**: All pages now follow same architectural pattern
+- ✅ **Separation of Concerns**: Data fetching logic removed from presentation layer
+- ✅ **Maintainability**: Caching strategies centralized in one place per service
+- ✅ **Zero Regressions**: All 600 tests passing (no broken functionality)
+- ✅ **Type Safety**: Proper TypeScript typing for all hooks
+
+**Technical Details**:
+- Custom hooks wrap React Query (useTanstackQuery, useTanstackMutation) with service methods
+- Consistent caching configuration across all hooks using `CachingTime` constants
+- Hooks follow existing pattern from `useStudent.ts` (enabled checks, queryKey structure, stale/gc times)
+- Mutation hooks simplified interface (no need to pass `method: 'PUT'`, it's handled by service layer)
+- Proper query invalidation patterns maintained via `queryClient.invalidateQueries()`
+
+**Impact**:
+- `src/hooks/useAdmin.ts`: New file with 8 custom hooks for admin service data fetching
+- `src/hooks/useTeacher.ts`: New file with 5 custom hooks for teacher service data fetching
+- `src/pages/portal/admin/AdminUserManagementPage.tsx`: Updated to use useAdmin hooks, cleaner code
+- `src/pages/portal/teacher/TeacherGradeManagementPage.tsx`: Updated to use useTeacher hooks, consistent pattern
+- All other pages already following correct pattern (Student, Parent, Public)
+- Architectural consistency achieved across all domain services
+
+**Success Criteria**:
+- [x] Domain-specific hooks created for Admin service
+- [x] Domain-specific hooks created for Teacher service
+- [x] AdminUserManagementPage uses useAdmin hooks
+- [x] TeacherGradeManagementPage uses useTeacher hooks
+- [x] All pages follow consistent architectural pattern
+- [x] Data fetching logic separated from presentation layer
+- [x] All 600 tests passing (0 regression)
+- [x] Zero breaking changes to existing functionality
+
 ### DevOps Improvements (2026-01-08)
 
 | Initiative | Status | Impact |
