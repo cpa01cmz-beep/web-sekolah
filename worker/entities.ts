@@ -4,6 +4,7 @@ import { hashPassword } from "./password-utils";
 import { CompoundSecondaryIndex } from "./storage/CompoundSecondaryIndex";
 import { DateSortedSecondaryIndex } from "./storage/DateSortedSecondaryIndex";
 import { seedData } from "./seed-data";
+import { StudentDateSortedIndex } from "./storage/StudentDateSortedIndex";
 
 export class UserEntity extends IndexedEntity<SchoolUser> {
   static readonly entityName = "user";
@@ -86,6 +87,37 @@ export class GradeEntity extends IndexedEntity<Grade> {
 
     const compoundIndex = new CompoundSecondaryIndex(env, this.entityName, ['studentId', 'courseId']);
     await compoundIndex.remove([state.studentId, state.courseId], id);
+    return await super.delete(env, id);
+  }
+
+  static async getRecentForStudent(env: Env, studentId: string, limit: number): Promise<Grade[]> {
+    const dateIndex = new StudentDateSortedIndex(env, this.entityName, studentId);
+    const recentGradeIds = await dateIndex.getRecent(limit);
+    if (recentGradeIds.length === 0) {
+      return [];
+    }
+    const grades = await Promise.all(recentGradeIds.map(id => new this(env, id).getState()));
+    return grades.filter(g => g && !g.deletedAt) as Grade[];
+  }
+
+  static async createWithAllIndexes(env: Env, state: Grade): Promise<Grade> {
+    const created = await super.create(env, state);
+    const compoundIndex = new CompoundSecondaryIndex(env, this.entityName, ['studentId', 'courseId']);
+    await compoundIndex.add([state.studentId, state.courseId], state.id);
+    const dateIndex = new StudentDateSortedIndex(env, this.entityName, state.studentId);
+    await dateIndex.add(state.createdAt, state.id);
+    return created;
+  }
+
+  static async deleteWithAllIndexes(env: Env, id: string): Promise<boolean> {
+    const inst = new this(env, id);
+    const state = await inst.getState() as Grade | null;
+    if (!state) return false;
+
+    const compoundIndex = new CompoundSecondaryIndex(env, this.entityName, ['studentId', 'courseId']);
+    await compoundIndex.remove([state.studentId, state.courseId], id);
+    const dateIndex = new StudentDateSortedIndex(env, this.entityName, state.studentId);
+    await dateIndex.remove(state.createdAt, id);
     return await super.delete(env, id);
   }
 }

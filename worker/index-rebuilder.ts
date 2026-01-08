@@ -3,6 +3,7 @@ import { UserEntity, ClassEntity, CourseEntity, GradeEntity, AnnouncementEntity,
 import { isStudent } from './type-guards';
 import { CompoundSecondaryIndex } from "./storage/CompoundSecondaryIndex";
 import { DateSortedSecondaryIndex } from "./storage/DateSortedSecondaryIndex";
+import { StudentDateSortedIndex } from "./storage/StudentDateSortedIndex";
 
 export async function rebuildAllIndexes(env: Env): Promise<void> {
   await rebuildUserIndexes(env);
@@ -71,6 +72,22 @@ async function rebuildGradeIndexes(env: Env): Promise<void> {
     await studentIdIndex.add(grade.studentId, grade.id);
     await courseIdIndex.add(grade.courseId, grade.id);
     await compoundIndex.add([grade.studentId, grade.courseId], grade.id);
+  }
+
+  const gradesByStudent = new Map<string, typeof grades>();
+  for (const grade of grades) {
+    if (grade.deletedAt) continue;
+    const studentGrades = gradesByStudent.get(grade.studentId) || [];
+    studentGrades.push(grade);
+    gradesByStudent.set(grade.studentId, studentGrades);
+  }
+
+  for (const [studentId, studentGrades] of gradesByStudent) {
+    const studentDateIndex = new StudentDateSortedIndex(env, GradeEntity.entityName, studentId);
+    await studentDateIndex.clear();
+    for (const grade of studentGrades) {
+      await studentDateIndex.add(grade.createdAt, grade.id);
+    }
   }
 }
 
