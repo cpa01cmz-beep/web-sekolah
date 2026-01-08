@@ -3,11 +3,28 @@ import type { Env } from './core-utils';
 import { ok, bad, notFound, forbidden } from './core-utils';
 import {
   UserEntity,
+  ClassEntity,
+  AnnouncementEntity,
   ensureAllSeedData
 } from "./entities";
 import { rebuildAllIndexes } from "./index-rebuilder";
 import { authenticate, authorize } from './middleware/auth';
-import type { Grade, CreateUserData, UpdateUserData } from "@shared/types";
+import type { 
+  Grade, 
+  CreateUserData, 
+  UpdateUserData, 
+  StudentDashboardData,
+  StudentCardData,
+  TeacherDashboardData,
+  ParentDashboardData,
+  AdminDashboardData,
+  SchoolUser,
+  UserFilters,
+  Announcement,
+  CreateAnnouncementData,
+  Settings,
+  SubmitGradeData
+} from "@shared/types";
 import { logger } from './logger';
 import { WebhookService } from './webhook-service';
 import { StudentDashboardService } from './domain';
@@ -22,9 +39,194 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
     return ok(c, { message: 'Database seeded successfully.' });
   });
 
+  app.get('/api/students/:id/grades', authenticate(), authorize('student'), async (c) => {
+    const user = getAuthUser(c);
+    const userId = user!.id;
+    const requestedStudentId = c.req.param('id');
+
+    if (userId !== requestedStudentId) {
+      logger.warn('[AUTH] Student accessing another student grades', { userId, requestedStudentId });
+      return forbidden(c, 'Access denied: Cannot access another student data');
+    }
+
+    const grades = await GradeService.getStudentGrades(c.env, requestedStudentId);
+    return ok(c, grades);
+  });
+
+  app.get('/api/students/:id/schedule', authenticate(), authorize('student'), async (c) => {
+    const user = getAuthUser(c);
+    const userId = user!.id;
+    const requestedStudentId = c.req.param('id');
+
+    if (userId !== requestedStudentId) {
+      logger.warn('[AUTH] Student accessing another student schedule', { userId, requestedStudentId });
+      return forbidden(c, 'Access denied: Cannot access another student data');
+    }
+
+    const student = await UserEntity.get(c.env, requestedStudentId) as any;
+    if (!student || !student.classId) {
+      return notFound(c, 'Student or class not found');
+    }
+
+    const classEntity = new ClassEntity(c.env, student.classId);
+    const classState = await classEntity.getState();
+    if (!classState) {
+      return notFound(c, 'Class not found');
+    }
+
+    const scheduleEntity = await UserEntity.get(c.env, `schedule-${student.classId}`);
+    const scheduleState = scheduleEntity as any;
+    const schedule = scheduleState?.items || [];
+
+    return ok(c, schedule);
+  });
+
+  app.get('/api/students/:id/card', authenticate(), authorize('student'), async (c) => {
+    const user = getAuthUser(c);
+    const userId = user!.id;
+    const requestedStudentId = c.req.param('id');
+
+    if (userId !== requestedStudentId) {
+      logger.warn('[AUTH] Student accessing another student card', { userId, requestedStudentId });
+      return forbidden(c, 'Access denied: Cannot access another student data');
+    }
+
+    const student = await UserEntity.get(c.env, requestedStudentId);
+    if (!student) {
+      return notFound(c, 'Student not found');
+    }
+
+    const classEntity = student.classId ? new ClassEntity(c.env, student.classId) : null;
+    const classState = classEntity ? await classEntity.getState() : null;
+
+    const grades = await GradeService.getStudentGrades(c.env, requestedStudentId);
+    const averageScore = grades.length > 0 
+      ? grades.reduce((sum, g) => sum + g.score, 0) / grades.length 
+      : 0;
+
+    const cardData: StudentCardData = {
+      studentId: student.id,
+      name: student.name,
+      email: student.email,
+      avatarUrl: student.avatarUrl || '',
+      className: classState?.name || 'N/A',
+      averageScore: Math.round(averageScore * 10) / 10,
+      totalGrades: grades.length,
+      gradeDistribution: {
+        A: grades.filter(g => g.score >= 90).length,
+        B: grades.filter(g => g.score >= 80 && g.score < 90).length,
+        C: grades.filter(g => g.score >= 70 && g.score < 80).length,
+        D: grades.filter(g => g.score >= 60 && g.score < 70).length,
+        F: grades.filter(g => g.score < 60).length,
+      },
+      recentGrades: grades.slice(-5).reverse()
+    };
+
+    return ok(c, cardData);
+  });
+
   app.post('/api/admin/rebuild-indexes', authenticate(), authorize('admin'), async (c) => {
     await rebuildAllIndexes(c.env);
     return ok(c, { message: 'All secondary indexes rebuilt successfully.' });
+  });
+
+  app.get('/api/teachers/:id/dashboard', authenticate(), authorize('teacher'), async (c) => {
+    const user = getAuthUser(c);
+    const userId = user!.id;
+    const requestedTeacherId = c.req.param('id');
+
+    if (userId !== requestedTeacherId) {
+      logger.warn('[AUTH] Teacher accessing another teacher dashboard', { userId, requestedTeacherId });
+      return forbidden(c, 'Access denied: Cannot access another teacher data');
+    }
+
+    const teacher = await UserEntity.get(c.env, requestedTeacherId);
+    if (!teacher) {
+      return notFound(c, 'Teacher not found');
+    }
+
+    const classes = await TeacherService.getClasses(c.env, requestedTeacherId);
+    const totalStudents = await Promise.all(
+      classes.map(async (cls) => {
+        const students = await UserEntity.getByClassId(c.env, cls.id);
+        return students.length;
+      })
+    ).then(counts => counts.reduce((sum, count) => sum + count, 0));
+
+    const recentGrades = await GradeService.getCourseGrades(c.env, classes[0]?.id || '');
+    const recentAnnouncements = await AnnouncementEntity.list(c.env);
+    const filteredAnnouncements = recentAnnouncements.items
+      .filter(a => a.targetRole === 'teacher' || a.targetRole === 'all')
+      .slice(-5)
+      .reverse();
+
+    const dashboardData: TeacherDashboardData = {
+      teacherId: teacher.id,
+      name: teacher.name,
+      email: teacher.email,
+      totalClasses: classes.length,
+      totalStudents: totalStudents,
+      recentGrades: recentGrades.slice(-5).reverse(),
+      recentAnnouncements: filteredAnnouncements
+    };
+
+    return ok(c, dashboardData);
+  });
+
+  app.get('/api/teachers/:id/announcements', authenticate(), authorize('teacher'), async (c) => {
+    const user = getAuthUser(c);
+    const userId = user!.id;
+    const requestedTeacherId = c.req.param('id');
+
+    if (userId !== requestedTeacherId) {
+      logger.warn('[AUTH] Teacher accessing another teacher announcements', { userId, requestedTeacherId });
+      return forbidden(c, 'Access denied: Cannot access another teacher data');
+    }
+
+    const { items: allAnnouncements } = await AnnouncementEntity.list(c.env);
+    const filteredAnnouncements = allAnnouncements.filter(a => 
+      a.targetRole === 'teacher' || a.targetRole === 'all'
+    );
+
+    return ok(c, filteredAnnouncements);
+  });
+
+  app.post('/api/teachers/grades', authenticate(), authorize('teacher'), async (c) => {
+    const gradeData = await c.req.json<SubmitGradeData>();
+
+    try {
+      const newGrade = await GradeService.createGrade(c.env, gradeData);
+      await WebhookService.triggerEvent(c.env, 'grade.created', newGrade as unknown as Record<string, unknown>);
+      return ok(c, newGrade);
+    } catch (error) {
+      if (error instanceof Error) {
+        return bad(c, error.message);
+      }
+      throw error;
+    }
+  });
+
+  app.post('/api/teachers/announcements', authenticate(), authorize('teacher'), async (c) => {
+    const announcementData = await c.req.json<CreateAnnouncementData>();
+    const user = getAuthUser(c);
+
+    const now = new Date().toISOString();
+    const newAnnouncement: Announcement = {
+      id: crypto.randomUUID(),
+      title: announcementData.title,
+      content: announcementData.content,
+      date: now,
+      targetRole: announcementData.targetRole || 'all',
+      targetClassIds: announcementData.targetClassIds || [],
+      createdBy: user!.id,
+      createdAt: now,
+      updatedAt: now
+    };
+
+    await AnnouncementEntity.create(c.env, newAnnouncement.id, newAnnouncement);
+    await WebhookService.triggerEvent(c.env, 'announcement.created', newAnnouncement as unknown as Record<string, unknown>);
+
+    return ok(c, newAnnouncement);
   });
 
   app.get('/api/students/:id/dashboard', authenticate(), authorize('student'), async (c) => {
@@ -46,6 +248,42 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
       }
       throw error;
     }
+  });
+
+  app.get('/api/parents/:id/dashboard', authenticate(), authorize('parent'), async (c) => {
+    const user = getAuthUser(c);
+    const userId = user!.id;
+    const requestedParentId = c.req.param('id');
+
+    if (userId !== requestedParentId) {
+      logger.warn('[AUTH] Parent accessing another parent dashboard', { userId, requestedParentId });
+      return forbidden(c, 'Access denied: Cannot access another parent data');
+    }
+
+    const parent = await UserEntity.get(c.env, requestedParentId);
+    if (!parent || !parent.childId) {
+      return notFound(c, 'Parent or child not found');
+    }
+
+    const child = await UserEntity.get(c.env, parent.childId);
+    if (!child) {
+      return notFound(c, 'Child student not found');
+    }
+
+    const dashboardData = await StudentDashboardService.getDashboardData(c.env, parent.childId);
+    const parentDashboardData: ParentDashboardData = {
+      parentId: parent.id,
+      name: parent.name,
+      email: parent.email,
+      childId: child.id,
+      childName: child.name,
+      childClassId: child.classId || '',
+      childGrades: dashboardData.grades,
+      childSchedule: dashboardData.schedule,
+      recentAnnouncements: dashboardData.announcements
+    };
+
+    return ok(c, parentDashboardData);
   });
 
   app.get('/api/teachers/:id/classes', authenticate(), authorize('teacher'), async (c) => {
@@ -161,5 +399,114 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
     }
 
     return ok(c, result);
+  });
+
+  app.get('/api/admin/dashboard', authenticate(), authorize('admin'), async (c) => {
+    const { items: allUsers } = await UserEntity.list(c.env);
+    const { items: allClasses } = await ClassEntity.list(c.env);
+    const { items: allAnnouncements } = await AnnouncementEntity.list(c.env);
+
+    const dashboardData: AdminDashboardData = {
+      totalUsers: allUsers.length,
+      totalStudents: allUsers.filter(u => u.role === 'student').length,
+      totalTeachers: allUsers.filter(u => u.role === 'teacher').length,
+      totalParents: allUsers.filter(u => u.role === 'parent').length,
+      totalClasses: allClasses.length,
+      recentAnnouncements: allAnnouncements.slice(-5).reverse(),
+      userDistribution: {
+        students: allUsers.filter(u => u.role === 'student').length,
+        teachers: allUsers.filter(u => u.role === 'teacher').length,
+        parents: allUsers.filter(u => u.role === 'parent').length,
+        admins: allUsers.filter(u => u.role === 'admin').length
+      }
+    };
+
+    return ok(c, dashboardData);
+  });
+
+  app.get('/api/admin/users', authenticate(), authorize('admin'), async (c) => {
+    const role = c.req.query('role');
+    const classId = c.req.query('classId');
+    const search = c.req.query('search');
+
+    const { items: allUsers } = await UserEntity.list(c.env);
+
+    let filteredUsers = allUsers;
+
+    if (role) {
+      filteredUsers = filteredUsers.filter(u => u.role === role);
+    }
+
+    if (classId) {
+      filteredUsers = filteredUsers.filter(u => (u as any).classId === classId);
+    }
+
+    if (search) {
+      const searchLower = search.toLowerCase();
+      filteredUsers = filteredUsers.filter(u => 
+        u.name.toLowerCase().includes(searchLower) ||
+        u.email.toLowerCase().includes(searchLower)
+      );
+    }
+
+    const usersWithoutPasswords = filteredUsers.map(u => {
+      const { passwordHash: _, ...userWithoutPassword } = u;
+      return userWithoutPassword;
+    });
+
+    return ok(c, usersWithoutPasswords);
+  });
+
+  app.get('/api/admin/announcements', authenticate(), authorize('admin'), async (c) => {
+    const { items: announcements } = await AnnouncementEntity.list(c.env);
+    return ok(c, announcements);
+  });
+
+  app.post('/api/admin/announcements', authenticate(), authorize('admin'), async (c) => {
+    const announcementData = await c.req.json<CreateAnnouncementData>();
+    const user = getAuthUser(c);
+
+    const now = new Date().toISOString();
+    const newAnnouncement: Announcement = {
+      id: crypto.randomUUID(),
+      title: announcementData.title,
+      content: announcementData.content,
+      date: now,
+      targetRole: announcementData.targetRole || 'all',
+      targetClassIds: announcementData.targetClassIds || [],
+      createdBy: user!.id,
+      createdAt: now,
+      updatedAt: now
+    };
+
+    await AnnouncementEntity.create(c.env, newAnnouncement.id, newAnnouncement);
+    await WebhookService.triggerEvent(c.env, 'announcement.created', newAnnouncement as unknown as Record<string, unknown>);
+
+    return ok(c, newAnnouncement);
+  });
+
+  app.get('/api/admin/settings', authenticate(), authorize('admin'), async (c) => {
+    const settings: Settings = {
+      schoolName: c.env.SCHOOL_NAME || 'SMA Negeri 1 Jakarta',
+      academicYear: c.env.ACADEMIC_YEAR || '2024-2025',
+      semester: parseInt(c.env.SEMESTER || '1'),
+      allowRegistration: c.env.ALLOW_REGISTRATION === 'true',
+      maintenanceMode: c.env.MAINTENANCE_MODE === 'true'
+    };
+
+    return ok(c, settings);
+  });
+
+  app.put('/api/admin/settings', authenticate(), authorize('admin'), async (c) => {
+    const updates = await c.req.json<Partial<Settings>>();
+    const updatedSettings: Settings = {
+      schoolName: updates.schoolName || c.env.SCHOOL_NAME || 'SMA Negeri 1 Jakarta',
+      academicYear: updates.academicYear || c.env.ACADEMIC_YEAR || '2024-2025',
+      semester: updates.semester ?? parseInt(c.env.SEMESTER || '1'),
+      allowRegistration: updates.allowRegistration ?? c.env.ALLOW_REGISTRATION === 'true',
+      maintenanceMode: updates.maintenanceMode ?? c.env.MAINTENANCE_MODE === 'true'
+    };
+
+    return ok(c, updatedSettings);
   });
 }
