@@ -10,6 +10,7 @@ import { SlideUp } from '@/components/animations';
 import { useParentDashboard } from '@/hooks/useParent';
 import { useAuthStore } from '@/lib/authStore';
 import type { Grade } from '@shared/types';
+import { formatDate } from '@/utils/date';
 
 export function ParentDashboardPage() {
   const user = useAuthStore((state) => state.user);
@@ -113,7 +114,7 @@ export function ParentDashboardPage() {
                 {data.recentAnnouncements.map((ann, index) => (
                   <li key={index} className="text-sm">
                     <p className="font-medium truncate">{ann.title}</p>
-                    <p className="text-xs text-muted-foreground">{new Date(ann.date).toLocaleDateString()}</p>
+                    <p className="text-xs text-muted-foreground">{formatDate(ann.date)}</p>
                   </li>
                 ))}
               </ul>

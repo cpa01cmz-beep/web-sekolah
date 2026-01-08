@@ -9,6 +9,7 @@ import { Clock, BookCopy, Megaphone, Users, AlertTriangle, Inbox } from 'lucide-
 import { SlideUp } from '@/components/animations';
 import { useTeacherDashboard } from '@/hooks/useTeacher';
 import { useAuthStore } from '@/lib/authStore';
+import { formatDate } from '@/utils/date';
 
 export function TeacherDashboardPage() {
   const user = useAuthStore((state) => state.user);
@@ -87,7 +88,7 @@ export function TeacherDashboardPage() {
                 {data.recentAnnouncements.map((ann, index) => (
                   <li key={index} className="text-sm">
                     <p className="font-medium truncate">{ann.title}</p>
-                    <p className="text-xs text-muted-foreground">{new Date(ann.date).toLocaleDateString()}</p>
+                    <p className="text-xs text-muted-foreground">{formatDate(ann.date)}</p>
                   </li>
                 ))}
               </ul>
