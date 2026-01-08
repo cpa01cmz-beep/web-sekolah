@@ -125,7 +125,7 @@ This clears and rebuilds all secondary indexes from existing data.
 **Impact**:
 - `worker/entities.ts`: Added `getByStudentIdAndCourseId()` method using compound index
 - `worker/domain/GradeService.ts`: Updated to use `createWithCompoundIndex()` for grade creation
-- All 510 tests passing (0 regression)
+- All 846 tests passing (2 skipped, 0 regression)
 
 #### Date-Sorted Secondary Index for Announcements
 **Problem**: `StudentDashboardService.getAnnouncements()` loaded ALL announcements and sorted in-memory (O(n log n) complexity)
@@ -147,7 +147,7 @@ This clears and rebuilds all secondary indexes from existing data.
 **Impact**:
 - `worker/entities.ts`: Added `getRecent()` method for AnnouncementEntity
 - `worker/domain/StudentDashboardService.ts`: Updated to use `AnnouncementEntity.getRecent()` instead of `list()` + `sort()`
-- All 510 tests passing (0 regression)
+- All 846 tests passing (2 skipped, 0 regression)
 
 #### Event Type Secondary Index for Webhooks (2026-01-08)
 **Problem**: `WebhookEventEntity.getByEventType()` loaded ALL webhook events and filtered in-memory for eventType (O(n) complexity)
@@ -169,7 +169,7 @@ This clears and rebuilds all secondary indexes from existing data.
 - `worker/entities.ts`: Updated `getByEventType()` method for WebhookEventEntity
 - Webhook trigger performance improved when filtering by event type
 - Consistent with other entity query patterns (UserEntity, ClassEntity, CourseEntity, GradeEntity)
-- All 837 tests passing (2 skipped, 0 regression)
+- All 846 tests passing (2 skipped, 0 regression)
 
 #### Service Layer Consistency Improvement (2026-01-08)
 
