@@ -396,10 +396,11 @@ This document tracks architectural refactoring tasks for Akademia Pro.
 
 | Priority | Task | Effort | Location |
 |----------|------|--------|----------|
-| | Low | Refactor large page components | Medium | Multiple page files (>150 lines) |
-| Medium | Centralize theme color constants | Small | 18+ hardcoded color references (#0D47A1, #00ACC1) |
-| Medium | Extract router configuration to separate module | Medium | src/App.tsx (161 lines with route definitions) |
-| | ✅ | Consolidate time constants across error reporter | Small | src/lib/error-reporter/ (JITTER_DELAY_MS, ERROR_RETENTION_MS constants added) |
+| Low | Refactor large UI components | Medium | src/components/ui/sidebar.tsx (771 lines) |
+| Medium | Consolidate retry configuration constants | Small | worker/webhook-service.ts (MAX_RETRIES, RETRY_DELAYS) |
+| Medium | Replace `any` types with proper interfaces in tests | Small | worker/domain/__tests__/UserService.test.ts (12+ instances) |
+| Medium | Abstract localStorage usage into storage utility | Medium | src/lib/authStore.ts (direct localStorage access) |
+| Low | Extract WebhookService signature verification to separate utility | Small | worker/webhook-service.ts:240 (verifySignature function) |
 
 ### Interface Definition and Layer Separation (2026-01-08) - Completed ✅
 
