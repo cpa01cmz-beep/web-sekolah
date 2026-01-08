@@ -483,7 +483,7 @@ const VITE_LOG_LEVEL = 'debug'
 
 ```typescript
 // Enable debug logging
-LOG_LEVEL=debug bun dev
+LOG_LEVEL=debug npm run dev
 
 // Check worker logs
 wrangler tail
