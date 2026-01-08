@@ -4,7 +4,7 @@ This document tracks architectural refactoring tasks for Akademia Pro.
 
 ## Status Summary
 
-**Last Updated**: 2026-01-07
+**Last Updated**: 2026-01-08
 
 ### Overall Health
 - ✅ **Security**: Production ready with password authentication (PBKDF2), 0 vulnerabilities
@@ -45,6 +45,13 @@ This document tracks architectural refactoring tasks for Akademia Pro.
 | Medium | Centralize theme color constants | Small | 18+ hardcoded color references (#0D47A1, #00ACC1) |
 | Medium | Extract router configuration to separate module | Medium | src/App.tsx (161 lines with route definitions) |
 | Low | Consolidate time constants across error reporter | Small | src/lib/error-reporter/ErrorReporter.ts (1000, 10000, 300000 magic numbers) |
+
+### DevOps Improvements (2026-01-08)
+
+| Initiative | Status | Impact |
+|------------|--------|--------|
+| Add wrangler.toml for version control | ✅ Complete | Cloudflare Workers deployment configuration now tracked in git |
+| Fix deploy script (bun → npm) | ✅ Complete | Deployment now works without bun dependency |
 
 ### Query Optimization (N+1 Elimination) - Completed ✅
 
