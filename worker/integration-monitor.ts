@@ -144,14 +144,6 @@ class IntegrationMonitor {
     this.webhookStats.pendingDeliveries = count;
   }
 
-  recordWebhookEventCreated(): void {
-    this.webhookStats.totalEvents++;
-  }
-
-  recordWebhookEventProcessed(): void {
-    this.webhookStats.pendingEvents = Math.max(0, this.webhookStats.pendingEvents - 1);
-  }
-
   private updateAverageDeliveryTime(): void {
     if (this.deliveryTimes.length === 0) {
       this.webhookStats.averageDeliveryTime = 0;
