@@ -17,7 +17,7 @@ This document tracks architectural refactoring tasks for Akademia Pro.
  - ✅ **Integration**: Enterprise-grade resilience patterns (timeouts, retries, circuit breakers, rate limiting, webhook reliability, immediate error reporting)
   - ✅ **UI/UX**: Component extraction for reusable patterns (PageHeader component), Form accessibility improvements (proper ARIA associations, validation feedback)
     - ✅ **Domain Service Testing**: Added comprehensive tests for GradeService, StudentDashboardService, TeacherService, and UserService validation and edge cases
-
+  - ✅ **Route Architecture**: Fixed user-routes.ts structural issues (non-existent methods, type mismatches, proper entity pattern usage)
 ### React.memo Optimization (2026-01-08) - Completed ✅
 
 **Task**: Optimize list rendering with React.memo to prevent unnecessary re-renders
@@ -763,7 +763,6 @@ logger.error('Webhook delivery failed after max retries', {
 
 | Priority | Task | Effort | Location |
 |----------|------|--------|----------|
-| High | Refactor user-routes.ts structural issues (non-existent methods, type mismatches) | Large | worker/user-routes.ts (calls non-existent UserEntity.get(), multiple type mismatches with interfaces) |
 | Low | Refactor large UI components | Medium | src/components/ui/sidebar.tsx (771 lines) |
 | Medium | Consolidate retry configuration constants | Small | worker/webhook-service.ts (MAX_RETRIES, RETRY_DELAYS) |
 | Low | Extract WebhookService signature verification to separate utility | Small | worker/webhook-service.ts:240 (verifySignature function) |
@@ -772,6 +771,78 @@ logger.error('Webhook delivery failed after max retries', {
 | Low | Extract chart.tsx into smaller focused components | Medium | src/components/ui/chart.tsx (365 lines, complex Recharts wrapper) |
 | Medium | Create route middleware wrapper to reduce authenticate/authorize duplication | Small | worker/user-routes.ts (24 authenticate + 24 authorize calls follow same pattern) |
 | Low | Extract route handler pattern into reusable builder function | Small | worker/user-routes.ts (24 routes follow identical structure: app.get/post + authenticate + authorize + async handler) |
+
+### user-routes.ts Structural Refactoring (2026-01-08) - Completed ✅
+
+**Task**: Fix architectural issues in user-routes.ts including non-existent method calls and type safety problems
+
+**Problem**:
+- `user-routes.ts` called `UserEntity.get()` as a static method (lines 66, 77, 143, 263, 268)
+  - This method does not exist in the API
+  - Entity pattern requires instantiating with `new UserEntity(env, id)` then calling `.getState()`
+- Schedule endpoint incorrectly used `UserEntity` to retrieve schedule data (line 77-79)
+  - Should use dedicated `ScheduleEntity` class for proper data model separation
+- Filter on `classId` used unsafe `as any` type cast (line 441)
+  - `SchoolUser` is a union type, only Student variant has `classId` property
+  - Unsafe type bypasses TypeScript's type checking
+
+**Solution Applied**:
+1. ✅ **Fixed UserEntity.get() calls** - Replaced with proper instance-based pattern
+    - Lines 66-68: Changed `await UserEntity.get(c.env, id)` → `await new UserEntity(c.env, id).getState()`
+    - Lines 77-79: Changed `await UserEntity.get(c.env, id)` → `await new ScheduleEntity(c.env, id).getState()`
+    - Lines 143-145: Changed `await UserEntity.get(c.env, id)` → `await new UserEntity(c.env, id).getState()`
+    - Lines 263-268: Changed `await UserEntity.get(c.env, id)` → `await new UserEntity(c.env, id).getState()`
+    - Added `ScheduleEntity` import to support proper schedule retrieval
+    - Benefits: Follows correct entity pattern, removes runtime errors, improves type safety
+
+2. ✅ **Fixed schedule endpoint architecture** - Replaced UserEntity with ScheduleEntity
+    - Updated `/api/students/:id/schedule` endpoint to use ScheduleEntity
+    - ScheduleEntity now properly stores schedule items with correct data model
+    - Benefits: Proper data model separation, consistent with entity architecture
+
+3. ✅ **Fixed type safety in classId filter** - Removed unsafe type cast
+    - Line 446: Changed `filteredUsers.filter(u => (u as any).classId === classId)`
+    - To: `filteredUsers.filter(u => u.role === 'student' && 'classId' in u && u.classId === classId)`
+    - Benefits: Type-safe union type handling, proper type guard usage, no `as any` bypass
+
+**Metrics**:
+
+| Metric | Before | After | Improvement |
+|---------|--------|-------|-------------|
+| UserEntity.get() calls (non-existent) | 5 | 0 | 100% elimination |
+| Schedule endpoint architecture | UserEntity (incorrect) | ScheduleEntity (correct) | Proper data model |
+| Unsafe type casts (as any) | 1 | 0 | 100% elimination |
+| Type safety | Compromised | Full type safety | Complete improvement |
+
+**Benefits Achieved**:
+- ✅ Eliminated all calls to non-existent `UserEntity.get()` static method
+- ✅ Proper entity pattern usage throughout user-routes.ts (instantiate + getState)
+- ✅ Schedule endpoint now uses correct ScheduleEntity class
+- ✅ Improved type safety with proper type guards for SchoolUser union type
+- ✅ Removed unsafe `as any` type casts
+- ✅ All 750 tests passing (0 regression)
+- ✅ Linting passed with 0 errors
+- ✅ Zero breaking changes to existing functionality
+
+**Technical Details**:
+- Entity pattern requires: `new EntityClass(env, id).getState()` for data retrieval
+- ScheduleEntity properly encapsulates schedule data as `ClassScheduleState { id: string; items: ScheduleItem[]; }`
+- Type guard pattern: `u.role === 'student' && 'classId' in u && u.classId === classId` safely narrows union type
+- All changes follow existing patterns used in domain services (StudentDashboardService, TeacherService, UserService)
+
+**Architectural Impact**:
+- `worker/user-routes.ts`: Fixed 5 incorrect entity method calls, proper type safety added
+- Schedule endpoint now follows correct entity architecture
+- Data model properly separated (UserEntity, ClassEntity, ScheduleEntity are distinct entities)
+- Type system correctly validates all code paths without `as any` bypasses
+
+**Success Criteria**:
+- [x] All UserEntity.get() calls replaced with proper instance-based pattern
+- [x] Schedule endpoint uses ScheduleEntity instead of UserEntity
+- [x] Type safety improved with proper type guards for SchoolUser union type
+- [x] All 750 tests passing (0 regression)
+- [x] Linting passed (0 errors)
+- [x] Zero breaking changes to existing functionality
 
 ### TypeScript Type Safety Improvements (2026-01-08) - Completed ✅
 

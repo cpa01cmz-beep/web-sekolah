@@ -5,6 +5,7 @@ import {
   UserEntity,
   ClassEntity,
   AnnouncementEntity,
+  ScheduleEntity,
   ensureAllSeedData
 } from "./entities";
 import { rebuildAllIndexes } from "./index-rebuilder";
@@ -63,7 +64,8 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
       return forbidden(c, 'Access denied: Cannot access another student data');
     }
 
-    const student = await UserEntity.get(c.env, requestedStudentId) as any;
+    const studentEntity = new UserEntity(c.env, requestedStudentId);
+    const student = await studentEntity.getState();
     if (!student || !student.classId) {
       return notFound(c, 'Student or class not found');
     }
@@ -74,8 +76,8 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
       return notFound(c, 'Class not found');
     }
 
-    const scheduleEntity = await UserEntity.get(c.env, `schedule-${student.classId}`);
-    const scheduleState = scheduleEntity as any;
+    const scheduleEntity = new ScheduleEntity(c.env, student.classId);
+    const scheduleState = await scheduleEntity.getState();
     const schedule = scheduleState?.items || [];
 
     return ok(c, schedule);
@@ -140,7 +142,8 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
       return forbidden(c, 'Access denied: Cannot access another teacher data');
     }
 
-    const teacher = await UserEntity.get(c.env, requestedTeacherId);
+    const teacherEntity = new UserEntity(c.env, requestedTeacherId);
+    const teacher = await teacherEntity.getState();
     if (!teacher) {
       return notFound(c, 'Teacher not found');
     }
@@ -260,12 +263,14 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
       return forbidden(c, 'Access denied: Cannot access another parent data');
     }
 
-    const parent = await UserEntity.get(c.env, requestedParentId);
+    const parentEntity = new UserEntity(c.env, requestedParentId);
+    const parent = await parentEntity.getState();
     if (!parent || !parent.childId) {
       return notFound(c, 'Parent or child not found');
     }
 
-    const child = await UserEntity.get(c.env, parent.childId);
+    const childEntity = new UserEntity(c.env, parent.childId);
+    const child = await childEntity.getState();
     if (!child) {
       return notFound(c, 'Child student not found');
     }
@@ -438,7 +443,7 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
     }
 
     if (classId) {
-      filteredUsers = filteredUsers.filter(u => (u as any).classId === classId);
+      filteredUsers = filteredUsers.filter(u => u.role === 'student' && 'classId' in u && u.classId === classId);
     }
 
     if (search) {
