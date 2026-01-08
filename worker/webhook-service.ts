@@ -21,10 +21,6 @@ export class WebhookService {
       return;
     }
 
-    const allEvents = await WebhookEventEntity.list(env);
-    const pendingEvents = allEvents.items.filter((e: WebhookEvent) => !e.processed);
-    integrationMonitor.recordWebhookEvent(allEvents.items.length, pendingEvents.length);
-
     for (const config of activeConfigs) {
       const eventId = `event-${crypto.randomUUID()}`;
       const now = new Date().toISOString();
@@ -39,6 +35,7 @@ export class WebhookService {
       };
 
       await new WebhookEventEntity(env, eventId).save(event);
+      integrationMonitor.recordWebhookEventCreated();
 
       const deliveryId = `delivery-${crypto.randomUUID()}`;
       const delivery: WebhookDelivery = {
@@ -175,6 +172,7 @@ export class WebhookService {
         processed: true,
         updatedAt: new Date().toISOString()
       });
+      integrationMonitor.recordWebhookEventProcessed();
     }
   }
 
