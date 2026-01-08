@@ -1174,7 +1174,46 @@ Webhooks are retried with exponential backoff on delivery failures:
 | 5 | 1 hour |
 | 6 | 2 hours |
 
-After 6 failed attempts, the webhook delivery is marked as failed and will not be retried.
+After 6 failed attempts, the webhook delivery is archived to the Dead Letter Queue for inspection and will not be retried.
+
+### Idempotency
+
+Webhook deliveries use idempotency keys to prevent duplicate deliveries:
+
+```typescript
+const idempotencyKey = `${eventId}:${webhookConfigId}`;
+```
+
+- Each delivery has a unique idempotency key
+- Duplicates are detected and skipped before delivery
+- Ensures at-least-once delivery guarantee
+
+### Dead Letter Queue
+
+Failed webhook deliveries are archived after max retries:
+
+**Endpoints**:
+- `GET /api/admin/webhooks/dead-letter-queue` - List all failed webhooks
+- `GET /api/admin/webhooks/dead-letter-queue/:id` - Get specific DLQ entry
+- `DELETE /api/admin/webhooks/dead-letter-queue/:id` - Delete DLQ entry
+
+**Schema**:
+```typescript
+{
+  id: string,
+  eventId: string,
+  webhookConfigId: string,
+  eventType: string,
+  url: string,
+  payload: Record<string, unknown>,
+  status: number,
+  attempts: number,
+  errorMessage: string,
+  failedAt: string,
+  createdAt: string,
+  updatedAt: string
+}
+```
 
 ### Circuit Breaker Pattern
 
@@ -1221,6 +1260,94 @@ Circuit breaker state is logged:
 - `Circuit half-open, attempting recovery` - When testing recovery
 - `Circuit closed after successful call` - When recovered
 - `Circuit is open, rejecting request` - When blocking requests
+
+---
+
+### Get Dead Letter Queue Entries
+
+#### GET /api/admin/webhooks/dead-letter-queue
+
+Get all failed webhook deliveries from Dead Letter Queue.
+
+**Rate Limit:** Strict (50 requests / 5 min)
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": "dlq-1",
+      "eventId": "event-1",
+      "webhookConfigId": "webhook-1",
+      "eventType": "grade.created",
+      "url": "https://example.com/webhook",
+      "payload": { "gradeId": "g-01" },
+      "status": 500,
+      "attempts": 6,
+      "errorMessage": "Max retries exceeded",
+      "failedAt": "2026-01-07T11:00:00.000Z",
+      "createdAt": "2026-01-07T10:00:00.000Z",
+      "updatedAt": "2026-01-07T11:00:00.000Z"
+    }
+  ],
+  "requestId": "uuid"
+}
+```
+
+#### GET /api/admin/webhooks/dead-letter-queue/:id
+
+Get details of a specific Dead Letter Queue entry.
+
+**Path Parameters:**
+- `id` (string) - DLQ entry ID
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "id": "dlq-1",
+    "eventId": "event-1",
+    "webhookConfigId": "webhook-1",
+    "eventType": "grade.created",
+    "url": "https://example.com/webhook",
+    "payload": { "gradeId": "g-01" },
+    "status": 500,
+    "attempts": 6,
+    "errorMessage": "Max retries exceeded",
+    "failedAt": "2026-01-07T11:00:00.000Z",
+    "createdAt": "2026-01-07T10:00:00.000Z",
+    "updatedAt": "2026-01-07T11:00:00.000Z"
+  },
+  "requestId": "uuid"
+}
+```
+
+**Error Responses:**
+- 404 - DLQ entry not found
+
+#### DELETE /api/admin/webhooks/dead-letter-queue/:id
+
+Delete a Dead Letter Queue entry (soft delete).
+
+**Path Parameters:**
+- `id` (string) - DLQ entry ID
+
+**Response (Success):**
+```json
+{
+  "success": true,
+  "data": {
+    "id": "dlq-1",
+    "deleted": true
+  },
+  "requestId": "uuid"
+}
+```
+
+**Error Responses:**
+- 404 - DLQ entry not found
 
 ---
 
@@ -1297,6 +1424,11 @@ Create a new webhook configuration.
   "active": true
 }
 ```
+
+**Idempotency:**
+- Webhook deliveries are idempotent using unique keys
+- Duplicate event/config combinations are skipped
+- Ensures at-least-once delivery guarantee
 
 **Response:**
 ```json

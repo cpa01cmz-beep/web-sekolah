@@ -1,7 +1,7 @@
 import { Hono } from 'hono';
 import type { Env } from './core-utils';
 import { ok, bad, notFound, unauthorized, serverError, forbidden } from './core-utils';
-import { WebhookConfigEntity, WebhookEventEntity, WebhookDeliveryEntity } from './entities';
+import { WebhookConfigEntity, WebhookEventEntity, WebhookDeliveryEntity, DeadLetterQueueWebhookEntity } from './entities';
 import { WebhookService } from './webhook-service';
 import { logger } from './logger';
 import { CircuitBreaker } from './CircuitBreaker';
@@ -256,6 +256,58 @@ export const webhookRoutes = (app: Hono<{ Bindings: Env }>) => {
     } catch (error) {
       logger.error('Failed to process webhook deliveries', error);
       return serverError(c, 'Failed to process webhook deliveries');
+    }
+  });
+
+  app.get('/api/admin/webhooks/dead-letter-queue', async (c) => {
+    try {
+      const failedWebhooks = await DeadLetterQueueWebhookEntity.getAllFailed(c.env);
+      return ok(c, failedWebhooks);
+    } catch (error) {
+      logger.error('Failed to get dead letter queue', error);
+      return serverError(c, 'Failed to get dead letter queue');
+    }
+  });
+
+  app.get('/api/admin/webhooks/dead-letter-queue/:id', async (c) => {
+    try {
+      const id = c.req.param('id');
+      const dlqEntry = await new DeadLetterQueueWebhookEntity(c.env, id).getState();
+
+      if (!dlqEntry || dlqEntry.deletedAt) {
+        return notFound(c, 'Dead letter queue entry not found');
+      }
+
+      return ok(c, dlqEntry);
+    } catch (error) {
+      logger.error('Failed to get dead letter queue entry', error);
+      return serverError(c, 'Failed to get dead letter queue entry');
+    }
+  });
+
+  app.delete('/api/admin/webhooks/dead-letter-queue/:id', async (c) => {
+    try {
+      const id = c.req.param('id');
+      const existing = await new DeadLetterQueueWebhookEntity(c.env, id).getState();
+
+      if (!existing || existing.deletedAt) {
+        return notFound(c, 'Dead letter queue entry not found');
+      }
+
+      const updated = {
+        ...existing,
+        deletedAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+
+      await new DeadLetterQueueWebhookEntity(c.env, id).save(updated);
+
+      logger.info('Dead letter queue entry deleted', { id });
+
+      return ok(c, { id, deleted: true });
+    } catch (error) {
+      logger.error('Failed to delete dead letter queue entry', error);
+      return serverError(c, 'Failed to delete dead letter queue entry');
     }
   });
 };

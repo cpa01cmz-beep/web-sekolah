@@ -1,5 +1,5 @@
 import { IndexedEntity, Index, SecondaryIndex, type Env } from "./core-utils";
-import type { SchoolUser, SchoolClass, Course, Grade, Announcement, ScheduleItem, SchoolData, UserRole, Student, WebhookConfig, WebhookEvent, WebhookDelivery } from "@shared/types";
+import type { SchoolUser, SchoolClass, Course, Grade, Announcement, ScheduleItem, SchoolData, UserRole, Student, WebhookConfig, WebhookEvent, WebhookDelivery, DeadLetterQueueWebhook } from "@shared/types";
 import { hashPassword } from "./password-utils";
 import { CompoundSecondaryIndex } from "./storage/CompoundSecondaryIndex";
 import { DateSortedSecondaryIndex } from "./storage/DateSortedSecondaryIndex";
@@ -267,7 +267,8 @@ export class WebhookDeliveryEntity extends IndexedEntity<WebhookDelivery> {
     attempts: 0,
     createdAt: "",
     updatedAt: "",
-    deletedAt: null
+    deletedAt: null,
+    idempotencyKey: undefined
   };
 
   static async getPendingRetries(env: Env): Promise<WebhookDelivery[]> {
@@ -276,6 +277,15 @@ export class WebhookDeliveryEntity extends IndexedEntity<WebhookDelivery> {
     return pendingDeliveries.filter(
       d => d.nextAttemptAt && d.nextAttemptAt <= now
     );
+  }
+
+  static async getByIdempotencyKey(env: Env, idempotencyKey: string): Promise<WebhookDelivery | null> {
+    const index = new SecondaryIndex<string>(env, this.entityName, 'idempotencyKey');
+    const deliveryIds = await index.getByValue(idempotencyKey);
+    if (deliveryIds.length === 0) return null;
+    const deliveries = await Promise.all(deliveryIds.map(id => new this(env, id).getState()));
+    const validDelivery = deliveries.find(d => d && !d.deletedAt);
+    return validDelivery || null;
   }
 
   static async getByEventId(env: Env, eventId: string): Promise<WebhookDelivery[]> {
@@ -290,5 +300,44 @@ export class WebhookDeliveryEntity extends IndexedEntity<WebhookDelivery> {
     const deliveryIds = await index.getByValue(webhookConfigId);
     const deliveries = await Promise.all(deliveryIds.map(id => new this(env, id).getState()));
     return deliveries.filter(d => d && !d.deletedAt) as WebhookDelivery[];
+  }
+}
+
+export class DeadLetterQueueWebhookEntity extends IndexedEntity<DeadLetterQueueWebhook> {
+  static readonly entityName = "deadLetterQueueWebhook";
+  static readonly indexName = "deadLetterQueueWebhooks";
+  static readonly initialState: DeadLetterQueueWebhook = {
+    id: "",
+    eventId: "",
+    webhookConfigId: "",
+    eventType: "",
+    url: "",
+    payload: {},
+    status: 0,
+    attempts: 0,
+    errorMessage: "",
+    failedAt: "",
+    createdAt: "",
+    updatedAt: "",
+    deletedAt: null
+  };
+
+  static async getAllFailed(env: Env): Promise<DeadLetterQueueWebhook[]> {
+    const result = await this.list(env);
+    return result.items;
+  }
+
+  static async getByWebhookConfigId(env: Env, webhookConfigId: string): Promise<DeadLetterQueueWebhook[]> {
+    const index = new SecondaryIndex<string>(env, this.entityName, 'webhookConfigId');
+    const dlqIds = await index.getByValue(webhookConfigId);
+    const dlqItems = await Promise.all(dlqIds.map(id => new this(env, id).getState()));
+    return dlqItems.filter(d => d && !d.deletedAt) as DeadLetterQueueWebhook[];
+  }
+
+  static async getByEventType(env: Env, eventType: string): Promise<DeadLetterQueueWebhook[]> {
+    const index = new SecondaryIndex<string>(env, this.entityName, 'eventType');
+    const dlqIds = await index.getByValue(eventType);
+    const dlqItems = await Promise.all(dlqIds.map(id => new this(env, id).getState()));
+    return dlqItems.filter(d => d && !d.deletedAt) as DeadLetterQueueWebhook[];
   }
 }

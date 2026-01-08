@@ -1,0 +1,50 @@
+export const WEBHOOK_TEST_DATA = {
+  config: {
+    id: 'webhook-test',
+    url: 'https://example.com/webhook',
+    events: ['grade.created'],
+    secret: 'test-secret',
+    active: true,
+    createdAt: '',
+    updatedAt: '',
+    deletedAt: null
+  },
+  event: {
+    id: 'event-test',
+    eventType: 'grade.created',
+    data: { gradeId: 'grade-1' },
+    processed: false,
+    createdAt: '',
+    updatedAt: '',
+    deletedAt: null
+  },
+  delivery: {
+    id: 'delivery-test',
+    eventId: 'event-test',
+    webhookConfigId: 'webhook-test',
+    status: 'pending' as const,
+    attempts: 0,
+    createdAt: '',
+    updatedAt: '',
+    deletedAt: null,
+    idempotencyKey: undefined
+  }
+} as const;
+
+export const DEAD_LETTER_QUEUE_TEST_DATA = {
+  entry: {
+    id: 'dlq-test',
+    eventId: 'event-dlq',
+    webhookConfigId: 'webhook-dlq',
+    eventType: 'grade.updated',
+    url: 'https://example.com/webhook',
+    payload: { gradeId: 'grade-dlq' },
+    status: 500,
+    attempts: 6,
+    errorMessage: 'Max retries exceeded',
+    failedAt: '',
+    createdAt: '',
+    updatedAt: '',
+    deletedAt: null
+  }
+} as const;

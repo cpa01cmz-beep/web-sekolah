@@ -288,6 +288,20 @@ export interface WebhookDelivery extends TimestampedEntity {
   attempts: number;
   nextAttemptAt?: string;
   errorMessage?: string;
+  idempotencyKey?: string;
+}
+
+export interface DeadLetterQueueWebhook extends TimestampedEntity {
+  id: string;
+  eventId: string;
+  webhookConfigId: string;
+  eventType: string;
+  url: string;
+  payload: Record<string, unknown>;
+  status: number;
+  attempts: number;
+  errorMessage: string;
+  failedAt: string;
 }
 
 export type WebhookEventType =

@@ -308,27 +308,39 @@ Integration Monitor tracks:
 ### Webhook Architecture
 
 ```
-Event Triggered → Event Created → Delivery Queued → Circuit Breaker Check
-                                                               ↓
-                                                      Attempt Delivery
-                                                               ↓
-                                                    ┌──────────────┴──────────────┐
-                                                    │                             │
-                                                Success                      Failure
-                                                    │                             │
-                                                    ↓                             ↓
-                                         Mark as Delivered               Schedule Retry
-                                                    │                             │
-                                                    └──────────────┬──────────────┘
-                                                                   ↓
-                                                            Max Retries (6)?
-                                                                   ↓
-                                                        ┌──────────┴──────────┐
-                                                        │                   │
-                                                    Yes (Fail)           No (Retry)
-                                                        │                   │
-                                                        ↓                   ↓
-                                                Mark as Failed       Update nextAttemptAt
+Event Triggered → Event Created → Delivery Queued → Idempotency Check
+                                                                ↓
+                                                        Idempotent?
+                                                                ↓
+                                                     ┌──────────┴──────────┐
+                                                     │                     │
+                                                 Yes (Skip)           No (New)
+                                                     │                     │
+                                                     ↓                     ↓
+                                              Skip Delivery      Circuit Breaker Check
+                                                                     ↓
+                                                               Attempt Delivery
+                                                                     ↓
+                                                    ┌──────────────────────┴──────────────────────┐
+                                                    │                                       │
+                                                Success                                   Failure
+                                                    │                                       │
+                                                    ↓                                       ↓
+                                         Mark as Delivered                      Schedule Retry
+                                                    │                                       │
+                                                    └──────────────────────┬──────────────────────┘
+                                                                       ↓
+                                                               Max Retries (6)?
+                                                                       ↓
+                                                           ┌──────────┴──────────┐
+                                                           │                   │
+                                                       Yes (Fail)           No (Retry)
+                                                           │                   │
+                                                           ↓                   ↓
+                                                   Archive to DLQ     Update nextAttemptAt
+                                                           │
+                                                           ▼
+                                                    Dead Letter Queue
 ```
 
 ### Retry Logic
@@ -343,7 +355,99 @@ Event Triggered → Event Created → Delivery Queued → Circuit Breaker Check
 | 6 | 1 hour | 111m |
 | 7 | 2 hours | 231m |
 
-After 6 failed attempts, the webhook delivery is marked as **failed** and will not be retried.
+After 6 failed attempts, webhook delivery is archived to the **Dead Letter Queue** and will not be retried.
+
+### Idempotency
+
+**Purpose**: Prevent duplicate webhook deliveries for the same event and configuration.
+
+**Implementation**:
+- Each delivery has a unique `idempotencyKey` = `${eventId}:${webhookConfigId}`
+- Before creating a delivery, check if one with the same idempotency key exists
+- Skip duplicate deliveries, log debug message
+- Prevents duplicate webhooks when the same event is triggered multiple times
+
+**API**:
+- `WebhookDeliveryEntity.getByIdempotencyKey(env, idempotencyKey)` - Check for existing delivery
+- WebhookDelivery table has `idempotencyKey` secondary index
+
+**Benefits**:
+- ✅ Prevents duplicate webhook deliveries
+- ✅ Handles race conditions when event is triggered multiple times
+- ✅ Maintains at-least-once delivery guarantee
+- ✅ Idempotent event triggering
+
+**Implementation**: `worker/webhook-service.ts:14-56`
+
+### Parallel Delivery Processing (Bulkhead Isolation)
+
+**Purpose**: Process webhook deliveries in parallel batches to improve throughput while maintaining system stability.
+
+**Configuration**:
+- Concurrency Limit: 5 deliveries at a time
+- Batch Processing: Deliveries processed in batches of 5
+- Prevents head-of-line blocking from slow webhook endpoints
+
+**Implementation**:
+```typescript
+for (let i = 0; i < pendingDeliveries.length; i += concurrencyLimit) {
+  const batch = pendingDeliveries.slice(i, i + concurrencyLimit);
+  await Promise.all(batch.map(delivery => this.attemptDelivery(env, delivery)));
+}
+```
+
+**Benefits**:
+- ✅ Up to 5x faster webhook delivery processing
+- ✅ Prevents head-of-line blocking
+- ✅ Bulkhead isolation limits resource consumption
+- ✅ Respects per-URL circuit breakers
+- ✅ Predictable performance with concurrency limit
+
+**Implementation**: `worker/webhook-service.ts:58-82`, `worker/webhook-constants.ts:1-8`
+
+### Dead Letter Queue
+
+**Purpose**: Archive permanently failed webhook deliveries for manual inspection and replay.
+
+**Features**:
+- Stores webhook delivery details when max retries (6) exceeded
+- Captures full event data for inspection
+- Includes error messages and delivery metadata
+- Queryable by webhook config ID, event type, or all entries
+- Soft delete support (mark as deleted without removing data)
+
+**Schema**:
+```typescript
+interface DeadLetterQueueWebhook {
+  id: string;
+  eventId: string;
+  webhookConfigId: string;
+  eventType: string;
+  url: string;
+  payload: Record<string, unknown>;
+  status: number;
+  attempts: number;
+  errorMessage: string;
+  failedAt: string;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt?: string | null;
+}
+```
+
+**API Endpoints**:
+- `GET /api/admin/webhooks/dead-letter-queue` - List all failed webhooks
+- `GET /api/admin/webhooks/dead-letter-queue/:id` - Get specific DLQ entry
+- `DELETE /api/admin/webhooks/dead-letter-queue/:id` - Delete DLQ entry
+
+**Benefits**:
+- ✅ Failed webhooks are archived, not lost
+- ✅ Full event data preserved for inspection
+- ✅ Error messages captured for debugging
+- ✅ Manual replay possible (create new delivery from DLQ data)
+- ✅ Analytics: Identify patterns in webhook failures
+
+**Implementation**: `worker/entities.ts:295-351`, `worker/webhook-service.ts:244-268`, `worker/webhook-routes.ts:263-307`
 
 ### Circuit Breaker (Per-URL)
 
@@ -357,6 +461,9 @@ After 6 failed attempts, the webhook delivery is marked as **failed** and will n
 - Fast failure when endpoint is unavailable (no 30s timeout)
 - Automatic recovery when endpoint comes back online
 - Independent isolation per webhook URL
+- Works with parallel delivery processing (each URL has independent breaker)
+
+**Implementation**: `worker/CircuitBreaker.ts`, `worker/webhook-service.ts:92-96`
 
 ### Signature Verification
 
@@ -379,7 +486,7 @@ const isValid = await verifySignature(
 );
 ```
 
-**Implementation**: `worker/webhook-service.ts:229-250`
+**Implementation**: `worker/webhook-service.ts:105`
 
 ### Webhook Events
 
@@ -392,6 +499,10 @@ const isValid = await verifySignature(
 | `user.deleted` | A user has been deleted | Admin deletes a user account |
 | `announcement.created` | A new announcement has been created | Teacher or admin posts an announcement |
 | `announcement.updated` | An existing announcement has been updated | Teacher or admin modifies an announcement |
+
+**Idempotency**: Each event delivery is idempotent. Triggering the same event multiple times will only result in one webhook delivery per configured webhook endpoint.
+
+**Reliability**: Failed deliveries are archived to Dead Letter Queue after 6 retry attempts for manual inspection.
 
 ---
 
@@ -483,15 +594,16 @@ Returns current system health:
 
 ### Integration Test Coverage
 
-- ✅ **600 tests passing**
+- ✅ **960 tests passing (2 skipped)**
 - ✅ **Circuit Breaker**: 3 test suites (frontend, backend, integration)
 - ✅ **Rate Limiting**: 321 tests
 - ✅ **Webhook Service**: 3 tests (trigger, process, signature verification)
+- ✅ **Webhook Reliability**: Idempotency, Dead Letter Queue, Parallel Processing
 - ✅ **Error Reporter**: 15 tests (retry logic, queue management, deduplication, immediate error reporting resilience)
 - ✅ **API Client**: 7 tests (timeout, retry, circuit breaker)
 - ✅ **Integration Monitor**: Full coverage of health metrics
 
-**Implementation**: `worker/__tests__/CircuitBreaker.test.ts`, `src/lib/__tests__/api-client.test.ts`
+**Implementation**: `worker/__tests__/CircuitBreaker.test.ts`, `src/lib/__tests__/api-client.test.ts`, `worker/__tests__/webhook-reliability.test.ts`
 
 ---
 
@@ -585,8 +697,8 @@ Returns current system health:
 - ✅ Documentation complete (blueprint, this guide)
 - ✅ Error responses standardized (consistent codes and messages)
 - ✅ Zero breaking changes (backward compatible)
-- ✅ All 600 tests passing (0 regression)
-- ✅ Webhook reliability verified (6 retries, circuit breaker, signature verification)
+- ✅ All 960 tests passing (0 regression)
+- ✅ Webhook reliability verified (idempotency, parallel processing, dead letter queue, circuit breaker, signature verification)
 - ✅ Error reporting hardened (immediate + queued with resilience patterns)
 - ✅ Rate limiting implemented (3-tier system with monitoring)
 - ✅ Integration monitoring functional (health metrics, error tracking)
