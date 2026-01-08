@@ -1,5 +1,5 @@
 import { SecondaryIndex, Index, type Env } from "./core-utils";
-import { UserEntity, ClassEntity, CourseEntity, GradeEntity, AnnouncementEntity, WebhookConfigEntity, WebhookEventEntity, WebhookDeliveryEntity } from "./entities";
+import { UserEntity, ClassEntity, CourseEntity, GradeEntity, AnnouncementEntity, WebhookConfigEntity, WebhookEventEntity, WebhookDeliveryEntity, DeadLetterQueueWebhookEntity } from "./entities";
 import { isStudent } from './type-guards';
 import { CompoundSecondaryIndex } from "./storage/CompoundSecondaryIndex";
 import { DateSortedSecondaryIndex } from "./storage/DateSortedSecondaryIndex";
@@ -14,6 +14,7 @@ export async function rebuildAllIndexes(env: Env): Promise<void> {
   await rebuildWebhookConfigIndexes(env);
   await rebuildWebhookEventIndexes(env);
   await rebuildWebhookDeliveryIndexes(env);
+  await rebuildDeadLetterQueueIndexes(env);
 }
 
 async function rebuildUserIndexes(env: Env): Promise<void> {
@@ -143,10 +144,12 @@ async function rebuildWebhookDeliveryIndexes(env: Env): Promise<void> {
   const statusIndex = new SecondaryIndex<string>(env, WebhookDeliveryEntity.entityName, 'status');
   const eventIdIndex = new SecondaryIndex<string>(env, WebhookDeliveryEntity.entityName, 'eventId');
   const webhookConfigIdIndex = new SecondaryIndex<string>(env, WebhookDeliveryEntity.entityName, 'webhookConfigId');
+  const idempotencyKeyIndex = new SecondaryIndex<string>(env, WebhookDeliveryEntity.entityName, 'idempotencyKey');
 
   await statusIndex.clear();
   await eventIdIndex.clear();
   await webhookConfigIdIndex.clear();
+  await idempotencyKeyIndex.clear();
 
   const { items: deliveries } = await WebhookDeliveryEntity.list(env);
   for (const delivery of deliveries) {
@@ -154,5 +157,23 @@ async function rebuildWebhookDeliveryIndexes(env: Env): Promise<void> {
     await statusIndex.add(delivery.status, delivery.id);
     await eventIdIndex.add(delivery.eventId, delivery.id);
     await webhookConfigIdIndex.add(delivery.webhookConfigId, delivery.id);
+    if (delivery.idempotencyKey) {
+      await idempotencyKeyIndex.add(delivery.idempotencyKey, delivery.id);
+    }
+  }
+}
+
+async function rebuildDeadLetterQueueIndexes(env: Env): Promise<void> {
+  const webhookConfigIdIndex = new SecondaryIndex<string>(env, DeadLetterQueueWebhookEntity.entityName, 'webhookConfigId');
+  const eventTypeIndex = new SecondaryIndex<string>(env, DeadLetterQueueWebhookEntity.entityName, 'eventType');
+
+  await webhookConfigIdIndex.clear();
+  await eventTypeIndex.clear();
+
+  const { items: dlqItems } = await DeadLetterQueueWebhookEntity.list(env);
+  for (const item of dlqItems) {
+    if (item.deletedAt) continue;
+    await webhookConfigIdIndex.add(item.webhookConfigId, item.id);
+    await eventTypeIndex.add(item.eventType, item.id);
   }
 }

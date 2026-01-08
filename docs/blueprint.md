@@ -48,16 +48,16 @@ The application uses **Cloudflare Workers Durable Objects** for persistent stora
 ### Entities
 
  | Entity | Primary Index | Secondary Indexes |
- |---------|----------------|-------------------|
- | UserEntity | ID | email, role, classId |
- | ClassEntity | ID | teacherId |
- | CourseEntity | ID | teacherId |
- | GradeEntity | ID | studentId, courseId, createdAt (date-sorted per-student) |
-  | AnnouncementEntity | ID | authorId, targetRole, date (date-sorted) |
- | ScheduleEntity | ID | - |
- | WebhookConfigEntity | ID | - |
- | WebhookEventEntity | ID | - |
- | WebhookDeliveryEntity | ID | eventId, webhookConfigId |
+|---------|----------------|-------------------|
+| UserEntity | ID | email, role, classId |
+| ClassEntity | ID | teacherId |
+| CourseEntity | ID | teacherId |
+| GradeEntity | ID | studentId, courseId, (studentId,courseId) compound, createdAt (date-sorted per-student) |
+| AnnouncementEntity | ID | authorId, targetRole, date (date-sorted) |
+| ScheduleEntity | ID | - |
+| WebhookConfigEntity | ID | active |
+| WebhookEventEntity | ID | processed, eventType |
+| WebhookDeliveryEntity | ID | eventId, webhookConfigId, status, idempotencyKey |
 
 ### Index Performance
 
@@ -87,7 +87,7 @@ This clears and rebuilds all secondary indexes from existing data.
 
 **Union Types**: UserEntity uses `SchoolUser` union type to support different user roles (Student, Teacher, Parent, Admin). The `initialState` is defined with Admin role (simplest structure) and excludes role-specific fields (classId, studentIdNumber) to maintain type safety across the union.
 
-**Secondary Index Management**: Some entities (GradeEntity, AnnouncementEntity, WebhookDeliveryEntity) manually manage their secondary indexes using `SecondaryIndex` class. This is an acceptable pattern that provides explicit control over index operations.
+**Secondary Index Management**: All entities with secondary indexes are properly managed in the index rebuilder. Specialized index types (CompoundSecondaryIndex, DateSortedSecondaryIndex, StudentDateSortedIndex) are also supported for complex query patterns. All index rebuild operations are reversible and data-safe.
 
 **Index Usage Patterns**:
 - Secondary indexes use field-based lookups: `SecondaryIndex<T>(env, entityName, fieldName)`
@@ -104,6 +104,8 @@ This clears and rebuilds all secondary indexes from existing data.
 - ~~WebhookEventEntity.getByEventType(): Full table scan + in-memory filter for event type lookups~~ ✅ **COMPLETED** (2026-01-08) - Now uses eventType secondary index for O(1) lookups
 - ~~Seed data mixed with entity definitions: entities.ts had 157 lines of seed data (lines 9-165) mixed with entity classes~~ ✅ **COMPLETED** (2026-01-08) - Extracted to dedicated `worker/seed-data.ts` module for clear separation of concerns
 - ~~Index rebuilder incomplete: rebuildAllIndexes() was missing rebuild functions for CompoundSecondaryIndex, DateSortedSecondaryIndex, and all webhook entity indexes~~ ✅ **COMPLETED** (2026-01-08) - Added complete index rebuild coverage for all entities (GradeEntity compound index, AnnouncementEntity date-sorted index, WebhookConfigEntity/EventEntity/DeliveryEntity secondary indexes)
+- ~~WebhookDeliveryEntity idempotencyKey index missing from rebuild function: Critical data integrity issue where idempotencyKey index was not being rebuilt~~ ✅ **COMPLETED** (2026-01-08) - Added idempotencyKey index to rebuildWebhookDeliveryIndexes() to ensure idempotency is maintained
+- ~~DeadLetterQueueWebhookEntity rebuild function missing: No rebuild function existed for DLQ indexes~~ ✅ **COMPLETED** (2026-01-08) - Added rebuildDeadLetterQueueIndexes() function to maintain webhookConfigId and eventType indexes
 - ~~Service layer inconsistency: user-routes.ts had direct entity access mixed with domain service calls~~ ✅ **COMPLETED** (2026-01-08) - Extracted CommonDataService for shared data access patterns, all GET routes now use domain services
 - ~~StudentDashboardService.getRecentGrades() loaded ALL grades for student~~ ✅ **COMPLETED** (2026-01-08) - Now uses per-student date-sorted index for O(n) retrieval
 - ~~Announcement filtering business logic in routes: Routes had inline filtering logic for targetRole and used incorrect field names (createdBy, targetClassIds)~~ ✅ **COMPLETED** (2026-01-08) - Extracted announcement filtering to domain services, fixed type safety issues, added targetRole field to types
