@@ -26,12 +26,16 @@ export function GalleryPage() {
             {[...Array(12)].map((_, index) => (
               <SlideUp key={index} delay={index * 0.05}>
                 <div className="aspect-square rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow">
-                  <div className={`w-full h-full ${
-                    index % 4 === 0 ? 'bg-gradient-to-r from-blue-400 to-blue-600' :
-                    index % 4 === 1 ? 'bg-gradient-to-r from-green-400 to-green-600' :
-                    index % 4 === 2 ? 'bg-gradient-to-r from-purple-400 to-purple-600' :
-                    'bg-gradient-to-r from-yellow-400 to-yellow-600'
-                  }`}></div>
+                  <div
+                    className={`w-full h-full ${
+                      index % 4 === 0 ? 'bg-gradient-to-r from-blue-400 to-blue-600' :
+                      index % 4 === 1 ? 'bg-gradient-to-r from-green-400 to-green-600' :
+                      index % 4 === 2 ? 'bg-gradient-to-r from-purple-400 to-purple-600' :
+                      'bg-gradient-to-r from-yellow-400 to-yellow-600'
+                    }`}
+                    role="img"
+                    aria-label={`Galeri foto ${index + 1}`}
+                  ></div>
                 </div>
               </SlideUp>
             ))}

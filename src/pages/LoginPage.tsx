@@ -19,21 +19,23 @@ export function LoginPage() {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState<UserRole | null>(null);
 
+  const [showValidationErrors, setShowValidationErrors] = useState(false);
+
   const getEmailError = () => {
-    if (email === '') return undefined;
+    if (email === '') return showValidationErrors ? 'Email is required' : undefined;
     if (!/^\S+@\S+\.\S+$/.test(email)) return 'Please enter a valid email address';
     return undefined;
   };
 
   const getPasswordError = () => {
-    if (password === '') return undefined;
+    if (password === '') return showValidationErrors ? 'Password is required' : undefined;
     if (password.length < 6) return 'Password must be at least 6 characters';
     return undefined;
   };
 
   const handleLogin = async (role: UserRole) => {
-    if (!email || !password) {
-      toast.error('Please enter email and password.');
+    setShowValidationErrors(true);
+    if (!email || !password || getEmailError() || getPasswordError()) {
       return;
     }
 
@@ -69,6 +71,7 @@ export function LoginPage() {
             </CardHeader>
             <form onSubmit={(e) => {
               e.preventDefault();
+              setShowValidationErrors(true);
               if (!isLoading && email && password) {
                 toast.error('Please select your role to login.');
               }
@@ -91,7 +94,7 @@ export function LoginPage() {
                   disabled={!!isLoading}
                   aria-required="true"
                   aria-invalid={!!getEmailError()}
-                  aria-describedby="email-error"
+                  aria-describedby={getEmailError() ? 'email-error' : 'email-helper'}
                 />
               </FormField>
               <FormField
@@ -111,7 +114,7 @@ export function LoginPage() {
                   disabled={!!isLoading}
                   aria-required="true"
                   aria-invalid={!!getPasswordError()}
-                  aria-describedby="password-error"
+                  aria-describedby={getPasswordError() ? 'password-error' : 'password-helper'}
                 />
               </FormField>
             </CardContent>

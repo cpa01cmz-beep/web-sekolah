@@ -57,7 +57,7 @@ npm run test:coverage   # Run with coverage
 npm run test:ui         # Run tests with UI
 
 # Quality
-npm run typecheck       # Check TypeScript types
+npx tsc --noEmit      # Check TypeScript types
 npm run lint           # Run ESLint
 ```
 
@@ -506,11 +506,11 @@ curl http://localhost:3000/api/health
 
 **Tests failing?**
 - Run `npm install` to update dependencies
-- Check TypeScript compilation: `npm run typecheck`
+- Check TypeScript compilation: `npx tsc --noEmit`
 
 **Build failing?**
 - Check for linting errors: `npm run lint`
-- Verify TypeScript types: `npm run typecheck`
+- Verify TypeScript types: `npx tsc --noEmit`
 
 **API requests failing?**
 - Check worker is running

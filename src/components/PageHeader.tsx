@@ -1,4 +1,4 @@
-import { ReactNode } from 'react';
+import { ReactNode, memo } from 'react';
 import { cn } from '@/lib/utils';
 
 interface PageHeaderProps {
@@ -8,7 +8,7 @@ interface PageHeaderProps {
   children?: ReactNode;
 }
 
-export function PageHeader({ title, description, className, children }: PageHeaderProps) {
+export const PageHeader = memo(function PageHeader({ title, description, className, children }: PageHeaderProps) {
   return (
     <div className={cn('mb-6', className)}>
       <h1 className="text-3xl font-bold">{title}</h1>
@@ -16,4 +16,4 @@ export function PageHeader({ title, description, className, children }: PageHead
       {children && <div className="mt-4">{children}</div>}
     </div>
   );
-}
+});

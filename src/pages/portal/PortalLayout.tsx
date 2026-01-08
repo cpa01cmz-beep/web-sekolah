@@ -8,9 +8,9 @@ import { Menu, Bell, GraduationCap } from 'lucide-react';
 import { Toaster } from 'sonner';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
+import React from 'react';
 import { SkipLink } from '@/components/SkipLink';
 import { navLinksMap, NavLink as NavLinkType } from '@/config/navigation';
-import React from 'react';
 import { THEME_COLORS } from '@/theme/colors';
 export function PortalLayout() {
   const user = useAuthStore((state) => state.user);
@@ -33,13 +33,14 @@ export function PortalLayout() {
                   <Menu className="h-6 w-6" />
                 </Button>
               </SheetTrigger>
-              <SheetContent side="left" className="p-0 w-64">
+              <SheetContent side="left" className="p-0 w-64" role="dialog" aria-label="Mobile navigation menu">
                 <div className="flex flex-col h-full">
                   <div className="flex items-center h-16 border-b px-4">
                     <GraduationCap className="h-7 w-7" style={{ color: THEME_COLORS.PRIMARY }} aria-hidden="true" />
                     <span className="ml-2 text-lg font-bold">Akademia Pro</span>
                   </div>
-                  <nav className="flex-grow p-4 space-y-2" aria-label={`${user.role} portal mobile navigation`} role="navigation">
+                  <nav className="flex-grow p-4 space-y-2" role="navigation" aria-label={`${user.role} portal navigation`}>
+                    <h3 className="sr-only">Navigation Menu</h3>
                     {navLinks.map((link: NavLinkType) => (
                       <NavLink
                         key={link.to}
@@ -64,7 +65,7 @@ export function PortalLayout() {
             </Sheet>
           </div>
           <div className="flex-1 text-center md:text-left">
-            <h1 className="text-lg font-semibold">Welcome, {user.name}!</h1>
+            <h2 className="text-lg font-semibold">Welcome, {user.name}!</h2>
           </div>
           <div className="flex items-center gap-4">
             <Button variant="ghost" size="icon" className="rounded-full" aria-label="View notifications">

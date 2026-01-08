@@ -12,16 +12,20 @@ interface SecurityHeadersConfig {
 }
 
 // CSP SECURITY NOTES:
-// - 'unsafe-inline' in script-src: Required for React runtime and inline event handlers
-// - 'unsafe-eval' in script-src: Required for some React libraries and eval() usage
-// - 'unsafe-inline' in style-src: Required for Tailwind CSS and inline styles
+// - 'unsafe-eval' in script-src: Required by React runtime (documented limitation)
+// - 'sha256-...' in script-src: Hash-based CSP for inline error reporting script in index.html
+// - 'unsafe-inline' in style-src: Required for chart component dynamic styles (Chart.tsx dangerouslySetInnerHTML)
 //
-// PRODUCTION RECOMMENDATIONS:
-// - Implement nonce-based CSP for scripts instead of 'unsafe-inline'
-// - Remove 'unsafe-eval' if possible (refactor code to avoid eval())
-// - Use CSP hash-based approach for inline scripts
-// - Consider separating development and production CSP configurations
-// - For maximum security: Use strict CSP with server-rendered nonces
+// SECURITY IMPROVEMENTS (2026-01-08):
+// - ✅ Replaced 'unsafe-inline' in script-src with SHA-256 hash for known inline script
+// - ✅ Removed script-src 'unsafe-inline' (major XSS risk reduction)
+// - ✅ Documented remaining 'unsafe-eval' requirement (React runtime)
+// - ✅ Documented style-src 'unsafe-inline' requirement (Chart component)
+//
+// FUTURE IMPROVEMENTS:
+// - Refactor Chart component to avoid dangerouslySetInnerHTML (eliminate style-src 'unsafe-inline')
+// - Consider nonce-based CSP for dynamic content (requires server-side rendering)
+// - Remove 'unsafe-eval' if React runtime no longer requires it
 
 const DEFAULT_SECURITY_HEADERS: SecurityHeadersConfig = {
   enableHSTS: true,
@@ -30,7 +34,7 @@ const DEFAULT_SECURITY_HEADERS: SecurityHeadersConfig = {
   enableXContentTypeOptions: true,
   enableReferrerPolicy: true,
   enablePermissionsPolicy: true,
-  cspDirectives: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self';",
+  cspDirectives: "default-src 'self'; script-src 'self' 'sha256-1LjDIY7ayXpv8ODYzP8xZXqNvuMhUBdo39lNMQ1oGHI=' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self';",
   hstsMaxAge: 31536000,
 };
 

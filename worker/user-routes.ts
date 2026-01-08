@@ -2,13 +2,12 @@ import { Hono } from "hono";
 import type { Env } from './core-utils';
 import { ok, bad, notFound, forbidden } from './core-utils';
 import {
-  UserEntity,
-  ClassEntity,
   AnnouncementEntity,
   ensureAllSeedData
 } from "./entities";
 import { rebuildAllIndexes } from "./index-rebuilder";
 import { authenticate, authorize } from './middleware/auth';
+import { GRADE_A_THRESHOLD, GRADE_B_THRESHOLD, GRADE_C_THRESHOLD, PASSING_SCORE_THRESHOLD } from './constants';
 import type { 
   Grade, 
   CreateUserData, 
@@ -27,11 +26,24 @@ import type {
 } from "@shared/types";
 import { logger } from './logger';
 import { WebhookService } from './webhook-service';
-import { StudentDashboardService } from './domain';
-import { TeacherService } from './domain';
-import { GradeService } from './domain';
-import { UserService } from './domain';
-import { getAuthUser } from './type-guards';
+import { StudentDashboardService, TeacherService, GradeService, UserService, ParentDashboardService, CommonDataService } from './domain';
+import { getAuthUser, getRoleSpecificFields } from './type-guards';
+import type { Context } from 'hono';
+
+function validateUserAccess(
+  c: Context,
+  userId: string,
+  requestedId: string,
+  role: string,
+  resourceType: string = 'data'
+): boolean {
+  if (userId !== requestedId) {
+    logger.warn(`[AUTH] ${role} accessing another ${role} ${resourceType}`, { userId, requestedId });
+    forbidden(c, `Access denied: Cannot access another ${role} ${resourceType}`);
+    return false;
+  }
+  return true;
+}
 
 export function userRoutes(app: Hono<{ Bindings: Env }>) {
   app.post('/api/seed', async (c) => {
@@ -44,9 +56,8 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
     const userId = user!.id;
     const requestedStudentId = c.req.param('id');
 
-    if (userId !== requestedStudentId) {
-      logger.warn('[AUTH] Student accessing another student grades', { userId, requestedStudentId });
-      return forbidden(c, 'Access denied: Cannot access another student data');
+    if (!validateUserAccess(c, userId, requestedStudentId, 'student', 'grades')) {
+      return;
     }
 
     const grades = await GradeService.getStudentGrades(c.env, requestedStudentId);
@@ -58,27 +69,16 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
     const userId = user!.id;
     const requestedStudentId = c.req.param('id');
 
-    if (userId !== requestedStudentId) {
-      logger.warn('[AUTH] Student accessing another student schedule', { userId, requestedStudentId });
-      return forbidden(c, 'Access denied: Cannot access another student data');
+    if (!validateUserAccess(c, userId, requestedStudentId, 'student', 'schedule')) {
+      return;
     }
 
-    const student = await UserEntity.get(c.env, requestedStudentId) as any;
-    if (!student || !student.classId) {
+    const { student, classData, schedule } = await CommonDataService.getStudentWithClassAndSchedule(c.env, requestedStudentId);
+    if (!student || !student.classId || !classData || !schedule) {
       return notFound(c, 'Student or class not found');
     }
 
-    const classEntity = new ClassEntity(c.env, student.classId);
-    const classState = await classEntity.getState();
-    if (!classState) {
-      return notFound(c, 'Class not found');
-    }
-
-    const scheduleEntity = await UserEntity.get(c.env, `schedule-${student.classId}`);
-    const scheduleState = scheduleEntity as any;
-    const schedule = scheduleState?.items || [];
-
-    return ok(c, schedule);
+    return ok(c, schedule?.items || []);
   });
 
   app.get('/api/students/:id/card', authenticate(), authorize('student'), async (c) => {
@@ -86,22 +86,18 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
     const userId = user!.id;
     const requestedStudentId = c.req.param('id');
 
-    if (userId !== requestedStudentId) {
-      logger.warn('[AUTH] Student accessing another student card', { userId, requestedStudentId });
-      return forbidden(c, 'Access denied: Cannot access another student data');
+    if (!validateUserAccess(c, userId, requestedStudentId, 'student', 'card')) {
+      return;
     }
 
-    const student = await UserEntity.get(c.env, requestedStudentId);
-    if (!student) {
+    const { student, classData } = await CommonDataService.getStudentForGrades(c.env, requestedStudentId);
+    if (!student || student.role !== 'student') {
       return notFound(c, 'Student not found');
     }
 
-    const classEntity = student.classId ? new ClassEntity(c.env, student.classId) : null;
-    const classState = classEntity ? await classEntity.getState() : null;
-
     const grades = await GradeService.getStudentGrades(c.env, requestedStudentId);
-    const averageScore = grades.length > 0 
-      ? grades.reduce((sum, g) => sum + g.score, 0) / grades.length 
+    const averageScore = grades.length > 0
+      ? grades.reduce((sum, g) => sum + g.score, 0) / grades.length
       : 0;
 
     const cardData: StudentCardData = {
@@ -109,15 +105,15 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
       name: student.name,
       email: student.email,
       avatarUrl: student.avatarUrl || '',
-      className: classState?.name || 'N/A',
+      className: classData?.name || 'N/A',
       averageScore: Math.round(averageScore * 10) / 10,
       totalGrades: grades.length,
       gradeDistribution: {
-        A: grades.filter(g => g.score >= 90).length,
-        B: grades.filter(g => g.score >= 80 && g.score < 90).length,
-        C: grades.filter(g => g.score >= 70 && g.score < 80).length,
-        D: grades.filter(g => g.score >= 60 && g.score < 70).length,
-        F: grades.filter(g => g.score < 60).length,
+        A: grades.filter(g => g.score >= GRADE_A_THRESHOLD).length,
+        B: grades.filter(g => g.score >= GRADE_B_THRESHOLD && g.score < GRADE_A_THRESHOLD).length,
+        C: grades.filter(g => g.score >= GRADE_C_THRESHOLD && g.score < GRADE_B_THRESHOLD).length,
+        D: grades.filter(g => g.score >= PASSING_SCORE_THRESHOLD && g.score < GRADE_C_THRESHOLD).length,
+        F: grades.filter(g => g.score < PASSING_SCORE_THRESHOLD).length,
       },
       recentGrades: grades.slice(-5).reverse()
     };
@@ -135,27 +131,25 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
     const userId = user!.id;
     const requestedTeacherId = c.req.param('id');
 
-    if (userId !== requestedTeacherId) {
-      logger.warn('[AUTH] Teacher accessing another teacher dashboard', { userId, requestedTeacherId });
-      return forbidden(c, 'Access denied: Cannot access another teacher data');
+    if (!validateUserAccess(c, userId, requestedTeacherId, 'teacher', 'dashboard')) {
+      return;
     }
 
-    const teacher = await UserEntity.get(c.env, requestedTeacherId);
+    const { teacher, classes: teacherClasses } = await CommonDataService.getTeacherWithClasses(c.env, requestedTeacherId);
     if (!teacher) {
       return notFound(c, 'Teacher not found');
     }
 
-    const classes = await TeacherService.getClasses(c.env, requestedTeacherId);
     const totalStudents = await Promise.all(
-      classes.map(async (cls) => {
-        const students = await UserEntity.getByClassId(c.env, cls.id);
+      teacherClasses.map(async (cls) => {
+        const students = await CommonDataService.getClassStudents(c.env, cls.id);
         return students.length;
       })
     ).then(counts => counts.reduce((sum, count) => sum + count, 0));
 
-    const recentGrades = await GradeService.getCourseGrades(c.env, classes[0]?.id || '');
-    const recentAnnouncements = await AnnouncementEntity.list(c.env);
-    const filteredAnnouncements = recentAnnouncements.items
+    const recentGrades = await GradeService.getCourseGrades(c.env, teacherClasses[0]?.id || '');
+    const allAnnouncements = await CommonDataService.getAllAnnouncements(c.env);
+    const filteredAnnouncements = allAnnouncements
       .filter(a => a.targetRole === 'teacher' || a.targetRole === 'all')
       .slice(-5)
       .reverse();
@@ -164,7 +158,7 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
       teacherId: teacher.id,
       name: teacher.name,
       email: teacher.email,
-      totalClasses: classes.length,
+      totalClasses: teacherClasses.length,
       totalStudents: totalStudents,
       recentGrades: recentGrades.slice(-5).reverse(),
       recentAnnouncements: filteredAnnouncements
@@ -178,12 +172,11 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
     const userId = user!.id;
     const requestedTeacherId = c.req.param('id');
 
-    if (userId !== requestedTeacherId) {
-      logger.warn('[AUTH] Teacher accessing another teacher announcements', { userId, requestedTeacherId });
-      return forbidden(c, 'Access denied: Cannot access another teacher data');
+    if (!validateUserAccess(c, userId, requestedTeacherId, 'teacher', 'announcements')) {
+      return;
     }
 
-    const { items: allAnnouncements } = await AnnouncementEntity.list(c.env);
+    const allAnnouncements = await CommonDataService.getAllAnnouncements(c.env);
     const filteredAnnouncements = allAnnouncements.filter(a => 
       a.targetRole === 'teacher' || a.targetRole === 'all'
     );
@@ -234,9 +227,8 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
     const userId = user!.id;
     const requestedStudentId = c.req.param('id');
 
-    if (userId !== requestedStudentId) {
-      logger.warn('[AUTH] Student accessing another student dashboard', { userId, requestedStudentId });
-      return forbidden(c, 'Access denied: Cannot access another student data');
+    if (!validateUserAccess(c, userId, requestedStudentId, 'student', 'dashboard')) {
+      return;
     }
 
     try {
@@ -255,65 +247,22 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
     const userId = user!.id;
     const requestedParentId = c.req.param('id');
 
-    if (userId !== requestedParentId) {
-      logger.warn('[AUTH] Parent accessing another parent dashboard', { userId, requestedParentId });
-      return forbidden(c, 'Access denied: Cannot access another parent data');
+    if (!validateUserAccess(c, userId, requestedParentId, 'parent', 'dashboard')) {
+      return;
     }
-
-    const parent = await UserEntity.get(c.env, requestedParentId);
-    if (!parent || !parent.childId) {
-      return notFound(c, 'Parent or child not found');
-    }
-
-    const child = await UserEntity.get(c.env, parent.childId);
-    if (!child) {
-      return notFound(c, 'Child student not found');
-    }
-
-    const dashboardData = await StudentDashboardService.getDashboardData(c.env, parent.childId);
-    const parentDashboardData: ParentDashboardData = {
-      parentId: parent.id,
-      name: parent.name,
-      email: parent.email,
-      childId: child.id,
-      childName: child.name,
-      childClassId: child.classId || '',
-      childGrades: dashboardData.grades,
-      childSchedule: dashboardData.schedule,
-      recentAnnouncements: dashboardData.announcements
-    };
-
-    return ok(c, parentDashboardData);
-  });
-
-  app.get('/api/teachers/:id/classes', authenticate(), authorize('teacher'), async (c) => {
-    const user = getAuthUser(c);
-    const userId = user!.id;
-    const requestedTeacherId = c.req.param('id');
-
-    if (userId !== requestedTeacherId) {
-      logger.warn('[AUTH] Teacher accessing another teacher data', { userId, requestedTeacherId });
-      return forbidden(c, 'Access denied: Cannot access another teacher data');
-    }
-
-    const classes = await TeacherService.getClasses(c.env, requestedTeacherId);
-    return ok(c, classes);
-  });
-
-  app.get('/api/classes/:id/students', authenticate(), authorize('teacher'), async (c) => {
-    const classId = c.req.param('id');
-    const user = getAuthUser(c);
-    const teacherId = user!.id;
 
     try {
-      const studentsWithGrades = await TeacherService.getClassStudentsWithGrades(c.env, classId, teacherId);
-      return ok(c, studentsWithGrades);
+      const dashboardData = await ParentDashboardService.getDashboardData(c.env, requestedParentId);
+      return ok(c, dashboardData);
     } catch (error) {
-      if (error instanceof Error && error.message === 'Class not found') {
-        return notFound(c, 'Class not found');
+      if (error instanceof Error && error.message === 'Parent not found') {
+        return notFound(c, 'Parent not found');
       }
-      if (error instanceof Error && error.message === 'Teacher not assigned to this class') {
-        return forbidden(c, 'Access denied: Teacher not assigned to this class');
+      if (error instanceof Error && error.message === 'Child not found') {
+        return notFound(c, 'Child not found');
+      }
+      if (error instanceof Error && error.message === 'Parent has no associated child') {
+        return notFound(c, 'Parent has no associated child');
       }
       throw error;
     }
@@ -391,7 +340,7 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
   app.delete('/api/users/:id', authenticate(), authorize('admin'), async (c) => {
     const userId = c.req.param('id');
 
-    const user = await new UserEntity(c.env, userId).getState();
+    const user = await CommonDataService.getUserById(c.env, userId);
     const result = await UserService.deleteUser(c.env, userId);
 
     if (result.deleted && user) {
@@ -402,9 +351,9 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
   });
 
   app.get('/api/admin/dashboard', authenticate(), authorize('admin'), async (c) => {
-    const { items: allUsers } = await UserEntity.list(c.env);
-    const { items: allClasses } = await ClassEntity.list(c.env);
-    const { items: allAnnouncements } = await AnnouncementEntity.list(c.env);
+    const allUsers = await CommonDataService.getAllUsers(c.env);
+    const allClasses = await CommonDataService.getAllClasses(c.env);
+    const allAnnouncements = await CommonDataService.getAllAnnouncements(c.env);
 
     const dashboardData: AdminDashboardData = {
       totalUsers: allUsers.length,
@@ -429,7 +378,7 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
     const classId = c.req.query('classId');
     const search = c.req.query('search');
 
-    const { items: allUsers } = await UserEntity.list(c.env);
+    const allUsers = await CommonDataService.getAllUsers(c.env);
 
     let filteredUsers = allUsers;
 
@@ -438,7 +387,7 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
     }
 
     if (classId) {
-      filteredUsers = filteredUsers.filter(u => (u as any).classId === classId);
+      filteredUsers = filteredUsers.filter(u => u.role === 'student' && 'classId' in u && u.classId === classId);
     }
 
     if (search) {

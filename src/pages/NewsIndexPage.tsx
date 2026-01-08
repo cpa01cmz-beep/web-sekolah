@@ -65,7 +65,11 @@ export function NewsIndexPage() {
               <div className="space-y-4">
                 <SlideLeft>
                   <div className="flex items-start gap-4 p-4 bg-card rounded-lg shadow-sm hover:shadow-md transition-shadow">
-                    <div className="flex-shrink-0 w-16 h-16 bg-gradient-to-r from-blue-400 to-blue-600 rounded-md"></div>
+                    <div
+                      className="flex-shrink-0 w-16 h-16 bg-gradient-to-r from-blue-400 to-blue-600 rounded-md"
+                      role="img"
+                      aria-label="Foto prestasi siswa olimpiade sains nasional"
+                    ></div>
                     <div>
                       <h3 className="font-bold">Prestasi Siswa di Olimpiade Sains Nasional</h3>
                       <p className="text-sm text-muted-foreground mt-1">Tim sains kami berhasil meraih medali emas di ajang bergengsi tingkat nasional.</p>
@@ -76,7 +80,11 @@ export function NewsIndexPage() {
 
                 <SlideLeft delay={0.1}>
                   <div className="flex items-start gap-4 p-4 bg-card rounded-lg shadow-sm hover:shadow-md transition-shadow">
-                    <div className="flex-shrink-0 w-16 h-16 bg-gradient-to-r from-green-400 to-green-600 rounded-md"></div>
+                    <div
+                      className="flex-shrink-0 w-16 h-16 bg-gradient-to-r from-green-400 to-green-600 rounded-md"
+                      role="img"
+                      aria-label="Foto pembangunan gedung baru sekolah"
+                    ></div>
                     <div>
                       <h3 className="font-bold">Pembangunan Gedung Baru Dimulai</h3>
                       <p className="text-sm text-muted-foreground mt-1">Proyek pembangunan gedung serba guna baru telah dimulai dengan target selesai akhir tahun.</p>

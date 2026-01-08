@@ -1,6 +1,8 @@
 import { SiteHeader } from '@/components/SiteHeader';
 import { SiteFooter } from '@/components/SiteFooter';
 import { SlideUp } from '@/components/animations';
+import { formatDate } from '@/utils/date';
+
 export function PrivacyPolicyPage() {
   return (
     <div className="flex flex-col min-h-screen bg-background">
@@ -15,7 +17,7 @@ export function PrivacyPolicyPage() {
             </SlideUp>
             <SlideUp delay={0.2}>
               <p className="mt-4 max-w-2xl mx-auto text-lg text-muted-foreground">
-                Last updated: {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+                Last updated: {formatDate(new Date(), 'long')}
               </p>
             </SlideUp>
           </div>

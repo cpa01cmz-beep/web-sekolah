@@ -2,6 +2,10 @@ import type { Context, Next } from 'hono';
 import { integrationMonitor } from '../integration-monitor';
 import { logger } from '../logger';
 
+interface ErrorWithCode extends Error {
+  code?: string;
+}
+
 export function errorMonitoring() {
   return async (c: Context, next: Next) => {
     try {
@@ -10,7 +14,7 @@ export function errorMonitoring() {
       const status = c.res.status || 500;
       let code = 'INTERNAL_SERVER_ERROR';
       if (error instanceof Error && 'code' in error) {
-        const err = error as { code?: string };
+        const err = error as ErrorWithCode;
         code = err.code ?? code;
       }
       const endpoint = c.req.path;

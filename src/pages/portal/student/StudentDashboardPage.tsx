@@ -1,6 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { EmptyState } from '@/components/ui/empty-state';
 import { DashboardSkeleton } from '@/components/ui/loading-skeletons';
@@ -10,6 +9,7 @@ import { Clock, BookOpen, Megaphone, AlertTriangle, Inbox } from 'lucide-react';
 import { useStudentDashboard } from '@/hooks/useStudent';
 import { useAuthStore } from '@/lib/authStore';
 import type { StudentDashboardData } from '@shared/types';
+import { formatDate } from '@/utils/date';
 
 export function StudentDashboardPage() {
   const user = useAuthStore((state) => state.user);
@@ -98,7 +98,7 @@ export function StudentDashboardPage() {
                   {data.announcements.map((ann, index) => (
                     <li key={index} className="text-sm">
                       <p className="font-medium truncate">{ann.title}</p>
-                      <p className="text-xs text-muted-foreground">{new Date(ann.date).toLocaleDateString()}</p>
+                      <p className="text-xs text-muted-foreground">{formatDate(ann.date)}</p>
                     </li>
                   ))}
                 </ul>

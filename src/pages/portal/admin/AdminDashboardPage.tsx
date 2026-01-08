@@ -10,9 +10,21 @@ import { SlideUp } from '@/components/animations';
 import { useReducedMotion } from '@/hooks/use-reduced-motion';
 import { useAdminDashboard } from '@/hooks/useAdmin';
 import { THEME_COLORS } from '@/theme/colors';
+import { formatDate } from '@/utils/date';
+
+interface ChartComponents {
+  BarChart: React.ComponentType<any>;
+  Bar: React.ComponentType<any>;
+  XAxis: React.ComponentType<any>;
+  YAxis: React.ComponentType<any>;
+  CartesianGrid: React.ComponentType<any>;
+  Tooltip: React.ComponentType<any>;
+  Legend: React.ComponentType<any>;
+  ResponsiveContainer: React.ComponentType<any>;
+}
 
 function EnrollmentChart({ data }: { data: Array<{ name: string; students: number }> }) {
-  const [Chart, setChart] = useState<{ BarChart: any, Bar: any, XAxis: any, YAxis: any, CartesianGrid: any, Tooltip: any, Legend: any, ResponsiveContainer: any } | null>(null);
+  const [Chart, setChart] = useState<ChartComponents | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -134,7 +146,7 @@ export function AdminDashboardPage() {
                     <Activity className="h-4 w-4 mt-1 mr-3 text-muted-foreground flex-shrink-0" />
                     <div>
                       <p className="text-sm font-medium">{ann.title}</p>
-                      <p className="text-xs text-muted-foreground">{new Date(ann.date).toLocaleDateString()}</p>
+                      <p className="text-xs text-muted-foreground">{formatDate(ann.date)}</p>
                     </div>
                   </li>
                 ))}
