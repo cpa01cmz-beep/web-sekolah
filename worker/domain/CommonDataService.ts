@@ -53,8 +53,7 @@ export class CommonDataService {
       return { teacher: null, classes: [] };
     }
 
-    const { items: allClasses } = await ClassEntity.list(env);
-    const teacherClasses = allClasses.filter((c: SchoolClass) => c.teacherId === teacherId);
+    const teacherClasses = await ClassEntity.getByTeacherId(env, teacherId);
 
     return { teacher, classes: teacherClasses };
   }
