@@ -102,6 +102,7 @@ This clears and rebuilds all secondary indexes from existing data.
 - ~~TypeScript type safety: UserService.test.ts used unsafe `as any` type casts (12+ instances)~~ ✅ **COMPLETED** (2026-01-08) - All `as any` replaced with proper types (Env, CreateUserData, UpdateUserData, UserRole)
 - ~~WebhookEventEntity.getByEventType(): Full table scan + in-memory filter for event type lookups~~ ✅ **COMPLETED** (2026-01-08) - Now uses eventType secondary index for O(1) lookups
 - ~~Seed data mixed with entity definitions: entities.ts had 157 lines of seed data (lines 9-165) mixed with entity classes~~ ✅ **COMPLETED** (2026-01-08) - Extracted to dedicated `worker/seed-data.ts` module for clear separation of concerns
+- ~~Index rebuilder incomplete: rebuildAllIndexes() was missing rebuild functions for CompoundSecondaryIndex, DateSortedSecondaryIndex, and all webhook entity indexes~~ ✅ **COMPLETED** (2026-01-08) - Added complete index rebuild coverage for all entities (GradeEntity compound index, AnnouncementEntity date-sorted index, WebhookConfigEntity/EventEntity/DeliveryEntity secondary indexes)
 
 ### Recent Data Optimizations (2026-01-07)
 
