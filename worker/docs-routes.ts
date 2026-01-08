@@ -1,17 +1,52 @@
 import { Hono } from 'hono';
 import type { Env } from './core-utils';
+import { CircuitBreaker } from './CircuitBreaker';
+
+const DOCS_TIMEOUT_MS = 30000;
+const DOCS_MAX_RETRIES = 3;
+const DOCS_RETRY_DELAY_MS = 1000;
+
+const docsCircuitBreaker = new CircuitBreaker('docs-api-spec', {
+  failureThreshold: 5,
+  timeoutMs: 60000,
+});
+
+async function fetchWithRetry(url: string, maxRetries = DOCS_MAX_RETRIES): Promise<Response> {
+  let lastError: Error | null = null;
+
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      const response = await docsCircuitBreaker.execute(async () => {
+        return await fetch(url, {
+          signal: AbortSignal.timeout(DOCS_TIMEOUT_MS),
+        });
+      });
+
+      if (response.ok) {
+        return response;
+      }
+
+      throw new Error(`Failed to fetch spec: ${response.status} ${response.statusText}`);
+    } catch (error) {
+      lastError = error instanceof Error ? error : new Error(String(error));
+
+      if (attempt < maxRetries) {
+        const delay = DOCS_RETRY_DELAY_MS * (attempt + 1);
+        await new Promise(resolve => setTimeout(resolve, delay));
+      }
+    }
+  }
+
+  throw lastError || new Error('Failed to fetch OpenAPI spec');
+}
 
 export function docsRoutes(app: Hono<{ Bindings: Env }>) {
   app.get('/api-docs', async (c) => {
     const specUrl = new URL(c.req.url);
     specUrl.pathname = '/openapi.yaml';
-    
+
     try {
-      const response = await fetch(specUrl.toString());
-      if (!response.ok) {
-        throw new Error('OpenAPI spec not found');
-      }
-      
+      const response = await fetchWithRetry(specUrl.toString());
       const spec = await response.text();
       return c.text(spec, 200, {
         'Content-Type': 'application/x-yaml',
@@ -19,7 +54,7 @@ export function docsRoutes(app: Hono<{ Bindings: Env }>) {
     } catch (error) {
       return c.json({
         success: false,
-        error: 'Failed to load OpenAPI specification',
+        error: error instanceof Error ? error.message : 'Failed to load OpenAPI specification',
         code: 'INTERNAL_SERVER_ERROR',
       }, 500);
     }
@@ -28,13 +63,9 @@ export function docsRoutes(app: Hono<{ Bindings: Env }>) {
   app.get('/api-docs.yaml', async (c) => {
     const specUrl = new URL(c.req.url);
     specUrl.pathname = '/openapi.yaml';
-    
+
     try {
-      const response = await fetch(specUrl.toString());
-      if (!response.ok) {
-        throw new Error('OpenAPI spec not found');
-      }
-      
+      const response = await fetchWithRetry(specUrl.toString());
       const spec = await response.text();
       return c.text(spec, 200, {
         'Content-Type': 'application/x-yaml',
@@ -42,7 +73,7 @@ export function docsRoutes(app: Hono<{ Bindings: Env }>) {
     } catch (error) {
       return c.json({
         success: false,
-        error: 'Failed to load OpenAPI specification',
+        error: error instanceof Error ? error.message : 'Failed to load OpenAPI specification',
         code: 'INTERNAL_SERVER_ERROR',
       }, 500);
     }

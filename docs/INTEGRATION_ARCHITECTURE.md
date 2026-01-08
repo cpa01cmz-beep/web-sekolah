@@ -85,8 +85,33 @@ All external calls have configured timeouts to prevent indefinite hanging.
 | Error Reporter | 10s per attempt | Fixed |
 | Webhook Delivery | 30s per attempt | Fixed |
 | Backend Routes | 30s | Per endpoint |
+| Docs Routes | 30s | Fixed |
 
-**Implementation**: `src/lib/api-client.ts:197-220`, `worker/webhook-service.ts:123`
+**Implementation**: `src/lib/api-client.ts:197-220`, `worker/webhook-service.ts:123`, `worker/docs-routes.ts:12`
+
+#### Docs Routes Timeout (2026-01-08)
+
+API documentation endpoints (`/api-docs`, `/api-docs.yaml`) fetch the OpenAPI specification from `/openapi.yaml` with resilience patterns:
+
+**Configuration**:
+- **Timeout**: 30 seconds (prevents hanging requests)
+- **Max Retries**: 3 attempts
+- **Retry Delays**: 1s, 2s, 3s (exponential backoff)
+- **Circuit Breaker**: Failure threshold 5, timeout 60s
+
+**Implementation**:
+```typescript
+const response = await fetchWithRetry(specUrl.toString());
+```
+
+**Benefits**:
+- ✅ Prevents documentation requests from hanging indefinitely
+- ✅ Handles transient network issues with automatic retry
+- ✅ Circuit breaker prevents cascading failures
+- ✅ Consistent with other backend resilience patterns
+- ✅ Reduces error rate for documentation access
+
+**Implementation**: `worker/docs-routes.ts:8-42`
 
 ---
 
@@ -765,6 +790,6 @@ Returns current system health:
 
  ---
 
-**Last Updated**: 2026-01-08 (Integration Engineer - Webhook Test Route Retry Enhancement)
+**Last Updated**: 2026-01-08 (Integration Engineer - Docs Routes Resilience Enhancement)
 
 **Status**: ✅ **Production Ready** - All integration patterns fully implemented and tested. 100% hardening coverage achieved.
