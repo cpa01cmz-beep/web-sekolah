@@ -4,6 +4,7 @@ import { ok, bad, notFound, unauthorized, serverError, forbidden } from './core-
 import { WebhookConfigEntity, WebhookEventEntity, WebhookDeliveryEntity } from './entities';
 import { WebhookService } from './webhook-service';
 import { logger } from './logger';
+import { CircuitBreaker } from './CircuitBreaker';
 
 export const webhookRoutes = (app: Hono<{ Bindings: Env }>) => {
   app.get('/api/webhooks', async (c) => {
@@ -171,8 +172,10 @@ export const webhookRoutes = (app: Hono<{ Bindings: Env }>) => {
   });
 
   app.post('/api/webhooks/test', async (c) => {
+    let body: { url: string; secret: string } = { url: '', secret: '' };
+    
     try {
-      const body = await c.req.json<{
+      body = await c.req.json<{
         url: string;
         secret: string;
       }>();
@@ -198,17 +201,21 @@ export const webhookRoutes = (app: Hono<{ Bindings: Env }>) => {
       const hexArray = Array.from(hash).map(b => b.toString(16).padStart(2, '0'));
       const signatureHeader = `sha256=${hexArray.join('')}`;
 
-      const response = await fetch(body.url, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Webhook-Signature': signatureHeader,
-          'X-Webhook-ID': testPayload.id,
-          'X-Webhook-Timestamp': testPayload.timestamp,
-          'User-Agent': 'Akademia-Pro-Webhook/1.0'
-        },
-        body: JSON.stringify(testPayload),
-        signal: AbortSignal.timeout(30000)
+      const breaker = CircuitBreaker.createWebhookBreaker(body.url);
+
+      const response = await breaker.execute(async () => {
+        return await fetch(body.url, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Webhook-Signature': signatureHeader,
+            'X-Webhook-ID': testPayload.id,
+            'X-Webhook-Timestamp': testPayload.timestamp,
+            'User-Agent': 'Akademia-Pro-Webhook/1.0'
+          },
+          body: JSON.stringify(testPayload),
+          signal: AbortSignal.timeout(30000)
+        });
       });
 
       const responseText = await response.text();
@@ -222,6 +229,18 @@ export const webhookRoutes = (app: Hono<{ Bindings: Env }>) => {
       });
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      
+      if (errorMessage.includes('Circuit breaker is open')) {
+        logger.warn('Webhook test skipped due to open circuit breaker', {
+          url: body?.url,
+          errorMessage
+        });
+        return ok(c, {
+          success: false,
+          error: 'Circuit breaker is open for this webhook URL. Please wait before retrying.'
+        });
+      }
+      
       logger.error('Webhook test failed', error);
       return ok(c, {
         success: false,

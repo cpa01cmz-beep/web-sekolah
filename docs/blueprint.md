@@ -1300,6 +1300,11 @@ Get details of a specific webhook event including delivery attempts.
 
 Test a webhook configuration without saving it.
 
+**Resilience:**
+- ✅ Circuit breaker protection (per-URL isolation)
+- ✅ 30-second timeout
+- ✅ Fast failure on open circuit
+
 **Request Body:**
 ```json
 {
@@ -1323,6 +1328,7 @@ Test a webhook configuration without saving it.
 
 **Error Responses:**
 - 400 - Missing required fields (url, secret)
+- Circuit breaker open: `"error": "Circuit breaker is open for this webhook URL. Please wait before retrying."`
 
 ---
 

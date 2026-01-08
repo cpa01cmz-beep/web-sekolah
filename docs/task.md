@@ -19,22 +19,34 @@ This document tracks architectural refactoring tasks for Akademia Pro.
 
 ### Integration Hardening (2026-01-08) - Completed ✅
 
-**Task**: Harden error reporting integration with resilience patterns
+**Task 1**: Harden error reporting integration with resilience patterns
 
 **Completed Hardening**:
 1. ✅ **Immediate Error Reporting Resilience** - Added timeout, retry, and exponential backoff to `sendImmediateError()`
-   - Updated `src/lib/error-reporter/immediate-interceptors.ts:61-76`
-   - Added 10-second timeout per attempt to prevent indefinite hanging
-   - Implemented retry logic with exponential backoff (2 attempts, base delay 1000ms)
-   - Added jitter (±1000ms) to prevent thundering herd during recovery
-   - Ensures immediate console errors don't block application if endpoint is slow
-   - Maintains backward compatibility (still fails silently after all retries exhausted)
+    - Updated `src/lib/error-reporter/immediate-interceptors.ts:61-76`
+    - Added 10-second timeout per attempt to prevent indefinite hanging
+    - Implemented retry logic with exponential backoff (2 attempts, base delay 1000ms)
+    - Added jitter (±1000ms) to prevent thundering herd during recovery
+    - Ensures immediate console errors don't block application if endpoint is slow
+    - Maintains backward compatibility (still fails silently after all retries exhausted)
+
+**Task 2**: Harden webhook test endpoint with circuit breaker protection
+
+**Completed Hardening**:
+1. ✅ **Webhook Test Endpoint Circuit Breaker** - Added circuit breaker protection to `/api/webhooks/test`
+    - Updated `worker/webhook-routes.ts:173-242`
+    - Added `CircuitBreaker` import from `worker/CircuitBreaker`
+    - Wrapped fetch call in `breaker.execute()` for consistent resilience
+    - Added circuit breaker open error handling with user-friendly message
+    - Ensures webhook testing doesn't cascade failures to production endpoints
+    - Timeout protection maintained at 30 seconds
 
 **Verification**:
-- ✅ Webhook test endpoint already has proper timeout (30s) and error handling
-- ✅ All other fetch calls use apiClient with full resilience patterns
+- ✅ All webhook endpoints now use circuit breaker (test + delivery)
+- ✅ All fetch calls use proper resilience patterns (circuit breaker, timeout, retry)
 - ✅ All 735 tests passing (0 regression)
 - ✅ Build successful with no errors
+- ✅ Consistent error messaging for circuit breaker failures
 
 **Benefits**:
 - ✅ Prevents application hangs from slow error reporting endpoints
@@ -42,12 +54,16 @@ This document tracks architectural refactoring tasks for Akademia Pro.
 - ✅ Reduces error loss during brief outages
 - ✅ Consistent resilience patterns across all error reporting (immediate + queued)
 - ✅ Production-ready error handling without blocking application
+- ✅ Webhook testing now uses same resilience patterns as production deliveries
+- ✅ Prevents cascading failures from webhook test endpoint failures
+- ✅ Fast failure on persistently failing webhook URLs during testing
 
 **Impact**:
 - `src/lib/error-reporter/immediate-interceptors.ts`: Enhanced sendImmediateError() with resilience
+- `worker/webhook-routes.ts`: Added circuit breaker protection to webhook test endpoint
 - Immediate error reports now use timeout (10s), retry (2 attempts), exponential backoff (1000ms base), jitter (±1000ms)
-- Maintains zero blocking behavior (fails silently after all retries)
- - All other integrations already hardened (ErrorReporter, apiClient, webhook-service)
+- Webhook test endpoint now uses circuit breaker with 5-failure threshold, 60s timeout, per-URL isolation
+- All external integrations now hardened with full resilience patterns
 
 ### Domain Service Testing (2026-01-08) - Completed ✅
 
