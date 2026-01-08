@@ -4,7 +4,7 @@ import type { WebhookConfig, WebhookEvent, WebhookDelivery } from '@shared/types
 import { logger } from './logger';
 import { integrationMonitor } from './integration-monitor';
 import { CircuitBreaker } from './CircuitBreaker';
-import { WEBHOOK_CONFIG, RETRY_DELAYS_MS } from './webhook-constants';
+import { WEBHOOK_CONFIG } from './webhook-constants';
 import { generateSignature, verifySignature } from './webhook-crypto';
 import type { WebhookEventPayload } from './webhook-types';
 
@@ -203,7 +203,7 @@ export class WebhookService {
       return;
     }
 
-    const retryDelay = RETRY_DELAYS_MS[Math.min(newAttempt, RETRY_DELAYS_MS.length - 1)];
+    const retryDelay = WEBHOOK_CONFIG.RETRY_DELAYS_MS[Math.min(newAttempt, WEBHOOK_CONFIG.RETRY_DELAYS_MS.length - 1)];
     const nextAttemptAt = new Date(Date.now() + retryDelay).toISOString();
 
     const deliveryEntity = new WebhookDeliveryEntity(env, delivery.id);
