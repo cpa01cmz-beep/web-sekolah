@@ -7,6 +7,7 @@ class GlobalErrorDeduplication {
   >();
   private readonly ERROR_DEDUPLICATION_WINDOW_MS = 5000;
   private readonly CLEANUP_INTERVAL_MS = 60000;
+  private readonly ERROR_RETENTION_MS = 300000;
   private lastCleanup = Date.now();
 
   private calculateErrorPrecedence(context: ErrorContext): ErrorPrecedence {
@@ -124,7 +125,7 @@ class GlobalErrorDeduplication {
   private maybeCleanup() {
     const now = Date.now();
     if (now - this.lastCleanup > this.CLEANUP_INTERVAL_MS) {
-      const cutoff = now - 300000;
+      const cutoff = now - this.ERROR_RETENTION_MS;
       for (const [signature, data] of this.reportedErrors.entries()) {
         if (data.timestamp < cutoff) {
           this.reportedErrors.delete(signature);

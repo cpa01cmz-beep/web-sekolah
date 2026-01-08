@@ -41,10 +41,10 @@ This document tracks architectural refactoring tasks for Akademia Pro.
 
 | Priority | Task | Effort | Location |
 |----------|------|--------|----------|
-| Low | Refactor large page components | Medium | Multiple page files (>150 lines) |
+| | Low | Refactor large page components | Medium | Multiple page files (>150 lines) |
 | Medium | Centralize theme color constants | Small | 18+ hardcoded color references (#0D47A1, #00ACC1) |
 | Medium | Extract router configuration to separate module | Medium | src/App.tsx (161 lines with route definitions) |
-| Low | Consolidate time constants across error reporter | Small | src/lib/error-reporter/ErrorReporter.ts (1000, 10000, 300000 magic numbers) |
+| | ✅ | Consolidate time constants across error reporter | Small | src/lib/error-reporter/ (JITTER_DELAY_MS, ERROR_RETENTION_MS constants added) |
 
 ### DevOps Improvements (2026-01-08)
 

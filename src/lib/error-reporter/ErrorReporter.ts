@@ -320,7 +320,7 @@ class ErrorReporter {
         clearTimeout(timeoutId);
 
         if (attempt < this.maxRetries) {
-          const delay = this.baseRetryDelay * Math.pow(2, attempt) + Math.random() * 1000;
+          const delay = this.baseRetryDelay * Math.pow(2, attempt) + Math.random() * ERROR_REPORTER_CONFIG.JITTER_DELAY_MS;
           logger.debug("[ErrorReporter] Retrying error report", {
             attempt: attempt + 1,
             maxRetries: this.maxRetries,
