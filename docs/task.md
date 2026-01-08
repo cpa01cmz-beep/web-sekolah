@@ -4230,3 +4230,60 @@ Created comprehensive `docs/blueprint.md` with:
 - Source maps can be re-enabled once a wrangler fix is available, or if debugging is needed
 - The actual Durable Object class extends `DurableObject<Env, unknown>` from `cloudflare:workers`
 
+
+## Cloudflare Workers Build Failure Investigation (2026-01-08) - In Progress 🔄
+
+**Issue**: Workers Builds: website-sekolah - FAILURE (intermittent)
+
+**Related Issues**:
+- #119: PR #109 blocked: Cloudflare Workers build failing intermittently
+- #125: PR #109 blocked: Unable to bypass Cloudflare Workers build requirement
+- #126: PR #109 blocked: Uncertainty about merging despite Workers Build environmental failure
+
+**Root Cause Identified**:
+- **Pino v9.14.0** (auto-upgraded by npm install) uses `WeakRef` (ES2022 feature)
+- **Cloudflare Workers runtime** does NOT support `WeakRef` (requires ES2022)
+- Cloudflare API validates bundled worker code and rejects it during deployment
+
+**Error Trace**:
+```
+Uncaught ReferenceError: WeakRef is not defined
+    at null.<anonymous> (assets/worker-entry-BEqLkRBU.js:83:22800) in l
+```
+
+**Fix Applied**:
+1. **Pinned Pino to exact v9.11.0** in package.json
+   - Prevents auto-upgrade to v9.14.0
+   - Commit: bf81c4a
+
+2. **Added custom Vite plugin** to remove WeakRef from bundled code
+   - File: vite.config.ts
+   - Plugin: `removeWeakRef()` - attempts to replace WeakRef with comments
+   - Commit: bf81c4a
+
+**Status**:
+- ✅ Local build: Passes (7.77s)
+- ✅ Local tests: All 735 passing, 0 regressions
+- ✅ Local lint: 0 errors
+- ⏳ Cloudflare Workers deploy: Still failing (custom plugin did not fully resolve WeakRef removal)
+
+**Analysis**:
+- Custom Vite plugin approach did NOT successfully remove WeakRef from bundled code
+- WeakRef likely coming from Pino internal polyfills or minification
+- Regex replacement in `renderChunk` phase may not be catching all WeakRef usages
+
+**Recommended Next Steps**:
+1. Investigate Pino source code to understand WeakRef usage
+2. Consider alternative logger for Cloudflare Workers (console.log + custom formatter)
+3. Monitor Cloudflare Workers runtime for WeakRef support updates
+4. Check if @cloudflare/vite-plugin has specific configuration options for WeakRef handling
+
+**Commits Made**:
+- Commit bf81c4a: "fix(ci): Pin Pino to v9.11.0 and add WeakRef removal plugin"
+
+**Environment Details**:
+- Node.js: v20.21.0
+- Wrangler: v4.57.0
+- Vite: v6.4.1
+- @cloudflare/vite-plugin: v1.20.0
+- Pino: v9.11.0 (pinned)
