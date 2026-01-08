@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, memo } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,6 +10,7 @@ import { SlideUp } from '@/components/animations';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { Trash2, Edit } from 'lucide-react';
+import { useAuthStore } from '@/lib/authStore';
 type Announcement = {
   id: string;
   title: string;
@@ -18,10 +19,36 @@ type Announcement = {
   date: string;
 };
 const initialAnnouncements: Announcement[] = [
-  { id: 'ann1', title: 'Mid-term Exam Schedule', content: 'The mid-term exam schedule has been posted. Please check the main notice board.', author: 'Admin Sekolah', date: new Date('2024-07-18').toISOString() },
+  { id: 'ann1', title: 'Mid-term Exam Schedule', content: 'The mid-term exam schedule has been posted. Please check main notice board.', author: 'Admin Sekolah', date: new Date('2024-07-18').toISOString() },
   { id: 'ann2', title: 'Class 11-A Project Deadline', content: 'Reminder: The mathematics project is due this Friday.', author: 'Ibu Siti', date: new Date('2024-07-22').toISOString() },
   { id: 'ann3', title: 'Parent-Teacher Meeting Schedule', content: 'The parent-teacher meeting will be held next Saturday.', author: 'Admin Sekolah', date: new Date('2024-07-19').toISOString() },
 ];
+
+const AnnouncementItem = memo(({ ann, index, total, onDelete }: { ann: Announcement; index: number; total: number; onDelete: (id: string) => void }) => {
+  return (
+    <div>
+      <div className="flex justify-between items-start">
+        <div>
+          <h3 className="font-semibold">{ann.title}</h3>
+          <p className="text-sm text-muted-foreground">
+            By {ann.author} on {format(new Date(ann.date), 'PPP')}
+          </p>
+        </div>
+        <div className="flex space-x-2">
+          <Button variant="outline" size="icon" className="h-8 w-8" aria-label={`Edit announcement: ${ann.title}`}>
+            <Edit className="h-4 w-4" />
+          </Button>
+          <Button variant="destructive" size="icon" className="h-8 w-8" onClick={() => onDelete(ann.id)} aria-label={`Delete announcement: ${ann.title}`}>
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        </div>
+      </div>
+      <p className="mt-2 text-sm">{ann.content}</p>
+      {index < total - 1 && <Separator className="mt-6" />}
+    </div>
+  );
+});
+AnnouncementItem.displayName = 'AnnouncementItem';
 export function AdminAnnouncementsPage() {
   const user = useAuthStore((state) => state.user);
   const [announcements, setAnnouncements] = useState<Announcement[]>(initialAnnouncements);
@@ -82,26 +109,13 @@ export function AdminAnnouncementsPage() {
             <CardContent className="space-y-6">
               {announcements.length > 0 ? (
                 announcements.map((ann, index) => (
-                  <div key={ann.id}>
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <h3 className="font-semibold">{ann.title}</h3>
-                        <p className="text-sm text-muted-foreground">
-                          By {ann.author} on {format(new Date(ann.date), 'PPP')}
-                        </p>
-                      </div>
-                      <div className="flex space-x-2">
-                        <Button variant="outline" size="icon" className="h-8 w-8" aria-label={`Edit announcement: ${ann.title}`}>
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button variant="destructive" size="icon" className="h-8 w-8" onClick={() => handleDelete(ann.id)} aria-label={`Delete announcement: ${ann.title}`}>
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </div>
-                    <p className="mt-2 text-sm">{ann.content}</p>
-                    {index < announcements.length - 1 && <Separator className="mt-6" />}
-                  </div>
+                  <AnnouncementItem
+                    key={ann.id}
+                    ann={ann}
+                    index={index}
+                    total={announcements.length}
+                    onDelete={handleDelete}
+                  />
                 ))
               ) : (
                 <p className="text-sm text-muted-foreground text-center py-8">No announcements posted yet.</p>

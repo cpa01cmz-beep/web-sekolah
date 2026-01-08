@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, memo } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -32,6 +32,27 @@ type StudentGrade = {
   feedback: string;
   gradeId: string | null;
 };
+
+const StudentGradeRow = memo(({ student, onEdit }: { student: StudentGrade; onEdit: (student: StudentGrade) => void }) => {
+  return (
+    <TableRow key={student.id}>
+      <TableCell className="font-medium">{student.name}</TableCell>
+      <TableCell className="text-center">{student.score ?? 'N/A'}</TableCell>
+      <TableCell className="text-muted-foreground truncate max-w-xs">{student.feedback}</TableCell>
+      <TableCell className="text-right">
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={() => onEdit(student)}
+          aria-label={`Edit grade for ${student.name}`}
+        >
+          <Edit className="h-4 w-4" />
+        </Button>
+      </TableCell>
+    </TableRow>
+  );
+});
+StudentGradeRow.displayName = 'StudentGradeRow';
 export function TeacherGradeManagementPage() {
   const user = useAuthStore((state) => state.user);
   const [selectedClass, setSelectedClass] = useState<string | null>(null);
@@ -124,21 +145,11 @@ export function TeacherGradeManagementPage() {
                   </TableHeader>
                       <TableBody>
                     {students.map(student => (
-                      <TableRow key={student.id}>
-                        <TableCell className="font-medium">{student.name}</TableCell>
-                        <TableCell className="text-center">{student.score ?? 'N/A'}</TableCell>
-                        <TableCell className="text-muted-foreground truncate max-w-xs">{student.feedback}</TableCell>
-                        <TableCell className="text-right">
-                          <Button 
-                            variant="outline" 
-                            size="icon" 
-                            onClick={() => handleEditClick(student)} 
-                            aria-label={`Edit grade for ${student.name}`}
-                          >
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                        </TableCell>
-                      </TableRow>
+                      <StudentGradeRow
+                        key={student.id}
+                        student={student}
+                        onEdit={handleEditClick}
+                      />
                     ))}
                   </TableBody>
                 </Table>

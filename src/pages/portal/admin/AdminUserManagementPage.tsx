@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, memo } from 'react';
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -33,6 +33,30 @@ const roleConfig: Record<UserRole, { color: string; label: string }> = {
   admin: { color: 'bg-red-500', label: 'Admin' },
 };
 
+const UserRow = memo(({ user, onEdit, onDelete }: { user: SchoolUser; onEdit: (user: SchoolUser) => void; onDelete: (userId: string) => void }) => {
+  return (
+    <TableRow>
+      <TableCell className="font-medium">{user.name}</TableCell>
+      <TableCell>{user.email}</TableCell>
+      <TableCell className="text-center">
+        <Badge className={`text-white ${roleConfig[user.role].color} flex items-center gap-1.5 px-2.5 py-1`}>
+          <span aria-hidden="true">{React.createElement(RoleIcon[user.role], { className: "h-3 w-3" })}</span>
+          <span>{roleConfig[user.role].label}</span>
+        </Badge>
+      </TableCell>
+      <TableCell className="text-right space-x-2">
+        <Button variant="outline" size="icon" onClick={() => onEdit(user)} aria-label={`Edit user ${user.name}`}>
+          <Edit className="h-4 w-4" />
+        </Button>
+        <Button variant="destructive" size="icon" onClick={() => onDelete(user.id)} aria-label={`Delete user ${user.name}`}>
+          <Trash2 className="h-4 w-4" />
+        </Button>
+      </TableCell>
+    </TableRow>
+  );
+});
+UserRow.displayName = 'UserRow';
+
 export function AdminUserManagementPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<SchoolUser | null>(null);
@@ -59,9 +83,9 @@ export function AdminUserManagementPage() {
   });
   const [userIdToDelete, setUserIdToDelete] = useState<string | null>(null);
   const deleteUserMutation = useDeleteUser(userIdToDelete || '', {
-    onSuccess: (_, userId) => {
+    onSuccess: () => {
       toast.success('User deleted successfully.');
-      queryClient.setQueryData(['users'], (oldData: SchoolUser[] | undefined) => oldData?.filter(u => u.id !== userId) || []);
+      queryClient.setQueryData(['users'], (oldData: SchoolUser[] | undefined) => oldData?.filter(u => u.id !== userIdToDelete) || []);
       setUserIdToDelete(null);
     },
     onError: (err) => toast.error(`Failed to delete user: ${err.message}`),
@@ -75,7 +99,7 @@ export function AdminUserManagementPage() {
       avatarUrl: getAvatarUrl(userEmail),
     };
     if (editingUser) {
-      updateUserMutation.mutate({ id: editingUser.id, ...userData });
+      updateUserMutation.mutate(userData);
     } else {
       createUserMutation.mutate(userData as Omit<SchoolUser, 'id'>);
     }
@@ -187,24 +211,12 @@ export function AdminUserManagementPage() {
                 </TableHeader>
                 <TableBody>
                   {users?.map(user => (
-                    <TableRow key={user.id}>
-                      <TableCell className="font-medium">{user.name}</TableCell>
-                      <TableCell>{user.email}</TableCell>
-                      <TableCell className="text-center">
-                        <Badge className={`text-white ${roleConfig[user.role].color} flex items-center gap-1.5 px-2.5 py-1`}>
-                          <span aria-hidden="true">{React.createElement(RoleIcon[user.role], { className: "h-3 w-3" })}</span>
-                          <span>{roleConfig[user.role].label}</span>
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-right space-x-2">
-                        <Button variant="outline" size="icon" onClick={() => { setEditingUser(user); setUserName(user.name); setUserEmail(user.email); setUserRole(user.role); setIsModalOpen(true); }} aria-label={`Edit user ${user.name}`}>
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button variant="destructive" size="icon" onClick={() => handleDeleteUser(user.id)} aria-label={`Delete user ${user.name}`}>
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </TableCell>
-                    </TableRow>
+                    <UserRow
+                      key={user.id}
+                      user={user}
+                      onEdit={(user) => { setEditingUser(user); setUserName(user.name); setUserEmail(user.email); setUserRole(user.role); setIsModalOpen(true); }}
+                      onDelete={handleDeleteUser}
+                    />
                   ))}
                 </TableBody>
               </Table>
