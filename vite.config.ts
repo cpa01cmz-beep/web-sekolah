@@ -89,9 +89,6 @@ export default ({ mode }: { mode: string }) => {
         output: {
           manualChunks: (id) => {
             if (id.includes('node_modules')) {
-              if (id.includes('recharts')) {
-                return 'charts';
-              }
               if (id.includes('jspdf') || id.includes('html2canvas')) {
                 return 'pdf';
               }
@@ -101,10 +98,7 @@ export default ({ mode }: { mode: string }) => {
               if (id.includes('lucide-react')) {
                 return 'icons';
               }
-              if (id.includes('@radix-ui')) {
-                return 'ui';
-              }
-              if (id.includes('react') || id.includes('react-dom') || id.includes('react-router-dom')) {
+              if (/\/node_modules\/(@radix-ui|react|react-dom|react-router-dom)\//.test(id)) {
                 return 'vendor';
               }
             }
