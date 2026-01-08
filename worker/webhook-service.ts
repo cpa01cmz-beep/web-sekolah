@@ -4,9 +4,8 @@ import type { WebhookConfig, WebhookEvent, WebhookDelivery } from '@shared/types
 import { logger } from './logger';
 import { integrationMonitor } from './integration-monitor';
 import { CircuitBreaker } from './CircuitBreaker';
-
-const MAX_RETRIES = 6;
-const RETRY_DELAYS = [1, 5, 15, 30, 60, 120].map(minutes => minutes * 60 * 1000);
+import { WEBHOOK_CONFIG, RETRY_DELAYS_MS } from './webhook-constants';
+import { generateSignature, verifySignature } from './webhook-crypto';
 
 const webhookCircuitBreakers = new Map<string, CircuitBreaker>();
 
@@ -102,7 +101,7 @@ export class WebhookService {
       timestamp: event.createdAt
     };
 
-    const signature = await this.generateSignature(JSON.stringify(payload), config.secret);
+    const signature = await generateSignature(JSON.stringify(payload), config.secret);
     const deliveryStartTime = Date.now();
 
     try {
@@ -117,7 +116,7 @@ export class WebhookService {
             'User-Agent': 'Akademia-Pro-Webhook/1.0'
           },
           body: JSON.stringify(payload),
-          signal: AbortSignal.timeout(30000)
+          signal: AbortSignal.timeout(WEBHOOK_CONFIG.REQUEST_TIMEOUT_MS)
         });
       });
 
@@ -132,7 +131,7 @@ export class WebhookService {
         });
       } else {
         const errorText = await response.text();
-        await this.handleDeliveryError(env, delivery, response.status, errorText);
+        await this.handleDeliveryError(env, delivery, config, response.status, errorText);
         integrationMonitor.recordWebhookDelivery(false);
       }
     } catch (error) {
@@ -146,7 +145,7 @@ export class WebhookService {
           errorMessage
         });
       } else {
-        await this.handleDeliveryError(env, delivery, 0, errorMessage);
+        await this.handleDeliveryError(env, delivery, config, 0, errorMessage);
       }
       
       integrationMonitor.recordWebhookDelivery(false);
@@ -176,21 +175,21 @@ export class WebhookService {
     }
   }
 
-  private static async handleDeliveryError(env: Env, delivery: WebhookDelivery, statusCode: number, errorMessage: string): Promise<void> {
+  private static async handleDeliveryError(env: Env, delivery: WebhookDelivery, config: WebhookConfig, statusCode: number, errorMessage: string): Promise<void> {
     const newAttempt = delivery.attempts + 1;
 
-    if (newAttempt >= MAX_RETRIES) {
+    if (newAttempt >= WEBHOOK_CONFIG.MAX_RETRIES) {
       await this.markDeliveryFailed(env, delivery, `Max retries exceeded: ${errorMessage}`);
       logger.error('Webhook delivery failed after max retries', {
         deliveryId: delivery.id,
-        webhookConfigId: delivery.webhookConfigId,
+        webhookConfigId: config.id,
         statusCode,
         errorMessage
       });
       return;
     }
 
-    const retryDelay = RETRY_DELAYS[Math.min(newAttempt, RETRY_DELAYS.length - 1)];
+    const retryDelay = RETRY_DELAYS_MS[Math.min(newAttempt, RETRY_DELAYS_MS.length - 1)];
     const nextAttemptAt = new Date(Date.now() + retryDelay).toISOString();
 
     const deliveryEntity = new WebhookDeliveryEntity(env, delivery.id);
@@ -223,26 +222,6 @@ export class WebhookService {
       updatedAt: new Date().toISOString()
     });
   }
-
-  private static async generateSignature(payload: string, secret: string): Promise<string> {
-    const encoder = new TextEncoder();
-    const key = encoder.encode(secret);
-    const data = encoder.encode(payload);
-
-    const importedKey = await crypto.subtle.importKey('raw', key, { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
-    const signature = await crypto.subtle.sign('HMAC', importedKey, data);
-    const hash = new Uint8Array(signature);
-    const hexArray = Array.from(hash).map(b => b.toString(16).padStart(2, '0'));
-    return `sha256=${hexArray.join('')}`;
-  }
 }
 
-export async function verifySignature(payload: string, signature: string, secret: string): Promise<boolean> {
-  try {
-    const expectedSignature = await WebhookService['generateSignature'](payload, secret);
-
-    return signature === expectedSignature;
-  } catch {
-    return false;
-  }
-}
+export { verifySignature };
