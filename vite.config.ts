@@ -83,16 +83,15 @@ function weakRefPolyfillPlugin() {
     name: "weakref-polyfill",
     renderChunk(code: string) {
       const polyfill = `
-if (typeof WeakRef === "undefined") {
-  var WeakRef = class {
-    constructor(e) {
-      this._target = e;
+if('WeakRef'in this===!1){
+  this.WeakRef=class{
+    constructor(e){
+      this._target=e
     }
-    deref() {
-      return this._target;
+    deref(){
+      return this._target
     }
-  };
-  globalThis.WeakRef = WeakRef;
+  }
 }
 `;
       return {
