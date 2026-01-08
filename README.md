@@ -152,7 +152,7 @@ Run the test suite to verify everything is working:
 npm test
 ```
 
-All tests should pass (currently 750 tests).
+All tests should pass (currently 837 tests, 2 skipped).
 
 ### Type Checking
 

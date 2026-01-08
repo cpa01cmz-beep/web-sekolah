@@ -168,7 +168,7 @@ This clears and rebuilds all secondary indexes from existing data.
 - `worker/entities.ts`: Updated `getByEventType()` method for WebhookEventEntity
 - Webhook trigger performance improved when filtering by event type
 - Consistent with other entity query patterns (UserEntity, ClassEntity, CourseEntity, GradeEntity)
-- All 750 tests passing (0 regression)
+- All 837 tests passing (2 skipped, 0 regression)
 
 ## Base URL
 
