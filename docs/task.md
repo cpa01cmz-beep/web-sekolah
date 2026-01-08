@@ -395,6 +395,83 @@
  
 ### Webhook Service Bug Fix (2026-01-08) - Completed ✅
 
+### TypeScript Type Safety and CI Hardening (2026-01-08) - Completed ✅
+
+**Task**: Enable TypeScript strict mode and add type checking to CI/CD pipeline
+
+**Problem**:
+- TypeScript strict mode was disabled in `tsconfig.app.json` (`"strict": false`)
+- No `typecheck` script existed in `package.json`
+- CI/CD workflows did NOT validate TypeScript compilation
+- TypeScript errors could slip through to production undetected
+- P1 issue #132 highlighted infrastructure gap: "Type Checking: NOT VALIDATING - TypeScript compilation errors not caught by CI"
+
+**Root Cause**:
+- `tsconfig.app.json:19` had `"strict": false`, allowing type safety violations
+- `package.json` lacked `typecheck` script to run `tsc --noEmit`
+- `.github/workflows/on-push.yml` and `on-pull.yml` had no typecheck step
+- Build and tests passed despite TypeScript type errors
+
+**Solution Applied**:
+1. ✅ **Added typecheck Script** - Added `"typecheck": "tsc --noEmit"` to `package.json`
+    - Enables TypeScript compilation checking without emitting output
+    - Line 7 added: New script entry
+    - Benefits: Detects TypeScript errors at development and CI time
+
+2. ✅ **Enabled TypeScript Strict Mode** - Updated `tsconfig.app.json`
+    - Changed `"strict": false` to `"strict": true`
+    - Changed `"noUnusedLocals": false` to `"noUnusedLocals": true`
+    - Changed `"noUnusedParameters": false` to `"noUnusedParameters": true`
+    - Changed `"noFallthroughCasesInSwitch": false` to `"noFallthroughCasesInSwitch": true`
+    - Benefits: Enforces strict type checking, catches unsafe code patterns
+
+3. ✅ **Added Typecheck to CI Workflows** - Updated both workflow files
+    - Added "TypeScript Type Check" step to `.github/workflows/on-push.yml` (after OpenCode install)
+    - Added "TypeScript Type Check" step to `.github/workflows/on-pull.yml` (after npm ci)
+    - Both workflows now run `npm run typecheck` before OpenCode flows
+    - Benefits: CI will fail if TypeScript errors are present
+
+4. ✅ **Removed Obsolete Test File** - Deleted `worker/middleware/__tests__/validation.test.ts`
+    - File tested `sanitizeHtml` and `sanitizeString` functions that no longer exist
+    - Current `validation.ts` uses Zod schema validation (`validateBody`, `validateQuery`, `validateParams`)
+    - Benefits: Eliminates test failures from obsolete code paths
+
+**Verification**:
+- ✅ `npm run typecheck` - Passed with 0 errors
+- ✅ TypeScript compilation: No errors with strict mode enabled
+- ✅ All 782 tests passing (2 skipped, 784 total)
+- ✅ Linting: 0 errors
+- ✅ PR #129: MERGEABLE (ready for merge)
+- ✅ Changes committed and pushed to agent branch
+
+**Benefits**:
+- ✅ TypeScript compilation errors NOW caught by CI
+- ✅ Strict mode enforces type safety and code quality
+- ✅ CI will fail if TypeScript errors are introduced
+- ✅ Better developer feedback (immediate type error detection)
+- ✅ Production safety (type errors can't reach deployment)
+
+**Impact**:
+- `package.json`: Added typecheck script (line 7)
+- `tsconfig.app.json`: Enabled strict mode and stricter compiler options (lines 19-22)
+- `.github/workflows/on-push.yml`: Added typecheck step (line 65)
+- `.github/workflows/on-pull.yml`: Added typecheck step (line 67)
+- `worker/middleware/__tests__/validation.test.ts`: Deleted obsolete test file
+- CI/CD pipeline now validates TypeScript compilation before deployment
+- Addresses P1 issue #132: Infrastructure gap resolved
+
+**Success Criteria**:
+- [x] typecheck script added to package.json
+- [x] TypeScript strict mode enabled
+- [x] Typecheck step added to on-push.yml workflow
+- [x] Typecheck step added to on-pull.yml workflow
+- [x] typecheck passes with 0 errors
+- [x] All 782 tests passing (0 regression)
+- [x] Zero lint errors
+- [x] Code pushed to agent branch
+- [x] PR ready for merge
+- [x] P1 issue #132 infrastructure gap resolved
+
 **Task**: Fix critical bug in webhook delivery error logging
 
 **Problem**: 
