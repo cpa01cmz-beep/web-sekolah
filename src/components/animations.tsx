@@ -1,4 +1,4 @@
-import React from 'react';
+import { memo } from 'react';
 import { useReducedMotion } from '@/hooks/use-reduced-motion';
 
 interface AnimationProps {
@@ -8,9 +8,9 @@ interface AnimationProps {
   style?: React.CSSProperties;
 }
 
-export function FadeIn({ children, delay = 0, className, style }: AnimationProps) {
+export const FadeIn = memo(function FadeIn({ children, delay = 0, className, style }: AnimationProps) {
   const prefersReducedMotion = useReducedMotion();
-
+  
   return (
     <div
       className={className}
@@ -23,11 +23,11 @@ export function FadeIn({ children, delay = 0, className, style }: AnimationProps
       {children}
     </div>
   );
-}
+});
 
-export function SlideUp({ children, delay = 0, className, style }: AnimationProps) {
+export const SlideUp = memo(function SlideUp({ children, delay = 0, className, style }: AnimationProps) {
   const prefersReducedMotion = useReducedMotion();
-
+  
   return (
     <div
       className={className}
@@ -40,11 +40,11 @@ export function SlideUp({ children, delay = 0, className, style }: AnimationProp
       {children}
     </div>
   );
-}
+});
 
-export function SlideLeft({ children, delay = 0, className, style }: AnimationProps) {
+export const SlideLeft = memo(function SlideLeft({ children, delay = 0, className, style }: AnimationProps) {
   const prefersReducedMotion = useReducedMotion();
-
+  
   return (
     <div
       className={className}
@@ -57,11 +57,11 @@ export function SlideLeft({ children, delay = 0, className, style }: AnimationPr
       {children}
     </div>
   );
-}
+});
 
-export function SlideRight({ children, delay = 0, className, style }: AnimationProps) {
+export const SlideRight = memo(function SlideRight({ children, delay = 0, className, style }: AnimationProps) {
   const prefersReducedMotion = useReducedMotion();
-
+  
   return (
     <div
       className={className}
@@ -74,4 +74,4 @@ export function SlideRight({ children, delay = 0, className, style }: AnimationP
       {children}
     </div>
   );
-}
+});

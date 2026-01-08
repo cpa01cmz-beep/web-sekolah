@@ -1,4 +1,4 @@
-import React from 'react';
+import { memo } from 'react';
 
 interface ContentCardProps {
   gradient: string;
@@ -13,7 +13,7 @@ interface ContentCardProps {
   className?: string;
 }
 
-export function ContentCard({
+export const ContentCard = memo(function ContentCard({
   gradient,
   category,
   title,
@@ -64,4 +64,4 @@ export function ContentCard({
       </div>
     </div>
   );
-}
+});
