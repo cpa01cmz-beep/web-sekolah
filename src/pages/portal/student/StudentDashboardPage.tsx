@@ -10,6 +10,36 @@ import { useStudentDashboard } from '@/hooks/useStudent';
 import { useAuthStore } from '@/lib/authStore';
 import type { StudentDashboardData } from '@shared/types';
 import { formatDate } from '@/utils/date';
+import { memo } from 'react';
+
+const ScheduleItem = memo(({ item }: { item: StudentDashboardData['schedule'][0] }) => (
+  <li className="flex items-start">
+    <div className="text-sm font-semibold w-24">{item.time}</div>
+    <div className="text-sm">
+      <p className="font-medium">{item.courseName}</p>
+      <p className="text-xs text-muted-foreground">{item.teacherName}</p>
+    </div>
+  </li>
+));
+ScheduleItem.displayName = 'ScheduleItem';
+
+const GradeItem = memo(({ grade }: { grade: StudentDashboardData['recentGrades'][0] }) => (
+  <li className="flex items-center justify-between">
+    <p className="text-sm font-medium">{grade.courseName}</p>
+    <Badge className="bg-green-500 text-white">
+      {grade.score}
+    </Badge>
+  </li>
+));
+GradeItem.displayName = 'GradeItem';
+
+const AnnouncementItem = memo(({ ann }: { ann: StudentDashboardData['announcements'][0] }) => (
+  <li className="text-sm">
+    <p className="font-medium truncate">{ann.title}</p>
+    <p className="text-xs text-muted-foreground">{formatDate(ann.date)}</p>
+  </li>
+));
+AnnouncementItem.displayName = 'AnnouncementItem';
 
 export function StudentDashboardPage() {
   const user = useAuthStore((state) => state.user);
@@ -55,13 +85,7 @@ export function StudentDashboardPage() {
               <CardContent>
                 <ul className="space-y-3">
                   {data.schedule.slice(0, 3).map((item, index) => (
-                    <li key={index} className="flex items-start">
-                      <div className="text-sm font-semibold w-24">{item.time}</div>
-                      <div className="text-sm">
-                        <p className="font-medium">{item.courseName}</p>
-                        <p className="text-xs text-muted-foreground">{item.teacherName}</p>
-                      </div>
-                    </li>
+                    <ScheduleItem key={index} item={item} />
                   ))}
                 </ul>
               </CardContent>
@@ -76,12 +100,7 @@ export function StudentDashboardPage() {
               <CardContent>
                 <ul className="space-y-3">
                   {data.recentGrades.map((grade, index) => (
-                    <li key={index} className="flex items-center justify-between">
-                      <p className="text-sm font-medium">{grade.courseName}</p>
-                      <Badge className="bg-green-500 text-white">
-                        {grade.score}
-                      </Badge>
-                    </li>
+                    <GradeItem key={index} grade={grade} />
                   ))}
                 </ul>
               </CardContent>
@@ -96,10 +115,7 @@ export function StudentDashboardPage() {
               <CardContent>
                 <ul className="space-y-3">
                   {data.announcements.map((ann, index) => (
-                    <li key={index} className="text-sm">
-                      <p className="font-medium truncate">{ann.title}</p>
-                      <p className="text-xs text-muted-foreground">{formatDate(ann.date)}</p>
-                    </li>
+                    <AnnouncementItem key={index} ann={ann} />
                   ))}
                 </ul>
               </CardContent>
