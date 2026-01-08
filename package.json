@@ -81,6 +81,7 @@
     "@cloudflare/vite-plugin": "^1.9.4",
     "@cloudflare/workers-types": "^4.20250807.0",
     "@eslint/js": "^9.39.1",
+    "@tailwindcss/postcss": "^4.1.18",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.1",
     "@types/node": "^25.0.3",
