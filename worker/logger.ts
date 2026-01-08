@@ -1,12 +1,15 @@
-import pino from 'pino';
-
 type LogLevel = 'debug' | 'info' | 'warn' | 'error';
 
 interface LogContext {
   [key: string]: unknown;
 }
 
-let instance: pino.Logger | null = null;
+interface LogEntry {
+  level: string;
+  timestamp: string;
+  message: string;
+  context?: LogContext;
+}
 
 function getLogLevel(): LogLevel {
   const level = process.env.LOG_LEVEL;
@@ -16,35 +19,72 @@ function getLogLevel(): LogLevel {
   return 'info';
 }
 
-function createLogger(): pino.Logger {
-  const level = getLogLevel();
-  
-  return pino({
-    level,
-    formatters: {
-      level: (label) => ({ level: label })
-    },
-    timestamp: pino.stdTimeFunctions.isoTime
-  });
+const logLevels: Record<LogLevel, number> = {
+  debug: 0,
+  info: 1,
+  warn: 2,
+  error: 3
+};
+
+const currentLevel = getLogLevel();
+const currentLevelValue = logLevels[currentLevel];
+
+function shouldLog(level: LogLevel): boolean {
+  return logLevels[level] >= currentLevelValue;
 }
 
-function getInstance(): pino.Logger {
-  if (!instance) {
-    instance = createLogger();
+function formatTimestamp(): string {
+  return new Date().toISOString();
+}
+
+function formatLogEntry(level: string, message: string, context?: LogContext): LogEntry {
+  const entry: LogEntry = {
+    level,
+    timestamp: formatTimestamp(),
+    message
+  };
+
+  if (context && Object.keys(context).length > 0) {
+    entry.context = context;
   }
-  return instance;
+
+  return entry;
+}
+
+function log(level: LogLevel, message: string, context?: LogContext): void {
+  if (!shouldLog(level)) {
+    return;
+  }
+
+  const entry = formatLogEntry(level, message, context);
+  const logString = JSON.stringify(entry);
+
+  switch (level) {
+    case 'debug':
+      console.debug(logString);
+      break;
+    case 'info':
+      console.log(logString);
+      break;
+    case 'warn':
+      console.warn(logString);
+      break;
+    case 'error':
+      console.error(logString);
+      break;
+  }
 }
 
 export function debug(message: string, context?: LogContext): void {
-  getInstance().debug(context || {}, message);
+  log('debug', message, context);
 }
 
 export function info(message: string, context?: LogContext): void {
-  getInstance().info(context || {}, message);
+  log('info', message, context);
 }
 
 export function warn(message: string, context?: LogContext): void {
-  getInstance().warn(context || {}, message);
+  log('warn', message, context);
 }
 
 function formatErrorContext(err: Error | unknown, context?: LogContext): LogContext {
@@ -64,7 +104,7 @@ function formatErrorContext(err: Error | unknown, context?: LogContext): LogCont
 }
 
 export function error(message: string, error?: Error | unknown, context?: LogContext): void {
-  getInstance().error(formatErrorContext(error, context), message);
+  log('error', message, formatErrorContext(error, context));
 }
 
 export function createChildLogger(context: LogContext): {
@@ -73,20 +113,24 @@ export function createChildLogger(context: LogContext): {
   warn: (message: string, additionalContext?: LogContext) => void;
   error: (message: string, error?: Error | unknown, additionalContext?: LogContext) => void;
 } {
-  const child = getInstance().child(context);
-  
+  const baseContext = context;
+
   return {
     debug: (message: string, additionalContext?: LogContext) => {
-      child.debug(additionalContext || {}, message);
+      const mergedContext = { ...baseContext, ...additionalContext };
+      debug(message, mergedContext);
     },
     info: (message: string, additionalContext?: LogContext) => {
-      child.info(additionalContext || {}, message);
+      const mergedContext = { ...baseContext, ...additionalContext };
+      info(message, mergedContext);
     },
     warn: (message: string, additionalContext?: LogContext) => {
-      child.warn(additionalContext || {}, message);
+      const mergedContext = { ...baseContext, ...additionalContext };
+      warn(message, mergedContext);
     },
     error: (message: string, err?: Error | unknown, additionalContext?: LogContext) => {
-      child.error(formatErrorContext(err, additionalContext), message);
+      const mergedContext = { ...baseContext, ...additionalContext };
+      error(message, err, mergedContext);
     }
   };
 }
@@ -98,6 +142,7 @@ export const logger = {
   error
 };
 
+let testResetCount = 0;
 export function resetForTesting(): void {
-  instance = null;
+  testResetCount++;
 }

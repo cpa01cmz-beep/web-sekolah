@@ -2,10 +2,7 @@ import { defineConfig, loadEnv, ViteDevServer } from "vite";
 import path from "path";
 import react from "@vitejs/plugin-react";
 import { exec } from "node:child_process";
-import pino from "pino";
 import { cloudflare } from "@cloudflare/vite-plugin";
-
-const logger = pino();
 
 const stripAnsi = (str: string) =>
   str.replace(
@@ -24,12 +21,12 @@ const emitLog = (level: "info" | "warn" | "error", rawMessage: string) => {
     .filter((part) => part.trim().length > 0);
 
   if (parts.length === 0) {
-    logger[level](cleaned.trimEnd());
+    console[level](cleaned.trimEnd());
     return;
   }
 
   for (const part of parts) {
-    logger[level](part);
+    console[level](part);
   }
 };
 
