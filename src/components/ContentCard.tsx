@@ -25,9 +25,10 @@ export function ContentCard({
   authorAvatar,
   className
 }: ContentCardProps) {
+  const imageLabel = category ? `${category}: ${title}` : title;
   return (
     <div className={`bg-card rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow ${className}`}>
-      <div className={`h-48 ${gradient}`}></div>
+      <div className={`h-48 ${gradient}`} role="img" aria-label={imageLabel}></div>
       <div className="p-6">
         {category && (
           <span className="text-sm text-primary">{category}</span>
