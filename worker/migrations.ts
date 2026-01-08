@@ -33,7 +33,7 @@ export class MigrationRunner {
   private static async loadState(env: Env): Promise<Set<string>> {
     try {
       const stub = env.GlobalDurableObject.get(env.GlobalDurableObject.idFromName('sys-migration-state'));
-      const doc = await stub.getDoc(MIGRATION_STATE_KEY) as any;
+      const doc = await stub.getDoc(MIGRATION_STATE_KEY) as { data: MigrationState | null } | null;
       return new Set(doc?.data?.appliedMigrations ?? []);
     } catch (error) {
       logger.error('[Migration] Failed to load migration state', error);
