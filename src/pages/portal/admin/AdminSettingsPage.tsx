@@ -7,6 +7,7 @@ import { Switch } from '@/components/ui/switch';
 import { Separator } from '@/components/ui/separator';
 import { SlideUp } from '@/components/animations';
 import { toast } from 'sonner';
+import { THEME_COLORS } from '@/theme/colors';
 export function AdminSettingsPage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -53,7 +54,7 @@ export function AdminSettingsPage() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="primary-color">Primary Color</Label>
-                <Input id="primary-color" type="color" defaultValue="#0D47A1" className="w-24" />
+                <Input id="primary-color" type="color" defaultValue={THEME_COLORS.PRIMARY} className="w-24" />
               </div>
             </CardContent>
           </Card>

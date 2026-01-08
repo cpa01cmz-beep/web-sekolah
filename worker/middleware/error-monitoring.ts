@@ -8,7 +8,11 @@ export function errorMonitoring() {
       await next();
     } catch (error) {
       const status = c.res.status || 500;
-      const code = error instanceof Error && 'code' in error ? (error as any).code : 'INTERNAL_SERVER_ERROR';
+      let code = 'INTERNAL_SERVER_ERROR';
+      if (error instanceof Error && 'code' in error) {
+        const err = error as { code?: string };
+        code = err.code ?? code;
+      }
       const endpoint = c.req.path;
 
       integrationMonitor.recordApiError(code, status, endpoint);

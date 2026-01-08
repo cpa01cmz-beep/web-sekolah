@@ -95,11 +95,16 @@ export default ({ mode }: { mode: string }) => {
       sourcemap: false, // Disable source maps to work around wrangler bug
       rollupOptions: {
         output: {
-          manualChunks: {
-            vendor: ['react', 'react-dom', 'react-router-dom'],
-            ui: ['@radix-ui/react-dialog', '@radix-ui/react-select', '@radix-ui/react-dropdown-menu', 'sonner'],
-            charts: ['recharts'],
-            pdf: ['jspdf', 'html2canvas'],
+          manualChunks: (id) => {
+            if (id.includes('node_modules')) {
+              if (id.includes('react') || id.includes('react-dom') || id.includes('react-router-dom')) {
+                return 'vendor';
+              }
+              if (id.includes('@radix-ui/react-dialog') || id.includes('@radix-ui/react-select') || id.includes('@radix-ui/react-dropdown-menu') || id.includes('sonner')) {
+                return 'ui';
+              }
+            }
+            return undefined;
           },
         },
       },

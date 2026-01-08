@@ -185,6 +185,10 @@ export const AddPasswordHashMigration: Migration = {
   async up(env: Env): Promise<void> {
     MigrationHelpers.log('Starting AddPasswordHashMigration');
 
+    if (env.ENVIRONMENT === 'production') {
+      throw new Error('Cannot set default passwords in production environment. Users must set passwords through a secure password reset flow.');
+    }
+
     const { items: users } = await UserEntity.list(env);
     const defaultPassword = 'password123';
 

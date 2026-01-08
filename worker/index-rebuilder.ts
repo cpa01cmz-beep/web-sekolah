@@ -1,5 +1,6 @@
 import { SecondaryIndex, Index, type Env } from "./core-utils";
 import { UserEntity, ClassEntity, CourseEntity, GradeEntity, AnnouncementEntity } from "./entities";
+import { isStudent } from './type-guards';
 
 export async function rebuildAllIndexes(env: Env): Promise<void> {
   await rebuildUserIndexes(env);
@@ -20,8 +21,8 @@ async function rebuildUserIndexes(env: Env): Promise<void> {
   for (const user of users) {
     if (user.deletedAt) continue;
     await roleIndex.add(user.role, user.id);
-    if (user.role === 'student') {
-      await classIdIndex.add((user as any).classId, user.id);
+    if (isStudent(user)) {
+      await classIdIndex.add(user.classId, user.id);
     }
   }
 }

@@ -45,7 +45,7 @@ The system is built on Cloudflare's high-performance serverless infrastructure, 
   - [Tailwind CSS](https://tailwindcss.com/)
   - [shadcn/ui](https://ui.shadcn.com/)
   - [Zustand](https://github.com/pmndrs/zustand) for state management
-  - [Framer Motion](https://www.framer.com/motion/) for animations
+  - [CSS Animations](https://tailwindcss.com/docs/animation) for animations
   - [Recharts](https://recharts.org/) for data visualization
 - **Backend**:
   - [Hono](https://hono.dev/) on [Cloudflare Workers](https://workers.cloudflare.com/)
@@ -60,8 +60,9 @@ To get a local copy up and running, follow these simple steps.
 
 ### Prerequisites
 
-Make sure you have the following installed:
-- [Bun](https://bun.sh/)
+Make sure you have following installed:
+- [Node.js](https://nodejs.org/) (recommended: v18 or later)
+- [npm](https://www.npmjs.com/) (comes with Node.js)
 - [Wrangler CLI](https://developers.cloudflare.com/workers/wrangler/install-and-update/)
 
 ### Installation
@@ -76,7 +77,7 @@ Make sure you have the following installed:
     ```
 3.  Install dependencies:
     ```bash
-    bun install
+    npm install
     ```
 4.  Configure environment variables:
     ```bash
@@ -90,15 +91,52 @@ Make sure you have the following installed:
 To start the development server, which runs both the Vite frontend and the Hono backend on Cloudflare Workers simultaneously, run:
 
 ```bash
-bun dev
+npm run dev
 ```
 
 The application will be available at `http://localhost:3000` (or the port specified in your environment).
+
+### Quick Start
+
+After starting the application:
+
+1. **Seed the Database** (First Time Only):
+   - Visit `http://localhost:3000`
+   - Navigate to `/api/seed` in your browser or use:
+     ```bash
+     curl -X POST http://localhost:3000/api/seed
+     ```
+   - This creates sample users, classes, and courses
+
+2. **Login to a Portal**:
+   - On the login page, select your role (Student, Teacher, Parent, or Admin)
+   - Enter your credentials:
+     - **Email**: Use any of the seed user emails (e.g., `student@example.com`)
+     - **Password**: `password123` (default for all seed users)
+   - Click "Login" to access your role-specific portal
+
+3. **Explore Your Portal**:
+   - **Student Portal**: View your schedule, grades, student card, and announcements
+   - **Teacher Portal**: Manage your classes, submit grades, and post announcements
+   - **Parent Portal**: Monitor your child's academic progress
+   - **Admin Portal**: Manage users and oversee school-wide data
+
+### Example User Credentials
+
+| Role | Email | Password |
+|------|-------|----------|
+| Student | student@example.com | password123 |
+| Teacher | teacher@example.com | password123 |
+| Parent | parent@example.com | password123 |
+| Admin | admin@example.com | password123 |
 
 ## Documentation
 
 Comprehensive documentation is available in our [docs/](./docs/) directory and [GitHub Wiki](https://github.com/cpa01cmz-beep/web-sekolah/wiki):
 
+- [Developer Guide](./docs/DEVELOPER_GUIDE.md) - Start here! Developer onboarding, architecture patterns, component creation, testing, and contribution guidelines
+- [Technical Documentation](./DOCUMENTATION.md) - Complete developer guide with architecture, patterns, and implementation details
+- [Quick Start Guide](./docs/QUICK_START.md) - Get started quickly with step-by-step guides for students, teachers, parents, and admins
 - [API Blueprint](./docs/blueprint.md) - Complete API reference with endpoints, error codes, and integration patterns
 - [User Guides](https://github.com/cpa01cmz-beep/web-sekolah/wiki/User-Guides) - Instructions for students, teachers, parents, and admins
 - [Architectural Task List](./docs/task.md) - Implementation status and roadmap
@@ -107,6 +145,74 @@ Comprehensive documentation is available in our [docs/](./docs/) directory and [
 - [Deployment Guide](https://github.com/cpa01cmz-beep/web-sekolah/wiki/Deployment-Guide) - Instructions for deploying the application
 - [Security Guidelines](https://github.com/cpa01cmz-beep/web-sekolah/wiki/Security-Guidelines) - Security best practices and guidelines
 - [Contributing](https://github.com/cpa01cmz-beep/web-sekolah/wiki/Contributing) - Guidelines for contributing to the project
+
+## Development
+
+### Running Tests
+
+Run the test suite to verify everything is working:
+
+```bash
+npm test
+```
+
+All tests should pass (currently 887 tests).
+
+### Type Checking
+
+Check TypeScript types:
+
+```bash
+npm run typecheck
+```
+
+### Linting
+
+Check code for linting errors:
+
+```bash
+npm run lint
+```
+
+### Building
+
+Build the production bundle:
+
+```bash
+npm run build
+```
+
+## Troubleshooting
+
+### Common Issues
+
+**Problem**: Application won't start after `npm run dev`
+- **Solution**: Check if port 3000 is already in use. Stop other services or change port in `.env`
+
+**Problem**: Seed data not appearing
+- **Solution**: Ensure you've run `POST /api/seed` at least once. Check browser console for errors
+
+**Problem**: Login fails with "Invalid credentials"
+- **Solution**: Verify password is `password123` (default). Check that you're using correct email from seed data
+
+**Problem**: 404 errors on API endpoints
+- **Solution**: Ensure backend worker is running. Check Wrangler authentication: `wrangler login`
+
+**Problem**: CORS errors in browser console
+- **Solution**: Add your local origin to `ALLOWED_ORIGINS` in `.env` file
+
+**Problem**: Tests failing
+- **Solution**: Ensure all dependencies installed: `npm install`. Check Node.js version compatibility
+
+### Debug Mode
+
+Enable debug logging by setting environment variable:
+
+```bash
+LOG_LEVEL=debug npm run dev
+```
+
+This provides detailed logs for troubleshooting API requests, database operations, and authentication.
 
 ## Deployment
 
@@ -118,7 +224,7 @@ This project is configured for seamless deployment to Cloudflare.
     ```
 2.  Run the deployment script:
     ```bash
-    bun deploy
+    npm run deploy
     ```
 This command will build the application and deploy it to your Cloudflare account.
 

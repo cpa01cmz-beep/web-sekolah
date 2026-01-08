@@ -7,6 +7,7 @@ import { useState } from 'react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { navLinksMap, NavLink as NavLinkType } from '@/config/navigation';
 import React from 'react';
+import { THEME_COLORS } from '@/theme/colors';
 export function PortalSidebar() {
   const user = useAuthStore((state) => state.user);
   const logout = useAuthStore((state) => state.logout);
@@ -30,7 +31,7 @@ export function PortalSidebar() {
         <div className="flex items-center justify-between h-16 border-b px-4">
           {!isCollapsed && (
             <div className="flex items-center gap-2">
-              <GraduationCap className="h-7 w-7 text-[#0D47A1]" />
+              <GraduationCap className="h-7 w-7" style={{ color: THEME_COLORS.PRIMARY }} />
               <span className="text-lg font-bold">Akademia Pro</span>
             </div>
           )}

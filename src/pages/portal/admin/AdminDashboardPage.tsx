@@ -1,29 +1,17 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Users, GraduationCap, School, Megaphone, Activity } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { EmptyState } from '@/components/ui/empty-state';
+import { DashboardSkeleton } from '@/components/ui/loading-skeletons';
+import { PageHeader } from '@/components/PageHeader';
+import { Users, GraduationCap, School, Megaphone, Activity, AlertTriangle, Inbox } from 'lucide-react';
 import { SlideUp } from '@/components/animations';
 import { useReducedMotion } from '@/hooks/use-reduced-motion';
-const mockAdminData = {
-  stats: [
-    { title: 'Total Students', value: '1,250', icon: <Users className="h-6 w-6 text-blue-500" /> },
-    { title: 'Total Teachers', value: '85', icon: <GraduationCap className="h-6 w-6 text-green-500" /> },
-    { title: 'Total Classes', value: '42', icon: <School className="h-6 w-6 text-purple-500" /> },
-    { title: 'Announcements', value: '12', icon: <Megaphone className="h-6 w-6 text-orange-500" /> },
-  ],
-  enrollmentData: [
-    { name: 'Grade 10', students: 450 },
-    { name: 'Grade 11', students: 420 },
-    { name: 'Grade 12', students: 380 },
-  ],
-  recentActivity: [
-    { action: 'New student enrolled: Ahmad', timestamp: '2 mins ago' },
-    { action: 'Ibu Siti posted a new announcement', timestamp: '1 hour ago' },
-    { action: 'Grade report for Class 11-A updated', timestamp: '3 hours ago' },
-    { action: 'New teacher account created: Mr. Budi', timestamp: '1 day ago' },
-  ],
-};
+import { useAdminDashboard } from '@/hooks/useAdmin';
+import { THEME_COLORS } from '@/theme/colors';
 
-function EnrollmentChart() {
+function EnrollmentChart({ data }: { data: Array<{ name: string; students: number }> }) {
   const [Chart, setChart] = useState<{ BarChart: any, Bar: any, XAxis: any, YAxis: any, CartesianGrid: any, Tooltip: any, Legend: any, ResponsiveContainer: any } | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -49,13 +37,13 @@ function EnrollmentChart() {
 
   return (
     <Chart.ResponsiveContainer width="100%" height={300}>
-      <Chart.BarChart data={mockAdminData.enrollmentData}>
+      <Chart.BarChart data={data}>
         <Chart.CartesianGrid strokeDasharray="3 3" />
         <Chart.XAxis dataKey="name" />
         <Chart.YAxis />
         <Chart.Tooltip />
         <Chart.Legend />
-        <Chart.Bar dataKey="students" fill="#0D47A1" />
+        <Chart.Bar dataKey="students" fill={THEME_COLORS.PRIMARY} />
       </Chart.BarChart>
     </Chart.ResponsiveContainer>
   );
@@ -63,15 +51,54 @@ function EnrollmentChart() {
 
 export function AdminDashboardPage() {
   const prefersReducedMotion = useReducedMotion();
+  const { data, isLoading, error } = useAdminDashboard();
+
+  if (isLoading) return <DashboardSkeleton />;
+  if (error) {
+    return (
+      <Alert variant="destructive">
+        <AlertTriangle className="h-4 w-4" />
+        <AlertTitle>Error</AlertTitle>
+        <AlertDescription>Failed to load dashboard data. Please try again later.</AlertDescription>
+      </Alert>
+    );
+  }
+  if (!data) {
+    return (
+      <EmptyState
+        icon={Inbox}
+        title="No data available"
+        description="We couldn't find any data for your dashboard. Please try again later or contact support if issue persists."
+        variant="error"
+      />
+    );
+  }
+
+  const stats = [
+    { title: 'Total Students', value: data.totalStudents.toString(), icon: <Users className="h-6 w-6 text-blue-500" /> },
+    { title: 'Total Teachers', value: data.totalTeachers.toString(), icon: <GraduationCap className="h-6 w-6 text-green-500" /> },
+    { title: 'Total Parents', value: data.totalParents.toString(), icon: <School className="h-6 w-6 text-purple-500" /> },
+    { title: 'Total Classes', value: data.totalClasses.toString(), icon: <Megaphone className="h-6 w-6 text-orange-500" /> },
+  ];
+
+  const enrollmentData = [
+    { name: 'Students', students: data.userDistribution.students },
+    { name: 'Teachers', students: data.userDistribution.teachers },
+    { name: 'Parents', students: data.userDistribution.parents },
+    { name: 'Admins', students: data.userDistribution.admins },
+  ];
+
   return (
-    <SlideUp className="space-y-6" style={prefersReducedMotion ? { opacity: 1 } : {}}>
-      <div>
-        <h1 className="text-3xl font-bold">Admin Dashboard</h1>
-        <p className="text-muted-foreground">Overall school management and statistics.</p>
-      </div>
+    <SlideUp delay={0} className="space-y-6" style={prefersReducedMotion ? { opacity: 1 } : {}}>
+      <SlideUp delay={0.1}>
+        <PageHeader
+          title="Admin Dashboard"
+          description="Overall school management and statistics."
+        />
+      </SlideUp>
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-        {mockAdminData.stats.map((stat, index) => (
-          <SlideUp key={index} delay={index * 0.1} style={prefersReducedMotion ? { opacity: 1 } : {}}>
+        {stats.map((stat, index) => (
+          <SlideUp key={index} delay={index * 0.1 + 0.2} style={prefersReducedMotion ? { opacity: 1 } : {}}>
             <Card className="hover:shadow-lg transition-shadow duration-200">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">{stat.title}</CardTitle>
@@ -85,29 +112,29 @@ export function AdminDashboardPage() {
         ))}
       </div>
       <div className="grid gap-6 lg:grid-cols-5">
-        <SlideUp delay={0.4} className="lg:col-span-3" style={prefersReducedMotion ? { opacity: 1 } : {}}>
+        <SlideUp delay={0.6} className="lg:col-span-3" style={prefersReducedMotion ? { opacity: 1 } : {}}>
           <Card className="h-[400px] hover:shadow-lg transition-shadow duration-200">
             <CardHeader>
-              <CardTitle>Student Enrollment by Grade</CardTitle>
+              <CardTitle>User Distribution</CardTitle>
             </CardHeader>
             <CardContent>
-              <EnrollmentChart />
+              <EnrollmentChart data={enrollmentData} />
             </CardContent>
           </Card>
         </SlideUp>
-        <SlideUp delay={0.5} className="lg:col-span-2" style={prefersReducedMotion ? { opacity: 1 } : {}}>
+        <SlideUp delay={0.7} className="lg:col-span-2" style={prefersReducedMotion ? { opacity: 1 } : {}}>
           <Card className="h-[400px] hover:shadow-lg transition-shadow duration-200">
             <CardHeader>
-              <CardTitle>Recent Activity</CardTitle>
+              <CardTitle>Recent Announcements</CardTitle>
             </CardHeader>
             <CardContent>
               <ul className="space-y-4">
-                {mockAdminData.recentActivity.map((activity, index) => (
+                {data.recentAnnouncements.map((ann, index) => (
                   <li key={index} className="flex items-start">
                     <Activity className="h-4 w-4 mt-1 mr-3 text-muted-foreground flex-shrink-0" />
                     <div>
-                      <p className="text-sm font-medium">{activity.action}</p>
-                      <p className="text-xs text-muted-foreground">{activity.timestamp}</p>
+                      <p className="text-sm font-medium">{ann.title}</p>
+                      <p className="text-xs text-muted-foreground">{new Date(ann.date).toLocaleDateString()}</p>
                     </div>
                   </li>
                 ))}

@@ -1,5 +1,8 @@
-import { LucideIcon } from 'lucide-react';
+import { LucideIcon, Info, AlertTriangle, AlertCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
+
+export type EmptyStateVariant = 'default' | 'info' | 'warning' | 'error';
 
 interface EmptyStateProps {
   icon?: LucideIcon;
@@ -8,9 +11,41 @@ interface EmptyStateProps {
   action?: {
     label: string;
     onClick: () => void;
+    variant?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link';
   };
   className?: string;
+  variant?: EmptyStateVariant;
 }
+
+const variantStyles: Record<EmptyStateVariant, { iconBg: string; iconColor: string; titleColor: string }> = {
+  default: {
+    iconBg: 'bg-muted',
+    iconColor: 'text-muted-foreground',
+    titleColor: 'text-foreground',
+  },
+  info: {
+    iconBg: 'bg-blue-100 dark:bg-blue-900/20',
+    iconColor: 'text-blue-600 dark:text-blue-400',
+    titleColor: 'text-foreground',
+  },
+  warning: {
+    iconBg: 'bg-yellow-100 dark:bg-yellow-900/20',
+    iconColor: 'text-yellow-600 dark:text-yellow-400',
+    titleColor: 'text-foreground',
+  },
+  error: {
+    iconBg: 'bg-red-100 dark:bg-red-900/20',
+    iconColor: 'text-red-600 dark:text-red-400',
+    titleColor: 'text-foreground',
+  },
+};
+
+const variantIcons: Record<EmptyStateVariant, LucideIcon | undefined> = {
+  default: undefined,
+  info: Info,
+  warning: AlertTriangle,
+  error: AlertCircle,
+};
 
 export function EmptyState({
   icon: Icon,
@@ -18,7 +53,11 @@ export function EmptyState({
   description,
   action,
   className,
+  variant = 'default',
 }: EmptyStateProps) {
+  const styles = variantStyles[variant];
+  const DefaultIcon = variantIcons[variant];
+
   return (
     <div
       className={cn(
@@ -28,25 +67,30 @@ export function EmptyState({
       role="status"
       aria-live="polite"
     >
-      {Icon && (
-        <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-muted">
-          <Icon className="h-8 w-8 text-muted-foreground" />
+      {(Icon || DefaultIcon) && (
+        <div className={cn('mb-4 flex h-16 w-16 items-center justify-center rounded-full', styles.iconBg)}>
+          {(Icon || DefaultIcon) && (
+            <div className="flex items-center justify-center">
+              {Icon ? <Icon className={cn('h-8 w-8', styles.iconColor)} /> : DefaultIcon && <DefaultIcon className={cn('h-8 w-8', styles.iconColor)} />}
+            </div>
+          )}
         </div>
       )}
-      <h3 className="text-lg font-semibold text-foreground">{title}</h3>
+      <h3 className={cn('text-lg font-semibold', styles.titleColor)}>{title}</h3>
       {description && (
         <p className="mt-2 text-sm text-muted-foreground max-w-md">
           {description}
         </p>
       )}
       {action && (
-        <button
+        <Button
           onClick={action.onClick}
-          className="mt-6 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+          className="mt-6"
+          variant={action.variant || 'default'}
           type="button"
         >
           {action.label}
-        </button>
+        </Button>
       )}
     </div>
   );

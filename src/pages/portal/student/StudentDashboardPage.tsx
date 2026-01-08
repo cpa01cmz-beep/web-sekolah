@@ -4,6 +4,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { EmptyState } from '@/components/ui/empty-state';
 import { DashboardSkeleton } from '@/components/ui/loading-skeletons';
+import { PageHeader } from '@/components/PageHeader';
 import { SlideUp } from '@/components/animations';
 import { Clock, BookOpen, Megaphone, AlertTriangle, Inbox } from 'lucide-react';
 import { useStudentDashboard } from '@/hooks/useStudent';
@@ -30,6 +31,7 @@ export function StudentDashboardPage() {
         icon={Inbox}
         title="No data available"
         description="We couldn't find any data for your dashboard. Please try again later or contact support if issue persists."
+        variant="error"
       />
     );
   }
@@ -38,8 +40,10 @@ export function StudentDashboardPage() {
     <SlideUp delay={0}>
       <div className="space-y-6">
         <SlideUp delay={0.1}>
-          <h1 className="text-3xl font-bold">Student Dashboard</h1>
-          <p className="text-muted-foreground">Here's a summary of your academic activities.</p>
+          <PageHeader 
+            title="Student Dashboard" 
+            description="Here's a summary of your academic activities."
+          />
         </SlideUp>
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           <SlideUp delay={0.2}>

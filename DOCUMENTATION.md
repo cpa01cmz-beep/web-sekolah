@@ -400,9 +400,9 @@ bun test:ui
 bun run lint
 ```
 
-**Test Statistics** (as of 2026-01-07):
-- Total tests: 303
-- Test files: 18
+**Test Statistics** (as of 2026-01-08):
+- Total tests: 582
+- Test files: 29
 - Coverage: Critical infrastructure, services, hooks, utilities, validation
 
 For detailed testing strategy, see [docs/task.md](./docs/task.md#critical-path-testing).
@@ -434,6 +434,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## Additional Documentation
 
+- [Developer Guide](./docs/DEVELOPER_GUIDE.md) - Developer onboarding, architecture patterns, component creation, testing, and contribution guidelines
 - [API Blueprint](./docs/blueprint.md) - Complete API reference with endpoints, error codes, and integration patterns
 - [Architectural Task List](./docs/task.md) - Implementation status and roadmap
 - [User Guides](./wiki/User-Guides.md) - Instructions for students, teachers, parents, and admins

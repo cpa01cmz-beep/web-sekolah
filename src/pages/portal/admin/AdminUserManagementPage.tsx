@@ -9,10 +9,12 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Edit, Trash2, PlusCircle, AlertTriangle, GraduationCap, Users, UserCog, Shield } from 'lucide-react';
+import { PageHeader } from '@/components/PageHeader';
 import { SlideUp } from '@/components/animations';
 import { toast } from 'sonner';
 import { UserRole, SchoolUser } from '@shared/types';
-import { useQuery, useMutation, queryClient } from '@/lib/api-client';
+import { useUsers, useCreateUser, useUpdateUser, useDeleteUser } from '@/hooks/useAdmin';
+import { queryClient } from '@/lib/api-client';
 import { TableSkeleton } from '@/components/ui/loading-skeletons';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { getAvatarUrl } from '@/constants/avatars';
@@ -37,9 +39,8 @@ export function AdminUserManagementPage() {
   const [userName, setUserName] = useState('');
   const [userEmail, setUserEmail] = useState('');
   const [userRole, setUserRole] = useState<UserRole>('student');
-  const { data: users, isLoading, error } = useQuery<SchoolUser[]>(['users']);
-  const createUserMutation = useMutation<SchoolUser, Error, Omit<SchoolUser, 'id'>>(['users'], {
-    method: 'POST',
+  const { data: users, isLoading, error } = useUsers();
+  const createUserMutation = useCreateUser({
     onSuccess: () => {
       toast.success('User created successfully.');
       queryClient.invalidateQueries({ queryKey: ['users'] });
@@ -47,8 +48,7 @@ export function AdminUserManagementPage() {
     },
     onError: (err) => toast.error(`Failed to create user: ${err.message}`),
   });
-  const updateUserMutation = useMutation<SchoolUser, Error, Partial<SchoolUser> & { id: string }>(['users', editingUser?.id || ''], {
-    method: 'PUT',
+  const updateUserMutation = useUpdateUser(editingUser?.id || '', {
     onSuccess: () => {
       toast.success('User updated successfully.');
       queryClient.invalidateQueries({ queryKey: ['users'] });
@@ -57,11 +57,12 @@ export function AdminUserManagementPage() {
     },
     onError: (err) => toast.error(`Failed to update user: ${err.message}`),
   });
-  const deleteUserMutation = useMutation<{ deleted: boolean }, Error, string>(['users'], {
-    method: 'DELETE',
+  const [userIdToDelete, setUserIdToDelete] = useState<string | null>(null);
+  const deleteUserMutation = useDeleteUser(userIdToDelete || '', {
     onSuccess: (_, userId) => {
       toast.success('User deleted successfully.');
       queryClient.setQueryData(['users'], (oldData: SchoolUser[] | undefined) => oldData?.filter(u => u.id !== userId) || []);
+      setUserIdToDelete(null);
     },
     onError: (err) => toast.error(`Failed to delete user: ${err.message}`),
   });
@@ -80,15 +81,15 @@ export function AdminUserManagementPage() {
     }
   };
   const handleDeleteUser = (userId: string) => {
-    deleteUserMutation.mutate(userId);
+    setUserIdToDelete(userId);
+    deleteUserMutation.mutate();
   };
   return (
     <SlideUp className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">User Management</h1>
-          <p className="text-muted-foreground">Manage all user accounts in the system.</p>
-        </div>
+      <PageHeader 
+        title="User Management" 
+        description="Manage all user accounts in the system."
+      >
         <Dialog open={isModalOpen} onOpenChange={(open) => {
           setIsModalOpen(open);
           if (!open) {
@@ -162,7 +163,7 @@ export function AdminUserManagementPage() {
             </form>
           </DialogContent>
         </Dialog>
-      </div>
+      </PageHeader>
       <Card>
         <CardContent className="pt-6">
           {isLoading ? (

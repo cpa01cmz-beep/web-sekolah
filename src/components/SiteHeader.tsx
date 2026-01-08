@@ -4,6 +4,7 @@ import { GraduationCap, Menu } from 'lucide-react';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { useState } from 'react';
+import { THEME_COLORS } from '@/theme/colors';
 
 const navLinks = [
   { name: 'Beranda', href: '/' },
@@ -49,7 +50,7 @@ export function SiteHeader() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
           <Link to="/" className="flex items-center gap-2">
-            <GraduationCap className="h-8 w-8 text-[#0D47A1]" />
+            <GraduationCap className="h-8 w-8" style={{ color: THEME_COLORS.PRIMARY }} />
             <span className="text-xl font-bold text-foreground">Akademia Pro</span>
           </Link>
           <nav className="hidden md:flex items-center space-x-6" aria-label="Main navigation" role="navigation">
@@ -85,7 +86,7 @@ export function SiteHeader() {
             ))}
           </nav>
           <div className="flex items-center gap-4">
-            <Button asChild className="hidden md:inline-flex bg-[#0D47A1] hover:bg-[#0b3a8a] transition-all duration-200">
+            <Button asChild className="hidden md:inline-flex transition-all duration-200" style={{ backgroundColor: THEME_COLORS.PRIMARY }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = THEME_COLORS.PRIMARY_HOVER} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = THEME_COLORS.PRIMARY}>
               <Link to="/login">Login</Link>
             </Button>
             <Sheet open={isMobileMenuOpen} onOpenChange={setMobileMenuOpen}>
@@ -98,7 +99,7 @@ export function SiteHeader() {
                 <nav aria-label="Mobile navigation">
                   <div className="flex flex-col space-y-6 p-4">
                     <Link to="/" className="flex items-center gap-2 mb-4" onClick={() => setMobileMenuOpen(false)} aria-label="Akademia Pro Home">
-                      <GraduationCap className="h-8 w-8 text-[#0D47A1]" aria-hidden="true" />
+                      <GraduationCap className="h-8 w-8" style={{ color: THEME_COLORS.PRIMARY }} aria-hidden="true" />
                       <span className="text-xl font-bold text-foreground">Akademia Pro</span>
                     </Link>
                     {navLinks.map((link) => (
@@ -135,7 +136,7 @@ export function SiteHeader() {
                         </NavLink>
                       )
                     ))}
-                    <Button asChild className="w-full bg-[#0D47A1] hover:bg-[#0b3a8a] transition-all duration-200" onClick={() => setMobileMenuOpen(false)}>
+                    <Button asChild className="w-full transition-all duration-200" style={{ backgroundColor: THEME_COLORS.PRIMARY }} onClick={() => setMobileMenuOpen(false)}>
                       <Link to="/login">Login</Link>
                     </Button>
                   </div>

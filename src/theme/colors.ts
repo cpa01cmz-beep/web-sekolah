@@ -1,0 +1,7 @@
+export const THEME_COLORS = {
+  PRIMARY: '#0D47A1',
+  PRIMARY_HOVER: '#0b3a8a',
+  SECONDARY: '#00ACC1',
+  SECONDARY_HOVER: '#008a99',
+  BACKGROUND: '#F5F7FA',
+} as const;

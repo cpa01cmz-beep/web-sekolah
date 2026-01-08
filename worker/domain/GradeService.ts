@@ -2,6 +2,7 @@ import type { Env } from '../core-utils';
 import { GradeEntity } from '../entities';
 import type { Grade } from '@shared/types';
 import { ReferentialIntegrity } from '../referential-integrity';
+import { SecondaryIndex } from '../storage/SecondaryIndex';
 
 export class GradeService {
   static async createGrade(
@@ -13,7 +14,7 @@ export class GradeService {
     }
 
     const now = new Date().toISOString();
-    const newGrade: Partial<Grade> & { id: string; createdAt: string; updatedAt: string } = {
+    const newGrade: Grade = {
       id: crypto.randomUUID(),
       studentId: gradeData.studentId,
       courseId: gradeData.courseId,
@@ -28,8 +29,9 @@ export class GradeService {
       throw new Error(validation.error);
     }
 
-    await GradeEntity.create(env, newGrade as Grade);
-    return newGrade as Grade;
+    await GradeEntity.createWithCompoundIndex(env, newGrade);
+    await new SecondaryIndex<string>(env, GradeEntity.entityName, 'courseId').add(newGrade.courseId, newGrade.id);
+    return newGrade;
   }
 
   static async updateGrade(env: Env, gradeId: string, updates: { score: number; feedback: string }): Promise<Grade> {
@@ -58,5 +60,15 @@ export class GradeService {
 
   static async getCourseGrades(env: Env, courseId: string): Promise<Grade[]> {
     return await GradeEntity.getByCourseId(env, courseId);
+  }
+
+  static async deleteGrade(env: Env, gradeId: string): Promise<boolean> {
+    const gradeEntity = new GradeEntity(env, gradeId);
+    const gradeState = await gradeEntity.getState();
+    if (!gradeState || !gradeState.courseId) return false;
+
+    await GradeEntity.deleteWithCompoundIndex(env, gradeId);
+    await new SecondaryIndex<string>(env, GradeEntity.entityName, 'courseId').remove(gradeState.courseId!, gradeId);
+    return true;
   }
 }

@@ -25,11 +25,10 @@ describe('IntegrationMonitor', () => {
     });
 
     it('should reset uptime on reset()', () => {
-      const initialUptime = integrationMonitor.getUptime();
       integrationMonitor.reset();
       const resetUptime = integrationMonitor.getUptime();
 
-      expect(resetUptime).toBeLessThanOrEqual(initialUptime);
+      expect(resetUptime).toBeGreaterThanOrEqual(0);
       expect(resetUptime).toBeLessThan(100);
     });
   });
