@@ -42,7 +42,7 @@ export function ParentDashboardPage() {
         <PageHeader
           title="Parent Dashboard"
           description={
-            <>Monitoring academic progress for <span className="font-semibold">{data.childName}</span>.</>
+            <>Monitoring academic progress for <span className="font-semibold">{data.child.name}</span>.</>
           }
         />
       </SlideUp>
@@ -53,18 +53,18 @@ export function ParentDashboardPage() {
               <CardTitle className="text-sm font-medium">Recent Grades</CardTitle>
               <Award className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
-            <CardContent>
-              <ul className="space-y-3">
-                {data.childGrades.map((grade, index) => (
-                  <li key={index} className="flex items-center justify-between">
-                    <p className="text-sm font-medium">{grade.courseId}</p>
-                    <Badge variant={getGradeBadgeVariant(grade.score)} className="bg-green-500 text-white">
-                      {getGradeLetter(grade.score)} ({grade.score})
-                    </Badge>
-                  </li>
-                ))}
-              </ul>
-            </CardContent>
+              <CardContent>
+                <ul className="space-y-3">
+                  {data.childGrades.map((grade) => (
+                    <li key={grade.id} className="flex items-center justify-between">
+                      <p className="text-sm font-medium">{grade.courseId}</p>
+                      <Badge variant={getGradeBadgeVariant(grade.score)} className="bg-green-500 text-white">
+                        {getGradeLetter(grade.score)} ({grade.score})
+                      </Badge>
+                    </li>
+                  ))}
+                </ul>
+              </CardContent>
           </Card>
         </SlideUp>
         <SlideUp delay={0.3}>
@@ -73,18 +73,18 @@ export function ParentDashboardPage() {
               <CardTitle className="text-sm font-medium">Child's Schedule</CardTitle>
               <CalendarCheck className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
-            <CardContent>
-              <ul className="space-y-2">
-                {data.childSchedule.slice(0, 5).map((item, index) => (
-                  <li key={index} className="text-sm">
-                    <p className="font-medium">{item.subject}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {item.time} - {item.day}
-                    </p>
-                  </li>
-                ))}
-              </ul>
-            </CardContent>
+              <CardContent>
+                <ul className="space-y-2">
+                  {data.childSchedule.slice(0, 5).map((item) => (
+                    <li key={`${item.courseId}-${item.time}`} className="text-sm">
+                      <p className="font-medium">{item.courseName}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {item.time} - {item.day}
+                      </p>
+                    </li>
+                  ))}
+                </ul>
+              </CardContent>
           </Card>
         </SlideUp>
         <SlideUp delay={0.4}>
@@ -93,16 +93,16 @@ export function ParentDashboardPage() {
               <CardTitle className="text-sm font-medium">School Announcements</CardTitle>
               <Megaphone className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
-            <CardContent>
-              <ul className="space-y-3">
-                {data.recentAnnouncements.map((ann, index) => (
-                  <li key={index} className="text-sm">
-                    <p className="font-medium truncate">{ann.title}</p>
-                    <p className="text-xs text-muted-foreground">{formatDate(ann.date)}</p>
-                  </li>
-                ))}
-              </ul>
-            </CardContent>
+              <CardContent>
+                <ul className="space-y-3">
+                  {data.announcements.map((ann) => (
+                    <li key={ann.id} className="text-sm">
+                      <p className="font-medium truncate">{ann.title}</p>
+                      <p className="text-xs text-muted-foreground">{formatDate(ann.date)}</p>
+                    </li>
+                  ))}
+                </ul>
+              </CardContent>
           </Card>
         </SlideUp>
       </div>
