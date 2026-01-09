@@ -165,7 +165,7 @@ After starting the application:
 **📖 Essential Reading**
 - [Quick Start Guide](./docs/QUICK_START.md) - 5-minute setup for each user role
 - [Developer Guide](./docs/DEVELOPER_GUIDE.md) - Architecture, component patterns, and testing
-- [API Blueprint](./docs/blueprint.md) - Complete API reference with 3000+ endpoints
+- [API Blueprint](./docs/blueprint.md) - Complete API reference with 40+ endpoints
 
 **🏗️ Architecture & Best Practices**
 - [Integration Architecture](./docs/INTEGRATION_ARCHITECTURE.md) - Circuit breakers, retries, webhook reliability
