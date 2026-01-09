@@ -1,16 +1,15 @@
 import { useState, memo } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { PageHeader } from '@/components/PageHeader';
 import { SlideUp } from '@/components/animations';
 import { toast } from 'sonner';
 import { formatDateLong } from '@/utils/date';
-import { Trash2, Edit, AlertCircle } from 'lucide-react';
+import { Trash2, Edit } from 'lucide-react';
 import { useAuthStore } from '@/lib/authStore';
+import { AnnouncementForm } from '@/components/forms/AnnouncementForm';
+
 type Announcement = {
   id: string;
   title: string;
@@ -49,68 +48,42 @@ const AnnouncementItem = memo(({ ann, index, total, onDelete }: { ann: Announcem
   );
 });
 AnnouncementItem.displayName = 'AnnouncementItem';
+
 export function AdminAnnouncementsPage() {
   const user = useAuthStore((state) => state.user);
   const [announcements, setAnnouncements] = useState<Announcement[]>(initialAnnouncements);
-  const [newTitle, setNewTitle] = useState('');
-  const [newContent, setNewContent] = useState('');
-  const [titleError, setTitleError] = useState('');
-  const [contentError, setContentError] = useState('');
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [isPosting, setIsPosting] = useState(false);
 
-  const validateForm = () => {
-    let isValid = true;
-    setTitleError('');
-    setContentError('');
-
-    if (!newTitle.trim()) {
-      setTitleError('Title is required');
-      isValid = false;
-    } else if (newTitle.trim().length < 5) {
-      setTitleError('Title must be at least 5 characters');
-      isValid = false;
-    }
-
-    if (!newContent.trim()) {
-      setContentError('Content is required');
-      isValid = false;
-    } else if (newContent.trim().length < 10) {
-      setContentError('Content must be at least 10 characters');
-      isValid = false;
-    }
-
-    return isValid;
-  };
-
-  const handlePostAnnouncement = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handlePostAnnouncement = (data: { title: string; content: string }) => {
     if (!user) {
       toast.error('You must be logged in to post announcements.');
       return;
     }
 
-    if (!validateForm()) {
-      toast.error('Please fix the errors before submitting.');
-      return;
-    }
-
+    setIsPosting(true);
     const newAnnouncement: Announcement = {
       id: `ann-${Date.now()}`,
-      title: newTitle.trim(),
-      content: newContent.trim(),
+      title: data.title,
+      content: data.content,
       author: user.name,
       date: new Date().toISOString(),
     };
     setAnnouncements([newAnnouncement, ...announcements]);
-    setNewTitle('');
-    setNewContent('');
-    setTitleError('');
-    setContentError('');
+    setIsFormOpen(false);
+    setIsPosting(false);
     toast.success('Announcement posted successfully!');
   };
+
   const handleDelete = (id: string) => {
     setAnnouncements(announcements.filter(ann => ann.id !== id));
     toast.success('Announcement deleted.');
   };
+
+  const handleCloseForm = () => {
+    setIsFormOpen(false);
+  };
+
   return (
     <SlideUp className="space-y-6">
       <PageHeader title="Manage Announcements" />
@@ -122,62 +95,12 @@ export function AdminAnnouncementsPage() {
               <CardDescription>Post a new school-wide announcement.</CardDescription>
             </CardHeader>
             <CardContent>
-              <form onSubmit={handlePostAnnouncement} className="space-y-4" aria-label="Create new announcement form">
-                <div className="space-y-2">
-                  <Label htmlFor="announcement-title" className="flex items-center gap-2">
-                    Title
-                    <span className="text-destructive" aria-label="required">*</span>
-                  </Label>
-                  <Input
-                    id="announcement-title"
-                    value={newTitle}
-                    onChange={(e) => {
-                      setNewTitle(e.target.value);
-                      if (titleError) setTitleError('');
-                    }}
-                    placeholder="Announcement Title"
-                    aria-required="true"
-                    aria-invalid={!!titleError}
-                    aria-describedby={titleError ? 'title-error' : 'title-helper'}
-                  />
-                  <p id="title-helper" className="text-xs text-muted-foreground">Enter a descriptive title (minimum 5 characters)</p>
-                  {titleError && (
-                    <p id="title-error" className="text-xs text-destructive flex items-center gap-1" role="alert" aria-live="polite">
-                      <AlertCircle className="h-3 w-3" aria-hidden="true" />
-                      {titleError}
-                    </p>
-                  )}
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="announcement-content" className="flex items-center gap-2">
-                    Content
-                    <span className="text-destructive" aria-label="required">*</span>
-                  </Label>
-                  <Textarea
-                    id="announcement-content"
-                    value={newContent}
-                    onChange={(e) => {
-                      setNewContent(e.target.value);
-                      if (contentError) setContentError('');
-                    }}
-                    placeholder="Write your announcement here..."
-                    rows={5}
-                    aria-required="true"
-                    aria-invalid={!!contentError}
-                    aria-describedby={contentError ? 'content-error' : 'content-helper'}
-                  />
-                  <p id="content-helper" className="text-xs text-muted-foreground">Provide detailed information (minimum 10 characters)</p>
-                  {contentError && (
-                    <p id="content-error" className="text-xs text-destructive flex items-center gap-1" role="alert" aria-live="polite">
-                      <AlertCircle className="h-3 w-3" aria-hidden="true" />
-                      {contentError}
-                    </p>
-                  )}
-                </div>
-                <Button type="submit" className="w-full" aria-label="Post new announcement">
-                  Post Announcement
-                </Button>
-              </form>
+              <Button
+                onClick={() => setIsFormOpen(true)}
+                className="w-full"
+              >
+                Create New Announcement
+              </Button>
             </CardContent>
           </Card>
         </div>
@@ -204,6 +127,12 @@ export function AdminAnnouncementsPage() {
           </Card>
         </div>
       </div>
+      <AnnouncementForm
+        open={isFormOpen}
+        onClose={handleCloseForm}
+        onSave={handlePostAnnouncement}
+        isLoading={isPosting}
+      />
     </SlideUp>
   );
 }
