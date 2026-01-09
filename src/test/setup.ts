@@ -2,13 +2,29 @@ import '@testing-library/jest-dom';
 import { vi } from 'vitest';
 
 global.fetch = vi.fn();
-global.localStorage = {
-  getItem: vi.fn(),
-  setItem: vi.fn(),
-  removeItem: vi.fn(),
-  clear: vi.fn(),
-  get length() {
-    return 0;
-  },
-  key: vi.fn(),
-} as Storage;
+
+// Mock localStorage with in-memory implementation
+const localStorageMock = (() => {
+  let store: Record<string, string> = {};
+
+  return {
+    getItem: (key: string) => {
+      return key in store ? store[key] : null;
+    },
+    setItem: (key: string, value: string) => {
+      store[key] = value.toString();
+    },
+    removeItem: (key: string) => {
+      delete store[key];
+    },
+    clear: () => {
+      store = {};
+    },
+    get length() {
+      return Object.keys(store).length;
+    },
+    key: (index: number) => Object.keys(store)[index] || null,
+  };
+})();
+
+global.localStorage = localStorageMock as Storage;

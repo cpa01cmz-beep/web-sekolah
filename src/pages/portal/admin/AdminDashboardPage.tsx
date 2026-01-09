@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { EmptyState } from '@/components/ui/empty-state';
 import { DashboardSkeleton } from '@/components/ui/loading-skeletons';
@@ -28,16 +27,25 @@ function EnrollmentChart({ data }: { data: Array<{ name: string; students: numbe
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    import('recharts').then((recharts) => {
+    Promise.all([
+      import('recharts/es6/chart/BarChart'),
+      import('recharts/es6/cartesian/Bar'),
+      import('recharts/es6/cartesian/XAxis'),
+      import('recharts/es6/cartesian/YAxis'),
+      import('recharts/es6/cartesian/CartesianGrid'),
+      import('recharts/es6/component/Tooltip'),
+      import('recharts/es6/component/Legend'),
+      import('recharts/es6/component/ResponsiveContainer'),
+    ]).then(([BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer]) => {
       setChart({
-        BarChart: recharts.BarChart,
-        Bar: recharts.Bar,
-        XAxis: recharts.XAxis,
-        YAxis: recharts.YAxis,
-        CartesianGrid: recharts.CartesianGrid,
-        Tooltip: recharts.Tooltip,
-        Legend: recharts.Legend,
-        ResponsiveContainer: recharts.ResponsiveContainer,
+        BarChart: BarChart.BarChart,
+        Bar: Bar.Bar,
+        XAxis: XAxis.XAxis,
+        YAxis: YAxis.YAxis,
+        CartesianGrid: CartesianGrid.CartesianGrid,
+        Tooltip: Tooltip.Tooltip,
+        Legend: Legend.Legend,
+        ResponsiveContainer: ResponsiveContainer.ResponsiveContainer,
       });
       setIsLoading(false);
     });

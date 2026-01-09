@@ -95,6 +95,7 @@ This clears and rebuilds all secondary indexes from existing data.
 - All indexed queries filter out soft-deleted records automatically
 
 **Optimization Opportunities**:
+- ~~Recharts bundle size (500.68 kB): recharts loaded entire library including all chart types~~ ✅ **COMPLETED** (2026-01-09) - Implemented subpath imports to load only used components (BarChart, Bar, XAxis, YAxis, etc.), reduced bundle size by 45.8%
 - ~~PasswordHash exposure in CommonDataService: CommonDataService.getAllUsers() and getUserById() exposed passwordHash in returned data~~ ✅ **COMPLETED** (2026-01-09) - CommonDataService now filters passwordHash at service layer, consistent with UserService
 - ~~Circular dependency between auth.ts and type-guards.ts: Import cycle violated Clean Architecture principle~~ ✅ **COMPLETED** (2026-01-08) - Moved AuthUser interface to worker/types.ts, broken circular dependency
 - ~~`GradeEntity.getByStudentIdAndCourseId()`: Currently uses studentId index + in-memory filtering. Could benefit from compound index on (studentId, courseId) for large datasets~~ ✅ **COMPLETED** (2026-01-07)
