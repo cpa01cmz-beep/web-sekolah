@@ -84,8 +84,8 @@ export function StudentDashboardPage() {
               </CardHeader>
               <CardContent>
                 <ul className="space-y-3">
-                  {data.schedule.slice(0, 3).map((item, index) => (
-                    <ScheduleItem key={index} item={item} />
+                  {data.schedule.slice(0, 3).map((item) => (
+                    <ScheduleItem key={`${item.courseId}-${item.time}`} item={item} />
                   ))}
                 </ul>
               </CardContent>
@@ -99,8 +99,8 @@ export function StudentDashboardPage() {
               </CardHeader>
               <CardContent>
                 <ul className="space-y-3">
-                  {data.recentGrades.map((grade, index) => (
-                    <GradeItem key={index} grade={grade} />
+                  {data.recentGrades.map((grade) => (
+                    <GradeItem key={grade.id} grade={grade} />
                   ))}
                 </ul>
               </CardContent>
@@ -114,8 +114,8 @@ export function StudentDashboardPage() {
               </CardHeader>
               <CardContent>
                 <ul className="space-y-3">
-                  {data.announcements.map((ann, index) => (
-                    <AnnouncementItem key={index} ann={ann} />
+                  {data.announcements.map((ann) => (
+                    <AnnouncementItem key={ann.id} ann={ann} />
                   ))}
                 </ul>
               </CardContent>

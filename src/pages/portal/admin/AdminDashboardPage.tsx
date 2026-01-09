@@ -109,8 +109,8 @@ export function AdminDashboardPage() {
         />
       </SlideUp>
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-        {stats.map((stat, index) => (
-          <SlideUp key={index} delay={index * 0.1 + 0.2} style={prefersReducedMotion ? { opacity: 1 } : {}}>
+        {stats.map((stat) => (
+          <SlideUp key={stat.title} delay={stats.indexOf(stat) * 0.1 + 0.2} style={prefersReducedMotion ? { opacity: 1 } : {}}>
             <Card className="hover:shadow-lg transition-shadow duration-200">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">{stat.title}</CardTitle>
@@ -141,8 +141,8 @@ export function AdminDashboardPage() {
             </CardHeader>
             <CardContent>
               <ul className="space-y-4">
-                {data.recentAnnouncements.map((ann, index) => (
-                  <li key={index} className="flex items-start">
+                {data.recentAnnouncements.map((ann) => (
+                  <li key={ann.id} className="flex items-start">
                     <Activity className="h-4 w-4 mt-1 mr-3 text-muted-foreground flex-shrink-0" />
                     <div>
                       <p className="text-sm font-medium">{ann.title}</p>
