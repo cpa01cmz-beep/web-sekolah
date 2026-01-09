@@ -55,12 +55,10 @@ export function SiteHeader() {
           </Link>
           <nav className="hidden md:flex items-center space-x-6" aria-label="Main navigation" role="navigation">
               {navLinks.map((link) => (
-              link.submenu ? (
+                link.submenu ? (
                 <DropdownMenu key={link.name}>
                   <DropdownMenuTrigger
                     className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
-                    aria-haspopup="true"
-                    aria-expanded={undefined}
                   >
                     {link.name}
                   </DropdownMenuTrigger>
