@@ -5,6 +5,7 @@ import { WebhookConfigEntity, WebhookEventEntity, WebhookDeliveryEntity, DeadLet
 import { WebhookService } from './webhook-service';
 import { logger } from './logger';
 import { CircuitBreaker } from './CircuitBreaker';
+import { RetryDelay } from './config/time';
 
 export const webhookRoutes = (app: Hono<{ Bindings: Env }>) => {
   app.get('/api/webhooks', async (c) => {
@@ -205,7 +206,7 @@ export const webhookRoutes = (app: Hono<{ Bindings: Env }>) => {
 
       let lastError: Error | unknown;
       const maxRetries = 3;
-      const retryDelaysMs = [1000, 2000, 3000];
+      const retryDelaysMs = [RetryDelay.ONE_SECOND_MS, RetryDelay.TWO_SECONDS_MS, RetryDelay.THREE_SECONDS_MS];
       
       for (let attempt = 0; attempt <= maxRetries; attempt++) {
         try {

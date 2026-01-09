@@ -15,6 +15,7 @@ import { defaultTimeout } from './middleware/timeout';
 import { securityHeaders } from './middleware/security-headers';
 import { responseErrorMonitoring } from './middleware/error-monitoring';
 import { integrationMonitor } from './integration-monitor';
+import { HttpStatusCode, TimeConstants } from './config/time';
 
 // Need to export GlobalDurableObject to make it available in wrangler
 export { GlobalDurableObject };
@@ -49,10 +50,10 @@ app.use('/api/*', async (c, next) => {
   c.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
   c.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   c.header('Access-Control-Allow-Credentials', 'true');
-  c.header('Access-Control-Max-Age', '86400');
+  c.header('Access-Control-Max-Age', (TimeConstants.ONE_DAY_MS / 1000).toString());
   
   if (c.req.method === 'OPTIONS') {
-    return new Response(null, { status: 204 });
+    return new Response(null, { status: HttpStatusCode.NO_CONTENT });
   }
   
   await next();

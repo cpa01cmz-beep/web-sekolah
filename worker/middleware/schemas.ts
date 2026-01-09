@@ -1,7 +1,8 @@
 import { z } from 'zod';
+import { StatusCodeRanges, ValidationLimits } from '../config/validation';
 
 export const createUserSchema = z.object({
-  name: z.string().min(2, 'Name must be at least 2 characters').max(100, 'Name must be less than 100 characters'),
+  name: z.string().min(ValidationLimits.USER_NAME_MIN_LENGTH, 'Name must be at least 2 characters').max(ValidationLimits.USER_NAME_MAX_LENGTH, 'Name must be less than 100 characters'),
   email: z.string().email('Invalid email address'),
   role: z.enum(['student', 'teacher', 'parent', 'admin'], {
     message: 'Invalid role. Must be student, teacher, parent, or admin',
@@ -23,8 +24,8 @@ export const updateUserSchema = createUserSchema.partial();
 export const createGradeSchema = z.object({
   studentId: z.string().uuid('Invalid student ID'),
   courseId: z.string().uuid('Invalid course ID'),
-  score: z.number().min(0, 'Score must be at least 0').max(100, 'Score must be at most 100').optional(),
-  feedback: z.string().max(1000, 'Feedback must be less than 1000 characters').optional(),
+  score: z.number().min(ValidationLimits.GRADE_MIN_SCORE, 'Score must be at least 0').max(ValidationLimits.GRADE_MAX_SCORE, 'Score must be at most 100').optional(),
+  feedback: z.string().max(ValidationLimits.GRADE_FEEDBACK_MAX_LENGTH, 'Feedback must be less than 1000 characters').optional(),
 });
 
 export const updateGradeSchema = createGradeSchema.partial().extend({
@@ -32,15 +33,15 @@ export const updateGradeSchema = createGradeSchema.partial().extend({
 });
 
 export const createClassSchema = z.object({
-  name: z.string().min(2).max(100),
+  name: z.string().min(ValidationLimits.USER_NAME_MIN_LENGTH).max(ValidationLimits.USER_NAME_MAX_LENGTH),
   gradeLevel: z.number().int().min(1).max(12),
   teacherId: z.string().uuid('Invalid teacher ID'),
   academicYear: z.string().regex(/^\d{4}-\d{4}$/, 'Academic year must be in format YYYY-YYYY'),
 });
 
 export const createAnnouncementSchema = z.object({
-  title: z.string().min(5).max(200),
-  content: z.string().min(10).max(5000),
+  title: z.string().min(ValidationLimits.ANNOUNCEMENT_TITLE_MIN_LENGTH).max(ValidationLimits.ANNOUNCEMENT_TITLE_MAX_LENGTH),
+  content: z.string().min(ValidationLimits.ANNOUNCEMENT_CONTENT_MIN_LENGTH).max(ValidationLimits.ANNOUNCEMENT_CONTENT_MAX_LENGTH),
   authorId: z.string().uuid('Invalid author ID'),
   targetAudience: z.enum(['all', 'students', 'teachers', 'parents']).default('all'),
 });
@@ -65,14 +66,14 @@ export const queryParamsSchema = z.object({
 });
 
 export const clientErrorSchema = z.object({
-  message: z.string().min(1, 'Error message is required').max(1000),
+  message: z.string().min(ValidationLimits.ERROR_MESSAGE_MIN_LENGTH, 'Error message is required').max(ValidationLimits.ERROR_MESSAGE_MAX_LENGTH),
   url: z.string().url('Invalid URL').optional(),
-  userAgent: z.string().max(500).optional(),
+  userAgent: z.string().max(ValidationLimits.USER_AGENT_MAX_LENGTH).optional(),
   timestamp: z.string().optional(),
   stack: z.string().optional(),
   componentStack: z.string().optional(),
   errorBoundary: z.boolean().optional(),
-  source: z.string().max(100).optional(),
+  source: z.string().max(ValidationLimits.ERROR_SOURCE_MAX_LENGTH).optional(),
   lineno: z.number().int().optional(),
   colno: z.number().int().optional(),
 });
