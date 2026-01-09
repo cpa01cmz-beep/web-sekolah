@@ -86,6 +86,9 @@ export default ({ mode }: { mode: string }) => {
         output: {
           manualChunks: (id) => {
             if (id.includes('node_modules')) {
+              if (id.includes('recharts')) {
+                return 'recharts';
+              }
               if (id.includes('@tanstack/react-query')) {
                 return 'query';
               }
