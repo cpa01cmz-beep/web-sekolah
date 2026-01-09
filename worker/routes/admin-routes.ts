@@ -1,11 +1,11 @@
 import { Hono } from "hono";
 import type { Env } from '../core-utils';
-import { ok, notFound } from '../core-utils';
+import { ok, bad, notFound } from '../core-utils';
 import { authenticate, authorize } from '../middleware/auth';
 import { AnnouncementEntity, ensureAllSeedData } from "../entities";
 import { rebuildAllIndexes } from "../index-rebuilder";
 import type { CreateUserData, UpdateUserData, Announcement, CreateAnnouncementData, AdminDashboardData, Settings } from "@shared/types";
-import { UserService, CommonDataService } from '../domain';
+import { UserService, CommonDataService, AnnouncementService } from '../domain';
 import { WebhookService } from '../webhook-service';
 import { toWebhookPayload } from '../webhook-types';
 import { getCurrentUserId } from '../type-guards';
@@ -77,22 +77,17 @@ export function adminRoutes(app: Hono<{ Bindings: Env }>) {
     const announcementData = await c.req.json<CreateAnnouncementData>();
     const authorId = getCurrentUserId(c);
 
-    const now = new Date().toISOString();
-    const newAnnouncement: Announcement = {
-      id: crypto.randomUUID(),
-      title: announcementData.title,
-      content: announcementData.content,
-      date: now,
-      targetRole: announcementData.targetRole || 'all',
-      authorId,
-      createdAt: now,
-      updatedAt: now
-    };
+    try {
+      const newAnnouncement = await AnnouncementService.createAnnouncement(c.env, announcementData, authorId);
+      await WebhookService.triggerEvent(c.env, 'announcement.created', toWebhookPayload(newAnnouncement));
 
-    await AnnouncementEntity.create(c.env, newAnnouncement.id, newAnnouncement);
-    await WebhookService.triggerEvent(c.env, 'announcement.created', toWebhookPayload(newAnnouncement));
-
-    return ok(c, newAnnouncement);
+      return ok(c, newAnnouncement);
+    } catch (error) {
+      if (error instanceof Error) {
+        return bad(c, error.message);
+      }
+      throw error;
+    }
   });
 
   app.get('/api/admin/settings', authenticate(), authorize('admin'), async (c: Context) => {
