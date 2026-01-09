@@ -16,6 +16,7 @@ import { securityHeaders } from './middleware/security-headers';
 import { responseErrorMonitoring } from './middleware/error-monitoring';
 import { integrationMonitor } from './integration-monitor';
 import { HttpStatusCode, TimeConstants } from './config/time';
+import { DefaultOrigins } from './config/defaults';
 
 // Need to export GlobalDurableObject to make it available in wrangler
 export { GlobalDurableObject };
@@ -38,7 +39,7 @@ const app = new Hono<{ Bindings: Env }>();
 app.use('*', logger());
 
 app.use('/api/*', async (c, next) => {
-  const allowedOrigins = c.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:3000', 'http://localhost:4173'];
+  const allowedOrigins = c.env.ALLOWED_ORIGINS?.split(',') || DefaultOrigins.LOCAL_DEV;
   const origin = c.req.header('Origin');
   
   if (origin && allowedOrigins.includes(origin)) {
