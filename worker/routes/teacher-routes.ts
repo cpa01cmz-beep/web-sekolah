@@ -3,8 +3,8 @@ import type { Env } from '../core-utils';
 import { ok, bad, notFound } from '../core-utils';
 import { authenticate, authorize } from '../middleware/auth';
 import type { TeacherDashboardData, Announcement, CreateAnnouncementData, SubmitGradeData, Grade } from "@shared/types";
-import { AnnouncementEntity } from "../entities";
-import { GradeService, CommonDataService } from '../domain';
+
+import { GradeService, CommonDataService, AnnouncementService } from '../domain';
 import { WebhookService } from '../webhook-service';
 import { toWebhookPayload } from '../webhook-types';
 import { validateUserAccess } from './route-utils';
@@ -80,21 +80,15 @@ export function teacherRoutes(app: Hono<{ Bindings: Env }>) {
     const announcementData = await c.req.json<CreateAnnouncementData>();
     const authorId = getCurrentUserId(c);
 
-    const now = new Date().toISOString();
-    const newAnnouncement: Announcement = {
-      id: crypto.randomUUID(),
-      title: announcementData.title,
-      content: announcementData.content,
-      date: now,
-      targetRole: announcementData.targetRole || 'all',
-      authorId,
-      createdAt: now,
-      updatedAt: now
-    };
-
-    await AnnouncementEntity.create(c.env, newAnnouncement.id, newAnnouncement);
-    await WebhookService.triggerEvent(c.env, 'announcement.created', toWebhookPayload(newAnnouncement));
-
-    return ok(c, newAnnouncement);
+    try {
+      const newAnnouncement = await AnnouncementService.createAnnouncement(c.env, announcementData, authorId);
+      await WebhookService.triggerEvent(c.env, 'announcement.created', toWebhookPayload(newAnnouncement));
+      return ok(c, newAnnouncement);
+    } catch (error) {
+      if (error instanceof Error) {
+        return bad(c, error.message);
+      }
+      throw error;
+    }
   });
 }
