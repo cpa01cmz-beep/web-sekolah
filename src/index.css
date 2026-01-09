@@ -315,3 +315,39 @@
     transform: translateX(0);
   }
 }
+
+@layer print {
+  @media print {
+    * {
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+    }
+
+    body {
+      background: white !important;
+    }
+
+    button,
+    .no-print {
+      display: none !important;
+    }
+
+    .min-h-screen,
+    .space-y-6 {
+      min-height: auto !important;
+      gap: 0 !important;
+    }
+
+    .max-w-2xl {
+      max-width: none !important;
+    }
+
+    .rounded-2xl {
+      border-radius: 12px !important;
+    }
+
+    .shadow-2xl {
+      box-shadow: none !important;
+    }
+  }
+}
