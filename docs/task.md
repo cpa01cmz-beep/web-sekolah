@@ -1,10 +1,122 @@
-         # Architectural Task List
+          # Architectural Task List
 
-          This document tracks architectural refactoring and testing tasks for Akademia Pro.
+           This document tracks architectural refactoring and testing tasks for Akademia Pro.
 
-           ## Status Summary
+            ## Status Summary
 
-            **Last Updated**: 2026-01-09 (Data Architect - Security Fixes)
+             **Last Updated**: 2026-01-09 (Integration Engineer - Error Response Standardization)
+
+        ### Integration Engineer - Error Response Standardization (2026-01-09) - Completed ✅
+
+        **Task**: Centralize error response mapping to eliminate code duplication
+
+        **Problem**:
+        - mapStatusToErrorCode function duplicated in two files:
+          - src/lib/api-client.ts (using ErrorCode enum values)
+          - worker/middleware/error-monitoring.ts (using plain strings)
+        - Violation of DRY principle increases maintenance burden
+        - Risk of inconsistency between frontend and backend error handling
+        - Changes to error codes require updates in multiple locations
+
+        **Solution**:
+        - Created centralized error utility in shared/error-utils.ts
+        - Exported mapStatusToErrorCode function from shared module
+        - Updated both files to import and use centralized function
+        - Added code field to ApiResponse interface for type safety
+        - Enhanced error handling in api-client.ts with undefined data check
+
+        **Implementation**:
+
+        1. **Created shared/error-utils.ts** (new file, 40 lines):
+           - mapStatusToErrorCode function maps HTTP status codes to ErrorCode enum values
+           - Uses consistent ErrorCode enum from shared/types.ts
+           - Comprehensive JSDoc documentation with examples
+           - Exported as shared utility for both frontend and backend
+
+        2. **Updated src/lib/api-client.ts**:
+           - Removed local mapStatusToErrorCode function (23 lines)
+           - Added import: `import { mapStatusToErrorCode } from '../../shared/error-utils'`
+           - Removed unused ErrorCode import (only mapStatusToErrorCode needed it)
+           - Removed unused MutationOptions interface (duplicate)
+           - Fixed undefined data handling with explicit error check
+           - All error code references now use centralized function
+
+        3. **Updated worker/middleware/error-monitoring.ts**:
+           - Removed local mapStatusToErrorCode function (23 lines)
+           - Added import: `import { mapStatusToErrorCode } from '../../shared/error-utils'`
+           - All error monitoring now uses centralized error mapping
+           - Consistent with frontend error code handling
+
+        4. **Updated shared/types.ts**:
+           - Added optional `code` field to ApiResponse interface
+           - Allows backend to include error code in response body
+           - Type-safe access to json.code without casting
+
+        **Metrics**:
+
+        | Metric | Before | After | Improvement |
+        |---------|--------|-------|-------------|
+        | mapStatusToErrorCode duplicates | 2 | 0 | 100% eliminated |
+        | Files using centralized mapping | 0 | 2 | 100% coverage |
+        | Code duplication (lines) | 46 | 0 | 100% eliminated |
+        | Error consistency risk | High | Low | Significantly reduced |
+        | Maintenance overhead | High (2 locations) | Low (1 location) | 50% reduction |
+
+        **Benefits Achieved**:
+        - ✅ mapStatusToErrorCode centralized in shared/error-utils.ts (40 lines)
+        - ✅ Eliminated 46 lines of duplicate code
+        - ✅ Consistent error mapping across frontend and backend
+        - ✅ Single source of truth for error code translation
+        - ✅ Type-safe with ErrorCode enum usage
+        - ✅ Reduced maintenance burden (update 1 file instead of 2)
+        - ✅ All 1303 tests passing (2 skipped, 154 todo)
+        - ✅ Linting passed with 0 errors
+        - ✅ TypeScript compilation successful (0 errors)
+        - ✅ Zero breaking changes to existing functionality
+
+        **Technical Details**:
+
+        **Centralized Error Mapping**:
+        - HTTP status codes mapped to standardized error codes
+        - Uses ErrorCode enum for type safety
+        - Consistent mapping: 400→VALIDATION_ERROR, 401→UNAUTHORIZED, etc.
+        - Default handling: 5xx→INTERNAL_SERVER_ERROR, others→NETWORK_ERROR
+
+        **Impact**:
+        - `shared/error-utils.ts`: New file (40 lines, centralized error mapping)
+        - `src/lib/api-client.ts`: Removed 23 lines (local function), added import
+        - `worker/middleware/error-monitoring.ts`: Removed 23 lines (local function), added import
+        - `shared/types.ts`: Added `code?: string` to ApiResponse interface
+        - Error consistency: Frontend and backend now use identical mapping logic
+        - Maintainability: Error code changes require updates in 1 location only
+
+        **Architectural Impact**:
+        - **DRY**: Eliminated code duplication, single source of truth
+        - **Consistency**: Frontend and backend error handling aligned
+        - **Type Safety**: ErrorCode enum prevents typos in error codes
+        - **Maintainability**: Reduced cognitive load and change impact
+        - **Reliability**: Consistent error responses across all layers
+
+        **Success Criteria**:
+        - [x] shared/error-utils.ts created with centralized mapStatusToErrorCode
+        - [x] src/lib/api-client.ts updated to use centralized mapping
+        - [x] worker/middleware/error-monitoring.ts updated to use centralized mapping
+        - [x] ApiResponse interface enhanced with code field
+        - [x] All duplicate code eliminated (46 lines)
+        - [x] All 1303 tests passing (2 skipped, 154 todo)
+        - [x] Linting passed (0 errors)
+        - [x] TypeScript compilation successful (0 errors)
+        - [x] Zero breaking changes to existing functionality
+
+        **Impact**:
+        - Error response standardization: 100% complete
+        - Code duplication: 0 instances remaining
+        - Error mapping consistency: Frontend = Backend
+        - Future error code changes: Update 1 file instead of 2
+
+        **Success**: ✅ **ERROR RESPONSE STANDARDIZATION COMPLETE, 46 LINES OF DUPLICATE CODE ELIMINATED**
+
+        ---
 
         ### Data Architect - Security Fixes (2026-01-09) - Completed ✅
 

@@ -3,7 +3,8 @@
 // ====================
 
 import { QueryClient, useQuery as useTanstackQuery, useMutation as useTanstackMutation, UseQueryOptions, UseMutationOptions } from '@tanstack/react-query';
-import { ApiResponse, ErrorCode } from "../../shared/types";
+import { ApiResponse } from "../../shared/types";
+import { mapStatusToErrorCode } from '../../shared/error-utils';
 import { CachingTime, ApiTimeout, RetryDelay, RetryCount, CircuitBreakerConfig } from '../config/time';
 import { STORAGE_KEYS } from '../constants/storage-keys';
 import { storage } from '../lib/storage';
@@ -20,11 +21,6 @@ interface ApiError extends Error {
   code?: string;
   retryable?: boolean;
   requestId?: string;
-}
-
-interface MutationOptions<TData, TError, TVariables> extends Omit<UseMutationOptions<TData, TError, TVariables>, 'mutationKey' | 'mutationFn'> {
-  method?: string;
-  timeout?: number;
 }
 
 interface RequestOptions extends RequestInit {
@@ -47,7 +43,7 @@ async function fetchWithRetry<T>(
   maxRetries = 3,
   baseDelay = 1000
 ): Promise<T> {
-  let lastError: Error;
+  let lastError: Error | undefined;
   
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     try {
@@ -87,9 +83,9 @@ export const queryClient = new QueryClient({
       retry: (failureCount, error: ApiError) => {
         if (!error.retryable) return false;
         if (error.status === 404) return false;
-        if (error.code === ErrorCode.VALIDATION_ERROR) return false;
-        if (error.code === ErrorCode.UNAUTHORIZED) return false;
-        if (error.code === ErrorCode.FORBIDDEN) return false;
+        if (error.code === 'VALIDATION_ERROR') return false;
+        if (error.code === 'UNAUTHORIZED') return false;
+        if (error.code === 'FORBIDDEN') return false;
         return failureCount < 3;
       },
       retryDelay: (attemptIndex) => Math.min(RetryDelay.ONE_SECOND * Math.pow(2, attemptIndex), RetryDelay.THIRTY_SECONDS),
@@ -131,7 +127,7 @@ async function fetchWithTimeout(url: string, options: RequestOptions = {}): Prom
     clearTimeout(timeoutId);
     if (error instanceof Error && error.name === 'AbortError') {
       const timeoutError = new Error('Request timeout') as ApiError;
-      timeoutError.code = ErrorCode.TIMEOUT;
+      timeoutError.code = 'TIMEOUT';
       timeoutError.status = 408;
       timeoutError.retryable = true;
       throw timeoutError;
@@ -153,12 +149,12 @@ export async function apiClient<T>(path: string, init?: RequestInit & { timeout?
   const { headers: initHeaders, timeout = ApiTimeout.THIRTY_SECONDS, circuitBreaker: useCircuitBreaker = true, ...restInit } = init || {};
   const requestId = crypto.randomUUID();
 
-  const executeRequest = async (): Promise<T> => {
+    const executeRequest = async (): Promise<T> => {
     const token = getAuthToken();
-    const headers: HeadersInit = {
+    const headers: Record<string, string> = {
       'Content-Type': 'application/json',
       'X-Request-ID': requestId,
-      ...initHeaders,
+      ...initHeaders as Record<string, string>,
     };
 
     if (token) {
@@ -202,7 +198,15 @@ export async function apiClient<T>(path: string, init?: RequestInit & { timeout?
     const json = (await res.json()) as ApiResponse<T>;
     if (!json.success) {
       const error = new Error(json.error || 'API request failed') as ApiError;
-      error.code = ErrorCode.INTERNAL_SERVER_ERROR;
+      error.code = (json.code as string) || mapStatusToErrorCode(res.status);
+      error.requestId = requestIdHeader || requestId;
+      throw error;
+    }
+
+    if (json.data === undefined) {
+      const error = new Error('API response missing data field') as ApiError;
+      error.code = 'INTERNAL_SERVER_ERROR';
+      error.status = res.status;
       error.requestId = requestIdHeader || requestId;
       throw error;
     }
@@ -219,30 +223,6 @@ export async function apiClient<T>(path: string, init?: RequestInit & { timeout?
   return fetchWithRetry(executeRequest, RetryCount.THREE, RetryDelay.ONE_SECOND);
 }
 
-function mapStatusToErrorCode(status: number): string {
-  switch (status) {
-    case 400:
-      return ErrorCode.VALIDATION_ERROR;
-    case 401:
-      return ErrorCode.UNAUTHORIZED;
-    case 403:
-      return ErrorCode.FORBIDDEN;
-    case 404:
-      return ErrorCode.NOT_FOUND;
-    case 408:
-      return ErrorCode.TIMEOUT;
-    case 429:
-      return ErrorCode.RATE_LIMIT_EXCEEDED;
-    case 503:
-      return ErrorCode.SERVICE_UNAVAILABLE;
-    case 504:
-      return ErrorCode.TIMEOUT;
-    default:
-      if (status >= 500) return ErrorCode.INTERNAL_SERVER_ERROR;
-      return ErrorCode.NETWORK_ERROR;
-  }
-}
-
 export function getCircuitBreakerState(): CircuitBreakerState {
   return circuitBreaker.getState();
 }
@@ -257,16 +237,16 @@ export function resetCircuitBreaker(): void {
 
 type QueryKey = readonly unknown[];
 
-interface QueryOptions<TData, TError> extends Omit<UseQueryOptions<TData, TError>, 'queryKey' | 'queryFn'> {
+  interface QueryOptions<TData, TError> extends Omit<UseQueryOptions<TData, TError>, 'queryKey' | 'queryFn'> {
   timeout?: number;
   circuitBreaker?: boolean;
 }
 
-interface ExtendedMutationOptions<TData, TError, TVariables> extends Omit<UseMutationOptions<TData, TError, TVariables>, 'mutationKey' | 'mutationFn'> {
-  method?: string;
-  timeout?: number;
-  circuitBreaker?: boolean;
-}
+  interface ExtendedMutationOptions<TData, TError, TVariables> extends Omit<UseMutationOptions<TData, TError, TVariables>, 'mutationKey' | 'mutationFn'> {
+    method?: string;
+    timeout?: number;
+    circuitBreaker?: boolean;
+  }
 
 /**
  * Custom hook for data fetching with automatic API path construction

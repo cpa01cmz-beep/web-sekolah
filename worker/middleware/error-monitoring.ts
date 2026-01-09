@@ -1,6 +1,7 @@
 import type { Context, Next } from 'hono';
 import { integrationMonitor } from '../integration-monitor';
 import { logger } from '../logger';
+import { mapStatusToErrorCode } from '../../shared/error-utils';
 
 interface ErrorWithCode extends Error {
   code?: string;
@@ -42,28 +43,4 @@ export function responseErrorMonitoring() {
       });
     }
   };
-}
-
-function mapStatusToErrorCode(status: number): string {
-  switch (status) {
-    case 400:
-      return 'VALIDATION_ERROR';
-    case 401:
-      return 'UNAUTHORIZED';
-    case 403:
-      return 'FORBIDDEN';
-    case 404:
-      return 'NOT_FOUND';
-    case 408:
-      return 'TIMEOUT';
-    case 429:
-      return 'RATE_LIMIT_EXCEEDED';
-    case 503:
-      return 'SERVICE_UNAVAILABLE';
-    case 504:
-      return 'TIMEOUT';
-    default:
-      if (status >= 500) return 'INTERNAL_SERVER_ERROR';
-      return 'NETWORK_ERROR';
-  }
 }
