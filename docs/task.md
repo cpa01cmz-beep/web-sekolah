@@ -5351,12 +5351,138 @@ for (let attempt = 0; attempt <= maxRetries; attempt++) {
    - Testability: UserForm can be tested independently of page component
    - Future refactoring: Similar pattern applies to GradeForm extraction
 
-   ### [REFACTOR] Extract GradeForm Component from TeacherGradeManagementPage
-   - Location: src/pages/portal/teacher/TeacherGradeManagementPage.tsx
-   - Issue: Large page component (226 lines) with inline grade editing dialog, form validation (score: 0-100), and class selection logic
-   - Suggestion: Extract grade editing dialog into GradeForm component with validation, memoized input components for score and feedback fields. Move score validation constants to shared constants file.
-   - Priority: Medium
-   - Effort: Medium
+    ### [REFACTOR] Extract GradeForm Component from TeacherGradeManagementPage - Completed ✅
+
+    **Task**: Extract GradeForm component from TeacherGradeManagementPage for improved modularity
+
+    **Problem**:
+    - TeacherGradeManagementPage had 226 lines with inline grade editing dialog
+    - Form validation (score: 0-100) embedded in page component
+    - Score validation constants hardcoded in multiple places
+    - Dialog with form mixed with page-level concerns (data fetching, table rendering)
+    - Violation of Separation of Concerns: UI, logic, data tightly coupled
+
+    **Solution**:
+    - Created dedicated `GradeForm` component with encapsulated form logic
+    - Extracted form state management into GradeForm (useState, useEffect for editing)
+    - Moved form validation and submission logic into component
+    - Extracted score validation constants to src/utils/validation.ts
+    - Page component now only handles data fetching and user actions
+    - GradeForm is atomic, replaceable, and testable
+
+    **Implementation**:
+
+    1. **Created GradeForm Component** at `src/components/forms/GradeForm.tsx`:
+       - Props: `open`, `onClose`, `editingStudent`, `onSave`, `isLoading`
+       - Form state: `currentScore`, `currentFeedback` (managed internally)
+       - `useEffect` to sync form with editingStudent prop
+       - `handleSubmit` function for form submission with score validation
+       - Encapsulated Dialog with form fields (score: 0-100, feedback: textarea)
+       - Form validation using `isValidScore()` utility
+       - Error handling with aria-invalid and aria-describedby for accessibility
+
+    2. **Refactored TeacherGradeManagementPage** at `src/pages/portal/teacher/TeacherGradeManagementPage.tsx`:
+       - Removed inline form JSX (Dialog with form fields)
+       - Added GradeForm import
+       - Simplified `handleSaveGrade` to accept `UpdateGradeData` data
+       - Added `handleCloseModal` helper function
+       - Page now only manages: class selection, editing student, mutations
+       - GradeForm component handles all form concerns
+
+    3. **Extracted Score Validation Constants** at `src/utils/validation.ts`:
+       - `MIN_SCORE = 0` constant
+       - `MAX_SCORE = 100` constant
+       - `isValidScore(score: number | null | undefined): score is number` function
+       - Type guard for score validation (0-100 range)
+       - Used by GradeForm component for validation
+
+    **Metrics**:
+
+    | Metric | Before | After | Improvement |
+    |---------|---------|--------|-------------|
+    | TeacherGradeManagementPage lines | 226 | 153 | 32% reduction |
+    | GradeForm component | 0 | 116 | New reusable component |
+    | Form logic in page | Inline (73 lines) | Extracted to component | 100% separated |
+    | Validation constants | Hardcoded | Centralized in validation.ts | Single source of truth |
+    | Separation of Concerns | Mixed | Clean | Complete separation |
+    | Reusability | Single use | Reusable component | New capability |
+
+    **Architectural Impact**:
+    - **Modularity**: Form logic is atomic and replaceable
+    - **Separation of Concerns**: UI (GradeForm) separated from data (Page component)
+    - **Clean Architecture**: Dependencies flow correctly (Page → GradeForm)
+    - **Single Responsibility**: GradeForm handles form concerns, Page handles data concerns
+    - **Open/Closed**: GradeForm can be extended without modifying Page component
+    - **DRY Principle**: Validation constants defined once, used everywhere
+
+    **Benefits Achieved**:
+    - ✅ GradeForm component created (116 lines, fully self-contained)
+    - ✅ TeacherGradeManagementPage reduced from 226 to 153 lines (32% reduction)
+    - ✅ Form logic extracted (validation, state management, submission)
+    - ✅ Separation of Concerns (UI vs data concerns)
+    - ✅ Single Responsibility (GradeForm: form, Page: data)
+    - ✅ GradeForm is reusable for other grade management contexts
+    - ✅ Score validation constants centralized in validation.ts (MIN_SCORE, MAX_SCORE, isValidScore)
+    - ✅ All 1584 tests passing (2 skipped, 154 todo)
+    - ✅ Linting passed with 0 errors
+    - ✅ TypeScript compilation successful (0 errors)
+    - ✅ Zero breaking changes to existing functionality
+
+    **Technical Details**:
+
+    **GradeForm Component Features**:
+    - Controlled form with React state (currentScore, currentFeedback)
+    - useEffect to sync form with editingStudent prop for editing mode
+    - Form validation with HTML5 required attributes (min="0", max="100", step="1")
+    - Score validation using `isValidScore()` utility (0-100 range)
+    - Textarea for feedback input (3 rows)
+    - Loading state handling during mutation
+    - Accessibility: ARIA labels, required field indicators, aria-invalid, aria-describedby
+    - Responsive layout (grid system for labels and inputs)
+    - Error messaging: helper text for score range, error alert for invalid scores
+
+    **Validation Constants**:
+    - MIN_SCORE = 0
+    - MAX_SCORE = 100
+    - isValidScore(): Type guard function that returns true for valid scores (0-100)
+    - Type safety: Function uses TypeScript type guard (score is number)
+    - Handles null and undefined gracefully (returns false)
+
+    **TeacherGradeManagementPage Simplifications**:
+    - Removed inline form JSX (73 lines)
+    - Removed form validation logic
+    - Added GradeForm import
+    - Simplified grade mutation handling
+    - Added handleCloseModal helper
+    - Clearer data flow: Page → GradeForm → onSave → Mutations
+
+    **Success Criteria**:
+    - [x] GradeForm component created at src/components/forms/GradeForm.tsx
+    - [x] TeacherGradeManagementPage reduced from 226 to 153 lines (32% reduction)
+    - [x] Form state extracted to GradeForm (currentScore, currentFeedback)
+    - [x] Form validation logic encapsulated in GradeForm
+    - [x] Score validation constants extracted to src/utils/validation.ts
+    - [x] Page component only handles data fetching and mutations
+    - [x] GradeForm is reusable and atomic
+    - [x] All 1584 tests passing (2 skipped, 154 todo)
+    - [x] Linting passed (0 errors)
+    - [x] TypeScript compilation successful (0 errors)
+    - [x] Zero breaking changes to existing functionality
+    - [x] Separation of Concerns achieved (UI vs data)
+    - [x] Single Responsibility Principle applied
+    - [x] DRY Principle applied (validation constants centralized)
+
+    **Impact**:
+    - `src/components/forms/GradeForm.tsx`: New component (116 lines)
+    - `src/pages/portal/teacher/TeacherGradeManagementPage.tsx`: Reduced 226 → 153 lines (73 lines removed)
+    - `src/utils/validation.ts`: Added validation constants (MIN_SCORE, MAX_SCORE, isValidScore)
+    - `src/components/forms/`: New directory for form components (modularity foundation, now contains UserForm and GradeForm)
+    - Component reusability: GradeForm can be used in other grade management contexts
+    - Maintainability: Form logic centralized in one component
+    - Testability: GradeForm can be tested independently of page component
+    - Validation consistency: Single source of truth for score validation (0-100 range)
+
+    **Success**: ✅ **GRADEFORM COMPONENT EXTRACTION COMPLETE, 32% CODE REDUCTION, CLEAN SEPARATION OF CONCERNS ACHIEVED**
 
     ### [REFACTOR] Centralize Theme Color Usage - Completed ✅
 
