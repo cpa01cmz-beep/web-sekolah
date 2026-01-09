@@ -668,9 +668,128 @@ This clears and rebuilds all secondary indexes from existing data.
    - CircuitBreaker reusability: Can now be imported and used in other modules
    - Maintainability: CircuitBreaker logic centralized in one module
    - Testability: CircuitBreaker can be tested independently of api-client
-   - Future refactoring: Similar pattern applies to other cross-cutting concerns (retry logic, timeout handling)
+- Future refactoring: Similar pattern applies to other cross-cutting concerns (retry logic, timeout handling)
 
-   ## Base URL
+---
+
+## Route Module Architecture
+
+### Route Organization
+
+The API routes are organized by user role into focused, atomic modules following **Separation of Concerns** and **Single Responsibility** principles:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│              user-routes.ts (Registry)                  │
+│  - Imports and registers all route modules                │
+│  - 12 lines (97% reduction from original 446 lines)   │
+└─────────────────────────────────────────────────────────────┘
+                           │
+        ┌──────────────────┼──────────────────┐
+        │                  │                  │
+        ▼                  ▼                  ▼
+┌──────────────┐  ┌──────────────┐  ┌──────────────┐
+│student-routes│  │teacher-routes│  │admin-routes  │
+│   (4 routes) │  │  (4 routes)  │  │  (7 routes)  │
+│   98 lines   │  │  100 lines   │  │  122 lines    │
+└──────────────┘  └──────────────┘  └──────────────┘
+        │                  │                  │
+        ▼                  ▼                  ▼
+┌──────────────────┐  ┌──────────────────┐  ┌──────────────────┐
+│parent-routes    │  │user-management- │  │system-routes   │
+│  (1 route)     │  │routes (6 routes)│  │ (1 route)      │
+│  35 lines       │  │  95 lines       │  │  11 lines       │
+└──────────────────┘  └──────────────────┘  └──────────────────┘
+                                                        │
+                                                        ▼
+                                              ┌──────────────────┐
+                                              │ route-utils.ts   │
+                                              │ - Shared route  │
+                                              │   utilities    │
+                                              │ - 18 lines      │
+                                              └──────────────────┘
+```
+
+### Route Modules
+
+| Module | Routes | Lines | Responsibility |
+|---------|---------|---------|----------------|
+| **student-routes.ts** | 4 | GET grades, schedule, card, dashboard for students |
+| **teacher-routes.ts** | 4 | GET dashboard, announcements; POST grades, announcements for teachers |
+| **admin-routes.ts** | 7 | GET dashboard, users, announcements, settings; POST rebuild-indexes, announcements, settings; PUT settings for admins |
+| **parent-routes.ts** | 1 | GET dashboard for parents |
+| **user-management-routes.ts** | 6 | CRUD operations for users and grades (admin/user management) |
+| **system-routes.ts** | 1 | POST /api/seed for database seeding |
+| **route-utils.ts** | Utility | Shared route validation and helper functions |
+
+### Benefits Achieved
+
+**Modularity**:
+- ✅ Each route module is atomic and replaceable
+- ✅ Routes organized by user role and responsibility
+- ✅ New routes for a role can be added to that role's module without modifying others
+
+**Separation of Concerns**:
+- ✅ HTTP layer separated by role (student, teacher, admin, parent, system, user management)
+- ✅ Shared utilities extracted to route-utils.ts
+- ✅ Each module has single responsibility
+
+**Clean Architecture**:
+- ✅ Dependencies flow correctly (user-routes → route modules → services/entities)
+- ✅ Routes focus on HTTP handling, services handle business logic
+- ✅ Clear separation between presentation (routes) and business logic (services)
+
+**Maintainability**:
+- ✅ Reduced cognitive load: Each file is focused and easier to understand
+- ✅ Easier to locate routes: All student routes in one file
+- ✅ Reduced file size: user-routes.ts reduced from 446 to 12 lines (97% reduction)
+
+**Metrics**:
+
+| Metric | Before | After | Improvement |
+|---------|---------|--------|-------------|
+| user-routes.ts lines | 446 | 12 | 97% reduction |
+| Route modules created | 0 | 7 | New modular structure |
+| Separation of Concerns | Mixed | Clean | Complete separation |
+| Single Responsibility | Multiple concerns | Focused modules | All principles met |
+| Typecheck errors | 0 | 0 | No regressions |
+
+### Implementation Details
+
+**Route Module Structure**:
+- Each module exports a function that registers routes on Hono app
+- Modules import necessary dependencies (services, entities, middleware)
+- Shared utilities (validateUserAccess) centralized in route-utils.ts
+- Type-safe Context parameter for better IDE support
+
+**Registration Pattern**:
+```typescript
+// user-routes.ts (registry)
+import { studentRoutes, teacherRoutes, adminRoutes, ... } from './routes';
+
+export function userRoutes(app: Hono<{ Bindings: Env }>) {
+  studentRoutes(app);      // Register all student routes
+  teacherRoutes(app);     // Register all teacher routes
+  adminRoutes(app);       // Register all admin routes
+  // ... etc
+}
+```
+
+**Shared Utilities**:
+- `validateUserAccess()`: User access validation for protected routes
+- Imported from `worker/type-guards`: `getCurrentUserId()` for getting authenticated user ID
+
+### Architectural Impact
+
+**Modularity**: Each route module is atomic and replaceable
+**Separation of Concerns**: Routes organized by role and responsibility
+**Clean Architecture**: Dependencies flow inward (routes → services → entities)
+**Single Responsibility**: Each module handles one concern (role's routes)
+**Open/Closed**: New routes for a role can be added without modifying others
+
+---
+
+## Base URL
 
 ```
 https://your-domain.workers.dev/api
