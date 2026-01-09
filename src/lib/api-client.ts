@@ -7,6 +7,7 @@ import { ApiResponse, ErrorCode } from "../../shared/types";
 import { CachingTime, ApiTimeout, RetryDelay, RetryCount, CircuitBreakerConfig } from '../config/time';
 import { STORAGE_KEYS } from '../constants/storage-keys';
 import { storage } from '../lib/storage';
+import { CircuitBreaker, type CircuitBreakerState } from './resilience/CircuitBreaker';
 
 const getAuthToken = () => storage.getItem(STORAGE_KEYS.AUTH_TOKEN);
 
@@ -29,105 +30,6 @@ interface MutationOptions<TData, TError, TVariables> extends Omit<UseMutationOpt
 interface RequestOptions extends RequestInit {
   timeout?: number;
   circuitBreaker?: boolean;
-}
-
-// ====================
-// Circuit Breaker Implementation
-// ====================
-
-interface CircuitBreakerState {
-  isOpen: boolean;
-  failureCount: number;
-  lastFailureTime: number;
-  nextAttemptTime: number;
-}
-
-class CircuitBreaker {
-  private state: CircuitBreakerState = {
-    isOpen: false,
-    failureCount: 0,
-    lastFailureTime: 0,
-    nextAttemptTime: 0,
-  };
-  private readonly threshold: number;
-  private readonly timeout: number;
-  private readonly resetTimeout: number;
-  private readonly halfOpenMaxCalls: number;
-  private halfOpenCalls = 0;
-
-  constructor(threshold = CircuitBreakerConfig.FAILURE_THRESHOLD, timeout = CircuitBreakerConfig.TIMEOUT_MS, resetTimeout = CircuitBreakerConfig.RESET_TIMEOUT_MS, halfOpenMaxCalls = 3) {
-    this.threshold = threshold;
-    this.timeout = timeout;
-    this.resetTimeout = resetTimeout;
-    this.halfOpenMaxCalls = halfOpenMaxCalls;
-  }
-
-  async execute<T>(fn: () => Promise<T>): Promise<T> {
-    if (this.state.isOpen) {
-      const now = Date.now();
-      
-      if (now < this.state.nextAttemptTime) {
-        const error = new Error('Circuit breaker is open') as ApiError;
-        error.code = ErrorCode.CIRCUIT_BREAKER_OPEN;
-        error.status = 503;
-        error.retryable = false;
-        throw error;
-      }
-
-      this.halfOpenCalls = 0;
-    }
-
-    try {
-      const result = await fn();
-      this.onSuccess();
-      return result;
-    } catch (error) {
-      this.onFailure();
-      throw error;
-    }
-  }
-
-  private onSuccess(): void {
-    if (this.state.isOpen) {
-      this.halfOpenCalls++;
-      
-      if (this.halfOpenCalls >= this.halfOpenMaxCalls) {
-        this.state.isOpen = false;
-        this.state.failureCount = 0;
-        this.halfOpenCalls = 0;
-      }
-    } else {
-      this.state.failureCount = 0;
-    }
-  }
-
-  private onFailure(): void {
-    const now = Date.now();
-    this.state.failureCount++;
-    this.state.lastFailureTime = now;
-    
-    if (this.state.isOpen) {
-      this.halfOpenCalls = 0;
-      this.state.nextAttemptTime = now + this.timeout;
-    } else if (this.state.failureCount >= this.threshold) {
-      this.state.isOpen = true;
-      this.state.nextAttemptTime = now + this.timeout;
-    }
-  }
-
-  getState(): CircuitBreakerState {
-    return { ...this.state };
-  }
-
-  reset(): void {
-    this.state = {
-      isOpen: false,
-      failureCount: 0,
-      lastFailureTime: 0,
-      nextAttemptTime: 0,
-    };
-    this.halfOpenCalls = 0;
-  }
 }
 
 const circuitBreaker = new CircuitBreaker(CircuitBreakerConfig.FAILURE_THRESHOLD, CircuitBreakerConfig.TIMEOUT_MS, CircuitBreakerConfig.RESET_TIMEOUT_MS);

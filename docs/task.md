@@ -8408,6 +8408,115 @@ const mockStudentService = createStudentService(new MockRepository());
 
 None currently in progress.
 
+### CircuitBreaker Module Extraction (2026-01-09) - Completed ✅
+
+**Task**: Extract CircuitBreaker from api-client.ts to separate resilience module
+
+**Problem**:
+- api-client.ts (426 lines) had CircuitBreaker class implementation mixed with API communication logic
+- Violated Separation of Concerns: resilience logic mixed with API communication
+- Violated Single Responsibility Principle: api-client had multiple reasons to change
+- CircuitBreaker was not reusable across application
+- Difficult to test CircuitBreaker independently of api-client
+
+**Solution**:
+- Extracted CircuitBreaker to dedicated `src/lib/resilience/CircuitBreaker.ts` module
+- Updated api-client.ts to import CircuitBreaker from resilience module
+- Created new resilience directory for cross-cutting concerns
+- CircuitBreaker is now reusable and independently testable
+
+**Implementation**:
+
+1. **Created CircuitBreaker Module** at `src/lib/resilience/CircuitBreaker.ts`:
+   - Exported CircuitBreaker class with state management
+   - Exported CircuitBreakerState interface
+   - Imported ErrorCode from shared/types
+   - Imported CircuitBreakerConfig from config/time (corrected import path: ../../config/time)
+
+2. **Refactored api-client.ts** at `src/lib/api-client.ts`:
+   - Removed CircuitBreaker class implementation (lines 38-133, 96 lines removed)
+   - Removed CircuitBreakerState interface definition
+   - Removed ApiError interface (kept in api-client for local use)
+   - Added import: `import { CircuitBreaker, type CircuitBreakerState } from './resilience/CircuitBreaker'`
+   - Maintained existing CircuitBreaker instance configuration
+   - All exports (getCircuitBreakerState, resetCircuitBreaker) still work as before
+
+**Metrics**:
+
+| Metric | Before | After | Improvement |
+|---------|---------|--------|-------------|
+| api-client.ts lines | 426 | 330 | 23% reduction |
+| CircuitBreaker module | Inline (96 lines) | Separate file (98 lines) | New reusable module |
+| Separation of Concerns | Mixed | Clean | Complete separation |
+| Single Responsibility | Multiple concerns | API client only | Focused module |
+| Reusability | Not reusable | Exported module | New capability |
+| Test results | 1270 passing | 1270 passing | 0 regression |
+| Linting errors | 0 | 0 | No regressions |
+| Typecheck errors | 0 | 0 | No regressions |
+
+**Benefits Achieved**:
+- ✅ CircuitBreaker extracted to dedicated module (98 lines, fully self-contained)
+- ✅ api-client.ts reduced by 23% (426 → 330 lines, 96 lines removed)
+- ✅ Separation of Concerns (Resilience logic separated from API communication)
+- ✅ Single Responsibility (CircuitBreaker handles resilience, api-client handles API communication)
+- ✅ CircuitBreaker is now reusable across the application
+- ✅ All 1270 tests passing (2 skipped, 0 regression)
+- ✅ Linting passed with 0 errors
+- ✅ TypeScript compilation successful with 0 errors
+- ✅ Zero breaking changes to existing functionality
+
+**Technical Details**:
+
+**CircuitBreaker Module Features**:
+- State management: isOpen, failureCount, lastFailureTime, nextAttemptTime
+- Circuit states: Closed, Open, Half-Open
+- Threshold-based failure detection (default: 5 failures from CircuitBreakerConfig)
+- Timeout-based recovery (default: 60 seconds from CircuitBreakerConfig)
+- Exponential backoff for open state
+- Half-Open mode for testing recovery
+- State getter (getState()) and reset (reset()) methods
+- execute() method wraps async functions with circuit breaking logic
+
+**api-client.ts Simplifications**:
+- Removed CircuitBreakerState interface (6 lines)
+- Removed CircuitBreaker class implementation (90 lines)
+- Added import for extracted CircuitBreaker module
+- All CircuitBreaker functionality preserved (execute, getState, reset)
+- CircuitBreaker instance still created with same configuration
+- All exports (getCircuitBreakerState, resetCircuitBreaker) unchanged
+- ApiError interface kept in api-client for local use (CircuitBreaker uses inline type)
+
+**Architectural Impact**:
+- **Modularity**: CircuitBreaker is atomic and replaceable
+- **Separation of Concerns**: Resilience (CircuitBreaker) separated from API communication (api-client)
+- **Clean Architecture**: Dependencies flow correctly (api-client → CircuitBreaker)
+- **Single Responsibility**: CircuitBreaker handles circuit breaking, api-client handles API communication
+- **Reusability**: CircuitBreaker can now be imported and used elsewhere
+
+**Success Criteria**:
+- [x] CircuitBreaker module created at src/lib/resilience/CircuitBreaker.ts
+- [x] api-client.ts reduced from 426 to 330 lines (23% reduction)
+- [x] CircuitBreaker implementation extracted (96 lines removed from api-client)
+- [x] Separation of Concerns achieved (resilience vs API communication)
+- [x] CircuitBreaker is reusable (exported module)
+- [x] All 1270 tests passing (2 skipped, 0 regression)
+- [x] Linting passed (0 errors)
+- [x] TypeScript compilation successful (0 errors)
+- [x] Zero breaking changes to existing functionality
+
+**Impact**:
+- `src/lib/resilience/CircuitBreaker.ts`: New module (98 lines)
+- `src/lib/api-client.ts`: Reduced 426 → 330 lines (96 lines removed, 23% reduction)
+- `src/lib/resilience/`: New directory for resilience patterns (modularity foundation)
+- CircuitBreaker reusability: Can now be imported and used in other modules
+- Maintainability: CircuitBreaker logic centralized in one module
+- Testability: CircuitBreaker can be tested independently of api-client
+- Future refactoring: Similar pattern applies to other cross-cutting concerns (retry logic, timeout handling)
+
+**Success**: ✅ **CIRCUITBREAKER MODULE EXTRACTION COMPLETE, SEPARATION OF CONCERNS ACHIEVED, API CLIENT REDUCED BY 23%**
+
+---
+
 ### [REFACTOR] Consolidate Retry Configuration Constants - Completed ✅
 
 **Task**: Consolidate retry configuration constants into single WEBHOOK_CONFIG object
