@@ -1,14 +1,12 @@
-import { useRef, useState } from 'react';
 import { useAuthStore } from '@/lib/authStore';
 import { useStudentCard } from '@/hooks/useStudent';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { GraduationCap, QrCode, Download, AlertTriangle } from 'lucide-react';
+import { GraduationCap, QrCode, Printer, AlertTriangle } from 'lucide-react';
 import { SlideUp } from '@/components/animations';
 import { toast } from 'sonner';
-import { logger } from '@/lib/logger';
 import { THEME_COLORS } from '@/theme/colors';
 
 function CardSkeleton() {
@@ -31,42 +29,11 @@ function CardSkeleton() {
 export function StudentCardPage() {
   const user = useAuthStore((state) => state.user);
   const { data: cardData, isLoading, error } = useStudentCard(user?.id || '');
-  const cardRef = useRef<HTMLDivElement>(null);
-  const [isDownloading, setIsDownloading] = useState(false);
 
-  const handleDownload = async () => {
-    if (!cardRef.current) return;
-    setIsDownloading(true);
-    toast.info('Generating PDF...');
-
-    try {
-      const [html2canvas, jsPDF] = await Promise.all([
-        import('html2canvas').then(m => m.default),
-        import('jspdf').then(m => m.default)
-      ]);
-
-      const canvas = await html2canvas(cardRef.current, {
-        scale: 2,
-        useCORS: true,
-        backgroundColor: null,
-      });
-
-      const imgData = canvas.toDataURL('image/png');
-      const pdf = new jsPDF({
-        orientation: 'landscape',
-        unit: 'px',
-        format: [canvas.width, canvas.height],
-      });
-
-      pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
-      pdf.save(`student-card-${user?.id || 'user'}.pdf`);
-      toast.success('PDF downloaded successfully!');
-    } catch (err) {
-      logger.error("Error generating PDF", err, { userId: user?.id });
-      toast.error('Failed to generate PDF.');
-    } finally {
-      setIsDownloading(false);
-    }
+  const handlePrint = () => {
+    toast.info('Opening print dialog...');
+    window.print();
+    toast.success('Print dialog opened. Select "Save as PDF" to save as file.');
   };
 
   if (!user) return null;
@@ -106,7 +73,6 @@ export function StudentCardPage() {
         <p className="text-sm sm:text-base text-muted-foreground">Ini adalah kartu pelajar digital Anda. Anda dapat mengunduhnya sebagai PDF.</p>
       </div>
       <div
-        ref={cardRef}
         className="w-full max-w-[550px] min-h-[330px] rounded-2xl p-4 sm:p-6 text-white shadow-2xl flex flex-col justify-between relative overflow-hidden" style={{ background: `linear-gradient(to bottom right, ${THEME_COLORS.PRIMARY}, ${THEME_COLORS.SECONDARY})` }}
       >
         <div className="absolute -top-10 -right-10 w-32 h-32 sm:w-40 sm:h-40 bg-white/10 rounded-full"></div>
@@ -148,9 +114,9 @@ export function StudentCardPage() {
             </div>
         </footer>
       </div>
-      <Button onClick={handleDownload} disabled={isDownloading} size="lg" className="mt-6 sm:mt-8 w-full sm:w-auto">
-        <Download className="mr-2 h-5 w-5" />
-        {isDownloading ? 'Downloading...' : 'Download as PDF'}
+      <Button onClick={handlePrint} size="lg" className="mt-6 sm:mt-8 w-full sm:w-auto">
+        <Printer className="mr-2 h-5 w-5" />
+        Print / Save as PDF
       </Button>
     </SlideUp>
   );

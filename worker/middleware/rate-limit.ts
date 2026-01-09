@@ -1,6 +1,7 @@
 import type { Context, Next } from 'hono';
 import { integrationMonitor } from '../integration-monitor';
 import { rateLimitExceeded } from '../core-utils';
+import { RateLimitMaxRequests, RateLimitWindow, TimeConstants } from '../config/time';
 
 interface RateLimitStore {
   count: number;
@@ -34,8 +35,8 @@ export interface RateLimitMiddlewareOptions {
 }
 
 const DEFAULT_CONFIG: RateLimitConfig = {
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  maxRequests: 100,
+  windowMs: RateLimitWindow.STANDARD,
+  maxRequests: RateLimitMaxRequests.STANDARD,
 };
 
 function cleanupExpiredEntries(): void {
@@ -81,8 +82,8 @@ function getOrCreateEntry(key: string, config: RateLimitConfig): RateLimitStore 
 
 export function rateLimit(options: RateLimitMiddlewareOptions = {}) {
   const config: RateLimitConfig = {
-    windowMs: options.windowMs ?? 15 * 60 * 1000,
-    maxRequests: options.maxRequests ?? 100,
+    windowMs: options.windowMs ?? RateLimitWindow.STANDARD,
+    maxRequests: options.maxRequests ?? RateLimitMaxRequests.STANDARD,
     skipFailedRequests: options.skipFailedRequests,
     skipSuccessfulRequests: options.skipSuccessfulRequests,
   };
@@ -101,7 +102,7 @@ export function rateLimit(options: RateLimitMiddlewareOptions = {}) {
     const info: RateLimitInfo = {
       limit: config.maxRequests,
       remaining: Math.max(0, config.maxRequests - entry.count),
-      reset: Math.ceil(entry.resetTime / 1000),
+      reset: Math.ceil(entry.resetTime / TimeConstants.SECOND_MS),
     };
     
     if (standardHeaders) {
@@ -119,8 +120,8 @@ export function rateLimit(options: RateLimitMiddlewareOptions = {}) {
         return options.handler(c, info);
       }
       
-      c.header('Retry-After', Math.ceil((entry.resetTime - now) / 1000).toString());
-      return rateLimitExceeded(c, Math.ceil((entry.resetTime - now) / 1000));
+      c.header('Retry-After', Math.ceil((entry.resetTime - now) / TimeConstants.SECOND_MS).toString());
+      return rateLimitExceeded(c, Math.ceil((entry.resetTime - now) / TimeConstants.SECOND_MS));
     }
     
     await next();
@@ -138,7 +139,10 @@ export function rateLimit(options: RateLimitMiddlewareOptions = {}) {
 export function createRateLimiter(config?: Partial<RateLimitConfig>) {
   const mergedConfig: RateLimitConfig = {
     ...DEFAULT_CONFIG,
-    ...config,
+    windowMs: config?.windowMs ?? DEFAULT_CONFIG.windowMs,
+    maxRequests: config?.maxRequests ?? DEFAULT_CONFIG.maxRequests,
+    skipFailedRequests: config?.skipFailedRequests,
+    skipSuccessfulRequests: config?.skipSuccessfulRequests,
   };
 
   return (options?: RateLimitMiddlewareOptions) => {
@@ -153,23 +157,23 @@ export function createRateLimiter(config?: Partial<RateLimitConfig>) {
 }
 
 export const defaultRateLimiter = createRateLimiter({
-  windowMs: 15 * 60 * 1000,
-  maxRequests: 100,
+  windowMs: RateLimitWindow.STANDARD,
+  maxRequests: RateLimitMaxRequests.STANDARD,
 });
 
 export const strictRateLimiter = createRateLimiter({
-  windowMs: 5 * 60 * 1000,
-  maxRequests: 50,
+  windowMs: RateLimitWindow.STRICT,
+  maxRequests: RateLimitMaxRequests.STRICT,
 });
 
 export const looseRateLimiter = createRateLimiter({
-  windowMs: 60 * 60 * 1000,
-  maxRequests: 1000,
+  windowMs: RateLimitWindow.LOOSE,
+  maxRequests: RateLimitMaxRequests.LOOSE,
 });
 
 export const authRateLimiter = createRateLimiter({
-  windowMs: 15 * 60 * 1000,
-  maxRequests: 5,
+  windowMs: RateLimitWindow.AUTH,
+  maxRequests: RateLimitMaxRequests.AUTH,
 });
 
 export function clearRateLimitStore(): void {

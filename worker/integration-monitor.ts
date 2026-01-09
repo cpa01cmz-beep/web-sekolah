@@ -1,4 +1,5 @@
 import { logger } from './logger';
+import { IntegrationMonitor as IntegrationMonitorConfig } from './config/time';
 
 export interface CircuitBreakerStats {
   isOpen: boolean;
@@ -52,7 +53,7 @@ class IntegrationMonitor {
     totalRequests: 0,
     blockedRequests: 0,
     currentEntries: 0,
-    windowMs: 15 * 60 * 1000,
+    windowMs: IntegrationMonitorConfig.DEFAULT_WINDOW_MS,
   };
   private webhookStats: WebhookStats = {
     totalEvents: 0,
@@ -70,7 +71,7 @@ class IntegrationMonitor {
     recentErrors: [],
   };
   private deliveryTimes: number[] = [];
-  private readonly maxRecentErrors = 100;
+  private readonly maxRecentErrors = IntegrationMonitorConfig.MAX_RECENT_ERRORS;
 
   constructor() {
     this.startTime = Date.now();
@@ -124,7 +125,7 @@ class IntegrationMonitor {
 
     if (deliveryTime) {
       this.deliveryTimes.push(deliveryTime);
-      if (this.deliveryTimes.length > 1000) {
+      if (this.deliveryTimes.length > IntegrationMonitorConfig.MAX_DELIVERY_TIMES) {
         this.deliveryTimes.shift();
       }
       this.updateAverageDeliveryTime();
@@ -210,7 +211,7 @@ class IntegrationMonitor {
       totalRequests: 0,
       blockedRequests: 0,
       currentEntries: 0,
-      windowMs: 15 * 60 * 1000,
+      windowMs: IntegrationMonitorConfig.DEFAULT_WINDOW_MS,
     };
     this.webhookStats = {
       totalEvents: 0,

@@ -1,6 +1,7 @@
 import { SiteHeader } from '@/components/SiteHeader';
 import { SiteFooter } from '@/components/SiteFooter';
 import { SlideUp } from '@/components/animations';
+import { InfoCard } from '@/components/InfoCard';
 
 export function GalleryPage() {
   return (
@@ -47,39 +48,30 @@ export function GalleryPage() {
             </SlideUp>
             <div className="grid md:grid-cols-3 gap-8">
               <SlideUp>
-                <div className="bg-card rounded-lg shadow-md p-6 text-center hover:shadow-lg transition-shadow">
-                  <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <span className="text-2xl text-blue-600">🎓</span>
-                  </div>
-                  <h3 className="text-xl font-bold mb-2">Kegiatan Akademik</h3>
-                  <p className="text-muted-foreground">
-                    Dokumentasi kegiatan belajar mengajar, ujian, dan presentasi siswa.
-                  </p>
-                </div>
+                <InfoCard
+                  title="Kegiatan Akademik"
+                  description="Dokumentasi kegiatan belajar mengajar, ujian, dan presentasi siswa."
+                  iconElement={<span className="text-2xl text-blue-600" aria-hidden="true">🎓</span>}
+                  iconClassName="bg-blue-100"
+                />
               </SlideUp>
 
               <SlideUp delay={0.1}>
-                <div className="bg-card rounded-lg shadow-md p-6 text-center hover:shadow-lg transition-shadow">
-                  <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <span className="text-2xl text-green-600">⚽</span>
-                  </div>
-                  <h3 className="text-xl font-bold mb-2">Ekstrakurikuler</h3>
-                  <p className="text-muted-foreground">
-                    Kegiatan ekstrakurikuler siswa seperti olahraga, seni, dan klub.
-                  </p>
-                </div>
+                <InfoCard
+                  title="Ekstrakurikuler"
+                  description="Kegiatan ekstrakurikuler siswa seperti olahraga, seni, dan klub."
+                  iconElement={<span className="text-2xl text-green-600" aria-hidden="true">⚽</span>}
+                  iconClassName="bg-green-100"
+                />
               </SlideUp>
 
               <SlideUp delay={0.2}>
-                <div className="bg-card rounded-lg shadow-md p-6 text-center hover:shadow-lg transition-shadow">
-                  <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <span className="text-2xl text-purple-600">🏆</span>
-                  </div>
-                  <h3 className="text-xl font-bold mb-2">Prestasi & Penghargaan</h3>
-                  <p className="text-muted-foreground">
-                    Momen perayaan prestasi siswa dan penghargaan yang diraih sekolah.
-                  </p>
-                </div>
+                <InfoCard
+                  title="Prestasi & Penghargaan"
+                  description="Momen perayaan prestasi siswa dan penghargaan yang diraih sekolah."
+                  iconElement={<span className="text-2xl text-purple-600" aria-hidden="true">🏆</span>}
+                  iconClassName="bg-purple-100"
+                />
               </SlideUp>
             </div>
           </div>
