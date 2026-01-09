@@ -1,5 +1,5 @@
 import React, { useState, memo } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { DialogTrigger } from '@/components/ui/dialog';
@@ -14,6 +14,7 @@ import { queryClient } from '@/lib/api-client';
 import { TableSkeleton } from '@/components/ui/loading-skeletons';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { UserForm } from '@/components/forms/UserForm';
+import { ROLE_COLORS } from '@/theme/colors';
 
 const RoleIcon: Record<UserRole, React.ComponentType<{ className?: string }>> = {
   student: GraduationCap,
@@ -22,22 +23,15 @@ const RoleIcon: Record<UserRole, React.ComponentType<{ className?: string }>> = 
   admin: Shield,
 };
 
-const roleConfig: Record<UserRole, { color: string; label: string }> = {
-  student: { color: 'bg-blue-500', label: 'Student' },
-  teacher: { color: 'bg-green-500', label: 'Teacher' },
-  parent: { color: 'bg-purple-500', label: 'Parent' },
-  admin: { color: 'bg-red-500', label: 'Admin' },
-};
-
 const UserRow = memo(({ user, onEdit, onDelete }: { user: SchoolUser; onEdit: (user: SchoolUser) => void; onDelete: (userId: string) => void }) => {
   return (
     <TableRow>
       <TableCell className="font-medium">{user.name}</TableCell>
       <TableCell>{user.email}</TableCell>
       <TableCell className="text-center">
-        <Badge className={`text-white ${roleConfig[user.role].color} flex items-center gap-1.5 px-2.5 py-1`}>
+        <Badge className={`text-white ${ROLE_COLORS[user.role].color} flex items-center gap-1.5 px-2.5 py-1`}>
           <span aria-hidden="true">{React.createElement(RoleIcon[user.role], { className: "h-3 w-3" })}</span>
-          <span>{roleConfig[user.role].label}</span>
+          <span>{ROLE_COLORS[user.role].label}</span>
         </Badge>
       </TableCell>
       <TableCell className="text-right space-x-2">
