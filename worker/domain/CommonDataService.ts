@@ -80,7 +80,7 @@ export class CommonDataService {
 
   static async getAllUsers(env: Env): Promise<SchoolUser[]> {
     const { items: allUsers } = await UserEntity.list(env);
-    return allUsers;
+    return allUsers.map(({ passwordHash: _, ...rest }) => rest);
   }
 
   static async getAllClasses(env: Env): Promise<SchoolClass[]> {
@@ -90,6 +90,11 @@ export class CommonDataService {
 
   static async getUserById(env: Env, userId: string): Promise<SchoolUser | null> {
     const userEntity = new UserEntity(env, userId);
-    return await userEntity.getState() as SchoolUser | null;
+    const user = await userEntity.getState() as SchoolUser | null;
+    if (!user) {
+      return null;
+    }
+    const { passwordHash: _, ...userWithoutPassword } = user;
+    return userWithoutPassword;
   }
 }

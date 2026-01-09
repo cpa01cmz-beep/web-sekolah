@@ -393,7 +393,7 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
   });
 
   app.get('/api/admin/announcements', authenticate(), authorize('admin'), async (c) => {
-    const { items: announcements } = await AnnouncementEntity.list(c.env);
+    const announcements = await CommonDataService.getAllAnnouncements(c.env);
     return ok(c, announcements);
   });
 
