@@ -1,10 +1,10 @@
-export type Announcement = {
+export interface Announcement {
   id: string;
   title: string;
   content: string;
   author: string;
   date: string;
-};
+}
 
 export const initialAnnouncements: Announcement[] = [
   { id: 'ann1', title: 'Mid-term Exam Schedule', content: 'The mid-term exam schedule has been posted. Please check main notice board.', author: 'Admin Sekolah', date: new Date('2024-07-18').toISOString() },
