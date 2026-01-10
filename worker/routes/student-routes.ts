@@ -1,51 +1,30 @@
 import { Hono } from "hono";
 import type { Env } from '../core-utils';
 import { ok, notFound } from '../core-utils';
-import { authenticate, authorize } from '../middleware/auth';
 import type { StudentDashboardData, StudentCardData } from "@shared/types";
 import { GRADE_A_THRESHOLD, GRADE_B_THRESHOLD, GRADE_C_THRESHOLD, PASSING_SCORE_THRESHOLD } from '../constants';
 import { GradeService, CommonDataService, StudentDashboardService } from '../domain';
-import { validateUserAccess } from './route-utils';
-import { getCurrentUserId } from '../type-guards';
+import { withUserValidation } from './route-utils';
 import type { Context } from 'hono';
 
 export function studentRoutes(app: Hono<{ Bindings: Env }>) {
-  app.get('/api/students/:id/grades', authenticate(), authorize('student'), async (c: Context) => {
-    const userId = getCurrentUserId(c);
+  app.get('/api/students/:id/grades', ...withUserValidation('student', 'grades'), async (c: Context) => {
     const requestedStudentId = c.req.param('id');
-
-    if (!validateUserAccess(c, userId, requestedStudentId, 'student', 'grades')) {
-      return;
-    }
-
     const grades = await GradeService.getStudentGrades(c.env, requestedStudentId);
     return ok(c, grades);
   });
 
-  app.get('/api/students/:id/schedule', authenticate(), authorize('student'), async (c: Context) => {
-    const userId = getCurrentUserId(c);
+  app.get('/api/students/:id/schedule', ...withUserValidation('student', 'schedule'), async (c: Context) => {
     const requestedStudentId = c.req.param('id');
-
-    if (!validateUserAccess(c, userId, requestedStudentId, 'student', 'schedule')) {
-      return;
-    }
-
     const { student, classData, schedule } = await CommonDataService.getStudentWithClassAndSchedule(c.env, requestedStudentId);
     if (!student || !student.classId || !classData || !schedule) {
       return notFound(c, 'Student or class not found');
     }
-
     return ok(c, schedule?.items || []);
   });
 
-  app.get('/api/students/:id/card', authenticate(), authorize('student'), async (c: Context) => {
-    const userId = getCurrentUserId(c);
+  app.get('/api/students/:id/card', ...withUserValidation('student', 'card'), async (c: Context) => {
     const requestedStudentId = c.req.param('id');
-
-    if (!validateUserAccess(c, userId, requestedStudentId, 'student', 'card')) {
-      return;
-    }
-
     const { student, classData } = await CommonDataService.getStudentForGrades(c.env, requestedStudentId);
     if (!student || student.role !== 'student') {
       return notFound(c, 'Student not found');
@@ -77,14 +56,8 @@ export function studentRoutes(app: Hono<{ Bindings: Env }>) {
     return ok(c, cardData);
   });
 
-  app.get('/api/students/:id/dashboard', authenticate(), authorize('student'), async (c: Context) => {
-    const userId = getCurrentUserId(c);
+  app.get('/api/students/:id/dashboard', ...withUserValidation('student', 'dashboard'), async (c: Context) => {
     const requestedStudentId = c.req.param('id');
-
-    if (!validateUserAccess(c, userId, requestedStudentId, 'student', 'dashboard')) {
-      return;
-    }
-
     try {
       const dashboardData = await StudentDashboardService.getDashboardData(c.env, requestedStudentId);
       return ok(c, dashboardData);

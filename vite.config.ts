@@ -86,6 +86,9 @@ export default ({ mode }: { mode: string }) => {
         output: {
           manualChunks: (id) => {
             if (id.includes('node_modules')) {
+              if (id.includes('victory-vendor') || id.includes('d3-')) {
+                return 'charts-core';
+              }
               if (id.includes('recharts')) {
                 return 'recharts';
               }
@@ -107,10 +110,7 @@ export default ({ mode }: { mode: string }) => {
               if (id.includes('dompurify')) {
                 return 'sanitization';
               }
-              if (id.includes('victory-vendor') || id.includes('d3-')) {
-                return 'charts-core';
-              }
-              if (id.includes('@radix-ui') || id.includes('react') || id.includes('react-dom') || id.includes('react-router-dom')) {
+              if (id.includes('@radix-ui')) {
                 return 'vendor';
               }
             }

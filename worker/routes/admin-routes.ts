@@ -1,23 +1,23 @@
 import { Hono } from "hono";
 import type { Env } from '../core-utils';
 import { ok, bad, notFound } from '../core-utils';
-import { authenticate, authorize } from '../middleware/auth';
 import { AnnouncementEntity, ensureAllSeedData } from "../entities";
 import { rebuildAllIndexes } from "../index-rebuilder";
 import type { CreateUserData, UpdateUserData, Announcement, CreateAnnouncementData, AdminDashboardData, Settings } from "@shared/types";
 import { UserService, CommonDataService, AnnouncementService } from '../domain';
 import { WebhookService } from '../webhook-service';
 import { toWebhookPayload } from '../webhook-types';
+import { withAuth } from './route-utils';
 import { getCurrentUserId } from '../type-guards';
 import type { Context } from 'hono';
 
 export function adminRoutes(app: Hono<{ Bindings: Env }>) {
-  app.post('/api/admin/rebuild-indexes', authenticate(), authorize('admin'), async (c: Context) => {
+  app.post('/api/admin/rebuild-indexes', ...withAuth('admin'), async (c: Context) => {
     await rebuildAllIndexes(c.env);
     return ok(c, { message: 'All secondary indexes rebuilt successfully.' });
   });
 
-  app.get('/api/admin/dashboard', authenticate(), authorize('admin'), async (c: Context) => {
+  app.get('/api/admin/dashboard', ...withAuth('admin'), async (c: Context) => {
     const allUsers = await CommonDataService.getAllUsers(c.env);
     const allClasses = await CommonDataService.getAllClasses(c.env);
     const allAnnouncements = await CommonDataService.getAllAnnouncements(c.env);
@@ -40,7 +40,7 @@ export function adminRoutes(app: Hono<{ Bindings: Env }>) {
     return ok(c, dashboardData);
   });
 
-  app.get('/api/admin/users', authenticate(), authorize('admin'), async (c: Context) => {
+  app.get('/api/admin/users', ...withAuth('admin'), async (c: Context) => {
     const role = c.req.query('role');
     const classId = c.req.query('classId');
     const search = c.req.query('search');
@@ -68,19 +68,17 @@ export function adminRoutes(app: Hono<{ Bindings: Env }>) {
     return ok(c, filteredUsers);
   });
 
-  app.get('/api/admin/announcements', authenticate(), authorize('admin'), async (c: Context) => {
+  app.get('/api/admin/announcements', ...withAuth('admin'), async (c: Context) => {
     const announcements = await CommonDataService.getAllAnnouncements(c.env);
     return ok(c, announcements);
   });
 
-  app.post('/api/admin/announcements', authenticate(), authorize('admin'), async (c: Context) => {
+  app.post('/api/admin/announcements', ...withAuth('admin'), async (c: Context) => {
     const announcementData = await c.req.json<CreateAnnouncementData>();
     const authorId = getCurrentUserId(c);
-
     try {
       const newAnnouncement = await AnnouncementService.createAnnouncement(c.env, announcementData, authorId);
       await WebhookService.triggerEvent(c.env, 'announcement.created', toWebhookPayload(newAnnouncement));
-
       return ok(c, newAnnouncement);
     } catch (error) {
       if (error instanceof Error) {
@@ -90,7 +88,7 @@ export function adminRoutes(app: Hono<{ Bindings: Env }>) {
     }
   });
 
-  app.get('/api/admin/settings', authenticate(), authorize('admin'), async (c: Context) => {
+  app.get('/api/admin/settings', ...withAuth('admin'), async (c: Context) => {
     const settings: Settings = {
       schoolName: c.env.SCHOOL_NAME || 'SMA Negeri 1 Jakarta',
       academicYear: c.env.ACADEMIC_YEAR || '2024-2025',
@@ -102,7 +100,7 @@ export function adminRoutes(app: Hono<{ Bindings: Env }>) {
     return ok(c, settings);
   });
 
-  app.put('/api/admin/settings', authenticate(), authorize('admin'), async (c: Context) => {
+  app.put('/api/admin/settings', ...withAuth('admin'), async (c: Context) => {
     const updates = await c.req.json<Partial<Settings>>();
     const updatedSettings: Settings = {
       schoolName: updates.schoolName || c.env.SCHOOL_NAME || 'SMA Negeri 1 Jakarta',

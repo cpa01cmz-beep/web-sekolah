@@ -7,19 +7,13 @@ import type { TeacherDashboardData, Announcement, CreateAnnouncementData, Submit
 import { GradeService, CommonDataService, AnnouncementService } from '../domain';
 import { WebhookService } from '../webhook-service';
 import { toWebhookPayload } from '../webhook-types';
-import { validateUserAccess } from './route-utils';
+import { withAuth, withUserValidation } from './route-utils';
 import { getCurrentUserId } from '../type-guards';
 import type { Context } from 'hono';
 
 export function teacherRoutes(app: Hono<{ Bindings: Env }>) {
-  app.get('/api/teachers/:id/dashboard', authenticate(), authorize('teacher'), async (c: Context) => {
-    const userId = getCurrentUserId(c);
+  app.get('/api/teachers/:id/dashboard', ...withUserValidation('teacher', 'dashboard'), async (c: Context) => {
     const requestedTeacherId = c.req.param('id');
-
-    if (!validateUserAccess(c, userId, requestedTeacherId, 'teacher', 'dashboard')) {
-      return;
-    }
-
     const { teacher, classes: teacherClasses } = await CommonDataService.getTeacherWithClasses(c.env, requestedTeacherId);
     if (!teacher) {
       return notFound(c, 'Teacher not found');
@@ -48,22 +42,13 @@ export function teacherRoutes(app: Hono<{ Bindings: Env }>) {
     return ok(c, dashboardData);
   });
 
-  app.get('/api/teachers/:id/announcements', authenticate(), authorize('teacher'), async (c: Context) => {
-    const userId = getCurrentUserId(c);
-    const requestedTeacherId = c.req.param('id');
-
-    if (!validateUserAccess(c, userId, requestedTeacherId, 'teacher', 'announcements')) {
-      return;
-    }
-
+  app.get('/api/teachers/:id/announcements', ...withUserValidation('teacher', 'announcements'), async (c: Context) => {
     const filteredAnnouncements = await CommonDataService.getAnnouncementsByRole(c.env, 'teacher');
-
     return ok(c, filteredAnnouncements);
   });
 
-  app.post('/api/teachers/grades', authenticate(), authorize('teacher'), async (c: Context) => {
+  app.post('/api/teachers/grades', ...withAuth('teacher'), async (c: Context) => {
     const gradeData = await c.req.json<SubmitGradeData>();
-
     try {
       const newGrade = await GradeService.createGrade(c.env, gradeData);
       await WebhookService.triggerEvent(c.env, 'grade.created', toWebhookPayload(newGrade));
@@ -76,10 +61,9 @@ export function teacherRoutes(app: Hono<{ Bindings: Env }>) {
     }
   });
 
-  app.post('/api/teachers/announcements', authenticate(), authorize('teacher'), async (c: Context) => {
+  app.post('/api/teachers/announcements', ...withAuth('teacher'), async (c: Context) => {
     const announcementData = await c.req.json<CreateAnnouncementData>();
     const authorId = getCurrentUserId(c);
-
     try {
       const newAnnouncement = await AnnouncementService.createAnnouncement(c.env, announcementData, authorId);
       await WebhookService.triggerEvent(c.env, 'announcement.created', toWebhookPayload(newAnnouncement));

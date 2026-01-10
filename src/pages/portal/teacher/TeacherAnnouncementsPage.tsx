@@ -9,17 +9,8 @@ import { useAuthStore } from '@/lib/authStore';
 import { SlideUp } from '@/components/animations';
 import { toast } from 'sonner';
 import { formatDateLong } from '@/utils/date';
-type Announcement = {
-  id: string;
-  title: string;
-  content: string;
-  author: string;
-  date: string;
-};
-const initialAnnouncements: Announcement[] = [
-  { id: 'ann1', title: 'Mid-term Exam Schedule', content: 'The mid-term exam schedule has been posted. Please check the main notice board.', author: 'Admin Sekolah', date: new Date('2024-07-18').toISOString() },
-  { id: 'ann2', title: 'Class 11-A Project Deadline', content: 'Reminder: The mathematics project is due this Friday.', author: 'Ibu Siti', date: new Date('2024-07-22').toISOString() },
-];
+import { initialAnnouncements } from '@/mock-data/announcements';
+import type { Announcement } from '@/mock-data/announcements';
 export function TeacherAnnouncementsPage() {
   const user = useAuthStore((state) => state.user);
   const [announcements, setAnnouncements] = useState<Announcement[]>(initialAnnouncements);

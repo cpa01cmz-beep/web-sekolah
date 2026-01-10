@@ -116,8 +116,10 @@ This clears and rebuilds all secondary indexes from existing data.
  - ~~Large page components with inline forms: AdminUserManagementPage (228 lines) had form logic mixed with data concerns~~ ✅ **COMPLETED** (2026-01-08) - Extracted UserForm component (28% reduction, clean separation of concerns)
  - ~~Announcement creation lacked referential integrity validation: Routes called AnnouncementEntity.create() directly without validating author existence and role~~ ✅ **COMPLETED** (2026-01-09) - Created AnnouncementService with ReferentialIntegrity validation, consistent with GradeService pattern, 16 tests added
 - ~~Repetitive card patterns in pages: HomePage features and GalleryPage categories had inline card rendering with duplicated code~~ ✅ **COMPLETED** (2026-01-08) - Extracted FeatureCard and InfoCard components (40-50% code reduction, improved accessibility with aria-hidden attributes)
-- ~~CircuitBreaker implementation mixed in api-client.ts: API client (426 lines) had CircuitBreaker class implementation mixed with API communication logic~~ ✅ **COMPLETED** (2026-01-09) - Extracted CircuitBreaker to dedicated resilience module (src/lib/resilience/CircuitBreaker.ts), improved Separation of Concerns and Single Responsibility Principle
-   ### Recent Data Optimizations (2026-01-07)
+ - ~~CircuitBreaker implementation mixed in api-client.ts: API client (426 lines) had CircuitBreaker class implementation mixed with API communication logic~~ ✅ **COMPLETED** (2026-01-09) - Extracted CircuitBreaker to dedicated resilience module (src/lib/resilience/CircuitBreaker.ts), improved Separation of Concerns and Single Responsibility Principle
+ - ~~Monolithic entities.ts (405 lines) with 10+ entity classes in single file~~ ✅ **COMPLETED** (2026-01-10) - Extracted entities into 11 focused modules in worker/entities/ directory (UserEntity, ClassEntity, CourseEntity, GradeEntity, AnnouncementEntity, ScheduleEntity, WebhookConfigEntity, WebhookEventEntity, WebhookDeliveryEntity, DeadLetterQueueWebhookEntity), created barrel export (index.ts) and seed-data-init.ts, reduced entities.ts to 13 lines (97% reduction), applied Single Responsibility Principle and Modularity
+
+    ### Recent Data Optimizations (2026-01-07)
 
 #### Compound Secondary Index for Grades
 **Problem**: `GradeEntity.getByStudentIdAndCourseId()` loaded all grades for a student and filtered in-memory for courseId (O(n) complexity)
