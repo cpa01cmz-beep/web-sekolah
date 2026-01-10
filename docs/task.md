@@ -15211,3 +15211,78 @@ Excluded tests follow existing skip pattern from service tests:
 - Effort: Medium
 
 ---
+
+## [REFACTOR] Duplicate CircuitBreaker Implementations Consolidation
+- Location: `worker/CircuitBreaker.ts` (128 lines), `src/lib/resilience/CircuitBreaker.ts` (105 lines)
+- Issue: Two separate CircuitBreaker implementations exist with different behavior and logic
+  - `worker/CircuitBreaker.ts`: Has `key` parameter, `createWebhookBreaker()` static method, custom logger integration
+  - `src/lib/resilience/CircuitBreaker.ts`: Has `resetTimeout` parameter, different `onSuccess()` logic with halfOpenCalls tracking
+  - Different constructor signatures (key-based vs threshold-based)
+  - Different `onSuccess()` behavior - worker version resets immediately, frontend version tracks halfOpenCalls
+  - Different `onFailure()` behavior - worker version sets `nextAttemptTime`, frontend version uses `timeout` variable
+  - Bug discrepancy: frontend version has halfOpenCalls reset bug (line 50), worker version may or may not have same bug
+- Suggestion: Consolidate to single implementation or clearly document why separate implementations exist
+  - Option 1 (Recommended): Move worker CircuitBreaker to `worker/resilience/CircuitBreaker.ts` matching src structure
+    - Align interfaces between both implementations
+    - Use shared types from `shared/types` if possible
+    - Ensure both have `getState()` and `reset()` methods
+    - Add tests for both implementations to verify consistent behavior
+  - Option 2: Document intentional separation if different contexts truly require different implementations
+    - Add JSDoc comments explaining which to use for which context
+    - Document differences in behavior
+    - Consider renaming to clarify usage (e.g., WebhookCircuitBreaker vs ApiCircuitBreaker)
+- Priority: High (maintainability risk, potential bugs from inconsistent behavior)
+- Effort: Medium (requires careful coordination between frontend and backend code)
+
+---
+
+## [REFACTOR] Inconsistent Query Options Usage in Hooks
+- Location: `src/hooks/useStudent.ts`, `src/hooks/useTeacher.ts`, `src/hooks/useParent.ts`, `src/hooks/useAdmin.ts`
+- Issue: Inconsistent use of `createQueryOptions()` helper vs manual query option specification
+  - `useStudent.ts`: Uses `createQueryOptions<T>()` helper for all hooks (lines 11, 20, 29, 38)
+  - `useTeacher.ts`: Manually specifies staleTime, gcTime, refetchOnWindowFocus, etc. for all hooks (lines 17-23, 31-37, 51-57, 79-85)
+  - `useParent.ts`: Manually specifies options for all hooks (lines 10-16, 24-30)
+  - `useAdmin.ts`: Manually specifies options for all hooks (lines 19-24, 34-39, 68-73, 88-93)
+- Suggestion: Standardize to use `createQueryOptions()` helper across all hooks for consistency
+  - Update `useTeacher.ts`, `useParent.ts`, `useAdmin.ts` to use `createQueryOptions<T>()` helper
+  - Remove manual staleTime, gcTime, refetchOnWindowFocus, refetchOnMount, refetchOnReconnect specifications
+  - Pass custom options through `createQueryOptions()` config parameter
+  - Ensure all existing hook tests pass (verify behavior unchanged)
+- Benefits:
+  - Single source of truth for query configuration
+  - Easier to update caching behavior globally
+  - Reduced code duplication
+  - Consistent developer experience across hooks
+- Priority: Medium (maintainability, consistency)
+- Effort: Small (mechanical refactoring, tests already in place)
+
+---
+
+## [REFACTOR] Router Configuration Module Extraction
+- Location: `src/router.tsx` (123 lines)
+- Issue: Router configuration is monolithic with all routes defined in single file
+  - 26 lazy-loaded page components defined at top of file (lines 7-48)
+  - Single large `createBrowserRouter()` call with 18+ routes (lines 50-122)
+  - Routes mixed: public routes, portal routes (student/teacher/parent/admin), news routes, profile routes
+  - Adding new routes requires editing large file
+  - Harder to find specific routes (linear search through 123 lines)
+  - Difficult to isolate route configuration for testing
+- Suggestion: Extract routes to modular route configuration files
+  - Create `src/routes/` directory with separate modules:
+    - `src/routes/public.routes.ts` - Home, Login, About, Contact, Privacy (6 routes)
+    - `src/routes/portal.routes.ts` - Student, Teacher, Parent, Admin portal routes (15 routes)
+    - `src/routes/content.routes.ts` - News, Profile, Works, Gallery, Links, PPDB (12 routes)
+    - `src/routes/index.ts` - Barrel export combining all route modules
+  - Each route module exports route configuration arrays
+  - Update `src/router.tsx` to import from barrel export and combine routes
+  - Keep lazy imports in `src/router.tsx` or move to route modules (design decision)
+- Benefits:
+  - Separation of Concerns - routes grouped by functional area
+  - Easier to locate routes (find route by looking at appropriate module)
+  - Smaller, focused files (~30-40 lines per module vs 123 lines monolithic)
+  - Better testability (can test route modules in isolation)
+  - Easier to add new routes (add to specific module instead of large file)
+- Priority: Low (code organization, maintainability)
+- Effort: Medium (requires creating new directory structure and moving route definitions)
+
+---
