@@ -5,13 +5,19 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { UserRole, SchoolUser } from '@shared/types';
-import { getAvatarUrl } from '@/constants/avatars';
+import { AlertCircle } from 'lucide-react';
+
+interface UserFormData {
+  name: string;
+  email: string;
+  role: UserRole;
+}
 
 interface UserFormProps {
   open: boolean;
   onClose: () => void;
   editingUser: SchoolUser | null;
-  onSave: (data: Omit<SchoolUser, 'id'>) => void;
+  onSave: (data: UserFormData) => void;
   isLoading: boolean;
 }
 
@@ -19,6 +25,7 @@ export function UserForm({ open, onClose, editingUser, onSave, isLoading }: User
   const [userName, setUserName] = useState('');
   const [userEmail, setUserEmail] = useState('');
   const [userRole, setUserRole] = useState<UserRole>('student');
+  const [showValidationErrors, setShowValidationErrors] = useState(false);
 
   useEffect(() => {
     if (editingUser) {
@@ -30,15 +37,42 @@ export function UserForm({ open, onClose, editingUser, onSave, isLoading }: User
       setUserEmail('');
       setUserRole('student');
     }
-  }, [editingUser]);
+    setShowValidationErrors(false);
+  }, [editingUser, open]);
+
+  const getNameError = () => {
+    if (!userName.trim()) return showValidationErrors ? 'Name is required' : undefined;
+    if (userName.trim().length < 2) return 'Name must be at least 2 characters';
+    return undefined;
+  };
+
+  const getEmailError = () => {
+    if (!userEmail.trim()) return showValidationErrors ? 'Email is required' : undefined;
+    if (!/^\S+@\S+\.\S+$/.test(userEmail)) return 'Please enter a valid email address';
+    return undefined;
+  };
+
+  const getRoleError = () => {
+    if (!userRole) return showValidationErrors ? 'Role is required' : undefined;
+    return undefined;
+  };
+
+  const nameError = getNameError();
+  const emailError = getEmailError();
+  const roleError = getRoleError();
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const userData = {
-      name: userName,
-      email: userEmail,
+    setShowValidationErrors(true);
+
+    if (nameError || emailError || roleError) {
+      return;
+    }
+
+    const userData: UserFormData = {
+      name: userName.trim(),
+      email: userEmail.trim(),
       role: userRole,
-      avatarUrl: getAvatarUrl(userEmail),
     };
     onSave(userData);
   };
@@ -65,11 +99,19 @@ export function UserForm({ open, onClose, editingUser, onSave, isLoading }: User
                   id="name" 
                   name="name" 
                   value={userName} 
-                  onChange={(e) => setUserName(e.target.value)} 
+                  onChange={(e) => setUserName(e.target.value)}
                   required 
-                  aria-required="true" 
+                  aria-required="true"
+                  aria-invalid={!!nameError}
+                  aria-describedby={nameError ? 'name-error' : 'name-helper'}
                 />
-                <p className="text-xs text-muted-foreground">Full name of the user</p>
+                <p id="name-helper" className="text-xs text-muted-foreground">Full name of the user</p>
+                {nameError && (
+                  <p id="name-error" className="text-xs text-destructive flex items-center gap-1" role="alert" aria-live="polite">
+                    <AlertCircle className="h-3 w-3" aria-hidden="true" />
+                    {nameError}
+                  </p>
+                )}
               </div>
             </div>
             <div className="grid grid-cols-4 items-start gap-4">
@@ -84,10 +126,18 @@ export function UserForm({ open, onClose, editingUser, onSave, isLoading }: User
                   value={userEmail} 
                   onChange={(e) => setUserEmail(e.target.value)} 
                   required 
-                  aria-required="true" 
+                  aria-required="true"
+                  aria-invalid={!!emailError}
+                  aria-describedby={emailError ? 'email-error' : 'email-helper'}
                   placeholder="user@example.com" 
                 />
-                <p className="text-xs text-muted-foreground">Valid email address for account access</p>
+                <p id="email-helper" className="text-xs text-muted-foreground">Valid email address for account access</p>
+                {emailError && (
+                  <p id="email-error" className="text-xs text-destructive flex items-center gap-1" role="alert" aria-live="polite">
+                    <AlertCircle className="h-3 w-3" aria-hidden="true" />
+                    {emailError}
+                  </p>
+                )}
               </div>
             </div>
             <div className="grid grid-cols-4 items-start gap-4">
@@ -101,6 +151,7 @@ export function UserForm({ open, onClose, editingUser, onSave, isLoading }: User
                   onValueChange={(value: UserRole) => setUserRole(value)} 
                   required 
                   aria-required="true"
+                  aria-invalid={!!roleError}
                 >
                   <SelectTrigger className="col-span-3"><SelectValue placeholder="Select a role" /></SelectTrigger>
                   <SelectContent>
