@@ -6,7 +6,7 @@ import { AlertTriangle } from 'lucide-react';
 import { SlideUp } from '@/components/animations';
 import { useStudentDashboard } from '@/hooks/useStudent';
 import { useAuthStore } from '@/lib/authStore';
-import { getGradeColorClass, getGradeLetter } from '@/utils/grades';
+import { calculateAverageScore, getGradeColorClass, getGradeLetter } from '@/utils/grades';
 import { ResponsiveTable } from '@/components/ui/responsive-table';
 
 export function StudentGradesPage() {
@@ -27,9 +27,7 @@ export function StudentGradesPage() {
 
   const grades = dashboardData?.recentGrades || [];
 
-  const averageScore = grades.length > 0 
-    ? (grades.reduce((sum, g) => sum + g.score, 0) / grades.length).toFixed(1)
-    : '-';
+  const averageScore = grades.length > 0 ? calculateAverageScore(grades) : '-';
 
   const tableHeaders = [
     { key: 'no', label: 'No.' },
