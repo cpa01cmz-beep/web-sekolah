@@ -10,6 +10,7 @@ import { toast } from 'sonner';
 import { UserRole, SchoolUser } from '@shared/types';
 import { useUsers, useCreateUser, useUpdateUser, useDeleteUser } from '@/hooks/useAdmin';
 import { queryClient } from '@/lib/api-client';
+import { getAvatarUrl } from '@/constants/avatars';
 import { TableSkeleton } from '@/components/ui/loading-skeletons';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { UserForm } from '@/components/forms/UserForm';
@@ -54,11 +55,15 @@ export function AdminUserManagementPage() {
     },
     onError: (err) => toast.error(`Failed to delete user: ${err.message}`),
   });
-  const handleSaveUser = (data: Omit<SchoolUser, 'id'>) => {
+  const handleSaveUser = (data: { name: string; email: string; role: UserRole }) => {
+    const userData = {
+      ...data,
+      avatarUrl: getAvatarUrl(data.email),
+    };
     if (editingUser) {
-      updateUserMutation.mutate(data);
+      updateUserMutation.mutate(userData);
     } else {
-      createUserMutation.mutate(data);
+      createUserMutation.mutate(userData);
     }
   };
   const handleDeleteUser = (userId: string) => {

@@ -39,7 +39,7 @@ export class CircuitBreaker {
   async execute<T>(fn: () => Promise<T>): Promise<T> {
     if (this.state.isOpen) {
       const now = Date.now();
-      
+
       if (now < this.state.nextAttemptTime) {
         logger.warn('[CircuitBreaker] Circuit is open, rejecting request', {
           key: this.key,
@@ -51,8 +51,8 @@ export class CircuitBreaker {
 
       logger.info('[CircuitBreaker] Circuit half-open, attempting recovery', {
         key: this.key,
+        halfOpenCalls: this.halfOpenCalls,
       });
-      this.halfOpenCalls = 0;
     }
 
     try {
@@ -67,18 +67,24 @@ export class CircuitBreaker {
 
   private onSuccess(): void {
     if (this.state.isOpen) {
-      logger.info('[CircuitBreaker] Circuit closed after successful call', {
-        key: this.key,
-      });
-    }
+      this.halfOpenCalls++;
 
-    this.state = {
-      isOpen: false,
-      failureCount: 0,
-      lastFailureTime: 0,
-      nextAttemptTime: 0,
-    };
-    this.halfOpenCalls = 0;
+      if (this.halfOpenCalls >= this.config.halfOpenMaxCalls) {
+        logger.info('[CircuitBreaker] Circuit closed after successful calls', {
+          key: this.key,
+          halfOpenCalls: this.halfOpenCalls,
+        });
+        this.state = {
+          isOpen: false,
+          failureCount: 0,
+          lastFailureTime: 0,
+          nextAttemptTime: 0,
+        };
+        this.halfOpenCalls = 0;
+      }
+    } else {
+      this.state.failureCount = 0;
+    }
   }
 
   private onFailure(): void {
@@ -86,7 +92,15 @@ export class CircuitBreaker {
     this.state.failureCount++;
     this.state.lastFailureTime = now;
 
-    if (this.state.failureCount >= this.config.failureThreshold) {
+    if (this.state.isOpen) {
+      this.halfOpenCalls = 0;
+      this.state.nextAttemptTime = now + this.config.timeoutMs;
+
+      logger.warn('[CircuitBreaker] Half-open call failed, keeping circuit open', {
+        key: this.key,
+        failureCount: this.state.failureCount,
+      });
+    } else if (this.state.failureCount >= this.config.failureThreshold) {
       this.state.isOpen = true;
       this.state.nextAttemptTime = now + this.config.timeoutMs;
 

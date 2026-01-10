@@ -13,6 +13,7 @@ import {
   useSettings,
   useUpdateSettings
 } from '../useAdmin';
+import { resetCircuitBreaker } from '../../lib/api-client';
 
 describe('useAdmin Hooks', () => {
   let testQueryClient: QueryClient;
@@ -42,6 +43,7 @@ describe('useAdmin Hooks', () => {
 
   afterEach(() => {
     vi.restoreAllMocks();
+    resetCircuitBreaker();
   });
 
   describe('useAdminDashboard', () => {
