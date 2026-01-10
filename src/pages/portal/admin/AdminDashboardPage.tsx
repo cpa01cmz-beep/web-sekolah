@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, memo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { EmptyState } from '@/components/ui/empty-state';
@@ -10,6 +10,18 @@ import { useReducedMotion } from '@/hooks/use-reduced-motion';
 import { useAdminDashboard } from '@/hooks/useAdmin';
 import { THEME_COLORS } from '@/theme/colors';
 import { formatDate } from '@/utils/date';
+import type { AdminDashboardData } from '@shared/types';
+
+const AnnouncementItem = memo(({ ann }: { ann: AdminDashboardData['recentAnnouncements'][0] }) => (
+  <li className="flex items-start">
+    <Activity className="h-4 w-4 mt-1 mr-3 text-muted-foreground flex-shrink-0" />
+    <div>
+      <p className="text-sm font-medium">{ann.title}</p>
+      <p className="text-xs text-muted-foreground">{formatDate(ann.date)}</p>
+    </div>
+  </li>
+));
+AnnouncementItem.displayName = 'AnnouncementItem';
 
 interface ChartComponents {
   BarChart: React.ComponentType<any>;
@@ -147,19 +159,13 @@ export function AdminDashboardPage() {
             <CardHeader>
               <CardTitle>Recent Announcements</CardTitle>
             </CardHeader>
-            <CardContent>
-              <ul className="space-y-4">
-                {data.recentAnnouncements.map((ann) => (
-                  <li key={ann.id} className="flex items-start">
-                    <Activity className="h-4 w-4 mt-1 mr-3 text-muted-foreground flex-shrink-0" />
-                    <div>
-                      <p className="text-sm font-medium">{ann.title}</p>
-                      <p className="text-xs text-muted-foreground">{formatDate(ann.date)}</p>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            </CardContent>
+              <CardContent>
+                <ul className="space-y-4">
+                  {data.recentAnnouncements.map((ann) => (
+                    <AnnouncementItem key={ann.id} ann={ann} />
+                  ))}
+                </ul>
+              </CardContent>
           </Card>
         </SlideUp>
       </div>

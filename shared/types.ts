@@ -112,9 +112,13 @@ export interface StudentCardData {
 
 // --- Teacher Service Types ---
 export interface TeacherDashboardData {
-  classes: (SchoolClass & { studentCount: number })[];
-  recentSubmissions: Grade[];
-  upcomingClasses: ScheduleItem[];
+  teacherId: string;
+  name: string;
+  email: string;
+  totalClasses: number;
+  totalStudents: number;
+  recentGrades: Grade[];
+  recentAnnouncements: Announcement[];
 }
 
 export interface SubmitGradeData {
@@ -140,11 +144,18 @@ export interface ParentDashboardData {
 
 // --- Admin Service Types ---
 export interface AdminDashboardData {
+  totalUsers: number;
   totalStudents: number;
   totalTeachers: number;
+  totalParents: number;
   totalClasses: number;
   recentAnnouncements: Announcement[];
-  systemStatus: string;
+  userDistribution: {
+    students: number;
+    teachers: number;
+    parents: number;
+    admins: number;
+  };
 }
 
 export interface UserFilters {

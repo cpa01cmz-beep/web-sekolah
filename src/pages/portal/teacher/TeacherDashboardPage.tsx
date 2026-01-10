@@ -1,15 +1,33 @@
+import { memo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { EmptyState } from '@/components/ui/empty-state';
 import { DashboardSkeleton } from '@/components/ui/loading-skeletons';
 import { PageHeader } from '@/components/PageHeader';
-import { Clock, BookCopy, Megaphone, Users, AlertTriangle, Inbox } from 'lucide-react';
+import { BookCopy, Megaphone, Clock, AlertTriangle, Inbox } from 'lucide-react';
 import { SlideUp } from '@/components/animations';
 import { useTeacherDashboard } from '@/hooks/useTeacher';
 import { useAuthStore } from '@/lib/authStore';
 import { formatDate } from '@/utils/date';
+import type { TeacherDashboardData } from '@shared/types';
+
+const GradeItem = memo(({ grade }: { grade: TeacherDashboardData['recentGrades'][0] }) => (
+  <li className="text-sm">
+    <p className="font-medium">{grade.studentId}</p>
+    <p className="text-xs text-muted-foreground">
+      Score: {grade.score} - {grade.courseId}
+    </p>
+  </li>
+));
+GradeItem.displayName = 'GradeItem';
+
+const AnnouncementItem = memo(({ ann }: { ann: TeacherDashboardData['recentAnnouncements'][0] }) => (
+  <li className="text-sm">
+    <p className="font-medium truncate">{ann.title}</p>
+    <p className="text-xs text-muted-foreground">{formatDate(ann.date)}</p>
+  </li>
+));
+AnnouncementItem.displayName = 'AnnouncementItem';
 
 export function TeacherDashboardPage() {
   const user = useAuthStore((state) => state.user);
@@ -65,13 +83,8 @@ export function TeacherDashboardPage() {
             </CardHeader>
             <CardContent>
               <ul className="space-y-2">
-                {data.recentGrades.map((grade, index) => (
-                  <li key={index} className="text-sm">
-                    <p className="font-medium">{grade.studentId}</p>
-                    <p className="text-xs text-muted-foreground">
-                      Score: {grade.score} - {grade.courseId}
-                    </p>
-                  </li>
+                {data.recentGrades.map((grade) => (
+                  <GradeItem key={grade.id} grade={grade} />
                 ))}
               </ul>
             </CardContent>
@@ -85,11 +98,8 @@ export function TeacherDashboardPage() {
             </CardHeader>
             <CardContent>
               <ul className="space-y-2">
-                {data.recentAnnouncements.map((ann, index) => (
-                  <li key={index} className="text-sm">
-                    <p className="font-medium truncate">{ann.title}</p>
-                    <p className="text-xs text-muted-foreground">{formatDate(ann.date)}</p>
-                  </li>
+                {data.recentAnnouncements.map((ann) => (
+                  <AnnouncementItem key={ann.id} ann={ann} />
                 ))}
               </ul>
             </CardContent>
