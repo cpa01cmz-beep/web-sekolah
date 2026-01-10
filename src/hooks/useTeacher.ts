@@ -9,17 +9,13 @@ import type {
   CreateAnnouncementData
 } from '@shared/types';
 import { CachingTime } from '@/config/time';
+import { createQueryOptions } from '@/config/query-config';
 
 export function useTeacherDashboard(teacherId: string, options?: UseQueryOptions<TeacherDashboardData>) {
   return useTanstackQuery({
     queryKey: ['teachers', teacherId, 'dashboard'],
     queryFn: () => teacherService.getDashboard(teacherId),
-    enabled: !!teacherId,
-    staleTime: CachingTime.FIVE_MINUTES,
-    gcTime: CachingTime.TWENTY_FOUR_HOURS,
-    refetchOnWindowFocus: false,
-    refetchOnMount: false,
-    refetchOnReconnect: true,
+    ...createQueryOptions<TeacherDashboardData>({ enabled: !!teacherId, staleTime: CachingTime.FIVE_MINUTES }),
     ...options,
   });
 }
@@ -28,12 +24,7 @@ export function useTeacherClasses(teacherId: string, options?: UseQueryOptions<S
   return useTanstackQuery({
     queryKey: ['teachers', teacherId, 'classes'],
     queryFn: () => teacherService.getClasses(teacherId),
-    enabled: !!teacherId,
-    staleTime: CachingTime.ONE_HOUR,
-    gcTime: CachingTime.TWENTY_FOUR_HOURS,
-    refetchOnWindowFocus: false,
-    refetchOnMount: false,
-    refetchOnReconnect: true,
+    ...createQueryOptions<SchoolClass[]>({ enabled: !!teacherId, staleTime: CachingTime.ONE_HOUR }),
     ...options,
   });
 }
@@ -49,12 +40,7 @@ export function useTeacherAnnouncements(teacherId: string, options?: UseQueryOpt
   return useTanstackQuery({
     queryKey: ['teachers', teacherId, 'announcements'],
     queryFn: () => teacherService.getAnnouncements(teacherId),
-    enabled: !!teacherId,
-    staleTime: CachingTime.FIVE_MINUTES,
-    gcTime: CachingTime.TWENTY_FOUR_HOURS,
-    refetchOnWindowFocus: false,
-    refetchOnMount: false,
-    refetchOnReconnect: true,
+    ...createQueryOptions<Announcement[]>({ enabled: !!teacherId, staleTime: CachingTime.FIVE_MINUTES }),
     ...options,
   });
 }
@@ -76,12 +62,13 @@ export function useTeacherClassStudents(classId: string, options?: UseQueryOptio
   return useTanstackQuery({
     queryKey: ['classes', classId, 'students'],
     queryFn: () => teacherService.getClassStudentsWithGrades(classId),
-    enabled: !!classId,
-    staleTime: CachingTime.FIVE_MINUTES,
-    gcTime: CachingTime.TWENTY_FOUR_HOURS,
-    refetchOnWindowFocus: false,
-    refetchOnMount: false,
-    refetchOnReconnect: true,
+    ...createQueryOptions<Array<{
+      id: string;
+      name: string;
+      score: number | null;
+      feedback: string;
+      gradeId: string | null;
+    }>>({ enabled: !!classId, staleTime: CachingTime.FIVE_MINUTES }),
     ...options,
   });
 }

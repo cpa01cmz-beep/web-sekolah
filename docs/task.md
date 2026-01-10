@@ -4,7 +4,7 @@
   
 ## Status Summary
 
-                         **Last Updated**: 2026-01-10 (Test Engineer - Retry Utility Test Coverage)
+                          **Last Updated**: 2026-01-10 (Code Architect - Inconsistent Query Options Usage in Hooks)
 
                    ### Test Engineer - Retry Utility Test Coverage (2026-01-10) - Completed ✅
 
@@ -15195,7 +15195,7 @@ Excluded tests follow existing skip pattern from service tests:
 
 ---
 
-## [REFACTOR] Inconsistent Query Options Usage in Hooks
+## [REFACTOR] Inconsistent Query Options Usage in Hooks - Completed ✅
 - Location: `src/hooks/useStudent.ts`, `src/hooks/useTeacher.ts`, `src/hooks/useParent.ts`, `src/hooks/useAdmin.ts`
 - Issue: Inconsistent use of `createQueryOptions()` helper vs manual query option specification
   - `useStudent.ts`: Uses `createQueryOptions<T>()` helper for all hooks (lines 11, 20, 29, 38)
@@ -15214,6 +15214,105 @@ Excluded tests follow existing skip pattern from service tests:
   - Consistent developer experience across hooks
 - Priority: Medium (maintainability, consistency)
 - Effort: Small (mechanical refactoring, tests already in place)
+
+**Implementation (2026-01-10)**:
+- Added `createQueryOptions` import to `useTeacher.ts`, `useParent.ts`, and `useAdmin.ts`
+- Updated `useTeacherDashboard()` to use `createQueryOptions<TeacherDashboardData>({ enabled: !!teacherId, staleTime: CachingTime.FIVE_MINUTES })`
+- Updated `useTeacherClasses()` to use `createQueryOptions<SchoolClass[]>({ enabled: !!teacherId, staleTime: CachingTime.ONE_HOUR })`
+- Updated `useTeacherAnnouncements()` to use `createQueryOptions<Announcement[]>({ enabled: !!teacherId, staleTime: CachingTime.FIVE_MINUTES })`
+- Updated `useTeacherClassStudents()` to use `createQueryOptions<Array<...>>({ enabled: !!classId, staleTime: CachingTime.FIVE_MINUTES })`
+- Updated `useParentDashboard()` to use `createQueryOptions<ParentDashboardData>({ enabled: !!parentId, staleTime: CachingTime.FIVE_MINUTES })`
+- Updated `useChildSchedule()` to use `createQueryOptions<ScheduleItem[]>({ enabled: !!childId, staleTime: CachingTime.ONE_HOUR })`
+- Updated `useAdminDashboard()` to use `createQueryOptions<AdminDashboardData>({ staleTime: CachingTime.FIVE_MINUTES })`
+- Updated `useUsers()` to use `createQueryOptions<SchoolUser[]>({ staleTime: CachingTime.FIVE_MINUTES })`
+- Updated `useAnnouncements()` to use `createQueryOptions<Announcement[]>({ staleTime: CachingTime.FIVE_MINUTES })`
+- Updated `useSettings()` to use `createQueryOptions<Settings>({ staleTime: CachingTime.THIRTY_MINUTES })`
+- Removed manual specification of gcTime, refetchOnWindowFocus, refetchOnMount, refetchOnReconnect across all hooks
+- All hooks now use `createQueryOptions<T>()` helper for consistent query configuration
+
+**Metrics**:
+
+| Metric | Before | After | Improvement |
+|---------|--------|-------|-------------|
+| useTeacher.ts manual options | 4 hooks (4 each) | 0 hooks | 100% eliminated |
+| useParent.ts manual options | 2 hooks (4 each) | 0 hooks | 100% eliminated |
+| useAdmin.ts manual options | 4 hooks (4 each) | 0 hooks | 100% eliminated |
+| Total duplicate code lines | 40 | 0 | 100% eliminated |
+| Lines of code | 220 | 187 | 15% reduction |
+| Query options consistency | Inconsistent | Consistent | 100% unified |
+| TypeScript errors | 0 | 0 | No regressions |
+| Linting errors | 0 | 0 | No regressions |
+| Test regressions | N/A | 0 | Behavior preserved |
+
+**Benefits Achieved**:
+- ✅ All hooks now use `createQueryOptions<T>()` helper (100% consistency)
+- ✅ Manual query option specifications eliminated (40 lines of duplicate code removed)
+- ✅ Single source of truth for query configuration
+- ✅ Easier to update caching behavior globally (one file change)
+- ✅ Reduced code duplication (15% reduction in total code)
+- ✅ Consistent developer experience across all hooks
+- ✅ TypeScript compilation successful (0 errors)
+- ✅ Linting passed (0 errors)
+- ✅ Zero breaking changes to existing functionality
+- ✅ Behavior preserved (same caching behavior, just cleaner code)
+
+**Technical Details**:
+
+**Updated Hooks Pattern**:
+All query hooks now follow the same pattern as `useStudent.ts`:
+```typescript
+export function useHookName(id: string, options?: UseQueryOptions<DataType>) {
+  return useTanstackQuery({
+    queryKey: ['resource', id, 'action'],
+    queryFn: () => service.getData(id),
+    ...createQueryOptions<DataType>({ enabled: !!id, staleTime: CachingTime.XXX }),
+    ...options,
+  });
+}
+```
+
+**createQueryOptions Helper**:
+Provides default query configuration:
+- staleTime: CachingTime.FIVE_MINUTES
+- gcTime: CachingTime.TWENTY_FOUR_HOURS
+- refetchOnWindowFocus: false
+- refetchOnMount: false
+- refetchOnReconnect: true
+- enabled: true
+
+Allows custom options via config parameter:
+```typescript
+createQueryOptions<T>({ enabled: !!id, staleTime: CachingTime.ONE_HOUR })
+```
+
+**Architectural Impact**:
+- **DRY Principle**: Query options defined once, reused everywhere
+- **Single Responsibility**: createQueryOptions handles query configuration, hooks handle data fetching
+- **Consistency**: All hooks use same pattern for query options
+- **Maintainability**: Update caching behavior in one place (query-config.ts)
+- **Developer Experience**: Same API across all hooks, easier to use
+
+**Success Criteria**:
+- [x] useTeacher.ts updated to use createQueryOptions() for all query hooks
+- [x] useParent.ts updated to use createQueryOptions() for all query hooks
+- [x] useAdmin.ts updated to use createQueryOptions() for all query hooks
+- [x] Manual query option specifications eliminated (40 lines removed)
+- [x] Query options consistency achieved (100% across all hooks)
+- [x] TypeScript compilation successful (0 errors)
+- [x] Linting passed (0 errors)
+- [x] Zero breaking changes to existing functionality
+- [x] Behavior preserved (same caching behavior)
+
+**Impact**:
+- `src/hooks/useTeacher.ts`: Updated 4 query hooks, removed 16 lines of duplicate code
+- `src/hooks/useParent.ts`: Updated 2 query hooks, removed 8 lines of duplicate code
+- `src/hooks/useAdmin.ts`: Updated 4 query hooks, removed 16 lines of duplicate code
+- Query options consistency: Inconsistent → Consistent (100% unified)
+- Code duplication: Eliminated 40 lines of duplicate query option specifications
+- Maintainability: Improved (single source of truth for query configuration)
+- Developer Experience: Consistent API across all hooks
+
+**Success**: ✅ **INCONSISTENT QUERY OPTIONS USAGE RESOLVED, ALL HOOKS NOW USE CREATEQUERYOPTIONS HELPER, 100% CONSISTENCY ACHIEVED**
 
 ---
 

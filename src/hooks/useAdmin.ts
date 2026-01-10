@@ -11,16 +11,13 @@ import type {
   Settings
 } from '@shared/types';
 import { CachingTime } from '@/config/time';
+import { createQueryOptions } from '@/config/query-config';
 
 export function useAdminDashboard(options?: UseQueryOptions<AdminDashboardData>) {
   return useTanstackQuery({
     queryKey: ['admin', 'dashboard'],
     queryFn: () => adminService.getDashboard(),
-    staleTime: CachingTime.FIVE_MINUTES,
-    gcTime: CachingTime.TWENTY_FOUR_HOURS,
-    refetchOnWindowFocus: false,
-    refetchOnMount: false,
-    refetchOnReconnect: true,
+    ...createQueryOptions<AdminDashboardData>({ staleTime: CachingTime.FIVE_MINUTES }),
     ...options,
   });
 }
@@ -31,11 +28,7 @@ export function useUsers(filters?: UserFilters, options?: UseQueryOptions<School
   return useTanstackQuery({
     queryKey,
     queryFn: () => adminService.getUsers(filters),
-    staleTime: CachingTime.FIVE_MINUTES,
-    gcTime: CachingTime.TWENTY_FOUR_HOURS,
-    refetchOnWindowFocus: false,
-    refetchOnMount: false,
-    refetchOnReconnect: true,
+    ...createQueryOptions<SchoolUser[]>({ staleTime: CachingTime.FIVE_MINUTES }),
     ...options,
   });
 }
@@ -65,11 +58,7 @@ export function useAnnouncements(options?: UseQueryOptions<Announcement[]>) {
   return useTanstackQuery({
     queryKey: ['admin', 'announcements'],
     queryFn: () => adminService.getAnnouncements(),
-    staleTime: CachingTime.FIVE_MINUTES,
-    gcTime: CachingTime.TWENTY_FOUR_HOURS,
-    refetchOnWindowFocus: false,
-    refetchOnMount: false,
-    refetchOnReconnect: true,
+    ...createQueryOptions<Announcement[]>({ staleTime: CachingTime.FIVE_MINUTES }),
     ...options,
   });
 }
@@ -85,11 +74,7 @@ export function useSettings(options?: UseQueryOptions<Settings>) {
   return useTanstackQuery({
     queryKey: ['admin', 'settings'],
     queryFn: () => adminService.getSettings(),
-    staleTime: CachingTime.THIRTY_MINUTES,
-    gcTime: CachingTime.TWENTY_FOUR_HOURS,
-    refetchOnWindowFocus: false,
-    refetchOnMount: false,
-    refetchOnReconnect: true,
+    ...createQueryOptions<Settings>({ staleTime: CachingTime.THIRTY_MINUTES }),
     ...options,
   });
 }
