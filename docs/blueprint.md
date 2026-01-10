@@ -115,9 +115,11 @@ This clears and rebuilds all secondary indexes from existing data.
  - ~~CommonDataService.getRecentAnnouncementsByRole() query bug: Loaded globally recent announcements then filtered by role, could return 0 results if most recent are all for different roles~~ ✅ **COMPLETED** (2026-01-09) - Now uses getByTargetRole() first then sorts by date and limits, always returns N most recent for role
  - ~~Large page components with inline forms: AdminUserManagementPage (228 lines) had form logic mixed with data concerns~~ ✅ **COMPLETED** (2026-01-08) - Extracted UserForm component (28% reduction, clean separation of concerns)
  - ~~Announcement creation lacked referential integrity validation: Routes called AnnouncementEntity.create() directly without validating author existence and role~~ ✅ **COMPLETED** (2026-01-09) - Created AnnouncementService with ReferentialIntegrity validation, consistent with GradeService pattern, 16 tests added
-- ~~Repetitive card patterns in pages: HomePage features and GalleryPage categories had inline card rendering with duplicated code~~ ✅ **COMPLETED** (2026-01-08) - Extracted FeatureCard and InfoCard components (40-50% code reduction, improved accessibility with aria-hidden attributes)
+ - ~~Repetitive card patterns in pages: HomePage features and GalleryPage categories had inline card rendering with duplicated code~~ ✅ **COMPLETED** (2026-01-08) - Extracted FeatureCard and InfoCard components (40-50% code reduction, improved accessibility with aria-hidden attributes)
  - ~~CircuitBreaker implementation mixed in api-client.ts: API client (426 lines) had CircuitBreaker class implementation mixed with API communication logic~~ ✅ **COMPLETED** (2026-01-09) - Extracted CircuitBreaker to dedicated resilience module (src/lib/resilience/CircuitBreaker.ts), improved Separation of Concerns and Single Responsibility Principle
  - ~~Monolithic entities.ts (405 lines) with 10+ entity classes in single file~~ ✅ **COMPLETED** (2026-01-10) - Extracted entities into 11 focused modules in worker/entities/ directory (UserEntity, ClassEntity, CourseEntity, GradeEntity, AnnouncementEntity, ScheduleEntity, WebhookConfigEntity, WebhookEventEntity, WebhookDeliveryEntity, DeadLetterQueueWebhookEntity), created barrel export (index.ts) and seed-data-init.ts, reduced entities.ts to 13 lines (97% reduction), applied Single Responsibility Principle and Modularity
+ - ~~Monolithic webhook-routes.ts (348 lines) with all webhook routes mixed in single file~~ ✅ **COMPLETED** (2026-01-10) - Extracted routes into 4 focused modules in worker/routes/webhooks/ directory (webhook-config-routes, webhook-delivery-routes, webhook-test-routes, webhook-admin-routes), created barrel export (index.ts), reduced webhook-routes.ts to 12 lines (97% reduction), applied Single Responsibility Principle and Separation of Concerns
+
 
     ### Recent Data Optimizations (2026-01-07)
 
@@ -791,6 +793,134 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
 **Clean Architecture**: Dependencies flow inward (routes → services → entities)
 **Single Responsibility**: Each module handles one concern (role's routes)
 **Open/Closed**: New routes for a role can be added without modifying others
+
+---
+
+## Webhook Routes Module Architecture (2026-01-10)
+
+### Webhook Route Organization
+
+The webhook routes are organized by functional responsibility into focused, atomic modules following **Separation of Concerns** and **Single Responsibility** principles:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│           webhook-routes.ts (Registry)                     │
+│  - Imports and registers all webhook route modules          │
+│  - 12 lines (97% reduction from original 348 lines)   │
+└─────────────────────────────────────────────────────────────┘
+                            │
+         ┌──────────────────┼──────────────────┬──────────────┐
+         │                  │                  │              │
+         ▼                  ▼                  ▼              ▼
+ ┌──────────────────┐ ┌──────────────┐ ┌──────────────┐ ┌──────────────────┐
+ │webhook-config-  │ │webhook-      │ │webhook-      │ │webhook-admin-    │
+ │routes           │ │delivery-     │ │test-routes   │ │routes            │
+ │(5 routes)       │ │routes        │ │(1 route)     │ │(4 routes)        │
+ │ 111 lines       │ │(3 routes)    │ │ 102 lines    │ │ 79 lines         │
+ └──────────────────┘ │ 54 lines     │ └──────────────┘ └──────────────────┘
+                    └──────────────┘
+```
+
+### Webhook Route Modules
+
+| Module | Routes | Lines | Responsibility |
+|--------|---------|---------|----------------|
+| **webhook-config-routes.ts** | 5 | GET, POST, PUT, DELETE /api/webhooks/* - Webhook configuration CRUD |
+| **webhook-delivery-routes.ts** | 3 | GET /api/webhooks/:id/deliveries, /api/webhooks/events/* - Webhook delivery/event queries |
+| **webhook-test-routes.ts** | 1 | POST /api/webhooks/test - Webhook testing with retry logic and circuit breaker |
+| **webhook-admin-routes.ts** | 4 | POST /api/admin/webhooks/process, GET/DELETE /api/admin/webhooks/dead-letter-queue/* - Admin operations |
+| **webhook-routes.ts** | Registry | 12 lines - Imports and registers all webhook route modules |
+
+### Benefits Achieved
+
+**Modularity**:
+- ✅ Each webhook route module is atomic and replaceable
+- ✅ Routes organized by functional responsibility (config, delivery, test, admin)
+- ✅ New webhook routes can be added to appropriate module without modifying others
+
+**Separation of Concerns**:
+- ✅ Webhook configuration management separated from delivery tracking
+- ✅ Webhook testing logic isolated with retry/circuit breaker concerns
+- ✅ Admin operations (DLQ, processing) separated from public endpoints
+- ✅ Each module has single responsibility
+
+**Clean Architecture**:
+- ✅ Dependencies flow correctly (webhook-routes → webhook route modules → services/entities)
+- ✅ Routes focus on HTTP handling, services handle business logic
+- ✅ Clear separation between presentation (routes) and business logic (services)
+
+**Maintainability**:
+- ✅ Reduced cognitive load: Each file is focused and easier to understand
+- ✅ Easier to locate webhook routes: All config routes in one file, test logic in another
+- ✅ Reduced file size: webhook-routes.ts reduced from 348 to 12 lines (97% reduction)
+
+**Metrics**:
+
+| Metric | Before | After | Improvement |
+|---------|---------|--------|-------------|
+| webhook-routes.ts lines | 348 | 12 | 97% reduction |
+| Webhook route modules created | 0 | 4 | New modular structure |
+| Largest route module | 348 lines | 111 lines (webhook-config) | 68% reduction |
+| Separation of Concerns | Mixed | Clean | Complete separation |
+| Single Responsibility | Multiple concerns | Focused modules | All principles met |
+| Typecheck errors | 0 | 0 | No regressions |
+
+### Implementation Details
+
+**Route Module Structure**:
+- Each module exports a function that registers routes on Hono app
+- Modules import necessary dependencies (services, entities, utilities)
+- Type-safe Context parameter for better IDE support
+- Consistent error handling and logging across all modules
+
+**Registration Pattern**:
+```typescript
+// webhook-routes.ts (registry)
+import { webhookConfigRoutes, webhookDeliveryRoutes, webhookTestRoutes, webhookAdminRoutes } from './routes/webhooks';
+
+export const webhookRoutes = (app: Hono<{ Bindings: Env }>) => {
+  webhookConfigRoutes(app);      // Register webhook configuration routes
+  webhookDeliveryRoutes(app);     // Register webhook delivery/event routes
+  webhookTestRoutes(app);        // Register webhook testing route
+  webhookAdminRoutes(app);       // Register admin webhook operations
+};
+```
+
+**Module Organization**:
+
+1. **webhook-config-routes.ts** (111 lines):
+   - GET /api/webhooks - List all webhook configurations
+   - GET /api/webhooks/:id - Get specific webhook configuration
+   - POST /api/webhooks - Create new webhook configuration
+   - PUT /api/webhooks/:id - Update webhook configuration
+   - DELETE /api/webhooks/:id - Soft delete webhook configuration
+
+2. **webhook-delivery-routes.ts** (54 lines):
+   - GET /api/webhooks/:id/deliveries - List webhook deliveries for a config
+   - GET /api/webhooks/events - List all webhook events
+   - GET /api/webhooks/events/:id - Get specific webhook event with deliveries
+
+3. **webhook-test-routes.ts** (102 lines):
+   - POST /api/webhooks/test - Test webhook delivery with:
+     - HMAC signature generation (SHA-256)
+     - Circuit breaker integration
+     - Retry logic (3 retries with exponential backoff)
+     - 30-second timeout
+     - Detailed logging for each attempt
+
+4. **webhook-admin-routes.ts** (79 lines):
+   - POST /api/admin/webhooks/process - Process pending webhook deliveries
+   - GET /api/admin/webhooks/dead-letter-queue - List failed webhooks in DLQ
+   - GET /api/admin/webhooks/dead-letter-queue/:id - Get specific DLQ entry
+   - DELETE /api/admin/webhooks/dead-letter-queue/:id - Delete DLQ entry
+
+### Architectural Impact
+
+**Modularity**: Each webhook route module is atomic and replaceable
+**Separation of Concerns**: Routes organized by functional responsibility
+**Clean Architecture**: Dependencies flow inward (routes → services → entities)
+**Single Responsibility**: Each module handles one concern (config, delivery, test, admin)
+**Open/Closed**: New webhook routes can be added without modifying existing modules
 
 ---
 
