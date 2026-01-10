@@ -1,21 +1,13 @@
 import { Hono } from "hono";
 import type { Env } from '../core-utils';
 import { ok, notFound } from '../core-utils';
-import { authenticate, authorize } from '../middleware/auth';
 import { ParentDashboardService } from '../domain';
-import { validateUserAccess } from './route-utils';
-import { getCurrentUserId } from '../type-guards';
+import { withUserValidation } from './route-utils';
 import type { Context } from 'hono';
 
 export function parentRoutes(app: Hono<{ Bindings: Env }>) {
-  app.get('/api/parents/:id/dashboard', authenticate(), authorize('parent'), async (c: Context) => {
-    const userId = getCurrentUserId(c);
+  app.get('/api/parents/:id/dashboard', ...withUserValidation('parent', 'dashboard'), async (c: Context) => {
     const requestedParentId = c.req.param('id');
-
-    if (!validateUserAccess(c, userId, requestedParentId, 'parent', 'dashboard')) {
-      return;
-    }
-
     try {
       const dashboardData = await ParentDashboardService.getDashboardData(c.env, requestedParentId);
       return ok(c, dashboardData);
