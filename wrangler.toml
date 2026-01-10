@@ -17,3 +17,31 @@ class_name = "GlobalDurableObject"
 [[migrations]]
 tag = "v1"
 new_sqlite_classes = ["GlobalDurableObject"]
+
+# Staging Environment
+[env.staging]
+name = "website-sekolah-staging"
+vars = { ENVIRONMENT = "staging" }
+routes = [{ pattern = "staging.your-domain.workers.dev/*", zone_name = "your-domain.workers.dev" }]
+
+[[env.staging.durable_objects.bindings]]
+name = "GlobalDurableObject"
+class_name = "GlobalDurableObject"
+
+[[env.staging.migrations]]
+tag = "v1"
+new_sqlite_classes = ["GlobalDurableObject"]
+
+# Production Environment
+[env.production]
+name = "website-sekolah-production"
+vars = { ENVIRONMENT = "production" }
+routes = [{ pattern = "your-domain.workers.dev/*", zone_name = "your-domain.workers.dev" }]
+
+[[env.production.durable_objects.bindings]]
+name = "GlobalDurableObject"
+class_name = "GlobalDurableObject"
+
+[[env.production.migrations]]
+tag = "v1"
+new_sqlite_classes = ["GlobalDurableObject"]
