@@ -15805,8 +15805,9 @@ createQueryOptions<T>({ enabled: !!id, staleTime: CachingTime.ONE_HOUR })
   - Smaller, focused files (~30-40 lines per module vs 123 lines monolithic)
   - Better testability (can test route modules in isolation)
   - Easier to add new routes (add to specific module instead of large file)
-- Priority: Low (code organization, maintainability)
-- Effort: Medium (requires creating new directory structure and moving route definitions)
+ - Priority: Low (code organization, maintainability)
+ - Effort: Medium (requires creating new directory structure and moving route definitions)
+ - Note: Dead route files removed (2026-01-10) - `src/routes/` directory deleted (files had lint errors and were not integrated/used anywhere)
 
 ---
 
