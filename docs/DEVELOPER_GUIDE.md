@@ -399,6 +399,8 @@ export async function getDashboard(env: Env, studentId: string): Promise<Student
 
 ## Testing Guidelines
 
+**📖 See Also**: [Testing Guide](./TESTING_GUIDE.md) - Comprehensive testing patterns, utilities, and best practices
+
 ### Frontend Tests
 
 **Test File Location:** Same as component file, with `.test.tsx` suffix
@@ -582,6 +584,7 @@ curl http://localhost:3000/api/health
 ### Documentation
 
 - [API Blueprint](./blueprint.md) - Complete API reference
+- [Testing Guide](./TESTING_GUIDE.md) - Comprehensive testing patterns and strategies
 - [README](../README.md) - Project overview
 - [Quick Start](./QUICK_START.md) - User guides
 
