@@ -4,11 +4,16 @@ import { withRetry } from '../Retry';
 describe('Retry Utility', () => {
   beforeEach(() => {
     vi.useFakeTimers();
+    process.on('unhandledRejection', () => {});
+  });
+  beforeEach(() => {
+    vi.useFakeTimers();
   });
 
   afterEach(() => {
     vi.restoreAllMocks();
     vi.useRealTimers();
+    process.removeAllListeners('unhandledRejection');
   });
 
   describe('Happy Path - Successful Execution', () => {

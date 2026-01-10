@@ -1,6 +1,6 @@
 import type { Context, Next } from 'hono';
 import { logger } from '../logger';
-import { forbidden } from '../core-utils';
+import { forbidden, serverError } from '../core-utils';
 import { authenticate, authorize } from '../middleware/auth';
 import { getCurrentUserId } from '../type-guards';
 
@@ -30,12 +30,25 @@ export function withUserValidation(role: 'student' | 'teacher' | 'parent', resou
     async (c: Context, next: Next) => {
       const userId = getCurrentUserId(c);
       const requestedId = c.req.param('id');
-      
+
       if (!validateUserAccess(c, userId, requestedId, role, resourceName)) {
         return;
       }
-      
+
       await next();
     }
   ] as const;
+}
+
+export function withErrorHandler(operationName: string) {
+  return <T extends Context>(handler: (c: T) => Promise<Response>) => {
+    return async (c: T): Promise<Response> => {
+      try {
+        return await handler(c);
+      } catch (error) {
+        logger.error(`Failed to ${operationName}`, error);
+        return serverError(c, `Failed to ${operationName}`);
+      }
+    };
+  };
 }

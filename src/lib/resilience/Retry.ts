@@ -71,7 +71,7 @@ export async function withRetry<T>(
       }
 
       const delay = calculateDelay(attempt, baseDelay, jitterMs);
-      await sleep(delay);
+      await sleep(delay).catch(() => {});
     }
   }
 
