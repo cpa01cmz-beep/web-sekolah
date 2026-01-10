@@ -1,5 +1,6 @@
 import { LucideIcon } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
+import { memo } from 'react';
 
 interface InfoCardProps {
   icon?: LucideIcon;
@@ -10,7 +11,7 @@ interface InfoCardProps {
   className?: string;
 }
 
-export function InfoCard({ icon: Icon, iconElement, title, description, iconClassName, className }: InfoCardProps) {
+export const InfoCard = memo(function InfoCard({ icon: Icon, iconElement, title, description, iconClassName, className }: InfoCardProps) {
   return (
     <Card className={`text-center hover:shadow-lg transition-shadow ${className}`}>
       <CardContent className="p-6">
@@ -31,4 +32,5 @@ export function InfoCard({ icon: Icon, iconElement, title, description, iconClas
       </CardContent>
     </Card>
   );
-}
+});
+InfoCard.displayName = 'InfoCard';
