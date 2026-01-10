@@ -80,7 +80,7 @@ jobs:
             
             This issue was automatically created by the monitoring workflow."
           env:
-            GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            GH_TOKEN: ${{ github.token }}
 
   check-code-quality:
     name: Check Code Quality
@@ -124,7 +124,7 @@ jobs:
       - name: Alert on Code Quality Issues
         if: steps.console_logs.outputs.console_log_count > 10 || steps.untyped.outputs.any_count > 20
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ github.token }}
         run: |
           gh issue create \
             --title "📊 Code Quality Alert - $(date +%Y-%m-%d)" \
@@ -193,7 +193,7 @@ jobs:
             
             This issue was automatically created by the monitoring workflow."
           env:
-            GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            GH_TOKEN: ${{ github.token }}
 
       - name: Alert on Outdated Dependencies
         if: steps.outdated.outputs.outdated_count > '5'
@@ -212,7 +212,7 @@ jobs:
             
             This issue was automatically created by the monitoring workflow."
           env:
-            GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            GH_TOKEN: ${{ github.token }}
 
   summarize-findings:
     name: Summarize Monitoring Findings

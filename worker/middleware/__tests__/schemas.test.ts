@@ -344,10 +344,31 @@ describe('Validation Schemas', () => {
       const data = {
         id: '770e8400-e29b-41d4-a716-446655440002',
         score: 98,
+        feedback: 'Great work!',
       };
 
       const result = updateGradeSchema.safeParse(data);
       expect(result.success).toBe(true);
+    });
+
+    it('should reject grade update with only score', () => {
+      const data = {
+        id: '770e8400-e29b-41d4-a716-446655440002',
+        score: 98,
+      };
+
+      const result = updateGradeSchema.safeParse(data);
+      expect(result.success).toBe(false);
+    });
+
+    it('should reject grade update with only feedback', () => {
+      const data = {
+        id: '770e8400-e29b-41d4-a716-446655440002',
+        feedback: 'Great work!',
+      };
+
+      const result = updateGradeSchema.safeParse(data);
+      expect(result.success).toBe(false);
     });
   });
 
