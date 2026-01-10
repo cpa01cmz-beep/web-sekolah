@@ -123,23 +123,23 @@ jobs:
 
       - name: Alert on Code Quality Issues
         if: steps.console_logs.outputs.console_log_count > 10 || steps.untyped.outputs.any_count > 20
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           gh issue create \
             --title "📊 Code Quality Alert - $(date +%Y-%m-%d)" \
             --label "refactor" \
             --label "P3" \
             --body "Code quality check detected issues:
-            
+
             - Console log statements: ${{ steps.console_logs.outputs.console_log_count }}
             - 'any' type usages: ${{ steps.untyped.outputs.any_count }}
-            
+
             Recommendations:
             - Consider removing or replacing console.log statements with proper logging
             - Replace 'any' types with specific types for better type safety
-            
+
             This issue was automatically created by the monitoring workflow."
-          env:
-            GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   check-dependencies:
     name: Check Dependencies
