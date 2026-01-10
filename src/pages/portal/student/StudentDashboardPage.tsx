@@ -23,14 +23,18 @@ const ScheduleItem = memo(({ item }: { item: StudentDashboardData['schedule'][0]
 ));
 ScheduleItem.displayName = 'ScheduleItem';
 
-const GradeItem = memo(({ grade }: { grade: StudentDashboardData['recentGrades'][0] }) => (
-  <li className="flex items-center justify-between">
-    <p className="text-sm font-medium">{grade.courseName}</p>
-    <Badge className="bg-green-500 text-white">
-      {grade.score}
-    </Badge>
-  </li>
-));
+const GradeItem = memo(({ grade }: { grade: StudentDashboardData['recentGrades'][0] }) => {
+  const isPassing = grade.score >= 70;
+  return (
+    <li className="flex items-center justify-between">
+      <p className="text-sm font-medium">{grade.courseName}</p>
+      <Badge className={isPassing ? 'bg-green-500 text-white' : 'bg-red-500 text-white'}>
+        <span className="sr-only">{isPassing ? 'Passing grade: ' : 'Failing grade: '}</span>
+        {grade.score}
+      </Badge>
+    </li>
+  );
+});
 GradeItem.displayName = 'GradeItem';
 
 const AnnouncementItem = memo(({ ann }: { ann: StudentDashboardData['announcements'][0] }) => (

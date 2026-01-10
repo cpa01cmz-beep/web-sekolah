@@ -2566,8 +2566,51 @@ X-Content-Type-Options: nosniff
 X-Frame-Options: DENY
 X-XSS-Protection: 1; mode=block
 Strict-Transport-Security: max-age=31536000; includeSubDomains
-Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'
+Content-Security-Policy: default-src 'self'; script-src 'self' 'sha256-1LjDIY7ayXpv8ODYzP8xZXqNvuMhUBdo39lNMQ1oGHI=' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self'; frame-src 'self'; frame-ancestors 'none'; object-src 'none'; worker-src 'self'; base-uri 'self'; form-action 'self'; report-uri /api/csp-report;
 ```
+
+### CSP Violation Monitoring (2026-01-10)
+
+**Implementation**: Added `/api/csp-report` endpoint to receive and log CSP violation reports
+
+**Features**:
+- POST endpoint accepting `application/csp-report` or `application/json` content types
+- Logs violations at WARN level via pinoLogger for security monitoring
+- Returns 204 No Content for all requests (no information leakage)
+- Graceful error handling (malformed reports don't reveal processing status)
+
+**CSP Report Format**:
+Browsers send CSP violation reports with the following structure:
+```typescript
+{
+  'csp-report': {
+    'document-uri': 'https://example.com/page',
+    'referrer': 'https://example.com/referrer',
+    'violated-directive': 'script-src',
+    'effective-directive': 'script-src',
+    'original-policy': 'default-src 'self'; script-src...',
+    'disposition': 'report',
+    'blocked-uri': 'https://evil.com/script.js',
+    'line-number': 10,
+    'column-number': 5,
+    'source-file': 'https://example.com/page',
+    'status-code': 200,
+    'script-sample': '',
+  }
+}
+```
+
+**Security Headers Updated**:
+- **Script Source**: Replaced 'unsafe-inline' with SHA-256 hash for known inline script
+- **Report URI**: Changed from `/csp-report` to `/api/csp-report` for consistency
+- **Additional Directives**: Added object-src none, worker-src self, frame-src self, base-uri self, form-action self
+- **Monitoring**: Violations logged to pinoLogger for real-time security monitoring
+
+**Test Coverage**:
+- Valid CSP report logging
+- Malformed JSON handling
+- Empty violation handling
+- 204 response verification
 
 ## CORS Configuration
 
@@ -2846,6 +2889,71 @@ All error responses include:
 - `code`: Standardized error code (from `ErrorCode` enum)
 - `requestId`: UUID for request tracing
 
+### Error Handling Pattern: withErrorHandler Wrapper (2026-01-10)
+
+All route handlers MUST use the `withErrorHandler` wrapper for consistent error handling:
+
+```typescript
+import { withErrorHandler } from './routes/route-utils';
+import type { Context } from 'hono';
+
+export function exampleRoutes(app: Hono<{ Bindings: Env }>) {
+  // Good pattern: Use withErrorHandler wrapper
+  app.get('/api/example', withErrorHandler('retrieve example data')(async (c: Context) => {
+    const data = await SomeEntity.get(c.env);
+    return ok(c, data);
+  }));
+
+  // Bad pattern: Manual try-catch with serverError
+  // app.get('/api/example', async (c) => {
+  //   try {
+  //     const data = await SomeEntity.get(c.env);
+  //     return ok(c, data);
+  //   } catch (error) {
+  //     logger.error('Failed to retrieve example data', error);
+  //     return serverError(c, 'Failed to retrieve example data');
+  //   }
+  // });
+}
+```
+
+**Benefits of withErrorHandler Pattern:**
+- **Consistency**: All routes handle errors identically
+- **DRY**: Eliminates duplicate try-catch boilerplate
+- **Maintainability**: Error handling centralized in one location
+- **Type Safety**: Properly typed Context and return values
+- **Auto Logging**: Automatically logs errors with operation name
+- **Standardized Responses**: All errors use serverError with consistent message format
+
+**Implementation:**
+The `withErrorHandler` wrapper is defined in `worker/routes/route-utils.ts`:
+
+```typescript
+export function withErrorHandler(operationName: string) {
+  return <T extends Context>(handler: (c: T) => Promise<Response>) => {
+    return async (c: T): Promise<Response> => {
+      try {
+        return await handler(c);
+      } catch (error) {
+        logger.error(`Failed to ${operationName}`, error);
+        return serverError(c, `Failed to ${operationName}`);
+      }
+    };
+  };
+}
+```
+
+**Standardization Progress (2026-01-10):**
+- ✅ admin-monitoring-routes.ts (7 routes standardized)
+- ✅ webhook-admin-routes.ts (4 routes standardized)
+- ✅ webhook-test-routes.ts (1 route standardized)
+- ✅ auth-routes.ts (1 route standardized)
+- ✅ docs-routes.ts (2 routes standardized)
+- ✅ webhook-config-routes.ts (5 routes already using pattern)
+- ✅ webhook-delivery-routes.ts (3 routes already using pattern)
+
+**Note**: When adding new routes, always use `withErrorHandler('operation name')(async (c: Context) => { ... })` pattern for consistency.
+
 ### Using apiClient (Frontend)
 
 ```typescript
@@ -3044,9 +3152,10 @@ All requests include `X-Request-ID` header for tracing:
 8. **Validate inputs** - Use Zod schemas for request/response validation
 9. **Use centralized logger** - Import from `@/lib/logger` (frontend) or `../logger` (worker) for consistent logging
 10. **Use standardized error helpers** - Always use proper helper functions (unauthorized, forbidden, etc.) instead of manual JSON responses
-11. **Verify webhook signatures** - Always verify `X-Webhook-Signature` header for incoming webhooks to prevent spoofing
-12. **Use retry logic for webhooks** - Webhook system automatically retries with exponential backoff, no need to implement retry logic
-13. **Process webhook deliveries regularly** - Use scheduled jobs to call `POST /api/admin/webhooks/process` for timely delivery
+11. **Use withErrorHandler wrapper** - Always wrap route handlers with `withErrorHandler('operation name')` for consistent error handling (worker/routes only)
+12. **Verify webhook signatures** - Always verify `X-Webhook-Signature` header for incoming webhooks to prevent spoofing
+13. **Use retry logic for webhooks** - Webhook system automatically retries with exponential backoff, no need to implement retry logic
+14. **Process webhook deliveries regularly** - Use scheduled jobs to call `POST /api/admin/webhooks/process` for timely delivery
 
 ---
 
