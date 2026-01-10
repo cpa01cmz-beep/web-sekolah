@@ -54,7 +54,7 @@ describe('useAdmin Hooks', () => {
         ok: true,
         status: 200,
         headers: { get: vi.fn() },
-        json: vi.fn().mockResolvedValueOnce(mockData)
+        json: vi.fn().mockResolvedValueOnce({ success: true, data: mockData })
       });
 
       const { result } = renderHook(() => useAdminDashboard(), {
@@ -84,7 +84,7 @@ describe('useAdmin Hooks', () => {
         ok: true,
         status: 200,
         headers: { get: vi.fn() },
-        json: vi.fn().mockResolvedValue({})
+        json: vi.fn().mockResolvedValue({ success: true, data: {} })
       });
 
       await waitFor(() => {
@@ -115,7 +115,7 @@ describe('useAdmin Hooks', () => {
         ok: true,
         status: 200,
         headers: { get: vi.fn() },
-        json: vi.fn().mockResolvedValueOnce(mockUsers)
+        json: vi.fn().mockResolvedValueOnce({ success: true, data: mockUsers })
       });
 
       const { result } = renderHook(() => useUsers(), {
@@ -152,12 +152,13 @@ describe('useAdmin Hooks', () => {
 
     it('should call API on mutate', async () => {
       const userData = { name: 'Test', email: 'test@example.com', password: 'pass', role: 'student' as any };
+      const mockUser = { id: '123', ...userData };
 
       (global.fetch as any).mockResolvedValueOnce({
         ok: true,
         status: 201,
         headers: { get: vi.fn() },
-        json: vi.fn().mockResolvedValueOnce({ id: '123', ...userData })
+        json: vi.fn().mockResolvedValueOnce({ success: true, data: mockUser })
       });
 
       const { result } = renderHook(() => useCreateUser(), {
@@ -167,6 +168,7 @@ describe('useAdmin Hooks', () => {
       await result.current.mutateAsync(userData);
 
       expect(global.fetch).toHaveBeenCalledWith(
+        expect.any(String),
         expect.objectContaining({
           method: 'POST'
         })
@@ -181,7 +183,7 @@ describe('useAdmin Hooks', () => {
         ok: true,
         status: 201,
         headers: { get: vi.fn() },
-        json: vi.fn().mockResolvedValueOnce(mockUser)
+        json: vi.fn().mockResolvedValueOnce({ success: true, data: mockUser })
       });
 
       const { result } = renderHook(() => useCreateUser(), {
@@ -210,12 +212,13 @@ describe('useAdmin Hooks', () => {
 
     it('should call API on mutate', async () => {
       const userData = { name: 'Updated', email: 'updated@example.com', role: 'teacher' as any };
+      const mockUser = { id: 'user-123', ...userData };
 
       (global.fetch as any).mockResolvedValueOnce({
         ok: true,
         status: 200,
         headers: { get: vi.fn() },
-        json: vi.fn().mockResolvedValueOnce({ id: 'user-123', ...userData })
+        json: vi.fn().mockResolvedValueOnce({ success: true, data: mockUser })
       });
 
       const { result } = renderHook(() => useUpdateUser('user-123'), {
@@ -225,6 +228,7 @@ describe('useAdmin Hooks', () => {
       await result.current.mutateAsync(userData);
 
       expect(global.fetch).toHaveBeenCalledWith(
+        expect.any(String),
         expect.objectContaining({
           method: 'PUT'
         })
@@ -245,9 +249,9 @@ describe('useAdmin Hooks', () => {
     it('should call DELETE API', async () => {
       (global.fetch as any).mockResolvedValueOnce({
         ok: true,
-        status: 204,
+        status: 200,
         headers: { get: vi.fn() },
-        json: vi.fn().mockResolvedValueOnce(undefined)
+        json: vi.fn().mockResolvedValueOnce({ success: true, data: null })
       });
 
       const { result } = renderHook(() => useDeleteUser('user-123'), {
@@ -257,6 +261,7 @@ describe('useAdmin Hooks', () => {
       await result.current.mutateAsync();
 
       expect(global.fetch).toHaveBeenCalledWith(
+        expect.any(String),
         expect.objectContaining({
           method: 'DELETE'
         })
@@ -272,7 +277,7 @@ describe('useAdmin Hooks', () => {
         ok: true,
         status: 200,
         headers: { get: vi.fn() },
-        json: vi.fn().mockResolvedValueOnce(mockAnnouncements)
+        json: vi.fn().mockResolvedValueOnce({ success: true, data: mockAnnouncements })
       });
 
       const { result } = renderHook(() => useAnnouncements(), {
@@ -299,12 +304,13 @@ describe('useAdmin Hooks', () => {
 
     it('should call API on mutate', async () => {
       const announcementData = { title: 'New', content: 'Content', targetRole: 'all' as any };
+      const mockAnnouncement = { id: 'ann-1', ...announcementData };
 
       (global.fetch as any).mockResolvedValueOnce({
         ok: true,
         status: 201,
         headers: { get: vi.fn() },
-        json: vi.fn().mockResolvedValueOnce({ id: 'ann-1', ...announcementData })
+        json: vi.fn().mockResolvedValueOnce({ success: true, data: mockAnnouncement })
       });
 
       const { result } = renderHook(() => useCreateAnnouncement(), {
@@ -314,6 +320,7 @@ describe('useAdmin Hooks', () => {
       await result.current.mutateAsync(announcementData);
 
       expect(global.fetch).toHaveBeenCalledWith(
+        expect.any(String),
         expect.objectContaining({
           method: 'POST'
         })
@@ -328,7 +335,7 @@ describe('useAdmin Hooks', () => {
         ok: true,
         status: 201,
         headers: { get: vi.fn() },
-        json: vi.fn().mockResolvedValueOnce(mockAnnouncement)
+        json: vi.fn().mockResolvedValueOnce({ success: true, data: mockAnnouncement })
       });
 
       const { result } = renderHook(() => useCreateAnnouncement(), {
@@ -353,7 +360,7 @@ describe('useAdmin Hooks', () => {
         ok: true,
         status: 200,
         headers: { get: vi.fn() },
-        json: vi.fn().mockResolvedValueOnce(mockSettings)
+        json: vi.fn().mockResolvedValueOnce({ success: true, data: mockSettings })
       });
 
       const { result } = renderHook(() => useSettings(), {
@@ -381,12 +388,13 @@ describe('useAdmin Hooks', () => {
     it('should call API on mutate', async () => {
       const mockSettings = { schoolName: 'Test' } as any;
       const settingsData = { schoolName: 'Updated' } as any;
+      const updatedSettings = { ...mockSettings, ...settingsData };
 
       (global.fetch as any).mockResolvedValueOnce({
         ok: true,
         status: 200,
         headers: { get: vi.fn() },
-        json: vi.fn().mockResolvedValueOnce({ ...mockSettings, ...settingsData })
+        json: vi.fn().mockResolvedValueOnce({ success: true, data: updatedSettings })
       });
 
       const { result } = renderHook(() => useUpdateSettings(), {
@@ -396,6 +404,7 @@ describe('useAdmin Hooks', () => {
       await result.current.mutateAsync(settingsData);
 
       expect(global.fetch).toHaveBeenCalledWith(
+        expect.any(String),
         expect.objectContaining({
           method: 'PUT'
         })
@@ -405,12 +414,13 @@ describe('useAdmin Hooks', () => {
     it('should handle partial settings update', async () => {
       const mockSettings = { schoolName: 'Test' } as any;
       const partialData = { schoolName: 'Updated' } as any;
+      const updatedSettings = { ...mockSettings, ...partialData };
 
       (global.fetch as any).mockResolvedValueOnce({
         ok: true,
         status: 200,
         headers: { get: vi.fn() },
-        json: vi.fn().mockResolvedValueOnce({ ...mockSettings, ...partialData })
+        json: vi.fn().mockResolvedValueOnce({ success: true, data: updatedSettings })
       });
 
       const { result } = renderHook(() => useUpdateSettings(), {
@@ -478,7 +488,7 @@ describe('useAdmin Hooks', () => {
         ok: true,
         status: 200,
         headers: { get: vi.fn() },
-        json: vi.fn().mockResolvedValue({})
+        json: vi.fn().mockResolvedValue({ success: true, data: {} })
       });
 
       await waitFor(() => {
@@ -496,17 +506,23 @@ describe('useAdmin Hooks', () => {
         wrapper: createWrapper()
       });
 
-      expect(result.current.isPending).toBe(false);
+      const userData = { name: 'Test', email: 'test@example.com', password: 'pass', role: 'student' as any };
+      const mockUser = { id: '123', ...userData };
 
-      await result.current.mutateAsync({ name: 'Test', email: 'test@example.com', password: 'pass', role: 'student' as any });
-      expect(result.current.isPending).toBe(true);
+      const mutationPromise = result.current.mutateAsync(userData);
+
+      await waitFor(() => {
+        expect(result.current.isPending).toBe(true);
+      });
 
       resolveFetch({
         ok: true,
         status: 201,
         headers: { get: vi.fn() },
-        json: vi.fn().mockResolvedValueOnce({ id: '123' })
+        json: vi.fn().mockResolvedValueOnce({ success: true, data: mockUser })
       });
+
+      await mutationPromise;
 
       await waitFor(() => {
         expect(result.current.isPending).toBe(false);
@@ -523,12 +539,13 @@ describe('useAdmin Hooks', () => {
       });
 
       const userData = { name: 'Test', email: 'test@example.com', password: 'pass', role: 'student' as any };
+      const mockUser = { id: '123', ...userData };
 
       (global.fetch as any).mockResolvedValueOnce({
         ok: true,
         status: 201,
         headers: { get: vi.fn() },
-        json: vi.fn().mockResolvedValueOnce({ id: '123' })
+        json: vi.fn().mockResolvedValueOnce({ success: true, data: mockUser })
       });
 
       await result.current.mutateAsync(userData);
