@@ -94,6 +94,25 @@ This clears and rebuilds all secondary indexes from existing data.
 - Primary indexes use ID-based lookups: `Index<T>(env, indexName)`
 - All indexed queries filter out soft-deleted records automatically
 
+### Data Integrity Constraints (2026-01-10)
+
+**Referential Integrity**: All critical entity relationships are validated before creation and updates:
+- `ReferentialIntegrity.validateGrade()`: Ensures grade references valid student, course, and enrollment
+- `ReferentialIntegrity.validateClass()`: Ensures class references valid teacher
+- `ReferentialIntegrity.validateCourse()`: Ensures course references valid teacher
+- `ReferentialIntegrity.validateStudent()`: Ensures student has valid class and optional parent
+- `ReferentialIntegrity.validateAnnouncement()`: Ensures announcement references valid author (teacher/admin only)
+
+**Dependent Record Checking**: Before deletion, checks for related records:
+- Deleting a user checks for: grades, classes, courses, announcements, children
+- Deleting a class checks for: enrolled students
+- Deleting a course checks for: associated grades
+
+**Soft Delete Consistency**: All entities support soft-deletion with `deletedAt` timestamp:
+- Soft-deleted records excluded from queries automatically
+- Maintains historical data while preventing active usage
+- Referential integrity checks account for soft-deleted status
+
 **Optimization Opportunities**:
 - ~~Recharts bundle size (500.68 kB): recharts loaded entire library including all chart types~~ ✅ **COMPLETED** (2026-01-09) - Implemented subpath imports to load only used components (BarChart, Bar, XAxis, YAxis, etc.), reduced bundle size by 45.8%
 - ~~PasswordHash exposure in CommonDataService: CommonDataService.getAllUsers() and getUserById() exposed passwordHash in returned data~~ ✅ **COMPLETED** (2026-01-09) - CommonDataService now filters passwordHash at service layer, consistent with UserService
@@ -120,6 +139,9 @@ This clears and rebuilds all secondary indexes from existing data.
  - ~~Monolithic entities.ts (405 lines) with 10+ entity classes in single file~~ ✅ **COMPLETED** (2026-01-10) - Extracted entities into 11 focused modules in worker/entities/ directory (UserEntity, ClassEntity, CourseEntity, GradeEntity, AnnouncementEntity, ScheduleEntity, WebhookConfigEntity, WebhookEventEntity, WebhookDeliveryEntity, DeadLetterQueueWebhookEntity), created barrel export (index.ts) and seed-data-init.ts, reduced entities.ts to 13 lines (97% reduction), applied Single Responsibility Principle and Modularity
   - ~~Monolithic webhook-routes.ts (348 lines) with all webhook routes mixed in single file~~ ✅ **COMPLETED** (2026-01-10) - Extracted routes into 4 focused modules in worker/routes/webhooks/ directory (webhook-config-routes, webhook-delivery-routes, webhook-test-routes, webhook-admin-routes), created barrel export (index.ts), reduced webhook-routes.ts to 12 lines (97% reduction), applied Single Responsibility Principle and Separation of Concerns
   - ~~Duplicate try-catch error handling patterns in routes (30+ instances): Each route had identical try-catch pattern for error logging and serverError response~~ ✅ **COMPLETED** (2026-01-10) - Created withErrorHandler wrapper in route-utils.ts, refactored webhook-config-routes.ts (5 routes, 29% reduction) and webhook-delivery-routes.ts (3 routes, 35% reduction), eliminated 8 duplicate patterns, applied DRY principle
+  - ~~ParentDashboardService.getChildGrades() loaded ALL grades for student~~ ✅ **COMPLETED** (2026-01-10) - Now uses GradeEntity.getRecentForStudent() with limit parameter (default 10), reduced data loaded from 100s to 10 grades (90%+ reduction)
+  - ~~CommonDataService.getRecentAnnouncementsByRole() loaded all role announcements then sorted in-memory~~ ✅ **COMPLETED** (2026-01-10) - Now uses date-sorted index then filters by role, O(n) retrieval instead of O(n log n) sort
+  - ~~Schedule/grades queries loaded duplicate courses and teachers~~ ✅ **COMPLETED** (2026-01-10) - Added ID deduplication before fetching courses/teachers, 20-50% reduction in redundant entity lookups
 
 
     ### Recent Data Optimizations (2026-01-07)

@@ -24,15 +24,17 @@ export class StudentDashboardService {
   private static async getSchedule(env: Env, classId: string): Promise<(ScheduleItem & { courseName: string; teacherName: string })[]> {
     const scheduleEntity = new ScheduleEntity(env, classId);
     const scheduleState = await scheduleEntity.getState();
-    
+
     if (!scheduleState) {
       return [];
     }
 
     const courseIds = scheduleState.items.map(item => item.courseId);
-    const courses = await Promise.all(courseIds.map(id => new CourseEntity(env, id).getState()));
-    const teacherIds = courses.map(course => course.teacherId);
-    const teachers = await Promise.all(teacherIds.map(id => new UserEntity(env, id).getState()));
+    const uniqueCourseIds = Array.from(new Set(courseIds));
+    const courses = await Promise.all(uniqueCourseIds.map(id => new CourseEntity(env, id).getState()));
+    const teacherIds = courses.map(course => course?.teacherId).filter((id): id is string => id !== undefined);
+    const uniqueTeacherIds = Array.from(new Set(teacherIds));
+    const teachers = await Promise.all(uniqueTeacherIds.map(id => new UserEntity(env, id).getState()));
 
     const coursesMap = new Map(courses.filter(c => c).map(c => [c!.id, c!]));
     const teachersMap = new Map(teachers.filter(t => t).map(t => [t!.id, t!]));
