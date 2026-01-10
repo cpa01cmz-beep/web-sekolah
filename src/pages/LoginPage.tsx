@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { FormField } from '@/components/ui/form-field';
@@ -11,6 +10,7 @@ import { UserRole } from '@shared/types';
 import { SlideUp } from '@/components/animations';
 import { Toaster, toast } from 'sonner';
 import { THEME_COLORS } from '@/theme/colors';
+import { RoleButtonGrid } from '@/components/forms/RoleButtonGrid';
 
 export function LoginPage() {
   const navigate = useNavigate();
@@ -120,40 +120,11 @@ export function LoginPage() {
             </CardContent>
             <CardFooter className="flex flex-col gap-4">
               <p className="text-sm text-muted-foreground">Select your role to login:</p>
-              <div className="grid grid-cols-2 gap-2 w-full">
-                <Button
-                  onClick={() => handleLogin('student')}
-                  className="w-full" style={{ backgroundColor: THEME_COLORS.PRIMARY }}
-                  disabled={isLoading === 'student'}
-                  aria-busy={isLoading === 'student'}
-                >
-                  {isLoading === 'student' ? 'Logging in...' : 'Student'}
-                </Button>
-                <Button
-                  onClick={() => handleLogin('teacher')}
-                  className="w-full" style={{ backgroundColor: THEME_COLORS.SECONDARY }}
-                  disabled={isLoading === 'teacher'}
-                  aria-busy={isLoading === 'teacher'}
-                >
-                  {isLoading === 'teacher' ? 'Logging in...' : 'Teacher'}
-                </Button>
-                <Button
-                  onClick={() => handleLogin('parent')}
-                  className="w-full bg-secondary text-secondary-foreground hover:bg-secondary/80"
-                  disabled={isLoading === 'parent'}
-                  aria-busy={isLoading === 'parent'}
-                >
-                  {isLoading === 'parent' ? 'Logging in...' : 'Parent'}
-                </Button>
-                <Button
-                  onClick={() => handleLogin('admin')}
-                  className="w-full bg-secondary text-secondary-foreground hover:bg-secondary/80"
-                  disabled={isLoading === 'admin'}
-                  aria-busy={isLoading === 'admin'}
-                >
-                  {isLoading === 'admin' ? 'Logging in...' : 'Admin'}
-                </Button>
-              </div>
+              <RoleButtonGrid
+                loadingRole={isLoading}
+                onRoleSelect={handleLogin}
+                buttonClassName="w-full"
+              />
               <Link to="/" className="text-sm text-primary hover:underline mt-4 flex items-center gap-1">
                 Back to Home <ArrowRight className="h-4 w-4" />
               </Link>
