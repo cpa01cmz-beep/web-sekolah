@@ -852,7 +852,93 @@ This clears and rebuilds all secondary indexes from existing data.
    - Maintainability: Significantly improved (retry logic centralized in one module)
    - Reusability: Retry utility can now be used for any async operation that needs retry
 
-   **Success**: ✅ **RETRY UTILITY MODULE EXTRACTION COMPLETE, 97 LINES OF DUPLICATE CODE ELIMINATED, RETRY BEHAVIOR UNIFIED**
+    **Success**: ✅ **RETRY UTILITY MODULE EXTRACTION COMPLETE, 97 LINES OF DUPLICATE CODE ELIMINATED, RETRY BEHAVIOR UNIFIED**
+
+---
+
+## CI/CD & Deployment
+
+### Environments
+
+| Environment | Name | Purpose | Auto-Deploy |
+|-------------|------|---------|-------------|
+| Staging | website-sekolah-staging | Testing environment | Yes (main branch) |
+| Production | website-sekolah-production | Live production | Manual approval only |
+
+### Deployment Pipeline
+
+The project uses GitHub Actions for automated CI/CD deployments to Cloudflare Workers.
+
+**Workflow**: `.github/workflows/deploy.yml`
+
+**Staging Deployment** (Automatic):
+- Triggered on: push to main, PR merge to main
+- Steps: tests → typecheck → lint → build → deploy → health check
+- URL: `https://website-sekolah-staging.<account>.workers.dev`
+
+**Production Deployment** (Manual):
+- Triggered by: workflow_dispatch with approval
+- Steps: backup → tests → typecheck → lint → build → deploy → health check
+- Rollback: automatic on health check failure
+- URL: `https://website-sekolah-production.<account>.workers.dev`
+
+### Environment Variables
+
+| Variable | Staging | Production | Description |
+|----------|---------|------------|-------------|
+| `ENVIRONMENT` | `staging` | `production` | Current environment |
+| `JWT_SECRET` | `STAGING_JWT_SECRET` | `JWT_SECRET` | JWT signing secret (64+ chars) |
+| `CLOUDFLARE_ACCOUNT_ID` | Shared | Shared | Cloudflare account ID |
+| `CLOUDFLARE_API_TOKEN` | Shared | Shared | Cloudflare API token |
+
+### Health Checks
+
+After each deployment, automated health checks verify:
+- Endpoint: `/api/health`
+- Retries: 5 attempts
+- Interval: 10 seconds
+- Success: HTTP 200 or 404 (endpoint may not exist)
+- Failure: triggers rollback for production
+
+### Rollback Procedures
+
+**Automatic Rollback** (Production):
+- Triggers when health check fails after deployment
+- Backup saved before production deployment
+- Automatic rollback to previous stable version
+
+**Manual Rollback**:
+```bash
+# List recent deployments
+wrangler deployment list --env production
+
+# Rollback to specific deployment
+wrangler rollback --env production --deployment-id <deployment-id>
+```
+
+### Local Deployment
+
+Deploy locally without CI/CD:
+
+```bash
+# Staging
+wrangler deploy --env staging
+
+# Production
+wrangler deploy --env production
+```
+
+### Prerequisites
+
+For CI/CD deployment, configure GitHub Secrets:
+- `CLOUDFLARE_ACCOUNT_ID` - From Cloudflare Dashboard
+- `CLOUDFLARE_API_TOKEN` - API Token with Workers permissions
+- `JWT_SECRET` - Production JWT secret (64+ chars)
+- `STAGING_JWT_SECRET` - Staging JWT secret (64+ chars)
+
+### For More Information
+
+Complete deployment guide with troubleshooting: [DEPLOYMENT.md](./DEPLOYMENT.md)
 
 ---
 

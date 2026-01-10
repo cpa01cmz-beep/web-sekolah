@@ -177,6 +177,9 @@ After starting the application:
 - [Security Guide](./docs/SECURITY.md) - Security controls and deployment checklist
 - [Security Assessment](./docs/SECURITY_ASSESSMENT_2026-01-08.md) - 95/100 score, production ready
 
+**🚀 Deployment**
+- [Deployment Guide](./docs/DEPLOYMENT.md) - CI/CD procedures, environments, and rollback
+
 **🎨 UI/UX & Accessibility**
 - [UI/UX Best Practices](./docs/UI_UX_BEST_PRACTICES.md) - WCAG AA compliance and design patterns
 - [Color Contrast Verification](./docs/COLOR_CONTRAST_VERIFICATION.md) - Accessibility verification
