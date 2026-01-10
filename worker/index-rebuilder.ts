@@ -145,11 +145,13 @@ async function rebuildWebhookDeliveryIndexes(env: Env): Promise<void> {
   const eventIdIndex = new SecondaryIndex<string>(env, WebhookDeliveryEntity.entityName, 'eventId');
   const webhookConfigIdIndex = new SecondaryIndex<string>(env, WebhookDeliveryEntity.entityName, 'webhookConfigId');
   const idempotencyKeyIndex = new SecondaryIndex<string>(env, WebhookDeliveryEntity.entityName, 'idempotencyKey');
+  const dateIndex = new DateSortedSecondaryIndex(env, WebhookDeliveryEntity.entityName);
 
   await statusIndex.clear();
   await eventIdIndex.clear();
   await webhookConfigIdIndex.clear();
   await idempotencyKeyIndex.clear();
+  await dateIndex.clear();
 
   const { items: deliveries } = await WebhookDeliveryEntity.list(env);
   for (const delivery of deliveries) {
@@ -160,6 +162,7 @@ async function rebuildWebhookDeliveryIndexes(env: Env): Promise<void> {
     if (delivery.idempotencyKey) {
       await idempotencyKeyIndex.add(delivery.idempotencyKey, delivery.id);
     }
+    await dateIndex.add(delivery.createdAt, delivery.id);
   }
 }
 
