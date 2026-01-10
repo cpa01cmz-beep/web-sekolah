@@ -852,7 +852,93 @@ This clears and rebuilds all secondary indexes from existing data.
    - Maintainability: Significantly improved (retry logic centralized in one module)
    - Reusability: Retry utility can now be used for any async operation that needs retry
 
-   **Success**: ✅ **RETRY UTILITY MODULE EXTRACTION COMPLETE, 97 LINES OF DUPLICATE CODE ELIMINATED, RETRY BEHAVIOR UNIFIED**
+    **Success**: ✅ **RETRY UTILITY MODULE EXTRACTION COMPLETE, 97 LINES OF DUPLICATE CODE ELIMINATED, RETRY BEHAVIOR UNIFIED**
+
+---
+
+## CI/CD & Deployment
+
+### Environments
+
+| Environment | Name | Purpose | Auto-Deploy |
+|-------------|------|---------|-------------|
+| Staging | website-sekolah-staging | Testing environment | Yes (main branch) |
+| Production | website-sekolah-production | Live production | Manual approval only |
+
+### Deployment Pipeline
+
+The project uses GitHub Actions for automated CI/CD deployments to Cloudflare Workers.
+
+**Workflow**: `.github/workflows/deploy.yml`
+
+**Staging Deployment** (Automatic):
+- Triggered on: push to main, PR merge to main
+- Steps: tests → typecheck → lint → build → deploy → health check
+- URL: `https://website-sekolah-staging.<account>.workers.dev`
+
+**Production Deployment** (Manual):
+- Triggered by: workflow_dispatch with approval
+- Steps: backup → tests → typecheck → lint → build → deploy → health check
+- Rollback: automatic on health check failure
+- URL: `https://website-sekolah-production.<account>.workers.dev`
+
+### Environment Variables
+
+| Variable | Staging | Production | Description |
+|----------|---------|------------|-------------|
+| `ENVIRONMENT` | `staging` | `production` | Current environment |
+| `JWT_SECRET` | `STAGING_JWT_SECRET` | `JWT_SECRET` | JWT signing secret (64+ chars) |
+| `CLOUDFLARE_ACCOUNT_ID` | Shared | Shared | Cloudflare account ID |
+| `CLOUDFLARE_API_TOKEN` | Shared | Shared | Cloudflare API token |
+
+### Health Checks
+
+After each deployment, automated health checks verify:
+- Endpoint: `/api/health`
+- Retries: 5 attempts
+- Interval: 10 seconds
+- Success: HTTP 200 or 404 (endpoint may not exist)
+- Failure: triggers rollback for production
+
+### Rollback Procedures
+
+**Automatic Rollback** (Production):
+- Triggers when health check fails after deployment
+- Backup saved before production deployment
+- Automatic rollback to previous stable version
+
+**Manual Rollback**:
+```bash
+# List recent deployments
+wrangler deployment list --env production
+
+# Rollback to specific deployment
+wrangler rollback --env production --deployment-id <deployment-id>
+```
+
+### Local Deployment
+
+Deploy locally without CI/CD:
+
+```bash
+# Staging
+wrangler deploy --env staging
+
+# Production
+wrangler deploy --env production
+```
+
+### Prerequisites
+
+For CI/CD deployment, configure GitHub Secrets:
+- `CLOUDFLARE_ACCOUNT_ID` - From Cloudflare Dashboard
+- `CLOUDFLARE_API_TOKEN` - API Token with Workers permissions
+- `JWT_SECRET` - Production JWT secret (64+ chars)
+- `STAGING_JWT_SECRET` - Staging JWT secret (64+ chars)
+
+### For More Information
+
+Complete deployment guide with troubleshooting: [DEPLOYMENT.md](./DEPLOYMENT.md)
 
 ---
 
@@ -3944,3 +4030,44 @@ To re-enable excluded entity tests, implement full Cloudflare Workers mocking:
 
 *Last Updated: 2026-01-10*
 *API Version: 1.0*
+
+---
+
+### Integration Engineer - API Documentation (2026-01-10)
+
+**Task**: Update and complete OpenAPI specification with all implemented endpoints and schemas
+
+**Problem**:
+- OpenAPI spec was missing numerous endpoints that are implemented in the codebase
+- Many endpoint paths were not documented, breaking "Self-Documenting" principle
+- Schemas were missing for complex response types (TeacherDashboard, ParentDashboard, StudentCardData, etc.)
+- Webhook delivery endpoints were undocumented
+- System administration endpoints were missing from spec
+
+**Solution**:
+- Added missing tags: Parents and System to the OpenAPI spec
+- Added missing student endpoints: /students/{id}/grades, /students/{id}/schedule, /students/{id}/card
+- Added missing teacher endpoints: /teachers/{id}/dashboard, /teachers/{id}/announcements, POST /teachers/announcements
+- Added missing parent endpoint: /parents/{id}/dashboard
+- Added missing admin endpoints: /admin/dashboard, GET/POST /admin/announcements, GET/PUT /admin/settings, POST /admin/rebuild-indexes
+- Added missing webhook delivery endpoints: GET /webhooks/{id}/deliveries, GET /webhooks/events, GET /webhooks/events/{id}
+- Added missing system endpoint: POST /api/seed
+- Added missing schemas: TeacherDashboard, ParentDashboard, StudentCardData, Settings, WebhookEvent, WebhookDelivery, WebhookEventWithDeliveries, CreateAnnouncementRequest, UpdateSettingsRequest
+- Added missing admin DLQ endpoint: GET /admin/webhooks/dead-letter-queue/{id}
+
+**Benefits Achieved**:
+- All major endpoints now documented in OpenAPI spec
+- Student portal endpoints fully documented
+- Teacher portal endpoints fully documented  
+- Parent portal endpoint documented
+- Admin portal endpoints fully documented
+- Webhook delivery endpoints documented
+- System administration endpoint documented
+- All complex response schemas defined
+- API spec now self-documenting
+- Consistent with architectural principles
+- Ready for OpenAPI code generation
+
+**Success**: API DOCUMENTATION COMPLETE, 18 NEW ENDPOINTS + 11 NEW SCHEMAS ADDED
+
+---
