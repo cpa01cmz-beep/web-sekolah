@@ -1,6 +1,5 @@
-import { useState, useMemo, memo } from 'react';
+import { useState, useMemo } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { Edit } from 'lucide-react';
@@ -13,6 +12,7 @@ import { useTeacherClasses, useTeacherClassStudents } from '@/hooks/useTeacher';
 import { Skeleton } from '@/components/ui/skeleton';
 import { TableSkeleton } from '@/components/ui/loading-skeletons';
 import { GradeForm } from '@/components/forms/GradeForm';
+import { ResponsiveTable } from '@/components/ui/responsive-table';
 
 interface UpdateGradeData {
   score: number | null;
@@ -26,26 +26,6 @@ type StudentGrade = {
   gradeId: string | null;
 };
 
-const StudentGradeRow = memo(({ student, onEdit }: { student: StudentGrade; onEdit: (student: StudentGrade) => void }) => {
-  return (
-    <TableRow key={student.id}>
-      <TableCell className="font-medium">{student.name}</TableCell>
-      <TableCell className="text-center">{student.score ?? 'N/A'}</TableCell>
-      <TableCell className="text-muted-foreground truncate max-w-xs">{student.feedback}</TableCell>
-      <TableCell className="text-right">
-        <Button
-          variant="outline"
-          size="icon"
-          onClick={() => onEdit(student)}
-          aria-label={`Edit grade for ${student.name}`}
-        >
-          <Edit className="h-4 w-4" />
-        </Button>
-      </TableCell>
-    </TableRow>
-  );
-});
-StudentGradeRow.displayName = 'StudentGradeRow';
 export function TeacherGradeManagementPage() {
   const user = useAuthStore((state) => state.user);
   const [selectedClass, setSelectedClass] = useState<string | null>(null);
@@ -79,6 +59,43 @@ export function TeacherGradeManagementPage() {
   const selectedClassName = useMemo(() => {
     return classes?.find(c => c.id === selectedClass)?.name || '';
   }, [classes, selectedClass]);
+
+  const tableHeaders = [
+    { key: 'name', label: 'Student Name' },
+    { key: 'score', label: 'Score', className: 'text-center' },
+    { key: 'feedback', label: 'Feedback' },
+    { key: 'actions', label: 'Actions', className: 'text-right' },
+  ];
+
+  const tableRows = (students || []).map(student => ({
+    id: student.id,
+    cells: [
+      { key: 'name', content: student.name, className: 'font-medium' },
+      { key: 'score', content: student.score ?? 'N/A', className: 'text-center' },
+      { 
+        key: 'feedback', 
+        content: student.feedback || 'No feedback',
+        className: 'text-muted-foreground truncate max-w-xs',
+      },
+      {
+        key: 'actions',
+        content: (
+          <div className="flex gap-2 justify-end">
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => setEditingStudent(student)}
+              aria-label={`Edit grade for ${student.name}`}
+            >
+              <Edit className="h-4 w-4" />
+            </Button>
+          </div>
+        ),
+        className: 'text-right',
+      },
+    ],
+  }));
+
   return (
     <SlideUp className="space-y-6">
       <PageHeader title="Grade Management" />
@@ -113,29 +130,9 @@ export function TeacherGradeManagementPage() {
             {isLoadingStudents ? (
               <TableSkeleton columns={4} rows={3} />
             ) : students && students.length > 0 ? (
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Student Name</TableHead>
-                      <TableHead className="text-center">Score</TableHead>
-                      <TableHead>Feedback</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                      <TableBody>
-                    {students.map(student => (
-                      <StudentGradeRow
-                        key={student.id}
-                        student={student}
-                        onEdit={(student) => setEditingStudent(student)}
-                      />
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
+              <ResponsiveTable headers={tableHeaders} rows={tableRows} />
             ) : (
-              <p className="text-muted-foreground text-center py-4">No students found in this class.</p>
+              <p className="text-muted-foreground text-center py-8">No students found in this class.</p>
             )}
           </CardContent>
         </Card>

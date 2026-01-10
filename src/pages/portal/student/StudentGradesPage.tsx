@@ -1,17 +1,17 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableFooter } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { CardSkeleton } from '@/components/ui/loading-skeletons';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { AlertTriangle } from 'lucide-react';
 import { SlideUp } from '@/components/animations';
-import { useStudentGrades } from '@/hooks/useStudent';
+import { useStudentDashboard } from '@/hooks/useStudent';
 import { useAuthStore } from '@/lib/authStore';
-import { getGradeColorClass, getGradeLetter, calculateAverageScore } from '@/utils/grades';
+import { getGradeColorClass, getGradeLetter } from '@/utils/grades';
+import { ResponsiveTable } from '@/components/ui/responsive-table';
 
 export function StudentGradesPage() {
   const user = useAuthStore((state) => state.user);
-  const { data: grades = [], isLoading, error } = useStudentGrades(user?.id || '');
+  const { data: dashboardData, isLoading, error } = useStudentDashboard(user?.id || '');
 
   if (isLoading) return <CardSkeleton lines={5} showHeader />;
 
@@ -25,7 +25,38 @@ export function StudentGradesPage() {
     );
   }
 
-  const averageScore = calculateAverageScore(grades);
+  const grades = dashboardData?.recentGrades || [];
+
+  const averageScore = grades.length > 0 
+    ? (grades.reduce((sum, g) => sum + g.score, 0) / grades.length).toFixed(1)
+    : '-';
+
+  const tableHeaders = [
+    { key: 'no', label: 'No.' },
+    { key: 'subject', label: 'Mata Pelajaran' },
+    { key: 'score', label: 'Nilai', className: 'text-center' },
+    { key: 'grade', label: 'Predikat', className: 'text-center' },
+    { key: 'feedback', label: 'Keterangan' },
+  ];
+
+  const tableRows = grades.map((grade, index) => ({
+    id: grade.id,
+    cells: [
+      { key: 'no', content: index + 1, className: 'font-medium' },
+      { key: 'subject', content: grade.courseName },
+      { key: 'score', content: grade.score, className: 'text-center font-semibold' },
+      {
+        key: 'grade',
+        content: (
+          <Badge className={`text-white ${getGradeColorClass(grade.score)}`}>
+            {getGradeLetter(grade.score)}
+          </Badge>
+        ),
+        className: 'text-center',
+      },
+      { key: 'feedback', content: grade.feedback },
+    ],
+  }));
 
   return (
     <SlideUp className="space-y-6">
@@ -36,39 +67,30 @@ export function StudentGradesPage() {
           <CardDescription>Semester Ganjil - Tahun Ajaran 2023/2024</CardDescription>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-[50px]">No.</TableHead>
-                <TableHead>Mata Pelajaran</TableHead>
-                <TableHead className="text-center">Nilai</TableHead>
-                <TableHead className="text-center">Predikat</TableHead>
-                <TableHead>Keterangan</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {grades.map((grade, index) => (
-                <TableRow key={index} className="hover:bg-muted/50">
-                  <TableCell className="font-medium">{index + 1}</TableCell>
-                  <TableCell>{grade.courseName}</TableCell>
-                  <TableCell className="text-center font-semibold">{grade.score}</TableCell>
-                  <TableCell className="text-center">
-                    <Badge className={`text-white ${getGradeColorClass(grade.score)}`}>
-                      {getGradeLetter(grade.score)}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>{grade.feedback}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-            <TableFooter>
-              <TableRow>
-                <TableCell colSpan={2} className="font-bold text-lg">Rata-rata</TableCell>
-                <TableCell className="text-center font-bold text-lg">{averageScore}</TableCell>
-                <TableCell colSpan={2}></TableCell>
-              </TableRow>
-            </TableFooter>
-          </Table>
+          {grades.length > 0 ? (
+            <div className="space-y-4">
+              <ResponsiveTable headers={tableHeaders} rows={tableRows} />
+              <div className="md:hidden p-4 bg-muted/50 rounded-lg">
+                <div className="flex justify-between items-center">
+                  <span className="font-bold text-lg">Rata-rata</span>
+                  <span className="font-bold text-lg">{averageScore}</span>
+                </div>
+              </div>
+              <div className="hidden md:block border-t pt-4">
+                <table className="w-full caption-bottom text-sm">
+                  <tfoot>
+                    <tr className="border-t">
+                      <td colSpan={2} className="p-2 align-middle font-bold text-lg">Rata-rata</td>
+                      <td className="p-2 align-middle text-center font-bold text-lg">{averageScore}</td>
+                      <td colSpan={2}></td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+            </div>
+          ) : (
+            <p className="text-muted-foreground text-center py-8">No grades available.</p>
+          )}
         </CardContent>
       </Card>
     </SlideUp>

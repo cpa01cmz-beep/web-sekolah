@@ -5,6 +5,7 @@ import { FormField } from '@/components/ui/form-field';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useState } from 'react';
 import { toast } from 'sonner';
+import { AlertCircle } from 'lucide-react';
 
 interface PPDBFormData {
   name: string;
@@ -60,6 +61,11 @@ export function PPDBForm({ onSubmit }: PPDBFormProps) {
     return undefined;
   };
 
+  const nameError = getNameError();
+  const nisnError = getNisnError();
+  const emailError = getEmailError();
+  const phoneError = getPhoneError();
+
   const handleInputChange = (field: keyof PPDBFormData, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
@@ -98,7 +104,7 @@ export function PPDBForm({ onSubmit }: PPDBFormProps) {
         <FormField
           id="name"
           label="Nama Lengkap"
-          error={getNameError()}
+          error={nameError}
           helperText="Masukkan nama lengkap sesuai akta kelahiran"
           required
         >
@@ -109,9 +115,15 @@ export function PPDBForm({ onSubmit }: PPDBFormProps) {
             onChange={(e) => handleInputChange('name', e.target.value)}
             required
             aria-required="true"
-            aria-invalid={!!getNameError()}
-            aria-describedby={getNameError() ? 'name-error' : 'name-helper'}
+            aria-invalid={!!nameError}
+            aria-describedby={nameError ? 'name-error' : 'name-helper'}
           />
+          {nameError && (
+            <p id="name-error" className="text-xs text-destructive flex items-center gap-1" role="alert" aria-live="polite">
+              <AlertCircle className="h-3 w-3" aria-hidden="true" />
+              {nameError}
+            </p>
+          )}
         </FormField>
 
         <div className="grid grid-cols-2 gap-4">
@@ -150,7 +162,7 @@ export function PPDBForm({ onSubmit }: PPDBFormProps) {
         <FormField
           id="nisn"
           label="NISN"
-          error={getNisnError()}
+          error={nisnError}
           helperText="Nomor Induk Siswa Nasional (10 digit)"
           required
         >
@@ -161,9 +173,15 @@ export function PPDBForm({ onSubmit }: PPDBFormProps) {
             onChange={(e) => handleInputChange('nisn', e.target.value)}
             required
             aria-required="true"
-            aria-invalid={!!getNisnError()}
-            aria-describedby={getNisnError() ? 'nisn-error' : 'nisn-helper'}
+            aria-invalid={!!nisnError}
+            aria-describedby={nisnError ? 'nisn-error' : 'nisn-helper'}
           />
+          {nisnError && (
+            <p id="nisn-error" className="text-xs text-destructive flex items-center gap-1" role="alert" aria-live="polite">
+              <AlertCircle className="h-3 w-3" aria-hidden="true" />
+              {nisnError}
+            </p>
+          )}
         </FormField>
 
         <FormField
@@ -198,7 +216,7 @@ export function PPDBForm({ onSubmit }: PPDBFormProps) {
         <FormField
           id="email"
           label="Email Orang Tua"
-          error={getEmailError()}
+          error={emailError}
           helperText="Email aktif untuk menerima konfirmasi"
           required
         >
@@ -210,15 +228,21 @@ export function PPDBForm({ onSubmit }: PPDBFormProps) {
             onChange={(e) => handleInputChange('email', e.target.value)}
             required
             aria-required="true"
-            aria-invalid={!!getEmailError()}
-            aria-describedby={getEmailError() ? 'email-error' : 'email-helper'}
+            aria-invalid={!!emailError}
+            aria-describedby={emailError ? 'email-error' : 'email-helper'}
           />
+          {emailError && (
+            <p id="email-error" className="text-xs text-destructive flex items-center gap-1" role="alert" aria-live="polite">
+              <AlertCircle className="h-3 w-3" aria-hidden="true" />
+              {emailError}
+            </p>
+          )}
         </FormField>
 
         <FormField
           id="phone"
           label="Nomor Telepon"
-          error={getPhoneError()}
+          error={phoneError}
           helperText="Nomor WhatsApp yang bisa dihubungi"
           required
         >
@@ -230,9 +254,15 @@ export function PPDBForm({ onSubmit }: PPDBFormProps) {
             onChange={(e) => handleInputChange('phone', e.target.value)}
             required
             aria-required="true"
-            aria-invalid={!!getPhoneError()}
-            aria-describedby={getPhoneError() ? 'phone-error' : 'phone-helper'}
+            aria-invalid={!!phoneError}
+            aria-describedby={phoneError ? 'phone-error' : 'phone-helper'}
           />
+          {phoneError && (
+            <p id="phone-error" className="text-xs text-destructive flex items-center gap-1" role="alert" aria-live="polite">
+              <AlertCircle className="h-3 w-3" aria-hidden="true" />
+              {phoneError}
+            </p>
+          )}
         </FormField>
 
         <Button type="submit" className="w-full">Daftar Sekarang</Button>
