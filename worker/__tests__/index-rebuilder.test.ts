@@ -118,13 +118,14 @@ describe('Index Rebuilder', () => {
   });
 
   describe('rebuildWebhookDeliveryIndexes - WebhookDelivery Entity (Complex)', () => {
-    it('should clear existing status, eventId, webhookConfigId, and idempotencyKey indexes before rebuilding');
+    it('should clear existing status, eventId, webhookConfigId, idempotencyKey, and date indexes before rebuilding');
     it('should load all webhook deliveries from WebhookDeliveryEntity.list()');
     it('should skip soft-deleted webhook deliveries (deletedAt !== null)');
     it('should add webhook delivery ID to status index for all webhook deliveries');
     it('should add webhook delivery ID to eventId index for all webhook deliveries');
     it('should add webhook delivery ID to webhookConfigId index for all webhook deliveries');
     it('should add webhook delivery ID to idempotencyKey index only if idempotencyKey is not null');
+    it('should add webhook delivery ID to date-sorted index for all webhook deliveries');
     it('should handle empty webhook delivery list (no deliveries to rebuild)');
     it('should handle webhook deliveries without idempotencyKey (skip idempotencyKey index)');
     it('should handle webhook deliveries with idempotencyKey (add to idempotencyKey index)');

@@ -1,5 +1,6 @@
 import { IndexedEntity, SecondaryIndex, type Env } from "../core-utils";
 import type { WebhookDelivery } from "@shared/types";
+import { DateSortedSecondaryIndex } from "../storage/DateSortedSecondaryIndex";
 
 export class WebhookDeliveryEntity extends IndexedEntity<WebhookDelivery> {
   static readonly entityName = "webhookDelivery";
@@ -45,5 +46,32 @@ export class WebhookDeliveryEntity extends IndexedEntity<WebhookDelivery> {
     const deliveryIds = await index.getByValue(webhookConfigId);
     const deliveries = await Promise.all(deliveryIds.map(id => new this(env, id).getState()));
     return deliveries.filter(d => d && !d.deletedAt) as WebhookDelivery[];
+  }
+
+  static async getRecentDeliveries(env: Env, limit: number = 10): Promise<WebhookDelivery[]> {
+    const index = new DateSortedSecondaryIndex(env, this.entityName);
+    const recentIds = await index.getRecent(limit);
+    if (recentIds.length === 0) {
+      return [];
+    }
+    const deliveries = await Promise.all(recentIds.map(id => new this(env, id).getState()));
+    return deliveries.filter(d => d && !d.deletedAt) as WebhookDelivery[];
+  }
+
+  static async createWithDateIndex(env: Env, state: WebhookDelivery): Promise<WebhookDelivery> {
+    const created = await super.create(env, state);
+    const dateIndex = new DateSortedSecondaryIndex(env, this.entityName);
+    await dateIndex.add(state.createdAt, state.id);
+    return created as WebhookDelivery;
+  }
+
+  static async deleteWithDateIndex(env: Env, id: string): Promise<boolean> {
+    const inst = new this(env, id);
+    const state = await inst.getState() as WebhookDelivery | null;
+    if (!state) return false;
+
+    const dateIndex = new DateSortedSecondaryIndex(env, this.entityName);
+    await dateIndex.remove(state.createdAt, id);
+    return await super.delete(env, id);
   }
 }

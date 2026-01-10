@@ -34,15 +34,31 @@ export interface ClientErrorReport {
     colno?: number;
     error?: unknown;
   }
-const app = new Hono<{ Bindings: Env }>();
+
+export interface CSPViolationReport {
+  'csp-report': {
+    'document-uri'?: string;
+    'referrer'?: string;
+    'violated-directive'?: string;
+    'effective-directive'?: string;
+    'original-policy'?: string;
+    'disposition'?: string;
+    'blocked-uri'?: string;
+    'line-number'?: number;
+    'column-number'?: number;
+    'source-file'?: string;
+    'status-code'?: number;
+    'script-sample'?: string;
+  };
+}const app = new Hono<{ Bindings: Env }>();
 
 app.use('*', logger());
 
 app.use('/api/*', async (c, next) => {
   const allowedOrigins = c.env.ALLOWED_ORIGINS?.split(',') || DefaultOrigins.LOCAL_DEV;
   const origin = c.req.header('Origin');
-  
-  if (origin && allowedOrigins.includes(origin)) {
+
+  if (origin && allowedOrigins.includes(origin as 'http://localhost:3000' | 'http://localhost:4173')) {
     c.header('Access-Control-Allow-Origin', origin);
   } else if (allowedOrigins.length > 0) {
     c.header('Access-Control-Allow-Origin', allowedOrigins[0]);
@@ -127,6 +143,18 @@ app.post('/api/client-errors', async (c) => {
   } catch (error) {
     pinoLogger.error('[CLIENT ERROR HANDLER] Failed', error);
     return serverError(c, 'Failed to process error report');
+  }
+});
+
+app.post('/api/csp-report', async (c) => {
+  try {
+    const report = await c.req.json<CSPViolationReport>();
+    const violation = report['csp-report'];
+    pinoLogger.warn('[CSP VIOLATION]', { violation });
+    return new Response(null, { status: 204 });
+  } catch (error) {
+    pinoLogger.error('[CSP REPORT HANDLER] Failed', error);
+    return new Response(null, { status: 204 });
   }
 });
 

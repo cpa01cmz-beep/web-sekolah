@@ -58,7 +58,7 @@ export class WebhookService {
         idempotencyKey
       };
 
-      await new WebhookDeliveryEntity(env, deliveryId).save(delivery);
+      await WebhookDeliveryEntity.createWithDateIndex(env, delivery);
 
       logger.info('Webhook delivery created', { deliveryId, eventId, webhookConfigId: config.id, eventType, idempotencyKey });
     }

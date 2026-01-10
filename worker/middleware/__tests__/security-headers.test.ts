@@ -36,6 +36,18 @@ describe('Security Headers Middleware', () => {
     expect(csp).toContain("style-src 'self' 'unsafe-inline'");
   });
 
+  it('should include report-uri for CSP violation monitoring', async () => {
+    const app = new Hono();
+    app.use('*', securityHeaders());
+    app.get('/', (c) => c.text('Hello'));
+
+    const res = await app.request('/');
+    const csp = res.headers.get('Content-Security-Policy');
+
+    expect(csp).toBeDefined();
+    expect(csp).toContain("report-uri /api/csp-report");
+  });
+
   it('should allow HSTS configuration to be disabled', async () => {
     const app = new Hono();
     app.use('*', securityHeaders({ enableHSTS: false }));
