@@ -1,133 +1,109 @@
 import { Hono } from 'hono';
 import type { Env } from '../../core-utils';
-import { ok, bad, notFound, serverError } from '../../core-utils';
+import { ok, bad, notFound } from '../../core-utils';
 import { WebhookConfigEntity } from '../../entities';
 import { logger } from '../../logger';
 import type { Context } from 'hono';
+import { withErrorHandler } from '../route-utils';
 
 export function webhookConfigRoutes(app: Hono<{ Bindings: Env }>) {
-  app.get('/api/webhooks', async (c: Context) => {
-    try {
-      const configs = await WebhookConfigEntity.list(c.env);
-      return ok(c, configs.items);
-    } catch (error) {
-      logger.error('Failed to list webhooks', error);
-      return serverError(c, 'Failed to list webhooks');
+  app.get('/api/webhooks', withErrorHandler('list webhooks')(async (c: Context) => {
+    const configs = await WebhookConfigEntity.list(c.env);
+    return ok(c, configs.items);
+  }));
+
+  app.get('/api/webhooks/:id', withErrorHandler('get webhook')(async (c: Context) => {
+    const id = c.req.param('id');
+    const config = await new WebhookConfigEntity(c.env, id).getState();
+
+    if (!config || config.deletedAt) {
+      return notFound(c, 'Webhook configuration not found');
     }
-  });
 
-  app.get('/api/webhooks/:id', async (c: Context) => {
-    try {
-      const id = c.req.param('id');
-      const config = await new WebhookConfigEntity(c.env, id).getState();
+    return ok(c, config);
+  }));
 
-      if (!config || config.deletedAt) {
-        return notFound(c, 'Webhook configuration not found');
-      }
+  app.post('/api/webhooks', withErrorHandler('create webhook')(async (c: Context) => {
+    const body = await c.req.json<{
+      url: string;
+      events: string[];
+      secret: string;
+      active?: boolean;
+    }>();
 
-      return ok(c, config);
-    } catch (error) {
-      logger.error('Failed to get webhook', error);
-      return serverError(c, 'Failed to get webhook');
+    if (!body.url || !body.events || !body.secret) {
+      return bad(c, 'Missing required fields: url, events, secret');
     }
-  });
 
-  app.post('/api/webhooks', async (c: Context) => {
-    try {
-      const body = await c.req.json<{
-        url: string;
-        events: string[];
-        secret: string;
-        active?: boolean;
-      }>();
+    const id = `webhook-${crypto.randomUUID()}`;
+    const now = new Date().toISOString();
 
-      if (!body.url || !body.events || !body.secret) {
-        return bad(c, 'Missing required fields: url, events, secret');
-      }
+    const config = {
+      id,
+      url: body.url,
+      events: body.events,
+      secret: body.secret,
+      active: body.active ?? true,
+      createdAt: now,
+      updatedAt: now
+    };
 
-      const id = `webhook-${crypto.randomUUID()}`;
-      const now = new Date().toISOString();
+    await new WebhookConfigEntity(c.env, id).save(config);
 
-      const config = {
-        id,
-        url: body.url,
-        events: body.events,
-        secret: body.secret,
-        active: body.active ?? true,
-        createdAt: now,
-        updatedAt: now
-      };
+    logger.info('Webhook configuration created', { id, url: body.url, events: body.events });
 
-      await new WebhookConfigEntity(c.env, id).save(config);
+    return ok(c, config);
+  }));
 
-      logger.info('Webhook configuration created', { id, url: body.url, events: body.events });
+   app.put('/api/webhooks/:id', withErrorHandler('update webhook')(async (c: Context) => {
+    const id = c.req.param('id');
+    const existing = await new WebhookConfigEntity(c.env, id).getState();
 
-      return ok(c, config);
-    } catch (error) {
-      logger.error('Failed to create webhook', error);
-      return serverError(c, 'Failed to create webhook');
+    if (!existing || existing.deletedAt) {
+      return notFound(c, 'Webhook configuration not found');
     }
-  });
 
-  app.put('/api/webhooks/:id', async (c: Context) => {
-    try {
-      const id = c.req.param('id');
-      const existing = await new WebhookConfigEntity(c.env, id).getState();
+    const body = await c.req.json<{
+      url?: string;
+      events?: string[];
+      secret?: string;
+      active?: boolean;
+    }>();
 
-      if (!existing || existing.deletedAt) {
-        return notFound(c, 'Webhook configuration not found');
-      }
+    const updated = {
+      ...existing,
+      url: body.url ?? existing.url,
+      events: body.events ?? existing.events,
+      secret: body.secret ?? existing.secret,
+      active: body.active ?? existing.active,
+      updatedAt: new Date().toISOString()
+    };
 
-      const body = await c.req.json<{
-        url?: string;
-        events?: string[];
-        secret?: string;
-        active?: boolean;
-      }>();
+    await new WebhookConfigEntity(c.env, id).save(updated);
 
-      const updated = {
-        ...existing,
-        url: body.url ?? existing.url,
-        events: body.events ?? existing.events,
-        secret: body.secret ?? existing.secret,
-        active: body.active ?? existing.active,
-        updatedAt: new Date().toISOString()
-      };
+    logger.info('Webhook configuration updated', { id });
 
-      await new WebhookConfigEntity(c.env, id).save(updated);
+    return ok(c, updated);
+  }));
 
-      logger.info('Webhook configuration updated', { id });
+   app.delete('/api/webhooks/:id', withErrorHandler('delete webhook')(async (c: Context) => {
+    const id = c.req.param('id');
+    const existing = await new WebhookConfigEntity(c.env, id).getState();
 
-      return ok(c, updated);
-    } catch (error) {
-      logger.error('Failed to update webhook', error);
-      return serverError(c, 'Failed to update webhook');
+    if (!existing || existing.deletedAt) {
+      return notFound(c, 'Webhook configuration not found');
     }
-  });
 
-  app.delete('/api/webhooks/:id', async (c: Context) => {
-    try {
-      const id = c.req.param('id');
-      const existing = await new WebhookConfigEntity(c.env, id).getState();
+    const updated = {
+      ...existing,
+      deletedAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
 
-      if (!existing || existing.deletedAt) {
-        return notFound(c, 'Webhook configuration not found');
-      }
+    await new WebhookConfigEntity(c.env, id).save(updated);
 
-      const updated = {
-        ...existing,
-        deletedAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      };
+    logger.info('Webhook configuration deleted', { id });
 
-      await new WebhookConfigEntity(c.env, id).save(updated);
-
-      logger.info('Webhook configuration deleted', { id });
-
-      return ok(c, { id, deleted: true });
-    } catch (error) {
-      logger.error('Failed to delete webhook', error);
-      return serverError(c, 'Failed to delete webhook');
-    }
-  });
+    return ok(c, { id, deleted: true });
+  }));
 }
