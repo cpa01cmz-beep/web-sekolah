@@ -61,33 +61,29 @@ const shouldReportImmediate = (context: ErrorContext): boolean => {
 };
 
 const sendImmediateError = async (payload: ImmediatePayload): Promise<void> => {
-  try {
-    await withRetry(
-      async () => {
-        const response = await fetch("/api/client-errors", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        });
+  await withRetry(
+    async () => {
+      const response = await fetch("/api/client-errors", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
 
-        if (!response.ok) {
-          throw new Error(
-            `Failed to report immediate error: ${response.status} ${response.statusText}`
-          );
-        }
-
-        return undefined;
-      },
-      {
-        maxRetries: RetryCount.TWO,
-        baseDelay: RetryDelay.ONE_SECOND,
-        jitterMs: RetryDelay.ONE_SECOND,
-        timeout: ApiTimeout.ONE_MINUTE * 10
+      if (!response.ok) {
+        throw new Error(
+          `Failed to report immediate error: ${response.status} ${response.statusText}`
+        );
       }
-    );
-  } catch (err) {
-    throw err;
-  }
+
+      return undefined;
+    },
+    {
+      maxRetries: RetryCount.TWO,
+      baseDelay: RetryDelay.ONE_SECOND,
+      jitterMs: RetryDelay.ONE_SECOND,
+      timeout: ApiTimeout.ONE_MINUTE * 10
+    }
+  );
 };
 
 export const setupImmediateInterceptors = () => {
