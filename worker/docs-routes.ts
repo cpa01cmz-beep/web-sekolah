@@ -1,7 +1,8 @@
 import { Hono } from 'hono';
 import type { Env } from './core-utils';
 import { CircuitBreaker } from './CircuitBreaker';
-import { serverError } from './core-utils';
+import { withErrorHandler } from './routes/route-utils';
+import type { Context } from 'hono';
 
 const DOCS_TIMEOUT_MS = 30000;
 const DOCS_MAX_RETRIES = 3;
@@ -42,35 +43,27 @@ async function fetchWithRetry(url: string, maxRetries = DOCS_MAX_RETRIES): Promi
 }
 
 export function docsRoutes(app: Hono<{ Bindings: Env }>) {
-  app.get('/api-docs', async (c) => {
+  app.get('/api-docs', withErrorHandler('load API documentation')(async (c: Context) => {
     const specUrl = new URL(c.req.url);
     specUrl.pathname = '/openapi.yaml';
 
-    try {
-      const response = await fetchWithRetry(specUrl.toString());
-      const spec = await response.text();
-      return c.text(spec, 200, {
-        'Content-Type': 'application/x-yaml',
-      });
-    } catch (error) {
-      return serverError(c, error instanceof Error ? error.message : 'Failed to load OpenAPI specification');
-    }
-  });
+    const response = await fetchWithRetry(specUrl.toString());
+    const spec = await response.text();
+    return c.text(spec, 200, {
+      'Content-Type': 'application/x-yaml',
+    });
+  }));
 
-  app.get('/api-docs.yaml', async (c) => {
+  app.get('/api-docs.yaml', withErrorHandler('load OpenAPI specification')(async (c: Context) => {
     const specUrl = new URL(c.req.url);
     specUrl.pathname = '/openapi.yaml';
 
-    try {
-      const response = await fetchWithRetry(specUrl.toString());
-      const spec = await response.text();
-      return c.text(spec, 200, {
-        'Content-Type': 'application/x-yaml',
-      });
-    } catch (error) {
-      return serverError(c, error instanceof Error ? error.message : 'Failed to load OpenAPI specification');
-    }
-  });
+    const response = await fetchWithRetry(specUrl.toString());
+    const spec = await response.text();
+    return c.text(spec, 200, {
+      'Content-Type': 'application/x-yaml',
+    });
+  }));
 
   app.get('/api-docs.html', async (c) => {
     const html = `
@@ -114,7 +107,7 @@ export function docsRoutes(app: Hono<{ Bindings: Env }>) {
 </body>
 </html>
     `;
-    
+
     return c.html(html);
   });
 }
