@@ -2,6 +2,7 @@ import type { ImmediatePayload, ErrorContext, ConsoleNative, WrappedConsoleFn } 
 import { categorizeError, formatConsoleArgs } from './utils';
 import { globalDeduplication } from './deduplication';
 import { ApiTimeout, RetryDelay, RetryCount } from '../../config/time';
+import { withRetry } from '../resilience/Retry';
 
 const createImmediateErrorPayload = (
   message: string,
@@ -60,43 +61,32 @@ const shouldReportImmediate = (context: ErrorContext): boolean => {
 };
 
 const sendImmediateError = async (payload: ImmediatePayload): Promise<void> => {
-  const maxRetries = RetryCount.TWO;
-  const baseRetryDelay = RetryDelay.ONE_SECOND;
-  const requestTimeout = ApiTimeout.ONE_MINUTE * 10;
-  let lastError: Error | unknown;
+  try {
+    await withRetry(
+      async () => {
+        const response = await fetch("/api/client-errors", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
 
-  for (let attempt = 0; attempt <= maxRetries; attempt++) {
-    let timeoutId: NodeJS.Timeout;
-    try {
-      const controller = new AbortController();
-      timeoutId = setTimeout(() => controller.abort(), requestTimeout);
+        if (!response.ok) {
+          throw new Error(
+            `Failed to report immediate error: ${response.status} ${response.statusText}`
+          );
+        }
 
-      const response = await fetch("/api/client-errors", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-        signal: controller.signal,
-      });
-
-      clearTimeout(timeoutId);
-
-      if (!response.ok) {
-        throw new Error(
-          `Failed to report immediate error: ${response.status} ${response.statusText}`
-        );
+        return undefined;
+      },
+      {
+        maxRetries: RetryCount.TWO,
+        baseDelay: RetryDelay.ONE_SECOND,
+        jitterMs: RetryDelay.ONE_SECOND,
+        timeout: ApiTimeout.ONE_MINUTE * 10
       }
-
-      return;
-    } catch (err) {
-      lastError = err;
-      clearTimeout(timeoutId);
-
-      if (attempt < maxRetries) {
-        const jitter = Math.random() * RetryDelay.ONE_SECOND;
-        const delay = baseRetryDelay * Math.pow(2, attempt) + jitter;
-        await new Promise(resolve => setTimeout(resolve, delay));
-      }
-    }
+    );
+  } catch (err) {
+    throw err;
   }
 };
 

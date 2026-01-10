@@ -9,6 +9,7 @@ import { CachingTime, ApiTimeout, RetryDelay, RetryCount, CircuitBreakerConfig }
 import { STORAGE_KEYS } from '../constants/storage-keys';
 import { storage } from '../lib/storage';
 import { CircuitBreaker, type CircuitBreakerState } from './resilience/CircuitBreaker';
+import { withRetry } from './resilience/Retry';
 
 const getAuthToken = () => storage.getItem(STORAGE_KEYS.AUTH_TOKEN);
 
@@ -33,36 +34,6 @@ const circuitBreaker = new CircuitBreaker(CircuitBreakerConfig.FAILURE_THRESHOLD
 // ====================
 // Exponential Backoff Retry
 // ====================
-
-async function sleep(ms: number): Promise<void> {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
-
-async function fetchWithRetry<T>(
-  fn: () => Promise<T>,
-  maxRetries = 3,
-  baseDelay = 1000
-): Promise<T> {
-  let lastError: Error | undefined;
-  
-  for (let attempt = 0; attempt <= maxRetries; attempt++) {
-    try {
-      return await fn();
-    } catch (error) {
-      lastError = error as Error;
-      const apiError = lastError as ApiError;
-      
-      if (attempt === maxRetries || !apiError.retryable) {
-        throw lastError;
-      }
-      
-      const delay = baseDelay * Math.pow(2, attempt) + Math.random() * 1000;
-      await sleep(delay);
-    }
-  }
-  
-  throw lastError;
-}
 
 // ====================
 // Query Client Configuration
@@ -215,12 +186,28 @@ export async function apiClient<T>(path: string, init?: RequestInit & { timeout?
   };
 
   if (useCircuitBreaker) {
-    return circuitBreaker.execute(() => 
-      fetchWithRetry(executeRequest, RetryCount.THREE, RetryDelay.ONE_SECOND)
+    return circuitBreaker.execute(() =>
+      withRetry(executeRequest, {
+        maxRetries: RetryCount.THREE,
+        baseDelay: RetryDelay.ONE_SECOND,
+        jitterMs: RetryDelay.ONE_SECOND,
+        shouldRetry: (error) => {
+          const apiError = error as ApiError;
+          return apiError.retryable ?? false;
+        }
+      })
     );
   }
 
-  return fetchWithRetry(executeRequest, RetryCount.THREE, RetryDelay.ONE_SECOND);
+  return withRetry(executeRequest, {
+    maxRetries: RetryCount.THREE,
+    baseDelay: RetryDelay.ONE_SECOND,
+    jitterMs: RetryDelay.ONE_SECOND,
+    shouldRetry: (error) => {
+      const apiError = error as ApiError;
+      return apiError.retryable ?? false;
+    }
+  });
 }
 
 export function getCircuitBreakerState(): CircuitBreakerState {
