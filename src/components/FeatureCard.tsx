@@ -1,6 +1,7 @@
 import { LucideIcon } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { THEME_COLORS } from '@/theme/colors';
+import { memo } from 'react';
 
 interface FeatureCardProps {
   icon: LucideIcon;
@@ -9,7 +10,7 @@ interface FeatureCardProps {
   className?: string;
 }
 
-export function FeatureCard({ icon: Icon, title, description, className }: FeatureCardProps) {
+export const FeatureCard = memo(function FeatureCard({ icon: Icon, title, description, className }: FeatureCardProps) {
   return (
     <Card className={`text-center h-full hover:shadow-lg hover:-translate-y-1 transition-all duration-200 ${className}`}>
       <CardHeader>
@@ -23,4 +24,5 @@ export function FeatureCard({ icon: Icon, title, description, className }: Featu
       </CardContent>
     </Card>
   );
-}
+});
+FeatureCard.displayName = 'FeatureCard';

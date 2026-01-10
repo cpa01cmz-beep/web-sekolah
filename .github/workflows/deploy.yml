@@ -67,17 +67,19 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           JWT_SECRET: ${{ secrets.STAGING_JWT_SECRET }}
         run: |
-          wrangler deploy --env staging
+          wrangler deploy --env staging | tee /tmp/deploy_output.txt
+          echo "url=$(grep -oP 'https://\S+\.workers\.dev' /tmp/deploy_output.txt | head -1)" >> $GITHUB_OUTPUT
 
       - name: Health Check
         run: |
           max_retries=5
           retry_count=0
+          deployed_url="${{ steps.deploy.outputs.url }}"
           
           while [ $retry_count -lt $max_retries ]; do
-            echo "Health check attempt $((retry_count + 1)) of $max_retries"
+            echo "Health check attempt $((retry_count + 1)) of $max_retries to $deployed_url"
             
-            if curl -f -s -o /dev/null -w "%{http_code}" https://staging.your-domain.workers.dev/api/health | grep -q "200\|404"; then
+            if curl -f -s -o /dev/null -w "%{http_code}" "${deployed_url}/api/health" | grep -q "200\|404"; then
               echo "✅ Health check passed"
               exit 0
             fi
@@ -96,12 +98,12 @@ jobs:
           curl -X POST ${{ github.api_url }}/repos/${{ github.repository }}/statuses/${{ github.sha }} \
             -H "Authorization: Bearer ${{ github.token }}" \
             -H "Accept: application/vnd.github+json" \
-            -d '{
-              "state": "success",
-              "target_url": "https://staging.your-domain.workers.dev",
-              "description": "Deployed to staging",
-              "context": "deployment/staging"
-            }'
+            -d "{
+              \"state\": \"success\",
+              \"target_url\": \"${{ steps.deploy.outputs.url }}\",
+              \"description\": \"Deployed to staging\",
+              \"context\": \"deployment/staging\"
+            }"
 
   deploy-production:
     name: Deploy to Production
@@ -156,17 +158,19 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
         run: |
-          wrangler deploy --env production
+          wrangler deploy --env production | tee /tmp/deploy_output.txt
+          echo "url=$(grep -oP 'https://\S+\.workers\.dev' /tmp/deploy_output.txt | head -1)" >> $GITHUB_OUTPUT
 
       - name: Health Check
         run: |
           max_retries=5
           retry_count=0
+          deployed_url="${{ steps.deploy.outputs.url }}"
           
           while [ $retry_count -lt $max_retries ]; do
-            echo "Health check attempt $((retry_count + 1)) of $max_retries"
+            echo "Health check attempt $((retry_count + 1)) of $max_retries to $deployed_url"
             
-            if curl -f -s -o /dev/null -w "%{http_code}" https://your-domain.workers.dev/api/health | grep -q "200\|404"; then
+            if curl -f -s -o /dev/null -w "%{http_code}" "${deployed_url}/api/health" | grep -q "200\|404"; then
               echo "✅ Health check passed"
               exit 0
             fi
@@ -196,12 +200,12 @@ jobs:
           curl -X POST ${{ github.api_url }}/repos/${{ github.repository }}/statuses/${{ github.sha }} \
             -H "Authorization: Bearer ${{ github.token }}" \
             -H "Accept: application/vnd.github+json" \
-            -d '{
-              "state": "success",
-              "target_url": "https://your-domain.workers.dev",
-              "description": "Deployed to production",
-              "context": "deployment/production"
-            }'
+            -d "{
+              \"state\": \"success\",
+              \"target_url\": \"${{ steps.deploy.outputs.url }}\",
+              \"description\": \"Deployed to production\",
+              \"context\": \"deployment/production\"
+            }"
 
       - name: Notify Success
         if: success()
