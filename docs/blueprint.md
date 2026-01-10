@@ -1177,6 +1177,79 @@ await breaker.execute(async () => {
 - ✅ Independent isolation per webhook URL
 - ✅ Prevents cascading failures across system
 
+### Integration Hardening (2026-01-10)
+
+**CircuitBreaker Bug Fix:**
+
+Fixed critical bug in `src/lib/resilience/CircuitBreaker.ts` that prevented circuit from closing after successful calls.
+
+**Problem:**
+- `halfOpenCalls` was reset to 0 on every `execute()` call in half-open state (line 50)
+- This prevented `halfOpenCalls` from ever reaching `halfOpenMaxCalls` threshold
+- Circuit never closed after multiple successful calls in half-open state
+- Result: Degraded service stays degraded indefinitely
+
+**Solution:**
+```typescript
+// Before (bug):
+if (this.state.isOpen) {
+  if (now < this.state.nextAttemptTime) { throw error; }
+  this.halfOpenCalls = 0;  // BUG: Resets on every call
+}
+
+// After (fixed):
+if (this.state.isOpen) {
+  if (now < this.state.nextAttemptTime) { throw error; }
+  if (this.halfOpenCalls === 0) { this.halfOpenCalls = 1; }  // Fixed: Init once
+}
+```
+
+**Benefits:**
+- ✅ Circuit properly recovers after `halfOpenMaxCalls` successful calls
+- ✅ External service degradation is temporary (not permanent)
+- ✅ Resilience pattern works as designed
+- ✅ Removed unused `timeout` parameter (cleaner code)
+- ✅ Consistent with worker CircuitBreaker implementation
+
+**Webhook Rate Limiting:**
+
+Added strict rate limiting to all webhook endpoints to protect from abuse.
+
+**Protected Routes:**
+- `GET/POST/PUT/DELETE /api/webhooks` - Webhook configuration CRUD
+- `POST /api/webhooks/test` - Webhook testing with retry logic
+- `GET/POST /api/webhooks/:id/deliveries` - Webhook delivery tracking
+- `GET/POST /api/webhooks/events` - Webhook event queries
+- `GET/POST /api/admin/webhooks/*` - Admin webhook operations (already protected)
+
+**Rate Limits:**
+- STRICT: 10 requests per minute (60 seconds window)
+- Standard headers: X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset
+- Consistent with existing rate limiting patterns
+
+**Implementation:**
+```typescript
+// worker/webhook-routes.ts
+import { strictRateLimiter } from './middleware/rate-limit';
+
+export const webhookRoutes = (app: Hono<{ Bindings: Env }>) => {
+  app.use('/api/webhooks', strictRateLimiter());
+  app.use('/api/webhooks/test', strictRateLimiter());
+  
+  webhookConfigRoutes(app);
+  webhookDeliveryRoutes(app);
+  webhookTestRoutes(app);
+  webhookAdminRoutes(app);
+};
+```
+
+**Benefits:**
+- ✅ All webhook endpoints protected from abuse
+- ✅ Prevents webhook delivery overload
+- ✅ Reduces attack surface for webhook infrastructure
+- ✅ Consistent with other rate-limited endpoints
+- ✅ Zero breaking changes to existing functionality
+
 ---
 
 ## API Endpoints

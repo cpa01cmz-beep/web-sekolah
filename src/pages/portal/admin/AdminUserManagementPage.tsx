@@ -1,6 +1,5 @@
-import React, { useState, memo } from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { DialogTrigger } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
@@ -15,6 +14,7 @@ import { TableSkeleton } from '@/components/ui/loading-skeletons';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { UserForm } from '@/components/forms/UserForm';
 import { ROLE_COLORS } from '@/theme/colors';
+import { ResponsiveTable } from '@/components/ui/responsive-table';
 
 const RoleIcon: Record<UserRole, React.ComponentType<{ className?: string }>> = {
   student: GraduationCap,
@@ -22,30 +22,6 @@ const RoleIcon: Record<UserRole, React.ComponentType<{ className?: string }>> = 
   parent: UserCog,
   admin: Shield,
 };
-
-const UserRow = memo(({ user, onEdit, onDelete }: { user: SchoolUser; onEdit: (user: SchoolUser) => void; onDelete: (userId: string) => void }) => {
-  return (
-    <TableRow>
-      <TableCell className="font-medium">{user.name}</TableCell>
-      <TableCell>{user.email}</TableCell>
-      <TableCell className="text-center">
-        <Badge className={`text-white ${ROLE_COLORS[user.role].color} flex items-center gap-1.5 px-2.5 py-1`}>
-          <span aria-hidden="true">{React.createElement(RoleIcon[user.role], { className: "h-3 w-3" })}</span>
-          <span>{ROLE_COLORS[user.role].label}</span>
-        </Badge>
-      </TableCell>
-      <TableCell className="text-right space-x-2">
-        <Button variant="outline" size="icon" onClick={() => onEdit(user)} aria-label={`Edit user ${user.name}`}>
-          <Edit className="h-4 w-4" />
-        </Button>
-        <Button variant="destructive" size="icon" onClick={() => onDelete(user.id)} aria-label={`Delete user ${user.name}`}>
-          <Trash2 className="h-4 w-4" />
-        </Button>
-      </TableCell>
-    </TableRow>
-  );
-});
-UserRow.displayName = 'UserRow';
 
 export function AdminUserManagementPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -89,10 +65,54 @@ export function AdminUserManagementPage() {
     setUserIdToDelete(userId);
     deleteUserMutation.mutate();
   };
+  const handleEditUser = (user: SchoolUser) => {
+    setEditingUser(user);
+    setIsModalOpen(true);
+  };
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setEditingUser(null);
   };
+
+  const tableHeaders = [
+    { key: 'name', label: 'Name' },
+    { key: 'email', label: 'Email' },
+    { key: 'role', label: 'Role', className: 'text-center' },
+    { key: 'actions', label: 'Actions', className: 'text-right' },
+  ];
+
+  const tableRows = (users || []).map(user => ({
+    id: user.id,
+    cells: [
+      { key: 'name', content: user.name, className: 'font-medium' },
+      { key: 'email', content: user.email },
+      {
+        key: 'role',
+        content: (
+          <Badge className={`text-white ${ROLE_COLORS[user.role].color} flex items-center gap-1.5 px-2.5 py-1`}>
+            <span aria-hidden="true">{React.createElement(RoleIcon[user.role], { className: "h-3 w-3" })}</span>
+            <span>{ROLE_COLORS[user.role].label}</span>
+          </Badge>
+        ),
+        className: 'text-center',
+      },
+      {
+        key: 'actions',
+        content: (
+          <div className="flex gap-2 justify-end">
+            <Button variant="outline" size="icon" onClick={() => handleEditUser(user)} aria-label={`Edit user ${user.name}`}>
+              <Edit className="h-4 w-4" />
+            </Button>
+            <Button variant="destructive" size="icon" onClick={() => handleDeleteUser(user.id)} aria-label={`Delete user ${user.name}`}>
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          </div>
+        ),
+        className: 'text-right',
+      },
+    ],
+  }));
+
   return (
     <SlideUp className="space-y-6">
       <PageHeader
@@ -125,32 +145,10 @@ export function AdminUserManagementPage() {
               <AlertTitle>Error</AlertTitle>
               <AlertDescription>Failed to load users.</AlertDescription>
             </Alert>
+          ) : users && users.length > 0 ? (
+            <ResponsiveTable headers={tableHeaders} rows={tableRows} />
           ) : (
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Email</TableHead>
-                    <TableHead className="text-center">Role</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {users?.map(user => (
-                    <UserRow
-                      key={user.id}
-                      user={user}
-                      onEdit={(user) => {
-                        setEditingUser(user);
-                        setIsModalOpen(true);
-                      }}
-                      onDelete={handleDeleteUser}
-                    />
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
+            <p className="text-muted-foreground text-center py-8">No users found.</p>
           )}
         </CardContent>
       </Card>

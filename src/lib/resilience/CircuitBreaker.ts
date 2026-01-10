@@ -23,14 +23,12 @@ export class CircuitBreaker {
     nextAttemptTime: 0,
   };
   private readonly threshold: number;
-  private readonly timeout: number;
   private readonly resetTimeout: number;
   private readonly halfOpenMaxCalls: number;
   private halfOpenCalls = 0;
 
-  constructor(threshold = CircuitBreakerConfig.FAILURE_THRESHOLD, timeout = CircuitBreakerConfig.TIMEOUT_MS, resetTimeout = CircuitBreakerConfig.RESET_TIMEOUT_MS, halfOpenMaxCalls = 3) {
+  constructor(threshold = CircuitBreakerConfig.FAILURE_THRESHOLD, resetTimeout = CircuitBreakerConfig.RESET_TIMEOUT_MS, halfOpenMaxCalls = 3) {
     this.threshold = threshold;
-    this.timeout = timeout;
     this.resetTimeout = resetTimeout;
     this.halfOpenMaxCalls = halfOpenMaxCalls;
   }
@@ -38,7 +36,7 @@ export class CircuitBreaker {
   async execute<T>(fn: () => Promise<T>): Promise<T> {
     if (this.state.isOpen) {
       const now = Date.now();
-      
+
       if (now < this.state.nextAttemptTime) {
         const error = new Error('Circuit breaker is open') as ApiError;
         error.code = ErrorCode.CIRCUIT_BREAKER_OPEN;
@@ -47,7 +45,9 @@ export class CircuitBreaker {
         throw error;
       }
 
-      this.halfOpenCalls = 0;
+      if (this.halfOpenCalls === 0) {
+        this.halfOpenCalls = 1;
+      }
     }
 
     try {
@@ -78,13 +78,13 @@ export class CircuitBreaker {
     const now = Date.now();
     this.state.failureCount++;
     this.state.lastFailureTime = now;
-    
+
     if (this.state.isOpen) {
       this.halfOpenCalls = 0;
-      this.state.nextAttemptTime = now + this.timeout;
+      this.state.nextAttemptTime = now + this.resetTimeout;
     } else if (this.state.failureCount >= this.threshold) {
       this.state.isOpen = true;
-      this.state.nextAttemptTime = now + this.timeout;
+      this.state.nextAttemptTime = now + this.resetTimeout;
     }
   }
 

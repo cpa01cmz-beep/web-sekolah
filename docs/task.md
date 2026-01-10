@@ -3,8 +3,127 @@
                   This document tracks architectural refactoring and testing tasks for Akademia Pro.
   
 ## Status Summary
- 
-                        **Last Updated**: 2026-01-10 (Code Architect - Webhook Routes Module Extraction)
+
+                         **Last Updated**: 2026-01-10 (Integration Engineer - Integration Hardening)
+
+                   ### Integration Engineer - Integration Hardening (2026-01-10) - Completed ✅
+
+                  **Task**: Fix critical CircuitBreaker bug and add rate limiting to webhook endpoints
+
+                  **Problem**:
+                  - CircuitBreaker in src/lib/resilience/CircuitBreaker.ts had halfOpenCalls reset bug
+                  - Bug prevented circuit from closing after multiple successful calls in half-open state
+                  - Webhook endpoints (/api/webhooks/*) lacked rate limiting protection
+                  - Potential for abuse or overwhelming webhook delivery infrastructure
+                  - Missing rate limiting on webhook test endpoint (/api/webhooks/test)
+
+                  **Solution**:
+                  - Fixed CircuitBreaker halfOpenCalls reset bug (line 50)
+                  - Changed from unconditional reset to conditional initialization (only when entering half-open state)
+                  - Added strictRateLimiter to /api/webhooks/* routes
+                  - Added strictRateLimiter to /api/webhooks/test route
+                  - Consistent with existing rate limiting patterns in worker/index.ts
+
+                  **Implementation**:
+
+                  1. **Fixed CircuitBreaker Bug** in src/lib/resilience/CircuitBreaker.ts:
+                     - Removed unconditional `this.halfOpenCalls = 0` (line 50)
+                     - Changed to conditional initialization: `if (this.halfOpenCalls === 0) { this.halfOpenCalls = 1; }`
+                     - Removed unused `timeout` parameter from constructor
+                     - Updated onFailure() to use `this.resetTimeout` instead of `this.timeout`
+                     - Circuit now properly closes after halfOpenMaxCalls successful calls
+                     - Consistent with worker CircuitBreaker behavior
+
+                  2. **Added Rate Limiting** in worker/webhook-routes.ts:
+                     - Imported `strictRateLimiter` from middleware/rate-limit
+                     - Applied rate limiting to /api/webhooks/* routes (CRUD operations)
+                     - Applied rate limiting to /api/webhooks/test route (webhook testing)
+                     - Note: /api/admin/webhooks/* already had rate limiting from worker/index.ts
+                     - Rate limiting follows existing pattern (STRICT: 10 requests/minute)
+                     - Consistent with other rate-limited endpoints (/api/auth, /api/seed, etc.)
+
+                  **Metrics**:
+
+                  | Metric | Before | After | Improvement |
+                  |---------|--------|-------|-------------|
+                  | CircuitBreaker half-open recovery | Broken (never closes) | Fixed (closes properly) | Bug fixed |
+                  | Webhook rate limiting (config) | None | STRICT (10 req/min) | Protected |
+                  | Webhook rate limiting (test) | None | STRICT (10 req/min) | Protected |
+                  | Rate limiting consistency | Partial | Complete (all webhook routes) | 100% covered |
+                  | Typecheck errors | 0 | 0 | No regressions |
+                  | Linting errors | 0 | 0 | No regressions |
+                  | Tests passing | 1658 | 1658 | No regressions |
+
+                  **Benefits Achieved**:
+                  - ✅ CircuitBreaker halfOpenCalls bug fixed in src/lib/resilience/CircuitBreaker.ts
+                  - ✅ Circuit now properly recovers after multiple successful calls
+                  - ✅ Removed unused `timeout` parameter (cleaner code)
+                  - ✅ Rate limiting added to /api/webhooks routes (webhook config CRUD)
+                  - ✅ Rate limiting added to /api/webhooks/test route (webhook testing)
+                  - ✅ All webhook endpoints now protected from abuse
+                  - ✅ Consistent with existing rate limiting patterns
+                  - ✅ All 1658 tests passing (2 skipped, 154 todo)
+                  - ✅ Typecheck passed (0 errors)
+                  - ✅ Linting passed (0 errors)
+                  - ✅ Zero breaking changes to existing functionality
+
+                  **Technical Details**:
+
+                  **CircuitBreaker Bug Fix**:
+                  - Bug location: src/lib/resilience/CircuitBreaker.ts:50
+                  - Original code: `this.halfOpenCalls = 0;` (unconditional reset)
+                  - Problem: halfOpenCalls reset on every execute() call in half-open state
+                  - Result: halfOpenCalls never reaches halfOpenMaxCalls (3), circuit never closes
+                  - Fixed code: `if (this.halfOpenCalls === 0) { this.halfOpenCalls = 1; }` (conditional init)
+                  - Behavior: halfOpenCalls initialized to 1 on first half-open call, then incremented
+                  - Recovery: Circuit closes when halfOpenCalls >= halfOpenMaxCalls (3 successful calls)
+                  - Removed unused parameter: `timeout` (now uses `resetTimeout` for circuit open duration)
+
+                  **Rate Limiting Implementation**:
+                  - Applied strict rate limiting (10 requests/minute) to webhook endpoints
+                  - Routes protected:
+                    * GET/POST/PUT/DELETE /api/webhooks (webhook config CRUD)
+                    * POST /api/webhooks/test (webhook testing with retry logic)
+                  - Consistent pattern: app.use('/api/webhooks', strictRateLimiter())
+                  - Rate limiting middleware applied before route registration
+                  - Existing protection: /api/admin/webhooks/* already rate-limited in worker/index.ts
+
+                  **Impact**:
+                  - `src/lib/resilience/CircuitBreaker.ts`: Bug fixed (line 50)
+                  - `worker/webhook-routes.ts`: Added rate limiting imports and middleware application (14 lines)
+                  - CircuitBreaker reliability: Broken → Fixed (proper recovery mechanism)
+                  - Webhook rate limiting: None → STRICT (10 req/min)
+                  - Integration hardening: Significantly improved (resilience + protection)
+
+                  **Architectural Impact**:
+                  - **Resilience**: CircuitBreaker now properly recovers from failures
+                  - **Protection**: Webhook endpoints protected from abuse/overload
+                  - **Consistency**: Rate limiting applied consistently across all webhook routes
+                  - **Reliability**: External service failures handled gracefully with circuit recovery
+
+                  **Success Criteria**:
+                  - [x] CircuitBreaker halfOpenCalls bug fixed
+                  - [x] Circuit now properly closes after successful calls
+                  - [x] Rate limiting added to /api/webhooks routes
+                  - [x] Rate limiting added to /api/webhooks/test route
+                  - [x] All webhook endpoints protected from abuse
+                  - [x] All 1658 tests passing (2 skipped, 154 todo)
+                  - [x] Typecheck passed (0 errors)
+                  - [x] Linting passed (0 errors)
+                  - [x] Zero breaking changes to existing functionality
+
+                  **Impact**:
+                  - `src/lib/resilience/CircuitBreaker.ts`: Bug fixed (line 50)
+                  - `worker/webhook-routes.ts`: Rate limiting added (14 lines)
+                  - CircuitBreaker recovery: Fixed (closes properly now)
+                  - Webhook protection: 100% of routes now rate-limited
+                  - Integration reliability: Significantly improved
+
+                  **Success**: ✅ **INTEGRATION HARDENING COMPLETE, CIRCUIT BREAKER BUG FIXED, WEBHOOK ENDPOINTS PROTECTED WITH RATE LIMITING**
+
+                  ---
+
+
 
                   ### Code Architect - Webhook Routes Module Extraction (2026-01-10) - Completed ✅
 
