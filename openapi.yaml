@@ -59,6 +59,8 @@ tags:
     description: Student portal endpoints
   - name: Teachers
     description: Teacher portal endpoints
+  - name: Parents
+    description: Parent portal endpoints
   - name: Admin
     description: Admin portal endpoints
   - name: Webhooks
@@ -179,6 +181,174 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
         '404':
           description: Student not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /students/{id}/grades:
+    get:
+      tags:
+        - Students
+      summary: Get student grades
+      description: Retrieves all grades for a specific student
+      operationId: getStudentGrades
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Student ID
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Grades retrieved successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Grade'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Student not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /students/{id}/schedule:
+    get:
+      tags:
+        - Students
+      summary: Get student schedule
+      description: Retrieves schedule for a specific student
+      operationId: getStudentSchedule
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Student ID
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Schedule retrieved successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/ScheduleItem'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Student or class not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /students/{id}/card:
+    get:
+      tags:
+        - Students
+      summary: Get student card
+      description: Retrieves student card with grades distribution and recent grades
+      operationId: getStudentCard
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Student ID
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Student card retrieved successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/StudentCardData'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Student not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /parents/{id}/dashboard:
+    get:
+      tags:
+        - Parents
+      summary: Get parent dashboard
+      description: Retrieves parent dashboard with child's schedule, grades, and announcements
+      operationId: getParentDashboard
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Parent ID
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Dashboard data retrieved successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/ParentDashboard'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Parent not found
           content:
             application/json:
               schema:
