@@ -14002,7 +14002,7 @@ Excluded tests follow existing skip pattern from service tests:
 
 ---
 
-## [REFACTOR] Centralize Hardcoded Mock Data
+## [REFACTOR] Centralize Hardcoded Mock Data - Completed ✅
 
 - Location: src/pages/portal/admin/AdminAnnouncementsPage.tsx (lines 21-25), src/pages/portal/teacher/TeacherAnnouncementsPage.tsx (lines 19-24)
 - Issue: Duplicate mock data defined in multiple announcement pages
@@ -14016,6 +14016,89 @@ Excluded tests follow existing skip pattern from service tests:
   - Update AdminAnnouncementsPage and TeacherAnnouncementsPage to import from shared file
 - Priority: Medium
 - Effort: Small
+
+**Implementation (2026-01-10)**:
+
+1. **Created Centralized Mock Data Module** - `src/mock-data/announcements.ts`:
+   - Exported `Announcement` type with interface definition
+   - Exported `initialAnnouncements` array with shared mock data (3 announcements)
+   - Mock data includes: Mid-term Exam Schedule, Class 11-A Project Deadline, Parent-Teacher Meeting Schedule
+
+2. **Updated AdminAnnouncementsPage** - `src/pages/portal/admin/AdminAnnouncementsPage.tsx`:
+   - Removed inline `initialAnnouncements` array definition (5 lines removed)
+   - Removed local `Announcement` type definition (6 lines removed)
+   - Added import: `import { initialAnnouncements } from '@/mock-data/announcements'`
+   - Added import: `import type { Announcement } from '@/mock-data/announcements'`
+   - Benefits: Cleaner code, single source of truth for announcement mock data
+
+3. **Updated TeacherAnnouncementsPage** - `src/pages/portal/teacher/TeacherAnnouncementsPage.tsx`:
+   - Removed inline `initialAnnouncements` array definition (4 lines removed)
+   - Removed local `Announcement` type definition (6 lines removed)
+   - Added import: `import { initialAnnouncements } from '@/mock-data/announcements'`
+   - Added import: `import type { Announcement } from '@/mock-data/announcements'`
+   - Benefits: Cleaner code, consistent with admin page
+
+**Metrics**:
+
+| Metric | Before | After | Improvement |
+|---------|--------|-------|-------------|
+| Duplicate mock data definitions | 2 (AdminAnnouncementsPage + TeacherAnnouncementsPage) | 0 (shared module) | 100% eliminated |
+| Duplicate Announcement type definitions | 2 (inline in both pages) | 0 (shared type) | 100% eliminated |
+| Lines removed from pages | 21 (11 + 10) | 0 | 21 lines removed |
+| New mock data module | 0 | 16 | New shared module |
+| DRY principle violation | Yes | No | Resolved |
+| Maintainability | Difficult (multiple copies) | Easy (single source of truth) | Improved |
+
+**Benefits Achieved**:
+- ✅ Centralized mock data module created (src/mock-data/announcements.ts)
+- ✅ Announcement type exported for type safety
+- ✅ AdminAnnouncementsPage uses shared mock data (11 lines removed)
+- ✅ TeacherAnnouncementsPage uses shared mock data (10 lines removed)
+- ✅ Code duplication eliminated (100% DRY)
+- ✅ Single source of truth for announcement mock data
+- ✅ All 1658 tests passing (2 skipped, 154 todo)
+- ✅ Linting passed (0 errors)
+- ✅ TypeScript compilation successful (0 errors)
+- ✅ Zero breaking changes to existing functionality
+
+**Technical Details**:
+
+**Mock Data Structure**:
+- `Announcement` type with: id, title, content, author, date
+- `initialAnnouncements` array with 3 sample announcements
+- All dates are ISO 8601 formatted strings
+- Author names reflect Indonesian school context (Admin Sekolah, Ibu Siti)
+
+**Module Organization**:
+- Created `src/mock-data/` directory for centralized mock data
+- `announcements.ts` module exports type and data
+- Type-safe imports via type-only import (`import type { Announcement }`)
+- Reusable pattern for future mock data centralization
+
+**Architectural Impact**:
+- **DRY Principle**: Single source of truth for announcement mock data
+- **Separation of Concerns**: Mock data separated from page logic
+- **Maintainability**: One place to update announcement mock data
+- **Consistency**: Both admin and teacher pages use same base data
+
+**Success Criteria**:
+- [x] Centralized mock data module created (src/mock-data/announcements.ts)
+- [x] Announcement type exported for type safety
+- [x] AdminAnnouncementsPage uses shared mock data
+- [x] TeacherAnnouncementsPage uses shared mock data
+- [x] All inline mock data definitions removed from pages
+- [x] All 1658 tests passing (2 skipped, 154 todo)
+- [x] Linting passed (0 errors)
+- [x] TypeScript compilation successful (0 errors)
+- [x] Zero breaking changes to existing functionality
+
+**Impact**:
+- `src/mock-data/announcements.ts`: New file (16 lines, shared mock data)
+- `src/pages/portal/admin/AdminAnnouncementsPage.tsx`: Removed 11 lines, added 2 imports
+- `src/pages/portal/teacher/TeacherAnnouncementsPage.tsx`: Removed 10 lines, added 2 imports
+- Mock data duplication: 100% eliminated (2 duplicates → 1 shared module)
+- Code maintainability: Improved (single source of truth for announcement data)
+- Future extensibility: Easy to add role-specific mock data via `getInitialAnnouncements(role)`
 
 ---
 
