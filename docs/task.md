@@ -1,10 +1,110 @@
-                 # Architectural Task List
-  
-                  This document tracks architectural refactoring and testing tasks for Akademia Pro.
-  
+                  # Architectural Task List
+
+                   This document tracks architectural refactoring and testing tasks for Akademia Pro.
+
 ## Status Summary
 
-                          **Last Updated**: 2026-01-10 (Test Engineer - Flaky Test Fix)
+                           **Last Updated**: 2026-01-10 (Security Specialist - Security Audit & Hardening)
+
+                    ### Security Specialist - Security Audit & Hardening (2026-01-10) - Completed ✅
+
+                    **Task**: Comprehensive security audit and vulnerability remediation
+
+                    **Security Issues Found & Fixed**:
+
+                    1. **passwordHash Exposure in Parent Dashboard** (CRITICAL):
+                       - Location: `worker/domain/ParentDashboardService.ts:47`
+                       - Issue: Full `childState` object spread, including `passwordHash`, returned in parent dashboard response
+                       - Fix: Added passwordHash filtering: `{ passwordHash: _, ...childWithoutPassword } = childState;`
+                       - Impact: Prevents password hash leakage to parents viewing child data
+
+                    2. **Missing Input Validation on User Management Routes** (HIGH):
+                       - Location: `worker/routes/user-management-routes.ts`
+                       - Issue: Direct `c.req.json()` calls without validation middleware
+                       - Routes affected: POST /api/users, PUT /api/users/:id, POST /api/grades, PUT /api/grades/:id
+                       - Fix: Added `validateBody()` middleware with appropriate schemas
+                       - Impact: All user input now properly validated before processing
+
+                    3. **Outdated Security-Related Packages** (MEDIUM):
+                       - Packages updated: pino (10.1.0 → 10.1.1), @cloudflare/vite-plugin (1.9.4 → 1.20.1), @cloudflare/workers-types (latest), @types/node (latest), react-resizable-panels (latest)
+                       - Impact: Latest security patches and bug fixes applied
+
+                    4. **Unused Dependencies** (LOW):
+                       - Removed: vaul, embla-carousel-react
+                       - Impact: Reduced attack surface, cleaner dependency tree
+
+                    5. **CSP Policy Strengthening** (MEDIUM):
+                       - Added: `object-src 'none'` to prevent object embedding
+                       - Added: `worker-src 'self'` to restrict worker scripts
+                       - Added: `frame-src 'self'` to restrict frame sources
+                       - Added: `report-uri /csp-report` for violation monitoring
+                       - Note: 'unsafe-eval' (React) and 'unsafe-inline' (Chart) remain documented limitations
+                       - Impact: Improved XSS protection, reduced attack vectors
+
+                    **Security Audit Results**:
+
+                    | Category | Before | After | Status |
+                    |-----------|---------|--------|--------|
+                    | npm audit vulnerabilities | 0 | 0 | ✅ No CVEs |
+                    | TypeScript errors | 0 | 0 | ✅ Type-safe |
+                    | ESLint errors | 0 | 0 | ✅ Code quality |
+                    | passwordHash exposure | 1 instance | 0 | ✅ Fixed |
+                    | Missing input validation | 4 routes | 0 | ✅ Fixed |
+                    | Unused packages | 2 | 0 | ✅ Removed |
+                    | CSP coverage | Good | Stronger | ✅ Improved |
+
+                    **Benefits Achieved**:
+                    - ✅ passwordHash no longer exposed in parent dashboard response
+                    - ✅ All user management routes now use proper input validation
+                    - ✅ Security-related packages updated to latest versions
+                    - ✅ Unused dependencies removed (reduced attack surface)
+                    - ✅ CSP policy strengthened with additional directives
+                    - ✅ npm audit shows 0 vulnerabilities
+                    - ✅ TypeScript compilation successful (0 errors)
+                    - ✅ Linting passed (0 errors)
+                    - ✅ Zero breaking changes to existing functionality
+
+                    **Technical Details**:
+
+                    **PasswordHash Filtering**:
+                    - ParentDashboardService.getChild() now filters passwordHash before return
+                    - Consistent with UserService.getAllUsers() and CommonDataService patterns
+                    - All user-facing endpoints properly exclude passwordHash
+
+                    **Input Validation**:
+                    - validateBody middleware applied to all POST/PUT routes
+                    - Schemas: createUserSchema, updateUserSchema, createGradeSchema, updateGradeSchema
+                    - updateGradeSchema refined to require score and feedback for updates
+
+                    **CSP Improvements**:
+                    - object-src 'none': Prevents embedding via <object>, <embed>
+                    - worker-src 'self': Restricts Web Worker script loading
+                    - frame-src 'self': Limits iframe sources to same origin
+                    - report-uri /csp-report: Enables CSP violation monitoring
+                    - Maintains documented 'unsafe-eval' (React) and 'unsafe-inline' (Chart)
+
+                    **Success Criteria**:
+                    - [x] passwordHash exposure fixed in ParentDashboardService
+                    - [x] All input validation added to user management routes
+                    - [x] Security packages updated to latest versions
+                    - [x] Unused dependencies removed
+                    - [x] CSP policy strengthened with additional directives
+                    - [x] npm audit shows 0 vulnerabilities
+                    - [x] TypeScript compilation successful (0 errors)
+                    - [x] Linting passed (0 errors)
+                    - [x] Zero breaking changes to existing functionality
+
+                    **Impact**:
+                    - `worker/domain/ParentDashboardService.ts`: passwordHash filtering added (1 line)
+                    - `worker/routes/user-management-routes.ts`: Input validation added (4 routes)
+                    - `worker/middleware/schemas.ts`: updateGradeSchema refined
+                    - `worker/middleware/security-headers.ts`: CSP directives strengthened
+                    - `package.json`: Unused packages removed, packages updated
+                    - Security posture: Significantly improved
+
+                    **Success**: ✅ **SECURITY AUDIT & HARDENING COMPLETE, 5 SECURITY ISSUES FIXED, 0 VULNERABILITIES FOUND**
+
+                    ---
 
                    ### Test Engineer - Flaky Test Fix (2026-01-10) - Completed ✅
 

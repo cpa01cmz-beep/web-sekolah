@@ -6,6 +6,8 @@ import { UserService, CommonDataService, GradeService } from '../domain';
 import { WebhookService } from '../webhook-service';
 import { toWebhookPayload } from '../webhook-types';
 import { withAuth } from './route-utils';
+import { validateBody } from '../middleware/validation';
+import { createUserSchema, updateUserSchema, createGradeSchema, updateGradeSchema } from '../middleware/schemas';
 import type { Context } from 'hono';
 
 export function userRoutes(app: Hono<{ Bindings: Env }>) {
@@ -14,16 +16,16 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
     return ok(c, users);
   });
 
-  app.post('/api/users', ...withAuth('admin'), async (c: Context) => {
-    const userData = await c.req.json<CreateUserData>();
+  app.post('/api/users', ...withAuth('admin'), validateBody(createUserSchema), async (c: Context) => {
+    const userData = c.get('validatedBody') as CreateUserData;
     const newUser = await UserService.createUser(c.env, userData);
     await WebhookService.triggerEvent(c.env, 'user.created', toWebhookPayload(newUser));
     return ok(c, newUser);
   });
 
-  app.put('/api/users/:id', ...withAuth('admin'), async (c: Context) => {
+  app.put('/api/users/:id', ...withAuth('admin'), validateBody(updateUserSchema), async (c: Context) => {
     const userId = c.req.param('id');
-    const userData = await c.req.json<UpdateUserData>();
+    const userData = c.get('validatedBody') as UpdateUserData;
     try {
       const updatedUser = await UserService.updateUser(c.env, userId, userData);
       await WebhookService.triggerEvent(c.env, 'user.updated', toWebhookPayload(updatedUser));
@@ -47,11 +49,11 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
     return ok(c, result);
   });
 
-  app.put('/api/grades/:id', ...withAuth('teacher'), async (c: Context) => {
+  app.put('/api/grades/:id', ...withAuth('teacher'), validateBody(updateGradeSchema), async (c: Context) => {
     const gradeId = c.req.param('id');
-    const { score, feedback } = await c.req.json<{ score: number; feedback: string }>();
+    const validatedData = c.get('validatedBody') as { score: number; feedback: string };
     try {
-      const updatedGrade = await GradeService.updateGrade(c.env, gradeId, { score, feedback });
+      const updatedGrade = await GradeService.updateGrade(c.env, gradeId, { score: validatedData.score, feedback: validatedData.feedback });
       await WebhookService.triggerEvent(c.env, 'grade.updated', toWebhookPayload(updatedGrade));
       return ok(c, updatedGrade);
     } catch (error) {
@@ -62,10 +64,10 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
     }
   });
 
-  app.post('/api/grades', ...withAuth('teacher'), async (c: Context) => {
-    const gradeData = await c.req.json<Partial<Grade> & { studentId: string; courseId: string }>();
+  app.post('/api/grades', ...withAuth('teacher'), validateBody(createGradeSchema), async (c: Context) => {
+    const validatedData = c.get('validatedBody') as typeof createGradeSchema._output;
     try {
-      const newGrade = await GradeService.createGrade(c.env, gradeData);
+      const newGrade = await GradeService.createGrade(c.env, validatedData);
       await WebhookService.triggerEvent(c.env, 'grade.created', toWebhookPayload(newGrade));
       return ok(c, newGrade);
     } catch (error) {

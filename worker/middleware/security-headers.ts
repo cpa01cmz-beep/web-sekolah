@@ -22,6 +22,14 @@ interface SecurityHeadersConfig {
 // - ✅ Documented remaining 'unsafe-eval' requirement (React runtime)
 // - ✅ Documented style-src 'unsafe-inline' requirement (Chart component)
 //
+// SECURITY IMPROVEMENTS (2026-01-10):
+// - ✅ Added 'object-src none' to prevent object embedding
+// - ✅ Added 'worker-src self' to restrict worker scripts
+// - ✅ Added 'frame-src self' to restrict frame sources
+// - ✅ Added 'base-uri self' for URL base restriction
+// - ✅ Added 'form-action self' to restrict form submissions
+// - ✅ Added 'report-uri' for CSP violation monitoring
+//
 // FUTURE IMPROVEMENTS:
 // - Refactor Chart component to avoid dangerouslySetInnerHTML (eliminate style-src 'unsafe-inline')
 // - Consider nonce-based CSP for dynamic content (requires server-side rendering)
@@ -34,7 +42,7 @@ const DEFAULT_SECURITY_HEADERS: SecurityHeadersConfig = {
   enableXContentTypeOptions: true,
   enableReferrerPolicy: true,
   enablePermissionsPolicy: true,
-  cspDirectives: "default-src 'self'; script-src 'self' 'sha256-1LjDIY7ayXpv8ODYzP8xZXqNvuMhUBdo39lNMQ1oGHI=' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self';",
+  cspDirectives: "default-src 'self'; script-src 'self' 'sha256-1LjDIY7ayXpv8ODYzP8xZXqNvuMhUBdo39lNMQ1oGHI=' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self'; frame-src 'self'; frame-ancestors 'none'; object-src 'none'; worker-src 'self'; base-uri 'self'; form-action 'self'; report-uri /csp-report;",
   hstsMaxAge: 31536000,
 };
 

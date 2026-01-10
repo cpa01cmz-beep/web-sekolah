@@ -29,13 +29,13 @@ export class ParentDashboardService {
   private static async getChild(env: Env, childId: string): Promise<Student & { className: string }> {
     const childEntity = new UserEntity(env, childId);
     const childState = await childEntity.getState();
-    
+
     if (!childState || childState.role !== 'student') {
       throw new Error('Child not found');
     }
 
     const childRoleFields = getRoleSpecificFields(childState);
-    
+
     let className = 'N/A';
     if (childRoleFields.classId) {
       const classEntity = new ClassEntity(env, childRoleFields.classId);
@@ -43,8 +43,9 @@ export class ParentDashboardService {
       className = classState?.name || 'N/A';
     }
 
+    const { passwordHash: _, ...childWithoutPassword } = childState;
     return {
-      ...childState,
+      ...childWithoutPassword,
       className
     } as Student & { className: string };
   }
