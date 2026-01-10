@@ -47,6 +47,7 @@ export function StudentGradesPage() {
         key: 'grade',
         content: (
           <Badge className={`text-white ${getGradeColorClass(grade.score)}`}>
+            <span className="sr-only">{grade.score >= 70 ? 'Passing grade: ' : 'Failing grade: '}</span>
             {getGradeLetter(grade.score)}
           </Badge>
         ),

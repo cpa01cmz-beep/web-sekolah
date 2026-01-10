@@ -13,14 +13,18 @@ import { formatDate } from '@/utils/date';
 import { getGradeBadgeVariant, getGradeLetter } from '@/utils/grades';
 import type { ParentDashboardData } from '@shared/types';
 
-const GradeItem = memo(({ grade }: { grade: ParentDashboardData['childGrades'][0] }) => (
-  <li className="flex items-center justify-between">
-    <p className="text-sm font-medium">{grade.courseId}</p>
-    <Badge variant={getGradeBadgeVariant(grade.score)} className="bg-green-500 text-white">
-      {getGradeLetter(grade.score)} ({grade.score})
-    </Badge>
-  </li>
-));
+const GradeItem = memo(({ grade }: { grade: ParentDashboardData['childGrades'][0] }) => {
+  const isPassing = grade.score >= 70;
+  return (
+    <li className="flex items-center justify-between">
+      <p className="text-sm font-medium">{grade.courseId}</p>
+      <Badge variant={getGradeBadgeVariant(grade.score)} className="bg-green-500 text-white">
+        <span className="sr-only">{isPassing ? 'Passing grade: ' : 'Failing grade: '}</span>
+        {getGradeLetter(grade.score)} ({grade.score})
+      </Badge>
+    </li>
+  );
+});
 GradeItem.displayName = 'GradeItem';
 
 const ScheduleItem = memo(({ item }: { item: ParentDashboardData['childSchedule'][0] }) => (
