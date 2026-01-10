@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { validateUserAccess } from '../routes/route-utils';
+import { validateUserAccess, withAuth, withUserValidation, withErrorHandler } from '../routes/route-utils';
 import type { Context } from 'hono';
 
 describe('route-utils', () => {
@@ -412,6 +412,232 @@ describe('route-utils', () => {
         expect(result).toBe(false);
         expect(mockContext.json).toHaveBeenCalled();
       });
+    });
+  });
+
+  describe('withAuth', () => {
+    it('should return array with authenticate and authorize for student role', () => {
+      const middlewares = withAuth('student');
+      
+      expect(Array.isArray(middlewares)).toBe(true);
+      expect(middlewares).toHaveLength(2);
+    });
+
+    it('should return array with authenticate and authorize for teacher role', () => {
+      const middlewares = withAuth('teacher');
+      
+      expect(Array.isArray(middlewares)).toBe(true);
+      expect(middlewares).toHaveLength(2);
+    });
+
+    it('should return array with authenticate and authorize for parent role', () => {
+      const middlewares = withAuth('parent');
+      
+      expect(Array.isArray(middlewares)).toBe(true);
+      expect(middlewares).toHaveLength(2);
+    });
+
+    it('should return array with authenticate and authorize for admin role', () => {
+      const middlewares = withAuth('admin');
+      
+      expect(Array.isArray(middlewares)).toBe(true);
+      expect(middlewares).toHaveLength(2);
+    });
+
+    it('should return readonly tuple type', () => {
+      const middlewares = withAuth('student');
+      
+      expect(middlewares).toBeInstanceOf(Array);
+    });
+  });
+
+  describe('withUserValidation', () => {
+    it('should return array with three middleware functions', () => {
+      const middlewares = withUserValidation('student', 'data');
+      
+      expect(Array.isArray(middlewares)).toBe(true);
+      expect(middlewares).toHaveLength(3);
+    });
+
+    it('should return middleware array for student role', () => {
+      const middlewares = withUserValidation('student', 'grades');
+      
+      expect(middlewares).toHaveLength(3);
+    });
+
+    it('should return middleware array for teacher role', () => {
+      const middlewares = withUserValidation('teacher', 'dashboard');
+      
+      expect(middlewares).toHaveLength(3);
+    });
+
+    it('should return middleware array for parent role', () => {
+      const middlewares = withUserValidation('parent', 'schedule');
+      
+      expect(middlewares).toHaveLength(3);
+    });
+
+    it('should use default resourceType when not specified', () => {
+      const middlewares = withUserValidation('student');
+      
+      expect(middlewares).toHaveLength(3);
+    });
+
+    it('should use custom resourceType when specified', () => {
+      const middlewares = withUserValidation('teacher', 'announcements');
+      
+      expect(middlewares).toHaveLength(3);
+    });
+  });
+
+  describe('withErrorHandler', () => {
+    it('should return a function that wraps handler with error handling', () => {
+      const errorHandler = withErrorHandler('test operation');
+      
+      expect(typeof errorHandler).toBe('function');
+    });
+
+    it('should call handler successfully and return response', async () => {
+      const mockHandler = vi.fn().mockResolvedValue(new Response('success', { status: 200 }));
+      const errorHandler = withErrorHandler('test operation');
+      
+      const wrappedHandler = errorHandler(mockHandler);
+      const result = await wrappedHandler(mockContext);
+      
+      expect(mockHandler).toHaveBeenCalledWith(mockContext);
+      expect(result).toBeInstanceOf(Response);
+    });
+
+    it('should catch error and call serverError', async () => {
+      const mockHandler = vi.fn().mockRejectedValue(new Error('Test error'));
+      const errorHandler = withErrorHandler('test operation');
+      
+      const wrappedHandler = errorHandler(mockHandler);
+      await wrappedHandler(mockContext);
+      
+      expect(mockHandler).toHaveBeenCalledWith(mockContext);
+      expect(mockContext.json).toHaveBeenCalled();
+    });
+
+    it('should catch TypeError and call serverError', async () => {
+      const mockHandler = vi.fn().mockRejectedValue(new TypeError('Type error'));
+      const errorHandler = withErrorHandler('type operation');
+      
+      const wrappedHandler = errorHandler(mockHandler);
+      await wrappedHandler(mockContext);
+      
+      expect(mockHandler).toHaveBeenCalledWith(mockContext);
+      expect(mockContext.json).toHaveBeenCalled();
+    });
+
+    it('should include operation name in error message', async () => {
+      const mockHandler = vi.fn().mockRejectedValue(new Error('Test error'));
+      const errorHandler = withErrorHandler('create user');
+      
+      const wrappedHandler = errorHandler(mockHandler);
+      await wrappedHandler(mockContext);
+      
+      expect(mockHandler).toHaveBeenCalledWith(mockContext);
+      expect(mockContext.json).toHaveBeenCalled();
+    });
+
+    it('should catch null error and call serverError', async () => {
+      const mockHandler = vi.fn().mockRejectedValue(null);
+      const errorHandler = withErrorHandler('null operation');
+      
+      const wrappedHandler = errorHandler(mockHandler);
+      await wrappedHandler(mockContext);
+      
+      expect(mockHandler).toHaveBeenCalledWith(mockContext);
+      expect(mockContext.json).toHaveBeenCalled();
+    });
+
+    it('should catch undefined error and call serverError', async () => {
+      const mockHandler = vi.fn().mockRejectedValue(undefined);
+      const errorHandler = withErrorHandler('undefined operation');
+      
+      const wrappedHandler = errorHandler(mockHandler);
+      await wrappedHandler(mockContext);
+      
+      expect(mockHandler).toHaveBeenCalledWith(mockContext);
+      expect(mockContext.json).toHaveBeenCalled();
+    });
+
+    it('should catch string thrown as error and call serverError', async () => {
+      const mockHandler = vi.fn().mockRejectedValue('string error');
+      const errorHandler = withErrorHandler('string operation');
+      
+      const wrappedHandler = errorHandler(mockHandler);
+      await wrappedHandler(mockContext);
+      
+      expect(mockHandler).toHaveBeenCalledWith(mockContext);
+      expect(mockContext.json).toHaveBeenCalled();
+    });
+
+    it('should catch number thrown as error and call serverError', async () => {
+      const mockHandler = vi.fn().mockRejectedValue(404);
+      const errorHandler = withErrorHandler('number operation');
+      
+      const wrappedHandler = errorHandler(mockHandler);
+      await wrappedHandler(mockContext);
+      
+      expect(mockHandler).toHaveBeenCalledWith(mockContext);
+      expect(mockContext.json).toHaveBeenCalled();
+    });
+
+    it('should handle custom error objects', async () => {
+      class CustomError extends Error {
+        constructor(message: string, public code: string) {
+          super(message);
+          this.name = 'CustomError';
+        }
+      }
+      const mockHandler = vi.fn().mockRejectedValue(new CustomError('Custom error', 'CUSTOM_001'));
+      const errorHandler = withErrorHandler('custom operation');
+      
+      const wrappedHandler = errorHandler(mockHandler);
+      await wrappedHandler(mockContext);
+      
+      expect(mockHandler).toHaveBeenCalledWith(mockContext);
+      expect(mockContext.json).toHaveBeenCalled();
+    });
+
+    it('should preserve async handler behavior', async () => {
+      const mockHandler = vi.fn().mockImplementation(async () => {
+        await new Promise(resolve => setTimeout(resolve, 10));
+        return new Response('async success', { status: 200 });
+      });
+      const errorHandler = withErrorHandler('async operation');
+      
+      const wrappedHandler = errorHandler(mockHandler);
+      const result = await wrappedHandler(mockContext);
+      
+      expect(mockHandler).toHaveBeenCalledWith(mockContext);
+      expect(result).toBeInstanceOf(Response);
+    });
+
+    it('should work with different operation names', async () => {
+      const operations = ['create', 'update', 'delete', 'read', 'process'];
+      
+      for (const op of operations) {
+        const mockHandler = vi.fn().mockResolvedValue(new Response('success'));
+        const errorHandler = withErrorHandler(op);
+        
+        const wrappedHandler = errorHandler(mockHandler);
+        await wrappedHandler(mockContext);
+        
+        expect(mockHandler).toHaveBeenCalled();
+      }
+    });
+
+    it('should call serverError with proper error message on error', async () => {
+      const mockHandler = vi.fn().mockRejectedValue(new Error('Critical error'));
+      const errorHandler = withErrorHandler('critical operation');
+      
+      const wrappedHandler = errorHandler(mockHandler);
+      await wrappedHandler(mockContext);
+      
+      expect(mockContext.json).toHaveBeenCalled();
     });
   });
 });
