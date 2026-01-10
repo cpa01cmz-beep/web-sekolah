@@ -26,29 +26,23 @@ export function RoleButtonGrid({ loadingRole, onRoleSelect, buttonClassName }: R
     <div className="grid grid-cols-2 gap-3 w-full">
       {DEFAULT_ROLES.map((button) => {
         const isPrimary = button.variant === 'primary';
-        const backgroundColor = isPrimary ? THEME_COLORS.PRIMARY : THEME_COLORS.SECONDARY;
-        const hoverBackgroundColor = isPrimary ? THEME_COLORS.PRIMARY_HOVER : THEME_COLORS.SECONDARY_HOVER;
+        const style = {
+          '--bg-color': isPrimary ? THEME_COLORS.PRIMARY : THEME_COLORS.SECONDARY,
+          '--bg-hover-color': isPrimary ? THEME_COLORS.PRIMARY_HOVER : THEME_COLORS.SECONDARY_HOVER,
+          '--bg-focus-color': isPrimary ? THEME_COLORS.PRIMARY_HOVER : THEME_COLORS.SECONDARY_HOVER,
+        } as React.CSSProperties;
 
         return (
           <Button
             key={button.role}
             size="lg"
+            variant={isPrimary ? 'default' : 'secondary'}
             onClick={() => onRoleSelect(button.role)}
             disabled={loadingRole === button.role}
             aria-busy={loadingRole === button.role}
             aria-label={`Login as ${button.label.toLowerCase()}`}
-            className={`${buttonClassName} min-h-[44px]`}
-            style={{
-              backgroundColor,
-            }}
-            onMouseEnter={(e) => {
-              if (!loadingRole) {
-                e.currentTarget.style.backgroundColor = hoverBackgroundColor;
-              }
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = backgroundColor;
-            }}
+            className={`${buttonClassName} min-h-[44px] bg-[--bg-color] hover:bg-[--bg-hover-color] focus-visible:bg-[--bg-focus-color]`}
+            style={style}
           >
             {loadingRole === button.role ? 'Logging in...' : button.label}
           </Button>
