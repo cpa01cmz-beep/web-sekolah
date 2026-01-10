@@ -49,10 +49,6 @@ export class CircuitBreaker {
         throw new Error(`Circuit breaker is open for ${this.key}`);
       }
 
-      if (this.halfOpenCalls === 0) {
-        this.halfOpenCalls = 1;
-      }
-
       logger.info('[CircuitBreaker] Circuit half-open, attempting recovery', {
         key: this.key,
         halfOpenCalls: this.halfOpenCalls,

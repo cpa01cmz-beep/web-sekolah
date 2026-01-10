@@ -30,7 +30,7 @@ describe('CircuitBreaker', () => {
     });
 
     it('should close circuit after successful call in half-open state', async () => {
-      const breakerWithShortTimeout = new CircuitBreaker('test-key', { timeoutMs: 100 });
+      const breakerWithShortTimeout = new CircuitBreaker('test-key', { timeoutMs: 100, halfOpenMaxCalls: 1 });
       const failureFn = vi.fn().mockRejectedValue(new Error('fail'));
       
       for (let i = 0; i < 5; i++) {
@@ -102,7 +102,7 @@ describe('CircuitBreaker', () => {
     });
 
     it('should allow retry after timeout period', async () => {
-      const breakerWithShortTimeout = new CircuitBreaker('test-key', { timeoutMs: 100 });
+      const breakerWithShortTimeout = new CircuitBreaker('test-key', { timeoutMs: 100, halfOpenMaxCalls: 1 });
       const failureFn = vi.fn().mockRejectedValue(new Error('fail'));
       
       for (let i = 0; i < 5; i++) {
@@ -171,7 +171,7 @@ describe('CircuitBreaker', () => {
     });
 
     it('should use custom timeout', async () => {
-      const customBreaker = new CircuitBreaker('test-key', { timeoutMs: 50 });
+      const customBreaker = new CircuitBreaker('test-key', { timeoutMs: 50, halfOpenMaxCalls: 1 });
       const failureFn = vi.fn().mockRejectedValue(new Error('fail'));
       
       for (let i = 0; i < 5; i++) {
@@ -209,6 +209,7 @@ describe('CircuitBreaker', () => {
         try {
           await breakerWithShortTimeout.execute(failureFn);
         } catch {
+          // Expected to fail
         }
       }
 
@@ -237,6 +238,7 @@ describe('CircuitBreaker', () => {
         try {
           await breakerWithShortTimeout.execute(failureFn);
         } catch {
+          // Expected to fail
         }
       }
 
@@ -248,6 +250,7 @@ describe('CircuitBreaker', () => {
       try {
         await breakerWithShortTimeout.execute(failureFn);
       } catch {
+        // Expected to fail
       }
 
       let state = breakerWithShortTimeout.getState();
@@ -268,6 +271,7 @@ describe('CircuitBreaker', () => {
         try {
           await breakerWithShortTimeout.execute(failureFn);
         } catch {
+          // Expected to fail
         }
       }
 
@@ -312,6 +316,7 @@ describe('CircuitBreaker', () => {
       try {
         await breaker.execute(failureFn);
       } catch {
+        // Expected to fail
       }
       await breaker.execute(successFn);
 
@@ -338,6 +343,7 @@ describe('CircuitBreaker', () => {
       try {
         await breaker.execute(fn);
       } catch {
+        // Expected to fail
       }
 
       const state = breaker.getState();
@@ -350,6 +356,7 @@ describe('CircuitBreaker', () => {
       try {
         await breaker.execute(fn);
       } catch {
+        // Expected to fail
       }
 
       const state = breaker.getState();
@@ -362,6 +369,7 @@ describe('CircuitBreaker', () => {
       try {
         await breaker.execute(fn);
       } catch {
+        // Expected to fail
       }
 
       const state = breaker.getState();
