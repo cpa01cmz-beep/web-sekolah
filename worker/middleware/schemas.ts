@@ -30,7 +30,10 @@ export const createGradeSchema = z.object({
 
 export const updateGradeSchema = createGradeSchema.partial().extend({
   id: z.string().uuid('Invalid grade ID'),
-});
+}).refine(
+  (data) => data.score !== undefined && data.feedback !== undefined,
+  { message: 'Score and feedback are required for grade update' }
+);
 
 export const createClassSchema = z.object({
   name: z.string().min(ValidationLimits.USER_NAME_MIN_LENGTH).max(ValidationLimits.USER_NAME_MAX_LENGTH),

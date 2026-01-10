@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -10,6 +11,35 @@ import { useParentDashboard } from '@/hooks/useParent';
 import { useAuthStore } from '@/lib/authStore';
 import { formatDate } from '@/utils/date';
 import { getGradeBadgeVariant, getGradeLetter } from '@/utils/grades';
+import type { ParentDashboardData } from '@shared/types';
+
+const GradeItem = memo(({ grade }: { grade: ParentDashboardData['childGrades'][0] }) => (
+  <li className="flex items-center justify-between">
+    <p className="text-sm font-medium">{grade.courseId}</p>
+    <Badge variant={getGradeBadgeVariant(grade.score)} className="bg-green-500 text-white">
+      {getGradeLetter(grade.score)} ({grade.score})
+    </Badge>
+  </li>
+));
+GradeItem.displayName = 'GradeItem';
+
+const ScheduleItem = memo(({ item }: { item: ParentDashboardData['childSchedule'][0] }) => (
+  <li className="text-sm">
+    <p className="font-medium">{item.courseName}</p>
+    <p className="text-xs text-muted-foreground">
+      {item.time} - {item.day}
+    </p>
+  </li>
+));
+ScheduleItem.displayName = 'ScheduleItem';
+
+const AnnouncementItem = memo(({ ann }: { ann: ParentDashboardData['announcements'][0] }) => (
+  <li className="text-sm">
+    <p className="font-medium truncate">{ann.title}</p>
+    <p className="text-xs text-muted-foreground">{formatDate(ann.date)}</p>
+  </li>
+));
+AnnouncementItem.displayName = 'AnnouncementItem';
 
 export function ParentDashboardPage() {
   const user = useAuthStore((state) => state.user);
@@ -56,12 +86,7 @@ export function ParentDashboardPage() {
               <CardContent>
                 <ul className="space-y-3">
                   {data.childGrades.map((grade) => (
-                    <li key={grade.id} className="flex items-center justify-between">
-                      <p className="text-sm font-medium">{grade.courseId}</p>
-                      <Badge variant={getGradeBadgeVariant(grade.score)} className="bg-green-500 text-white">
-                        {getGradeLetter(grade.score)} ({grade.score})
-                      </Badge>
-                    </li>
+                    <GradeItem key={grade.id} grade={grade} />
                   ))}
                 </ul>
               </CardContent>
@@ -76,12 +101,7 @@ export function ParentDashboardPage() {
               <CardContent>
                 <ul className="space-y-2">
                   {data.childSchedule.slice(0, 5).map((item) => (
-                    <li key={`${item.courseId}-${item.time}`} className="text-sm">
-                      <p className="font-medium">{item.courseName}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {item.time} - {item.day}
-                      </p>
-                    </li>
+                    <ScheduleItem key={`${item.courseId}-${item.time}`} item={item} />
                   ))}
                 </ul>
               </CardContent>
@@ -96,10 +116,7 @@ export function ParentDashboardPage() {
               <CardContent>
                 <ul className="space-y-3">
                   {data.announcements.map((ann) => (
-                    <li key={ann.id} className="text-sm">
-                      <p className="font-medium truncate">{ann.title}</p>
-                      <p className="text-xs text-muted-foreground">{formatDate(ann.date)}</p>
-                    </li>
+                    <AnnouncementItem key={ann.id} ann={ann} />
                   ))}
                 </ul>
               </CardContent>

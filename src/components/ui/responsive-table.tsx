@@ -1,4 +1,5 @@
 import * as React from "react"
+import { memo } from "react"
 import { cn } from "@/lib/utils"
 import { Card, CardContent } from "@/components/ui/card"
 
@@ -8,6 +9,59 @@ interface ResponsiveTableProps extends React.HTMLAttributes<HTMLDivElement> {
   mobileCardClassName?: string
   tableClassName?: string
 }
+
+const TableRow = memo(({ 
+  row, 
+  headers, 
+  mobileCardClassName 
+}: { 
+  row: { id: string | number; cells: { key: string; content: React.ReactNode; className?: string }[] }
+  headers: { key: string; label: string; className?: string }[]
+  mobileCardClassName?: string
+}) => {
+  return (
+      <tr key={row.id} className="border-b transition-colors hover:bg-muted/50">
+        {row.cells.map((cell) => (
+          <td
+            key={cell.key}
+            className={cn("p-2 align-middle", cell.className)}
+          >
+            {cell.content}
+          </td>
+        ))}
+      </tr>
+  );
+});
+TableRow.displayName = "TableRow"
+
+const MobileCardRow = memo(({ 
+  row, 
+  headers, 
+  mobileCardClassName 
+}: { 
+  row: { id: string | number; cells: { key: string; content: React.ReactNode; className?: string }[] }
+  headers: { key: string; label: string; className?: string }[]
+  mobileCardClassName?: string
+}) => {
+  return (
+    <Card key={row.id} className={cn("p-4 md:hidden", mobileCardClassName)}>
+      <CardContent className="p-0 space-y-3">
+        {row.cells.map((cell) => {
+          const header = headers.find((h) => h.key === cell.key)
+          return (
+            <div key={cell.key} className="flex flex-col gap-1">
+              <span className="text-xs font-semibold text-muted-foreground">
+                {header?.label}
+              </span>
+              <div className={cn(cell.className)}>{cell.content}</div>
+            </div>
+          )
+        })}
+      </CardContent>
+    </Card>
+  );
+});
+MobileCardRow.displayName = "MobileCardRow"
 
 export function ResponsiveTable({ 
   headers, 
@@ -38,16 +92,7 @@ export function ResponsiveTable({
           </thead>
           <tbody>
             {rows.map((row) => (
-              <tr key={row.id} className="border-b transition-colors hover:bg-muted/50">
-                {row.cells.map((cell) => (
-                  <td
-                    key={cell.key}
-                    className={cn("p-2 align-middle", cell.className)}
-                  >
-                    {cell.content}
-                  </td>
-                ))}
-              </tr>
+              <TableRow key={row.id} row={row} headers={headers} />
             ))}
           </tbody>
         </table>
@@ -55,21 +100,7 @@ export function ResponsiveTable({
 
       <div className="md:hidden space-y-3">
         {rows.map((row) => (
-          <Card key={row.id} className={cn("p-4", mobileCardClassName)}>
-            <CardContent className="p-0 space-y-3">
-              {row.cells.map((cell) => {
-                const header = headers.find((h) => h.key === cell.key)
-                return (
-                  <div key={cell.key} className="flex flex-col gap-1">
-                    <span className="text-xs font-semibold text-muted-foreground">
-                      {header?.label}
-                    </span>
-                    <div className={cn(cell.className)}>{cell.content}</div>
-                  </div>
-                )
-              })}
-            </CardContent>
-          </Card>
+          <MobileCardRow key={row.id} row={row} headers={headers} mobileCardClassName={mobileCardClassName} />
         ))}
       </div>
     </>

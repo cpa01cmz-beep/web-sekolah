@@ -66,6 +66,8 @@ jobs:
 
       - name: Alert on Build Issues
         if: steps.flaky_tests.outputs.flaky == '1' || steps.build_time.outputs.build_slow == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
           # Create issue for build problems
           gh issue create \
@@ -79,8 +81,6 @@ jobs:
             - Build time: ${{ steps.build_time.outputs.build_time }}s
             
             This issue was automatically created by the monitoring workflow."
-          env:
-            GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   check-code-quality:
     name: Check Code Quality
@@ -124,7 +124,7 @@ jobs:
       - name: Alert on Code Quality Issues
         if: steps.console_logs.outputs.console_log_count > 10 || steps.untyped.outputs.any_count > 20
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
           gh issue create \
             --title "📊 Code Quality Alert - $(date +%Y-%m-%d)" \
@@ -178,6 +178,8 @@ jobs:
 
       - name: Alert on Security Issues
         if: steps.audit.outputs.vulnerability_count > '0'
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
           gh issue create \
             --title "🔒 Security Alert - Vulnerabilities Detected - $(date +%Y-%m-%d)" \
@@ -192,11 +194,11 @@ jobs:
             Run 'npm audit fix' to automatically fix vulnerabilities.
             
             This issue was automatically created by the monitoring workflow."
-          env:
-            GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Alert on Outdated Dependencies
         if: steps.outdated.outputs.outdated_count > '5'
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
           gh issue create \
             --title "📦 Dependencies Alert - Outdated Packages - $(date +%Y-%m-%d)" \
@@ -211,8 +213,6 @@ jobs:
             Run 'npm outdated' to see which packages need updates.
             
             This issue was automatically created by the monitoring workflow."
-          env:
-            GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   summarize-findings:
     name: Summarize Monitoring Findings

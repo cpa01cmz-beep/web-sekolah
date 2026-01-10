@@ -20,7 +20,7 @@ export class ParentDashboardService {
 
     const child = await this.getChild(env, roleFields.childId);
     const childSchedule = await this.getChildSchedule(env, roleFields.childId);
-    const childGrades = await this.getChildGrades(env, roleFields.childId);
+    const childGrades = await this.getChildGrades(env, roleFields.childId, 10);
     const announcements = await this.getAnnouncements(env, 5);
 
     return { child, childSchedule, childGrades, announcements };
@@ -29,13 +29,13 @@ export class ParentDashboardService {
   private static async getChild(env: Env, childId: string): Promise<Student & { className: string }> {
     const childEntity = new UserEntity(env, childId);
     const childState = await childEntity.getState();
-    
+
     if (!childState || childState.role !== 'student') {
       throw new Error('Child not found');
     }
 
     const childRoleFields = getRoleSpecificFields(childState);
-    
+
     let className = 'N/A';
     if (childRoleFields.classId) {
       const classEntity = new ClassEntity(env, childRoleFields.classId);
@@ -43,8 +43,9 @@ export class ParentDashboardService {
       className = classState?.name || 'N/A';
     }
 
+    const { passwordHash: _, ...childWithoutPassword } = childState;
     return {
-      ...childState,
+      ...childWithoutPassword,
       className
     } as Student & { className: string };
   }
@@ -69,15 +70,17 @@ export class ParentDashboardService {
   private static async getSchedule(env: Env, classId: string): Promise<(ScheduleItem & { courseName: string; teacherName: string })[]> {
     const scheduleEntity = new ScheduleEntity(env, classId);
     const scheduleState = await scheduleEntity.getState();
-    
+
     if (!scheduleState) {
       return [];
     }
 
     const courseIds = scheduleState.items.map(item => item.courseId);
-    const courses = await Promise.all(courseIds.map(id => new CourseEntity(env, id).getState()));
+    const uniqueCourseIds = Array.from(new Set(courseIds));
+    const courses = await Promise.all(uniqueCourseIds.map(id => new CourseEntity(env, id).getState()));
     const teacherIds = courses.map(course => course?.teacherId).filter((id): id is string => id !== undefined);
-    const teachers = await Promise.all(teacherIds.map(id => new UserEntity(env, id).getState()));
+    const uniqueTeacherIds = Array.from(new Set(teacherIds));
+    const teachers = await Promise.all(uniqueTeacherIds.map(id => new UserEntity(env, id).getState()));
 
     const coursesMap = new Map(courses.filter((c): c is Course => c !== null).map(c => [c.id, c]));
     const teachersMap = new Map(teachers.filter((t): t is SchoolUser => t !== null).map(t => [t.id, t]));
@@ -89,15 +92,16 @@ export class ParentDashboardService {
     }));
   }
 
-  private static async getChildGrades(env: Env, childId: string): Promise<(Grade & { courseName: string })[]> {
-    const studentGrades = await GradeEntity.getByStudentId(env, childId);
-    
+  private static async getChildGrades(env: Env, childId: string, limit: number = 10): Promise<(Grade & { courseName: string })[]> {
+    const studentGrades = await GradeEntity.getRecentForStudent(env, childId, limit);
+
     if (studentGrades.length === 0) {
       return [];
     }
 
     const gradeCourseIds = studentGrades.map(g => g.courseId);
-    const gradeCourses = await Promise.all(gradeCourseIds.map(id => new CourseEntity(env, id).getState()));
+    const uniqueCourseIds = Array.from(new Set(gradeCourseIds));
+    const gradeCourses = await Promise.all(uniqueCourseIds.map(id => new CourseEntity(env, id).getState()));
     const gradeCoursesMap = new Map(gradeCourses.filter((c): c is Course => c !== null).map(c => [c.id, c]));
 
     return studentGrades.map(grade => ({
