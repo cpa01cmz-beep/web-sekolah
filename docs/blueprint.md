@@ -111,7 +111,12 @@ This clears and rebuilds all secondary indexes from existing data.
 **Soft Delete Consistency**: All entities support soft-deletion with `deletedAt` timestamp:
 - Soft-deleted records excluded from queries automatically
 - Maintains historical data while preventing active usage
-- Referential integrity checks account for soft-deleted status
+- Referential integrity checks validate against soft-deleted status:
+  - `validateGrade()`: Rejects grades referencing deleted students, courses, or classes
+  - `validateClass()`: Rejects classes referencing deleted teachers
+  - `validateCourse()`: Rejects courses referencing deleted teachers
+  - `validateStudent()`: Rejects students referencing deleted classes or parents
+  - `validateAnnouncement()`: Rejects announcements referencing deleted authors
 
 **Optimization Opportunities**:
 - ~~Recharts bundle size (500.68 kB): recharts loaded entire library including all chart types~~ ✅ **COMPLETED** (2026-01-09) - Implemented subpath imports to load only used components (BarChart, Bar, XAxis, YAxis, etc.), reduced bundle size by 45.8%
