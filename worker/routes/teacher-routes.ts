@@ -10,6 +10,7 @@ import { toWebhookPayload } from '../webhook-types';
 import { withAuth, withUserValidation } from './route-utils';
 import { getCurrentUserId } from '../type-guards';
 import type { Context } from 'hono';
+import { logger } from '../logger';
 
 export function teacherRoutes(app: Hono<{ Bindings: Env }>) {
   app.get('/api/teachers/:id/dashboard', ...withUserValidation('teacher', 'dashboard'), async (c: Context) => {
@@ -51,7 +52,9 @@ export function teacherRoutes(app: Hono<{ Bindings: Env }>) {
     const gradeData = await c.req.json<SubmitGradeData>();
     try {
       const newGrade = await GradeService.createGrade(c.env, gradeData);
-      await WebhookService.triggerEvent(c.env, 'grade.created', toWebhookPayload(newGrade));
+      WebhookService.triggerEvent(c.env, 'grade.created', toWebhookPayload(newGrade)).catch(err => {
+        logger.error('Failed to trigger grade.created webhook', { err, gradeId: newGrade.id });
+      });
       return ok(c, newGrade);
     } catch (error) {
       if (error instanceof Error) {
@@ -66,7 +69,9 @@ export function teacherRoutes(app: Hono<{ Bindings: Env }>) {
     const authorId = getCurrentUserId(c);
     try {
       const newAnnouncement = await AnnouncementService.createAnnouncement(c.env, announcementData, authorId);
-      await WebhookService.triggerEvent(c.env, 'announcement.created', toWebhookPayload(newAnnouncement));
+      WebhookService.triggerEvent(c.env, 'announcement.created', toWebhookPayload(newAnnouncement)).catch(err => {
+        logger.error('Failed to trigger announcement.created webhook', { err, announcementId: newAnnouncement.id });
+      });
       return ok(c, newAnnouncement);
     } catch (error) {
       if (error instanceof Error) {
