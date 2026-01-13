@@ -102,7 +102,7 @@ export function SiteHeader() {
                   <div className="flex flex-col space-y-6 p-4">
                     <Link
                       to="/"
-                      className="flex items-center gap-2 mb-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 rounded-md"
+                      className="flex items-center gap-2 mb-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-md p-2 -m-2"
                       onClick={() => setMobileMenuOpen(false)}
                       aria-label="Akademia Pro Home"
                     >
@@ -112,14 +112,14 @@ export function SiteHeader() {
                     {navLinks.map((link) => (
                       link.submenu ? (
                         <div key={link.name} className="flex flex-col space-y-2" role="group" aria-label={`${link.name} submenu`}>
-                          <span className="text-lg font-medium text-foreground">{link.name}</span>
+                          <span className="text-lg font-medium text-foreground" role="heading" aria-level={3}>{link.name}</span>
                           {link.submenu.map((sublink) => (
                             <NavLink
                               key={sublink.name}
                               to={sublink.href}
                               onClick={() => setMobileMenuOpen(false)}
                               className={({ isActive }) =>
-                                `ml-4 text-base font-medium transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 rounded-md ${
+                                `ml-4 text-base font-medium transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-md px-2 py-1 -mx-2 ${
                                   isActive ? 'text-primary' : 'text-muted-foreground'
                                 }`
                               }
@@ -134,7 +134,7 @@ export function SiteHeader() {
                           to={link.href}
                           onClick={() => setMobileMenuOpen(false)}
                           className={({ isActive }) =>
-                            `text-lg font-medium transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 rounded-md ${
+                            `text-lg font-medium transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-md px-2 py-1 -mx-2 ${
                               isActive ? 'text-primary' : 'text-muted-foreground'
                             }`
                           }
@@ -144,7 +144,7 @@ export function SiteHeader() {
                       )
                     ))}
                     <Button asChild className="w-full transition-all duration-200" style={{ backgroundColor: THEME_COLORS.PRIMARY }} onClick={() => setMobileMenuOpen(false)}>
-                      <Link to="/login">Login</Link>
+                      <Link to="/login" className="focus-visible:ring-offset-2">Login</Link>
                     </Button>
                   </div>
                 </nav>
