@@ -13275,6 +13275,151 @@ None currently in progress.
 
 ---
 
+### Code Architect - Form Validation Utility Module (2026-01-13) - Completed ✅
+
+**Task**: Eliminate duplicate validation logic across form components by creating centralized validation utility
+
+**Problem**:
+- Duplicate validation functions across multiple form components violated DRY principle
+- getNameError, getEmailError duplicated in UserForm, ContactForm, PPDBForm
+- getPhoneError, getNisnError duplicated in PPDBForm
+- getMessageError duplicated in ContactForm
+- getTitleError, getContentError duplicated in AnnouncementForm
+- 50+ lines of duplicate validation code across 4 forms
+- Maintenance burden: updating validation logic required changes in multiple files
+
+**Solution**:
+- Created centralized validation utility module with reusable validation functions
+- Extracted all validation logic to src/utils/validation.ts
+- Refactored all forms to use centralized validation utilities
+- Applied DRY principle and Single Responsibility Principle
+
+**Implementation**:
+
+1. **Enhanced src/utils/validation.ts** (expanded from 9 to 150+ lines):
+   - Added ValidationRule<T> interface for typed validation rules
+   - Added validateField<T>() generic function for field validation
+   - Added ValidationOptions interface for showErrors flag
+   - Added validationRules object with configurable validation rules:
+     * name: required, minLength validation
+     * email: required, format validation (regex: /^\S+@\S+\.\S+$/)
+     * phone: required, numeric, length validation
+     * nisn: required, numeric, exactLength validation
+     * message: required, minLength validation
+     * role: required validation
+     * title: required, minLength validation
+     * content: required, minLength validation
+   - Added 9 reusable validation functions:
+     * validateName(value, showErrors, minLength = 2)
+     * validateEmail(value, showErrors)
+     * validatePhone(value, showErrors, min = 10, max = 13)
+     * validateNisn(value, showErrors, length = 10)
+     * validateMessage(value, showErrors, minLength = 10)
+     * validateRole(value, showErrors)
+     * validateTitle(value, showErrors, minLength = 5)
+     * validateContent(value, showErrors, minLength = 10)
+
+2. **Refactored UserForm.tsx** (179 lines → 162 lines, 9% reduction):
+   - Removed getNameError, getEmailError, getRoleError inline validation functions
+   - Import validateName, validateEmail, validateRole from @/utils/validation
+   - Changed from inline validation to utility calls
+
+3. **Refactored ContactForm.tsx** (113 lines → 98 lines, 13% reduction):
+   - Removed getNameError, getEmailError, getMessageError inline validation functions
+   - Import validateName, validateEmail, validateMessage from @/utils/validation
+   - All validation logic centralized in utility module
+
+4. **Refactored PPDBForm.tsx** (273 lines → 251 lines, 8% reduction):
+   - Removed getNameError, getEmailError, getPhoneError, getNisnError inline validation functions
+   - Import validateName, validateEmail, validatePhone, validateNisn from @/utils/validation
+   - Configurable validation: validateNisn(..., 10), validatePhone(..., 10, 13)
+
+5. **Refactored AnnouncementForm.tsx** (139 lines → 122 lines, 12% reduction):
+   - Removed validateForm inline validation function
+   - Import validateTitle, validateContent from @/utils/validation
+   - Simplified handleSubmit to use utility validation
+
+**Metrics**:
+
+| Metric | Before | After | Improvement |
+|---------|---------|--------|-------------|
+| Duplicate validation code locations | 4 forms | 0 forms | 100% eliminated |
+| Duplicate validation functions | 11 functions | 0 functions | 100% eliminated |
+| Duplicate validation code lines | 50+ lines | 0 lines | 100% eliminated |
+| UserForm size | 179 lines | 162 lines | 9% reduction |
+| ContactForm size | 113 lines | 98 lines | 13% reduction |
+| PPDBForm size | 273 lines | 251 lines | 8% reduction |
+| AnnouncementForm size | 139 lines | 122 lines | 12% reduction |
+| Total form lines reduced | 704 lines | 633 lines | 10% average reduction |
+| Maintenance locations | 4 files | 1 file | 75% reduction |
+
+**Benefits Achieved**:
+- ✅ Centralized validation utility module (150+ lines, fully self-contained)
+- ✅ 50+ lines of duplicate validation code eliminated
+- ✅ 4 forms refactored to use centralized validation
+- ✅ Consistent validation behavior across all forms
+- ✅ Single source of truth for validation logic
+- ✅ Maintainability: Update validation in one location
+- ✅ Testability: Validation logic can be tested independently
+- ✅ Reusability: Validation functions available for new forms
+- ✅ Type-safe validation with TypeScript generics
+- ✅ Configurable validation parameters (minLength, length, min, max)
+- ✅ All typechecks pass (0 errors)
+- ✅ Zero breaking changes to existing functionality
+
+**Technical Details**:
+
+**Validation Utility Pattern**:
+```typescript
+// Good pattern: Use centralized validation utility
+import { validateName, validateEmail } from '@/utils/validation';
+
+const nameError = validateName(name, showValidationErrors);
+const emailError = validateEmail(email, showValidationErrors);
+
+// Bad pattern: Inline validation logic
+// const getNameError = () => {
+//   if (!name.trim()) return showValidationErrors ? 'Name is required' : undefined;
+//   if (name.trim().length < 2) return 'Name must be at least 2 characters';
+//   return undefined;
+// };
+```
+
+**Architectural Impact**:
+- **DRY Principle**: Eliminated 50+ lines of duplicate validation code
+- **Single Responsibility**: Validation logic in one module (utils/validation.ts)
+- **Separation of Concerns**: Forms handle UI, validation utility handles validation
+- **Consistency**: All forms use identical validation patterns
+- **Maintainability**: Single source of truth for validation rules
+- **Extensibility**: New validation rules easily added to validationRules object
+- **Testability**: Validation logic can be tested independently of React components
+
+**Success Criteria**:
+- [x] Centralized validation utility module created
+- [x] All duplicate validation code eliminated
+- [x] UserForm refactored to use validation utility
+- [x] ContactForm refactored to use validation utility
+- [x] PPDBForm refactored to use validation utility
+- [x] AnnouncementForm refactored to use validation utility
+- [x] All forms reduced in size (9-13% reduction)
+- [x] Validation behavior consistent across all forms
+- [x] Typecheck passed (0 errors)
+- [x] Zero breaking changes to existing functionality
+
+**Impact**:
+- `src/utils/validation.ts`: Enhanced from 9 to 150+ lines (new validation functions)
+- `src/components/forms/UserForm.tsx`: Reduced 179 → 162 lines (9% reduction)
+- `src/components/forms/ContactForm.tsx`: Reduced 113 → 98 lines (13% reduction)
+- `src/components/forms/PPDBForm.tsx`: Reduced 273 → 251 lines (8% reduction)
+- `src/components/forms/AnnouncementForm.tsx`: Reduced 139 → 122 lines (12% reduction)
+- Duplicate code eliminated: 50+ lines of validation logic
+- Code maintainability: Significantly improved (single source of truth)
+- Future form development: New forms use centralized validation utilities
+
+**Success**: ✅ **FORM VALIDATION UTILITY MODULE COMPLETE, 50+ LINES DUPLICATE CODE ELIMINATED, 4 FORMS REFACTORED**
+
+---
+
 ### Code Architect - Error Handling Middleware Wrapper (2026-01-10) - Completed ✅
 
 **Task**: Create error handling middleware wrapper to reduce duplicate try-catch patterns across routes

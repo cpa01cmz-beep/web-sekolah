@@ -3,6 +3,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { FormField } from '@/components/ui/form-field';
 import { useState } from 'react';
+import { validateName, validateEmail, validateMessage } from '@/utils/validation';
 
 interface ContactFormProps {
   onSubmit?: (data: { name: string; email: string; message: string }) => void;
@@ -14,28 +15,14 @@ export function ContactForm({ onSubmit }: ContactFormProps) {
   const [message, setMessage] = useState('');
   const [showValidationErrors, setShowValidationErrors] = useState(false);
 
-  const getNameError = () => {
-    if (name === '') return showValidationErrors ? 'Name is required' : undefined;
-    if (name.length < 2) return 'Name must be at least 2 characters';
-    return undefined;
-  };
-
-  const getEmailError = () => {
-    if (email === '') return showValidationErrors ? 'Email is required' : undefined;
-    if (!/^\S+@\S+\.\S+$/.test(email)) return 'Please enter a valid email address';
-    return undefined;
-  };
-
-  const getMessageError = () => {
-    if (message === '') return showValidationErrors ? 'Message is required' : undefined;
-    if (message.length < 10) return 'Message must be at least 10 characters';
-    return undefined;
-  };
+  const nameError = validateName(name, showValidationErrors);
+  const emailError = validateEmail(email, showValidationErrors);
+  const messageError = validateMessage(message, showValidationErrors);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setShowValidationErrors(true);
-    if (getNameError() || getEmailError() || getMessageError()) {
+    if (nameError || emailError || messageError) {
       return;
     }
     onSubmit?.({ name, email, message });
@@ -88,7 +75,7 @@ export function ContactForm({ onSubmit }: ContactFormProps) {
       <FormField
         id="contact-message"
         label="Message"
-        error={getMessageError()}
+        error={messageError}
         helperText="How can we help you? Provide as much detail as possible"
         required
       >
@@ -100,8 +87,8 @@ export function ContactForm({ onSubmit }: ContactFormProps) {
           onChange={(e) => setMessage(e.target.value)}
           required
           aria-required="true"
-          aria-invalid={!!getMessageError()}
-          aria-describedby={getMessageError() ? 'contact-message-error' : 'contact-message-helper'}
+          aria-invalid={!!messageError}
+          aria-describedby={messageError ? 'contact-message-error' : 'contact-message-helper'}
         />
       </FormField>
       <Button type="submit" className="w-full">

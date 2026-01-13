@@ -5,6 +5,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { AlertCircle } from 'lucide-react';
+import { validateTitle, validateContent } from '@/utils/validation';
 
 interface AnnouncementFormProps {
   open: boolean;
@@ -18,6 +19,7 @@ export function AnnouncementForm({ open, onClose, onSave, isLoading }: Announcem
   const [content, setContent] = useState('');
   const [titleError, setTitleError] = useState('');
   const [contentError, setContentError] = useState('');
+  const [showValidationErrors, setShowValidationErrors] = useState(false);
 
   useEffect(() => {
     if (!open) {
@@ -25,38 +27,21 @@ export function AnnouncementForm({ open, onClose, onSave, isLoading }: Announcem
       setContent('');
       setTitleError('');
       setContentError('');
+      setShowValidationErrors(false);
     }
   }, [open]);
 
-  const validateForm = () => {
-    let isValid = true;
-    setTitleError('');
-    setContentError('');
-
-    if (!title.trim()) {
-      setTitleError('Title is required');
-      isValid = false;
-    } else if (title.trim().length < 5) {
-      setTitleError('Title must be at least 5 characters');
-      isValid = false;
-    }
-
-    if (!content.trim()) {
-      setContentError('Content is required');
-      isValid = false;
-    } else if (content.trim().length < 10) {
-      setContentError('Content must be at least 10 characters');
-      isValid = false;
-    }
-
-    return isValid;
-  };
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!validateForm()) {
+    setShowValidationErrors(true);
+
+    const newTitleError = validateTitle(title, showValidationErrors, 5);
+    const newContentError = validateContent(content, showValidationErrors, 10);
+
+    if (newTitleError || newContentError) {
       return;
     }
+
     onSave({ title: title.trim(), content: content.trim() });
   };
 
@@ -79,10 +64,7 @@ export function AnnouncementForm({ open, onClose, onSave, isLoading }: Announcem
               <Input
                 id="announcement-title"
                 value={title}
-                onChange={(e) => {
-                  setTitle(e.target.value);
-                  if (titleError) setTitleError('');
-                }}
+                onChange={(e) => setTitle(e.target.value)}
                 placeholder="Announcement Title"
                 aria-required="true"
                 aria-invalid={!!titleError}
@@ -104,10 +86,7 @@ export function AnnouncementForm({ open, onClose, onSave, isLoading }: Announcem
               <Textarea
                 id="announcement-content"
                 value={content}
-                onChange={(e) => {
-                  setContent(e.target.value);
-                  if (contentError) setContentError('');
-                }}
+                onChange={(e) => setContent(e.target.value)}
                 placeholder="Write your announcement here..."
                 rows={5}
                 aria-required="true"

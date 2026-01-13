@@ -6,6 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { AlertCircle } from 'lucide-react';
+import { validateName, validateEmail, validatePhone, validateNisn } from '@/utils/validation';
 
 interface PPDBFormData {
   name: string;
@@ -35,36 +36,10 @@ export function PPDBForm({ onSubmit }: PPDBFormProps) {
   });
   const [showValidationErrors, setShowValidationErrors] = useState(false);
 
-  const getNameError = () => {
-    if (!formData.name) return showValidationErrors ? 'Nama lengkap wajib diisi' : undefined;
-    if (formData.name.length < 3) return 'Nama lengkap minimal 3 karakter';
-    return undefined;
-  };
-
-  const getNisnError = () => {
-    if (!formData.nisn) return showValidationErrors ? 'NISN wajib diisi' : undefined;
-    if (!/^\d+$/.test(formData.nisn)) return 'NISN harus berupa angka';
-    if (formData.nisn.length !== 10) return 'NISN harus 10 digit';
-    return undefined;
-  };
-
-  const getEmailError = () => {
-    if (!formData.email) return showValidationErrors ? 'Email wajib diisi' : undefined;
-    if (!/^\S+@\S+\.\S+$/.test(formData.email)) return 'Format email tidak valid';
-    return undefined;
-  };
-
-  const getPhoneError = () => {
-    if (!formData.phone) return showValidationErrors ? 'Nomor telepon wajib diisi' : undefined;
-    if (!/^\d+$/.test(formData.phone)) return 'Nomor telepon harus berupa angka';
-    if (formData.phone.length < 10 || formData.phone.length > 13) return 'Nomor telepon harus 10-13 digit';
-    return undefined;
-  };
-
-  const nameError = getNameError();
-  const nisnError = getNisnError();
-  const emailError = getEmailError();
-  const phoneError = getPhoneError();
+  const nameError = validateName(formData.name, showValidationErrors, 3);
+  const nisnError = validateNisn(formData.nisn, showValidationErrors, 10);
+  const emailError = validateEmail(formData.email, showValidationErrors);
+  const phoneError = validatePhone(formData.phone, showValidationErrors, 10, 13);
 
   const handleInputChange = (field: keyof PPDBFormData, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -74,7 +49,7 @@ export function PPDBForm({ onSubmit }: PPDBFormProps) {
     e.preventDefault();
     setShowValidationErrors(true);
 
-    if (getNameError() || getNisnError() || getEmailError() || getPhoneError()) {
+    if (nameError || nisnError || emailError || phoneError) {
       toast.error('Mohon lengkapi formulir dengan benar.');
       return;
     }
