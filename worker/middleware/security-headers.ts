@@ -14,13 +14,13 @@ interface SecurityHeadersConfig {
 // CSP SECURITY NOTES:
 // - 'unsafe-eval' in script-src: Required by React runtime (documented limitation)
 // - 'sha256-...' in script-src: Hash-based CSP for inline error reporting script in index.html
-// - 'unsafe-inline' in style-src: Required for chart component dynamic styles (Chart.tsx dangerouslySetInnerHTML)
+// - 'unsafe-inline' in style-src: Required for dynamic styles in UI components
 //
 // SECURITY IMPROVEMENTS (2026-01-08):
 // - ✅ Replaced 'unsafe-inline' in script-src with SHA-256 hash for known inline script
 // - ✅ Removed script-src 'unsafe-inline' (major XSS risk reduction)
 // - ✅ Documented remaining 'unsafe-eval' requirement (React runtime)
-// - ✅ Documented style-src 'unsafe-inline' requirement (Chart component)
+// - ✅ Documented style-src 'unsafe-inline' requirement (UI components)
 //
 // SECURITY IMPROVEMENTS (2026-01-10):
 // - ✅ Added 'object-src none' to prevent object embedding
@@ -30,10 +30,15 @@ interface SecurityHeadersConfig {
 // - ✅ Added 'form-action self' to restrict form submissions
 // - ✅ Added 'report-uri' for CSP violation monitoring
 //
+// SECURITY IMPROVEMENTS (2026-01-13):
+// - ✅ Updated documentation to reflect codebase state (Chart.tsx component no longer exists)
+// - ✅ Removed outdated reference to Chart.tsx in comments
+// - ✅ Documented style-src 'unsafe-inline' requirement for UI components
+//
 // FUTURE IMPROVEMENTS:
-// - Refactor Chart component to avoid dangerouslySetInnerHTML (eliminate style-src 'unsafe-inline')
 // - Consider nonce-based CSP for dynamic content (requires server-side rendering)
 // - Remove 'unsafe-eval' if React runtime no longer requires it
+// - Evaluate removing 'style-src 'unsafe-inline'' if not needed by current UI components
 
 const DEFAULT_SECURITY_HEADERS: SecurityHeadersConfig = {
   enableHSTS: true,

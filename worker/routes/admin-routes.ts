@@ -10,6 +10,7 @@ import { toWebhookPayload } from '../webhook-types';
 import { withAuth } from './route-utils';
 import { getCurrentUserId } from '../type-guards';
 import type { Context } from 'hono';
+import { logger } from '../logger';
 
 export function adminRoutes(app: Hono<{ Bindings: Env }>) {
   app.post('/api/admin/rebuild-indexes', ...withAuth('admin'), async (c: Context) => {
@@ -78,7 +79,9 @@ export function adminRoutes(app: Hono<{ Bindings: Env }>) {
     const authorId = getCurrentUserId(c);
     try {
       const newAnnouncement = await AnnouncementService.createAnnouncement(c.env, announcementData, authorId);
-      await WebhookService.triggerEvent(c.env, 'announcement.created', toWebhookPayload(newAnnouncement));
+      WebhookService.triggerEvent(c.env, 'announcement.created', toWebhookPayload(newAnnouncement)).catch(err => {
+        logger.error('Failed to trigger announcement.created webhook', { err, announcementId: newAnnouncement.id });
+      });
       return ok(c, newAnnouncement);
     } catch (error) {
       if (error instanceof Error) {

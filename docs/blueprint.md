@@ -111,7 +111,12 @@ This clears and rebuilds all secondary indexes from existing data.
 **Soft Delete Consistency**: All entities support soft-deletion with `deletedAt` timestamp:
 - Soft-deleted records excluded from queries automatically
 - Maintains historical data while preventing active usage
-- Referential integrity checks account for soft-deleted status
+- Referential integrity checks validate against soft-deleted status:
+  - `validateGrade()`: Rejects grades referencing deleted students, courses, or classes
+  - `validateClass()`: Rejects classes referencing deleted teachers
+  - `validateCourse()`: Rejects courses referencing deleted teachers
+  - `validateStudent()`: Rejects students referencing deleted classes or parents
+  - `validateAnnouncement()`: Rejects announcements referencing deleted authors
 
 **Optimization Opportunities**:
 - ~~Recharts bundle size (500.68 kB): recharts loaded entire library including all chart types~~ ✅ **COMPLETED** (2026-01-09) - Implemented subpath imports to load only used components (BarChart, Bar, XAxis, YAxis, etc.), reduced bundle size by 45.8%
@@ -145,7 +150,8 @@ This clears and rebuilds all secondary indexes from existing data.
    - ~~ContactPage (162 lines) with inline form logic mixed with page UI~~ ✅ **COMPLETED** (2026-01-13) - Extracted ContactForm component (112 lines), reduced ContactPage to 64 lines (60% reduction), improved Separation of Concerns and Single Responsibility Principle
     - ~~Duplicate validation logic in form components: getNameError, getEmailError, getPhoneError, getNisnError, getMessageError duplicated across UserForm, ContactForm, PPDBForm, AnnouncementForm~~ ✅ **COMPLETED** (2026-01-13) - Created centralized validation utility module (src/utils/validation.ts) with 9 reusable validation functions (validateName, validateEmail, validatePhone, validateNisn, validateMessage, validateRole, validateTitle, validateContent), refactored 4 forms to use centralized validation (eliminated 50+ lines of duplicate validation code), applied DRY principle and Single Responsibility Principle
      - ~~Circuit breaker management mixed in WebhookService: Module-level Map managed circuit breakers directly, creating tight coupling between service and circuit breaker lifecycle~~ ✅ **COMPLETED** (2026-01-13) - Extracted CircuitBreakerRegistry module (worker/CircuitBreakerRegistry.ts) with singleton pattern for managing circuit breakers, providing getOrCreate, reset, resetAll, and getAllStates methods, improved Modularity and Single Responsibility Principle
-     - ~~Duplicate error response boilerplate in response-helpers.ts: 9 error response functions repeated identical ApiErrorResponse construction and request ID generation logic~~ ✅ **COMPLETED** (2026-01-13) - Extracted createErrorResponse helper function (worker/api/response-helpers.ts) that centralizes error response construction, eliminated 45+ lines of duplicate code across bad, unauthorized, forbidden, notFound, conflict, rateLimitExceeded, serverError, serviceUnavailable, and gatewayTimeout functions, applied DRY principle
+      - ~~Duplicate error response boilerplate in response-helpers.ts: 9 error response functions repeated identical ApiErrorResponse construction and request ID generation logic~~ ✅ **COMPLETED** (2026-01-13) - Extracted createErrorResponse helper function (worker/api/response-helpers.ts) that centralizes error response construction, eliminated 45+ lines of duplicate code across bad, unauthorized, forbidden, notFound, conflict, rateLimitExceeded, serverError, serviceUnavailable, and gatewayTimeout functions, applied DRY principle
+      - ~~Synchronous webhook triggers blocking API responses: Routes awaited WebhookService.triggerEvent() before returning, adding 50-500ms latency per request~~ ✅ **COMPLETED** (2026-01-13) - Implemented fire-and-forget pattern for all 8 webhook triggers (user-management-routes.ts: 5 triggers, teacher-routes.ts: 2 triggers, admin-routes.ts: 1 trigger), removed `await` from trigger calls, added error handling with `.catch()` and logger.error(), API responses return immediately, 50-500ms faster response times for webhook-enabled operations
 
 
 

@@ -19,7 +19,6 @@ export class ReferentialIntegrity {
       return { valid: false, error: 'Grade must reference a valid course' };
     }
 
-    // Check if student exists and is actually a student
     const student = await new UserEntity(env, grade.studentId).getState();
     if (!student) {
       return { valid: false, error: `Student with id ${grade.studentId} does not exist` };
@@ -27,17 +26,24 @@ export class ReferentialIntegrity {
     if (student.role !== 'student') {
       return { valid: false, error: `User ${grade.studentId} is not a student` };
     }
+    if (student.deletedAt) {
+      return { valid: false, error: `Student ${grade.studentId} has been deleted` };
+    }
 
-    // Check if course exists
     const course = await new CourseEntity(env, grade.courseId).getState();
     if (!course) {
       return { valid: false, error: `Course with id ${grade.courseId} does not exist` };
     }
+    if (course.deletedAt) {
+      return { valid: false, error: `Course ${grade.courseId} has been deleted` };
+    }
 
-    // Optional: Validate that student is enrolled in the class that teaches this course
     const studentUser = student as SchoolUser & { classId: string };
     const classEntity = await new ClassEntity(env, studentUser.classId).getState();
     if (classEntity) {
+      if (classEntity.deletedAt) {
+        return { valid: false, error: `Student's class ${studentUser.classId} has been deleted` };
+      }
       const classCourses = await CourseEntity.getByTeacherId(env, classEntity.teacherId);
       if (!classCourses.some(c => c.id === grade.courseId)) {
         return { valid: false, error: 'Student is not enrolled in a class that offers this course' };
@@ -62,6 +68,9 @@ export class ReferentialIntegrity {
     if (teacher.role !== 'teacher') {
       return { valid: false, error: `User ${classData.teacherId} is not a teacher` };
     }
+    if (teacher.deletedAt) {
+      return { valid: false, error: `Teacher ${classData.teacherId} has been deleted` };
+    }
 
     return { valid: true };
   }
@@ -81,6 +90,9 @@ export class ReferentialIntegrity {
     if (teacher.role !== 'teacher') {
       return { valid: false, error: `User ${courseData.teacherId} is not a teacher` };
     }
+    if (teacher.deletedAt) {
+      return { valid: false, error: `Teacher ${courseData.teacherId} has been deleted` };
+    }
 
     return { valid: true };
   }
@@ -97,6 +109,9 @@ export class ReferentialIntegrity {
     if (!classEntity) {
       return { valid: false, error: `Class with id ${studentData.classId} does not exist` };
     }
+    if (classEntity.deletedAt) {
+      return { valid: false, error: `Class ${studentData.classId} has been deleted` };
+    }
 
     if (studentData.parentId) {
       const parent = await new UserEntity(env, studentData.parentId).getState();
@@ -105,6 +120,9 @@ export class ReferentialIntegrity {
       }
       if (parent.role !== 'parent') {
         return { valid: false, error: `User ${studentData.parentId} is not a parent` };
+      }
+      if (parent.deletedAt) {
+        return { valid: false, error: `Parent ${studentData.parentId} has been deleted` };
       }
     }
 
@@ -124,9 +142,12 @@ export class ReferentialIntegrity {
       return { valid: false, error: `Author with id ${announcement.authorId} does not exist` };
     }
 
-    // Only teachers and admins can create announcements
     if (author.role !== 'teacher' && author.role !== 'admin') {
       return { valid: false, error: 'Only teachers and admins can create announcements' };
+    }
+
+    if (author.deletedAt) {
+      return { valid: false, error: `Author ${announcement.authorId} has been deleted` };
     }
 
     return { valid: true };
