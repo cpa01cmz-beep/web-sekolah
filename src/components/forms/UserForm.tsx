@@ -6,6 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Button } from '@/components/ui/button';
 import { UserRole, SchoolUser } from '@shared/types';
 import { AlertCircle } from 'lucide-react';
+import { validateName, validateEmail, validateRole } from '@/utils/validation';
 
 interface UserFormData {
   name: string;
@@ -40,26 +41,9 @@ export function UserForm({ open, onClose, editingUser, onSave, isLoading }: User
     setShowValidationErrors(false);
   }, [editingUser, open]);
 
-  const getNameError = () => {
-    if (!userName.trim()) return showValidationErrors ? 'Name is required' : undefined;
-    if (userName.trim().length < 2) return 'Name must be at least 2 characters';
-    return undefined;
-  };
-
-  const getEmailError = () => {
-    if (!userEmail.trim()) return showValidationErrors ? 'Email is required' : undefined;
-    if (!/^\S+@\S+\.\S+$/.test(userEmail)) return 'Please enter a valid email address';
-    return undefined;
-  };
-
-  const getRoleError = () => {
-    if (!userRole) return showValidationErrors ? 'Role is required' : undefined;
-    return undefined;
-  };
-
-  const nameError = getNameError();
-  const emailError = getEmailError();
-  const roleError = getRoleError();
+  const nameError = validateName(userName, showValidationErrors);
+  const emailError = validateEmail(userEmail, showValidationErrors);
+  const roleError = validateRole(userRole, showValidationErrors);
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();

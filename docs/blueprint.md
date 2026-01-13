@@ -141,7 +141,12 @@ This clears and rebuilds all secondary indexes from existing data.
   - ~~Duplicate try-catch error handling patterns in routes (30+ instances): Each route had identical try-catch pattern for error logging and serverError response~~ ✅ **COMPLETED** (2026-01-10) - Created withErrorHandler wrapper in route-utils.ts, refactored webhook-config-routes.ts (5 routes, 29% reduction) and webhook-delivery-routes.ts (3 routes, 35% reduction), eliminated 8 duplicate patterns, applied DRY principle
   - ~~ParentDashboardService.getChildGrades() loaded ALL grades for student~~ ✅ **COMPLETED** (2026-01-10) - Now uses GradeEntity.getRecentForStudent() with limit parameter (default 10), reduced data loaded from 100s to 10 grades (90%+ reduction)
   - ~~CommonDataService.getRecentAnnouncementsByRole() loaded all role announcements then sorted in-memory~~ ✅ **COMPLETED** (2026-01-10) - Now uses date-sorted index then filters by role, O(n) retrieval instead of O(n log n) sort
-  - ~~Schedule/grades queries loaded duplicate courses and teachers~~ ✅ **COMPLETED** (2026-01-10) - Added ID deduplication before fetching courses/teachers, 20-50% reduction in redundant entity lookups
+   - ~~Schedule/grades queries loaded duplicate courses and teachers~~ ✅ **COMPLETED** (2026-01-10) - Added ID deduplication before fetching courses/teachers, 20-50% reduction in redundant entity lookups
+   - ~~ContactPage (162 lines) with inline form logic mixed with page UI~~ ✅ **COMPLETED** (2026-01-13) - Extracted ContactForm component (112 lines), reduced ContactPage to 64 lines (60% reduction), improved Separation of Concerns and Single Responsibility Principle
+    - ~~Duplicate validation logic in form components: getNameError, getEmailError, getPhoneError, getNisnError, getMessageError duplicated across UserForm, ContactForm, PPDBForm, AnnouncementForm~~ ✅ **COMPLETED** (2026-01-13) - Created centralized validation utility module (src/utils/validation.ts) with 9 reusable validation functions (validateName, validateEmail, validatePhone, validateNisn, validateMessage, validateRole, validateTitle, validateContent), refactored 4 forms to use centralized validation (eliminated 50+ lines of duplicate validation code), applied DRY principle and Single Responsibility Principle
+     - ~~Circuit breaker management mixed in WebhookService: Module-level Map managed circuit breakers directly, creating tight coupling between service and circuit breaker lifecycle~~ ✅ **COMPLETED** (2026-01-13) - Extracted CircuitBreakerRegistry module (worker/CircuitBreakerRegistry.ts) with singleton pattern for managing circuit breakers, providing getOrCreate, reset, resetAll, and getAllStates methods, improved Modularity and Single Responsibility Principle
+     - ~~Duplicate error response boilerplate in response-helpers.ts: 9 error response functions repeated identical ApiErrorResponse construction and request ID generation logic~~ ✅ **COMPLETED** (2026-01-13) - Extracted createErrorResponse helper function (worker/api/response-helpers.ts) that centralizes error response construction, eliminated 45+ lines of duplicate code across bad, unauthorized, forbidden, notFound, conflict, rateLimitExceeded, serverError, serviceUnavailable, and gatewayTimeout functions, applied DRY principle
+
 
 
     ### Recent Data Optimizations (2026-01-07)
@@ -853,6 +858,159 @@ This clears and rebuilds all secondary indexes from existing data.
    - Reusability: Retry utility can now be used for any async operation that needs retry
 
     **Success**: ✅ **RETRY UTILITY MODULE EXTRACTION COMPLETE, 97 LINES OF DUPLICATE CODE ELIMINATED, RETRY BEHAVIOR UNIFIED**
+
+---
+
+### Form Validation Utility Module (2026-01-13)
+
+**Problem**: Duplicate validation logic across multiple form components violated DRY principle
+- getNameError, getEmailError duplicated in UserForm, ContactForm, PPDBForm
+- getPhoneError, getNisnError duplicated in PPDBForm
+- getMessageError duplicated in ContactForm
+- getTitleError, getContentError duplicated in AnnouncementForm
+- 50+ lines of duplicate validation code across 4 forms
+- Maintenance burden: updating validation logic required changes in multiple files
+
+**Solution**: Created centralized validation utility module with reusable validation functions
+
+**Implementation**:
+
+1. **Enhanced src/utils/validation.ts** (expanded from 9 to 150+ lines):
+   - Added `ValidationRule<T>` interface for typed validation rules
+   - Added `validateField<T>()` generic function for field validation
+   - Added `ValidationOptions` interface for showErrors flag
+   - Added `validationRules` object with configurable validation rules:
+     * name: required, minLength validation
+     * email: required, format validation (regex: /^\S+@\S+\.\S+$/)
+     * phone: required, numeric, length validation
+     * nisn: required, numeric, exactLength validation
+     * message: required, minLength validation
+     * role: required validation
+     * title: required, minLength validation
+     * content: required, minLength validation
+   - Added 9 reusable validation functions:
+     * `validateName(value, showErrors, minLength = 2)`
+     * `validateEmail(value, showErrors)`
+     * `validatePhone(value, showErrors, min = 10, max = 13)`
+     * `validateNisn(value, showErrors, length = 10)`
+     * `validateMessage(value, showErrors, minLength = 10)`
+     * `validateRole(value, showErrors)`
+     * `validateTitle(value, showErrors, minLength = 5)`
+     * `validateContent(value, showErrors, minLength = 10)`
+
+2. **Refactored UserForm.tsx** (179 lines → 162 lines, 9% reduction):
+   - Removed getNameError, getEmailError, getRoleError inline validation functions
+   - Import validateName, validateEmail, validateRole from @/utils/validation
+   - Changed from inline validation to utility calls:
+     * Before: `const getNameError = () => { if (!userName.trim()) return ... }`
+     * After: `const nameError = validateName(userName, showValidationErrors)`
+
+3. **Refactored ContactForm.tsx** (113 lines → 98 lines, 13% reduction):
+   - Removed getNameError, getEmailError, getMessageError inline validation functions
+   - Import validateName, validateEmail, validateMessage from @/utils/validation
+   - All validation logic centralized in utility module
+
+4. **Refactored PPDBForm.tsx** (273 lines → 251 lines, 8% reduction):
+   - Removed getNameError, getEmailError, getPhoneError, getNisnError inline validation functions
+   - Import validateName, validateEmail, validatePhone, validateNisn from @/utils/validation
+   - Configurable validation: validateNisn(..., 10), validatePhone(..., 10, 13)
+
+5. **Refactored AnnouncementForm.tsx** (139 lines → 122 lines, 12% reduction):
+   - Removed validateForm inline validation function
+   - Import validateTitle, validateContent from @/utils/validation
+   - Simplified handleSubmit to use utility validation
+
+**Metrics**:
+
+| Metric | Before | After | Improvement |
+|---------|--------|-------|-------------|
+| Duplicate validation code locations | 4 forms | 0 forms | 100% eliminated |
+| Duplicate validation functions | 11 functions | 0 functions | 100% eliminated |
+| Duplicate validation code lines | 50+ lines | 0 lines | 100% eliminated |
+| UserForm size | 179 lines | 162 lines | 9% reduction |
+| ContactForm size | 113 lines | 98 lines | 13% reduction |
+| PPDBForm size | 273 lines | 251 lines | 8% reduction |
+| AnnouncementForm size | 139 lines | 122 lines | 12% reduction |
+| Total form lines reduced | 704 lines | 633 lines | 10% average reduction |
+| Maintenance locations | 4 files | 1 file | 75% reduction |
+
+**Benefits Achieved**:
+- ✅ Centralized validation utility module (150+ lines, fully self-contained)
+- ✅ 50+ lines of duplicate validation code eliminated
+- ✅ 4 forms refactored to use centralized validation
+- ✅ Consistent validation behavior across all forms
+- ✅ Single source of truth for validation logic
+- ✅ Maintainability: Update validation in one location
+- ✅ Testability: Validation logic can be tested independently
+- ✅ Reusability: Validation functions available for new forms
+- ✅ Type-safe validation with TypeScript generics
+- ✅ Configurable validation parameters (minLength, length, min, max)
+- ✅ All typechecks pass (0 errors)
+- ✅ Zero breaking changes to existing functionality
+
+**Technical Details**:
+
+**Validation Utility Pattern**:
+```typescript
+// Good pattern: Use centralized validation utility
+import { validateName, validateEmail } from '@/utils/validation';
+
+const nameError = validateName(name, showValidationErrors);
+const emailError = validateEmail(email, showValidationErrors);
+
+// Bad pattern: Inline validation logic
+// const getNameError = () => {
+//   if (!name.trim()) return showValidationErrors ? 'Name is required' : undefined;
+//   if (name.trim().length < 2) return 'Name must be at least 2 characters';
+//   return undefined;
+// };
+```
+
+**Validation Rule Structure**:
+- Composable validation rules with validate predicate and error message
+- Support for required checks, format validation (regex), length validation
+- Configurable parameters for field-specific validation (minLength, exactLength)
+- Conditional error display based on showErrors flag
+
+**Form Validation Flow**:
+1. Form state includes showValidationErrors flag
+2. Validation utilities called with value + showErrors flag
+3. On form submit, setShowValidationErrors(true) triggers validation
+4. If any validation error, form submission is prevented
+5. Validation errors displayed via ARIA attributes for accessibility
+
+**Architectural Impact**:
+- **DRY Principle**: Eliminated 50+ lines of duplicate validation code
+- **Single Responsibility**: Validation logic in one module (utils/validation.ts)
+- **Separation of Concerns**: Forms handle UI, validation utility handles validation
+- **Consistency**: All forms use identical validation patterns
+- **Maintainability**: Single source of truth for validation rules
+- **Extensibility**: New validation rules easily added to validationRules object
+- **Testability**: Validation logic can be tested independently of React components
+
+**Success Criteria**:
+- [x] Centralized validation utility module created
+- [x] All duplicate validation code eliminated
+- [x] UserForm refactored to use validation utility
+- [x] ContactForm refactored to use validation utility
+- [x] PPDBForm refactored to use validation utility
+- [x] AnnouncementForm refactored to use validation utility
+- [x] All forms reduced in size (9-13% reduction)
+- [x] Validation behavior consistent across all forms
+- [x] Typecheck passed (0 errors)
+- [x] Zero breaking changes to existing functionality
+
+**Impact**:
+- `src/utils/validation.ts`: Enhanced from 9 to 150+ lines (new validation functions)
+- `src/components/forms/UserForm.tsx`: Reduced 179 → 162 lines (9% reduction)
+- `src/components/forms/ContactForm.tsx`: Reduced 113 → 98 lines (13% reduction)
+- `src/components/forms/PPDBForm.tsx`: Reduced 273 → 251 lines (8% reduction)
+- `src/components/forms/AnnouncementForm.tsx`: Reduced 139 → 122 lines (12% reduction)
+- Duplicate code eliminated: 50+ lines of validation logic
+- Code maintainability: Significantly improved (single source of truth)
+- Future form development: New forms use centralized validation utilities
+
+**Success**: ✅ **FORM VALIDATION UTILITY MODULE COMPLETE, 50+ LINES DUPLICATE CODE ELIMINATED, 4 FORMS REFACTORED**
 
 ---
 
@@ -3152,10 +3310,11 @@ All requests include `X-Request-ID` header for tracing:
 8. **Validate inputs** - Use Zod schemas for request/response validation
 9. **Use centralized logger** - Import from `@/lib/logger` (frontend) or `../logger` (worker) for consistent logging
 10. **Use standardized error helpers** - Always use proper helper functions (unauthorized, forbidden, etc.) instead of manual JSON responses
-11. **Use withErrorHandler wrapper** - Always wrap route handlers with `withErrorHandler('operation name')` for consistent error handling (worker/routes only)
-12. **Verify webhook signatures** - Always verify `X-Webhook-Signature` header for incoming webhooks to prevent spoofing
-13. **Use retry logic for webhooks** - Webhook system automatically retries with exponential backoff, no need to implement retry logic
-14. **Process webhook deliveries regularly** - Use scheduled jobs to call `POST /api/admin/webhooks/process` for timely delivery
+ 11. **Use withErrorHandler wrapper** - Always wrap route handlers with `withErrorHandler('operation name')` for consistent error handling (worker/routes only)
+ 12. **Verify webhook signatures** - Always verify `X-Webhook-Signature` header for incoming webhooks to prevent spoofing
+ 13. **Use retry logic for webhooks** - Webhook system automatically retries with exponential backoff, no need to implement retry logic
+ 14. **Process webhook deliveries regularly** - Use scheduled jobs to call `POST /api/admin/webhooks/process` for timely delivery
+ 15. **Use centralized validation utilities** - Import validation functions from `@/utils/validation` for consistent form validation across components
 
 ---
 

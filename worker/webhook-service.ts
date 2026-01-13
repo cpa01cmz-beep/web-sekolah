@@ -3,12 +3,10 @@ import { WebhookConfigEntity, WebhookEventEntity, WebhookDeliveryEntity, DeadLet
 import type { WebhookConfig, WebhookEvent, WebhookDelivery } from '@shared/types';
 import { logger } from './logger';
 import { integrationMonitor } from './integration-monitor';
-import { CircuitBreaker } from './CircuitBreaker';
 import { WEBHOOK_CONFIG } from './webhook-constants';
 import { generateSignature, verifySignature } from './webhook-crypto';
 import type { WebhookEventPayload } from './webhook-types';
-
-const webhookCircuitBreakers = new Map<string, CircuitBreaker>();
+import { CircuitBreakerRegistry } from './CircuitBreakerRegistry';
 
 export class WebhookService {
   static async triggerEvent(env: Env, eventType: string, data: Record<string, unknown>): Promise<void> {
@@ -58,7 +56,7 @@ export class WebhookService {
         idempotencyKey
       };
 
-      await new WebhookDeliveryEntity(env, deliveryId).save(delivery);
+      await WebhookDeliveryEntity.createWithDateIndex(env, delivery);
 
       logger.info('Webhook delivery created', { deliveryId, eventId, webhookConfigId: config.id, eventType, idempotencyKey });
     }
@@ -101,11 +99,7 @@ export class WebhookService {
       return;
     }
 
-    let breaker = webhookCircuitBreakers.get(config.url);
-    if (!breaker) {
-      breaker = CircuitBreaker.createWebhookBreaker(config.url);
-      webhookCircuitBreakers.set(config.url, breaker);
-    }
+    const breaker = CircuitBreakerRegistry.getOrCreate(config.url);
 
     const payload = {
       id: event.id,
