@@ -1,4 +1,4 @@
-import { IndexedEntity, SecondaryIndex, type Env } from "../core-utils";
+import { IndexedEntity, type Env } from "../core-utils";
 import type { Announcement } from "@shared/types";
 import { seedData } from "../seed-data";
 import { DateSortedSecondaryIndex } from "../storage/DateSortedSecondaryIndex";
@@ -15,10 +15,7 @@ export class AnnouncementEntity extends IndexedEntity<Announcement> {
   ];
 
   static async getByAuthorId(env: Env, authorId: string): Promise<Announcement[]> {
-    const index = new SecondaryIndex<string>(env, this.entityName, 'authorId');
-    const announcementIds = await index.getByValue(authorId);
-    const announcements = await Promise.all(announcementIds.map(id => new this(env, id).getState()));
-    return announcements.filter(a => a && !a.deletedAt) as Announcement[];
+    return this.getBySecondaryIndex(env, 'authorId', authorId);
   }
 
   static async getByTargetRole(env: Env, targetRole: string): Promise<Announcement[]> {
