@@ -95,7 +95,7 @@ export const validationRules = {
   },
   role: {
     required: {
-      validate: (value: string) => value && value.length > 0,
+      validate: (value: string) => Boolean(value && value.length > 0),
       message: 'Role is required',
     },
   },
