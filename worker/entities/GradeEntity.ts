@@ -10,6 +10,11 @@ export class GradeEntity extends IndexedEntity<Grade> {
   static readonly initialState: Grade = { id: "", studentId: "", courseId: "", score: 0, feedback: "", createdAt: "", updatedAt: "", deletedAt: null };
   static seedData = seedData.grades;
 
+  static readonly secondaryIndexes = [
+    { fieldName: 'studentId', getValue: (state: { id: string; }) => (state as Grade).studentId },
+    { fieldName: 'courseId', getValue: (state: { id: string; }) => (state as Grade).courseId }
+  ];
+
   static async getByStudentId(env: Env, studentId: string): Promise<Grade[]> {
     const index = new SecondaryIndex<string>(env, this.entityName, 'studentId');
     const gradeIds = await index.getByValue(studentId);

@@ -17,6 +17,13 @@ export class WebhookDeliveryEntity extends IndexedEntity<WebhookDelivery> {
     idempotencyKey: undefined
   };
 
+  static readonly secondaryIndexes = [
+    { fieldName: 'eventId', getValue: (state: { id: string; }) => (state as WebhookDelivery).eventId },
+    { fieldName: 'webhookConfigId', getValue: (state: { id: string; }) => (state as WebhookDelivery).webhookConfigId },
+    { fieldName: 'status', getValue: (state: { id: string; }) => (state as WebhookDelivery).status },
+    { fieldName: 'idempotencyKey', getValue: (state: { id: string; }) => (state as WebhookDelivery).idempotencyKey || '' }
+  ];
+
   static async getPendingRetries(env: Env): Promise<WebhookDelivery[]> {
     const pendingDeliveries = await this.getBySecondaryIndex(env, 'status', 'pending');
     const now = new Date().toISOString();

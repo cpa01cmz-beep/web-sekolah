@@ -8,6 +8,10 @@ export class ClassEntity extends IndexedEntity<SchoolClass> {
   static readonly initialState: SchoolClass = { id: "", name: "", teacherId: "", createdAt: "", updatedAt: "", deletedAt: null };
   static seedData = seedData.classes;
 
+  static readonly secondaryIndexes = [
+    { fieldName: 'teacherId', getValue: (state: { id: string; }) => (state as SchoolClass).teacherId }
+  ];
+
   static async getByTeacherId(env: Env, teacherId: string): Promise<SchoolClass[]> {
     return this.getBySecondaryIndex(env, 'teacherId', teacherId);
   }

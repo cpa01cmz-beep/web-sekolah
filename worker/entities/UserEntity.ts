@@ -8,6 +8,12 @@ export class UserEntity extends IndexedEntity<SchoolUser> {
   static readonly initialState: SchoolUser = { id: "", name: "", email: "", role: 'admin', avatarUrl: '', passwordHash: null, createdAt: '', updatedAt: '', deletedAt: null };
   static seedData = seedData.users;
 
+  static readonly secondaryIndexes = [
+    { fieldName: 'role', getValue: (state: { id: string; }) => (state as SchoolUser).role },
+    { fieldName: 'email', getValue: (state: { id: string; }) => (state as SchoolUser).email },
+    { fieldName: 'classId', getValue: (state: { id: string; }) => ((state as Student).classId || '') }
+  ];
+
   static async getByRole(env: Env, role: UserRole): Promise<SchoolUser[]> {
     return this.getBySecondaryIndex(env, 'role', role);
   }

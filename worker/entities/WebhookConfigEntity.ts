@@ -15,6 +15,10 @@ export class WebhookConfigEntity extends IndexedEntity<WebhookConfig> {
     deletedAt: null
   };
 
+  static readonly secondaryIndexes = [
+    { fieldName: 'active', getValue: (state: { id: string; }) => String((state as WebhookConfig).active) }
+  ];
+
   static async getActive(env: Env): Promise<WebhookConfig[]> {
     return this.getBySecondaryIndex(env, 'active', 'true');
   }

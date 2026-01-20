@@ -31,23 +31,17 @@ export function webhookAdminRoutes(app: Hono<{ Bindings: Env }>) {
   }));
 
   app.delete('/api/admin/webhooks/dead-letter-queue/:id', withErrorHandler('delete dead letter queue entry')(async (c: Context) => {
-    const id = c.req.param('id');
-    const existing = await new DeadLetterQueueWebhookEntity(c.env, id).getState();
+     const id = c.req.param('id');
+     const existing = await new DeadLetterQueueWebhookEntity(c.env, id).getState();
 
-    if (!existing || existing.deletedAt) {
-      return notFound(c, 'Dead letter queue entry not found');
-    }
+     if (!existing || existing.deletedAt) {
+       return notFound(c, 'Dead letter queue entry not found');
+     }
 
-    const updated = {
-      ...existing,
-      deletedAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    };
+     await DeadLetterQueueWebhookEntity.delete(c.env, id);
 
-    await new DeadLetterQueueWebhookEntity(c.env, id).save(updated);
+     logger.info('Dead letter queue entry deleted', { id });
 
-    logger.info('Dead letter queue entry deleted', { id });
-
-    return ok(c, { id, deleted: true });
-  }));
+     return ok(c, { id, deleted: true });
+   }));
 }
