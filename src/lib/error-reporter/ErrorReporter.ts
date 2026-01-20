@@ -13,11 +13,11 @@ import { GlobalErrorHandler } from './GlobalErrorHandler';
 import { ErrorSender } from './ErrorSender';
 
 class ErrorReporter {
-  private errorFilter: ErrorFilter;
-  private errorQueue: ErrorQueue;
-  private consoleInterceptor: ConsoleInterceptor;
-  private globalErrorHandler: GlobalErrorHandler;
-  private errorSender: ErrorSender;
+  private errorFilter!: ErrorFilter;
+  private errorQueue!: ErrorQueue;
+  private consoleInterceptor!: ConsoleInterceptor;
+  private globalErrorHandler!: GlobalErrorHandler;
+  private errorSender!: ErrorSender;
   private isInitialized = false;
 
   constructor() {
@@ -105,6 +105,7 @@ class ErrorReporter {
     try {
       this.errorQueue.report(error);
     } catch (err) {
+      /* empty */
     }
   }
 

@@ -1,6 +1,5 @@
 import type { ConsoleMethod, ConsoleNative, WrappedConsoleFn, ErrorContext } from './types';
 import { REACT_WARNING_PATTERN, WARNING_PREFIX, CONSOLE_ERROR_PREFIX } from './constants';
-import { parseStackTrace } from './utils';
 
 export class ConsoleInterceptor {
   private originalConsoleWarn: typeof console.warn | null = null;
@@ -69,6 +68,7 @@ export class ConsoleInterceptor {
 
         this.errorCallback(context);
       } catch {
+        /* empty */
       }
     };
   }
