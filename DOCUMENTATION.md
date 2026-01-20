@@ -74,37 +74,6 @@ Before you begin, ensure you have following installed:
     wrangler dev worker/index.ts
     ```
 
-2. Navigate to the project directory:
-    ```bash
-    cd web-sekolah
-    ```
-
-3. Install dependencies:
-    ```bash
-    bun install
-    ```
-
-4. Configure environment variables:
-    ```bash
-    cp .env.example .env
-    ```
-    
-    Update the `.env` file with your configuration. For local development, the defaults in `.env.example` should work. For production deployment, ensure you update the `ALLOWED_ORIGINS` and `JWT_SECRET` values.
-
-### Development Setup
-
-1. Start the development server:
-    ```bash
-    bun dev
-    ```
-
-2. The application will be available at `http://localhost:3000` (or the port specified in your environment).
-
-3. For backend-only development, you can also run the worker separately:
-    ```bash
-    wrangler dev worker/index.ts
-    ```
-
 ## Project Structure
 
 ```
@@ -432,10 +401,10 @@ npm run test:ui
 npm run lint
 ```
 
-**Test Statistics** (as of 2026-01-08):
-- Total tests: 960
-- Test files: 40+
-- Coverage: Critical infrastructure, services, hooks, utilities, validation, domain services
+**Test Statistics** (as of 2026-01-20):
+- Total tests: 2032 (2032 passing, 6 skipped, 155 todo)
+- Test files: 64
+- Coverage: Critical infrastructure, services, hooks, utilities, validation, domain services, rate limiting, query optimization
 
 For detailed testing strategy, see [docs/task.md](./docs/task.md).
 
