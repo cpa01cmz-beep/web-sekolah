@@ -2,6 +2,7 @@ import { Hono } from 'hono';
 import type { Env } from './core-utils';
 import { CircuitBreaker } from './CircuitBreaker';
 import { withErrorHandler } from './routes/route-utils';
+import { TimeConstants } from './config/time';
 import type { Context } from 'hono';
 
 const DOCS_TIMEOUT_MS = 30000;
@@ -33,7 +34,7 @@ async function fetchWithRetry(url: string, maxRetries = DOCS_MAX_RETRIES): Promi
       lastError = error instanceof Error ? error : new Error(String(error));
 
       if (attempt < maxRetries) {
-        const delay = DOCS_RETRY_DELAY_MS * Math.pow(2, attempt) + Math.random() * 1000;
+        const delay = DOCS_RETRY_DELAY_MS * Math.pow(2, attempt) + Math.random() * TimeConstants.SECOND_MS;
         await new Promise(resolve => setTimeout(resolve, delay));
       }
     }
