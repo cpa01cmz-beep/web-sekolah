@@ -1,27 +1,28 @@
 import type { Env } from '../core-utils';
-import { UserEntity, ClassEntity, CourseEntity, GradeEntity, AnnouncementEntity, ScheduleEntity } from '../entities';
-import type { ParentDashboardData, ScheduleItem, Grade, Announcement, Student, SchoolUser, Course } from '@shared/types';
+import { UserEntity, ClassEntity } from '../entities';
+import type { ParentDashboardData, Student, ScheduleItem } from '@shared/types';
 import { getRoleSpecificFields } from '../type-guards';
+import { CommonDataService } from './CommonDataService';
 
 export class ParentDashboardService {
   static async getDashboardData(env: Env, parentId: string): Promise<ParentDashboardData> {
     const parent = new UserEntity(env, parentId);
     const parentState = await parent.getState();
-    
+
     if (!parentState || parentState.role !== 'parent') {
       throw new Error('Parent not found');
     }
 
     const roleFields = getRoleSpecificFields(parentState);
-    
+
     if (!roleFields.childId) {
       throw new Error('Parent has no associated child');
     }
 
     const child = await this.getChild(env, roleFields.childId);
     const childSchedule = await this.getChildSchedule(env, roleFields.childId);
-    const childGrades = await this.getChildGrades(env, roleFields.childId, 10);
-    const announcements = await this.getAnnouncements(env, 5);
+    const childGrades = await CommonDataService.getRecentGradesWithCourseNames(env, roleFields.childId, 10);
+    const announcements = await CommonDataService.getAnnouncementsWithAuthorNames(env, 5);
 
     return { child, childSchedule, childGrades, announcements };
   }
@@ -53,77 +54,17 @@ export class ParentDashboardService {
   private static async getChildSchedule(env: Env, childId: string): Promise<(ScheduleItem & { courseName: string; teacherName: string })[]> {
     const childEntity = new UserEntity(env, childId);
     const childState = await childEntity.getState();
-    
+
     if (!childState || childState.role !== 'student') {
       return [];
     }
 
     const childRoleFields = getRoleSpecificFields(childState);
-    
+
     if (!childRoleFields.classId) {
       return [];
     }
 
-    return this.getSchedule(env, childRoleFields.classId);
-  }
-
-  private static async getSchedule(env: Env, classId: string): Promise<(ScheduleItem & { courseName: string; teacherName: string })[]> {
-    const scheduleEntity = new ScheduleEntity(env, classId);
-    const scheduleState = await scheduleEntity.getState();
-
-    if (!scheduleState) {
-      return [];
-    }
-
-    const courseIds = scheduleState.items.map(item => item.courseId);
-    const uniqueCourseIds = Array.from(new Set(courseIds));
-    const courses = await Promise.all(uniqueCourseIds.map(id => new CourseEntity(env, id).getState()));
-    const teacherIds = courses.map(course => course?.teacherId).filter((id): id is string => id !== undefined);
-    const uniqueTeacherIds = Array.from(new Set(teacherIds));
-    const teachers = await Promise.all(uniqueTeacherIds.map(id => new UserEntity(env, id).getState()));
-
-    const coursesMap = new Map(courses.filter((c): c is Course => c !== null).map(c => [c.id, c]));
-    const teachersMap = new Map(teachers.filter((t): t is SchoolUser => t !== null).map(t => [t.id, t]));
-
-    return scheduleState.items.map(item => ({
-      ...item,
-      courseName: coursesMap.get(item.courseId)?.name || 'Unknown Course',
-      teacherName: teachersMap.get(coursesMap.get(item.courseId)?.teacherId || '')?.name || 'Unknown Teacher',
-    }));
-  }
-
-  private static async getChildGrades(env: Env, childId: string, limit: number = 10): Promise<(Grade & { courseName: string })[]> {
-    const studentGrades = await GradeEntity.getRecentForStudent(env, childId, limit);
-
-    if (studentGrades.length === 0) {
-      return [];
-    }
-
-    const gradeCourseIds = studentGrades.map(g => g.courseId);
-    const uniqueCourseIds = Array.from(new Set(gradeCourseIds));
-    const gradeCourses = await Promise.all(uniqueCourseIds.map(id => new CourseEntity(env, id).getState()));
-    const gradeCoursesMap = new Map(gradeCourses.filter((c): c is Course => c !== null).map(c => [c.id, c]));
-
-    return studentGrades.map(grade => ({
-      ...grade,
-      courseName: gradeCoursesMap.get(grade.courseId)?.name || 'Unknown Course',
-    }));
-  }
-
-  private static async getAnnouncements(env: Env, limit: number): Promise<(Announcement & { authorName: string })[]> {
-    const recentAnnouncements = await AnnouncementEntity.getRecent(env, limit);
-
-    if (recentAnnouncements.length === 0) {
-      return [];
-    }
-
-    const uniqueAuthorIds = Array.from(new Set(recentAnnouncements.map(a => a.authorId)));
-    const announcementAuthors = await Promise.all(uniqueAuthorIds.map(id => new UserEntity(env, id).getState()));
-    const authorsMap = new Map(announcementAuthors.filter((a): a is SchoolUser => a !== null).map(a => [a.id, a]));
-
-    return recentAnnouncements.map(ann => ({
-      ...ann,
-      authorName: authorsMap.get(ann.authorId)?.name || 'Unknown Author',
-    }));
+    return CommonDataService.getScheduleWithDetails(env, childRoleFields.classId);
   }
 }

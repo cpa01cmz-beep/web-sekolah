@@ -1,6 +1,6 @@
 import type { Env } from '../core-utils';
-import { UserEntity, ClassEntity, AnnouncementEntity, ScheduleEntity, ClassScheduleState } from '../entities';
-import type { SchoolUser, SchoolClass, Announcement, Student } from '@shared/types';
+import { UserEntity, ClassEntity, AnnouncementEntity, ScheduleEntity, ClassScheduleState, CourseEntity, GradeEntity } from '../entities';
+import type { SchoolUser, SchoolClass, Announcement, Student, ScheduleItem, Grade, Course } from '@shared/types';
 
 export class CommonDataService {
   static async getStudentWithClassAndSchedule(env: Env, studentId: string): Promise<{
@@ -103,5 +103,65 @@ export class CommonDataService {
     }
     const { passwordHash: _, ...userWithoutPassword } = user;
     return userWithoutPassword;
+  }
+
+  static async getScheduleWithDetails(env: Env, classId: string): Promise<(ScheduleItem & { courseName: string; teacherName: string })[]> {
+    const scheduleEntity = new ScheduleEntity(env, classId);
+    const scheduleState = await scheduleEntity.getState();
+
+    if (!scheduleState) {
+      return [];
+    }
+
+    const courseIds = scheduleState.items.map(item => item.courseId);
+    const uniqueCourseIds = Array.from(new Set(courseIds));
+    const courses = await Promise.all(uniqueCourseIds.map(id => new CourseEntity(env, id).getState()));
+    const teacherIds = courses.map(course => course?.teacherId).filter((id): id is string => id !== undefined);
+    const uniqueTeacherIds = Array.from(new Set(teacherIds));
+    const teachers = await Promise.all(uniqueTeacherIds.map(id => new UserEntity(env, id).getState()));
+
+    const coursesMap = new Map(courses.filter(c => c).map(c => [c!.id, c!]));
+    const teachersMap = new Map(teachers.filter(t => t).map(t => [t!.id, t!]));
+
+    return scheduleState.items.map(item => ({
+      ...item,
+      courseName: coursesMap.get(item.courseId)?.name || 'Unknown Course',
+      teacherName: teachersMap.get(coursesMap.get(item.courseId)?.teacherId || '')?.name || 'Unknown Teacher',
+    }));
+  }
+
+  static async getAnnouncementsWithAuthorNames(env: Env, limit: number): Promise<(Announcement & { authorName: string })[]> {
+    const recentAnnouncements = await AnnouncementEntity.getRecent(env, limit);
+
+    if (recentAnnouncements.length === 0) {
+      return [];
+    }
+
+    const uniqueAuthorIds = Array.from(new Set(recentAnnouncements.map(a => a.authorId)));
+    const announcementAuthors = await Promise.all(uniqueAuthorIds.map(id => new UserEntity(env, id).getState()));
+    const authorsMap = new Map(announcementAuthors.filter(a => a).map(a => [a!.id, a!]));
+
+    return recentAnnouncements.map(ann => ({
+      ...ann,
+      authorName: authorsMap.get(ann.authorId)?.name || 'Unknown Author',
+    }));
+  }
+
+  static async getRecentGradesWithCourseNames(env: Env, studentId: string, limit: number = 10): Promise<(Grade & { courseName: string })[]> {
+    const studentGrades = await GradeEntity.getRecentForStudent(env, studentId, limit);
+
+    if (studentGrades.length === 0) {
+      return [];
+    }
+
+    const gradeCourseIds = studentGrades.map(g => g.courseId);
+    const uniqueCourseIds = Array.from(new Set(gradeCourseIds));
+    const gradeCourses = await Promise.all(uniqueCourseIds.map(id => new CourseEntity(env, id).getState()));
+    const gradeCoursesMap = new Map(gradeCourses.filter(c => c).map(c => [c!.id, c!]));
+
+    return studentGrades.map(grade => ({
+      ...grade,
+      courseName: gradeCoursesMap.get(grade.courseId)?.name || 'Unknown Course',
+    }));
   }
 }
