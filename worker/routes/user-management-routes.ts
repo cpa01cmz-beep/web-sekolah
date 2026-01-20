@@ -3,7 +3,7 @@ import type { Env } from '../core-utils';
 import { ok, bad, notFound } from '../core-utils';
 import type { CreateUserData, UpdateUserData, Grade } from "@shared/types";
 import { UserService, CommonDataService, GradeService } from '../domain';
-import { withAuth, triggerWebhookSafely } from './route-utils';
+import { withAuth, withErrorHandler, triggerWebhookSafely } from './route-utils';
 import { validateBody } from '../middleware/validation';
 import { createUserSchema, updateUserSchema, createGradeSchema, updateGradeSchema } from '../middleware/schemas';
 import type { Context } from 'hono';
@@ -21,21 +21,14 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
     return ok(c, newUser);
   });
 
-  app.put('/api/users/:id', ...withAuth('admin'), validateBody(updateUserSchema), async (c: Context) => {
+  app.put('/api/users/:id', ...withAuth('admin'), validateBody(updateUserSchema), withErrorHandler('update user')(async (c: Context) => {
     const userId = c.req.param('id');
     const userData = c.get('validatedBody') as UpdateUserData;
-    try {
-      const updatedUser = await UserService.updateUser(c.env, userId, userData);
-      triggerWebhookSafely(c.env, 'user.updated', updatedUser, { userId });
-      const { passwordHash: _, ...userWithoutPassword } = updatedUser;
-      return ok(c, userWithoutPassword);
-    } catch (error) {
-      if (error instanceof Error && error.message === 'User not found') {
-        return notFound(c, 'User not found');
-      }
-      throw error;
-    }
-  });
+    const updatedUser = await UserService.updateUser(c.env, userId, userData);
+    triggerWebhookSafely(c.env, 'user.updated', updatedUser, { userId });
+    const { passwordHash: _, ...userWithoutPassword } = updatedUser;
+    return ok(c, userWithoutPassword);
+  }));
 
   app.delete('/api/users/:id', ...withAuth('admin'), async (c: Context) => {
     const userId = c.req.param('id');
@@ -47,32 +40,18 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
     return ok(c, result);
   });
 
-  app.put('/api/grades/:id', ...withAuth('teacher'), validateBody(updateGradeSchema), async (c: Context) => {
+  app.put('/api/grades/:id', ...withAuth('teacher'), validateBody(updateGradeSchema), withErrorHandler('update grade')(async (c: Context) => {
     const gradeId = c.req.param('id');
     const validatedData = c.get('validatedBody') as { score: number; feedback: string };
-    try {
-      const updatedGrade = await GradeService.updateGrade(c.env, gradeId, { score: validatedData.score, feedback: validatedData.feedback });
-      triggerWebhookSafely(c.env, 'grade.updated', updatedGrade, { gradeId });
-      return ok(c, updatedGrade);
-    } catch (error) {
-      if (error instanceof Error && error.message === 'Grade not found') {
-        return notFound(c, 'Grade not found');
-      }
-      throw error;
-    }
-  });
+    const updatedGrade = await GradeService.updateGrade(c.env, gradeId, { score: validatedData.score, feedback: validatedData.feedback });
+    triggerWebhookSafely(c.env, 'grade.updated', updatedGrade, { gradeId });
+    return ok(c, updatedGrade);
+  }));
 
-  app.post('/api/grades', ...withAuth('teacher'), validateBody(createGradeSchema), async (c: Context) => {
+  app.post('/api/grades', ...withAuth('teacher'), validateBody(createGradeSchema), withErrorHandler('create grade')(async (c: Context) => {
     const validatedData = c.get('validatedBody') as typeof createGradeSchema._output;
-    try {
-      const newGrade = await GradeService.createGrade(c.env, validatedData);
-      triggerWebhookSafely(c.env, 'grade.created', newGrade, { gradeId: newGrade.id });
-      return ok(c, newGrade);
-    } catch (error) {
-      if (error instanceof Error) {
-        return bad(c, error.message);
-      }
-      throw error;
-    }
-  });
+    const newGrade = await GradeService.createGrade(c.env, validatedData);
+    triggerWebhookSafely(c.env, 'grade.created', newGrade, { gradeId: newGrade.id });
+    return ok(c, newGrade);
+  }));
 }
