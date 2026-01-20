@@ -1604,12 +1604,137 @@ await breaker.execute(async () => {
 ```
 
 **Benefits:**
-
 - ✅ Fast failure when endpoint is degraded (no timeout wait)
 - ✅ Reduces unnecessary network calls to failing endpoints
 - ✅ Automatic recovery when endpoint comes back online
 - ✅ Independent isolation per webhook URL
 - ✅ Prevents cascading failures across system
+
+### Rate Limiting (2026-01-20)
+
+Protects APIs from overload and abuse by limiting request frequency.
+
+**Configuration:**
+
+Four predefined limiters for different endpoint types:
+
+| Limiter | Window | Max Requests | Use Case |
+|----------|---------|---------------|-----------|
+| strictRateLimiter | 5 minutes | 50 | Sensitive endpoints (auth, admin) |
+| defaultRateLimiter | 15 minutes | 100 | Standard API endpoints |
+| looseRateLimiter | 1 hour | 1000 | Public endpoints (docs, health) |
+| authRateLimiter | 15 minutes | 5 | Authentication endpoints |
+
+**Implementation:**
+
+```typescript
+import { defaultRateLimiter, strictRateLimiter } from './middleware/rate-limit';
+
+// Apply to routes
+app.use('/api/users', defaultRateLimiter());
+app.use('/api/auth', strictRateLimiter());
+```
+
+**Features:**
+
+- **IP-based limiting**: Separate limits per IP address
+- **Path-based limiting**: Separate limits per API path
+- **Custom key generators**: User-based or custom limiting strategies
+- **Window expiration**: Automatic reset after configured time
+- **Standard headers**: X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset
+- **Retry-After header**: Included in 429 responses
+- **Skip options**: Configure to skip successful or failed requests
+- **Custom handlers**: Override default 429 response
+- **Callbacks**: Trigger onLimitReached when limit exceeded
+
+**Protected Endpoints:**
+
+- `/api/auth`: strictRateLimiter (auth endpoints, highly sensitive)
+- `/api/seed`: strictRateLimiter (database seeding, admin operation)
+- `/api/client-errors`: strictRateLimiter (error reporting, potential abuse)
+- `/api/users`: defaultRateLimiter (user management, moderate load)
+- `/api/grades`: defaultRateLimiter (grade operations, moderate load)
+- `/api/students`: defaultRateLimiter (student data, moderate load)
+- `/api/teachers`: defaultRateLimiter (teacher data, moderate load)
+- `/api/classes`: defaultRateLimiter (class data, moderate load)
+- `/api/webhooks`: defaultRateLimiter (webhook configuration, moderate load)
+- `/api/admin/webhooks`: strictRateLimiter (webhook management, admin operation)
+
+**Monitoring:**
+
+Rate limiting metrics are tracked in `/api/health`:
+```json
+{
+  "rateLimit": {
+    "blockRate": "0.00%",
+    "totalRequests": 42,
+    "blockedRequests": 0,
+    "currentEntries": 5
+  }
+}
+```
+
+**Test Coverage:**
+
+Comprehensive test suite with 22 tests covering:
+- Basic rate limiting (allow within limit, block exceeding, headers)
+- IP-based limiting (separate limits per IP, different headers)
+- Path-based limiting (separate limits per API path)
+- Custom key generator (user-based or custom limiting)
+- Window expiration (reset after configured timeout)
+- Predefined limiters (standard, strict, loose, auth)
+- Skip options (successful/failed request skipping)
+- Store management (cleanup, clear, get entries)
+- Custom handler (override default 429 response)
+- onLimitReached callback (trigger when limit exceeded)
+- Disable standard headers (optional header emission)
+
+**Benefits:**
+- ✅ All API endpoints protected from abuse
+- ✅ Configurable limits per endpoint type
+- ✅ IP-based isolation prevents cross-user abuse
+- ✅ Path-based isolation protects different resources
+- ✅ Custom key generators support user-based limiting
+- ✅ Automatic cleanup prevents memory leaks
+- ✅ Standard headers provide transparency to clients
+- ✅ Comprehensive test coverage ensures reliability
+- ✅ Zero breaking changes to existing functionality
+
+**Usage Examples:**
+
+```typescript
+// Basic rate limiting
+app.use('/api/test', rateLimit({
+  maxRequests: 100,
+  windowMs: 60000
+}));
+
+// Custom key generator for user-based limiting
+app.use('/api/test', rateLimit({
+  maxRequests: 50,
+  windowMs: 60000,
+  keyGenerator: (c) => `user:${c.req.header('X-User-ID')}`
+}));
+
+// Skip successful requests from count
+app.use('/api/test', rateLimit({
+  maxRequests: 100,
+  windowMs: 60000,
+  skipSuccessfulRequests: true
+}));
+
+// Custom handler for rate limit exceeded
+app.use('/api/test', rateLimit({
+  maxRequests: 50,
+  windowMs: 60000,
+  handler: (c, info) => {
+    return c.json({
+      error: 'Too many requests',
+      retryAfter: info.reset
+    }, 429);
+  }
+}));
+```
 
 ### Integration Hardening (2026-01-10)
 
