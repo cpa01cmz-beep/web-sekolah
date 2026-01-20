@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { PageHeader } from '@/components/PageHeader';
 import { GraduationCap, QrCode, Printer, AlertTriangle } from 'lucide-react';
 import { SlideUp } from '@/components/animations';
 import { toast } from 'sonner';
@@ -69,8 +70,10 @@ export function StudentCardPage() {
   return (
     <SlideUp className="space-y-6 flex flex-col items-center px-4 sm:px-0 w-full">
       <div className="text-center w-full max-w-2xl">
-        <h1 className="text-2xl sm:text-3xl font-bold">Kartu Pelajar Digital</h1>
-        <p className="text-sm sm:text-base text-muted-foreground">Ini adalah kartu pelajar digital Anda. Anda dapat mengunduhnya sebagai PDF.</p>
+        <PageHeader
+          title="Kartu Pelajar Digital"
+          description="Ini adalah kartu pelajar digital Anda. Anda dapat mengunduhnya sebagai PDF."
+        />
       </div>
       <div
         className="w-full max-w-[550px] min-h-[330px] rounded-2xl p-4 sm:p-6 text-white shadow-2xl flex flex-col justify-between relative overflow-hidden" style={{ background: `linear-gradient(to bottom right, ${THEME_COLORS.PRIMARY}, ${THEME_COLORS.SECONDARY})` }}

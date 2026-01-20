@@ -3,6 +3,7 @@ import { Badge } from '@/components/ui/badge';
 import { CardSkeleton } from '@/components/ui/loading-skeletons';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { AlertTriangle } from 'lucide-react';
+import { PageHeader } from '@/components/PageHeader';
 import { SlideUp } from '@/components/animations';
 import { useStudentDashboard } from '@/hooks/useStudent';
 import { useAuthStore } from '@/lib/authStore';
@@ -59,7 +60,7 @@ export function StudentGradesPage() {
 
   return (
     <SlideUp className="space-y-6">
-      <h1 className="text-3xl font-bold">Rapor Akademik</h1>
+      <PageHeader title="Rapor Akademik" />
       <Card className="overflow-hidden">
         <CardHeader>
           <CardTitle>Laporan Hasil Belajar</CardTitle>
