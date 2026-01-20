@@ -172,7 +172,11 @@ describe('ReferentialIntegrity', () => {
         });
 
         if (test.score >= 0 && test.score <= 100) {
-          expect(result).toHaveProperty('valid');
+          expect(result.valid).toBe(true);
+          expect(result.error).toBeUndefined();
+        } else {
+          expect(result.valid).toBe(false);
+          expect(result.error).toBe('Score must be between 0 and 100');
         }
       }
     });
@@ -197,8 +201,8 @@ describe('ReferentialIntegrity', () => {
           feedback: test.feedback,
         });
 
-        expect(result).toHaveProperty('valid');
-        expect(result).toHaveProperty('error');
+        expect(result.valid).toBe(true);
+        expect(result.error).toBeUndefined();
       }
     });
 
@@ -382,8 +386,8 @@ describe('ReferentialIntegrity', () => {
         parentId: null as any,
       });
 
-      expect(result).toHaveProperty('valid');
-      expect(result).toHaveProperty('error');
+      expect(result.valid).toBe(true);
+      expect(result.error).toBeUndefined();
     });
 
     it('validateStudent should handle undefined parentId', async () => {
@@ -395,8 +399,8 @@ describe('ReferentialIntegrity', () => {
         parentId: undefined as any,
       });
 
-      expect(result).toHaveProperty('valid');
-      expect(result).toHaveProperty('error');
+      expect(result.valid).toBe(true);
+      expect(result.error).toBeUndefined();
     });
 
     it('validateAnnouncement should return correct structure', async () => {
