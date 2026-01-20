@@ -9732,14 +9732,42 @@ for (let attempt = 0; attempt <= maxRetries; attempt++) {
    - Priority: Low
    - Effort: Small
 
-   ### [REFACTOR] Replace console.log with Logger in Components
-   - Location: Multiple components with 28 console statements across src/
-   - Issue: Direct console.log/error/warn calls bypass centralized logger, missing structured logging and error reporting integration
-   - Suggestion: Replace all console.log/error/warn with logger from @/lib/logger. Use appropriate log levels (info, warn, error, debug). Ensure error objects are logged with context.
-   - Priority: Low
-   - Effort: Small
+    ### [REFACTOR] Replace console.log with Logger in Components
+    - Location: Multiple components with 28 console statements across src/
+    - Issue: Direct console.log/error/warn calls bypass centralized logger, missing structured logging and error reporting integration
+    - Suggestion: Replace all console.log/error/warn with logger from @/lib/logger. Use appropriate log levels (info, warn, error, debug). Ensure error objects are logged with context.
+    - Priority: Low
+    - Effort: Small
 
-  ### ParentDashboardService Critical Path Testing (2026-01-08) - Completed ✅
+    ### [REFACTOR] Extract DownloadCard Component from LinksDownloadPage
+    - Location: src/pages/LinksDownloadPage.tsx
+    - Issue: Repetitive download card rendering code (6 similar card patterns with inline button rendering). Duplicated layout logic for academic documents and forms. Violates DRY principle.
+    - Suggestion: Create reusable DownloadCard component with props: title, description, fileType, fileSize, onDownload. Extract card rendering to dedicated component. Reduce page from 142 lines and improve maintainability.
+    - Priority: Medium
+    - Effort: Small
+
+    ### [REFACTOR] Extract MaterialCard Component from LinksDownloadPage
+    - Location: src/pages/LinksDownloadPage.tsx
+    - Issue: Repetitive material card rendering code (3 similar patterns with inline badge styling). Hardcoded color classes (blue-100, green-100, purple-100) scattered across JSX. Violates Single Responsibility and DRY principles.
+    - Suggestion: Create reusable MaterialCard component with props: title, description, subject, badgeColor, badgeType. Extract material card layout and badge rendering. Centralize color classes in theme configuration.
+    - Priority: Medium
+    - Effort: Small
+
+    ### [REFACTOR] Extract MobileNavigation Component from SiteHeader
+    - Location: src/components/SiteHeader.tsx
+    - Issue: Mobile navigation menu logic (56 lines) mixed in SiteHeader component. Creates large component (158 lines) with multiple responsibilities. Desktop and mobile navigation logic tightly coupled. Harder to test mobile menu independently.
+    - Suggestion: Extract MobileNavigation component with props: isOpen, onOpenChange, navLinks. Move mobile menu SheetContent and navigation rendering to separate component. SiteHeader becomes cleaner with clear separation between desktop and mobile navigation.
+    - Priority: Low
+    - Effort: Small
+
+    ### [REFACTOR] Split API Client into Focused Modules
+    - Location: src/lib/api-client.ts (298 lines)
+    - Issue: Single large file handles multiple responsibilities: query client configuration, circuit breaker integration, retry logic, request execution, error handling, token management. Violates Single Responsibility Principle. Difficult to test individual concerns in isolation.
+    - Suggestion: Extract into focused modules: QueryClientConfig.ts (default options), RequestExecutor.ts (fetchWithTimeout, executeRequest), ErrorHandler.ts (error parsing, status code mapping), ApiClient.ts (main wrapper combining modules). Improve testability and maintainability.
+    - Priority: Medium
+    - Effort: Medium
+
+   ### ParentDashboardService Critical Path Testing (2026-01-08) - Completed ✅
 
   **Task**: Create comprehensive test coverage for ParentDashboardService critical business logic
 
