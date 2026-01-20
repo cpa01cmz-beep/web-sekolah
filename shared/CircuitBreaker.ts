@@ -1,13 +1,13 @@
-import { logger } from './logger';
+import { ErrorCode } from './common-types';
 
-interface CircuitBreakerState {
+export interface CircuitBreakerState {
   isOpen: boolean;
   failureCount: number;
   lastFailureTime: number;
   nextAttemptTime: number;
 }
 
-interface CircuitBreakerConfig {
+export interface CircuitBreakerConfig {
   failureThreshold: number;
   timeoutMs: number;
   halfOpenMaxCalls: number;
@@ -24,8 +24,14 @@ export class CircuitBreaker {
   private readonly config: CircuitBreakerConfig;
   private state: CircuitBreakerState;
   private halfOpenCalls = 0;
+  private readonly logger?: {
+    debug: (msg: string, meta?: Record<string, unknown>) => void;
+    info: (msg: string, meta?: Record<string, unknown>) => void;
+    warn: (msg: string, meta?: Record<string, unknown>) => void;
+    error: (msg: string, meta?: Record<string, unknown>) => void;
+  };
 
-  constructor(key: string, config?: Partial<CircuitBreakerConfig>) {
+  constructor(key: string, config?: Partial<CircuitBreakerConfig>, logger?: CircuitBreaker['logger']) {
     this.key = key;
     this.config = { ...DEFAULT_CONFIG, ...config };
     this.state = {
@@ -34,6 +40,7 @@ export class CircuitBreaker {
       lastFailureTime: 0,
       nextAttemptTime: 0,
     };
+    this.logger = logger;
   }
 
   async execute<T>(fn: () => Promise<T>): Promise<T> {
@@ -41,15 +48,19 @@ export class CircuitBreaker {
       const now = Date.now();
 
       if (now < this.state.nextAttemptTime) {
-        logger.warn('[CircuitBreaker] Circuit is open, rejecting request', {
+        this.logger?.debug('[CircuitBreaker] Circuit is open, rejecting request', {
           key: this.key,
           failureCount: this.state.failureCount,
           nextAttemptIn: this.state.nextAttemptTime - now,
         });
-        throw new Error(`Circuit breaker is open for ${this.key}`);
+
+        const error = new Error(`Circuit breaker is open for ${this.key}`) as Error & { code?: string; status?: number };
+        error.code = ErrorCode.CIRCUIT_BREAKER_OPEN;
+        error.status = 503;
+        throw error;
       }
 
-      logger.info('[CircuitBreaker] Circuit half-open, attempting recovery', {
+      this.logger?.info('[CircuitBreaker] Circuit half-open, attempting recovery', {
         key: this.key,
         halfOpenCalls: this.halfOpenCalls,
       });
@@ -70,7 +81,7 @@ export class CircuitBreaker {
       this.halfOpenCalls++;
 
       if (this.halfOpenCalls >= this.config.halfOpenMaxCalls) {
-        logger.info('[CircuitBreaker] Circuit closed after successful calls', {
+        this.logger?.info('[CircuitBreaker] Circuit closed after successful calls', {
           key: this.key,
           halfOpenCalls: this.halfOpenCalls,
         });
@@ -96,7 +107,7 @@ export class CircuitBreaker {
       this.halfOpenCalls = 0;
       this.state.nextAttemptTime = now + this.config.timeoutMs;
 
-      logger.warn('[CircuitBreaker] Half-open call failed, keeping circuit open', {
+      this.logger?.warn('[CircuitBreaker] Half-open call failed, keeping circuit open', {
         key: this.key,
         failureCount: this.state.failureCount,
       });
@@ -104,14 +115,14 @@ export class CircuitBreaker {
       this.state.isOpen = true;
       this.state.nextAttemptTime = now + this.config.timeoutMs;
 
-      logger.error('[CircuitBreaker] Circuit opened due to failures', {
+      this.logger?.error('[CircuitBreaker] Circuit opened due to failures', {
         key: this.key,
         failureCount: this.state.failureCount,
         timeoutMs: this.config.timeoutMs,
         nextAttemptAt: new Date(this.state.nextAttemptTime).toISOString(),
       });
     } else {
-      logger.warn('[CircuitBreaker] Call failed, counting failures', {
+      this.logger?.warn('[CircuitBreaker] Call failed, counting failures', {
         key: this.key,
         failureCount: this.state.failureCount,
         threshold: this.config.failureThreshold,
@@ -124,7 +135,7 @@ export class CircuitBreaker {
   }
 
   reset(): void {
-    logger.info('[CircuitBreaker] Circuit manually reset', {
+    this.logger?.info('[CircuitBreaker] Circuit manually reset', {
       key: this.key,
     });
     this.state = {
@@ -136,7 +147,7 @@ export class CircuitBreaker {
     this.halfOpenCalls = 0;
   }
 
-  static createWebhookBreaker(webhookUrl: string): CircuitBreaker {
-    return new CircuitBreaker(`webhook:${webhookUrl}`);
+  static createWebhookBreaker(webhookUrl: string, logger?: CircuitBreaker['logger']): CircuitBreaker {
+    return new CircuitBreaker(`webhook:${webhookUrl}`, undefined, logger);
   }
 }

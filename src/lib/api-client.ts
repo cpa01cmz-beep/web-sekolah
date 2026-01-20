@@ -8,7 +8,7 @@ import { mapStatusToErrorCode } from '../../shared/error-utils';
 import { CachingTime, ApiTimeout, RetryDelay, RetryCount, CircuitBreakerConfig } from '../config/time';
 import { STORAGE_KEYS } from '../constants/storage-keys';
 import { storage } from '../lib/storage';
-import { CircuitBreaker, type CircuitBreakerState } from './resilience/CircuitBreaker';
+import { CircuitBreaker, type CircuitBreakerState } from '@shared/CircuitBreaker';
 import { withRetry } from './resilience/Retry';
 
 const getAuthToken = () => storage.getItem(STORAGE_KEYS.AUTH_TOKEN);
@@ -29,7 +29,10 @@ interface RequestOptions extends RequestInit {
   circuitBreaker?: boolean;
 }
 
-const circuitBreaker = new CircuitBreaker(CircuitBreakerConfig.FAILURE_THRESHOLD, CircuitBreakerConfig.TIMEOUT_MS, CircuitBreakerConfig.RESET_TIMEOUT_MS);
+const circuitBreaker = new CircuitBreaker('api-client', {
+  failureThreshold: CircuitBreakerConfig.FAILURE_THRESHOLD,
+  timeoutMs: CircuitBreakerConfig.TIMEOUT_MS,
+});
 
 // ====================
 // Exponential Backoff Retry
