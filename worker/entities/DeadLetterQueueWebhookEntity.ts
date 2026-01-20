@@ -1,4 +1,4 @@
-import { IndexedEntity, SecondaryIndex, type Env } from "../core-utils";
+import { IndexedEntity, type Env } from "../core-utils";
 import type { DeadLetterQueueWebhook } from "@shared/types";
 
 export class DeadLetterQueueWebhookEntity extends IndexedEntity<DeadLetterQueueWebhook> {
@@ -31,16 +31,10 @@ export class DeadLetterQueueWebhookEntity extends IndexedEntity<DeadLetterQueueW
   }
 
   static async getByWebhookConfigId(env: Env, webhookConfigId: string): Promise<DeadLetterQueueWebhook[]> {
-    const index = new SecondaryIndex<string>(env, this.entityName, 'webhookConfigId');
-    const dlqIds = await index.getByValue(webhookConfigId);
-    const dlqItems = await Promise.all(dlqIds.map(id => new this(env, id).getState()));
-    return dlqItems.filter(d => d && !d.deletedAt) as DeadLetterQueueWebhook[];
+    return this.getBySecondaryIndex(env, 'webhookConfigId', webhookConfigId);
   }
 
   static async getByEventType(env: Env, eventType: string): Promise<DeadLetterQueueWebhook[]> {
-    const index = new SecondaryIndex<string>(env, this.entityName, 'eventType');
-    const dlqIds = await index.getByValue(eventType);
-    const dlqItems = await Promise.all(dlqIds.map(id => new this(env, id).getState()));
-    return dlqItems.filter(d => d && !d.deletedAt) as DeadLetterQueueWebhook[];
+    return this.getBySecondaryIndex(env, 'eventType', eventType);
   }
 }
