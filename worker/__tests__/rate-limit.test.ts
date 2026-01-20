@@ -4,6 +4,12 @@ import { rateLimit, defaultRateLimiter, strictRateLimiter, looseRateLimiter, aut
 import { RateLimitWindow, RateLimitMaxRequests } from '../config/time';
 import type { Context } from 'hono';
 
+interface RateLimitInfo {
+  limit: number;
+  remaining: number;
+  reset: number;
+}
+
 describe('Rate Limiting Middleware', () => {
   let app: Hono;
 
@@ -458,7 +464,7 @@ describe('Rate Limiting Middleware', () => {
 
   describe('Custom handler', () => {
     it('should use custom handler when provided', async () => {
-      const customHandler = vi.fn((c: Context, info: any) => {
+      const customHandler = vi.fn((c: Context, info: RateLimitInfo) => {
         return c.json({ custom: true, limit: info.limit }, 429);
       });
 
