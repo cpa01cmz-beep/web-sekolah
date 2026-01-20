@@ -16,22 +16,28 @@ export function adminRoutes(app: Hono<{ Bindings: Env }>) {
   });
 
   app.get('/api/admin/dashboard', ...withAuth('admin'), async (c: Context) => {
-    const allUsers = await CommonDataService.getAllUsers(c.env);
     const allClasses = await CommonDataService.getAllClasses(c.env);
     const allAnnouncements = await CommonDataService.getAllAnnouncements(c.env);
 
+    const [totalStudents, totalTeachers, totalParents, totalAdmins] = await Promise.all([
+      CommonDataService.getUserCountByRole(c.env, 'student'),
+      CommonDataService.getUserCountByRole(c.env, 'teacher'),
+      CommonDataService.getUserCountByRole(c.env, 'parent'),
+      CommonDataService.getUserCountByRole(c.env, 'admin')
+    ]);
+
     const dashboardData: AdminDashboardData = {
-      totalUsers: allUsers.length,
-      totalStudents: allUsers.filter(u => u.role === 'student').length,
-      totalTeachers: allUsers.filter(u => u.role === 'teacher').length,
-      totalParents: allUsers.filter(u => u.role === 'parent').length,
+      totalUsers: totalStudents + totalTeachers + totalParents + totalAdmins,
+      totalStudents,
+      totalTeachers,
+      totalParents,
       totalClasses: allClasses.length,
       recentAnnouncements: allAnnouncements.slice(-5).reverse(),
       userDistribution: {
-        students: allUsers.filter(u => u.role === 'student').length,
-        teachers: allUsers.filter(u => u.role === 'teacher').length,
-        parents: allUsers.filter(u => u.role === 'parent').length,
-        admins: allUsers.filter(u => u.role === 'admin').length
+        students: totalStudents,
+        teachers: totalTeachers,
+        parents: totalParents,
+        admins: totalAdmins
       }
     };
 

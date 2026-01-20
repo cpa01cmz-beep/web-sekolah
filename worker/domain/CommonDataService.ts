@@ -77,6 +77,14 @@ export class CommonDataService {
     return await UserEntity.getByClassId(env, classId);
   }
 
+  static async getClassStudentsCount(env: Env, classId: string): Promise<number> {
+    return await UserEntity.countByClassId(env, classId);
+  }
+
+  static async getUserCountByRole(env: Env, role: string): Promise<number> {
+    return await UserEntity.countByRole(env, role as any);
+  }
+
   static async getAllUsers(env: Env): Promise<SchoolUser[]> {
     const { items: allUsers } = await UserEntity.list(env);
     return allUsers.map(({ passwordHash: _, ...rest }) => rest);
