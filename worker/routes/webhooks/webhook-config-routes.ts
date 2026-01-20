@@ -48,7 +48,7 @@ export function webhookConfigRoutes(app: Hono<{ Bindings: Env }>) {
       updatedAt: now
     };
 
-    await new WebhookConfigEntity(c.env, id).save(config);
+    await WebhookConfigEntity.create(c.env, config);
 
     logger.info('Webhook configuration created', { id, url: body.url, events: body.events });
 
@@ -56,54 +56,49 @@ export function webhookConfigRoutes(app: Hono<{ Bindings: Env }>) {
   }));
 
    app.put('/api/webhooks/:id', withErrorHandler('update webhook')(async (c: Context) => {
-    const id = c.req.param('id');
-    const existing = await new WebhookConfigEntity(c.env, id).getState();
+     const id = c.req.param('id');
+     const existing = await new WebhookConfigEntity(c.env, id).getState();
 
-    if (!existing || existing.deletedAt) {
-      return notFound(c, 'Webhook configuration not found');
-    }
+     if (!existing || existing.deletedAt) {
+       return notFound(c, 'Webhook configuration not found');
+     }
 
-    const body = await c.req.json<{
-      url?: string;
-      events?: string[];
-      secret?: string;
-      active?: boolean;
-    }>();
+     const body = await c.req.json<{
+       url?: string;
+       events?: string[];
+       secret?: string;
+       active?: boolean;
+     }>();
 
-    const updated = {
-      ...existing,
-      url: body.url ?? existing.url,
-      events: body.events ?? existing.events,
-      secret: body.secret ?? existing.secret,
-      active: body.active ?? existing.active,
-      updatedAt: new Date().toISOString()
-    };
+     const updated = {
+       ...existing,
+       url: body.url ?? existing.url,
+       events: body.events ?? existing.events,
+       secret: body.secret ?? existing.secret,
+       active: body.active ?? existing.active,
+       updatedAt: new Date().toISOString()
+     };
 
-    await new WebhookConfigEntity(c.env, id).save(updated);
+     const entity = new WebhookConfigEntity(c.env, id);
+     await entity.patch(updated);
 
-    logger.info('Webhook configuration updated', { id });
+     logger.info('Webhook configuration updated', { id });
 
-    return ok(c, updated);
-  }));
+     return ok(c, updated);
+   }));
 
    app.delete('/api/webhooks/:id', withErrorHandler('delete webhook')(async (c: Context) => {
-    const id = c.req.param('id');
-    const existing = await new WebhookConfigEntity(c.env, id).getState();
+     const id = c.req.param('id');
+     const existing = await new WebhookConfigEntity(c.env, id).getState();
 
-    if (!existing || existing.deletedAt) {
-      return notFound(c, 'Webhook configuration not found');
-    }
+     if (!existing || existing.deletedAt) {
+       return notFound(c, 'Webhook configuration not found');
+     }
 
-    const updated = {
-      ...existing,
-      deletedAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    };
+     await WebhookConfigEntity.delete(c.env, id);
 
-    await new WebhookConfigEntity(c.env, id).save(updated);
+     logger.info('Webhook configuration deleted', { id });
 
-    logger.info('Webhook configuration deleted', { id });
-
-    return ok(c, { id, deleted: true });
-  }));
+     return ok(c, { id, deleted: true });
+   }));
 }

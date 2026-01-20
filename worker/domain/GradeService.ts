@@ -2,7 +2,6 @@ import type { Env } from '../core-utils';
 import { GradeEntity } from '../entities';
 import type { Grade } from '@shared/types';
 import { ReferentialIntegrity } from '../referential-integrity';
-import { SecondaryIndex } from '../storage/SecondaryIndex';
 
 export class GradeService {
   static async createGrade(
@@ -29,8 +28,7 @@ export class GradeService {
       throw new Error(validation.error);
     }
 
-    await GradeEntity.createWithCompoundIndex(env, newGrade);
-    await new SecondaryIndex<string>(env, GradeEntity.entityName, 'courseId').add(newGrade.courseId, newGrade.id);
+    await GradeEntity.createWithAllIndexes(env, newGrade);
     return newGrade;
   }
 
@@ -40,7 +38,7 @@ export class GradeService {
     }
 
     const gradeEntity = new GradeEntity(env, gradeId);
-    
+
     if (!await gradeEntity.exists()) {
       throw new Error('Grade not found');
     }
@@ -63,12 +61,7 @@ export class GradeService {
   }
 
   static async deleteGrade(env: Env, gradeId: string): Promise<boolean> {
-    const gradeEntity = new GradeEntity(env, gradeId);
-    const gradeState = await gradeEntity.getState();
-    if (!gradeState || !gradeState.courseId) return false;
-
-    await GradeEntity.deleteWithCompoundIndex(env, gradeId);
-    await new SecondaryIndex<string>(env, GradeEntity.entityName, 'courseId').remove(gradeState.courseId!, gradeId);
+    await GradeEntity.deleteWithAllIndexes(env, gradeId);
     return true;
   }
 }

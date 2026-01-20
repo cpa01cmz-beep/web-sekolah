@@ -14,6 +14,11 @@ export class WebhookEventEntity extends IndexedEntity<WebhookEvent> {
     deletedAt: null
   };
 
+  static readonly secondaryIndexes = [
+    { fieldName: 'processed', getValue: (state: { id: string; }) => String((state as WebhookEvent).processed) },
+    { fieldName: 'eventType', getValue: (state: { id: string; }) => (state as WebhookEvent).eventType }
+  ];
+
   static async getPending(env: Env): Promise<WebhookEvent[]> {
     return this.getBySecondaryIndex(env, 'processed', 'false');
   }

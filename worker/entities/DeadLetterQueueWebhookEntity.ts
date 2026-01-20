@@ -20,6 +20,11 @@ export class DeadLetterQueueWebhookEntity extends IndexedEntity<DeadLetterQueueW
     deletedAt: null
   };
 
+  static readonly secondaryIndexes = [
+    { fieldName: 'webhookConfigId', getValue: (state: { id: string; }) => (state as DeadLetterQueueWebhook).webhookConfigId },
+    { fieldName: 'eventType', getValue: (state: { id: string; }) => (state as DeadLetterQueueWebhook).eventType }
+  ];
+
   static async getAllFailed(env: Env): Promise<DeadLetterQueueWebhook[]> {
     const result = await this.list(env);
     return result.items;

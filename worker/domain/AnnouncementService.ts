@@ -2,7 +2,6 @@ import type { Env } from '../core-utils';
 import { AnnouncementEntity } from '../entities';
 import type { Announcement, CreateAnnouncementData } from '@shared/types';
 import { ReferentialIntegrity } from '../referential-integrity';
-import { DateSortedSecondaryIndex } from '../storage/DateSortedSecondaryIndex';
 
 export class AnnouncementService {
   static async createAnnouncement(
@@ -41,7 +40,7 @@ export class AnnouncementService {
     }
 
     const announcementEntity = new AnnouncementEntity(env, announcementId);
-    
+
     if (!await announcementEntity.exists()) {
       throw new Error('Announcement not found');
     }

@@ -9,6 +9,11 @@ export class AnnouncementEntity extends IndexedEntity<Announcement> {
   static readonly initialState: Announcement = { id: "", title: "", content: "", date: "", authorId: "", targetRole: "all", createdAt: "", updatedAt: "", deletedAt: null };
   static seedData = seedData.announcements;
 
+  static readonly secondaryIndexes = [
+    { fieldName: 'authorId', getValue: (state: { id: string; }) => (state as Announcement).authorId },
+    { fieldName: 'targetRole', getValue: (state: { id: string; }) => (state as Announcement).targetRole }
+  ];
+
   static async getByAuthorId(env: Env, authorId: string): Promise<Announcement[]> {
     const index = new SecondaryIndex<string>(env, this.entityName, 'authorId');
     const announcementIds = await index.getByValue(authorId);
