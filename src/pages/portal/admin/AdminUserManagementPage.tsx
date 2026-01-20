@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { DialogTrigger } from '@/components/ui/dialog';
@@ -55,7 +55,7 @@ export function AdminUserManagementPage() {
     },
     onError: (err) => toast.error(`Failed to delete user: ${err.message}`),
   });
-  const handleSaveUser = (data: { name: string; email: string; role: UserRole }) => {
+  const handleSaveUser = useCallback((data: { name: string; email: string; role: UserRole }) => {
     const userData = {
       ...data,
       avatarUrl: getAvatarUrl(data.email),
@@ -65,28 +65,36 @@ export function AdminUserManagementPage() {
     } else {
       createUserMutation.mutate(userData);
     }
-  };
-  const handleDeleteUser = (userId: string) => {
+  }, [editingUser, updateUserMutation, createUserMutation]);
+  
+  const handleDeleteUser = useCallback((userId: string) => {
     setUserIdToDelete(userId);
     deleteUserMutation.mutate();
-  };
-  const handleEditUser = (user: SchoolUser) => {
+  }, [deleteUserMutation]);
+  
+  const handleEditUser = useCallback((user: SchoolUser) => {
     setEditingUser(user);
     setIsModalOpen(true);
-  };
-  const handleCloseModal = () => {
+  }, []);
+  
+  const handleCloseModal = useCallback(() => {
     setIsModalOpen(false);
     setEditingUser(null);
-  };
+  }, []);
 
-  const tableHeaders = [
+  const handleAddUser = useCallback(() => {
+    setEditingUser(null);
+    setIsModalOpen(true);
+  }, []);
+
+  const tableHeaders = useMemo(() => [
     { key: 'name', label: 'Name' },
     { key: 'email', label: 'Email' },
     { key: 'role', label: 'Role', className: 'text-center' },
     { key: 'actions', label: 'Actions', className: 'text-right' },
-  ];
+  ], []);
 
-  const tableRows = (users || []).map(user => ({
+  const tableRows = useMemo(() => (users || []).map(user => ({
     id: user.id,
     cells: [
       { key: 'name', content: user.name, className: 'font-medium' },
@@ -116,7 +124,7 @@ export function AdminUserManagementPage() {
         className: 'text-right',
       },
     ],
-  }));
+  })), [users, handleEditUser, handleDeleteUser]);
 
   return (
     <SlideUp className="space-y-6">
@@ -125,10 +133,7 @@ export function AdminUserManagementPage() {
         description="Manage all user accounts in the system."
       >
         <DialogTrigger asChild>
-          <Button onClick={() => {
-            setEditingUser(null);
-            setIsModalOpen(true);
-          }}>
+          <Button onClick={handleAddUser}>
             <PlusCircle className="mr-2 h-4 w-4" /> Add User
           </Button>
         </DialogTrigger>
