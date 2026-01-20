@@ -1,46 +1,42 @@
 import { Hono } from 'hono';
 import type { Env } from './core-utils';
 import { CircuitBreaker } from '@shared/CircuitBreaker';
+import { withRetry } from './resilience/Retry';
 import { withErrorHandler } from './routes/route-utils';
 import { TimeConstants } from './config/time';
 import type { Context } from 'hono';
 
 const DOCS_TIMEOUT_MS = 30000;
 const DOCS_MAX_RETRIES = 3;
-const DOCS_RETRY_DELAY_MS = 1000;
+const DOCS_BASE_RETRY_DELAY_MS = 1000;
 
 const docsCircuitBreaker = new CircuitBreaker('docs-api-spec', {
   failureThreshold: 5,
   timeoutMs: 60000,
 });
 
-async function fetchWithRetry(url: string, maxRetries = DOCS_MAX_RETRIES): Promise<Response> {
-  let lastError: Error | null = null;
-
-  for (let attempt = 0; attempt <= maxRetries; attempt++) {
-    try {
+async function fetchWithRetry(url: string): Promise<Response> {
+  return await withRetry(
+    async () => {
       const response = await docsCircuitBreaker.execute(async () => {
         return await fetch(url, {
           signal: AbortSignal.timeout(DOCS_TIMEOUT_MS),
         });
       });
 
-      if (response.ok) {
-        return response;
+      if (!response.ok) {
+        throw new Error(`Failed to fetch spec: ${response.status} ${response.statusText}`);
       }
 
-      throw new Error(`Failed to fetch spec: ${response.status} ${response.statusText}`);
-    } catch (error) {
-      lastError = error instanceof Error ? error : new Error(String(error));
-
-      if (attempt < maxRetries) {
-        const delay = DOCS_RETRY_DELAY_MS * Math.pow(2, attempt) + Math.random() * TimeConstants.SECOND_MS;
-        await new Promise(resolve => setTimeout(resolve, delay));
-      }
+      return response;
+    },
+    {
+      maxRetries: DOCS_MAX_RETRIES,
+      baseDelay: DOCS_BASE_RETRY_DELAY_MS,
+      jitterMs: TimeConstants.SECOND_MS,
+      timeout: DOCS_TIMEOUT_MS
     }
-  }
-
-  throw lastError || new Error('Failed to fetch OpenAPI spec');
+  );
 }
 
 export function docsRoutes(app: Hono<{ Bindings: Env }>) {
