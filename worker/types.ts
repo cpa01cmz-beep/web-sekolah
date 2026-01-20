@@ -4,6 +4,7 @@ export interface Env {
   GlobalDurableObject: DurableObjectNamespace<GlobalDurableObject>;
   ALLOWED_ORIGINS?: string;
   JWT_SECRET?: string;
+  DEFAULT_PASSWORD?: string;
   ENVIRONMENT?: 'development' | 'staging' | 'production';
 }
 
