@@ -3,7 +3,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { FormField } from '@/components/ui/form-field';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useState } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { toast } from 'sonner';
 import { AlertCircle } from 'lucide-react';
 import { validateName, validateEmail, validatePhone, validateNisn } from '@/utils/validation';
@@ -36,16 +36,16 @@ export function PPDBForm({ onSubmit }: PPDBFormProps) {
   });
   const [showValidationErrors, setShowValidationErrors] = useState(false);
 
-  const nameError = validateName(formData.name, showValidationErrors, 3);
-  const nisnError = validateNisn(formData.nisn, showValidationErrors, 10);
-  const emailError = validateEmail(formData.email, showValidationErrors);
-  const phoneError = validatePhone(formData.phone, showValidationErrors, 10, 13);
+  const nameError = useMemo(() => validateName(formData.name, showValidationErrors, 3), [formData.name, showValidationErrors]);
+  const nisnError = useMemo(() => validateNisn(formData.nisn, showValidationErrors, 10), [formData.nisn, showValidationErrors]);
+  const emailError = useMemo(() => validateEmail(formData.email, showValidationErrors), [formData.email, showValidationErrors]);
+  const phoneError = useMemo(() => validatePhone(formData.phone, showValidationErrors, 10, 13), [formData.phone, showValidationErrors]);
 
-  const handleInputChange = (field: keyof PPDBFormData, value: string) => {
+  const handleInputChange = useCallback((field: keyof PPDBFormData, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
-  };
+  }, []);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = useCallback((e: React.FormEvent) => {
     e.preventDefault();
     setShowValidationErrors(true);
 
@@ -70,7 +70,7 @@ export function PPDBForm({ onSubmit }: PPDBFormProps) {
       });
       setShowValidationErrors(false);
     }
-  };
+  }, [nameError, nisnError, emailError, phoneError, onSubmit, formData]);
 
   return (
     <div className="bg-card rounded-lg shadow-md p-6">
