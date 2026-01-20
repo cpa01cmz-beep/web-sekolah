@@ -10,6 +10,7 @@ import { adminMonitoringRoutes } from './admin-monitoring-routes';
 import { docsRoutes } from './docs-routes';
 import { Env, GlobalDurableObject, ok, notFound, serverError, bad } from './core-utils';
 import { logger as pinoLogger } from './logger';
+import { ClientErrorReport, CSPViolationReport } from './types';
 import { defaultRateLimiter, strictRateLimiter } from './middleware/rate-limit';
 import { defaultTimeout } from './middleware/timeout';
 import { securityHeaders } from './middleware/security-headers';
@@ -20,37 +21,8 @@ import { DefaultOrigins } from './config/defaults';
 
 // Need to export GlobalDurableObject to make it available in wrangler
 export { GlobalDurableObject };
-export interface ClientErrorReport {
-    message: string;
-    url: string;
-    userAgent: string;
-    timestamp: string;
-    stack?: string;
-    componentStack?: string;
-    errorBoundary?: boolean;
-    errorBoundaryProps?: Record<string, unknown>;
-    source?: string;
-    lineno?: number;
-    colno?: number;
-    error?: unknown;
-  }
 
-export interface CSPViolationReport {
-  'csp-report': {
-    'document-uri'?: string;
-    'referrer'?: string;
-    'violated-directive'?: string;
-    'effective-directive'?: string;
-    'original-policy'?: string;
-    'disposition'?: string;
-    'blocked-uri'?: string;
-    'line-number'?: number;
-    'column-number'?: number;
-    'source-file'?: string;
-    'status-code'?: number;
-    'script-sample'?: string;
-  };
-}const app = new Hono<{ Bindings: Env }>();
+const app = new Hono<{ Bindings: Env }>();
 
 app.use('*', logger());
 

@@ -2,11 +2,117 @@
  
                           This document tracks architectural refactoring and testing tasks for Akademia Pro.
  
-         ## Status Summary
- 
-                                      **Last Updated**: 2026-01-20 (Code Architect - Route Error Handling Standardization, Data Architect - Secondary Index Management)
- 
-                            ### Code Architect - Route Error Handling Standardization (2026-01-20) - Completed ✅
+          ## Status Summary
+
+                                      **Last Updated**: 2026-01-20 (Code Architect - Error Reporting Types Module Extraction)
+
+                             ### Code Architect - Error Reporting Types Module Extraction (2026-01-20) - Completed ✅
+
+                             **Task**: Extract error reporting interfaces from worker/index.ts to dedicated types module
+
+                             **Problem**:
+                             - ClientErrorReport and CSPViolationReport interfaces defined in worker/index.ts (lines 23-53)
+                             - Type definitions mixed with application setup and middleware configuration
+                             - Violated Single Responsibility Principle: worker/index.ts had multiple concerns (types + application setup)
+                             - Difficult to locate and modify error reporting types (buried in 166-line file)
+                             - No clear separation between type definitions and application logic
+
+                             **Solution**:
+                             - Created worker/types/error-reporting.ts module for error reporting interfaces
+                             - Moved ClientErrorReport and CSPViolationReport interfaces to dedicated module
+                             - Created barrel export in worker/types/index.ts for clean imports
+                             - Updated worker/index.ts to import from types module
+                             - Improved modularity and code organization
+
+                             **Implementation**:
+
+                             1. **Created worker/types/error-reporting.ts** (32 lines):
+                                - Exported ClientErrorReport interface with all error reporting fields
+                                - Exported CSPViolationReport interface with violation report structure
+                                - Documented all interface fields for clarity
+                                - Separated type definitions from application setup
+
+                             2. **Created worker/types/index.ts** (1 line):
+                                - Barrel export for clean imports
+                                - Re-exports ClientErrorReport and CSPViolationReport
+                                - Consistent with other barrel export patterns in codebase
+
+                             3. **Updated worker/index.ts** (166 lines → 164 lines, -2 lines):
+                                - Added import: `import { ClientErrorReport, CSPViolationReport } from './types'`
+                                - Removed inline ClientErrorReport interface definition (14 lines removed)
+                                - Removed inline CSPViolationReport interface definition (16 lines removed)
+                                - Maintained all existing functionality
+
+                             **Metrics**:
+
+                             | Metric | Before | After | Improvement |
+                             |---------|--------|-------|-------------|
+                             | worker/index.ts lines | 166 | 164 | 1% reduction |
+                             | Inline interface definitions | 2 | 0 | 100% removed |
+                             | Interface definition lines | 30 | 0 | Extracted to module |
+                             | New types module | 0 | 1 | worker/types/ directory created |
+                             | Type location | Mixed with app setup | Dedicated types module | Clear separation |
+                             | Modularity | Low | High | Significantly improved |
+                             | Typecheck errors | 0 | 0 | No regression |
+
+                             **Benefits Achieved**:
+                                - ✅ Error reporting interfaces extracted to dedicated module
+                                - ✅ Single Responsibility Principle applied (types separated from app setup)
+                                - ✅ worker/index.ts reduced from 166 to 164 lines (2 lines removed)
+                                - ✅ 30 lines of interface definitions extracted from main file
+                                - ✅ Improved code organization and maintainability
+                                - ✅ Clear separation of concerns (types vs application logic)
+                                - ✅ Barrel export provides clean import path
+                                - ✅ Typecheck passed (0 errors)
+                                - ✅ Zero breaking changes to existing functionality
+
+                             **Technical Details**:
+
+                             **Error Reporting Interfaces**:
+                             - ClientErrorReport: Captures frontend error reports (message, url, userAgent, stack, etc.)
+                             - CSPViolationReport: Captures Content Security Policy violations (csp-report structure)
+                             - Both interfaces used for error monitoring and security reporting
+                             - Located in dedicated module: worker/types/error-reporting.ts
+
+                             **Import Pattern**:
+                             ```typescript
+                             // Before: Interfaces defined inline in worker/index.ts
+                             export interface ClientErrorReport { ... }
+
+                             // After: Imported from dedicated types module
+                             import { ClientErrorReport, CSPViolationReport } from './types';
+                             ```
+
+                             **Architectural Impact**:
+                             - **Modularity**: Error reporting types are now atomic and replaceable
+                             - **Separation of Concerns**: Type definitions separated from application setup
+                             - **Clean Architecture**: Dependencies flow correctly (app → types)
+                             - **Single Responsibility**: worker/index.ts focuses on app setup, types module focuses on type definitions
+                             - **Code Organization**: Related types grouped in dedicated module
+                             - **Maintainability**: Easier to locate and modify error reporting types
+
+                             **Success Criteria**:
+                                - [x] worker/types/error-reporting.ts created with error reporting interfaces
+                                - [x] worker/types/index.ts barrel export created
+                                - [x] ClientErrorReport and CSPViolationReport interfaces removed from worker/index.ts
+                                - [x] worker/index.ts updated to import from types module
+                                - [x] worker/index.ts reduced from 166 to 164 lines
+                                - [x] Typecheck passed (0 errors)
+                                - [x] Zero breaking changes to existing functionality
+
+                             **Impact**:
+                                - `worker/types/error-reporting.ts`: New module (32 lines) - Error reporting interfaces
+                                - `worker/types/index.ts`: New module (1 line) - Barrel export
+                                - `worker/index.ts`: Reduced 166 → 164 lines (30 lines of interfaces removed, 2 lines import added)
+                                - Code organization: Error reporting types separated from application setup
+                                - Modularity: Significantly improved (types in dedicated module)
+                                - Maintainability: Easier to locate and modify error reporting types
+
+                             **Success**: ✅ **ERROR REPORTING TYPES MODULE EXTRACTION COMPLETE, INTERFACES EXTRACTED TO DEDICATED MODULE, IMPROVED MODULARITY**
+
+                             ---
+
+                             ### Code Architect - Route Error Handling Standardization (2026-01-20) - Completed ✅
  
                             **Task**: Eliminate duplicate try-catch error handling patterns in routes
  
