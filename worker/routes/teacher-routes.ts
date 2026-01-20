@@ -5,12 +5,9 @@ import { authenticate, authorize } from '../middleware/auth';
 import type { TeacherDashboardData, Announcement, CreateAnnouncementData, SubmitGradeData, Grade } from "@shared/types";
 
 import { GradeService, CommonDataService, AnnouncementService } from '../domain';
-import { WebhookService } from '../webhook-service';
-import { toWebhookPayload } from '../webhook-types';
-import { withAuth, withUserValidation } from './route-utils';
+import { withAuth, withUserValidation, triggerWebhookSafely } from './route-utils';
 import { getCurrentUserId } from '../type-guards';
 import type { Context } from 'hono';
-import { logger } from '../logger';
 
 export function teacherRoutes(app: Hono<{ Bindings: Env }>) {
   app.get('/api/teachers/:id/dashboard', ...withUserValidation('teacher', 'dashboard'), async (c: Context) => {
@@ -52,9 +49,7 @@ export function teacherRoutes(app: Hono<{ Bindings: Env }>) {
     const gradeData = await c.req.json<SubmitGradeData>();
     try {
       const newGrade = await GradeService.createGrade(c.env, gradeData);
-      WebhookService.triggerEvent(c.env, 'grade.created', toWebhookPayload(newGrade)).catch(err => {
-        logger.error('Failed to trigger grade.created webhook', { err, gradeId: newGrade.id });
-      });
+      triggerWebhookSafely(c.env, 'grade.created', newGrade, { gradeId: newGrade.id });
       return ok(c, newGrade);
     } catch (error) {
       if (error instanceof Error) {
@@ -69,9 +64,7 @@ export function teacherRoutes(app: Hono<{ Bindings: Env }>) {
     const authorId = getCurrentUserId(c);
     try {
       const newAnnouncement = await AnnouncementService.createAnnouncement(c.env, announcementData, authorId);
-      WebhookService.triggerEvent(c.env, 'announcement.created', toWebhookPayload(newAnnouncement)).catch(err => {
-        logger.error('Failed to trigger announcement.created webhook', { err, announcementId: newAnnouncement.id });
-      });
+      triggerWebhookSafely(c.env, 'announcement.created', newAnnouncement, { announcementId: newAnnouncement.id });
       return ok(c, newAnnouncement);
     } catch (error) {
       if (error instanceof Error) {

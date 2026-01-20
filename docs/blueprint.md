@@ -119,9 +119,10 @@ This clears and rebuilds all secondary indexes from existing data.
   - `validateAnnouncement()`: Rejects announcements referencing deleted authors
 
 **Optimization Opportunities**:
-- ~~Recharts bundle size (500.68 kB): recharts loaded entire library including all chart types~~ ✅ **COMPLETED** (2026-01-09) - Implemented subpath imports to load only used components (BarChart, Bar, XAxis, YAxis, etc.), reduced bundle size by 45.8%
-- ~~PasswordHash exposure in CommonDataService: CommonDataService.getAllUsers() and getUserById() exposed passwordHash in returned data~~ ✅ **COMPLETED** (2026-01-09) - CommonDataService now filters passwordHash at service layer, consistent with UserService
-- ~~Circular dependency between auth.ts and type-guards.ts: Import cycle violated Clean Architecture principle~~ ✅ **COMPLETED** (2026-01-08) - Moved AuthUser interface to worker/types.ts, broken circular dependency
+ - ~~Duplicate webhook trigger code patterns: 8 instances of WebhookService.triggerEvent().catch(err => { logger.error(...) }) across 3 route files~~ ✅ **COMPLETED** (2026-01-20) - Created triggerWebhookSafely() helper in route-utils.ts, eliminated 20 lines of duplicate code, applied DRY principle
+ - ~~Recharts bundle size (500.68 kB): recharts loaded entire library including all chart types~~ ✅ **COMPLETED** (2026-01-09) - Implemented subpath imports to load only used components (BarChart, Bar, XAxis, YAxis, etc.), reduced bundle size by 45.8%
+ - ~~PasswordHash exposure in CommonDataService: CommonDataService.getAllUsers() and getUserById() exposed passwordHash in returned data~~ ✅ **COMPLETED** (2026-01-09) - CommonDataService now filters passwordHash at service layer, consistent with UserService
+ - ~~Circular dependency between auth.ts and type-guards.ts: Import cycle violated Clean Architecture principle~~ ✅ **COMPLETED** (2026-01-08) - Moved AuthUser interface to worker/types.ts, broken circular dependency
 - ~~`GradeEntity.getByStudentIdAndCourseId()`: Currently uses studentId index + in-memory filtering. Could benefit from compound index on (studentId, courseId) for large datasets~~ ✅ **COMPLETED** (2026-01-07)
 - ~~Announcement sorting by date: Currently loads all announcements and sorts in-memory (O(n log n)). For production scale, consider date-based secondary index or cursor-based pagination~~ ✅ **COMPLETED** (2026-01-07)
 - ~~Webhook monitoring performance: Full table scan on every webhook trigger for metrics collection~~ ✅ **COMPLETED** (2026-01-08)
