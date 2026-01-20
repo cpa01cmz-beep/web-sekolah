@@ -17962,3 +17962,169 @@ const createErrorResponse = (
                      5. Consider code generation from updated OpenAPI spec
 
                      ---
+
+                     ### Code Architect - ErrorReporter Module Extraction (2026-01-20) - Completed ✅
+
+                     **Task**: Extract ErrorReporter class into modular components for improved SOLID adherence
+
+                     **Problem**:
+                     - ErrorReporter.ts (334 lines) violated Single Responsibility Principle
+                     - Multiple concerns mixed in one class: console interception, global error handling, error filtering, queue management, error sending
+                     - Difficult to test individual concerns in isolation
+                     - Adding new filter rules required modifying ErrorReporter class
+                     - Circuit breaker management tightly coupled with webhook delivery logic
+                     - No abstraction for circuit breaker operations (reset, query state)
+                     - Violation of Separation of Concerns principle
+
+                     **Solution**:
+                     - Extracted ErrorReporter into 5 focused modules
+                     - Created ErrorFilter module for filtering logic
+                     - Created ErrorQueue module for queue management
+                     - Created ConsoleInterceptor module for console interception
+                     - Created GlobalErrorHandler module for global error handling
+                     - Created ErrorSender module for network sending with retry
+                     - Refactored ErrorReporter to act as orchestrator (119 lines, 64% reduction)
+
+                     **Implementation**:
+
+                     1. **Created ErrorFilter Module** at `src/lib/error-reporter/ErrorFilter.ts` (74 lines):
+                        - Extracted filterError() method with all filtering rules
+                        - Private helper methods for each filter rule (internal debug, react router, deprecated warnings, vendor errors, deduplication)
+                        - Imports filter utilities and constants
+                        - Single responsibility: Error filtering logic only
+
+                     2. **Created ErrorQueue Module** at `src/lib/error-reporter/ErrorQueue.ts` (61 lines):
+                        - Extracted queue state management (errorQueue, isReporting)
+                        - Extracted report() method for adding errors to queue
+                        - Extracted processQueue() method for processing queued errors
+                        - Extracted maxQueueSize configuration
+                        - Process callback injected via constructor for dependency inversion
+                        - Helper methods: dispose(), getQueueSize(), isQueueEmpty(), isProcessing()
+                        - Single responsibility: Queue management only
+
+                     3. **Created ConsoleInterceptor Module** at `src/lib/error-reporter/ConsoleInterceptor.ts` (86 lines):
+                        - Extracted console interception logic (console.warn, console.error)
+                        - Extracted setupConsoleInterceptors() method
+                        - Extracted createConsoleInterceptor() method for creating interceptor functions
+                        - Extracted dispose() method for restoring original console methods
+                        - Console state management (originalConsoleWarn, originalConsoleError)
+                        - Error callback injected via constructor for dependency inversion
+                        - Single responsibility: Console interception only
+
+                     4. **Created GlobalErrorHandler Module** at `src/lib/error-reporter/GlobalErrorHandler.ts` (51 lines):
+                        - Extracted global error handling logic (window.onerror, unhandledrejection)
+                        - Extracted setupGlobalErrorHandler() method
+                        - Extracted setupUnhandledRejectionHandler() method
+                        - Extracted dispose() method (no-op for event listeners)
+                        - Error callback injected via constructor for dependency inversion
+                        - Single responsibility: Global error handling only
+
+                     5. **Created ErrorSender Module** at `src/lib/error-reporter/ErrorSender.ts` (62 lines):
+                        - Extracted sendError() method with retry logic
+                        - Extracted configuration (reportingEndpoint, maxRetries, baseRetryDelay, requestTimeout)
+                        - Integrated with Retry utility (withRetry) for resilience
+                        - Uses ERROR_REPORTER_CONFIG for configuration
+                        - Single responsibility: Network sending with retry only
+
+                     6. **Refactored ErrorReporter** at `src/lib/error-reporter/ErrorReporter.ts` (119 lines):
+                        - Reduced from 334 lines to 119 lines (64% reduction)
+                        - Removed all direct implementation of filtering, queue, interception, handling, sending
+                        - Instantiates all extracted modules with dependency injection
+                        - Acts as orchestrator/coordiator
+                        - handleError() method delegates to filter and queue
+                        - setup() method delegates to interceptor and global handler setup
+                        - report() public API delegates to queue
+                        - dispose() public API delegates to all module cleanup
+                        - Single responsibility: Orchestration of error reporting modules only
+
+                     **Metrics**:
+
+                     | Metric | Before | After | Improvement |
+                     |---------|---------|--------|-------------|
+                     | ErrorReporter.ts lines | 334 | 119 | 64% reduction |
+                     | Modules created | 0 | 5 | New modular structure |
+                     | Largest module | N/A | 86 (ConsoleInterceptor) | Focused modules |
+                     | Average module size | N/A | 66.8 lines | Maintainable |
+                     | Separation of Concerns | Mixed | Clean | Complete separation |
+                     | Single Responsibility | Violated (8 concerns) | Applied (1 per module) | All principles met |
+                     | Testability | Difficult | Easy | Isolated modules |
+                     | Dependency Inversion | Tight coupling | Constructor injection | Loose coupling |
+                     | Typecheck errors | 0 | 0 | No regressions |
+                     | Cognitive load | High (334 lines) | Low (66 avg) | Significantly reduced |
+
+                     **Benefits Achieved**:
+                        - ✅ ErrorReporter.ts reduced by 64% (334 → 119 lines)
+                        - ✅ 5 error-reporter modules created with focused, atomic classes
+                        - ✅ Each module is atomic and replaceable
+                        - ✅ Single Responsibility Principle applied (one concern per module)
+                        - ✅ Separation of Concerns achieved (filtering, queue, interception, handling, sending separated)
+                        - ✅ Dependency Inversion applied (callbacks injected via constructors)
+                        - ✅ Easier to locate error reporting code (ErrorFilter.ts vs searching 334 lines)
+                        - ✅ Reduced cognitive load (average 67 lines per module vs 334)
+                        - ✅ Better testability (each module can be tested independently)
+                        - ✅ Barrel export file provides clean import patterns
+                        - ✅ Backward compatible (original ErrorReporter API preserved)
+                        - ✅ TypeScript compilation successful (0 errors)
+                        - ✅ Zero breaking changes to existing functionality
+
+                     **Technical Details**:
+
+                     **Module Organization**:
+                     - ErrorFilter: Handles all error filtering rules (74 lines)
+                     - ErrorQueue: Manages error queue and processing (61 lines)
+                     - ConsoleInterceptor: Intercepts console.warn/error (86 lines)
+                     - GlobalErrorHandler: Handles window.onerror and unhandledrejection (51 lines)
+                     - ErrorSender: Sends errors with retry logic (62 lines)
+                     - ErrorReporter: Orchestrates all modules (119 lines)
+
+                     **Dependency Inversion Pattern**:
+                     - ErrorQueue accepts processCallback via constructor
+                     - ConsoleInterceptor accepts errorCallback via constructor
+                     - GlobalErrorHandler accepts errorCallback via constructor
+                     - ErrorSender configured via constructor (endpoints, timeouts)
+                     - ErrorReporter injects dependencies during initialization
+                     - Benefits: Testability, loose coupling, flexibility
+
+                     **Barrel Export Pattern**:
+                     - Each module can be imported individually
+                     - ErrorReporter remains the main export for backward compatibility
+                     - Modules can be tested independently of ErrorReporter
+
+                     **Architectural Impact**:
+                        - **Modularity**: Each error-reporter module is atomic and replaceable
+                        - **Separation of Concerns**: Error filtering, queue management, console interception, global error handling, and network sending are now separate modules
+                        - **Clean Architecture**: Dependencies flow correctly (ErrorReporter → extracted modules)
+                        - **Single Responsibility**: Each module handles one concern (filtering, queue, interception, handling, sending)
+                        - **Open/Closed**: New filtering rules can be added to ErrorFilter without modifying other modules
+                        - **Dependency Inversion**: All modules accept dependencies via constructors (loose coupling)
+                        - **Maintainability**: Focused files (67 avg lines) vs monolithic file (334 lines)
+
+                     **Success Criteria**:
+                        - [x] ErrorFilter module created (74 lines)
+                        - [x] ErrorQueue module created (61 lines)
+                        - [x] ConsoleInterceptor module created (86 lines)
+                        - [x] GlobalErrorHandler module created (51 lines)
+                        - [x] ErrorSender module created (62 lines)
+                        - [x] ErrorReporter refactored to orchestrator (119 lines, 64% reduction)
+                        - [x] Single Responsibility Principle applied (1 concern per module)
+                        - [x] Separation of Concerns achieved (all concerns separated)
+                        - [x] Dependency Inversion applied (constructor injection)
+                        - [x] TypeScript compilation successful (0 errors)
+                        - [x] Zero breaking changes to existing functionality
+                        - [x] docs/blueprint.md updated with optimization entry
+
+                     **Impact**:
+                        - `src/lib/error-reporter/ErrorFilter.ts`: New module (74 lines)
+                        - `src/lib/error-reporter/ErrorQueue.ts`: New module (61 lines)
+                        - `src/lib/error-reporter/ConsoleInterceptor.ts`: New module (86 lines)
+                        - `src/lib/error-reporter/GlobalErrorHandler.ts`: New module (51 lines)
+                        - `src/lib/error-reporter/ErrorSender.ts`: New module (62 lines)
+                        - `src/lib/error-reporter/ErrorReporter.ts`: Refactored 334 → 119 lines (64% reduction, 215 lines removed)
+                        - `src/lib/error-reporter/`: New modular structure (5 new modules)
+                        - Error reporting modularity: Monolithic → Modular (5 focused modules)
+                        - Maintainability: Significantly improved (67 avg lines vs 334 lines)
+                        - Testability: Each module can be tested independently
+
+                     **Success**: ✅ **ERRORREPORTER MODULE EXTRACTION COMPLETE, 5 FOCUSED MODULES CREATED, 64% SIZE REDUCTION ACHIEVED**
+
+                     ---
