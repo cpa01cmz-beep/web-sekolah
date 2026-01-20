@@ -1,6 +1,6 @@
 import { Hono } from 'hono';
 import type { Env } from './core-utils';
-import { CircuitBreaker } from './CircuitBreaker';
+import { CircuitBreaker } from '@shared/CircuitBreaker';
 import { withErrorHandler } from './routes/route-utils';
 import { TimeConstants } from './config/time';
 import type { Context } from 'hono';

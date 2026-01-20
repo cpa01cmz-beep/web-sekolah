@@ -6,9 +6,23 @@ import { integrationMonitor } from './integration-monitor';
 import { WEBHOOK_CONFIG } from './webhook-constants';
 import { generateSignature, verifySignature } from './webhook-crypto';
 import type { WebhookEventPayload } from './webhook-types';
-import { CircuitBreakerRegistry } from './CircuitBreakerRegistry';
+import { CircuitBreaker } from '@shared/CircuitBreaker';
 
 export class WebhookService {
+  private static readonly circuitBreakers = new Map<string, CircuitBreaker>();
+
+  private static getOrCreateCircuitBreaker(url: string): CircuitBreaker {
+    const existing = this.circuitBreakers.get(url);
+    if (existing) {
+      return existing;
+    }
+
+    const breaker = CircuitBreaker.createWebhookBreaker(url, logger);
+    this.circuitBreakers.set(url, breaker);
+    logger.debug('Created new circuit breaker for webhook URL', { url });
+    return breaker;
+  }
+
   static async triggerEvent(env: Env, eventType: string, data: Record<string, unknown>): Promise<void> {
     logger.info('Triggering webhook event', { eventType });
 
@@ -99,7 +113,7 @@ export class WebhookService {
       return;
     }
 
-    const breaker = CircuitBreakerRegistry.getOrCreate(config.url);
+    const breaker = this.getOrCreateCircuitBreaker(config.url);
 
     const payload = {
       id: event.id,

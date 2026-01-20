@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter, DialogClose } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -41,9 +41,9 @@ export function UserForm({ open, onClose, editingUser, onSave, isLoading }: User
     setShowValidationErrors(false);
   }, [editingUser, open]);
 
-  const nameError = validateName(userName, showValidationErrors);
-  const emailError = validateEmail(userEmail, showValidationErrors);
-  const roleError = validateRole(userRole, showValidationErrors);
+  const nameError = useMemo(() => validateName(userName, showValidationErrors), [userName, showValidationErrors]);
+  const emailError = useMemo(() => validateEmail(userEmail, showValidationErrors), [userEmail, showValidationErrors]);
+  const roleError = useMemo(() => validateRole(userRole, showValidationErrors), [userRole, showValidationErrors]);
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();

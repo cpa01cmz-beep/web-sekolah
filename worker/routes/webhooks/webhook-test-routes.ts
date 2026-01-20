@@ -2,7 +2,7 @@ import { Hono } from 'hono';
 import type { Env } from '../../core-utils';
 import { ok, bad } from '../../core-utils';
 import { logger } from '../../logger';
-import { CircuitBreaker } from '../../CircuitBreaker';
+import { CircuitBreaker } from '@shared/CircuitBreaker';
 import { RetryDelay } from '../../config/time';
 import type { Context } from 'hono';
 import { withErrorHandler } from '../route-utils';
