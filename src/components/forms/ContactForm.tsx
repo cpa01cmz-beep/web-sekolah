@@ -2,7 +2,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { FormField } from '@/components/ui/form-field';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { validateName, validateEmail, validateMessage } from '@/utils/validation';
 
 interface ContactFormProps {
@@ -15,9 +15,9 @@ export function ContactForm({ onSubmit }: ContactFormProps) {
   const [message, setMessage] = useState('');
   const [showValidationErrors, setShowValidationErrors] = useState(false);
 
-  const nameError = validateName(name, showValidationErrors);
-  const emailError = validateEmail(email, showValidationErrors);
-  const messageError = validateMessage(message, showValidationErrors);
+  const nameError = useMemo(() => validateName(name, showValidationErrors), [name, showValidationErrors]);
+  const emailError = useMemo(() => validateEmail(email, showValidationErrors), [email, showValidationErrors]);
+  const messageError = useMemo(() => validateMessage(message, showValidationErrors), [message, showValidationErrors]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,7 +37,7 @@ export function ContactForm({ onSubmit }: ContactFormProps) {
       <FormField
         id="contact-name"
         label="Full Name"
-        error={getNameError()}
+          error={nameError}
         helperText="Enter your full name"
         required
       >
@@ -49,14 +49,14 @@ export function ContactForm({ onSubmit }: ContactFormProps) {
           onChange={(e) => setName(e.target.value)}
           required
           aria-required="true"
-          aria-invalid={!!getNameError()}
-          aria-describedby={getNameError() ? 'contact-name-error' : 'contact-name-helper'}
+          aria-invalid={!!nameError}
+          aria-describedby={nameError ? 'contact-name-error' : 'contact-name-helper'}
         />
       </FormField>
       <FormField
         id="contact-email"
         label="Email"
-        error={getEmailError()}
+          error={emailError}
         helperText="We'll never share your email with anyone else"
         required
       >
@@ -68,8 +68,8 @@ export function ContactForm({ onSubmit }: ContactFormProps) {
           onChange={(e) => setEmail(e.target.value)}
           required
           aria-required="true"
-          aria-invalid={!!getEmailError()}
-          aria-describedby={getEmailError() ? 'contact-email-error' : 'contact-email-helper'}
+          aria-invalid={!!emailError}
+          aria-describedby={emailError ? 'contact-email-error' : 'contact-email-helper'}
         />
       </FormField>
       <FormField

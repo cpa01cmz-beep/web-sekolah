@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -17,16 +17,15 @@ interface AnnouncementFormProps {
 export function AnnouncementForm({ open, onClose, onSave, isLoading }: AnnouncementFormProps) {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
-  const [titleError, setTitleError] = useState('');
-  const [contentError, setContentError] = useState('');
   const [showValidationErrors, setShowValidationErrors] = useState(false);
+
+  const titleErrorMemo = useMemo(() => validateTitle(title, showValidationErrors, 5), [title, showValidationErrors]);
+  const contentErrorMemo = useMemo(() => validateContent(content, showValidationErrors, 10), [content, showValidationErrors]);
 
   useEffect(() => {
     if (!open) {
       setTitle('');
       setContent('');
-      setTitleError('');
-      setContentError('');
       setShowValidationErrors(false);
     }
   }, [open]);
@@ -35,10 +34,7 @@ export function AnnouncementForm({ open, onClose, onSave, isLoading }: Announcem
     e.preventDefault();
     setShowValidationErrors(true);
 
-    const newTitleError = validateTitle(title, showValidationErrors, 5);
-    const newContentError = validateContent(content, showValidationErrors, 10);
-
-    if (newTitleError || newContentError) {
+    if (titleErrorMemo || contentErrorMemo) {
       return;
     }
 
@@ -67,14 +63,14 @@ export function AnnouncementForm({ open, onClose, onSave, isLoading }: Announcem
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="Announcement Title"
                 aria-required="true"
-                aria-invalid={!!titleError}
-                aria-describedby={titleError ? 'title-error' : 'title-helper'}
+                aria-invalid={!!titleErrorMemo}
+                aria-describedby={titleErrorMemo ? 'title-error' : 'title-helper'}
               />
               <p id="title-helper" className="text-xs text-muted-foreground">Enter a descriptive title (minimum 5 characters)</p>
-              {titleError && (
+              {titleErrorMemo && (
                 <p id="title-error" className="text-xs text-destructive flex items-center gap-1" role="alert" aria-live="polite">
                   <AlertCircle className="h-3 w-3" aria-hidden="true" />
-                  {titleError}
+                  {titleErrorMemo}
                 </p>
               )}
             </div>
@@ -90,14 +86,14 @@ export function AnnouncementForm({ open, onClose, onSave, isLoading }: Announcem
                 placeholder="Write your announcement here..."
                 rows={5}
                 aria-required="true"
-                aria-invalid={!!contentError}
-                aria-describedby={contentError ? 'content-error' : 'content-helper'}
+                aria-invalid={!!contentErrorMemo}
+                aria-describedby={contentErrorMemo ? 'content-error' : 'content-helper'}
               />
               <p id="content-helper" className="text-xs text-muted-foreground">Provide detailed information (minimum 10 characters)</p>
-              {contentError && (
+              {contentErrorMemo && (
                 <p id="content-error" className="text-xs text-destructive flex items-center gap-1" role="alert" aria-live="polite">
                   <AlertCircle className="h-3 w-3" aria-hidden="true" />
-                  {contentError}
+                  {contentErrorMemo}
                 </p>
               )}
             </div>
