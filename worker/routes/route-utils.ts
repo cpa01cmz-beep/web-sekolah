@@ -1,8 +1,11 @@
 import type { Context, Next } from 'hono';
+import type { Env } from '../core-utils';
 import { logger } from '../logger';
 import { forbidden, serverError } from '../core-utils';
 import { authenticate, authorize } from '../middleware/auth';
 import { getCurrentUserId } from '../type-guards';
+import { WebhookService } from '../webhook-service';
+import { toWebhookPayload } from '../webhook-types';
 
 export function validateUserAccess(
   c: Context,
@@ -51,4 +54,10 @@ export function withErrorHandler(operationName: string) {
       }
     };
   };
+}
+
+export function triggerWebhookSafely(env: Env, eventType: string, payload: unknown, context?: Record<string, unknown>): void {
+  WebhookService.triggerEvent(env, eventType, toWebhookPayload(payload)).catch(err => {
+    logger.error(`Failed to trigger ${eventType} webhook`, { err, ...context });
+  });
 }
