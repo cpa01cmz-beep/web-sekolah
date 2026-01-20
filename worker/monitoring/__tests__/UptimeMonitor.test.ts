@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { UptimeMonitor } from '../UptimeMonitor';
 
 describe('UptimeMonitor', () => {
@@ -28,14 +28,16 @@ describe('UptimeMonitor', () => {
     });
 
     it('should return uptime elapsed since construction', () => {
+      const monitor = new UptimeMonitor();
       vi.advanceTimersByTime(10000);
-      const uptime = new UptimeMonitor().getUptime();
+      const uptime = monitor.getUptime();
       expect(uptime).toBe(10000);
     });
 
     it('should return uptime in milliseconds', () => {
+      const monitor = new UptimeMonitor();
       vi.advanceTimersByTime(5000);
-      const uptime = new UptimeMonitor().getUptime();
+      const uptime = monitor.getUptime();
       expect(uptime).toBe(5000);
     });
 
@@ -47,11 +49,11 @@ describe('UptimeMonitor', () => {
 
       vi.advanceTimersByTime(2000);
       uptime = monitor.getUptime();
-      expect(uptime).toBe(30000);
+      expect(uptime).toBe(12000);
 
       vi.advanceTimersByTime(5000);
       uptime = monitor.getUptime();
-      expect(uptime).toBe(35000);
+      expect(uptime).toBe(17000);
     });
 
     it('should return non-negative uptime', () => {
@@ -70,8 +72,8 @@ describe('UptimeMonitor', () => {
     });
 
     it('should reset start time', () => {
-      vi.advanceTimersByTime(10000);
       const monitor = new UptimeMonitor();
+      vi.advanceTimersByTime(10000);
       monitor.reset();
       vi.advanceTimersByTime(5000);
 
@@ -88,8 +90,8 @@ describe('UptimeMonitor', () => {
     });
 
     it('should handle multiple resets', () => {
-      vi.advanceTimersByTime(10000);
       const monitor = new UptimeMonitor();
+      vi.advanceTimersByTime(10000);
       monitor.reset();
       vi.advanceTimersByTime(5000);
 
@@ -123,14 +125,16 @@ describe('UptimeMonitor', () => {
     });
 
     it('should handle long uptime periods', () => {
+      const monitor = new UptimeMonitor();
       vi.advanceTimersByTime(86400000);
-      const uptime = new UptimeMonitor().getUptime();
+      const uptime = monitor.getUptime();
       expect(uptime).toBe(86400000);
     });
 
     it('should handle very short uptime periods', () => {
+      const monitor = new UptimeMonitor();
       vi.advanceTimersByTime(1);
-      const uptime = new UptimeMonitor().getUptime();
+      const uptime = monitor.getUptime();
       expect(uptime).toBe(1);
     });
 

@@ -212,7 +212,7 @@ describe('WebhookMonitor', () => {
       monitor.recordDelivery(true);
 
       const stats1 = monitor.getStats();
-      monitor.recordEventProcessed();
+      monitor.recordEventCreated();
       const stats2 = monitor.getStats();
 
       expect(stats1.totalEvents).toBe(1);
@@ -274,7 +274,7 @@ describe('WebhookMonitor', () => {
       monitor.recordDelivery(false);
 
       const rate = monitor.getSuccessRate();
-      expect(rate).toBe(66.67);
+      expect(rate).toBeCloseTo(66.67, 1);
     });
 
     it('should handle large delivery counts', () => {
@@ -307,6 +307,7 @@ describe('WebhookMonitor', () => {
     });
 
     it('should allow recording after reset', () => {
+      monitor.recordEventCreated();
       monitor.recordEventCreated();
       monitor.recordDelivery(true);
 

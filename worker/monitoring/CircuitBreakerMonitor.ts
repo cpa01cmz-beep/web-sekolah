@@ -16,7 +16,7 @@ export class CircuitBreakerMonitor {
   }
 
   getState(): CircuitBreakerStats | null {
-    return this.state;
+    return this.state ? { ...this.state } : null;
   }
 
   reset(): void {
