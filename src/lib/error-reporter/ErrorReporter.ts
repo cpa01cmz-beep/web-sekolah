@@ -1,332 +1,117 @@
 import { logger } from '../logger';
 import type {
   ErrorReport,
-  ErrorFilterResult,
   ErrorContext,
   BaseErrorData,
-  ConsoleMethod,
-  ConsoleNative,
-  WrappedConsoleFn
 } from './types';
-import { REACT_WARNING_PATTERN, WARNING_PREFIX, CONSOLE_ERROR_PREFIX, ERROR_REPORTER_CONFIG, VENDOR_PATTERNS } from './constants';
-import { categorizeError, isReactRouterFutureFlagMessage, isDeprecatedReactWarningMessage, hasRelevantSourceInStack, parseStackTrace } from './utils';
-import { globalDeduplication } from './deduplication';
-import { ConsoleArgs } from './types';
-import { withRetry } from '../resilience/Retry';
+import { ERROR_REPORTER_CONFIG } from './constants';
+import { categorizeError, parseStackTrace } from './utils';
+import { ErrorFilter } from './ErrorFilter';
+import { ErrorQueue } from './ErrorQueue';
+import { ConsoleInterceptor } from './ConsoleInterceptor';
+import { GlobalErrorHandler } from './GlobalErrorHandler';
+import { ErrorSender } from './ErrorSender';
 
 class ErrorReporter {
-  private errorQueue: ErrorReport[] = [];
-  private isReporting = false;
-  private readonly maxQueueSize = ERROR_REPORTER_CONFIG.MAX_QUEUE_SIZE;
-  private readonly reportingEndpoint = "/api/client-errors";
-  private originalConsoleWarn: typeof console.warn | null = null;
-  private originalConsoleError: typeof console.error | null = null;
+  private errorFilter: ErrorFilter;
+  private errorQueue: ErrorQueue;
+  private consoleInterceptor: ConsoleInterceptor;
+  private globalErrorHandler: GlobalErrorHandler;
+  private errorSender: ErrorSender;
   private isInitialized = false;
-  private readonly maxRetries = ERROR_REPORTER_CONFIG.MAX_RETRIES;
-  private readonly baseRetryDelay = ERROR_REPORTER_CONFIG.BASE_RETRY_DELAY_MS;
-  private readonly requestTimeout = ERROR_REPORTER_CONFIG.REQUEST_TIMEOUT_MS;
 
   constructor() {
-    if (typeof window === "undefined") return;
-
-    try {
-      this.setupConsoleInterceptors();
-      this.setupGlobalErrorHandler();
-      this.setupUnhandledRejectionHandler();
-
-      this.isInitialized = true;
-    } catch (err) {
-      logger.error("[ErrorReporter] Failed to initialize", err);
-    }
-  }
-
-  private setupGlobalErrorHandler() {
-    const originalHandler = window.onerror;
-    window.onerror = (message, source, lineno, colno, error) => {
-      const errorMessage =
-        typeof message === "string" ? message : "Unknown error";
-
-      const context: ErrorContext = {
-        message: errorMessage,
-        stack: error?.stack,
-        source: source || undefined,
-        level: "error",
-        url: window.location.href,
-      };
-
-      const filterResult = this.filterError(context);
-      if (!filterResult.shouldReport) {
-        if (originalHandler) {
-          return originalHandler(message, source, lineno, colno, error);
-        }
-        return true;
-      }
-
-      const payload = this.createErrorPayload({
-        message: errorMessage,
-        stack: error?.stack,
-        parsedStack: parseStackTrace(error?.stack),
-        source: source || undefined,
-        lineno: lineno || undefined,
-        colno: colno || undefined,
-        error: error,
-      });
-
-      this.report(payload);
-
-      if (originalHandler) {
-        return originalHandler(message, source, lineno, colno, error);
-      }
-      return true;
-    };
-  }
-
-  private setupUnhandledRejectionHandler() {
-    window.addEventListener("unhandledrejection", (event) => {
-      const error = event.reason;
-      const errorMessage = error?.message || "Unhandled Promise Rejection";
-
-      const context: ErrorContext = {
-        message: errorMessage,
-        stack: error?.stack,
-        level: "error",
-        url: window.location.href,
-      };
-
-      const filterResult = this.filterError(context);
-      if (!filterResult.shouldReport) return;
-
-      const payload = this.createErrorPayload({
-        message: errorMessage,
-        stack: error?.stack,
-        parsedStack: parseStackTrace(error?.stack),
-        error: error,
-      });
-
-      this.report(payload);
-    });
-  }
-
-  private createConsoleInterceptor(
-    method: ConsoleMethod,
-    original: ConsoleNative,
-    prefix: string
-  ) {
-    return (...args: ConsoleArgs) => {
-      original.apply(console, args);
-
-      try {
-        const message = args
-          .map((arg) =>
-            typeof arg === "string"
-              ? arg
-              : typeof arg === "object" && arg
-              ? JSON.stringify(arg, null, 2)
-              : String(arg)
-          )
-          .join(" ");
-        const stack = new Error().stack;
-        const level =
-          method === "warn" && message.includes(REACT_WARNING_PATTERN)
-            ? "warning"
-            : "error";
-
-        const context: ErrorContext = {
-          message: `${prefix} ${message}`,
-          stack,
-          level,
-          url: window.location.href,
-        };
-
-        const filterResult = this.filterError(context);
-        if (!filterResult.shouldReport) return;
-
-        const payload = this.createErrorPayload({
-          message: context.message,
-          stack,
-          parsedStack: parseStackTrace(stack),
-          level,
-        });
-
-        this.report(payload);
-      } catch { // Fail silently
-      }
-    };
-  }
-
-  private setupConsoleInterceptors() {
-    this.originalConsoleWarn = console.warn;
-    this.originalConsoleError = console.error;
-
-    const currentWarn = console.warn as WrappedConsoleFn;
-    const currentError = console.error as WrappedConsoleFn;
-    if (
-      currentWarn.__errorReporterWrapped &&
-      currentError.__errorReporterWrapped
-    ) {
+    if (typeof window === 'undefined') {
       return;
     }
 
-    console.error = this.createConsoleInterceptor(
-      "error",
-      this.originalConsoleError!,
-      CONSOLE_ERROR_PREFIX
+    this.errorFilter = new ErrorFilter();
+    this.errorSender = new ErrorSender(
+      '/api/client-errors',
+      ERROR_REPORTER_CONFIG.MAX_RETRIES,
+      ERROR_REPORTER_CONFIG.BASE_RETRY_DELAY_MS,
+      ERROR_REPORTER_CONFIG.REQUEST_TIMEOUT_MS
     );
-    console.warn = this.createConsoleInterceptor(
-      "warn",
-      this.originalConsoleWarn!,
-      WARNING_PREFIX
+
+    this.errorQueue = new ErrorQueue(
+      ERROR_REPORTER_CONFIG.MAX_QUEUE_SIZE,
+      this.processQueueCallback.bind(this)
     );
+
+    this.consoleInterceptor = new ConsoleInterceptor(
+      this.handleError.bind(this)
+    );
+
+    this.globalErrorHandler = new GlobalErrorHandler(
+      this.handleError.bind(this)
+    );
+
+    try {
+      this.setup();
+      this.isInitialized = true;
+    } catch (err) {
+      logger.error('[ErrorReporter] Failed to initialize', err);
+    }
   }
 
-  private createBaseErrorData(): BaseErrorData {
-    return {
-      url: window.location.href,
-      timestamp: new Date().toISOString(),
-    };
+  private setup(): void {
+    this.consoleInterceptor.setupConsoleInterceptors();
+    this.globalErrorHandler.setupGlobalErrorHandler();
+    this.globalErrorHandler.setupUnhandledRejectionHandler();
+  }
+
+  private handleError(context: ErrorContext): void {
+    const filterResult = this.errorFilter.filterError(context);
+    if (!filterResult.shouldReport) {
+      return;
+    }
+
+    const payload = this.createErrorPayload(context);
+    this.errorQueue.report(payload);
   }
 
   private createErrorPayload(
-    data: Partial<ErrorReport> & { message: string }
+    context: ErrorContext
   ): ErrorReport {
     const baseData = this.createBaseErrorData();
     return {
       ...baseData,
-      level: (data.level ?? "error") as "error" | "warning" | "info",
-      category: categorizeError(data.message),
-      ...data,
+      level: context.level,
+      category: categorizeError(context.message),
+      message: context.message,
+      stack: context.stack,
+      parsedStack: parseStackTrace(context.stack),
     };
   }
 
-  private filterError(context: ErrorContext): ErrorFilterResult {
-    const { message, stack, level, source } = context;
+  private createBaseErrorData(): BaseErrorData {
+    return {
+      url: typeof window !== 'undefined' ? window.location.href : '',
+      timestamp: new Date().toISOString(),
+    };
+  }
 
-    if (message.includes("[ErrorReporter]")) {
-      return { shouldReport: false, reason: "internal_debug" };
+  private async processQueueCallback(errors: ErrorReport[]): Promise<void> {
+    for (const error of errors) {
+      await this.errorSender.sendError(error);
     }
-
-    if (isReactRouterFutureFlagMessage(message)) {
-      return { shouldReport: false, reason: "react_router_future_flag" };
-    }
-
-    if (level === "warning" && isDeprecatedReactWarningMessage(message)) {
-      return { shouldReport: false, reason: "deprecated_react_warning" };
-    }
-
-    if (
-      level === "error" &&
-      message.includes("Uncaught Error") &&
-      !hasRelevantSourceInStack(stack)
-    ) {
-      return { shouldReport: false, reason: "no_relevant_source" };
-    }
-
-    if (
-      level === "error" &&
-      source &&
-      VENDOR_PATTERNS.some((pattern) => pattern.test(source)) &&
-      !hasRelevantSourceInStack(stack)
-    ) {
-      return { shouldReport: false, reason: "vendor_only_error" };
-    }
-
-    const deduplicationResult = globalDeduplication.shouldReport(
-      context,
-      false
-    );
-    if (!deduplicationResult.shouldReport)
-      return { shouldReport: false, reason: deduplicationResult.reason };
-
-    return { shouldReport: true };
   }
 
   public report(error: ErrorReport): void {
-    if (!this.isInitialized || typeof window === "undefined") {
+    if (!this.isInitialized || typeof window === 'undefined') {
       return;
     }
 
     try {
-      this.errorQueue.push(error);
-
-      if (this.errorQueue.length > this.maxQueueSize) {
-        this.errorQueue.shift();
-      }
-
-      this.processQueue();
-    } catch (err) { // Swallow reporting errors in client
-    }
-  }
-
-  private async processQueue() {
-    if (this.isReporting || this.errorQueue.length === 0) {
-      return;
-    }
-
-    this.isReporting = true;
-    const errorsToReport = [...this.errorQueue];
-    this.errorQueue = [];
-
-    try {
-      for (const error of errorsToReport) {
-        await this.sendError(error);
-      }
+      this.errorQueue.report(error);
     } catch (err) {
-      logger.error("[ErrorReporter] Failed to report errors", err);
-      this.errorQueue.unshift(...errorsToReport);
-    } finally {
-      this.isReporting = false;
-    }
-  }
-
-  private async sendError(error: ErrorReport) {
-    try {
-      await withRetry(
-        async () => {
-          const response = await fetch(this.reportingEndpoint, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(error),
-          });
-
-          if (!response.ok) {
-            throw new Error(
-              `Failed to report error: ${response.status} ${response.statusText}`
-            );
-          }
-
-          const result = (await response.json()) as {
-            success: boolean;
-            error?: string;
-          };
-
-          if (!result.success) {
-            throw new Error(result.error || "Unknown error occurred");
-          }
-
-          logger.debug("[ErrorReporter] Error reported successfully", { message: error.message });
-        },
-        {
-          maxRetries: this.maxRetries,
-          baseDelay: this.baseRetryDelay,
-          jitterMs: ERROR_REPORTER_CONFIG.JITTER_DELAY_MS,
-          timeout: this.requestTimeout
-        }
-      );
-    } catch (err) {
-      logger.error("[ErrorReporter] Failed to send error after retries", err);
-      throw err;
     }
   }
 
   public dispose(): void {
-    if (this.originalConsoleWarn) {
-      console.warn = this.originalConsoleWarn;
-    }
-    if (this.originalConsoleError) {
-      console.error = this.originalConsoleError;
-    }
+    this.consoleInterceptor.dispose();
+    this.globalErrorHandler.dispose();
+    this.errorQueue.dispose();
     this.isInitialized = false;
   }
 }
