@@ -3,6 +3,13 @@ import { logger } from './logger';
 import { UserEntity } from './entities';
 import { hashPassword } from './password-utils';
 
+function generateSecureRandomPassword(): string {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*';
+  const array = new Uint32Array(24);
+  crypto.getRandomValues(array);
+  return Array.from(array, (x) => chars[x % chars.length]).join('');
+}
+
 const MIGRATION_STATE_KEY = 'sys:migration:state';
 
 interface MigrationState {
@@ -190,7 +197,7 @@ export const AddPasswordHashMigration: Migration = {
     }
 
     const { items: users } = await UserEntity.list(env);
-    const defaultPassword = 'password123';
+    const defaultPassword = env.DEFAULT_PASSWORD || generateSecureRandomPassword();
 
     for (const user of users) {
       const userEntity = new UserEntity(env, user.id);
