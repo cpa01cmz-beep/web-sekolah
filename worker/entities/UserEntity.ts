@@ -23,6 +23,16 @@ export class UserEntity extends IndexedEntity<SchoolUser> {
     return users.filter((u): u is Student => u.role === 'student' && u.classId === classId);
   }
 
+  static async countByClassId(env: Env, classId: string): Promise<number> {
+    const index = new SecondaryIndex<string>(env, this.entityName, 'classId');
+    return await index.countByValue(classId);
+  }
+
+  static async countByRole(env: Env, role: UserRole): Promise<number> {
+    const index = new SecondaryIndex<string>(env, this.entityName, 'role');
+    return await index.countByValue(role);
+  }
+
   static async getByEmail(env: Env, email: string): Promise<SchoolUser | null> {
     const users = await this.getBySecondaryIndex(env, 'email', email);
     return users.length > 0 ? users[0] : null;

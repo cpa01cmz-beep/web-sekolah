@@ -19,8 +19,7 @@ export function teacherRoutes(app: Hono<{ Bindings: Env }>) {
 
     const totalStudents = await Promise.all(
       teacherClasses.map(async (cls) => {
-        const students = await CommonDataService.getClassStudents(c.env, cls.id);
-        return students.length;
+        return await CommonDataService.getClassStudentsCount(c.env, cls.id);
       })
     ).then(counts => counts.reduce((sum, count) => sum + count, 0));
 

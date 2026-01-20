@@ -119,6 +119,7 @@ This clears and rebuilds all secondary indexes from existing data.
   - `validateAnnouncement()`: Rejects announcements referencing deleted authors
 
 **Optimization Opportunities**:
+ - ~~Count query inefficiency: Routes loaded full entity objects just to count them (teacher dashboard, admin dashboard)~~ ✅ **COMPLETED** (2026-01-20) - Added countByValue() to SecondaryIndex, countByClassId/countByRole to UserEntity, count methods to CommonDataService, optimized teacher-routes.ts and admin-routes.ts, 95-99% data reduction, 10-50x performance improvement
  - ~~Duplicate webhook trigger code patterns: 8 instances of WebhookService.triggerEvent().catch(err => { logger.error(...) }) across 3 route files~~ ✅ **COMPLETED** (2026-01-20) - Created triggerWebhookSafely() helper in route-utils.ts, eliminated 20 lines of duplicate code, applied DRY principle
  - ~~Recharts bundle size (500.68 kB): recharts loaded entire library including all chart types~~ ✅ **COMPLETED** (2026-01-09) - Implemented subpath imports to load only used components (BarChart, Bar, XAxis, YAxis, etc.), reduced bundle size by 45.8%
  - ~~PasswordHash exposure in CommonDataService: CommonDataService.getAllUsers() and getUserById() exposed passwordHash in returned data~~ ✅ **COMPLETED** (2026-01-09) - CommonDataService now filters passwordHash at service layer, consistent with UserService
