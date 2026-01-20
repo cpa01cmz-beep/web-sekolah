@@ -5,7 +5,7 @@ import { AnnouncementEntity, ensureAllSeedData } from "../entities";
 import { rebuildAllIndexes } from "../index-rebuilder";
 import type { CreateUserData, UpdateUserData, Announcement, CreateAnnouncementData, AdminDashboardData, Settings } from "@shared/types";
 import { UserService, CommonDataService, AnnouncementService } from '../domain';
-import { withAuth, triggerWebhookSafely } from './route-utils';
+import { withAuth, withErrorHandler, triggerWebhookSafely } from './route-utils';
 import { getCurrentUserId } from '../type-guards';
 import type { Context } from 'hono';
 
@@ -71,20 +71,13 @@ export function adminRoutes(app: Hono<{ Bindings: Env }>) {
     return ok(c, announcements);
   });
 
-  app.post('/api/admin/announcements', ...withAuth('admin'), async (c: Context) => {
+  app.post('/api/admin/announcements', ...withAuth('admin'), withErrorHandler('create announcement')(async (c: Context) => {
     const announcementData = await c.req.json<CreateAnnouncementData>();
     const authorId = getCurrentUserId(c);
-    try {
-      const newAnnouncement = await AnnouncementService.createAnnouncement(c.env, announcementData, authorId);
-      triggerWebhookSafely(c.env, 'announcement.created', newAnnouncement, { announcementId: newAnnouncement.id });
-      return ok(c, newAnnouncement);
-    } catch (error) {
-      if (error instanceof Error) {
-        return bad(c, error.message);
-      }
-      throw error;
-    }
-  });
+    const newAnnouncement = await AnnouncementService.createAnnouncement(c.env, announcementData, authorId);
+    triggerWebhookSafely(c.env, 'announcement.created', newAnnouncement, { announcementId: newAnnouncement.id });
+    return ok(c, newAnnouncement);
+  }));
 
   app.get('/api/admin/settings', ...withAuth('admin'), async (c: Context) => {
     const settings: Settings = {

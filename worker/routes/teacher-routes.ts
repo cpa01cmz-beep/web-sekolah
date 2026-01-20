@@ -5,7 +5,7 @@ import { authenticate, authorize } from '../middleware/auth';
 import type { TeacherDashboardData, Announcement, CreateAnnouncementData, SubmitGradeData, Grade } from "@shared/types";
 
 import { GradeService, CommonDataService, AnnouncementService } from '../domain';
-import { withAuth, withUserValidation, triggerWebhookSafely } from './route-utils';
+import { withAuth, withUserValidation, withErrorHandler, triggerWebhookSafely } from './route-utils';
 import { getCurrentUserId } from '../type-guards';
 import type { Context } from 'hono';
 
@@ -45,32 +45,18 @@ export function teacherRoutes(app: Hono<{ Bindings: Env }>) {
     return ok(c, filteredAnnouncements);
   });
 
-  app.post('/api/teachers/grades', ...withAuth('teacher'), async (c: Context) => {
+  app.post('/api/teachers/grades', ...withAuth('teacher'), withErrorHandler('create grade')(async (c: Context) => {
     const gradeData = await c.req.json<SubmitGradeData>();
-    try {
-      const newGrade = await GradeService.createGrade(c.env, gradeData);
-      triggerWebhookSafely(c.env, 'grade.created', newGrade, { gradeId: newGrade.id });
-      return ok(c, newGrade);
-    } catch (error) {
-      if (error instanceof Error) {
-        return bad(c, error.message);
-      }
-      throw error;
-    }
-  });
+    const newGrade = await GradeService.createGrade(c.env, gradeData);
+    triggerWebhookSafely(c.env, 'grade.created', newGrade, { gradeId: newGrade.id });
+    return ok(c, newGrade);
+  }));
 
-  app.post('/api/teachers/announcements', ...withAuth('teacher'), async (c: Context) => {
+  app.post('/api/teachers/announcements', ...withAuth('teacher'), withErrorHandler('create announcement')(async (c: Context) => {
     const announcementData = await c.req.json<CreateAnnouncementData>();
     const authorId = getCurrentUserId(c);
-    try {
-      const newAnnouncement = await AnnouncementService.createAnnouncement(c.env, announcementData, authorId);
-      triggerWebhookSafely(c.env, 'announcement.created', newAnnouncement, { announcementId: newAnnouncement.id });
-      return ok(c, newAnnouncement);
-    } catch (error) {
-      if (error instanceof Error) {
-        return bad(c, error.message);
-      }
-      throw error;
-    }
-  });
+    const newAnnouncement = await AnnouncementService.createAnnouncement(c.env, announcementData, authorId);
+    triggerWebhookSafely(c.env, 'announcement.created', newAnnouncement, { announcementId: newAnnouncement.id });
+    return ok(c, newAnnouncement);
+  }));
 }
