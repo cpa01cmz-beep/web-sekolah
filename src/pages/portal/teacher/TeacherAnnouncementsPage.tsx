@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
+import { PageHeader } from '@/components/PageHeader';
 import { useAuthStore } from '@/lib/authStore';
 import { SlideUp } from '@/components/animations';
 import { toast } from 'sonner';
@@ -36,7 +37,7 @@ export function TeacherAnnouncementsPage() {
   };
   return (
     <SlideUp className="space-y-6">
-      <h1 className="text-3xl font-bold">Announcements</h1>
+      <PageHeader title="Announcements" />
       <div className="grid gap-8 md:grid-cols-3">
         <div className="md:col-span-1">
           <Card>

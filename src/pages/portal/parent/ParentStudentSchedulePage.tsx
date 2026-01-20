@@ -1,5 +1,6 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { PageHeader } from '@/components/PageHeader';
 import { SlideUp } from '@/components/animations';
 
 const scheduleData = {
@@ -32,8 +33,10 @@ const scheduleData = {
 export function ParentStudentSchedulePage() {
   return (
     <SlideUp className="space-y-6">
-      <h1 className="text-3xl font-bold">Jadwal Pelajaran Anak Anda</h1>
-      <p className="text-muted-foreground">Berikut adalah jadwal pelajaran mingguan untuk Budi Hartono.</p>
+      <PageHeader
+        title="Jadwal Pelajaran Anak Anda"
+        description="Berikut adalah jadwal pelajaran mingguan untuk Budi Hartono."
+      />
       <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
         {Object.entries(scheduleData).map(([day, lessons], index) => (
           <SlideUp key={day} delay={index * 0.1}>

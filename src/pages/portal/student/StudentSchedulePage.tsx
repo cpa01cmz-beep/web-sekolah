@@ -1,8 +1,9 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { AlertTriangle } from 'lucide-react';
+import { PageHeader } from '@/components/PageHeader';
 import { SlideUp } from '@/components/animations';
 import { useStudentSchedule } from '@/hooks/useStudent';
 import { useAuthStore } from '@/lib/authStore';
@@ -75,7 +76,7 @@ export function StudentSchedulePage() {
 
   return (
     <SlideUp className="space-y-6">
-      <h1 className="text-3xl font-bold">Jadwal Pelajaran</h1>
+      <PageHeader title="Jadwal Pelajaran" />
       <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
         {Object.entries(scheduleByDay).map(([day, lessons], index) => (
           <SlideUp key={day} delay={index * 0.1}>
