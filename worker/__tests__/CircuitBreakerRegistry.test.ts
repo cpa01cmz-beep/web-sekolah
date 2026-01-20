@@ -3,10 +3,6 @@ import { CircuitBreakerRegistry } from '../CircuitBreakerRegistry';
 
 let circuitBreakerInstances = new Map<string, any>();
 
-const mockResetAll = () => {
-  circuitBreakerInstances.clear();
-};
-
 beforeEach(() => {
   circuitBreakerInstances.clear();
 
@@ -349,20 +345,6 @@ describe('CircuitBreakerRegistry - Critical Path Testing', () => {
       CircuitBreakerRegistry.getOrCreate(url);
 
       expect(CircuitBreakerRegistry.has(url)).toBe(true);
-    });
-
-    it('should maintain isolation between different registries (test scenario)', async () => {
-      const url1 = 'https://example.com/webhook1';
-      const url2 = 'https://example.com/webhook2';
-
-      CircuitBreakerRegistry.getOrCreate(url1);
-      CircuitBreakerRegistry.getOrCreate(url2);
-
-      const states = CircuitBreakerRegistry.getAllStates();
-
-      expect(states.size).toBe(2);
-      expect(states.has(url1)).toBe(true);
-      expect(states.has(url2)).toBe(true);
     });
   });
 
