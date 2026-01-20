@@ -1,3 +1,5 @@
+import { RETRY_CONFIG } from '@shared/constants';
+
 export interface RetryOptions {
   maxRetries?: number;
   baseDelay?: number;
@@ -6,9 +8,9 @@ export interface RetryOptions {
   shouldRetry?: (error: unknown, attempt: number) => boolean;
 }
 
-const DEFAULT_MAX_RETRIES = 3;
-const DEFAULT_BASE_DELAY_MS = 1000;
-const DEFAULT_JITTER_MS = 0;
+const DEFAULT_MAX_RETRIES = RETRY_CONFIG.DEFAULT_MAX_RETRIES;
+const DEFAULT_BASE_DELAY_MS = RETRY_CONFIG.DEFAULT_BASE_DELAY_MS;
+const DEFAULT_JITTER_MS = RETRY_CONFIG.DEFAULT_JITTER_MS;
 
 async function sleep(ms: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, ms));
