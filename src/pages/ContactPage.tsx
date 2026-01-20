@@ -7,7 +7,6 @@ import { ContactForm } from '@/components/forms/ContactForm';
 export function ContactPage() {
   const handleSubmit = async (data: { name: string; email: string; message: string }) => {
     await new Promise(resolve => setTimeout(resolve, 1000));
-    console.log('Form submitted:', data);
   };
 
   return (
