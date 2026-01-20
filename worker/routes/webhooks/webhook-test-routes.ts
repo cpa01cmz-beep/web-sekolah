@@ -3,6 +3,7 @@ import type { Env } from '../../core-utils';
 import { ok, bad } from '../../core-utils';
 import { logger } from '../../logger';
 import { CircuitBreaker } from '@shared/CircuitBreaker';
+import { withRetry } from '../../resilience/Retry';
 import { RetryDelay } from '../../config/time';
 import type { Context } from 'hono';
 import { withErrorHandler } from '../route-utils';
@@ -37,78 +38,66 @@ export function webhookTestRoutes(app: Hono<{ Bindings: Env }>) {
 
     const breaker = CircuitBreaker.createWebhookBreaker(body.url);
 
-    let lastError: Error | unknown;
-    const maxRetries = 3;
-    const retryDelaysMs = [RetryDelay.ONE_SECOND_MS, RetryDelay.TWO_SECONDS_MS, RetryDelay.THREE_SECONDS_MS];
-
-    for (let attempt = 0; attempt <= maxRetries; attempt++) {
-      try {
-        const response = await breaker.execute(async () => {
-          return await fetch(body.url, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'X-Webhook-Signature': signatureHeader,
-              'X-Webhook-ID': testPayload.id,
-              'X-Webhook-Timestamp': testPayload.timestamp,
-              'User-Agent': 'Akademia-Pro-Webhook/1.0'
-            },
-            body: JSON.stringify(testPayload),
-            signal: AbortSignal.timeout(30000)
+    try {
+      const responseText = await withRetry(
+        async () => {
+          const response = await breaker.execute(async () => {
+            return await fetch(body.url, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'X-Webhook-Signature': signatureHeader,
+                'X-Webhook-ID': testPayload.id,
+                'X-Webhook-Timestamp': testPayload.timestamp,
+                'User-Agent': 'Akademia-Pro-Webhook/1.0'
+              },
+              body: JSON.stringify(testPayload),
+              signal: AbortSignal.timeout(30000)
+            });
           });
-        });
 
-        const responseText = await response.text();
+          if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+          }
 
-        if (attempt > 0) {
-          logger.info('Webhook test succeeded after retry', {
-            url: body.url,
-            status: response.status,
-            attempt: attempt + 1,
-            retries: attempt
-          });
-        } else {
-          logger.info('Webhook test sent', { url: body.url, status: response.status });
+          return await response.text();
+        },
+        {
+          maxRetries: 3,
+          baseDelay: RetryDelay.ONE_SECOND_MS,
+          jitterMs: RetryDelay.ONE_SECOND_MS,
+          shouldRetry: (error) => {
+            const errorMessage = error instanceof Error ? error.message : String(error);
+            return !errorMessage.includes('Circuit breaker is open');
+          }
         }
+      );
 
+      logger.info('Webhook test sent', { url: body.url, success: true });
+      return ok(c, {
+        success: true,
+        status: 200,
+        response: responseText
+      });
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+
+      if (errorMessage.includes('Circuit breaker is open')) {
+        logger.warn('Webhook test skipped due to open circuit breaker', {
+          url: body.url,
+          errorMessage
+        });
         return ok(c, {
-          success: response.ok,
-          status: response.status,
-          response: responseText
+          success: false,
+          error: 'Circuit breaker is open for this webhook URL. Please wait before retrying.'
         });
-      } catch (error) {
-        lastError = error;
-        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-
-        if (errorMessage.includes('Circuit breaker is open')) {
-          logger.warn('Webhook test skipped due to open circuit breaker', {
-            url: body?.url,
-            errorMessage
-          });
-          return ok(c, {
-            success: false,
-            error: 'Circuit breaker is open for this webhook URL. Please wait before retrying.'
-          });
-        }
-
-        if (attempt < maxRetries) {
-          const delay = retryDelaysMs[attempt];
-          logger.info('Webhook test retrying', {
-            url: body.url,
-            attempt: attempt + 1,
-            maxRetries: maxRetries + 1,
-            delayMs: delay
-          });
-          await new Promise(resolve => setTimeout(resolve, delay));
-        }
       }
-    }
 
-    const finalErrorMessage = lastError instanceof Error ? lastError.message : 'Unknown error';
-    logger.error('Webhook test failed after all retries', finalErrorMessage);
-    return ok(c, {
-      success: false,
-      error: finalErrorMessage
-    });
+      logger.error('Webhook test failed after all retries', errorMessage);
+      return ok(c, {
+        success: false,
+        error: errorMessage
+      });
+    }
   }));
 }

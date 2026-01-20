@@ -2,12 +2,12 @@ import { PublicLayout } from '@/components/PublicLayout';
 import { Card, CardContent } from '@/components/ui/card';
 import { SlideUp, SlideLeft, SlideRight } from '@/components/animations';
 import { Phone, Mail, MapPin } from 'lucide-react';
-import { toast } from 'sonner';
 import { ContactForm } from '@/components/forms/ContactForm';
 
 export function ContactPage() {
-  const handleSubmit = (data: { name: string; email: string; message: string }) => {
-    toast.success("Thank you for your message! We'll get back to you soon.");
+  const handleSubmit = async (data: { name: string; email: string; message: string }) => {
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    console.log('Form submitted:', data);
   };
 
   return (
