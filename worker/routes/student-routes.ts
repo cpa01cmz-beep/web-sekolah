@@ -2,7 +2,7 @@ import { Hono } from "hono";
 import type { Env } from '../core-utils';
 import { ok, notFound } from '../core-utils';
 import type { StudentDashboardData, StudentCardData } from "@shared/types";
-import { GRADE_A_THRESHOLD, GRADE_B_THRESHOLD, GRADE_C_THRESHOLD, PASSING_SCORE_THRESHOLD } from '../constants';
+import { GRADE_A_THRESHOLD, GRADE_B_THRESHOLD, GRADE_C_THRESHOLD, PASSING_SCORE_THRESHOLD, GRADE_PRECISION_FACTOR } from '../constants';
 import { GradeService, CommonDataService, StudentDashboardService } from '../domain';
 import { withUserValidation } from './route-utils';
 import type { Context } from 'hono';
@@ -41,7 +41,7 @@ export function studentRoutes(app: Hono<{ Bindings: Env }>) {
       email: student.email,
       avatarUrl: student.avatarUrl || '',
       className: classData?.name || 'N/A',
-      averageScore: Math.round(averageScore * 10) / 10,
+      averageScore: Math.round(averageScore * GRADE_PRECISION_FACTOR) / GRADE_PRECISION_FACTOR,
       totalGrades: grades.length,
       gradeDistribution: {
         A: grades.filter(g => g.score >= GRADE_A_THRESHOLD).length,

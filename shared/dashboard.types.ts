@@ -1,0 +1,40 @@
+import type { Grade, Announcement, ScheduleItem } from './entities.types';
+import type { Student } from './entities.types';
+
+export interface StudentDashboardData {
+  schedule: (ScheduleItem & { courseName: string; teacherName: string })[];
+  recentGrades: (Grade & { courseName: string })[];
+  announcements: (Announcement & { authorName: string })[];
+}
+
+export interface TeacherDashboardData {
+  teacherId: string;
+  name: string;
+  email: string;
+  totalClasses: number;
+  totalStudents: number;
+  recentGrades: Grade[];
+  recentAnnouncements: Announcement[];
+}
+
+export interface ParentDashboardData {
+  child: Student & { className: string };
+  childSchedule: (ScheduleItem & { courseName: string; teacherName: string })[];
+  childGrades: (Grade & { courseName: string })[];
+  announcements: (Announcement & { authorName: string })[];
+}
+
+export interface AdminDashboardData {
+  totalUsers: number;
+  totalStudents: number;
+  totalTeachers: number;
+  totalParents: number;
+  totalClasses: number;
+  recentAnnouncements: Announcement[];
+  userDistribution: {
+    students: number;
+    teachers: number;
+    parents: number;
+    admins: number;
+  };
+}
