@@ -1,12 +1,12 @@
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { FormField } from '@/components/ui/form-field';
+import { FormSuccess } from '@/components/ui/form-success';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useState, useMemo, useCallback } from 'react';
 import { toast } from 'sonner';
 import { AlertCircle } from 'lucide-react';
-import { validateName, validateEmail, validatePhone, validateNisn } from '@/utils/validation';
+import { validateName, validateEmail, validatePhone, validateNisn, validateRequired } from '@/utils/validation';
 
 interface PPDBFormData {
   name: string;
@@ -35,9 +35,15 @@ export function PPDBForm({ onSubmit }: PPDBFormProps) {
     phone: '',
   });
   const [showValidationErrors, setShowValidationErrors] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
 
   const nameError = useMemo(() => validateName(formData.name, showValidationErrors, 3), [formData.name, showValidationErrors]);
+  const placeOfBirthError = useMemo(() => validateRequired(formData.placeOfBirth, showValidationErrors, 'Tempat lahir'), [formData.placeOfBirth, showValidationErrors]);
+  const dateOfBirthError = useMemo(() => validateRequired(formData.dateOfBirth, showValidationErrors, 'Tanggal lahir'), [formData.dateOfBirth, showValidationErrors]);
   const nisnError = useMemo(() => validateNisn(formData.nisn, showValidationErrors, 10), [formData.nisn, showValidationErrors]);
+  const schoolError = useMemo(() => validateRequired(formData.school, showValidationErrors, 'Asal sekolah'), [formData.school, showValidationErrors]);
+  const levelError = useMemo(() => validateRequired(formData.level, showValidationErrors, 'Jenjang pendidikan'), [formData.level, showValidationErrors]);
   const emailError = useMemo(() => validateEmail(formData.email, showValidationErrors), [formData.email, showValidationErrors]);
   const phoneError = useMemo(() => validatePhone(formData.phone, showValidationErrors, 10, 13), [formData.phone, showValidationErrors]);
 
@@ -45,18 +51,26 @@ export function PPDBForm({ onSubmit }: PPDBFormProps) {
     setFormData(prev => ({ ...prev, [field]: value }));
   }, []);
 
-  const handleSubmit = useCallback((e: React.FormEvent) => {
+  const handleReset = () => {
+    setIsSuccess(false);
+    setShowValidationErrors(false);
+  };
+
+  const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
     setShowValidationErrors(true);
 
-    if (nameError || nisnError || emailError || phoneError) {
+    const errors = [nameError, placeOfBirthError, dateOfBirthError, nisnError, schoolError, levelError, emailError, phoneError].filter(Boolean);
+    
+    if (errors.length > 0) {
       toast.error('Mohon lengkapi formulir dengan benar.');
       return;
     }
 
-    if (onSubmit) {
-      onSubmit(formData);
-    } else {
+    setIsSubmitting(true);
+    try {
+      await onSubmit?.(formData);
+      setIsSuccess(true);
       toast.success('Pendaftaran berhasil dikirim! Silakan cek email untuk instruksi selanjutnya.');
       setFormData({
         name: '',
@@ -69,8 +83,25 @@ export function PPDBForm({ onSubmit }: PPDBFormProps) {
         phone: '',
       });
       setShowValidationErrors(false);
+    } catch (error) {
+      toast.error('Pendaftaran gagal. Silakan coba lagi.');
+    } finally {
+      setIsSubmitting(false);
     }
-  }, [nameError, nisnError, emailError, phoneError, onSubmit, formData]);
+  }, [nameError, placeOfBirthError, dateOfBirthError, nisnError, schoolError, levelError, emailError, phoneError, onSubmit, formData]);
+
+  if (isSuccess) {
+    return (
+      <FormSuccess
+        title="Pendaftaran Berhasil!"
+        description="Terima kasih telah mendaftar. Silakan cek email Anda untuk instruksi selanjutnya."
+        action={{
+          label: "Daftar Siswa Lain",
+          onClick: handleReset,
+        }}
+      />
+    );
+  }
 
   return (
     <div className="bg-card rounded-lg shadow-md p-6">
@@ -88,10 +119,12 @@ export function PPDBForm({ onSubmit }: PPDBFormProps) {
             placeholder="Masukkan nama lengkap"
             value={formData.name}
             onChange={(e) => handleInputChange('name', e.target.value)}
+            disabled={isSubmitting}
             required
             aria-required="true"
             aria-invalid={!!nameError}
             aria-describedby={nameError ? 'name-error' : 'name-helper'}
+            aria-busy={isSubmitting}
           />
           {nameError && (
             <p id="name-error" className="text-xs text-destructive flex items-center gap-1" role="alert" aria-live="polite">
@@ -105,6 +138,7 @@ export function PPDBForm({ onSubmit }: PPDBFormProps) {
           <FormField
             id="placeOfBirth"
             label="Tempat Lahir"
+            error={placeOfBirthError}
             helperText="Kota tempat lahir"
             required
           >
@@ -113,13 +147,23 @@ export function PPDBForm({ onSubmit }: PPDBFormProps) {
               placeholder="Tempat lahir"
               value={formData.placeOfBirth}
               onChange={(e) => handleInputChange('placeOfBirth', e.target.value)}
+              disabled={isSubmitting}
               required
               aria-required="true"
+              aria-invalid={!!placeOfBirthError}
+              aria-describedby={placeOfBirthError ? 'placeOfBirth-error' : 'placeOfBirth-helper'}
             />
+            {placeOfBirthError && (
+              <p id="placeOfBirth-error" className="text-xs text-destructive flex items-center gap-1" role="alert" aria-live="polite">
+                <AlertCircle className="h-3 w-3" aria-hidden="true" />
+                {placeOfBirthError}
+              </p>
+            )}
           </FormField>
           <FormField
             id="dateOfBirth"
             label="Tanggal Lahir"
+            error={dateOfBirthError}
             helperText="Tanggal lahir sesuai akta"
             required
           >
@@ -128,9 +172,18 @@ export function PPDBForm({ onSubmit }: PPDBFormProps) {
               type="date"
               value={formData.dateOfBirth}
               onChange={(e) => handleInputChange('dateOfBirth', e.target.value)}
+              disabled={isSubmitting}
               required
               aria-required="true"
+              aria-invalid={!!dateOfBirthError}
+              aria-describedby={dateOfBirthError ? 'dateOfBirth-error' : 'dateOfBirth-helper'}
             />
+            {dateOfBirthError && (
+              <p id="dateOfBirth-error" className="text-xs text-destructive flex items-center gap-1" role="alert" aria-live="polite">
+                <AlertCircle className="h-3 w-3" aria-hidden="true" />
+                {dateOfBirthError}
+              </p>
+            )}
           </FormField>
         </div>
 
@@ -146,10 +199,12 @@ export function PPDBForm({ onSubmit }: PPDBFormProps) {
             placeholder="Nomor Induk Siswa Nasional"
             value={formData.nisn}
             onChange={(e) => handleInputChange('nisn', e.target.value)}
+            disabled={isSubmitting}
             required
             aria-required="true"
             aria-invalid={!!nisnError}
             aria-describedby={nisnError ? 'nisn-error' : 'nisn-helper'}
+            aria-busy={isSubmitting}
           />
           {nisnError && (
             <p id="nisn-error" className="text-xs text-destructive flex items-center gap-1" role="alert" aria-live="polite">
@@ -162,6 +217,7 @@ export function PPDBForm({ onSubmit }: PPDBFormProps) {
         <FormField
           id="school"
           label="Asal Sekolah"
+          error={schoolError}
           helperText="Nama sekolah sebelumnya"
           required
         >
@@ -170,15 +226,29 @@ export function PPDBForm({ onSubmit }: PPDBFormProps) {
             placeholder="Nama sekolah sebelumnya"
             value={formData.school}
             onChange={(e) => handleInputChange('school', e.target.value)}
+            disabled={isSubmitting}
             required
             aria-required="true"
+            aria-invalid={!!schoolError}
+            aria-describedby={schoolError ? 'school-error' : 'school-helper'}
           />
+          {schoolError && (
+            <p id="school-error" className="text-xs text-destructive flex items-center gap-1" role="alert" aria-live="polite">
+              <AlertCircle className="h-3 w-3" aria-hidden="true" />
+              {schoolError}
+            </p>
+          )}
         </FormField>
 
-        <div className="space-y-2">
-          <Label htmlFor="level">Jenjang yang Dituju</Label>
+        <FormField
+          id="level"
+          label="Jenjang yang Dituju"
+          error={levelError}
+          helperText="Pilih jenjang pendidikan yang dituju"
+          required
+        >
           <Select onValueChange={(value) => handleInputChange('level', value)}>
-            <SelectTrigger aria-label="Pilih jenjang pendidikan">
+            <SelectTrigger id="level" aria-label="Pilih jenjang pendidikan" aria-invalid={!!levelError} aria-describedby={levelError ? 'level-error' : 'level-helper'}>
               <SelectValue placeholder="Pilih jenjang" />
             </SelectTrigger>
             <SelectContent>
@@ -186,7 +256,13 @@ export function PPDBForm({ onSubmit }: PPDBFormProps) {
               <SelectItem value="sma">SMA (Kelas 10)</SelectItem>
             </SelectContent>
           </Select>
-        </div>
+          {levelError && (
+            <p id="level-error" className="text-xs text-destructive flex items-center gap-1" role="alert" aria-live="polite">
+              <AlertCircle className="h-3 w-3" aria-hidden="true" />
+              {levelError}
+            </p>
+          )}
+        </FormField>
 
         <FormField
           id="email"
@@ -201,10 +277,12 @@ export function PPDBForm({ onSubmit }: PPDBFormProps) {
             placeholder="email@contoh.com"
             value={formData.email}
             onChange={(e) => handleInputChange('email', e.target.value)}
+            disabled={isSubmitting}
             required
             aria-required="true"
             aria-invalid={!!emailError}
             aria-describedby={emailError ? 'email-error' : 'email-helper'}
+            aria-busy={isSubmitting}
           />
           {emailError && (
             <p id="email-error" className="text-xs text-destructive flex items-center gap-1" role="alert" aria-live="polite">
@@ -227,10 +305,12 @@ export function PPDBForm({ onSubmit }: PPDBFormProps) {
             placeholder="081234567890"
             value={formData.phone}
             onChange={(e) => handleInputChange('phone', e.target.value)}
+            disabled={isSubmitting}
             required
             aria-required="true"
             aria-invalid={!!phoneError}
             aria-describedby={phoneError ? 'phone-error' : 'phone-helper'}
+            aria-busy={isSubmitting}
           />
           {phoneError && (
             <p id="phone-error" className="text-xs text-destructive flex items-center gap-1" role="alert" aria-live="polite">
@@ -240,7 +320,9 @@ export function PPDBForm({ onSubmit }: PPDBFormProps) {
           )}
         </FormField>
 
-        <Button type="submit" className="w-full">Daftar Sekarang</Button>
+        <Button type="submit" className="w-full" disabled={isSubmitting} aria-busy={isSubmitting}>
+          {isSubmitting ? 'Mengirim...' : 'Daftar Sekarang'}
+        </Button>
       </form>
     </div>
   );
