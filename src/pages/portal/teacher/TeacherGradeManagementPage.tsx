@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
@@ -44,36 +44,44 @@ export function TeacherGradeManagementPage() {
     },
   });
 
-  const handleSaveGrade = (data: UpdateGradeData) => {
+  const handleSaveGrade = useCallback((data: UpdateGradeData) => {
     if (!editingStudent || !editingStudent.gradeId) {
       toast.error("Cannot save changes. No grade record exists for this student yet.");
       return;
     }
     gradeMutation.mutate(data);
-  };
+  }, [editingStudent, gradeMutation]);
 
-  const handleCloseModal = () => {
+  const handleCloseModal = useCallback(() => {
     setEditingStudent(null);
-  };
+  }, []);
+
+  const handleSetSelectedClass = useCallback((value: string) => {
+    setSelectedClass(value);
+  }, []);
+
+  const handleEditStudent = useCallback((student: StudentGrade) => {
+    setEditingStudent(student);
+  }, []);
 
   const selectedClassName = useMemo(() => {
     return classes?.find(c => c.id === selectedClass)?.name || '';
   }, [classes, selectedClass]);
 
-  const tableHeaders = [
+  const tableHeaders = useMemo(() => [
     { key: 'name', label: 'Student Name' },
     { key: 'score', label: 'Score', className: 'text-center' },
     { key: 'feedback', label: 'Feedback' },
     { key: 'actions', label: 'Actions', className: 'text-right' },
-  ];
+  ], []);
 
-  const tableRows = (students || []).map(student => ({
+  const tableRows = useMemo(() => (students || []).map(student => ({
     id: student.id,
     cells: [
       { key: 'name', content: student.name, className: 'font-medium' },
       { key: 'score', content: student.score ?? 'N/A', className: 'text-center' },
-      { 
-        key: 'feedback', 
+      {
+        key: 'feedback',
         content: student.feedback || 'No feedback',
         className: 'text-muted-foreground truncate max-w-xs',
       },
@@ -84,7 +92,7 @@ export function TeacherGradeManagementPage() {
             <Button
               variant="outline"
               size="icon"
-              onClick={() => setEditingStudent(student)}
+              onClick={() => handleEditStudent(student)}
               aria-label={`Edit grade for ${student.name}`}
             >
               <Edit className="h-4 w-4" />
@@ -94,7 +102,7 @@ export function TeacherGradeManagementPage() {
         className: 'text-right',
       },
     ],
-  }));
+  })), [students, handleEditStudent]);
 
   return (
     <SlideUp className="space-y-6">
@@ -108,7 +116,7 @@ export function TeacherGradeManagementPage() {
           {isLoadingClasses ? (
             <Skeleton className="h-10 w-full md:w-[280px]" />
           ) : (
-            <Select onValueChange={setSelectedClass}>
+            <Select onValueChange={handleSetSelectedClass}>
               <SelectTrigger className="w-full md:w-[280px]">
                 <SelectValue placeholder="Select class..." />
               </SelectTrigger>
