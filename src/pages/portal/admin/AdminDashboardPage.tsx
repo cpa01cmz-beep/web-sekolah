@@ -4,6 +4,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { EmptyState } from '@/components/ui/empty-state';
 import { DashboardSkeleton } from '@/components/ui/loading-skeletons';
 import { PageHeader } from '@/components/PageHeader';
+import { DashboardStatCard } from '@/components/dashboard/DashboardStatCard';
 import { Users, GraduationCap, School, Megaphone, Activity, AlertTriangle, Inbox } from 'lucide-react';
 import { SlideUp } from '@/components/animations';
 import { useReducedMotion } from '@/hooks/use-reduced-motion';
@@ -107,10 +108,26 @@ export function AdminDashboardPage() {
   }
 
   const stats = [
-    { title: 'Total Students', value: data.totalStudents.toString(), icon: <Users className="h-6 w-6 text-blue-500" /> },
-    { title: 'Total Teachers', value: data.totalTeachers.toString(), icon: <GraduationCap className="h-6 w-6 text-green-500" /> },
-    { title: 'Total Parents', value: data.totalParents.toString(), icon: <School className="h-6 w-6 text-purple-500" /> },
-    { title: 'Total Classes', value: data.totalClasses.toString(), icon: <Megaphone className="h-6 w-6 text-orange-500" /> },
+    {
+      title: 'Total Students',
+      value: data.totalStudents.toString(),
+      icon: <Users className="h-6 w-6 text-blue-500" />,
+    },
+    {
+      title: 'Total Teachers',
+      value: data.totalTeachers.toString(),
+      icon: <GraduationCap className="h-6 w-6 text-green-500" />,
+    },
+    {
+      title: 'Total Parents',
+      value: data.totalParents.toString(),
+      icon: <School className="h-6 w-6 text-purple-500" />,
+    },
+    {
+      title: 'Total Classes',
+      value: data.totalClasses.toString(),
+      icon: <Megaphone className="h-6 w-6 text-orange-500" />,
+    },
   ];
 
   const enrollmentData = [
@@ -131,15 +148,11 @@ export function AdminDashboardPage() {
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         {stats.map((stat) => (
           <SlideUp key={stat.title} delay={stats.indexOf(stat) * 0.1 + 0.2} style={prefersReducedMotion ? { opacity: 1 } : {}}>
-            <Card className="hover:shadow-lg transition-shadow duration-200">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">{stat.title}</CardTitle>
-                {stat.icon}
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{stat.value}</div>
-              </CardContent>
-            </Card>
+            <DashboardStatCard
+              title={stat.title}
+              value={stat.value}
+              icon={stat.icon}
+            />
           </SlideUp>
         ))}
       </div>
