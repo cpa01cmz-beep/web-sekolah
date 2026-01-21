@@ -45,7 +45,7 @@ export function createTimeoutMiddleware(defaultTimeout: number = DEFAULT_TIMEOUT
   };
 }
 
-export const defaultTimeout = createTimeoutMiddleware(EndpointTimeout.ADMIN.STANDARD); // 30 seconds
+export const defaultTimeout = createTimeoutMiddleware(EndpointTimeout.ADMIN.STANDARD); // 15 seconds
 export const shortTimeout = createTimeoutMiddleware(EndpointTimeout.QUERY.STANDARD); // 5 seconds
 export const longTimeout = createTimeoutMiddleware(EndpointTimeout.ADMIN.COMPLEX); // 30 seconds
 export const veryLongTimeout = createTimeoutMiddleware(EndpointTimeout.SYSTEM.REBUILD_INDEXES); // 60 seconds
