@@ -13,7 +13,7 @@ import { withErrorHandler } from './routes/route-utils';
 import type { Context } from 'hono';
 
 export function authRoutes(app: Hono<{ Bindings: Env }>) {
-  app.get('/api/auth/verify', optionalAuthenticate(), async (c) => {
+  app.get('/api/auth/verify', withErrorHandler('verify auth token')(async (c: Context) => {
     const user = getAuthUser(c);
 
     if (!user) {
@@ -38,7 +38,7 @@ export function authRoutes(app: Hono<{ Bindings: Env }>) {
       childId: roleFields.childId,
       studentIdNumber: roleFields.studentIdNumber,
     });
-  });
+  }));
 
   app.post('/api/auth/login', withErrorHandler('login user')(async (c: Context) => {
     const body = await c.req.json();

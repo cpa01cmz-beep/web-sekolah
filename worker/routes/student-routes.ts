@@ -4,7 +4,7 @@ import { ok, notFound } from '../core-utils';
 import type { StudentDashboardData, StudentCardData } from "@shared/types";
 import { GRADE_A_THRESHOLD, GRADE_B_THRESHOLD, GRADE_C_THRESHOLD, PASSING_SCORE_THRESHOLD, GRADE_PRECISION_FACTOR } from '../constants';
 import { GradeService, CommonDataService, StudentDashboardService } from '../domain';
-import { withUserValidation } from './route-utils';
+import { withUserValidation, withErrorHandler } from './route-utils';
 import type { Context } from 'hono';
 
 export function studentRoutes(app: Hono<{ Bindings: Env }>) {
