@@ -5,6 +5,7 @@ This guide helps you get started with Akademia Pro for common use cases. For com
 ## Table of Contents
 
 - [Setting Up for the First Time](#setting-up-for-the-first-time)
+- [PPDB (New Student Admission)](#ppdb-new-student-admission)
 - [Student Portal](#student-portal)
 - [Teacher Portal](#teacher-portal)
 - [Parent Portal](#parent-portal)
@@ -55,6 +56,42 @@ This guide helps you get started with Akademia Pro for common use cases. For com
 | Teacher | `teacher@example.com` | `password123` |
 | Parent | `parent@example.com` | `password123` |
 | Admin | `admin@example.com` | `password123` |
+
+---
+
+## PPDB (New Student Admission)
+
+Prospective students can apply for admission online without logging in.
+
+### Applying for Admission
+
+1. Navigate to `/ppdb` on the website (no login required)
+2. Fill in the application form with:
+   - Student's full name
+   - Student ID number (NISN)
+   - Email address
+   - Phone number
+3. Submit the form
+4. You will receive a confirmation email with next steps
+
+### Admission Information
+
+**Schedule** (2025/2026 Academic Year):
+- Online Registration: December 1, 2025 - January 31, 2026
+- Selection Test: February 15, 2026
+- Results Announcement: March 1, 2026
+- Re-registration: March 5-10, 2026
+
+**Requirements**:
+- Birth certificate photocopy (2 copies)
+- Family card photocopy (2 copies)
+- 3x4 photo (4 copies)
+- Graduation certificate from previous school
+- Report cards for semesters 1-5 (certified copies)
+
+**Contact Information**:
+- Phone: (021) 123-4567
+- Email: ppdb@akademia.pro
 
 ---
 
