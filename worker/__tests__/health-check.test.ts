@@ -209,14 +209,14 @@ describe('External Service Health Check', () => {
         new Promise((_, reject) =>
           setTimeout(() =>
             reject(new Error('Timeout')),
-            50
+            100
           )
         )
       ) as any;
 
       const result = await ExternalServiceHealth.checkWebhookService('https://example.com/webhook');
 
-      expect(result.latency).toBeGreaterThanOrEqual(50);
+      expect(result.latency).toBeGreaterThanOrEqual(90);
     });
   });
 });
