@@ -24,7 +24,9 @@ export function LoginPage() {
 
   const handleLogin = async (role: UserRole) => {
     setShowValidationErrors(true);
-    if (!email || !password || validateEmail(email, showValidationErrors) || validatePassword(password, showValidationErrors)) {
+    const emailError = validateEmail(email, true);
+    const passwordError = validatePassword(password, true);
+    if (!email || !password || emailError || passwordError) {
       return;
     }
 
@@ -42,6 +44,9 @@ export function LoginPage() {
       setIsLoading(null);
     }
   };
+
+  const emailError = validateEmail(email, showValidationErrors);
+  const passwordError = validatePassword(password, showValidationErrors);
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-4" style={{ backgroundColor: THEME_COLORS.BACKGROUND }}>
@@ -71,7 +76,7 @@ export function LoginPage() {
                 label="Email"
                 helperText="Enter your registered email address"
                 required
-                error={validateEmail(email, showValidationErrors)}
+                error={emailError}
               >
                 <Input
                   id="email"
@@ -82,8 +87,8 @@ export function LoginPage() {
                   required
                   disabled={!!isLoading}
                   aria-required="true"
-                  aria-invalid={!!validateEmail(email, showValidationErrors)}
-                  aria-describedby={validateEmail(email, showValidationErrors) ? 'email-error' : 'email-helper'}
+                  aria-invalid={!!emailError}
+                  aria-describedby={emailError ? 'email-error' : 'email-helper'}
                 />
               </FormField>
               <FormField
@@ -91,7 +96,7 @@ export function LoginPage() {
                 label="Password"
                 helperText="Enter your password"
                 required
-                error={validatePassword(password, showValidationErrors)}
+                error={passwordError}
               >
                 <Input
                   id="password"
@@ -102,8 +107,8 @@ export function LoginPage() {
                   required
                   disabled={!!isLoading}
                   aria-required="true"
-                  aria-invalid={!!validatePassword(password, showValidationErrors)}
-                  aria-describedby={validatePassword(password, showValidationErrors) ? 'password-error' : 'password-helper'}
+                  aria-invalid={!!passwordError}
+                  aria-describedby={passwordError ? 'password-error' : 'password-helper'}
                 />
               </FormField>
             </CardContent>
