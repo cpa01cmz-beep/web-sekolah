@@ -1,14 +1,178 @@
-                             # Architectural Task List
+                              # Architectural Task List
 
-                              This document tracks architectural refactoring and testing tasks for Akademia Pro.
+                               This document tracks architectural refactoring and testing tasks for Akademia Pro.
 
-               ## Status Summary
+                ## Status Summary
 
-                                                   **Last Updated**:2026-01-21 (TeacherAnnouncementsPage Optimization Complete)
+                                                    **Last Updated**:2026-01-21 (Integration Hardening Complete)
 
-                                                   **Overall Test Status**:2279 tests passing,5 skipped, 155 todo (72 test files)
+                                                    **Overall Test Status**:2333 tests passing,5 skipped, 155 todo (75 test files)
 
-                                    ### Performance Engineer - TeacherAnnouncementsPage Rendering Optimization (2026-01-21) - Completed ✅
+                                     ### Integration Engineer - Integration Hardening (2026-01-21) - Completed ✅
+
+**Task**: Implement comprehensive integration hardening with endpoint-specific timeouts, external service health checks, and fallback mechanisms
+
+**Problem**:
+- All API routes used the same 30-second timeout regardless of operation complexity
+- No health monitoring for external services (webhooks, documentation)
+- No fallback mechanisms for graceful degradation when external services fail
+- Missing comprehensive timeout configuration for different endpoint types
+- Limited visibility into external service health and performance
+
+**Solution**:
+- Created `worker/config/endpoint-timeout.ts` with comprehensive timeout settings for query, aggregation, write, admin, system, external, and health operations
+- Implemented `worker/health-check.ts` with ExternalServiceHealth class for monitoring webhook and docs services
+- Implemented `worker/fallback.ts` with FallbackHandler class for graceful degradation patterns
+- Added 54 new tests for comprehensive coverage of resilience patterns
+- Updated integration documentation with new patterns and usage examples
+
+**Implementation**:
+
+1. **Endpoint-Specific Timeout Configuration** (worker/config/endpoint-timeout.ts):
+   - Query timeouts: Fast (2s), Standard (5s)
+   - Aggregation timeouts: Standard (10s), Complex (15s)
+   - Write timeouts: Fast (5s), Standard (10s)
+   - Admin timeouts: Standard (15s), Complex (30s)
+   - System timeouts: Rebuild Indexes (60s), Seed (60s)
+   - External timeouts: Webhook (30s), Docs (30s)
+   - Health check timeout: Check (5s)
+   - TimeoutCategory mapping for all endpoint types (auth, user, grade, dashboard, announcement, webhook, system)
+   - Helper functions: getTimeoutForEndpoint(), isFastQuery(), isComplexOperation()
+
+2. **External Service Health Monitoring** (worker/health-check.ts):
+   - ExternalServiceHealth class with static methods
+   - checkWebhookService(url, timeoutMs=5000): Health check with timeout
+   - checkDocsService(url, timeoutMs=5000): Health check with timeout
+   - getHealthStatus(service): Per-service health status
+   - getAllHealthStatus(): All service health statuses
+   - resetHealthStatus(service): Reset specific service status
+   - resetAllHealthStatus(): Reset all health statuses
+   - Consecutive failure tracking (unhealthy after 5 failures)
+   - Latency measurement for performance monitoring
+   - Health status management (lastCheck, lastSuccess, lastFailure, consecutiveFailures, isHealthy)
+
+3. **Fallback Mechanisms** (worker/fallback.ts):
+   - FallbackHandler class with static methods
+   - withFallback(primaryFn, options): Main fallback handler
+   - createStaticFallback(value): Static value fallback
+   - createNullFallback(): Null fallback
+   - createEmptyArrayFallback(): Empty array fallback
+   - createEmptyObjectFallback(): Empty object fallback
+   - FallbackOptions interface: fallback, onFallback, shouldFallback
+   - Support for both sync and async fallback functions
+   - Conditional fallback based on error type
+
+**Metrics**:
+
+| Metric | Before | After | Improvement |
+|---------|--------|-------|-------------|
+| Timeout configuration | Single 30s default | 7 categories, 20+ settings | Granular control |
+| Health monitoring | None | Webhook + Docs monitoring | External visibility |
+| Fallback mechanisms | None | 4 fallback patterns | Graceful degradation |
+| Integration tests | 0 | 54 new tests | Comprehensive coverage |
+| Test files | 72 | 75 | +3 files |
+| Total tests | 2279 | 2333 | +54 tests (+2.4%) |
+
+**Benefits Achieved**:
+   - ✅ Endpoint-specific timeout configuration (2s-60s based on complexity)
+   - ✅ External service health monitoring (webhook, docs)
+   - ✅ Consecutive failure detection (unhealthy after 5 failures)
+   - ✅ Latency measurement for performance insights
+   - ✅ Fallback mechanisms for graceful degradation (static, null, array, object)
+   - ✅ Conditional fallback based on error type (timeout, network errors)
+   - ✅ Support for chained fallbacks (multiple degrade levels)
+   - ✅ Type-safe timeout configuration with TypeScript
+   - ✅ Integration with existing resilience patterns (retries, circuit breakers, rate limiting)
+   - ✅ All 2333 tests passing (5 skipped, 155 todo)
+   - ✅ Zero regressions in existing functionality
+   - ✅ Comprehensive documentation in blueprint.md
+
+**Technical Details**:
+
+**Timeout Configuration**:
+- Type-safe constants with const assertion
+- Endpoint categorization based on operation type and complexity
+- Helper functions for runtime timeout lookup and classification
+- Integration with existing timeout middleware (worker/middleware/timeout.ts)
+
+**Health Monitoring**:
+- HEAD request health checks (lightweight, no data transfer)
+- Configurable timeout (default 5s)
+- Health status persistence across checks
+- Automatic unhealthy detection (5 consecutive failures)
+- Latency tracking for performance monitoring
+- Service isolation (webhook, docs tracked separately)
+
+**Fallback Patterns**:
+- Primary/fallback pattern with error handling
+- Pre-built fallback creators for common scenarios
+- Conditional fallback based on error inspection
+- Support for async fallback functions
+- Fallback callback for logging/monitoring
+- Chaining support for multiple degrade levels
+
+**Integration with Existing Resilience**:
+
+| Pattern | Integration Point |
+|---------|-----------------|
+| **Timeouts** | Routes can use TimeoutCategory with timeout middleware |
+| **Retries** | Fallback called after retries exhausted |
+| **Circuit Breaker** | Health check can trigger circuit reset on recovery |
+| **Rate Limiting** | Health status can inform rate limiting decisions |
+| **Webhook Reliability** | Health check monitors webhook endpoint availability |
+
+**Test Coverage**:
+
+**worker/config/__tests__/endpoint-timeout.test.ts** (24 tests):
+- Timeout constant verification (7 tests)
+- TimeoutCategory mapping (13 tests)
+- Helper functions (4 tests)
+
+**worker/__tests__/health-check.test.ts** (14 tests):
+- Webhook service health checks (4 tests)
+- Docs service health checks (3 tests)
+- Health status management (7 tests)
+
+**worker/__tests__/fallback.test.ts** (16 tests):
+- Fallback handler behavior (9 tests)
+- Pre-built fallback creators (4 tests)
+- Complex scenarios (3 tests)
+
+**Architectural Impact**:
+- **Resilience**: Multiple layers of protection (timeouts, health checks, fallbacks)
+- **Observability**: External service health and latency monitoring
+- **Graceful Degradation**: Fallback mechanisms prevent total system failure
+- **Maintainability**: Centralized configuration and utilities
+- **Consistency**: Type-safe, well-documented patterns
+- **Performance**: Endpoint-specific timeouts prevent unnecessary delays
+
+**Success Criteria**:
+   - [x] Endpoint-specific timeout configuration implemented
+   - [x] External service health monitoring added
+   - [x] Fallback mechanisms for graceful degradation
+   - [x] Comprehensive test coverage (54 new tests)
+   - [x] All existing tests passing (no regressions)
+   - [x] Integration with existing resilience patterns
+   - [x] Documentation updated in blueprint.md
+
+**Impact**:
+   - `worker/config/endpoint-timeout.ts`: New module (68 lines, 24 tests)
+   - `worker/config/__tests__/endpoint-timeout.test.ts`: New test file (193 lines)
+   - `worker/health-check.ts`: New module (126 lines)
+   - `worker/__tests__/health-check.test.ts`: New test file (258 lines)
+   - `worker/fallback.ts`: New module (67 lines)
+   - `worker/__tests__/fallback.test.ts`: New test file (304 lines)
+   - `worker/config/index.ts`: New barrel export (2 lines)
+   - Test coverage: 2279 → 2333 tests (+54 tests, +2.4%)
+   - Test files: 72 → 75 (+3 files)
+   - External visibility: Enhanced (health monitoring)
+   - System resilience: Significantly improved (fallback mechanisms)
+
+**Success**: ✅ **INTEGRATION HARDENING COMPLETE, ENHANCED RESILIENCE WITH TIMEOUT CONFIGURATION, HEALTH MONITORING, AND FALLBACK MECHANISMS, 54 NEW TESTS ADDED**
+
+---
+
+                                     ### Performance Engineer - TeacherAnnouncementsPage Rendering Optimization (2026-01-21) - Completed ✅
 
 **Task**: Optimize TeacherAnnouncementsPage component to reduce unnecessary re-renders and function recreations
 

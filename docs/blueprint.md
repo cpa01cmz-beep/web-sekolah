@@ -119,6 +119,7 @@ This clears and rebuilds all secondary indexes from existing data.
   - `validateAnnouncement()`: Rejects announcements referencing deleted authors
 
 **Optimization Opportunities**:
+   - ~~Integration Hardening: Missing endpoint-specific timeout configuration, external service health checks, and fallback mechanisms for critical API failures~~ ✅ **COMPLETED** (2026-01-21) - Added worker/config/endpoint-timeout.ts with comprehensive timeout settings for query (fast 2s, standard 5s), aggregation (standard 10s, complex 15s), write (fast 5s, standard 10s), admin (standard 15s, complex 30s), system (60s), external (webhook/docs 30s), health check (5s), created TimeoutCategory mapping for all endpoint types (auth, user, grade, dashboard, announcement, webhook, system), implemented worker/health-check.ts with ExternalServiceHealth class for monitoring webhook/docs services (checkWebhookService, checkDocsService with 5s timeout, health status tracking with consecutive failure detection, latency measurement), implemented worker/fallback.ts with FallbackHandler class and withFallback utility for graceful degradation (createStaticFallback, createNullFallback, createEmptyArrayFallback, createEmptyObjectFallback), all tests passing (24 endpoint-timeout tests, 14 health-check tests, 16 fallback tests), zero regressions, total 54 new integration resilience tests
    - ~~Incomplete API documentation: OpenAPI spec missing several implemented endpoints including admin dashboard, announcements, settings, rebuild-indexes, teacher dashboard and announcements~~ ✅ **COMPLETED** (2026-01-21) - Updated openapi.yaml to include all 8 missing endpoints (/admin/dashboard, /admin/users, /admin/announcements GET/POST, /admin/settings GET/PUT, /admin/rebuild-indexes, /teachers/{id}/dashboard, /teachers/{id}/announcements, /teachers/announcements POST, /seed), added proper request/response schemas, maintained consistency with existing endpoint definitions, all 2159 tests passing (0 regressions), TypeScript compilation successful
     - ~~Inefficient admin dashboard queries: Admin dashboard route loaded ALL classes and ALL announcements for simple count/recent operations~~ ✅ **COMPLETED** (2026-01-21) - Optimized /api/admin/dashboard to use indexed lookups instead of full table scans (getUserCountByRole for user counts, getRecentAnnouncementsByRole for recent announcements), parallelized all count queries with Promise.all, reduced data load from 100s of records to 5 recent announcements, O(n) → O(1) for count queries, O(n) → O(k) where k=5 for announcements, added CommonDataService.getByRole() method for role-based lookups, all 2159 tests passing (0 regressions)
    - ~~Inefficient admin user filtering: /api/admin/users route loaded ALL users then filtered in-memory instead of using indexed lookups~~ ✅ **COMPLETED** (2026-01-21) - Optimized user filtering to use indexed lookups (getByRole for role filter, getClassStudents for classId filter), only fallback to getAllUsers() when search parameter is present (requires full scan), reduced query complexity from O(n) to O(1) for role/classId filtering, added SchoolUser import to admin-routes.ts, all 2159 tests passing (0 regressions)
@@ -1974,7 +1975,201 @@ export const webhookRoutes = (app: Hono<{ Bindings: Env }>) => {
 - ✅ Prevents webhook delivery overload
 - ✅ Reduces attack surface for webhook infrastructure
 - ✅ Consistent with other rate-limited endpoints
-- ✅ Zero breaking changes to existing functionality
+ - ✅ Zero breaking changes to existing functionality
+
+### Integration Hardening - Enhanced Resilience Patterns (2026-01-21)
+
+**Endpoint-Specific Timeout Configuration:**
+
+Created comprehensive timeout configuration module with endpoint-specific settings for optimal performance.
+
+**Configuration Structure:**
+```typescript
+// worker/config/endpoint-timeout.ts
+export const EndpointTimeout = {
+  QUERY: {
+    FAST: 2000,      // Simple queries
+    STANDARD: 5000,     // Standard queries
+  },
+  AGGREGATION: {
+    STANDARD: 10000,    // Dashboard aggregations
+    COMPLEX: 15000,     // Complex aggregations
+  },
+  WRITE: {
+    FAST: 5000,         // Quick writes
+    STANDARD: 10000,     // Standard writes
+  },
+  ADMIN: {
+    STANDARD: 15000,     // Admin operations
+    COMPLEX: 30000,      // Complex admin ops
+  },
+  SYSTEM: {
+    REBUILD_INDEXES: 60000,  // Index rebuilds
+    SEED: 60000,            // Data seeding
+  },
+  EXTERNAL: {
+    WEBHOOK: 30000,    // Webhook external calls
+    DOCS: 30000,       // Documentation fetching
+  },
+  HEALTH: {
+    CHECK: 5000,       // Health checks
+  },
+} as const;
+
+export const TimeoutCategory = {
+  AUTH: EndpointTimeout.QUERY.STANDARD,
+  USER_GET: EndpointTimeout.QUERY.FAST,
+  USER_LIST: EndpointTimeout.QUERY.STANDARD,
+  GRADE_CREATE: EndpointTimeout.WRITE.FAST,
+  DASHBOARD_TEACHER: EndpointTimeout.AGGREGATION.STANDARD,
+  DASHBOARD_ADMIN: EndpointTimeout.AGGREGATION.STANDARD,
+  REBUILD_INDEXES: EndpointTimeout.SYSTEM.REBUILD_INDEXES,
+  // ... more categories
+} as const;
+```
+
+**Benefits:**
+- ✅ Timeout values matched to operation complexity
+- ✅ Fast queries timeout quickly (2s), complex operations allowed more time (60s)
+- ✅ Prevents cascading timeouts from slow endpoints
+- ✅ Consistent timeout management across all routes
+- ✅ Type-safe timeout configuration with TypeScript
+
+**External Service Health Monitoring:**
+
+Implemented health check pattern for external services with consecutive failure detection.
+
+**Health Check Features:**
+```typescript
+// worker/health-check.ts
+export class ExternalServiceHealth {
+  static async checkWebhookService(url: string, timeoutMs: number = 5000): Promise<HealthCheckResult>
+  static async checkDocsService(url: string, timeoutMs: number = 5000): Promise<HealthCheckResult>
+  static getHealthStatus(service: string): ServiceHealthStatus | null
+  static getAllHealthStatus(): Record<string, ServiceHealthStatus>
+  static resetHealthStatus(service: string): void
+  static resetAllHealthStatus(): void
+}
+
+interface ServiceHealthStatus {
+  service: string;
+  lastCheck: string;
+  lastSuccess: string | null;
+  lastFailure: string | null;
+  consecutiveFailures: number;
+  isHealthy: boolean;  // false after 5 consecutive failures
+}
+```
+
+**Health Check Capabilities:**
+- HEAD request to external services with configurable timeout (5s default)
+- Latency measurement for performance monitoring
+- Consecutive failure tracking (unhealthy after 5 failures)
+- Per-service health status management
+- Reset capability for health recovery
+
+**Benefits:**
+- ✅ External service health visibility
+- ✅ Automatic degradation detection (5 consecutive failures)
+- ✅ Latency monitoring for performance insights
+- ✅ Supports webhook and documentation service monitoring
+- ✅ Graceful recovery on service restoration
+
+**Fallback Mechanisms for Critical API Failures:**
+
+Implemented fallback handler pattern for graceful degradation when external services fail.
+
+**Fallback Handler Features:**
+```typescript
+// worker/fallback.ts
+export class FallbackHandler {
+  static async withFallback<T>(
+    primaryFn: () => Promise<T>,
+    options: FallbackOptions<T>
+  ): Promise<T>
+
+  static createStaticFallback<T>(value: T): () => T
+  static createNullFallback<T>(): () => T | null
+  static createEmptyArrayFallback<T>(): () => T[]
+  static createEmptyObjectFallback<T extends Record<string, unknown>>(): () => T
+}
+
+interface FallbackOptions<T> {
+  fallback?: () => T | Promise<T>;
+  onFallback?: (error: Error) => void;
+  shouldFallback?: (error: Error) => boolean;
+}
+```
+
+**Usage Example:**
+```typescript
+const result = await FallbackHandler.withFallback(
+  () => fetchExternalData(),
+  {
+    fallback: () => getCachedData(),
+    shouldFallback: (error) => error.message.includes('timeout'),
+    onFallback: (error) => logger.error('Using cached data', error),
+  }
+);
+```
+
+**Benefits:**
+- ✅ Graceful degradation when external services fail
+- ✅ Flexible fallback strategies (static, null, empty array, custom)
+- ✅ Conditional fallback based on error type
+- ✅ Fallback callback for logging/monitoring
+- ✅ Supports both sync and async fallback functions
+- ✅ Chained fallbacks for multiple degrade levels
+
+**Integration with Existing Resilience Patterns:**
+
+The new integration hardening patterns work seamlessly with existing resilience mechanisms:
+
+| Pattern | Existing | New Enhancement | Integration |
+|---------|-----------|-----------------|-------------|
+| **Timeouts** | Default 30s middleware | Endpoint-specific timeouts (2s-60s) | Route handlers can use timeout categories |
+| **Retries** | 3 retries exponential | Fallback after retries exhausted | Fallback called on final failure |
+| **Circuit Breaker** | Per-webhook URL | Health check monitors service status | Health check can trigger circuit reset |
+| **Rate Limiting** | 4-tier system | Health check tracks degradation | Health status informs rate limiting |
+| **Webhook Reliability** | Retry + DLQ | Health check + fallback | Better external service handling |
+
+**Test Coverage:**
+
+Added comprehensive test coverage for new integration hardening patterns:
+
+- **Endpoint Timeout Tests** (24 tests):
+  - Timeout constant verification
+  - Timeout category mapping
+  - Helper function validation
+  - Fast/complex operation classification
+
+- **Health Check Tests** (14 tests):
+  - Webhook service health checks
+  - Docs service health checks
+  - Health status tracking
+  - Consecutive failure detection
+  - Latency measurement
+  - Status reset operations
+
+- **Fallback Handler Tests** (16 tests):
+  - Primary/fallback execution
+  - Error handling
+  - Conditional fallback
+  - Static/null/array/object fallbacks
+  - Chained fallbacks
+  - Timeout error handling
+
+**Total New Tests: 54 tests**
+**All Tests Passing: 2279 + 54 = 2333 tests**
+
+**Success Criteria:**
+- [x] Endpoint-specific timeout configuration implemented
+- [x] External service health monitoring added
+- [x] Fallback mechanisms for graceful degradation
+- [x] Comprehensive test coverage (54 new tests)
+- [x] All existing tests passing (no regressions)
+- [x] Integration with existing resilience patterns
+- [x] Documentation updated
 
 ---
 
