@@ -71,38 +71,30 @@ export function LinksDownloadPage() {
             <div className="mt-16">
               <h2 className="text-3xl font-bold text-foreground mb-6">Materi Pembelajaran</h2>
               <div className="grid md:grid-cols-3 gap-6">
-                <div className="bg-card rounded-lg shadow-sm p-6">
-                  <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
-                    <span className="text-blue-600 font-bold">PDF</span>
-                  </div>
-                  <h3 className="font-bold mb-2">Modul Matematika Kelas X</h3>
-                  <p className="text-sm text-muted-foreground mb-4">Materi lengkap semester ganjil</p>
-                  <button className="w-full px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm hover:bg-primary/90 transition-colors">
-                    Download
-                  </button>
-                </div>
-
-                <div className="bg-card rounded-lg shadow-sm p-6">
-                  <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
-                    <span className="text-green-600 font-bold">PDF</span>
-                  </div>
-                  <h3 className="font-bold mb-2">Modul Bahasa Indonesia Kelas XI</h3>
-                  <p className="text-sm text-muted-foreground mb-4">Materi lengkap semester ganjil</p>
-                  <button className="w-full px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm hover:bg-primary/90 transition-colors">
-                    Download
-                  </button>
-                </div>
-
-                <div className="bg-card rounded-lg shadow-sm p-6">
-                  <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-4">
-                    <span className="text-purple-600 font-bold">PDF</span>
-                  </div>
-                  <h3 className="font-bold mb-2">Modul IPA Kelas XII</h3>
-                  <p className="text-sm text-muted-foreground mb-4">Materi lengkap semester ganjil</p>
-                  <button className="w-full px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm hover:bg-primary/90 transition-colors">
-                    Download
-                  </button>
-                </div>
+                <DownloadCard
+                  title="Modul Matematika Kelas X"
+                  fileFormat="PDF"
+                  fileSize="2.4 MB"
+                  description="Materi lengkap semester ganjil"
+                  variant="vertical"
+                  iconColor="blue"
+                />
+                <DownloadCard
+                  title="Modul Bahasa Indonesia Kelas XI"
+                  fileFormat="PDF"
+                  fileSize="1.8 MB"
+                  description="Materi lengkap semester ganjil"
+                  variant="vertical"
+                  iconColor="green"
+                />
+                <DownloadCard
+                  title="Modul IPA Kelas XII"
+                  fileFormat="PDF"
+                  fileSize="3.2 MB"
+                  description="Materi lengkap semester ganjil"
+                  variant="vertical"
+                  iconColor="purple"
+                />
               </div>
             </div>
           </SlideUp>
