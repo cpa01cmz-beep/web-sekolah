@@ -6,6 +6,8 @@ import { rebuildAllIndexes } from "../index-rebuilder";
 import type { CreateUserData, UpdateUserData, Announcement, CreateAnnouncementData, AdminDashboardData, Settings } from "@shared/types";
 import { UserService, CommonDataService, AnnouncementService } from '../domain';
 import { withAuth, withErrorHandler, triggerWebhookSafely } from './route-utils';
+import { validateBody } from '../middleware/validation';
+import { createAnnouncementSchema } from '../middleware/schemas';
 import { getCurrentUserId } from '../type-guards';
 import type { Context } from 'hono';
 
@@ -77,8 +79,8 @@ export function adminRoutes(app: Hono<{ Bindings: Env }>) {
     return ok(c, announcements);
   });
 
-  app.post('/api/admin/announcements', ...withAuth('admin'), withErrorHandler('create announcement')(async (c: Context) => {
-    const announcementData = await c.req.json<CreateAnnouncementData>();
+  app.post('/api/admin/announcements', ...withAuth('admin'), validateBody(createAnnouncementSchema), withErrorHandler('create announcement')(async (c: Context) => {
+    const announcementData = c.get('validatedBody') as CreateAnnouncementData;
     const authorId = getCurrentUserId(c);
     const newAnnouncement = await AnnouncementService.createAnnouncement(c.env, announcementData, authorId);
     triggerWebhookSafely(c.env, 'announcement.created', newAnnouncement, { announcementId: newAnnouncement.id });

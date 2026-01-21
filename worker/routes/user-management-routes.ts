@@ -4,8 +4,8 @@ import { ok, bad, notFound } from '../core-utils';
 import type { CreateUserData, UpdateUserData, Grade } from "@shared/types";
 import { UserService, CommonDataService, GradeService } from '../domain';
 import { withAuth, withErrorHandler, triggerWebhookSafely } from './route-utils';
-import { validateBody } from '../middleware/validation';
-import { createUserSchema, updateUserSchema, createGradeSchema, updateGradeSchema } from '../middleware/schemas';
+import { validateBody, validateParams } from '../middleware/validation';
+import { createUserSchema, updateUserSchema, createGradeSchema, updateGradeSchema, paramsSchema } from '../middleware/schemas';
 import type { Context } from 'hono';
 
 export function userRoutes(app: Hono<{ Bindings: Env }>) {
@@ -21,8 +21,8 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
     return ok(c, newUser);
   });
 
-  app.put('/api/users/:id', ...withAuth('admin'), validateBody(updateUserSchema), withErrorHandler('update user')(async (c: Context) => {
-    const userId = c.req.param('id');
+  app.put('/api/users/:id', ...withAuth('admin'), validateParams(paramsSchema), validateBody(updateUserSchema), withErrorHandler('update user')(async (c: Context) => {
+    const { id: userId } = c.get('validatedParams') as { id: string };
     const userData = c.get('validatedBody') as UpdateUserData;
     const updatedUser = await UserService.updateUser(c.env, userId, userData);
     triggerWebhookSafely(c.env, 'user.updated', updatedUser, { userId });
@@ -30,8 +30,8 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
     return ok(c, userWithoutPassword);
   }));
 
-  app.delete('/api/users/:id', ...withAuth('admin'), async (c: Context) => {
-    const userId = c.req.param('id');
+  app.delete('/api/users/:id', ...withAuth('admin'), validateParams(paramsSchema), async (c: Context) => {
+    const { id: userId } = c.get('validatedParams') as { id: string };
     const user = await CommonDataService.getUserById(c.env, userId);
     const result = await UserService.deleteUser(c.env, userId);
     if (result.deleted && user) {
@@ -40,8 +40,8 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
     return ok(c, result);
   });
 
-  app.put('/api/grades/:id', ...withAuth('teacher'), validateBody(updateGradeSchema), withErrorHandler('update grade')(async (c: Context) => {
-    const gradeId = c.req.param('id');
+  app.put('/api/grades/:id', ...withAuth('teacher'), validateParams(paramsSchema), validateBody(updateGradeSchema), withErrorHandler('update grade')(async (c: Context) => {
+    const { id: gradeId } = c.get('validatedParams') as { id: string };
     const validatedData = c.get('validatedBody') as { score: number; feedback: string };
     const updatedGrade = await GradeService.updateGrade(c.env, gradeId, { score: validatedData.score, feedback: validatedData.feedback });
     triggerWebhookSafely(c.env, 'grade.updated', updatedGrade, { gradeId });

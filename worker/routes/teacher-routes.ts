@@ -6,6 +6,8 @@ import type { TeacherDashboardData, Announcement, CreateAnnouncementData, Submit
 
 import { GradeService, CommonDataService, AnnouncementService } from '../domain';
 import { withAuth, withUserValidation, withErrorHandler, triggerWebhookSafely } from './route-utils';
+import { validateBody } from '../middleware/validation';
+import { createGradeSchema, createAnnouncementSchema } from '../middleware/schemas';
 import { getCurrentUserId } from '../type-guards';
 import type { Context } from 'hono';
 
@@ -44,15 +46,15 @@ export function teacherRoutes(app: Hono<{ Bindings: Env }>) {
     return ok(c, filteredAnnouncements);
   });
 
-  app.post('/api/teachers/grades', ...withAuth('teacher'), withErrorHandler('create grade')(async (c: Context) => {
-    const gradeData = await c.req.json<SubmitGradeData>();
+  app.post('/api/teachers/grades', ...withAuth('teacher'), validateBody(createGradeSchema), withErrorHandler('create grade')(async (c: Context) => {
+    const gradeData = c.get('validatedBody') as SubmitGradeData;
     const newGrade = await GradeService.createGrade(c.env, gradeData);
     triggerWebhookSafely(c.env, 'grade.created', newGrade, { gradeId: newGrade.id });
     return ok(c, newGrade);
   }));
 
-  app.post('/api/teachers/announcements', ...withAuth('teacher'), withErrorHandler('create announcement')(async (c: Context) => {
-    const announcementData = await c.req.json<CreateAnnouncementData>();
+  app.post('/api/teachers/announcements', ...withAuth('teacher'), validateBody(createAnnouncementSchema), withErrorHandler('create announcement')(async (c: Context) => {
+    const announcementData = c.get('validatedBody') as CreateAnnouncementData;
     const authorId = getCurrentUserId(c);
     const newAnnouncement = await AnnouncementService.createAnnouncement(c.env, announcementData, authorId);
     triggerWebhookSafely(c.env, 'announcement.created', newAnnouncement, { announcementId: newAnnouncement.id });
