@@ -213,6 +213,60 @@ export function PortalLayout() {
 }
 ```
 
+### Dashboard Components
+
+Dashboard components provide reusable UI elements for displaying statistics and metrics across different portal dashboards.
+
+**DashboardStatCard**
+
+Reusable card component for displaying dashboard statistics with optional icons and subtitles.
+
+**When to Use:**
+- Displaying metrics (counts, totals, averages)
+- Dashboard overview sections
+- Statistical summaries across all portals
+
+**Usage:**
+
+```typescript
+import { DashboardStatCard } from '@/components/dashboard/DashboardStatCard'
+
+// Simple stat card
+<DashboardStatCard
+  title="Total Students"
+  value={data.totalStudents.toString()}
+  icon={<Users className="h-6 w-6 text-blue-500" />}
+/>
+
+// Stat card with subtitle and custom value size
+<DashboardStatCard
+  title="Your Classes"
+  value={data.totalClasses.toString()}
+  icon={<BookCopy className="h-4 w-4 text-muted-foreground" />}
+  subtitle={`Total students: ${data.totalStudents}`}
+  valueSize="3xl"
+/>
+```
+
+**Props:**
+
+| Prop | Type | Required | Default | Description |
+|------|------|----------|----------|-------------|
+| title | string | Yes | - | Card title/label |
+| value | string \| number | Yes | - | Primary value to display |
+| icon | React.ReactNode | No | - | Optional icon component |
+| subtitle | string | No | - | Optional subtitle text |
+| valueSize | '2xl' \| '3xl' | No | '2xl' | Size of the value text |
+| className | string | No | - | Additional Tailwind classes |
+
+**Best Practices:**
+- Use for consistency across dashboard pages (Admin, Teacher, Student, Parent)
+- Icons should use aria-hidden for accessibility
+- Subtitles provide context (e.g., "Total students: 25")
+- Use valueSize="3xl" for primary metrics, "2xl" for secondary metrics
+
+**Location:** `src/components/dashboard/DashboardStatCard.tsx`
+
 ---
 
 ## Adding Features

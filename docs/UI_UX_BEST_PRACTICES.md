@@ -151,6 +151,39 @@ className="mt-6 mb-6" // margin-top: 24px, margin-bottom: 24px
 </Button>
 ```
 
+#### Dashboard Stat Card Pattern
+
+**Purpose**: Consistent display of statistics and metrics across dashboard pages (Admin, Teacher, Student, Parent).
+
+**Accessibility**: Icons marked with `aria-hidden` for screen readers. Subtitles provide additional context.
+
+```tsx
+import { DashboardStatCard } from '@/components/dashboard/DashboardStatCard'
+
+// Simple stat card (default valueSize: 2xl)
+<DashboardStatCard
+  title="Total Students"
+  value={data.totalStudents.toString()}
+  icon={<Users className="h-6 w-6 text-blue-500" />}
+/>
+
+// Complex stat card with subtitle and larger value
+<DashboardStatCard
+  title="Your Classes"
+  value={data.totalClasses.toString()}
+  icon={<BookCopy className="h-4 w-4 text-muted-foreground" />}
+  subtitle={`Total students: ${data.totalStudents}`}
+  valueSize="3xl"
+/>
+```
+
+**Best Practices**:
+- Use `valueSize="3xl"` for primary metrics (main dashboard numbers)
+- Use `valueSize="2xl"` for secondary metrics (supporting statistics)
+- Subtitles provide context (e.g., "Total students: 25")
+- Icons use muted-foreground color for non-primary visual elements
+- Consistent hover effects (`hover:shadow-lg`) across all stat cards
+
 ---
 
 ## Responsive Design Breakpoints

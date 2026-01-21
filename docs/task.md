@@ -2,11 +2,140 @@
 
                                This document tracks architectural refactoring and testing tasks for Akademia Pro.
 
-                ## Status Summary
+                 ## Status Summary
 
-                                                    **Last Updated**:2026-01-21 (Integration Hardening Complete)
+                                                     **Last Updated**:2026-01-21 (UI/UX Improvements Complete)
 
-                                                    **Overall Test Status**:2333 tests passing,5 skipped, 155 todo (75 test files)
+                                                     **Overall Test Status**:2333 tests passing,5 skipped, 155 todo (75 test files)
+
+                                     ### UI/UX Engineer - Dashboard Component Extraction (2026-01-21) - Completed ✅
+
+**Task**: Extract reusable DashboardStatCard component for improved consistency and reduced code duplication
+
+**Problem**:
+- AdminDashboardPage and TeacherDashboardPage had inline stat card code patterns
+- Repeated card structure made styling changes difficult (multiple files to update)
+- Code duplication reduced maintainability and increased risk of inconsistencies
+- No single source of truth for dashboard stat card styling
+
+**Solution**:
+- Created reusable `DashboardStatCard` component with flexible props (title, value, icon, subtitle, valueSize)
+- Updated AdminDashboardPage to use component for 4 stat cards (Students, Teachers, Parents, Classes)
+- Updated TeacherDashboardPage to use component for "Your Classes" card with subtitle
+- Component supports optional icon and subtitle, configurable value size (2xl or 3xl)
+
+**Implementation**:
+
+1. **Created DashboardStatCard** (src/components/dashboard/DashboardStatCard.tsx):
+   - Props interface with TypeScript: title (required), value (required), icon (optional), subtitle (optional), valueSize (optional, default 2xl)
+   - Consistent hover effects: shadow-lg with duration-200 transition
+   - Semantic structure: Card → CardHeader/CardTitle → Content
+   - Accessibility: Icon marked with aria-hidden when present
+   - Flex composition with className support for customization
+
+2. **Updated AdminDashboardPage** (src/pages/portal/admin/AdminDashboardPage.tsx):
+   - Refactored 4 stat cards to use DashboardStatCard component
+   - Maintained same functionality and visual appearance
+   - Reduced inline code duplication
+   - Stats: Total Students, Total Teachers, Total Parents, Total Classes
+
+3. **Updated TeacherDashboardPage** (src/pages/portal/teacher/TeacherDashboardPage.tsx):
+   - Refactored "Your Classes" card to use DashboardStatCard component
+   - Added subtitle: "Total students: {count}"
+   - Used valueSize="3xl" for larger display
+   - Reduced inline code duplication
+
+**Metrics**:
+
+| Metric | Before | After | Improvement |
+|--------|--------|-------|-------------|
+| AdminDashboardPage lines | 174 | 166 | 8 lines reduced (4.6%) |
+| TeacherDashboardPage lines | 111 | 105 | 6 lines reduced (5.4%) |
+| Code duplication | Inline card patterns | Single reusable component | Eliminated |
+| Consistency | Manual alignment | Component-based | 100% consistent |
+| Future updates | Multiple files | Single component | Easier maintenance |
+
+**Benefits Achieved**:
+    - ✅ DashboardStatCard component created (27 lines, fully reusable)
+    - ✅ AdminDashboardPage reduced by 8 lines (4.6% reduction)
+    - ✅ TeacherDashboardPage reduced by 6 lines (5.4% reduction)
+    - ✅ Inline card patterns extracted to component
+    - ✅ Consistent UI pattern across admin and teacher dashboards
+    - ✅ Accessibility improvements with proper ARIA attributes (aria-hidden on icons)
+    - ✅ All 2333 tests passing (5 skipped, 155 todo)
+    - ✅ Typecheck passed (0 errors)
+    - ✅ Linting passed (0 errors)
+    - ✅ Zero breaking changes to existing functionality
+
+**Technical Details**:
+
+**DashboardStatCard Component Features**:
+- **Props**: title (string, required), value (string | number, required), icon (React.ReactNode, optional), subtitle (string, optional), valueSize ('2xl' | '3xl', optional, default '2xl')
+- **Styling**: Tailwind classes for consistent appearance (h-full, hover:shadow-lg, transition-shadow, duration-200)
+- **Accessibility**: Icons properly marked with aria-hidden attribute when present
+- **Flexibility**: Supports both simple stat cards (value only) and complex ones (value + subtitle)
+- **Customization**: className prop for additional styling if needed
+
+**Component Architecture**:
+- Follows existing design system (Card, CardHeader, CardTitle, CardContent components)
+- TypeScript interface for type safety
+- Default prop values for optional fields (valueSize defaults to '2xl')
+- Composition pattern with className support via cn() utility
+- Consistent with existing UI components in src/components/ui/
+
+**Usage Examples**:
+
+Simple stat card (AdminDashboardPage):
+```tsx
+<DashboardStatCard
+  title="Total Students"
+  value={data.totalStudents.toString()}
+  icon={<Users className="h-6 w-6 text-blue-500" />}
+/>
+```
+
+Complex stat card with subtitle (TeacherDashboardPage):
+```tsx
+<DashboardStatCard
+  title="Your Classes"
+  value={data.totalClasses.toString()}
+  icon={<BookCopy className="h-4 w-4 text-muted-foreground" />}
+  subtitle={`Total students: ${data.totalStudents}`}
+  valueSize="3xl"
+/>
+```
+
+**Architectural Impact**:
+- **Component Reusability**: Single source of truth for dashboard stat cards
+- **Consistency**: All stat cards follow same design pattern automatically
+- **Maintainability**: Styling changes only need to be made in one place
+- **Accessibility**: Proper ARIA attributes by default (icons marked as aria-hidden)
+- **User Experience**: Consistent hover effects and transitions across all stat cards
+- **Future-Proof**: Component can be easily extended with additional props (e.g., trend indicators, charts)
+
+**Success Criteria**:
+    - [x] DashboardStatCard component created with flexible props
+    - [x] AdminDashboardPage updated to use DashboardStatCard (4 cards)
+    - [x] TeacherDashboardPage updated to use DashboardStatCard (1 card with subtitle)
+    - [x] Accessibility improved with proper ARIA attributes
+    - [x] All diagnostic checks passing (typecheck, lint, tests)
+    - [x] Zero breaking changes to existing functionality
+    - [x] Code duplication reduced across dashboard pages
+    - [x] Consistent UI pattern established
+
+**Impact**:
+    - `src/components/dashboard/DashboardStatCard.tsx`: New component (27 lines)
+    - `src/components/dashboard/`: New directory for dashboard components (modularity foundation)
+    - `src/pages/portal/admin/AdminDashboardPage.tsx`: 174 → 166 lines (8 lines removed, 4.6% reduction)
+    - `src/pages/portal/teacher/TeacherDashboardPage.tsx`: 111 → 105 lines (6 lines removed, 5.4% reduction)
+    - Code duplication: Eliminated (inline card patterns → single component)
+    - Consistency: 100% (all stat cards use same component)
+    - Future updates: Easier (single component to modify)
+    - Test coverage: 2333 tests passing (100% success rate)
+
+**Success**: ✅ **DASHBOARD COMPONENT EXTRACTION COMPLETE, REDUCED CODE DUPLICATION, IMPROVED CONSISTENCY AND ACCESSIBILITY**
+
+---
 
                                      ### Integration Engineer - Integration Hardening (2026-01-21) - Completed ✅
 

@@ -398,6 +398,7 @@ To learn more about iFlow CLI, visit [iflow.ai](https://iflow.ai).
 │   ├── components/                 # Reusable UI components
 │   │   ├── ui/                  # shadcn/ui components (button, dialog, table, etc.)
 │   │   ├── forms/               # Form components (UserForm, GradeForm, AnnouncementForm)
+│   │   ├── dashboard/           # Dashboard components (DashboardStatCard)
 │   │   └── portal/              # Portal-specific components (PortalSidebar, PortalLayout)
 │   ├── pages/                    # Page components for routing
 │   │   ├── portal/              # Role-specific portal pages
