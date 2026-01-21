@@ -1,9 +1,9 @@
 import { useState, useMemo, useCallback } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter, DialogClose } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
+import { FormField } from '@/components/ui/form-field';
 import { isValidScore } from '@/utils/validation';
 
 interface StudentGrade {
@@ -26,12 +26,6 @@ export function GradeForm({ open, onClose, editingStudent, onSave, isLoading }: 
   const [currentScore, setCurrentScore] = useState<string>(() => editingStudent?.score?.toString() || '');
   const [currentFeedback, setCurrentFeedback] = useState<string>(() => editingStudent?.feedback || '');
 
-  const handleClose = useCallback(() => {
-    setCurrentScore('');
-    setCurrentFeedback('');
-    onClose();
-  }, [onClose]);
-
   const handleOpenChange = useCallback((newOpen: boolean) => {
     if (!newOpen) {
       setCurrentScore('');
@@ -52,7 +46,11 @@ export function GradeForm({ open, onClose, editingStudent, onSave, isLoading }: 
     onSave({ score: scoreValue, feedback: currentFeedback });
   };
 
-  const isScoreInvalid = currentScore !== '' && !isValidScore(parseInt(currentScore, 10));
+  const scoreError = useMemo(() => {
+    if (currentScore === '') return '';
+    const scoreValue = parseInt(currentScore, 10);
+    return isValidScore(scoreValue) ? '' : 'Please enter a valid score between 0 and 100';
+  }, [currentScore]);
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
@@ -64,10 +62,13 @@ export function GradeForm({ open, onClose, editingStudent, onSave, isLoading }: 
         <form onSubmit={handleSubmit}>
           <div className="grid gap-6 py-4">
             <div className="grid grid-cols-4 items-start gap-4">
-              <Label htmlFor="score" className="text-right pt-2">
-                Score
-              </Label>
-              <div className="col-span-3 space-y-2">
+              <FormField
+                id="score"
+                label="Score"
+                error={scoreError}
+                helperText="Enter a score between 0 and 100. Leave empty for no score."
+                className="col-span-3"
+              >
                 <Input
                   id="score"
                   type="number"
@@ -78,22 +79,18 @@ export function GradeForm({ open, onClose, editingStudent, onSave, isLoading }: 
                   min="0"
                   max="100"
                   step="1"
-                  aria-invalid={isScoreInvalid}
-                  aria-describedby="score-helper score-error"
+                  aria-invalid={!!scoreError}
+                  aria-describedby={scoreError ? 'score-error' : 'score-helper'}
                 />
-                <p id="score-helper" className="text-xs text-muted-foreground">Enter a score between 0 and 100. Leave empty for no score.</p>
-                {isScoreInvalid && (
-                  <p id="score-error" className="text-xs text-destructive" role="alert">
-                    Please enter a valid score between 0 and 100
-                  </p>
-                )}
-              </div>
+              </FormField>
             </div>
             <div className="grid grid-cols-4 items-start gap-4">
-              <Label htmlFor="feedback" className="text-right pt-2">
-                Feedback
-              </Label>
-              <div className="col-span-3 space-y-2">
+              <FormField
+                id="feedback"
+                label="Feedback"
+                helperText="Provide constructive feedback to help student improve"
+                className="col-span-3"
+              >
                 <Textarea
                   id="feedback"
                   value={currentFeedback}
@@ -103,8 +100,7 @@ export function GradeForm({ open, onClose, editingStudent, onSave, isLoading }: 
                   rows={3}
                   aria-describedby="feedback-helper"
                 />
-                <p id="feedback-helper" className="text-xs text-muted-foreground">Provide constructive feedback to help student improve</p>
-              </div>
+              </FormField>
             </div>
           </div>
           <DialogFooter>
