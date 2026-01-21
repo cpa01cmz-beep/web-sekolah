@@ -194,3 +194,8 @@ export function validatePassword(value: string, showErrors: boolean, minLength: 
     validationRules.password.minLength(minLength),
   ], { showErrors });
 }
+
+export function validateRequired(value: string, showErrors: boolean, fieldName: string = 'Field'): string | undefined {
+  if (!showErrors) return undefined;
+  return value.trim().length > 0 ? undefined : `${fieldName} is required`;
+}
