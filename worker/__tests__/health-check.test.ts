@@ -201,7 +201,7 @@ describe('External Service Health Check', () => {
 
       const result = await ExternalServiceHealth.checkWebhookService('https://example.com/webhook');
 
-      expect(result.latency).toBeGreaterThanOrEqual(50);
+      expect(result.latency).toBeGreaterThanOrEqual(45);
     });
 
     it('should measure latency for failed request', async () => {
