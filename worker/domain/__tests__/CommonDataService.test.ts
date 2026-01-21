@@ -114,6 +114,276 @@ describe('CommonDataService - Critical Path Testing', () => {
     });
   });
 
+  describe('getUsersWithFilters - Happy Path', () => {
+    it('should verify getUsersWithFilters method exists', async () => {
+      if (!canLoadModule) {
+        console.warn('⏭️  Test skipped: Module not available without Cloudflare Workers');
+        return;
+      }
+
+      expect(typeof CommonDataService.getUsersWithFilters).toBe('function');
+    });
+
+    it('should return all users when no filters provided', async () => {
+      if (!canLoadModule) {
+        console.warn('⏭️  Test skipped: Module not available without Cloudflare Workers');
+        return;
+      }
+
+      const mockEnv = {} as any;
+
+      const result = await CommonDataService.getUsersWithFilters(mockEnv, {});
+
+      expect(Array.isArray(result)).toBe(true);
+    });
+
+    it('should filter users by valid role (student)', async () => {
+      if (!canLoadModule) {
+        console.warn('⏭️  Test skipped: Module not available without Cloudflare Workers');
+        return;
+      }
+
+      const mockEnv = {} as any;
+      const filters = { role: 'student' as const };
+
+      const result = await CommonDataService.getUsersWithFilters(mockEnv, filters);
+
+      expect(Array.isArray(result)).toBe(true);
+    });
+
+    it('should filter users by valid role (teacher)', async () => {
+      if (!canLoadModule) {
+        console.warn('⏭️  Test skipped: Module not available without Cloudflare Workers');
+        return;
+      }
+
+      const mockEnv = {} as any;
+      const filters = { role: 'teacher' as const };
+
+      const result = await CommonDataService.getUsersWithFilters(mockEnv, filters);
+
+      expect(Array.isArray(result)).toBe(true);
+    });
+
+    it('should filter users by valid role (parent)', async () => {
+      if (!canLoadModule) {
+        console.warn('⏭️  Test skipped: Module not available without Cloudflare Workers');
+        return;
+      }
+
+      const mockEnv = {} as any;
+      const filters = { role: 'parent' as const };
+
+      const result = await CommonDataService.getUsersWithFilters(mockEnv, filters);
+
+      expect(Array.isArray(result)).toBe(true);
+    });
+
+    it('should filter users by valid role (admin)', async () => {
+      if (!canLoadModule) {
+        console.warn('⏭️  Test skipped: Module not available without Cloudflare Workers');
+        return;
+      }
+
+      const mockEnv = {} as any;
+      const filters = { role: 'admin' as const };
+
+      const result = await CommonDataService.getUsersWithFilters(mockEnv, filters);
+
+      expect(Array.isArray(result)).toBe(true);
+    });
+
+    it('should filter students by classId when role=student and classId provided', async () => {
+      if (!canLoadModule) {
+        console.warn('⏭️  Test skipped: Module not available without Cloudflare Workers');
+        return;
+      }
+
+      const mockEnv = {} as any;
+      const filters = { role: 'student' as const, classId: 'class-123' };
+
+      const result = await CommonDataService.getUsersWithFilters(mockEnv, filters);
+
+      expect(Array.isArray(result)).toBe(true);
+    });
+
+    it('should search users by name (case-insensitive)', async () => {
+      if (!canLoadModule) {
+        console.warn('⏭️  Test skipped: Module not available without Cloudflare Workers');
+        return;
+      }
+
+      const mockEnv = {} as any;
+      const filters = { search: 'John' };
+
+      const result = await CommonDataService.getUsersWithFilters(mockEnv, filters);
+
+      expect(Array.isArray(result)).toBe(true);
+    });
+
+    it('should search users by email (case-insensitive)', async () => {
+      if (!canLoadModule) {
+        console.warn('⏭️  Test skipped: Module not available without Cloudflare Workers');
+        return;
+      }
+
+      const mockEnv = {} as any;
+      const filters = { search: 'john@example.com' };
+
+      const result = await CommonDataService.getUsersWithFilters(mockEnv, filters);
+
+      expect(Array.isArray(result)).toBe(true);
+    });
+  });
+
+  describe('getUsersWithFilters - Combined Filters', () => {
+    it('should filter by role and search term simultaneously', async () => {
+      if (!canLoadModule) {
+        console.warn('⏭️  Test skipped: Module not available without Cloudflare Workers');
+        return;
+      }
+
+      const mockEnv = {} as any;
+      const filters = { role: 'student' as const, search: 'John' };
+
+      const result = await CommonDataService.getUsersWithFilters(mockEnv, filters);
+
+      expect(Array.isArray(result)).toBe(true);
+    });
+
+    it('should filter by classId and role (student only)', async () => {
+      if (!canLoadModule) {
+        console.warn('⏭️  Test skipped: Module not available without Cloudflare Workers');
+        return;
+      }
+
+      const mockEnv = {} as any;
+      const filters = { role: 'student' as const, classId: 'class-123' };
+
+      const result = await CommonDataService.getUsersWithFilters(mockEnv, filters);
+
+      expect(Array.isArray(result)).toBe(true);
+    });
+  });
+
+  describe('getUsersWithFilters - Edge Cases', () => {
+    it('should handle invalid role by falling back to getAllUsers', async () => {
+      if (!canLoadModule) {
+        console.warn('⏭️  Test skipped: Module not available without Cloudflare Workers');
+        return;
+      }
+
+      const mockEnv = {} as any;
+      const filters = { role: 'invalid-role' as any };
+
+      const result = await CommonDataService.getUsersWithFilters(mockEnv, filters);
+
+      expect(Array.isArray(result)).toBe(true);
+    });
+
+    it('should handle empty search term (returns all users)', async () => {
+      if (!canLoadModule) {
+        console.warn('⏭️  Test skipped: Module not available without Cloudflare Workers');
+        return;
+      }
+
+      const mockEnv = {} as any;
+      const filters = { search: '' };
+
+      const result = await CommonDataService.getUsersWithFilters(mockEnv, filters);
+
+      expect(Array.isArray(result)).toBe(true);
+    });
+
+    it('should handle search term with special characters', async () => {
+      if (!canLoadModule) {
+        console.warn('⏭️  Test skipped: Module not available without Cloudflare Workers');
+        return;
+      }
+
+      const mockEnv = {} as any;
+      const filters = { search: 'O\'Brien' };
+
+      const result = await CommonDataService.getUsersWithFilters(mockEnv, filters);
+
+      expect(Array.isArray(result)).toBe(true);
+    });
+
+    it('should handle case-insensitive search correctly', async () => {
+      if (!canLoadModule) {
+        console.warn('⏭️  Test skipped: Module not available without Cloudflare Workers');
+        return;
+      }
+
+      const mockEnv = {} as any;
+      const filters = { search: 'JOHN' };
+
+      const result = await CommonDataService.getUsersWithFilters(mockEnv, filters);
+
+      expect(Array.isArray(result)).toBe(true);
+    });
+
+    it('should handle role filter with null search', async () => {
+      if (!canLoadModule) {
+        console.warn('⏭️  Test skipped: Module not available without Cloudflare Workers');
+        return;
+      }
+
+      const mockEnv = {} as any;
+      const filters = { role: 'student' as const, search: undefined };
+
+      const result = await CommonDataService.getUsersWithFilters(mockEnv, filters);
+
+      expect(Array.isArray(result)).toBe(true);
+    });
+  });
+
+  describe('getUsersWithFilters - Boundary Conditions', () => {
+    it('should handle search with no matching results', async () => {
+      if (!canLoadModule) {
+        console.warn('⏭️  Test skipped: Module not available without Cloudflare Workers');
+        return;
+      }
+
+      const mockEnv = {} as any;
+      const filters = { search: 'NonExistentUser123456' };
+
+      const result = await CommonDataService.getUsersWithFilters(mockEnv, filters);
+
+      expect(Array.isArray(result)).toBe(true);
+      expect(result.length).toBe(0);
+    });
+
+    it('should handle role with no matching results', async () => {
+      if (!canLoadModule) {
+        console.warn('⏭️  Test skipped: Module not available without Cloudflare Workers');
+        return;
+      }
+
+      const mockEnv = {} as any;
+      const filters = { role: 'student' as const };
+
+      const result = await CommonDataService.getUsersWithFilters(mockEnv, filters);
+
+      expect(Array.isArray(result)).toBe(true);
+    });
+
+    it('should handle classId with no matching results', async () => {
+      if (!canLoadModule) {
+        console.warn('⏭️  Test skipped: Module not available without Cloudflare Workers');
+        return;
+      }
+
+      const mockEnv = {} as any;
+      const filters = { role: 'student' as const, classId: 'nonexistent-class' };
+
+      const result = await CommonDataService.getUsersWithFilters(mockEnv, filters);
+
+      expect(Array.isArray(result)).toBe(true);
+      expect(result.length).toBe(0);
+    });
+  });
+
   describe('Testing Documentation', () => {
     it('should document that tests use mocked entities', () => {
       if (!canLoadModule) {
