@@ -28,15 +28,19 @@ export function FormField({
   const helperId = `${id}-helper`;
   const hasError = !!error;
 
+  const safeLabel = String(label || '');
+  const safeError = error ? String(error) : undefined;
+  const safeHelperText = helperText ? String(helperText) : undefined;
+
   return (
     <div className={cn('space-y-2', className)}>
       <Label htmlFor={id} className="text-sm font-medium">
-        {label}
+        {safeLabel}
         {required && <span className="text-destructive ml-1" aria-label="required">*</span>}
       </Label>
       {children}
-      {helperText && !hasError && (
-        <p id={helperId} className="text-xs text-muted-foreground">{helperText}</p>
+      {safeHelperText && !hasError && (
+        <p id={helperId} className="text-xs text-muted-foreground">{safeHelperText}</p>
       )}
       {hasError && (
         <p
@@ -46,7 +50,7 @@ export function FormField({
           aria-live="polite"
         >
           {showErrorIcon && <AlertCircle className="h-3 w-3" aria-hidden="true" />}
-          {error}
+          {safeError}
         </p>
       )}
     </div>
