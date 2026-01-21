@@ -268,11 +268,13 @@ None ✅ - All high-priority security issues resolved.
 - 2026-01-21: 7 packages outdated
 - 2026-01-21 (current): 4 packages outdated
 
-**Resolved Outdated Packages** (updated since previous assessment):
+**Resolved Outdated Packages** (updated in this assessment):
+- recharts (3.6.0 → 3.7.0) ✅ Updated (2026-01-21)
+
+**Previously Updated Packages** (updated prior to this assessment):
 - @vitejs/plugin-react (4.7.0 → 5.1.2) ✅ Updated
 - eslint-plugin-react-hooks (5.2.0 → 7.0.1) ✅ Updated
 - globals (16.5.0 → 17.0.0) ✅ Updated
-- recharts (3.6.0 → 3.7.0) ✅ Updated (2026-01-21)
 
 **Remaining Outdated Packages** (major versions, no security risk):
 - react (18.3.1 → 19.2.3)

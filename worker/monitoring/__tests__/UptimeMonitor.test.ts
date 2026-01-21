@@ -45,11 +45,12 @@ describe('UptimeMonitor', () => {
   describe('reset()', () => {
     it('should reset uptime to near zero', () => {
       vi.useFakeTimers();
+      const freshMonitor = new UptimeMonitor();
       vi.advanceTimersByTime(100);
-      const beforeReset = monitor.getUptime();
-      monitor.reset();
+      const beforeReset = freshMonitor.getUptime();
+      freshMonitor.reset();
       vi.advanceTimersByTime(10);
-      const afterReset = monitor.getUptime();
+      const afterReset = freshMonitor.getUptime();
       vi.useRealTimers();
 
       expect(beforeReset).toBe(100);
