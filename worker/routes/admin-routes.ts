@@ -3,7 +3,7 @@ import type { Env } from '../core-utils';
 import { ok, bad, notFound } from '../core-utils';
 import { AnnouncementEntity, ensureAllSeedData } from "../entities";
 import { rebuildAllIndexes } from "../index-rebuilder";
-import type { CreateUserData, UpdateUserData, Announcement, CreateAnnouncementData, AdminDashboardData, Settings, SchoolUser } from "@shared/types";
+import type { CreateUserData, UpdateUserData, Announcement, CreateAnnouncementData, AdminDashboardData, Settings, SchoolUser, UserRole } from "@shared/types";
 import { UserService, CommonDataService, AnnouncementService } from '../domain';
 import { withAuth, withErrorHandler, triggerWebhookSafely } from './route-utils';
 import { validateBody } from '../middleware/validation';
@@ -54,7 +54,13 @@ export function adminRoutes(app: Hono<{ Bindings: Env }>) {
     let users: SchoolUser[];
 
     if (role && !search) {
-      users = await CommonDataService.getByRole(c.env, role as any);
+      const validRoles: UserRole[] = ['student', 'teacher', 'parent', 'admin'];
+      const typedRole = role as UserRole;
+      if (validRoles.includes(typedRole)) {
+        users = await CommonDataService.getByRole(c.env, typedRole);
+      } else {
+        users = await CommonDataService.getAllUsers(c.env);
+      }
     } else if (classId && role === 'student' && !search) {
       users = await CommonDataService.getClassStudents(c.env, classId);
     } else {
