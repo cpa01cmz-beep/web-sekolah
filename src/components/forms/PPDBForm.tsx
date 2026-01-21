@@ -5,7 +5,6 @@ import { FormSuccess } from '@/components/ui/form-success';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useState, useMemo, useCallback } from 'react';
 import { toast } from 'sonner';
-import { AlertCircle } from 'lucide-react';
 import { validateName, validateEmail, validatePhone, validateNisn, validateRequired } from '@/utils/validation';
 
 interface PPDBFormData {
@@ -126,12 +125,6 @@ export function PPDBForm({ onSubmit }: PPDBFormProps) {
             aria-describedby={nameError ? 'name-error' : 'name-helper'}
             aria-busy={isSubmitting}
           />
-          {nameError && (
-            <p id="name-error" className="text-xs text-destructive flex items-center gap-1" role="alert" aria-live="polite">
-              <AlertCircle className="h-3 w-3" aria-hidden="true" />
-              {nameError}
-            </p>
-          )}
         </FormField>
 
         <div className="grid grid-cols-2 gap-4">
@@ -153,12 +146,6 @@ export function PPDBForm({ onSubmit }: PPDBFormProps) {
               aria-invalid={!!placeOfBirthError}
               aria-describedby={placeOfBirthError ? 'placeOfBirth-error' : 'placeOfBirth-helper'}
             />
-            {placeOfBirthError && (
-              <p id="placeOfBirth-error" className="text-xs text-destructive flex items-center gap-1" role="alert" aria-live="polite">
-                <AlertCircle className="h-3 w-3" aria-hidden="true" />
-                {placeOfBirthError}
-              </p>
-            )}
           </FormField>
           <FormField
             id="dateOfBirth"
@@ -178,12 +165,6 @@ export function PPDBForm({ onSubmit }: PPDBFormProps) {
               aria-invalid={!!dateOfBirthError}
               aria-describedby={dateOfBirthError ? 'dateOfBirth-error' : 'dateOfBirth-helper'}
             />
-            {dateOfBirthError && (
-              <p id="dateOfBirth-error" className="text-xs text-destructive flex items-center gap-1" role="alert" aria-live="polite">
-                <AlertCircle className="h-3 w-3" aria-hidden="true" />
-                {dateOfBirthError}
-              </p>
-            )}
           </FormField>
         </div>
 
@@ -206,12 +187,6 @@ export function PPDBForm({ onSubmit }: PPDBFormProps) {
             aria-describedby={nisnError ? 'nisn-error' : 'nisn-helper'}
             aria-busy={isSubmitting}
           />
-          {nisnError && (
-            <p id="nisn-error" className="text-xs text-destructive flex items-center gap-1" role="alert" aria-live="polite">
-              <AlertCircle className="h-3 w-3" aria-hidden="true" />
-              {nisnError}
-            </p>
-          )}
         </FormField>
 
         <FormField
@@ -232,12 +207,6 @@ export function PPDBForm({ onSubmit }: PPDBFormProps) {
             aria-invalid={!!schoolError}
             aria-describedby={schoolError ? 'school-error' : 'school-helper'}
           />
-          {schoolError && (
-            <p id="school-error" className="text-xs text-destructive flex items-center gap-1" role="alert" aria-live="polite">
-              <AlertCircle className="h-3 w-3" aria-hidden="true" />
-              {schoolError}
-            </p>
-          )}
         </FormField>
 
         <FormField
@@ -256,12 +225,6 @@ export function PPDBForm({ onSubmit }: PPDBFormProps) {
               <SelectItem value="sma">SMA (Kelas 10)</SelectItem>
             </SelectContent>
           </Select>
-          {levelError && (
-            <p id="level-error" className="text-xs text-destructive flex items-center gap-1" role="alert" aria-live="polite">
-              <AlertCircle className="h-3 w-3" aria-hidden="true" />
-              {levelError}
-            </p>
-          )}
         </FormField>
 
         <FormField
@@ -284,12 +247,6 @@ export function PPDBForm({ onSubmit }: PPDBFormProps) {
             aria-describedby={emailError ? 'email-error' : 'email-helper'}
             aria-busy={isSubmitting}
           />
-          {emailError && (
-            <p id="email-error" className="text-xs text-destructive flex items-center gap-1" role="alert" aria-live="polite">
-              <AlertCircle className="h-3 w-3" aria-hidden="true" />
-              {emailError}
-            </p>
-          )}
         </FormField>
 
         <FormField
@@ -312,12 +269,6 @@ export function PPDBForm({ onSubmit }: PPDBFormProps) {
             aria-describedby={phoneError ? 'phone-error' : 'phone-helper'}
             aria-busy={isSubmitting}
           />
-          {phoneError && (
-            <p id="phone-error" className="text-xs text-destructive flex items-center gap-1" role="alert" aria-live="polite">
-              <AlertCircle className="h-3 w-3" aria-hidden="true" />
-              {phoneError}
-            </p>
-          )}
         </FormField>
 
         <Button type="submit" className="w-full" disabled={isSubmitting} aria-busy={isSubmitting}>
