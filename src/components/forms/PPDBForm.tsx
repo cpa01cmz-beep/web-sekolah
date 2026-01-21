@@ -33,21 +33,21 @@ export function PPDBForm({ onSubmit }: PPDBFormProps) {
     email: '',
     phone: '',
   });
-  const [showValidationErrors, setShowValidationErrors] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isSuccess, setIsSuccess] = useState(false);
+  const [showValidationErrors, setShowValidationErrors] = useState<boolean>(false);
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [isSuccess, setIsSuccess] = useState<boolean>(false);
 
-  const nameError = useMemo(() => validateName(formData.name, showValidationErrors, 3), [formData.name, showValidationErrors]);
-  const placeOfBirthError = useMemo(() => validateRequired(formData.placeOfBirth, showValidationErrors, 'Tempat lahir'), [formData.placeOfBirth, showValidationErrors]);
-  const dateOfBirthError = useMemo(() => validateRequired(formData.dateOfBirth, showValidationErrors, 'Tanggal lahir'), [formData.dateOfBirth, showValidationErrors]);
-  const nisnError = useMemo(() => validateNisn(formData.nisn, showValidationErrors, 10), [formData.nisn, showValidationErrors]);
-  const schoolError = useMemo(() => validateRequired(formData.school, showValidationErrors, 'Asal sekolah'), [formData.school, showValidationErrors]);
-  const levelError = useMemo(() => validateRequired(formData.level, showValidationErrors, 'Jenjang pendidikan'), [formData.level, showValidationErrors]);
-  const emailError = useMemo(() => validateEmail(formData.email, showValidationErrors), [formData.email, showValidationErrors]);
-  const phoneError = useMemo(() => validatePhone(formData.phone, showValidationErrors, 10, 13), [formData.phone, showValidationErrors]);
+  const nameError = useMemo(() => String(validateName(formData.name, showValidationErrors, 3) || ''), [formData.name, showValidationErrors]);
+  const placeOfBirthError = useMemo(() => String(validateRequired(formData.placeOfBirth, showValidationErrors, 'Tempat lahir') || ''), [formData.placeOfBirth, showValidationErrors]);
+  const dateOfBirthError = useMemo(() => String(validateRequired(formData.dateOfBirth, showValidationErrors, 'Tanggal lahir') || ''), [formData.dateOfBirth, showValidationErrors]);
+  const nisnError = useMemo(() => String(validateNisn(formData.nisn, showValidationErrors, 10) || ''), [formData.nisn, showValidationErrors]);
+  const schoolError = useMemo(() => String(validateRequired(formData.school, showValidationErrors, 'Asal sekolah') || ''), [formData.school, showValidationErrors]);
+  const levelError = useMemo(() => String(validateRequired(formData.level, showValidationErrors, 'Jenjang pendidikan') || ''), [formData.level, showValidationErrors]);
+  const emailError = useMemo(() => String(validateEmail(formData.email, showValidationErrors) || ''), [formData.email, showValidationErrors]);
+  const phoneError = useMemo(() => String(validatePhone(formData.phone, showValidationErrors, 10, 13) || ''), [formData.phone, showValidationErrors]);
 
   const handleInputChange = useCallback((field: keyof PPDBFormData, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData(prev => ({ ...prev, [field]: String(value) }));
   }, []);
 
   const handleReset = () => {
@@ -55,9 +55,11 @@ export function PPDBForm({ onSubmit }: PPDBFormProps) {
     setShowValidationErrors(false);
   };
 
-  const handleSubmit = useCallback(async (e: React.FormEvent) => {
+  const handleSubmit = useCallback(async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setShowValidationErrors(true);
+    if (!showValidationErrors) {
+      setShowValidationErrors(true);
+    }
 
     const errors = [nameError, placeOfBirthError, dateOfBirthError, nisnError, schoolError, levelError, emailError, phoneError].filter(Boolean);
     
@@ -87,7 +89,7 @@ export function PPDBForm({ onSubmit }: PPDBFormProps) {
     } finally {
       setIsSubmitting(false);
     }
-  }, [nameError, placeOfBirthError, dateOfBirthError, nisnError, schoolError, levelError, emailError, phoneError, onSubmit, formData]);
+  }, [nameError, placeOfBirthError, dateOfBirthError, nisnError, schoolError, levelError, emailError, phoneError, showValidationErrors, onSubmit, formData]);
 
   if (isSuccess) {
     return (
