@@ -13385,6 +13385,42 @@ logger.error('Webhook delivery failed after max retries', {
 | Low | Extract route handler pattern into reusable builder function | Small | worker/user-routes.ts (24 routes follow identical structure: app.get/post + authenticate + authorize + async handler) |
 | Medium | Create error handling wrapper to reduce try-catch duplication | Small | ✅ **COMPLETED** (2026-01-10) - withErrorHandler created in route-utils.ts, 8 patterns eliminated |
 | Medium | Consolidate retry configuration constants | Small | ✅ **COMPLETED** (2026-01-20) - Added RETRY_CONFIG to shared/constants.ts, eliminated duplicate constants in worker/resilience/Retry.ts, src/lib/resilience/Retry.ts, src/lib/error-reporter/constants.ts, applied DRY principle |
+| Medium | Extract DownloadCard component from LinksDownloadPage | Small | src/pages/LinksDownloadPage.tsx (142 lines, 6 duplicate download button patterns) |
+| Low | Replace inline hover styles with CSS in SiteHeader | Small | src/components/SiteHeader.tsx:91 (onMouseEnter/onMouseLeave for button hover effect) |
+| Low | Centralize hardcoded color classes across pages | Medium | src/pages/LinksDownloadPage.tsx:103,114,125 (text-blue-600, text-green-600, text-purple-600) |
+| Medium | Extract DocumentCard pattern for consistency | Small | src/pages/LinksDownloadPage.tsx:29-36 (repeated card structure for document listing) |
+
+---
+
+## [REFACTOR] Extract DownloadCard Component from LinksDownloadPage
+- **Location**: src/pages/LinksDownloadPage.tsx
+- **Issue**: 6 duplicate download button patterns repeated across the page (lines 34-36, 44-46, 54-56, 69-71, 79-81, 89-91)
+- **Suggestion**: Create reusable DownloadCard component with props for title, description, fileSize, fileFormat, and download action
+- **Priority**: Medium
+- **Effort**: Small
+
+## [REFACTOR] Replace Inline Hover Styles with CSS in SiteHeader
+- **Location**: src/components/SiteHeader.tsx:91
+- **Issue**: Inline onMouseEnter/onMouseLeave handlers manipulate backgroundColor directly, mixing JavaScript styles with CSS
+- **Suggestion**: Create CSS class with hover effect using Tailwind's `hover:` variant or `group-hover:` for button hover states
+- **Priority**: Low
+- **Effort**: Small
+
+## [REFACTOR] Centralize Hardcoded Color Classes Across Pages
+- **Location**: src/pages/LinksDownloadPage.tsx:103,114,125; src/pages/LinksRelatedPage.tsx:73,81,89; src/pages/ProfileSchoolPage.tsx:46,56,66
+- **Issue**: Hardcoded Tailwind color classes (text-blue-600, text-green-600, text-purple-600) scattered across multiple pages
+- **Suggestion**: Add color utility constants to src/theme/colors.ts or use existing THEME_COLORS mapping for consistent color usage
+- **Priority**: Low
+- **Effort**: Medium
+
+## [REFACTOR] Extract DocumentCard Pattern for Consistency
+- **Location**: src/pages/LinksDownloadPage.tsx:29-36
+- **Issue**: Repeated card structure for document listing (title, description, download button) duplicated 6 times
+- **Suggestion**: Create DocumentCard component with consistent layout, styling, and download button pattern
+- **Priority**: Medium
+- **Effort**: Small
+
+---
 
 ### Seed Data Extraction (2026-01-08) - Completed ✅
 
