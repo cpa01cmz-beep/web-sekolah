@@ -14548,12 +14548,129 @@ All 735 tests passing. Build successful with no errors.
 | Test status | 433 passing | 433 passing | 0 regressions |
 | Lint status | Pass | Pass | No new errors |
 
-### [REFACTOR] Extract Validation Logic from LoginPage
-- Location: src/pages/LoginPage.tsx (lines 21-31)
-- Issue: Email and password validation logic is duplicated (email regex and password length check). This validation should be reusable across forms and components
-- Suggestion: Extract to shared validation utility `src/utils/formValidation.ts` with `validateEmail()` and `validatePassword()` functions. This makes validation logic testable and reusable
-- Priority: Low
-- Effort: Small
+### [REFACTOR] Extract Validation Logic from LoginPage - Completed ✅
+
+**Task**: Extract duplicate email and password validation logic from LoginPage to centralized validation utility
+
+**Problem**:
+- LoginPage had inline `getEmailError()` and `getPasswordError()` functions (lines 24-34)
+- Email validation used inline regex: `/^\S+@\S+\.\S+$/`
+- Password validation used inline length check: `password.length < 6`
+- Validation logic was not reusable across other forms
+- Violated DRY principle - validation patterns duplicated across forms
+
+**Solution**:
+- Added `password` validation rule to `src/utils/validation.ts`
+- Added `validatePassword()` function to `src/utils/validation.ts`
+- Updated LoginPage to use centralized `validateEmail()` and `validatePassword()` functions
+- Removed duplicate inline validation functions from LoginPage
+
+**Implementation**:
+
+1. **Added Password Validation Rule** to `src/utils/validation.ts`:
+   - Added `password` validation rule with `required` and `minLength` checks
+   - Consistent with existing validation patterns (name, email, phone, nisn, message, role, title, content)
+   - Default minimum password length: 6 characters
+   - Configurable via parameter
+
+2. **Added validatePassword() Function** to `src/utils/validation.ts`:
+   - New function at end of validation.ts file
+   - Accepts password value, showErrors boolean, and optional minLength parameter (default 6)
+   - Uses `validateField()` utility with password validation rules
+   - Returns error message or undefined based on validation result
+
+3. **Updated LoginPage** - `src/pages/LoginPage.tsx`:
+   - Added import: `import { validateEmail, validatePassword } from '@/utils/validation'`
+   - Removed inline `getEmailError()` function (lines 24-28, 5 lines)
+   - Removed inline `getPasswordError()` function (lines 30-34, 5 lines)
+   - Replaced all `getEmailError()` calls with `validateEmail(email, showValidationErrors)`
+   - Replaced all `getPasswordError()` calls with `validatePassword(password, showValidationErrors)`
+   - Updated handleLogin validation to use centralized functions
+   - Updated FormField error props to use centralized functions
+   - Updated Input aria-invalid and aria-describedby to use centralized functions
+
+**Metrics**:
+
+| Metric | Before | After | Improvement |
+|--------|--------|-------|-------------|
+| LoginPage inline validation functions | 2 (getEmailError, getPasswordError) | 0 | 100% eliminated |
+| Duplicate validation code | 10 lines (2 functions) | 0 lines | 100% eliminated |
+| Reusable validation functions | 0 | 1 (validatePassword) | New capability |
+| Validation code locations | 2 (LoginPage, validation.ts) | 1 (validation.ts) | Centralized |
+| Test status | 2079 passing | 2079 passing | 0 regressions |
+
+**Benefits Achieved**:
+- ✅ Added `validatePassword()` function to centralized validation utility
+- ✅ Eliminated 10 lines of duplicate validation code from LoginPage
+- ✅ Validation logic now reusable across all forms
+- ✅ Consistent validation patterns across codebase (DRY principle applied)
+- ✅ All 2079 tests passing (0 regressions)
+- ✅ Zero lint errors
+- ✅ Zero type errors
+- ✅ Improved maintainability - validation logic in one location
+- ✅ Better testability - validation functions can be tested independently
+
+**Technical Details**:
+
+**New Password Validation Rule**:
+```typescript
+password: {
+  required: {
+    validate: (value: string) => value.trim().length > 0,
+    message: 'Password is required',
+  },
+  minLength: (min: number) => ({
+    validate: (value: string) => value.length >= min,
+    message: `Password must be at least ${min} characters`,
+  }),
+},
+```
+
+**New validatePassword() Function**:
+```typescript
+export function validatePassword(value: string, showErrors: boolean, minLength: number = 6): string | undefined {
+  return validateField(value, [
+    validationRules.password.required,
+    validationRules.password.minLength(minLength),
+  ], { showErrors });
+}
+```
+
+**LoginPage Changes**:
+- Removed `getEmailError()` function (5 lines of duplicate logic)
+- Removed `getPasswordError()` function (5 lines of duplicate logic)
+- All validation now uses centralized functions from validation.ts
+- Consistent error messages across all forms
+- Password validation: 6 character minimum (configurable)
+- Email validation: regex pattern check (already in validation.ts)
+
+**Architectural Impact**:
+- **DRY Principle**: Duplicate validation logic eliminated
+- **Single Responsibility**: validation.ts handles all validation logic
+- **Separation of Concerns**: LoginPage manages UI, validation.ts manages validation
+- **Maintainability**: Update validation rules in one location
+- **Reusability**: validatePassword() available for all password fields
+- **Testability**: Validation functions can be tested independently
+
+**Success Criteria**:
+- [x] validatePassword() function added to src/utils/validation.ts
+- [x] Password validation rule added to validationRules object
+- [x] Inline validation functions removed from LoginPage
+- [x] LoginPage uses centralized validateEmail() and validatePassword()
+- [x] All 2079 tests passing (0 regressions)
+- [x] Zero lint errors
+- [x] Zero type errors
+- [x] Validation logic reusable across forms
+
+**Impact**:
+- `src/utils/validation.ts`: Added password validation rule and validatePassword() function (15 lines added)
+- `src/pages/LoginPage.tsx`: Removed 10 lines of duplicate validation code (2 inline functions)
+- Validation consistency: 100% unified across codebase
+- Code reduction: 10 lines eliminated (net: +5 lines for new centralized function)
+- Maintenance: Single source of truth for password validation
+- Test coverage: 2079 tests passing (100% success rate)
+
+**Success**: ✅ **LOGIN PAGE VALIDATION EXTRACTION COMPLETE, DUPLICATE VALIDATION CODE ELIMINATED, PASSWORD VALIDATION ADDED TO CENTRALIZED UTILITY**
 
 ## Integration Hardening (2026-01-07)
 

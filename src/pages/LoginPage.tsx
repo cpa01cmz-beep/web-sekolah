@@ -11,6 +11,7 @@ import { SlideUp } from '@/components/animations';
 import { Toaster, toast } from 'sonner';
 import { THEME_COLORS } from '@/theme/colors';
 import { RoleButtonGrid } from '@/components/forms/RoleButtonGrid';
+import { validateEmail, validatePassword } from '@/utils/validation';
 
 export function LoginPage() {
   const navigate = useNavigate();
@@ -21,21 +22,9 @@ export function LoginPage() {
 
   const [showValidationErrors, setShowValidationErrors] = useState(false);
 
-  const getEmailError = () => {
-    if (email === '') return showValidationErrors ? 'Email is required' : undefined;
-    if (!/^\S+@\S+\.\S+$/.test(email)) return 'Please enter a valid email address';
-    return undefined;
-  };
-
-  const getPasswordError = () => {
-    if (password === '') return showValidationErrors ? 'Password is required' : undefined;
-    if (password.length < 6) return 'Password must be at least 6 characters';
-    return undefined;
-  };
-
   const handleLogin = async (role: UserRole) => {
     setShowValidationErrors(true);
-    if (!email || !password || getEmailError() || getPasswordError()) {
+    if (!email || !password || validateEmail(email, showValidationErrors) || validatePassword(password, showValidationErrors)) {
       return;
     }
 
@@ -82,7 +71,7 @@ export function LoginPage() {
                 label="Email"
                 helperText="Enter your registered email address"
                 required
-                error={getEmailError()}
+                error={validateEmail(email, showValidationErrors)}
               >
                 <Input
                   id="email"
@@ -93,8 +82,8 @@ export function LoginPage() {
                   required
                   disabled={!!isLoading}
                   aria-required="true"
-                  aria-invalid={!!getEmailError()}
-                  aria-describedby={getEmailError() ? 'email-error' : 'email-helper'}
+                  aria-invalid={!!validateEmail(email, showValidationErrors)}
+                  aria-describedby={validateEmail(email, showValidationErrors) ? 'email-error' : 'email-helper'}
                 />
               </FormField>
               <FormField
@@ -102,7 +91,7 @@ export function LoginPage() {
                 label="Password"
                 helperText="Enter your password"
                 required
-                error={getPasswordError()}
+                error={validatePassword(password, showValidationErrors)}
               >
                 <Input
                   id="password"
@@ -113,8 +102,8 @@ export function LoginPage() {
                   required
                   disabled={!!isLoading}
                   aria-required="true"
-                  aria-invalid={!!getPasswordError()}
-                  aria-describedby={getPasswordError() ? 'password-error' : 'password-helper'}
+                  aria-invalid={!!validatePassword(password, showValidationErrors)}
+                  aria-describedby={validatePassword(password, showValidationErrors) ? 'password-error' : 'password-helper'}
                 />
               </FormField>
             </CardContent>
