@@ -1,8 +1,6 @@
 import { useState, useMemo, useCallback } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Button } from '@/components/ui/button';
-import { Edit } from 'lucide-react';
 import { PageHeader } from '@/components/PageHeader';
 import { SlideUp } from '@/components/animations';
 import { toast } from 'sonner';
@@ -13,6 +11,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { TableSkeleton } from '@/components/ui/loading-skeletons';
 import { GradeForm } from '@/components/forms/GradeForm';
 import { ResponsiveTable } from '@/components/ui/responsive-table';
+import { GradeActions } from '@/components/tables/GradeActions';
 
 interface UpdateGradeData {
   score: number | null;
@@ -60,9 +59,12 @@ export function TeacherGradeManagementPage() {
     setSelectedClass(value);
   }, []);
 
-  const handleEditStudent = useCallback((student: StudentGrade) => {
-    setEditingStudent(student);
-  }, []);
+  const handleEditStudent = useCallback((studentId: string) => {
+    const student = students?.find(s => s.id === studentId);
+    if (student) {
+      setEditingStudent(student);
+    }
+  }, [students]);
 
   const selectedClassName = useMemo(() => {
     return classes?.find(c => c.id === selectedClass)?.name || '';
@@ -87,18 +89,7 @@ export function TeacherGradeManagementPage() {
       },
       {
         key: 'actions',
-        content: (
-          <div className="flex gap-2 justify-end">
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => handleEditStudent(student)}
-              aria-label={`Edit grade for ${student.name}`}
-            >
-              <Edit className="h-4 w-4" />
-            </Button>
-          </div>
-        ),
+        content: <GradeActions studentId={student.id} studentName={student.name} onEdit={handleEditStudent} />,
         className: 'text-right',
       },
     ],
