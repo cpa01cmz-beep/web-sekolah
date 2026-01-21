@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -17,7 +17,7 @@ export function TeacherAnnouncementsPage() {
   const [announcements, setAnnouncements] = useState<Announcement[]>(initialAnnouncements);
   const [newTitle, setNewTitle] = useState('');
   const [newContent, setNewContent] = useState('');
-  const handlePostAnnouncement = (e: React.FormEvent) => {
+  const handlePostAnnouncement = useCallback((e: React.FormEvent) => {
     e.preventDefault();
     if (!newTitle.trim() || !newContent.trim() || !user) {
       toast.error('Title and content cannot be empty.');
@@ -34,7 +34,13 @@ export function TeacherAnnouncementsPage() {
     setNewTitle('');
     setNewContent('');
     toast.success('Announcement posted successfully!');
-  };
+  }, [user, announcements, newTitle, newContent]);
+  const handleTitleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setNewTitle(e.target.value);
+  }, []);
+  const handleContentChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setNewContent(e.target.value);
+  }, []);
   return (
     <SlideUp className="space-y-6">
       <PageHeader title="Announcements" />
@@ -49,11 +55,11 @@ export function TeacherAnnouncementsPage() {
               <form onSubmit={handlePostAnnouncement} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="title">Title</Label>
-                  <Input id="title" value={newTitle} onChange={(e) => setNewTitle(e.target.value)} placeholder="Announcement Title" />
+                  <Input id="title" value={newTitle} onChange={handleTitleChange} placeholder="Announcement Title" />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="content">Content</Label>
-                  <Textarea id="content" value={newContent} onChange={(e) => setNewContent(e.target.value)} placeholder="Write your announcement here..." rows={5} />
+                  <Textarea id="content" value={newContent} onChange={handleContentChange} placeholder="Write your announcement here..." rows={5} />
                 </div>
                 <Button type="submit" className="w-full">Post Announcement</Button>
               </form>

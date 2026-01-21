@@ -1,6 +1,6 @@
 import type { Env } from '../core-utils';
 import { UserEntity, ClassEntity, AnnouncementEntity, ScheduleEntity, ClassScheduleState, CourseEntity, GradeEntity } from '../entities';
-import type { SchoolUser, SchoolClass, Announcement, Student, ScheduleItem, Grade, Course } from '@shared/types';
+import type { SchoolUser, SchoolClass, Announcement, Student, ScheduleItem, Grade, Course, UserRole } from '@shared/types';
 
 export class CommonDataService {
   static async getStudentWithClassAndSchedule(env: Env, studentId: string): Promise<{
@@ -81,12 +81,12 @@ export class CommonDataService {
     return await UserEntity.countByClassId(env, classId);
   }
 
-  static async getUserCountByRole(env: Env, role: string): Promise<number> {
-    return await UserEntity.countByRole(env, role as any);
+  static async getUserCountByRole(env: Env, role: UserRole): Promise<number> {
+    return await UserEntity.countByRole(env, role);
   }
 
-  static async getByRole(env: Env, role: string): Promise<SchoolUser[]> {
-    return await UserEntity.getByRole(env, role as any);
+  static async getByRole(env: Env, role: UserRole): Promise<SchoolUser[]> {
+    return await UserEntity.getByRole(env, role);
   }
 
   static async getAllUsers(env: Env): Promise<SchoolUser[]> {

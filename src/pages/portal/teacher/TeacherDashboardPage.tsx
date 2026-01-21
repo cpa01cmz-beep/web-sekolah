@@ -4,6 +4,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { EmptyState } from '@/components/ui/empty-state';
 import { DashboardSkeleton } from '@/components/ui/loading-skeletons';
 import { PageHeader } from '@/components/PageHeader';
+import { DashboardStatCard } from '@/components/dashboard/DashboardStatCard';
 import { BookCopy, Megaphone, Clock, AlertTriangle, Inbox } from 'lucide-react';
 import { SlideUp } from '@/components/animations';
 import { useTeacherDashboard } from '@/hooks/useTeacher';
@@ -64,16 +65,13 @@ export function TeacherDashboardPage() {
       </SlideUp>
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         <SlideUp delay={0.2}>
-          <Card className="h-full hover:shadow-lg transition-shadow duration-200">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Your Classes</CardTitle>
-              <BookCopy className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold mb-2">{data.totalClasses}</div>
-              <p className="text-xs text-muted-foreground">Total students: {data.totalStudents}</p>
-            </CardContent>
-          </Card>
+          <DashboardStatCard
+            title="Your Classes"
+            value={data.totalClasses.toString()}
+            icon={<BookCopy className="h-4 w-4 text-muted-foreground" />}
+            subtitle={`Total students: ${data.totalStudents}`}
+            valueSize="3xl"
+          />
         </SlideUp>
         <SlideUp delay={0.3}>
           <Card className="h-full hover:shadow-lg transition-shadow duration-200">

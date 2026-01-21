@@ -5,6 +5,8 @@ import { WebhookConfigEntity } from '../../entities';
 import { logger } from '../../logger';
 import type { Context } from 'hono';
 import { withErrorHandler } from '../route-utils';
+import { validateBody, validateParams } from '../../middleware/validation';
+import { createWebhookConfigSchema, updateWebhookConfigSchema, paramsSchema } from '../../middleware/schemas';
 
 export function webhookConfigRoutes(app: Hono<{ Bindings: Env }>) {
   app.get('/api/webhooks', withErrorHandler('list webhooks')(async (c: Context) => {
@@ -24,16 +26,7 @@ export function webhookConfigRoutes(app: Hono<{ Bindings: Env }>) {
   }));
 
   app.post('/api/webhooks', withErrorHandler('create webhook')(async (c: Context) => {
-    const body = await c.req.json<{
-      url: string;
-      events: string[];
-      secret: string;
-      active?: boolean;
-    }>();
-
-    if (!body.url || !body.events || !body.secret) {
-      return bad(c, 'Missing required fields: url, events, secret');
-    }
+    const body = await c.req.json();
 
     const id = `webhook-${crypto.randomUUID()}`;
     const now = new Date().toISOString();
@@ -57,18 +50,13 @@ export function webhookConfigRoutes(app: Hono<{ Bindings: Env }>) {
 
    app.put('/api/webhooks/:id', withErrorHandler('update webhook')(async (c: Context) => {
      const id = c.req.param('id');
+     const body = await c.req.json();
+
      const existing = await new WebhookConfigEntity(c.env, id).getState();
 
      if (!existing || existing.deletedAt) {
        return notFound(c, 'Webhook configuration not found');
      }
-
-     const body = await c.req.json<{
-       url?: string;
-       events?: string[];
-       secret?: string;
-       active?: boolean;
-     }>();
 
      const updated = {
        ...existing,

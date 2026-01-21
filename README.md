@@ -4,7 +4,7 @@
 
 [![🤖 iFlow CLI Automation](https://img.shields.io/badge/iFlow--CLI-Automation-blue)](https://github.com/iflow-ai/iflow-cli-action)
 
-[![Tests: 2079 passing](https://img.shields.io/badge/Tests-2079%20passing-brightgreen)](https://github.com/cpa01cmz-beep/web-sekolah/actions)
+[![Tests: 2159 passing](https://img.shields.io/badge/Tests-2159%20passing-brightgreen)](https://github.com/cpa01cmz-beep/web-sekolah/actions)
 [![Security: 95/100](https://img.shields.io/badge/Security-95%2F100-success)](./docs/SECURITY_ASSESSMENT_2026-01-08.md)
 [![TypeScript: Strict](https://img.shields.io/badge/TypeScript-Strict-blue)](https://www.typescriptlang.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
@@ -52,6 +52,7 @@ The system is built on Cloudflare's high-performance serverless infrastructure, 
 ## Key Features
 
 - **Public Landing Page**: A professional, public-facing homepage serving as the school's digital front door.
+- **PPDB (New Student Admission)**: Online admission portal for prospective students with application form, requirements, and schedule information.
 - **Unified Login Portal**: A single, secure login page for all user roles (Student, Teacher, Parent, Admin) with role-based authentication.
 - **Student Portal**: Personalized dashboard for viewing schedules, grades (with RDM data design), digital student card, and announcements.
 - **Teacher Portal**: Dedicated workspace for managing classes, submitting grades, and posting announcements.
@@ -64,7 +65,7 @@ The system is built on Cloudflare's high-performance serverless infrastructure, 
 - **Load Time**: < 2 seconds on 3G connection
 - **API Response**: < 100ms average (Cloudflare Workers)
 - **Security**: 95/100 score (Production Ready ✅)
-- **Test Coverage**: 2079 tests passing (5 skipped, 155 todo)
+- **Test Coverage**: 2159 tests passing (5 skipped, 155 todo)
 
 ## Technology Stack
 
@@ -146,10 +147,11 @@ After starting the application:
    - Click "Login" to access your role-specific portal
 
 3. **Explore Your Portal**:
-   - **Student Portal**: View your schedule, grades, student card, and announcements
-   - **Teacher Portal**: Manage your classes, submit grades, and post announcements
-   - **Parent Portal**: Monitor your child's academic progress
-   - **Admin Portal**: Manage users and oversee school-wide data
+    - **Student Portal**: View your schedule, grades, student card, and announcements
+    - **Teacher Portal**: Manage your classes, submit grades, and post announcements
+    - **Parent Portal**: Monitor your child's academic progress
+    - **Admin Portal**: Manage users and oversee school-wide data
+    - **PPDB Portal**: New students can apply for admission at `/ppdb`
 
 ### Example User Credentials
 
@@ -221,7 +223,7 @@ Run the test suite to verify everything is working:
 npm test
 ```
 
-All tests should pass (currently 2079 tests passing, 5 skipped, 155 todo).
+All tests should pass (currently 2159 tests passing, 5 skipped, 155 todo).
 
 ### Type Checking
 
@@ -352,7 +354,7 @@ git push origin feature/your-feature-name
 ```
 
 **Contribution Guidelines**
-- ✅ All tests passing (1303 tests)
+- ✅ All tests passing (2159 tests)
 - ✅ Zero linting errors
 - ✅ TypeScript compilation successful
 - ✅ Documentation updated for new features
