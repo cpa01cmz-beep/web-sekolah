@@ -12,7 +12,7 @@ import { getCurrentUserId } from '../type-guards';
 import type { Context } from 'hono';
 
 export function teacherRoutes(app: Hono<{ Bindings: Env }>) {
-  app.get('/api/teachers/:id/dashboard', ...withUserValidation('teacher', 'dashboard'), async (c: Context) => {
+  app.get('/api/teachers/:id/dashboard', ...withUserValidation('teacher', 'dashboard'), withErrorHandler('get teacher dashboard')(async (c: Context) => {
     const requestedTeacherId = c.req.param('id');
     const { teacher, classes: teacherClasses } = await CommonDataService.getTeacherWithClasses(c.env, requestedTeacherId);
     if (!teacher) {
@@ -39,12 +39,12 @@ export function teacherRoutes(app: Hono<{ Bindings: Env }>) {
     };
 
     return ok(c, dashboardData);
-  });
+  }));
 
-  app.get('/api/teachers/:id/announcements', ...withUserValidation('teacher', 'announcements'), async (c: Context) => {
+  app.get('/api/teachers/:id/announcements', ...withUserValidation('teacher', 'announcements'), withErrorHandler('get teacher announcements')(async (c: Context) => {
     const filteredAnnouncements = await CommonDataService.getAnnouncementsByRole(c.env, 'teacher');
     return ok(c, filteredAnnouncements);
-  });
+  }));
 
   app.post('/api/teachers/grades', ...withAuth('teacher'), validateBody(createGradeSchema), withErrorHandler('create grade')(async (c: Context) => {
     const gradeData = c.get('validatedBody') as SubmitGradeData;

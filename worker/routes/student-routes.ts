@@ -8,22 +8,22 @@ import { withUserValidation, withErrorHandler } from './route-utils';
 import type { Context } from 'hono';
 
 export function studentRoutes(app: Hono<{ Bindings: Env }>) {
-  app.get('/api/students/:id/grades', ...withUserValidation('student', 'grades'), async (c: Context) => {
+  app.get('/api/students/:id/grades', ...withUserValidation('student', 'grades'), withErrorHandler('get student grades')(async (c: Context) => {
     const requestedStudentId = c.req.param('id');
     const grades = await GradeService.getStudentGrades(c.env, requestedStudentId);
     return ok(c, grades);
-  });
+  }));
 
-  app.get('/api/students/:id/schedule', ...withUserValidation('student', 'schedule'), async (c: Context) => {
+  app.get('/api/students/:id/schedule', ...withUserValidation('student', 'schedule'), withErrorHandler('get student schedule')(async (c: Context) => {
     const requestedStudentId = c.req.param('id');
     const { student, classData, schedule } = await CommonDataService.getStudentWithClassAndSchedule(c.env, requestedStudentId);
     if (!student || !student.classId || !classData || !schedule) {
       return notFound(c, 'Student or class not found');
     }
     return ok(c, schedule?.items || []);
-  });
+  }));
 
-  app.get('/api/students/:id/card', ...withUserValidation('student', 'card'), async (c: Context) => {
+  app.get('/api/students/:id/card', ...withUserValidation('student', 'card'), withErrorHandler('get student card')(async (c: Context) => {
     const requestedStudentId = c.req.param('id');
     const { student, classData } = await CommonDataService.getStudentForGrades(c.env, requestedStudentId);
     if (!student || student.role !== 'student') {
@@ -54,18 +54,11 @@ export function studentRoutes(app: Hono<{ Bindings: Env }>) {
     };
 
     return ok(c, cardData);
-  });
+  }));
 
-  app.get('/api/students/:id/dashboard', ...withUserValidation('student', 'dashboard'), async (c: Context) => {
+  app.get('/api/students/:id/dashboard', ...withUserValidation('student', 'dashboard'), withErrorHandler('get student dashboard')(async (c: Context) => {
     const requestedStudentId = c.req.param('id');
-    try {
-      const dashboardData = await StudentDashboardService.getDashboardData(c.env, requestedStudentId);
-      return ok(c, dashboardData);
-    } catch (error) {
-      if (error instanceof Error && error.message === 'Student not found') {
-        return notFound(c, 'Student not found');
-      }
-      throw error;
-    }
-  });
+    const dashboardData = await StudentDashboardService.getDashboardData(c.env, requestedStudentId);
+    return ok(c, dashboardData);
+  }));
 }

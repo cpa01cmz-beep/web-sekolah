@@ -7,11 +7,11 @@ import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Menu, Bell, GraduationCap } from 'lucide-react';
 import { Toaster } from 'sonner';
 import { cn } from '@/lib/utils';
-import { useState, useCallback } from 'react';
+import { useState, useCallback, memo } from 'react';
 import { SkipLink } from '@/components/SkipLink';
 import { navLinksMap, NavLink as NavLinkType } from '@/config/navigation';
 import { THEME_COLORS } from '@/theme/colors';
-export function PortalLayout() {
+export const PortalLayout = memo(function PortalLayout() {
   const user = useAuthStore((state) => state.user);
   const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -87,4 +87,5 @@ export function PortalLayout() {
       <Toaster richColors />
     </div>
   );
-}
+});
+PortalLayout.displayName = 'PortalLayout';
