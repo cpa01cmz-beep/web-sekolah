@@ -79,7 +79,6 @@ All security headers implemented in `worker/middleware/security-headers.ts`:
 | X-Content-Type-Options | nosniff | MIME type sniffing prevention |
 | Referrer-Policy | strict-origin-when-cross-origin | Referrer information control |
 | Permissions-Policy | geolocation=(), microphone=(), camera=() | Feature access control |
-| X-XSS-Protection | 1; mode=block | Legacy XSS protection |
 | Cross-Origin-Opener-Policy | same-origin | Cross-origin opener control |
 | Cross-Origin-Resource-Policy | same-site | Cross-origin resource control |
 
