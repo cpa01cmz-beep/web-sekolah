@@ -95,37 +95,37 @@ describe('ParentService', () => {
           courseId: 'eng-01',
         },
       ];
-
-      mockRepository.setMockData(`/api/students/${childId}/schedule`, mockData);
+ 
+      mockRepository.setMockData(`/api/parents/me/schedule`, mockData);
       const parentService = createParentService(mockRepository);
-
+ 
       const result = await parentService.getChildSchedule(childId);
-
+ 
       expect(result).toEqual(mockData);
       expect(result).toHaveLength(2);
     });
-
+ 
     it('should handle empty schedule', async () => {
       const childId = 'student-01';
       const mockData: any[] = [];
-
-      mockRepository.setMockData(`/api/students/${childId}/schedule`, mockData);
+ 
+      mockRepository.setMockData(`/api/parents/me/schedule`, mockData);
       const parentService = createParentService(mockRepository);
-
+ 
       const result = await parentService.getChildSchedule(childId);
-
+ 
       expect(result).toEqual([]);
     });
-
+ 
     it('should handle invalid child ID', async () => {
       const childId = 'invalid-child';
       const mockError = new Error('Child not found');
       mockError.name = 'ApiError';
       (mockError as any).status = 404;
-
-      mockRepository.setMockError(`/api/students/${childId}/schedule`, mockError);
+ 
+      mockRepository.setMockError(`/api/parents/me/schedule`, mockError);
       const parentService = createParentService(mockRepository);
-
+ 
       await expect(parentService.getChildSchedule(childId)).rejects.toThrow('Child not found');
     });
   });

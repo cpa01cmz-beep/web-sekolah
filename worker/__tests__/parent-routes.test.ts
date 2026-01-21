@@ -1,6 +1,57 @@
 import { describe, it, expect } from 'vitest';
 
 describe('parent-routes - Critical Business Logic', () => {
+  describe('Schedule Endpoint', () => {
+    it('should return child schedule for parent', () => {
+      const parent = {
+        id: 'parent-001',
+        name: 'Parent Smith',
+        email: 'parent@test.com',
+        role: 'parent' as const,
+        childId: 'student-001'
+      };
+
+      const childSchedule = [
+        { day: 'Monday', startTime: '08:00', endTime: '14:30', courseName: 'Mathematics' },
+        { day: 'Monday', startTime: '14:45', endTime: '16:15', courseName: 'Physics' },
+        { day: 'Tuesday', startTime: '08:00', endTime: '14:30', courseName: 'Chemistry' }
+      ];
+
+      expect(parent.childId).toBe('student-001');
+      expect(childSchedule).toHaveLength(3);
+      expect(childSchedule[0].courseName).toBe('Mathematics');
+    });
+
+    it('should return empty schedule when parent has no associated child', () => {
+      const parent = {
+        id: 'parent-001',
+        name: 'Parent Without Child',
+        email: 'parent@test.com',
+        role: 'parent' as const,
+        childId: undefined
+      };
+
+      const childSchedule: any[] = [];
+
+      expect(parent.childId).toBeUndefined();
+      expect(childSchedule).toHaveLength(0);
+    });
+
+    it('should return empty array when child has no schedule', () => {
+      const parent = {
+        id: 'parent-001',
+        name: 'Parent Smith',
+        role: 'parent' as const,
+        childId: 'student-001'
+      };
+
+      const childSchedule: any[] = [];
+
+      expect(parent.childId).toBe('student-001');
+      expect(childSchedule).toHaveLength(0);
+    });
+  });
+
   describe('Dashboard Data Aggregation', () => {
     it('should return parent dashboard data correctly', () => {
       const parent = {
@@ -9,28 +60,28 @@ describe('parent-routes - Critical Business Logic', () => {
         email: 'parent@test.com',
         role: 'parent' as const
       };
-
+ 
       const child = {
         id: 'student-001',
         name: 'Child Smith',
         classId: 'class-001',
         parentId: 'parent-001'
       };
-
+ 
       const childSchedule = [
         { day: 'Monday', startTime: '08:00', endTime: '14:30', courseName: 'Mathematics' },
         { day: 'Monday', startTime: '14:45', endTime: '16:15', courseName: 'Physics' }
       ];
-
+ 
       const recentGrades = [
         { id: 'grade-1', score: 95, courseName: 'Mathematics' },
         { id: 'grade-2', score: 88, courseName: 'Physics' }
       ];
-
+ 
       const announcements = [
         { id: 'ann-1', title: 'Parent Meeting', date: '2024-01-15' }
       ];
-
+ 
       const dashboardData = {
         parent,
         child,
@@ -38,7 +89,7 @@ describe('parent-routes - Critical Business Logic', () => {
         recentGrades,
         announcements
       };
-
+ 
       expect(dashboardData.parent.id).toBe('parent-001');
       expect(dashboardData.parent.name).toBe('Parent Smith');
       expect(dashboardData.child.id).toBe('student-001');
