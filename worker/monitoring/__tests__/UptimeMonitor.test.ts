@@ -52,8 +52,8 @@ describe('UptimeMonitor', () => {
       const afterReset = monitor.getUptime();
       vi.useRealTimers();
 
-      expect(beforeReset).toBeGreaterThanOrEqual(100);
-      expect(afterReset).toBeLessThan(20);
+      expect(beforeReset).toBe(100);
+      expect(afterReset).toBe(10);
     });
 
     it('should restart uptime tracking from zero', () => {
@@ -64,8 +64,7 @@ describe('UptimeMonitor', () => {
       const uptime = monitor.getUptime();
       vi.useRealTimers();
 
-      expect(uptime).toBeGreaterThanOrEqual(30);
-      expect(uptime).toBeLessThan(40);
+      expect(uptime).toBe(30);
     });
 
     it('should handle multiple resets correctly', () => {
@@ -85,12 +84,9 @@ describe('UptimeMonitor', () => {
       
       vi.useRealTimers();
 
-      expect(uptime1).toBeGreaterThanOrEqual(10);
-      expect(uptime1).toBeLessThan(15);
-      expect(uptime2).toBeGreaterThanOrEqual(20);
-      expect(uptime2).toBeLessThan(25);
-      expect(uptime3).toBeGreaterThanOrEqual(30);
-      expect(uptime3).toBeLessThan(35);
+      expect(uptime1).toBe(10);
+      expect(uptime2).toBe(20);
+      expect(uptime3).toBe(30);
     });
   });
 
@@ -111,7 +107,7 @@ describe('UptimeMonitor', () => {
       const uptime = freshMonitor.getUptime();
       vi.useRealTimers();
 
-      expect(uptime).toBeGreaterThanOrEqual(999999);
+      expect(uptime).toBe(999999);
     });
   });
 });

@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { CircuitBreakerMonitor } from '../CircuitBreakerMonitor';
 
 describe('CircuitBreakerMonitor', () => {
@@ -10,17 +10,20 @@ describe('CircuitBreakerMonitor', () => {
 
   describe('setState()', () => {
     it('should set circuit breaker state', () => {
+      vi.useFakeTimers().setSystemTime(new Date('2024-01-01T00:00:00.000Z'));
+      const now = Date.now();
       const state = {
         isOpen: true,
         failureCount: 5,
-        lastFailureTime: Date.now(),
-        nextAttemptTime: Date.now() + 60000,
+        lastFailureTime: now,
+        nextAttemptTime: now + 60000,
       };
 
       monitor.setState(state);
       const retrievedState = monitor.getState();
 
       expect(retrievedState).toEqual(state);
+      vi.useRealTimers();
     });
 
     it('should overwrite existing state', () => {
@@ -31,11 +34,13 @@ describe('CircuitBreakerMonitor', () => {
         nextAttemptTime: 0,
       };
 
+      vi.useFakeTimers().setSystemTime(new Date('2024-01-01T00:00:00.000Z'));
+      const now = Date.now();
       const state2 = {
         isOpen: true,
         failureCount: 5,
-        lastFailureTime: Date.now(),
-        nextAttemptTime: Date.now() + 60000,
+        lastFailureTime: now,
+        nextAttemptTime: now + 60000,
       };
 
       monitor.setState(state1);
@@ -43,6 +48,7 @@ describe('CircuitBreakerMonitor', () => {
       const retrievedState = monitor.getState();
 
       expect(retrievedState).toEqual(state2);
+      vi.useRealTimers();
     });
 
     it('should handle state with isOpen=false', () => {
@@ -61,11 +67,13 @@ describe('CircuitBreakerMonitor', () => {
     });
 
     it('should handle state with isOpen=true', () => {
+      vi.useFakeTimers().setSystemTime(new Date('2024-01-01T00:00:00.000Z'));
+      const now = Date.now();
       const state = {
         isOpen: true,
         failureCount: 10,
-        lastFailureTime: Date.now(),
-        nextAttemptTime: Date.now() + 120000,
+        lastFailureTime: now,
+        nextAttemptTime: now + 120000,
       };
 
       monitor.setState(state);
@@ -73,6 +81,7 @@ describe('CircuitBreakerMonitor', () => {
 
       expect(retrievedState).toEqual(state);
       expect(retrievedState?.isOpen).toBe(true);
+      vi.useRealTimers();
     });
 
     it('should handle state with zero failure count', () => {
@@ -90,17 +99,20 @@ describe('CircuitBreakerMonitor', () => {
     });
 
     it('should handle state with high failure count', () => {
+      vi.useFakeTimers().setSystemTime(new Date('2024-01-01T00:00:00.000Z'));
+      const now = Date.now();
       const state = {
         isOpen: true,
         failureCount: 999999,
-        lastFailureTime: Date.now(),
-        nextAttemptTime: Date.now() + 60000,
+        lastFailureTime: now,
+        nextAttemptTime: now + 60000,
       };
 
       monitor.setState(state);
       const retrievedState = monitor.getState();
 
       expect(retrievedState?.failureCount).toBe(999999);
+      vi.useRealTimers();
     });
   });
 
@@ -112,25 +124,30 @@ describe('CircuitBreakerMonitor', () => {
     });
 
     it('should return state after setState', () => {
+      vi.useFakeTimers().setSystemTime(new Date('2024-01-01T00:00:00.000Z'));
+      const now = Date.now();
       const state = {
         isOpen: true,
         failureCount: 5,
-        lastFailureTime: Date.now(),
-        nextAttemptTime: Date.now() + 60000,
+        lastFailureTime: now,
+        nextAttemptTime: now + 60000,
       };
 
       monitor.setState(state);
       const retrievedState = monitor.getState();
 
       expect(retrievedState).toEqual(state);
+      vi.useRealTimers();
     });
 
     it('should return copy of state to prevent mutation', () => {
+      vi.useFakeTimers().setSystemTime(new Date('2024-01-01T00:00:00.000Z'));
+      const now = Date.now();
       const state = {
         isOpen: true,
         failureCount: 5,
-        lastFailureTime: Date.now(),
-        nextAttemptTime: Date.now() + 60000,
+        lastFailureTime: now,
+        nextAttemptTime: now + 60000,
       };
 
       monitor.setState(state);
@@ -145,9 +162,12 @@ describe('CircuitBreakerMonitor', () => {
       expect(state2).toEqual(state);
       expect(state2?.isOpen).toBe(true);
       expect(state2?.failureCount).toBe(5);
+      vi.useRealTimers();
     });
 
     it('should return updated state after multiple setState calls', () => {
+      vi.useFakeTimers().setSystemTime(new Date('2024-01-01T00:00:00.000Z'));
+      const now = Date.now();
       const state1 = {
         isOpen: false,
         failureCount: 0,
@@ -158,15 +178,15 @@ describe('CircuitBreakerMonitor', () => {
       const state2 = {
         isOpen: true,
         failureCount: 3,
-        lastFailureTime: Date.now(),
-        nextAttemptTime: Date.now() + 30000,
+        lastFailureTime: now,
+        nextAttemptTime: now + 30000,
       };
 
       const state3 = {
         isOpen: true,
         failureCount: 7,
-        lastFailureTime: Date.now(),
-        nextAttemptTime: Date.now() + 60000,
+        lastFailureTime: now,
+        nextAttemptTime: now + 60000,
       };
 
       monitor.setState(state1);
@@ -177,16 +197,19 @@ describe('CircuitBreakerMonitor', () => {
 
       monitor.setState(state3);
       expect(monitor.getState()).toEqual(state3);
+      vi.useRealTimers();
     });
   });
 
   describe('reset()', () => {
     it('should clear state after reset', () => {
+      vi.useFakeTimers().setSystemTime(new Date('2024-01-01T00:00:00.000Z'));
+      const now = Date.now();
       const state = {
         isOpen: true,
         failureCount: 5,
-        lastFailureTime: Date.now(),
-        nextAttemptTime: Date.now() + 60000,
+        lastFailureTime: now,
+        nextAttemptTime: now + 60000,
       };
 
       monitor.setState(state);
@@ -194,14 +217,17 @@ describe('CircuitBreakerMonitor', () => {
       const retrievedState = monitor.getState();
 
       expect(retrievedState).toBeNull();
+      vi.useRealTimers();
     });
 
     it('should allow setState after reset', () => {
+      vi.useFakeTimers().setSystemTime(new Date('2024-01-01T00:00:00.000Z'));
+      const now = Date.now();
       const state1 = {
         isOpen: true,
         failureCount: 5,
-        lastFailureTime: Date.now(),
-        nextAttemptTime: Date.now() + 60000,
+        lastFailureTime: now,
+        nextAttemptTime: now + 60000,
       };
 
       monitor.setState(state1);
@@ -218,14 +244,17 @@ describe('CircuitBreakerMonitor', () => {
       const retrievedState = monitor.getState();
 
       expect(retrievedState).toEqual(state2);
+      vi.useRealTimers();
     });
 
     it('should handle multiple resets', () => {
+      vi.useFakeTimers().setSystemTime(new Date('2024-01-01T00:00:00.000Z'));
+      const now = Date.now();
       const state = {
         isOpen: true,
         failureCount: 5,
-        lastFailureTime: Date.now(),
-        nextAttemptTime: Date.now() + 60000,
+        lastFailureTime: now,
+        nextAttemptTime: now + 60000,
       };
 
       monitor.setState(state);
@@ -234,6 +263,7 @@ describe('CircuitBreakerMonitor', () => {
 
       const retrievedState = monitor.getState();
       expect(retrievedState).toBeNull();
+      vi.useRealTimers();
     });
 
     it('should handle reset without prior setState', () => {
@@ -246,17 +276,20 @@ describe('CircuitBreakerMonitor', () => {
 
   describe('Edge Cases', () => {
     it('should handle state with negative lastFailureTime', () => {
+      vi.useFakeTimers().setSystemTime(new Date('2024-01-01T00:00:00.000Z'));
+      const now = Date.now();
       const state = {
         isOpen: true,
         failureCount: 5,
         lastFailureTime: -1,
-        nextAttemptTime: Date.now() + 60000,
+        nextAttemptTime: now + 60000,
       };
 
       monitor.setState(state);
       const retrievedState = monitor.getState();
 
       expect(retrievedState?.lastFailureTime).toBe(-1);
+      vi.useRealTimers();
     });
 
     it('should handle state with zero nextAttemptTime', () => {
@@ -274,36 +307,44 @@ describe('CircuitBreakerMonitor', () => {
     });
 
     it('should handle state with very large nextAttemptTime', () => {
+      vi.useFakeTimers().setSystemTime(new Date('2024-01-01T00:00:00.000Z'));
+      const now = Date.now();
       const state = {
         isOpen: true,
         failureCount: 5,
-        lastFailureTime: Date.now(),
-        nextAttemptTime: Date.now() + 999999999,
+        lastFailureTime: now,
+        nextAttemptTime: now + 999999999,
       };
 
       monitor.setState(state);
       const retrievedState = monitor.getState();
 
-      expect(retrievedState?.nextAttemptTime).toBeGreaterThan(Date.now());
+      expect(retrievedState?.nextAttemptTime).toBe(now + 999999999);
+      vi.useRealTimers();
     });
 
     it('should handle state with lastFailureTime > nextAttemptTime', () => {
+      vi.useFakeTimers().setSystemTime(new Date('2024-01-01T00:00:00.000Z'));
+      const now = Date.now();
       const state = {
         isOpen: true,
         failureCount: 5,
-        lastFailureTime: Date.now() + 100000,
-        nextAttemptTime: Date.now(),
+        lastFailureTime: now + 100000,
+        nextAttemptTime: now,
       };
 
       monitor.setState(state);
       const retrievedState = monitor.getState();
 
       expect(retrievedState).toEqual(state);
+      vi.useRealTimers();
     });
   });
 
   describe('State Transition Scenarios', () => {
     it('should handle closed to open transition', () => {
+      vi.useFakeTimers().setSystemTime(new Date('2024-01-01T00:00:00.000Z'));
+      const now = Date.now();
       const closedState = {
         isOpen: false,
         failureCount: 0,
@@ -314,8 +355,8 @@ describe('CircuitBreakerMonitor', () => {
       const openState = {
         isOpen: true,
         failureCount: 5,
-        lastFailureTime: Date.now(),
-        nextAttemptTime: Date.now() + 60000,
+        lastFailureTime: now,
+        nextAttemptTime: now + 60000,
       };
 
       monitor.setState(closedState);
@@ -323,14 +364,17 @@ describe('CircuitBreakerMonitor', () => {
 
       monitor.setState(openState);
       expect(monitor.getState()?.isOpen).toBe(true);
+      vi.useRealTimers();
     });
 
     it('should handle open to closed transition', () => {
+      vi.useFakeTimers().setSystemTime(new Date('2024-01-01T00:00:00.000Z'));
+      const now = Date.now();
       const openState = {
         isOpen: true,
         failureCount: 5,
-        lastFailureTime: Date.now(),
-        nextAttemptTime: Date.now() + 60000,
+        lastFailureTime: now,
+        nextAttemptTime: now + 60000,
       };
 
       const closedState = {
@@ -345,9 +389,12 @@ describe('CircuitBreakerMonitor', () => {
 
       monitor.setState(closedState);
       expect(monitor.getState()?.isOpen).toBe(false);
+      vi.useRealTimers();
     });
 
     it('should handle incremental failure count updates', () => {
+      vi.useFakeTimers().setSystemTime(new Date('2024-01-01T00:00:00.000Z'));
+      const now = Date.now();
       monitor.setState({
         isOpen: false,
         failureCount: 0,
@@ -359,12 +406,13 @@ describe('CircuitBreakerMonitor', () => {
         monitor.setState({
           isOpen: false,
           failureCount: i,
-          lastFailureTime: Date.now(),
-          nextAttemptTime: Date.now() + 60000,
+          lastFailureTime: now,
+          nextAttemptTime: now + 60000,
         });
 
         expect(monitor.getState()?.failureCount).toBe(i);
       }
+      vi.useRealTimers();
     });
   });
 });
