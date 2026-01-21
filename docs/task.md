@@ -17105,6 +17105,131 @@ import { MockRepository } from '@/test/mocks';
 const mockStudentService = createStudentService(new MockRepository());
 ```
 
+### Code Architect - API Client Module Extraction (2026-01-21) - Completed ✅
+
+**Task**: Extract api-client.ts into focused modules for improved modularity and separation of concerns
+
+**Problem**:
+- api-client.ts (299 lines) had multiple responsibilities mixed in single file
+- Query Client configuration, timeout handling, error handling, and React Query hooks all in one place
+- Violated Single Responsibility Principle - file did too much
+- Difficult to test individual concerns independently
+- Not easily extensible for new API patterns
+- High coupling between unrelated API concerns
+
+**Solution**:
+- Extracted api-client.ts into 5 focused modules with single responsibilities
+- Created src/lib/api/ directory with modular structure
+- Maintained backward compatibility with all existing imports
+- Each module is atomic, replaceable, and independently testable
+
+**Implementation**:
+
+1. **Created Query Client Module** at `src/lib/api/query-client.ts` (36 lines):
+   - Single responsibility: React Query client configuration
+   - Exports `queryClient` instance with default options
+   - Configures stale time, gc time, and retry behavior
+   - Handles query and mutation retry logic
+
+2. **Created Fetch Timeout Module** at `src/lib/api/fetch-timeout.ts` (30 lines):
+   - Single responsibility: HTTP request timeout handling
+   - Exports `fetchWithTimeout()` function with AbortController
+   - Handles timeout errors with proper error codes
+   - Reusable timeout configuration
+
+3. **Created Error Handling Module** at `src/lib/api/error-handling.ts` (83 lines):
+   - Single responsibility: API error creation and handling
+   - Exports error utility functions (createApiError, isRetryableStatus, shouldRetryError)
+   - Handles response parsing and error extraction
+   - Centralized error logic for consistency
+
+4. **Created React Query Hooks Module** at `src/lib/api/react-query-hooks.ts` (59 lines):
+   - Single responsibility: Custom React Query hooks
+   - Exports `useQuery()` and `useMutation()` hooks
+   - Wraps @tanstack/react-query with automatic API path construction
+   - Supports timeout and circuit breaker options
+
+5. **Created Barrel Export** at `src/lib/api/index.ts` (13 lines):
+   - Single responsibility: Module exports organization
+   - Provides clean import interface for api module
+   - Exports all sub-modules for flexibility
+
+6. **Refactored api-client.ts** (299 → 102 lines, 66% reduction):
+   - Imports from extracted modules
+   - Maintains core apiClient() function
+   - Re-exports all necessary items for backward compatibility
+   - Manages circuit breaker state and exports
+
+**Metrics**:
+
+| Metric | Before | After | Improvement |
+|--------|---------|--------|-------------|
+| api-client.ts lines | 299 | 102 | 66% reduction |
+| Module structure | Single monolithic file | 5 focused modules | Complete separation |
+| Concerns per module | 5 mixed | 1 per module | 80% reduction |
+| TypeScript compilation | Pass | Pass | No regressions |
+| Testability | Difficult (mixed concerns) | Easy (focused modules) | Significant improvement |
+
+**Benefits Achieved**:
+    - ✅ api-client.ts reduced from 299 to 102 lines (66% reduction)
+    - ✅ 5 focused modules created (query-client, fetch-timeout, error-handling, react-query-hooks, index)
+    - ✅ Each module has single responsibility (SRP applied)
+    - ✅ Modules are atomic and replaceable
+    - ✅ Improved testability (independent module testing)
+    - ✅ Clean separation of concerns (Query Client, Timeout, Error Handling, React Query Hooks)
+    - ✅ Barrel export for clean module boundaries
+    - ✅ Backward compatibility maintained (all existing imports work)
+    - ✅ Zero breaking changes to existing code
+    - ✅ TypeScript compilation successful (0 errors)
+
+**Technical Details**:
+
+**Module Separation**:
+- `src/lib/api/query-client.ts`: QueryClient configuration (36 lines)
+- `src/lib/api/fetch-timeout.ts`: HTTP timeout handling (30 lines)
+- `src/lib/api/error-handling.ts`: Error utilities (83 lines)
+- `src/lib/api/react-query-hooks.ts`: React Query hooks (59 lines)
+- `src/lib/api/index.ts`: Barrel export (13 lines)
+- `src/lib/api-client.ts`: Core API client (102 lines)
+
+**Backward Compatibility**:
+- All existing imports continue to work: `import { apiClient, queryClient, useQuery, useMutation, getCircuitBreakerState, resetCircuitBreaker } from '@/lib/api-client'`
+- No changes required to existing code using api-client.ts
+- Re-exports maintain original interface
+
+**Architectural Impact**:
+- **Modularity**: Each module is atomic and replaceable
+- **Separation of Concerns**: Query Client, Timeout, Error Handling, and React Query Hooks are separate
+- **Clean Architecture**: Dependencies flow correctly (api-client → sub-modules)
+- **Single Responsibility**: Each module handles one concern only
+- **Open/Closed**: New API patterns can be added without modifying existing modules
+- **Maintainability**: Changes to one concern don't affect others
+- **Testability**: Each module can be tested independently
+
+**Success Criteria**:
+    - [x] 5 focused modules created (query-client, fetch-timeout, error-handling, react-query-hooks, index)
+    - [x] api-client.ts reduced from 299 to 102 lines (66% reduction)
+    - [x] Each module has single responsibility
+    - [x] Backward compatibility maintained (all existing imports work)
+    - [x] TypeScript compilation passed (0 errors)
+    - [x] Zero breaking changes to existing code
+    - [x] Improved modularity and separation of concerns
+
+**Impact**:
+    - `src/lib/api/query-client.ts`: New module (36 lines, Query Client configuration)
+    - `src/lib/api/fetch-timeout.ts`: New module (30 lines, timeout handling)
+    - `src/lib/api/error-handling.ts`: New module (83 lines, error utilities)
+    - `src/lib/api/react-query-hooks.ts`: New module (59 lines, React Query hooks)
+    - `src/lib/api/index.ts`: New module (13 lines, barrel export)
+    - `src/lib/api-client.ts`: Refactored from 299 to 102 lines (66% reduction)
+    - Code organization: 5 focused modules vs 1 monolithic file
+    - Testability: Improved (independent module testing)
+    - Maintainability: Improved (separation of concerns)
+
+**Success**: ✅ **API CLIENT MODULE EXTRACTION COMPLETE, REDUCED MAIN FILE BY 66%, APPLIED SINGLE RESPONSIBILITY PRINCIPLE, IMPROVED MODULARITY AND TESTABILITY**
+
+---
+
 ## In Progress
 
 None currently in progress.
