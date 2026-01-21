@@ -83,6 +83,16 @@ export const validationRules = {
       message: `NISN must be exactly ${length} digits`,
     }),
   },
+  password: {
+    required: {
+      validate: (value: string) => value.trim().length > 0,
+      message: 'Password is required',
+    },
+    minLength: (min: number) => ({
+      validate: (value: string) => value.length >= min,
+      message: `Password must be at least ${min} characters`,
+    }),
+  },
   message: {
     required: {
       validate: (value: string) => value.trim().length > 0,
@@ -175,5 +185,12 @@ export function validateContent(value: string, showErrors: boolean, minLength: n
   return validateField(value, [
     validationRules.content.required,
     validationRules.content.minLength(minLength),
+  ], { showErrors });
+}
+
+export function validatePassword(value: string, showErrors: boolean, minLength: number = 6): string | undefined {
+  return validateField(value, [
+    validationRules.password.required,
+    validationRules.password.minLength(minLength),
   ], { showErrors });
 }
