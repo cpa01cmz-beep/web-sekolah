@@ -12,6 +12,7 @@ import { Toaster, toast } from 'sonner';
 import { THEME_COLORS } from '@/theme/colors';
 import { RoleButtonGrid } from '@/components/forms/RoleButtonGrid';
 import { validateEmail, validatePassword } from '@/utils/validation';
+import { RetryDelay } from '@/config/time';
 
 export function LoginPage() {
   const navigate = useNavigate();
@@ -36,7 +37,7 @@ export function LoginPage() {
       toast.success(`Logged in as ${role}. Redirecting...`);
       setTimeout(() => {
         navigate(`/portal/${role}/dashboard`);
-      }, 1000);
+      }, RetryDelay.ONE_SECOND);
     } catch (error) {
       toast.error('Login failed. Please check your credentials.');
       logger.error('Login error', error, { email, role });
