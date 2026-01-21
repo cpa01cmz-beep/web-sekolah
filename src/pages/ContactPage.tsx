@@ -3,10 +3,11 @@ import { Card, CardContent } from '@/components/ui/card';
 import { SlideUp, SlideLeft, SlideRight } from '@/components/animations';
 import { Phone, Mail, MapPin } from 'lucide-react';
 import { ContactForm } from '@/components/forms/ContactForm';
+import { RetryDelay } from '@/config/time';
 
 export function ContactPage() {
-  const handleSubmit = async (data: { name: string; email: string; message: string }) => {
-    await new Promise(resolve => setTimeout(resolve, 1000));
+  const handleSubmit = async (_data: { name: string; email: string; message: string }) => {
+    await new Promise(resolve => setTimeout(resolve, RetryDelay.ONE_SECOND));
   };
 
   return (
