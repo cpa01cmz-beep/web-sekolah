@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter, DialogClose } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -23,18 +23,25 @@ interface GradeFormProps {
 }
 
 export function GradeForm({ open, onClose, editingStudent, onSave, isLoading }: GradeFormProps) {
-  const [currentScore, setCurrentScore] = useState<string>('');
-  const [currentFeedback, setCurrentFeedback] = useState<string>('');
+  const [currentScore, setCurrentScore] = useState<string>(() => editingStudent?.score?.toString() || '');
+  const [currentFeedback, setCurrentFeedback] = useState<string>(() => editingStudent?.feedback || '');
 
-  useEffect(() => {
-    if (editingStudent) {
-      setCurrentScore(editingStudent.score?.toString() || '');
-      setCurrentFeedback(editingStudent.feedback || '');
-    } else {
+  const handleClose = useCallback(() => {
+    setCurrentScore('');
+    setCurrentFeedback('');
+    onClose();
+  }, [onClose]);
+
+  const handleOpenChange = useCallback((newOpen: boolean) => {
+    if (!newOpen) {
       setCurrentScore('');
       setCurrentFeedback('');
+      onClose();
+    } else if (editingStudent) {
+      setCurrentScore(editingStudent.score?.toString() || '');
+      setCurrentFeedback(editingStudent.feedback || '');
     }
-  }, [editingStudent]);
+  }, [editingStudent, onClose]);
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -48,9 +55,7 @@ export function GradeForm({ open, onClose, editingStudent, onSave, isLoading }: 
   const isScoreInvalid = currentScore !== '' && !isValidScore(parseInt(currentScore, 10));
 
   return (
-    <Dialog open={open} onOpenChange={(open) => {
-      if (!open) onClose();
-    }}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Edit Grade for {editingStudent?.name}</DialogTitle>

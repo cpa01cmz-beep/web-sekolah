@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter, DialogClose } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -23,23 +23,25 @@ interface UserFormProps {
 }
 
 export function UserForm({ open, onClose, editingUser, onSave, isLoading }: UserFormProps) {
-  const [userName, setUserName] = useState('');
-  const [userEmail, setUserEmail] = useState('');
-  const [userRole, setUserRole] = useState<UserRole>('student');
+  const [userName, setUserName] = useState<string>(() => editingUser?.name || '');
+  const [userEmail, setUserEmail] = useState<string>(() => editingUser?.email || '');
+  const [userRole, setUserRole] = useState<UserRole>(() => editingUser?.role || 'student');
   const [showValidationErrors, setShowValidationErrors] = useState(false);
 
-  useEffect(() => {
-    if (editingUser) {
-      setUserName(editingUser.name);
-      setUserEmail(editingUser.email);
-      setUserRole(editingUser.role);
-    } else {
+  const handleOpenChange = useCallback((newOpen: boolean) => {
+    if (!newOpen) {
       setUserName('');
       setUserEmail('');
       setUserRole('student');
+      setShowValidationErrors(false);
+      onClose();
+    } else if (editingUser) {
+      setUserName(editingUser.name);
+      setUserEmail(editingUser.email);
+      setUserRole(editingUser.role);
+      setShowValidationErrors(false);
     }
-    setShowValidationErrors(false);
-  }, [editingUser, open]);
+  }, [editingUser, onClose]);
 
   const nameError = useMemo(() => validateName(userName, showValidationErrors), [userName, showValidationErrors]);
   const emailError = useMemo(() => validateEmail(userEmail, showValidationErrors), [userEmail, showValidationErrors]);
@@ -62,14 +64,12 @@ export function UserForm({ open, onClose, editingUser, onSave, isLoading }: User
   };
 
   return (
-    <Dialog open={open} onOpenChange={(open) => {
-      if (!open) onClose();
-    }}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>{editingUser ? 'Edit User' : 'Add New User'}</DialogTitle>
           <DialogDescription>
-            {editingUser ? 'Update the details for this user.' : 'Fill in the details to create a new user.'}
+            {editingUser ? 'Update details for this user.' : 'Fill in the details to create a new user.'}
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit}>
@@ -79,17 +79,17 @@ export function UserForm({ open, onClose, editingUser, onSave, isLoading }: User
                 Name <span className="text-destructive" aria-label="required">*</span>
               </Label>
               <div className="col-span-3 space-y-2">
-                <Input 
-                  id="name" 
-                  name="name" 
-                  value={userName} 
+                <Input
+                  id="name"
+                  name="name"
+                  value={userName}
                   onChange={(e) => setUserName(e.target.value)}
-                  required 
+                  required
                   aria-required="true"
                   aria-invalid={!!nameError}
                   aria-describedby={nameError ? 'name-error' : 'name-helper'}
                 />
-                <p id="name-helper" className="text-xs text-muted-foreground">Full name of the user</p>
+                <p id="name-helper" className="text-xs text-muted-foreground">Full name of user</p>
                 {nameError && (
                   <p id="name-error" className="text-xs text-destructive flex items-center gap-1" role="alert" aria-live="polite">
                     <AlertCircle className="h-3 w-3" aria-hidden="true" />
@@ -103,17 +103,17 @@ export function UserForm({ open, onClose, editingUser, onSave, isLoading }: User
                 Email <span className="text-destructive" aria-label="required">*</span>
               </Label>
               <div className="col-span-3 space-y-2">
-                <Input 
-                  id="email" 
-                  name="email" 
-                  type="email" 
-                  value={userEmail} 
-                  onChange={(e) => setUserEmail(e.target.value)} 
-                  required 
+                <Input
+                  id="email"
+                  name="email"
+                  type="email"
+                  value={userEmail}
+                  onChange={(e) => setUserEmail(e.target.value)}
+                  required
                   aria-required="true"
                   aria-invalid={!!emailError}
                   aria-describedby={emailError ? 'email-error' : 'email-helper'}
-                  placeholder="user@example.com" 
+                  placeholder="user@example.com"
                 />
                 <p id="email-helper" className="text-xs text-muted-foreground">Valid email address for account access</p>
                 {emailError && (
@@ -129,11 +129,11 @@ export function UserForm({ open, onClose, editingUser, onSave, isLoading }: User
                 Role <span className="text-destructive" aria-label="required">*</span>
               </Label>
               <div className="col-span-3 space-y-2">
-                <Select 
-                  name="role" 
-                  value={userRole} 
-                  onValueChange={(value: UserRole) => setUserRole(value)} 
-                  required 
+                <Select
+                  name="role"
+                  value={userRole}
+                  onValueChange={(value: UserRole) => setUserRole(value)}
+                  required
                   aria-required="true"
                   aria-invalid={!!roleError}
                 >

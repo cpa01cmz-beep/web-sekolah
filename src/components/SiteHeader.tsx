@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { GraduationCap, Menu } from 'lucide-react';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { useState } from 'react';
+import { useState, useCallback, MouseEvent } from 'react';
 import { THEME_COLORS } from '@/theme/colors';
 
 const navLinks = [
@@ -44,7 +44,23 @@ const navLinks = [
 
 export function SiteHeader() {
   const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
-  
+
+  const handleMobileNavClose = useCallback(() => {
+    setMobileMenuOpen(false);
+  }, []);
+
+  const handleLoginMouseEnter = useCallback((e: MouseEvent<HTMLButtonElement>) => {
+    e.currentTarget.style.backgroundColor = THEME_COLORS.PRIMARY_HOVER;
+  }, []);
+
+  const handleLoginMouseLeave = useCallback((e: MouseEvent<HTMLButtonElement>) => {
+    e.currentTarget.style.backgroundColor = THEME_COLORS.PRIMARY;
+  }, []);
+
+  const handleMobileLoginClick = useCallback(() => {
+    setMobileMenuOpen(false);
+  }, []);
+
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -88,7 +104,7 @@ export function SiteHeader() {
             ))}
           </nav>
           <div className="flex items-center gap-4">
-            <Button asChild className="hidden md:inline-flex transition-all duration-200" style={{ backgroundColor: THEME_COLORS.PRIMARY }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = THEME_COLORS.PRIMARY_HOVER} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = THEME_COLORS.PRIMARY}>
+            <Button asChild className="hidden md:inline-flex transition-all duration-200" style={{ backgroundColor: THEME_COLORS.PRIMARY }} onMouseEnter={handleLoginMouseEnter} onMouseLeave={handleLoginMouseLeave}>
               <Link to="/login">Login</Link>
             </Button>
             <Sheet open={isMobileMenuOpen} onOpenChange={setMobileMenuOpen}>
@@ -103,7 +119,7 @@ export function SiteHeader() {
                     <Link
                       to="/"
                       className="flex items-center gap-2 mb-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-md p-2 -m-2"
-                      onClick={() => setMobileMenuOpen(false)}
+                      onClick={handleMobileNavClose}
                       aria-label="Akademia Pro Home"
                     >
                       <GraduationCap className="h-8 w-8" style={{ color: THEME_COLORS.PRIMARY }} aria-hidden="true" />
@@ -117,11 +133,11 @@ export function SiteHeader() {
                             <NavLink
                               key={sublink.name}
                               to={sublink.href}
-                              onClick={() => setMobileMenuOpen(false)}
+                              onClick={handleMobileNavClose}
                               className={({ isActive }) =>
                                 `ml-4 text-base font-medium transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-md px-2 py-1 -mx-2 ${
-                                  isActive ? 'text-primary' : 'text-muted-foreground'
-                                }`
+                                    isActive ? 'text-primary' : 'text-muted-foreground'
+                                  }`
                               }
                             >
                               {sublink.name}
@@ -132,7 +148,7 @@ export function SiteHeader() {
                         <NavLink
                           key={link.name}
                           to={link.href}
-                          onClick={() => setMobileMenuOpen(false)}
+                          onClick={handleMobileNavClose}
                           className={({ isActive }) =>
                             `text-lg font-medium transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-md px-2 py-1 -mx-2 ${
                               isActive ? 'text-primary' : 'text-muted-foreground'
@@ -143,7 +159,7 @@ export function SiteHeader() {
                         </NavLink>
                       )
                     ))}
-                    <Button asChild className="w-full transition-all duration-200" style={{ backgroundColor: THEME_COLORS.PRIMARY }} onClick={() => setMobileMenuOpen(false)}>
+                    <Button asChild className="w-full transition-all duration-200" style={{ backgroundColor: THEME_COLORS.PRIMARY }} onClick={handleMobileLoginClick}>
                       <Link to="/login" className="focus-visible:ring-offset-2">Login</Link>
                     </Button>
                   </div>
