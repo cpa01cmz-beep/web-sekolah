@@ -2,9 +2,10 @@
 
                                     This document tracks architectural refactoring and testing tasks for Akademia Pro.
 
-       ## Status Summary
+<<<<<<< HEAD
+      ## Status Summary
 
-                                                          **Last Updated**:2026-01-21 (Test Engineer - Critical Path Testing for getUsersWithFilters)
+                                                         **Last Updated**:2026-01-22 (Code Architect - Layer Separation in admin-routes.ts)
 
                                                          **Overall Test Status**:2533 tests passing, 5 skipped, 155 todo (80 test files)
 
