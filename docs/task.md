@@ -1,142 +1,143 @@
-                              # Architectural Task List
+                               # Architectural Task List
 
-                               This document tracks architectural refactoring and testing tasks for Akademia Pro.
+                                This document tracks architectural refactoring and testing tasks for Akademia Pro.
 
-                ## Status Summary
+                 ## Status Summary
 
-                                                    **Last Updated**:2026-01-21 (Integration Hardening Complete)
+                                                     **Last Updated**:2026-01-21 (Integration Hardening Complete)
 
-                                                    **Overall Test Status**:2333 tests passing,5 skipped, 155 todo (75 test files)
+                                                     **Overall Test Status**:2333 tests passing,5 skipped, 155 todo (75 test files)
 
-                                     ### Integration Engineer - Integration Hardening (2026-01-21) - Completed ✅
+                                      ### UI/UX Engineer - Dashboard Component Extraction (2026-01-21) - Completed ✅
 
-**Task**: Implement comprehensive integration hardening with endpoint-specific timeouts, external service health checks, and fallback mechanisms
+**Task**: Extract reusable DashboardStatCard component for improved consistency and reduced code duplication
 
 **Problem**:
-- All API routes used the same 30-second timeout regardless of operation complexity
-- No health monitoring for external services (webhooks, documentation)
-- No fallback mechanisms for graceful degradation when external services fail
-- Missing comprehensive timeout configuration for different endpoint types
-- Limited visibility into external service health and performance
+- AdminDashboardPage and TeacherDashboardPage had inline stat card code patterns
+- Repeated card structure made styling changes difficult (multiple files to update)
+- Code duplication reduced maintainability and increased risk of inconsistencies
+- No single source of truth for dashboard stat card styling
 
 **Solution**:
-- Created `worker/config/endpoint-timeout.ts` with comprehensive timeout settings for query, aggregation, write, admin, system, external, and health operations
-- Implemented `worker/health-check.ts` with ExternalServiceHealth class for monitoring webhook and docs services
-- Implemented `worker/fallback.ts` with FallbackHandler class for graceful degradation patterns
-- Added 54 new tests for comprehensive coverage of resilience patterns
-- Updated integration documentation with new patterns and usage examples
+- Created reusable `DashboardStatCard` component with flexible props (title, value, icon, subtitle, valueSize)
+- Updated AdminDashboardPage to use component for 4 stat cards (Students, Teachers, Parents, Classes)
+- Updated TeacherDashboardPage to use component for "Your Classes" card with subtitle
+- Component supports optional icon and subtitle, configurable value size (2xl or 3xl)
 
 **Implementation**:
 
-1. **Endpoint-Specific Timeout Configuration** (worker/config/endpoint-timeout.ts):
-   - Query timeouts: Fast (2s), Standard (5s)
-   - Aggregation timeouts: Standard (10s), Complex (15s)
-   - Write timeouts: Fast (5s), Standard (10s)
-   - Admin timeouts: Standard (15s), Complex (30s)
-   - System timeouts: Rebuild Indexes (60s), Seed (60s)
-   - External timeouts: Webhook (30s), Docs (30s)
-   - Health check timeout: Check (5s)
-   - TimeoutCategory mapping for all endpoint types (auth, user, grade, dashboard, announcement, webhook, system)
-   - Helper functions: getTimeoutForEndpoint(), isFastQuery(), isComplexOperation()
+1. **Created DashboardStatCard** (src/components/dashboard/DashboardStatCard.tsx):
+   - Props interface with TypeScript: title (required), value (required), icon (optional), subtitle (optional), valueSize (optional, default 2xl)
+   - Consistent hover effects: shadow-lg with duration-200 transition
+   - Semantic structure: Card → CardHeader/CardTitle → Content
+   - Accessibility: Icon marked with aria-hidden when present
+   - Flex composition with className support for customization
 
-2. **External Service Health Monitoring** (worker/health-check.ts):
-   - ExternalServiceHealth class with static methods
-   - checkWebhookService(url, timeoutMs=5000): Health check with timeout
-   - checkDocsService(url, timeoutMs=5000): Health check with timeout
-   - getHealthStatus(service): Per-service health status
-   - getAllHealthStatus(): All service health statuses
-   - resetHealthStatus(service): Reset specific service status
-   - resetAllHealthStatus(): Reset all health statuses
-   - Consecutive failure tracking (unhealthy after 5 failures)
-   - Latency measurement for performance monitoring
-   - Health status management (lastCheck, lastSuccess, lastFailure, consecutiveFailures, isHealthy)
+2. **Updated AdminDashboardPage** (src/pages/portal/admin/AdminDashboardPage.tsx):
+   - Refactored 4 stat cards to use DashboardStatCard component
+   - Maintained same functionality and visual appearance
+   - Reduced inline code duplication
+   - Stats: Total Students, Total Teachers, Total Parents, Total Classes
 
-3. **Fallback Mechanisms** (worker/fallback.ts):
-   - FallbackHandler class with static methods
-   - withFallback(primaryFn, options): Main fallback handler
-   - createStaticFallback(value): Static value fallback
-   - createNullFallback(): Null fallback
-   - createEmptyArrayFallback(): Empty array fallback
-   - createEmptyObjectFallback(): Empty object fallback
-   - FallbackOptions interface: fallback, onFallback, shouldFallback
-   - Support for both sync and async fallback functions
-   - Conditional fallback based on error type
+3. **Updated TeacherDashboardPage** (src/pages/portal/teacher/TeacherDashboardPage.tsx):
+   - Refactored "Your Classes" card to use DashboardStatCard component
+   - Added subtitle: "Total students: {count}"
+   - Used valueSize="3xl" for larger display
+   - Reduced inline code duplication
 
 **Metrics**:
 
 | Metric | Before | After | Improvement |
-|---------|--------|-------|-------------|
-| Timeout configuration | Single 30s default | 7 categories, 20+ settings | Granular control |
-| Health monitoring | None | Webhook + Docs monitoring | External visibility |
-| Fallback mechanisms | None | 4 fallback patterns | Graceful degradation |
-| Integration tests | 0 | 54 new tests | Comprehensive coverage |
-| Test files | 72 | 75 | +3 files |
-| Total tests | 2279 | 2333 | +54 tests (+2.4%) |
+|--------|--------|-------|-------------|
+| AdminDashboardPage lines | 174 | 166 | 8 lines reduced (4.6%) |
+| TeacherDashboardPage lines | 111 | 105 | 6 lines reduced (5.4%) |
+| Code duplication | Inline card patterns | Single reusable component | Eliminated |
+| Consistency | Manual alignment | Component-based | 100% consistent |
+| Future updates | Multiple files | Single component | Easier maintenance |
 
 **Benefits Achieved**:
-   - ✅ Endpoint-specific timeout configuration (2s-60s based on complexity)
-   - ✅ External service health monitoring (webhook, docs)
-   - ✅ Consecutive failure detection (unhealthy after 5 failures)
-   - ✅ Latency measurement for performance insights
-   - ✅ Fallback mechanisms for graceful degradation (static, null, array, object)
-   - ✅ Conditional fallback based on error type (timeout, network errors)
-   - ✅ Support for chained fallbacks (multiple degrade levels)
-   - ✅ Type-safe timeout configuration with TypeScript
-   - ✅ Integration with existing resilience patterns (retries, circuit breakers, rate limiting)
-   - ✅ All 2333 tests passing (5 skipped, 155 todo)
-   - ✅ Zero regressions in existing functionality
-   - ✅ Comprehensive documentation in blueprint.md
+    - ✅ DashboardStatCard component created (27 lines, fully reusable)
+    - ✅ AdminDashboardPage reduced by 8 lines (4.6% reduction)
+    - ✅ TeacherDashboardPage reduced by 6 lines (5.4% reduction)
+    - ✅ Inline card patterns extracted to component
+    - ✅ Consistent UI pattern across admin and teacher dashboards
+    - ✅ Accessibility improvements with proper ARIA attributes (aria-hidden on icons)
+    - ✅ All 2333 tests passing (5 skipped, 155 todo)
+    - ✅ Typecheck passed (0 errors)
+    - ✅ Linting passed (0 errors)
+    - ✅ Zero breaking changes to existing functionality
 
 **Technical Details**:
 
-**Timeout Configuration**:
-- Type-safe constants with const assertion
-- Endpoint categorization based on operation type and complexity
-- Helper functions for runtime timeout lookup and classification
-- Integration with existing timeout middleware (worker/middleware/timeout.ts)
+**DashboardStatCard Component Features**:
+- **Props**: title (string, required), value (string | number, required), icon (React.ReactNode, optional), subtitle (string, optional), valueSize ('2xl' | '3xl', optional, default '2xl')
+- **Styling**: Tailwind classes for consistent appearance (h-full, hover:shadow-lg, transition-shadow, duration-200)
+- **Accessibility**: Icons properly marked with aria-hidden attribute when present
+- **Flexibility**: Supports both simple stat cards (value only) and complex ones (value + subtitle)
+- **Customization**: className prop for additional styling if needed
 
-**Health Monitoring**:
-- HEAD request health checks (lightweight, no data transfer)
-- Configurable timeout (default 5s)
-- Health status persistence across checks
-- Automatic unhealthy detection (5 consecutive failures)
-- Latency tracking for performance monitoring
-- Service isolation (webhook, docs tracked separately)
+**Component Architecture**:
+- Follows existing design system (Card, CardHeader, CardTitle, CardContent components)
+- TypeScript interface for type safety
+- Default prop values for optional fields (valueSize defaults to '2xl')
+- Composition pattern with className support via cn() utility
+- Consistent with existing UI components in src/components/ui/
 
-**Fallback Patterns**:
-- Primary/fallback pattern with error handling
-- Pre-built fallback creators for common scenarios
-- Conditional fallback based on error inspection
-- Support for async fallback functions
-- Fallback callback for logging/monitoring
-- Chaining support for multiple degrade levels
+**Usage Examples**:
 
-**Integration with Existing Resilience**:
+Simple stat card (AdminDashboardPage):
+```tsx
+<DashboardStatCard
+  title="Total Students"
+  value={data.totalStudents.toString()}
+  icon={<Users className="h-6 w-6 text-blue-500" />}
+/>
+```
 
-| Pattern | Integration Point |
-|---------|-----------------|
-| **Timeouts** | Routes can use TimeoutCategory with timeout middleware |
-| **Retries** | Fallback called after retries exhausted |
-| **Circuit Breaker** | Health check can trigger circuit reset on recovery |
-| **Rate Limiting** | Health status can inform rate limiting decisions |
-| **Webhook Reliability** | Health check monitors webhook endpoint availability |
+Complex stat card with subtitle (TeacherDashboardPage):
+```tsx
+<DashboardStatCard
+  title="Your Classes"
+  value={data.totalClasses.toString()}
+  icon={<BookCopy className="h-4 w-4 text-muted-foreground" />}
+  subtitle={`Total students: ${data.totalStudents}`}
+  valueSize="3xl"
+/>
+```
 
-**Test Coverage**:
+**Architectural Impact**:
+- **Component Reusability**: Single source of truth for dashboard stat cards
+- **Consistency**: All stat cards follow same design pattern automatically
+- **Maintainability**: Styling changes only need to be made in one place
+- **Accessibility**: Proper ARIA attributes by default (icons marked as aria-hidden)
+- **User Experience**: Consistent hover effects and transitions across all stat cards
+- **Future-Proof**: Component can be easily extended with additional props (e.g., trend indicators, charts)
 
-**worker/config/__tests__/endpoint-timeout.test.ts** (24 tests):
-- Timeout constant verification (7 tests)
-- TimeoutCategory mapping (13 tests)
-- Helper functions (4 tests)
+**Success Criteria**:
+    - [x] DashboardStatCard component created with flexible props
+    - [x] AdminDashboardPage updated to use DashboardStatCard (4 cards)
+    - [x] TeacherDashboardPage updated to use DashboardStatCard (1 card with subtitle)
+    - [x] Accessibility improved with proper ARIA attributes
+    - [x] All diagnostic checks passing (typecheck, lint, tests)
+    - [x] Zero breaking changes to existing functionality
+    - [x] Code duplication reduced across dashboard pages
+    - [x] Consistent UI pattern established
 
-**worker/__tests__/health-check.test.ts** (14 tests):
-- Webhook service health checks (4 tests)
-- Docs service health checks (3 tests)
-- Health status management (7 tests)
+**Impact**:
+    - `src/components/dashboard/DashboardStatCard.tsx`: New component (27 lines)
+    - `src/components/dashboard/`: New directory for dashboard components (modularity foundation)
+    - `src/pages/portal/admin/AdminDashboardPage.tsx`: 174 → 166 lines (8 lines removed, 4.6% reduction)
+    - `src/pages/portal/teacher/TeacherDashboardPage.tsx`: 111 → 105 lines (6 lines removed, 5.4% reduction)
+    - Code duplication: Eliminated (inline card patterns → single component)
+    - Consistency: 100% (all stat cards use same component)
+    - Future updates: Easier (single component to modify)
+    - Test coverage: 2333 tests passing (100% success rate)
 
-**worker/__tests__/fallback.test.ts** (16 tests):
-- Fallback handler behavior (9 tests)
-- Pre-built fallback creators (4 tests)
-- Complex scenarios (3 tests)
+**Success**: ✅ **DASHBOARD COMPONENT EXTRACTION COMPLETE, REDUCED CODE DUPLICATION, IMPROVED CONSISTENCY AND ACCESSIBILITY**
+
+---
+
+                                      ### Integration Engineer - Integration Hardening (2026-01-21) - Completed ✅
 
 **Architectural Impact**:
 - **Resilience**: Multiple layers of protection (timeouts, health checks, fallbacks)
@@ -13384,6 +13385,42 @@ logger.error('Webhook delivery failed after max retries', {
 | Low | Extract route handler pattern into reusable builder function | Small | worker/user-routes.ts (24 routes follow identical structure: app.get/post + authenticate + authorize + async handler) |
 | Medium | Create error handling wrapper to reduce try-catch duplication | Small | ✅ **COMPLETED** (2026-01-10) - withErrorHandler created in route-utils.ts, 8 patterns eliminated |
 | Medium | Consolidate retry configuration constants | Small | ✅ **COMPLETED** (2026-01-20) - Added RETRY_CONFIG to shared/constants.ts, eliminated duplicate constants in worker/resilience/Retry.ts, src/lib/resilience/Retry.ts, src/lib/error-reporter/constants.ts, applied DRY principle |
+| Medium | Extract DownloadCard component from LinksDownloadPage | Small | src/pages/LinksDownloadPage.tsx (142 lines, 6 duplicate download button patterns) |
+| Low | Replace inline hover styles with CSS in SiteHeader | Small | src/components/SiteHeader.tsx:91 (onMouseEnter/onMouseLeave for button hover effect) |
+| Low | Centralize hardcoded color classes across pages | Medium | src/pages/LinksDownloadPage.tsx:103,114,125 (text-blue-600, text-green-600, text-purple-600) |
+| Medium | Extract DocumentCard pattern for consistency | Small | src/pages/LinksDownloadPage.tsx:29-36 (repeated card structure for document listing) |
+
+---
+
+## [REFACTOR] Extract DownloadCard Component from LinksDownloadPage
+- **Location**: src/pages/LinksDownloadPage.tsx
+- **Issue**: 6 duplicate download button patterns repeated across the page (lines 34-36, 44-46, 54-56, 69-71, 79-81, 89-91)
+- **Suggestion**: Create reusable DownloadCard component with props for title, description, fileSize, fileFormat, and download action
+- **Priority**: Medium
+- **Effort**: Small
+
+## [REFACTOR] Replace Inline Hover Styles with CSS in SiteHeader
+- **Location**: src/components/SiteHeader.tsx:91
+- **Issue**: Inline onMouseEnter/onMouseLeave handlers manipulate backgroundColor directly, mixing JavaScript styles with CSS
+- **Suggestion**: Create CSS class with hover effect using Tailwind's `hover:` variant or `group-hover:` for button hover states
+- **Priority**: Low
+- **Effort**: Small
+
+## [REFACTOR] Centralize Hardcoded Color Classes Across Pages
+- **Location**: src/pages/LinksDownloadPage.tsx:103,114,125; src/pages/LinksRelatedPage.tsx:73,81,89; src/pages/ProfileSchoolPage.tsx:46,56,66
+- **Issue**: Hardcoded Tailwind color classes (text-blue-600, text-green-600, text-purple-600) scattered across multiple pages
+- **Suggestion**: Add color utility constants to src/theme/colors.ts or use existing THEME_COLORS mapping for consistent color usage
+- **Priority**: Low
+- **Effort**: Medium
+
+## [REFACTOR] Extract DocumentCard Pattern for Consistency
+- **Location**: src/pages/LinksDownloadPage.tsx:29-36
+- **Issue**: Repeated card structure for document listing (title, description, download button) duplicated 6 times
+- **Suggestion**: Create DocumentCard component with consistent layout, styling, and download button pattern
+- **Priority**: Medium
+- **Effort**: Small
+
+---
 
 ### Seed Data Extraction (2026-01-08) - Completed ✅
 
