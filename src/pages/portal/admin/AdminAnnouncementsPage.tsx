@@ -1,4 +1,4 @@
-import { useState, memo } from 'react';
+import { useState, memo, useCallback } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
@@ -44,7 +44,7 @@ export function AdminAnnouncementsPage() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isPosting, setIsPosting] = useState(false);
 
-  const handlePostAnnouncement = (data: { title: string; content: string }) => {
+  const handlePostAnnouncement = useCallback((data: { title: string; content: string }) => {
     if (!user) {
       toast.error('You must be logged in to post announcements.');
       return;
@@ -62,16 +62,20 @@ export function AdminAnnouncementsPage() {
     setIsFormOpen(false);
     setIsPosting(false);
     toast.success('Announcement posted successfully!');
-  };
+  }, [user, announcements]);
 
-  const handleDelete = (id: string) => {
+  const handleDelete = useCallback((id: string) => {
     setAnnouncements(announcements.filter(ann => ann.id !== id));
     toast.success('Announcement deleted.');
-  };
+  }, [announcements]);
 
-  const handleCloseForm = () => {
+  const handleCloseForm = useCallback(() => {
     setIsFormOpen(false);
-  };
+  }, []);
+
+  const handleOpenForm = useCallback(() => {
+    setIsFormOpen(true);
+  }, []);
 
   return (
     <SlideUp className="space-y-6">
@@ -85,7 +89,7 @@ export function AdminAnnouncementsPage() {
             </CardHeader>
             <CardContent>
               <Button
-                onClick={() => setIsFormOpen(true)}
+                onClick={handleOpenForm}
                 className="w-full"
               >
                 Create New Announcement

@@ -85,6 +85,10 @@ export class CommonDataService {
     return await UserEntity.countByRole(env, role as any);
   }
 
+  static async getByRole(env: Env, role: string): Promise<SchoolUser[]> {
+    return await UserEntity.getByRole(env, role as any);
+  }
+
   static async getAllUsers(env: Env): Promise<SchoolUser[]> {
     const { items: allUsers } = await UserEntity.list(env);
     return allUsers.map(({ passwordHash: _, ...rest }) => rest);
