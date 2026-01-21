@@ -74,7 +74,7 @@ paths:
       tags:
         - Health
       summary: Check API health
-      description: Returns the current health status of the API
+      description: Returns current health status of API
       operationId: healthCheck
       responses:
         '200':
@@ -83,6 +83,37 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/HealthResponse'
+
+  /seed:
+    post:
+      tags:
+        - Admin
+      summary: Seed database
+      description: Seeds database with sample data for development/testing
+      operationId: seedDatabase
+      responses:
+        '200':
+          description: Database seeded successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          message:
+                            type: string
+                          recordsCreated:
+                            type: integer
+        '400':
+          description: Database already seeded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
 
   /auth/login:
     post:
@@ -318,7 +349,7 @@ paths:
       tags:
         - Parents
       summary: Get parent dashboard
-      description: Retrieves parent dashboard with child's schedule, grades, and announcements
+      description: Retrieves parent dashboard data including child data
       operationId: getParentDashboard
       security:
         - BearerAuth: []
@@ -348,7 +379,155 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         '404':
-          description: Parent not found
+          description: Parent or child not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /teachers/{id}/dashboard:
+    get:
+      tags:
+        - Teachers
+      summary: Get teacher dashboard
+      description: Retrieves teacher dashboard data with class information and metrics
+      operationId: getTeacherDashboard
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Teacher ID
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Dashboard data retrieved successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          classes:
+                            type: array
+                            items:
+                              $ref: '#/components/schemas/Class'
+                          totalStudents:
+                            type: integer
+                          recentGrades:
+                            type: array
+                            items:
+                              $ref: '#/components/schemas/Grade'
+                          recentAnnouncements:
+                            type: array
+                            items:
+                              $ref: '#/components/schemas/Announcement'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Teacher not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /teachers/{id}/announcements:
+    get:
+      tags:
+        - Teachers
+      summary: Get teacher announcements
+      description: Retrieves announcements created by a specific teacher
+      operationId: getTeacherAnnouncements
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Teacher ID
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Announcements retrieved successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Announcement'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /teachers/announcements:
+    post:
+      tags:
+        - Teachers
+      summary: Create announcement
+      description: Creates a new announcement
+      operationId: createTeacherAnnouncement
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - title
+                - content
+                - targetRole
+              properties:
+                title:
+                  type: string
+                  description: Announcement title
+                content:
+                  type: string
+                  description: Announcement content
+                targetRole:
+                  type: string
+                  enum: [student, teacher, parent, all]
+                  description: Target role for announcement
+      responses:
+        '200':
+          description: Announcement created successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Announcement'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
           content:
             application/json:
               schema:
@@ -633,9 +812,9 @@ paths:
     get:
       tags:
         - Admin
-      summary: Get user by ID
+      summary: Get user
       description: Retrieves a specific user by ID
-      operationId: getUserById
+      operationId: getUser
       security:
         - BearerAuth: []
       parameters:
@@ -674,7 +853,7 @@ paths:
       tags:
         - Admin
       summary: Update user
-      description: Updates an existing user
+      description: Updates an existing user account
       operationId: updateUser
       security:
         - BearerAuth: []
@@ -726,7 +905,7 @@ paths:
       tags:
         - Admin
       summary: Delete user
-      description: Deletes a user with referential integrity checking
+      description: Deletes a user account
       operationId: deleteUser
       security:
         - BearerAuth: []
@@ -757,6 +936,293 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
         '404':
           description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /admin/dashboard:
+    get:
+      tags:
+        - Admin
+      summary: Get admin dashboard
+      description: Retrieves admin dashboard data with user distribution and system metrics
+      operationId: getAdminDashboard
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Dashboard data retrieved successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          totalStudents:
+                            type: integer
+                          totalTeachers:
+                            type: integer
+                          totalParents:
+                            type: integer
+                          totalAdmins:
+                            type: integer
+                          recentAnnouncements:
+                            type: array
+                            items:
+                              $ref: '#/components/schemas/Announcement'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /admin/users:
+    get:
+      tags:
+        - Admin
+      summary: Get users with filters
+      description: Retrieves users with optional role and class filters
+      operationId: getAdminUsers
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: role
+          in: query
+          description: Filter by role
+          schema:
+            type: string
+            enum: [student, teacher, parent, admin]
+        - name: classId
+          in: query
+          description: Filter by class ID (for students)
+          schema:
+            type: string
+        - name: search
+          in: query
+          description: Search by name or email
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Users retrieved successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/User'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /admin/announcements:
+    get:
+      tags:
+        - Admin
+      summary: Get announcements
+      description: Retrieves all announcements
+      operationId: getAnnouncements
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Announcements retrieved successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Announcement'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    post:
+      tags:
+        - Admin
+      summary: Create announcement
+      description: Creates a new announcement
+      operationId: createAdminAnnouncement
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - title
+                - content
+                - targetRole
+              properties:
+                title:
+                  type: string
+                  description: Announcement title
+                content:
+                  type: string
+                  description: Announcement content
+                targetRole:
+                  type: string
+                  enum: [student, teacher, parent, all]
+                  description: Target role for announcement
+      responses:
+        '200':
+          description: Announcement created successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Announcement'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /admin/settings:
+    get:
+      tags:
+        - Admin
+      summary: Get system settings
+      description: Retrieves system configuration settings
+      operationId: getSettings
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Settings retrieved successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          allowPublicRegistration:
+                            type: boolean
+                          maintenanceMode:
+                            type: boolean
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    put:
+      tags:
+        - Admin
+      summary: Update system settings
+      description: Updates system configuration settings
+      operationId: updateSettings
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                allowPublicRegistration:
+                  type: boolean
+                maintenanceMode:
+                  type: boolean
+      responses:
+        '200':
+          description: Settings updated successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          allowPublicRegistration:
+                            type: boolean
+                          maintenanceMode:
+                            type: boolean
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /admin/rebuild-indexes:
+    post:
+      tags:
+        - Admin
+      summary: Rebuild indexes
+      description: Rebuilds all secondary indexes from existing data
+      operationId: rebuildIndexes
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Indexes rebuilt successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          status:
+                            type: string
+                          indexesRebuilt:
+                            type: integer
+        '401':
+          description: Unauthorized
           content:
             application/json:
               schema:

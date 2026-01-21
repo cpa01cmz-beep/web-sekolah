@@ -3,9 +3,11 @@ import type { Env } from '../core-utils';
 import { ok, bad, notFound } from '../core-utils';
 import { AnnouncementEntity, ensureAllSeedData } from "../entities";
 import { rebuildAllIndexes } from "../index-rebuilder";
-import type { CreateUserData, UpdateUserData, Announcement, CreateAnnouncementData, AdminDashboardData, Settings } from "@shared/types";
+import type { CreateUserData, UpdateUserData, Announcement, CreateAnnouncementData, AdminDashboardData, Settings, SchoolUser } from "@shared/types";
 import { UserService, CommonDataService, AnnouncementService } from '../domain';
 import { withAuth, withErrorHandler, triggerWebhookSafely } from './route-utils';
+import { validateBody } from '../middleware/validation';
+import { createAnnouncementSchema } from '../middleware/schemas';
 import { getCurrentUserId } from '../type-guards';
 import type { Context } from 'hono';
 
@@ -16,15 +18,15 @@ export function adminRoutes(app: Hono<{ Bindings: Env }>) {
   });
 
   app.get('/api/admin/dashboard', ...withAuth('admin'), async (c: Context) => {
-    const allClasses = await CommonDataService.getAllClasses(c.env);
-    const allAnnouncements = await CommonDataService.getAllAnnouncements(c.env);
-
-    const [totalStudents, totalTeachers, totalParents, totalAdmins] = await Promise.all([
+    const [totalStudents, totalTeachers, totalParents, totalAdmins, recentAnnouncements] = await Promise.all([
       CommonDataService.getUserCountByRole(c.env, 'student'),
       CommonDataService.getUserCountByRole(c.env, 'teacher'),
       CommonDataService.getUserCountByRole(c.env, 'parent'),
-      CommonDataService.getUserCountByRole(c.env, 'admin')
+      CommonDataService.getUserCountByRole(c.env, 'admin'),
+      CommonDataService.getRecentAnnouncementsByRole(c.env, 'all', 5)
     ]);
+
+    const allClasses = await CommonDataService.getAllClasses(c.env);
 
     const dashboardData: AdminDashboardData = {
       totalUsers: totalStudents + totalTeachers + totalParents + totalAdmins,
@@ -32,7 +34,7 @@ export function adminRoutes(app: Hono<{ Bindings: Env }>) {
       totalTeachers,
       totalParents,
       totalClasses: allClasses.length,
-      recentAnnouncements: allAnnouncements.slice(-5).reverse(),
+      recentAnnouncements,
       userDistribution: {
         students: totalStudents,
         teachers: totalTeachers,
@@ -49,21 +51,29 @@ export function adminRoutes(app: Hono<{ Bindings: Env }>) {
     const classId = c.req.query('classId');
     const search = c.req.query('search');
 
-    const allUsers = await CommonDataService.getAllUsers(c.env);
+    let users: SchoolUser[];
 
-    let filteredUsers = allUsers;
+    if (role && !search) {
+      users = await CommonDataService.getByRole(c.env, role as any);
+    } else if (classId && role === 'student' && !search) {
+      users = await CommonDataService.getClassStudents(c.env, classId);
+    } else {
+      users = await CommonDataService.getAllUsers(c.env);
+    }
 
-    if (role) {
+    let filteredUsers = users;
+
+    if (role && search) {
       filteredUsers = filteredUsers.filter(u => u.role === role);
     }
 
-    if (classId) {
+    if (classId && !search) {
       filteredUsers = filteredUsers.filter(u => u.role === 'student' && 'classId' in u && u.classId === classId);
     }
 
     if (search) {
       const searchLower = search.toLowerCase();
-      filteredUsers = filteredUsers.filter(u => 
+      filteredUsers = filteredUsers.filter(u =>
         u.name.toLowerCase().includes(searchLower) ||
         u.email.toLowerCase().includes(searchLower)
       );
@@ -77,8 +87,8 @@ export function adminRoutes(app: Hono<{ Bindings: Env }>) {
     return ok(c, announcements);
   });
 
-  app.post('/api/admin/announcements', ...withAuth('admin'), withErrorHandler('create announcement')(async (c: Context) => {
-    const announcementData = await c.req.json<CreateAnnouncementData>();
+  app.post('/api/admin/announcements', ...withAuth('admin'), validateBody(createAnnouncementSchema), withErrorHandler('create announcement')(async (c: Context) => {
+    const announcementData = c.get('validatedBody') as CreateAnnouncementData;
     const authorId = getCurrentUserId(c);
     const newAnnouncement = await AnnouncementService.createAnnouncement(c.env, announcementData, authorId);
     triggerWebhookSafely(c.env, 'announcement.created', newAnnouncement, { announcementId: newAnnouncement.id });
