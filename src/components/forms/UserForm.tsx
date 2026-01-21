@@ -1,11 +1,10 @@
 import { useState, useMemo, useCallback } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter, DialogClose } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
+import { FormField } from '@/components/ui/form-field';
 import { UserRole, SchoolUser } from '@shared/types';
-import { AlertCircle } from 'lucide-react';
 import { validateName, validateEmail, validateRole } from '@/utils/validation';
 
 interface UserFormData {
@@ -75,10 +74,14 @@ export function UserForm({ open, onClose, editingUser, onSave, isLoading }: User
         <form onSubmit={handleSubmit}>
           <div className="grid gap-6 py-4">
             <div className="grid grid-cols-4 items-start gap-4">
-              <Label htmlFor="name" className="text-right pt-2">
-                Name <span className="text-destructive" aria-label="required">*</span>
-              </Label>
-              <div className="col-span-3 space-y-2">
+              <FormField
+                id="name"
+                label="Name"
+                error={nameError}
+                helperText="Full name of user"
+                required
+                className="col-span-3"
+              >
                 <Input
                   id="name"
                   name="name"
@@ -89,20 +92,17 @@ export function UserForm({ open, onClose, editingUser, onSave, isLoading }: User
                   aria-invalid={!!nameError}
                   aria-describedby={nameError ? 'name-error' : 'name-helper'}
                 />
-                <p id="name-helper" className="text-xs text-muted-foreground">Full name of user</p>
-                {nameError && (
-                  <p id="name-error" className="text-xs text-destructive flex items-center gap-1" role="alert" aria-live="polite">
-                    <AlertCircle className="h-3 w-3" aria-hidden="true" />
-                    {nameError}
-                  </p>
-                )}
-              </div>
+              </FormField>
             </div>
             <div className="grid grid-cols-4 items-start gap-4">
-              <Label htmlFor="email" className="text-right pt-2">
-                Email <span className="text-destructive" aria-label="required">*</span>
-              </Label>
-              <div className="col-span-3 space-y-2">
+              <FormField
+                id="email"
+                label="Email"
+                error={emailError}
+                helperText="Valid email address for account access"
+                required
+                className="col-span-3"
+              >
                 <Input
                   id="email"
                   name="email"
@@ -115,20 +115,17 @@ export function UserForm({ open, onClose, editingUser, onSave, isLoading }: User
                   aria-describedby={emailError ? 'email-error' : 'email-helper'}
                   placeholder="user@example.com"
                 />
-                <p id="email-helper" className="text-xs text-muted-foreground">Valid email address for account access</p>
-                {emailError && (
-                  <p id="email-error" className="text-xs text-destructive flex items-center gap-1" role="alert" aria-live="polite">
-                    <AlertCircle className="h-3 w-3" aria-hidden="true" />
-                    {emailError}
-                  </p>
-                )}
-              </div>
+              </FormField>
             </div>
             <div className="grid grid-cols-4 items-start gap-4">
-              <Label htmlFor="role" className="text-right pt-2">
-                Role <span className="text-destructive" aria-label="required">*</span>
-              </Label>
-              <div className="col-span-3 space-y-2">
+              <FormField
+                id="role"
+                label="Role"
+                error={roleError}
+                helperText="User role determines system access and permissions"
+                required
+                className="col-span-3"
+              >
                 <Select
                   name="role"
                   value={userRole}
@@ -145,8 +142,7 @@ export function UserForm({ open, onClose, editingUser, onSave, isLoading }: User
                     <SelectItem value="admin">Admin</SelectItem>
                   </SelectContent>
                 </Select>
-                <p className="text-xs text-muted-foreground">User role determines system access and permissions</p>
-              </div>
+              </FormField>
             </div>
           </div>
           <DialogFooter>

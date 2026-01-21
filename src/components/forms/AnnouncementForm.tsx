@@ -2,9 +2,8 @@ import { useState, useMemo, useCallback } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { AlertCircle } from 'lucide-react';
+import { FormField } from '@/components/ui/form-field';
 import { validateTitle, validateContent } from '@/utils/validation';
 
 interface AnnouncementFormProps {
@@ -58,11 +57,13 @@ export function AnnouncementForm({ open, onClose, onSave, isLoading }: Announcem
         </DialogHeader>
         <form onSubmit={handleSubmit}>
           <div className="grid gap-6 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="announcement-title" className="flex items-center gap-2">
-                Title
-                <span className="text-destructive" aria-label="required">*</span>
-              </Label>
+            <FormField
+              id="announcement-title"
+              label="Title"
+              error={titleErrorMemo}
+              helperText="Enter a descriptive title (minimum 5 characters)"
+              required
+            >
               <Input
                 id="announcement-title"
                 value={title}
@@ -72,19 +73,14 @@ export function AnnouncementForm({ open, onClose, onSave, isLoading }: Announcem
                 aria-invalid={!!titleErrorMemo}
                 aria-describedby={titleErrorMemo ? 'title-error' : 'title-helper'}
               />
-              <p id="title-helper" className="text-xs text-muted-foreground">Enter a descriptive title (minimum 5 characters)</p>
-              {titleErrorMemo && (
-                <p id="title-error" className="text-xs text-destructive flex items-center gap-1" role="alert" aria-live="polite">
-                  <AlertCircle className="h-3 w-3" aria-hidden="true" />
-                  {titleErrorMemo}
-                </p>
-              )}
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="announcement-content" className="flex items-center gap-2">
-                Content
-                <span className="text-destructive" aria-label="required">*</span>
-              </Label>
+            </FormField>
+            <FormField
+              id="announcement-content"
+              label="Content"
+              error={contentErrorMemo}
+              helperText="Provide detailed information (minimum 10 characters)"
+              required
+            >
               <Textarea
                 id="announcement-content"
                 value={content}
@@ -95,14 +91,7 @@ export function AnnouncementForm({ open, onClose, onSave, isLoading }: Announcem
                 aria-invalid={!!contentErrorMemo}
                 aria-describedby={contentErrorMemo ? 'content-error' : 'content-helper'}
               />
-              <p id="content-helper" className="text-xs text-muted-foreground">Provide detailed information (minimum 10 characters)</p>
-              {contentErrorMemo && (
-                <p id="content-error" className="text-xs text-destructive flex items-center gap-1" role="alert" aria-live="polite">
-                  <AlertCircle className="h-3 w-3" aria-hidden="true" />
-                  {contentErrorMemo}
-                </p>
-              )}
-            </div>
+            </FormField>
           </div>
           <DialogFooter>
             <Button type="button" variant="secondary" onClick={handleClose}>

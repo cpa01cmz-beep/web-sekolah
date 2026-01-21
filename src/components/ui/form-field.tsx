@@ -1,6 +1,7 @@
 import { ReactNode } from 'react';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
+import { AlertCircle } from 'lucide-react';
 
 interface FormFieldProps {
   id: string;
@@ -10,6 +11,7 @@ interface FormFieldProps {
   required?: boolean;
   children: ReactNode;
   className?: string;
+  showErrorIcon?: boolean;
 }
 
 export function FormField({
@@ -20,9 +22,11 @@ export function FormField({
   required,
   children,
   className,
+  showErrorIcon = true,
 }: FormFieldProps) {
   const errorId = `${id}-error`;
   const helperId = `${id}-helper`;
+  const hasError = !!error;
 
   return (
     <div className={cn('space-y-2', className)}>
@@ -31,18 +35,20 @@ export function FormField({
         {required && <span className="text-destructive ml-1" aria-label="required">*</span>}
       </Label>
       {children}
-      {error ? (
+      {helperText && !hasError && (
+        <p id={helperId} className="text-xs text-muted-foreground">{helperText}</p>
+      )}
+      {hasError && (
         <p
           id={errorId}
           className="text-xs text-destructive flex items-center gap-1"
           role="alert"
           aria-live="polite"
         >
+          {showErrorIcon && <AlertCircle className="h-3 w-3" aria-hidden="true" />}
           {error}
         </p>
-      ) : helperText ? (
-        <p id={helperId} className="text-xs text-muted-foreground">{helperText}</p>
-      ) : null}
+      )}
     </div>
   );
 }

@@ -1,9 +1,8 @@
-import React, { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { DialogTrigger } from '@/components/ui/dialog';
-import { Badge } from '@/components/ui/badge';
-import { Edit, Trash2, PlusCircle, AlertTriangle, GraduationCap, Users, UserCog, Shield } from 'lucide-react';
+import { PlusCircle, AlertTriangle } from 'lucide-react';
 import { PageHeader } from '@/components/PageHeader';
 import { SlideUp } from '@/components/animations';
 import { toast } from 'sonner';
@@ -14,15 +13,9 @@ import { getAvatarUrl } from '@/constants/avatars';
 import { TableSkeleton } from '@/components/ui/loading-skeletons';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { UserForm } from '@/components/forms/UserForm';
-import { ROLE_COLORS } from '@/theme/colors';
 import { ResponsiveTable } from '@/components/ui/responsive-table';
-
-const RoleIcon: Record<UserRole, React.ComponentType<{ className?: string }>> = {
-  student: GraduationCap,
-  teacher: Users,
-  parent: UserCog,
-  admin: Shield,
-};
+import { UserActions } from '@/components/tables/UserActions';
+import { UserRoleBadge } from '@/components/tables/UserRoleBadge';
 
 export function AdminUserManagementPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -72,10 +65,13 @@ export function AdminUserManagementPage() {
     deleteUserMutation.mutate();
   }, [deleteUserMutation]);
   
-  const handleEditUser = useCallback((user: SchoolUser) => {
-    setEditingUser(user);
-    setIsModalOpen(true);
-  }, []);
+  const handleEditUser = useCallback((userId: string, userName: string) => {
+    const user = users?.find(u => u.id === userId && u.name === userName);
+    if (user) {
+      setEditingUser(user);
+      setIsModalOpen(true);
+    }
+  }, [users]);
   
   const handleCloseModal = useCallback(() => {
     setIsModalOpen(false);
@@ -101,26 +97,12 @@ export function AdminUserManagementPage() {
       { key: 'email', content: user.email },
       {
         key: 'role',
-        content: (
-          <Badge className={`text-white ${ROLE_COLORS[user.role].color} flex items-center gap-1.5 px-2.5 py-1`}>
-            <span aria-hidden="true">{React.createElement(RoleIcon[user.role], { className: "h-3 w-3" })}</span>
-            <span>{ROLE_COLORS[user.role].label}</span>
-          </Badge>
-        ),
+        content: <UserRoleBadge role={user.role} />,
         className: 'text-center',
       },
       {
         key: 'actions',
-        content: (
-          <div className="flex gap-2 justify-end">
-            <Button variant="outline" size="icon" onClick={() => handleEditUser(user)} aria-label={`Edit user ${user.name}`}>
-              <Edit className="h-4 w-4" />
-            </Button>
-            <Button variant="destructive" size="icon" onClick={() => handleDeleteUser(user.id)} aria-label={`Delete user ${user.name}`}>
-              <Trash2 className="h-4 w-4" />
-            </Button>
-          </div>
-        ),
+        content: <UserActions userId={user.id} userName={user.name} onEdit={handleEditUser} onDelete={handleDeleteUser} />,
         className: 'text-right',
       },
     ],
