@@ -71,13 +71,28 @@ export function adminRoutes(app: Hono<{ Bindings: Env }>) {
 
   app.get('/api/admin/settings', ...withAuth('admin'), withErrorHandler('get admin settings')(async (c: Context) => {
     const settings = await c.env.STORAGE.get('settings');
-    return ok(c, settings ? JSON.parse(settings) : {});
+    if (!settings) {
+      return ok(c, {});
+    }
+    try {
+      return ok(c, JSON.parse(settings));
+    } catch (error) {
+      console.error('Failed to parse settings:', error);
+      return ok(c, {});
+    }
   }));
 
   app.put('/api/admin/settings', ...withAuth('admin'), validateBody(updateSettingsSchema), withErrorHandler('update admin settings')(async (c: Context) => {
     const settingsData = c.get('validatedBody') as Partial<Settings>;
     const currentSettingsJson = await c.env.STORAGE.get('settings');
-    const currentSettings = currentSettingsJson ? JSON.parse(currentSettingsJson) : {};
+    let currentSettings = {};
+    if (currentSettingsJson) {
+      try {
+        currentSettings = JSON.parse(currentSettingsJson);
+      } catch (error) {
+        console.error('Failed to parse current settings:', error);
+      }
+    }
     const updatedSettings = { ...currentSettings, ...settingsData };
     await c.env.STORAGE.put('settings', JSON.stringify(updatedSettings));
     return ok(c, updatedSettings);

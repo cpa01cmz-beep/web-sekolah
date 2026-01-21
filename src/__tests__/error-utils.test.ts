@@ -61,7 +61,7 @@ describe('Error Utils - mapStatusToErrorCode', () => {
       [502, 'Bad Gateway'],
       [505, 'HTTP Version Not Supported'],
       [511, 'Network Authentication Required'],
-    ])('should map %i (%s) to INTERNAL_SERVER_ERROR', (code) => {
+    ])('should map %i (%s) to INTERNAL_SERVER_ERROR', (code, _description) => {
       const result = mapStatusToErrorCode(code);
       expect(result).toBe('INTERNAL_SERVER_ERROR');
     });
@@ -75,7 +75,7 @@ describe('Error Utils - mapStatusToErrorCode', () => {
       [413, 'Payload Too Large'],
       [418, "I'm a Teapot"],
       [451, 'Unavailable For Legal Reasons'],
-    ])('should map %i (%s) to NETWORK_ERROR', (code) => {
+    ])('should map %i (%s) to NETWORK_ERROR', (code, _description) => {
       const result = mapStatusToErrorCode(code);
       expect(result).toBe('NETWORK_ERROR');
     });
@@ -113,7 +113,7 @@ describe('Error Utils - mapStatusToErrorCode', () => {
       [101, 'Switching Protocols'],
       [102, 'Processing'],
       [103, 'Early Hints'],
-    ])('should map %i (%s) to NETWORK_ERROR', (code) => {
+    ])('should map %i (%s) to NETWORK_ERROR', (code, _description) => {
       const result = mapStatusToErrorCode(code);
       expect(result).toBe('NETWORK_ERROR');
     });
@@ -126,7 +126,7 @@ describe('Error Utils - mapStatusToErrorCode', () => {
       [304, 'Not Modified'],
       [307, 'Temporary Redirect'],
       [308, 'Permanent Redirect'],
-    ])('should map %i (%s) to NETWORK_ERROR', (code) => {
+    ])('should map %i (%s) to NETWORK_ERROR', (code, _description) => {
       const result = mapStatusToErrorCode(code);
       expect(result).toBe('NETWORK_ERROR');
     });
@@ -139,7 +139,7 @@ describe('Error Utils - mapStatusToErrorCode', () => {
       [202, 'Accepted'],
       [204, 'No Content'],
       [206, 'Partial Content'],
-    ])('should map %i (%s) to NETWORK_ERROR', (code) => {
+    ])('should map %i (%s) to NETWORK_ERROR', (code, _description) => {
       const result = mapStatusToErrorCode(code);
       expect(result).toBe('NETWORK_ERROR');
     });
