@@ -1,4 +1,4 @@
-import { mapStatusToErrorCode } from '../../shared/error-utils';
+import { mapStatusToErrorCode } from '../../../shared/error-utils';
 
 export interface ApiError extends Error {
   status?: number;
@@ -45,12 +45,12 @@ export async function parseErrorResponse(response: Response): Promise<Record<str
   }
 }
 
-export function handleErrorResponse(
+export async function handleErrorResponse(
   response: Response,
   requestId: string,
   requestIdHeader: string | null
-): ApiError {
-  const errorJson = parseErrorResponse(response);
+): Promise<ApiError> {
+  const errorJson = await parseErrorResponse(response);
   return createApiError(
     (errorJson.error as string) || `Request failed with status ${response.status}`,
     response.status,

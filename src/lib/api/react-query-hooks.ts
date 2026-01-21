@@ -1,5 +1,5 @@
 import { useQuery as useTanstackQuery, useMutation as useTanstackMutation, UseQueryOptions, UseMutationOptions } from '@tanstack/react-query';
-import { apiClient } from './api-client';
+import { apiClient } from '../api-client';
 import { ApiTimeout } from '../../config/time';
 import type { ApiError } from './query-client';
 

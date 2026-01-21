@@ -48,7 +48,7 @@ export async function apiClient<T>(path: string, init?: RequestInit & { timeout?
     const requestIdHeader = res.headers.get('X-Request-ID');
 
     if (!res.ok) {
-      throw handleErrorResponse(res, requestId, requestIdHeader);
+      throw await handleErrorResponse(res, requestId, requestIdHeader);
     }
 
     const json = (await res.json()) as ApiResponse<T>;
