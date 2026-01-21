@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { GraduationCap, Menu } from 'lucide-react';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { useState, useCallback, MouseEvent } from 'react';
+import { useState, useCallback, MouseEvent, memo } from 'react';
 import { THEME_COLORS } from '@/theme/colors';
 
 const navLinks = [
@@ -42,7 +42,7 @@ const navLinks = [
   { name: 'PPDB', href: '/ppdb' },
 ];
 
-export function SiteHeader() {
+export const SiteHeader = memo(function SiteHeader() {
   const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const handleMobileNavClose = useCallback(() => {
@@ -171,4 +171,5 @@ export function SiteHeader() {
       </div>
     </header>
   );
-}
+});
+SiteHeader.displayName = 'SiteHeader';

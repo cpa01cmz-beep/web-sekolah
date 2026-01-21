@@ -1,4 +1,4 @@
-import { ReactNode } from 'react';
+import { ReactNode, memo } from 'react';
 import { SiteHeader } from '@/components/SiteHeader';
 import { SiteFooter } from '@/components/SiteFooter';
 import { SkipLink } from '@/components/SkipLink';
@@ -7,7 +7,7 @@ interface PublicLayoutProps {
   children: ReactNode;
 }
 
-export function PublicLayout({ children }: PublicLayoutProps) {
+export const PublicLayout = memo(function PublicLayout({ children }: PublicLayoutProps) {
   return (
     <div className="flex flex-col min-h-screen bg-background">
       <SkipLink targetId="main-content" />
@@ -18,4 +18,5 @@ export function PublicLayout({ children }: PublicLayoutProps) {
       <SiteFooter />
     </div>
   );
-}
+});
+PublicLayout.displayName = 'PublicLayout';

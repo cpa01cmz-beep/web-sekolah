@@ -1,7 +1,8 @@
 import { GraduationCap, Twitter, Facebook, Instagram } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { THEME_COLORS } from '@/theme/colors';
-export function SiteFooter() {
+import { memo } from 'react';
+export const SiteFooter = memo(function SiteFooter() {
   return (
     <footer className="bg-muted text-muted-foreground">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -53,4 +54,5 @@ export function SiteFooter() {
       </div>
     </footer>
   );
-}
+});
+SiteFooter.displayName = 'SiteFooter';

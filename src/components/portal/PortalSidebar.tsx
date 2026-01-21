@@ -3,12 +3,12 @@ import { useAuthStore } from '@/lib/authStore';
 import { Button } from '@/components/ui/button';
 import { LogOut, GraduationCap, ChevronLeft, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useState, useCallback } from 'react';
+import { useState, useCallback, memo } from 'react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { navLinksMap, NavLink as NavLinkType } from '@/config/navigation';
 import { THEME_COLORS } from '@/theme/colors';
 
-export function PortalSidebar() {
+export const PortalSidebar = memo(function PortalSidebar() {
   const user = useAuthStore((state) => state.user);
   const logout = useAuthStore((state) => state.logout);
   const navigate = useNavigate();
@@ -84,4 +84,5 @@ export function PortalSidebar() {
       </aside>
     </TooltipProvider>
   );
-}
+});
+PortalSidebar.displayName = 'PortalSidebar';
