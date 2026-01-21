@@ -96,7 +96,7 @@ describe('ParentService', () => {
         },
       ];
 
-      mockRepository.setMockData(`/api/students/${childId}/schedule`, mockData);
+       mockRepository.setMockData(`/api/parents/me/schedule`, mockData);
       const parentService = createParentService(mockRepository);
 
       const result = await parentService.getChildSchedule(childId);
@@ -109,7 +109,7 @@ describe('ParentService', () => {
       const childId = 'student-01';
       const mockData: any[] = [];
 
-      mockRepository.setMockData(`/api/students/${childId}/schedule`, mockData);
+      mockRepository.setMockData(`/api/parents/me/schedule`, mockData);
       const parentService = createParentService(mockRepository);
 
       const result = await parentService.getChildSchedule(childId);
@@ -123,7 +123,7 @@ describe('ParentService', () => {
       mockError.name = 'ApiError';
       (mockError as any).status = 404;
 
-      mockRepository.setMockError(`/api/students/${childId}/schedule`, mockError);
+      mockRepository.setMockError(`/api/parents/me/schedule`, mockError);
       const parentService = createParentService(mockRepository);
 
       await expect(parentService.getChildSchedule(childId)).rejects.toThrow('Child not found');
