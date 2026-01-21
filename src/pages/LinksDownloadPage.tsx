@@ -1,6 +1,7 @@
 import { SiteHeader } from '@/components/SiteHeader';
 import { SiteFooter } from '@/components/SiteFooter';
 import { SlideUp, SlideLeft, SlideRight } from '@/components/animations';
+import { DownloadCard } from '@/components/cards';
 
 export function LinksDownloadPage() {
   return (
@@ -26,70 +27,42 @@ export function LinksDownloadPage() {
             <SlideLeft>
               <h2 className="text-3xl font-bold text-foreground mb-6">Dokumen Akademik</h2>
               <div className="space-y-4">
-                <div className="flex items-center justify-between p-4 bg-card rounded-lg shadow-sm">
-                  <div>
-                    <h3 className="font-bold">Kalender Akademik 2025/2026</h3>
-                    <p className="text-sm text-muted-foreground mt-1">PDF, 2.4 MB</p>
-                  </div>
-                  <button className="px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm hover:bg-primary/90 transition-colors">
-                    Download
-                  </button>
-                </div>
-
-                <div className="flex items-center justify-between p-4 bg-card rounded-lg shadow-sm">
-                  <div>
-                    <h3 className="font-bold">Jadwal Pelajaran Semester Ganjil</h3>
-                    <p className="text-sm text-muted-foreground mt-1">PDF, 1.8 MB</p>
-                  </div>
-                  <button className="px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm hover:bg-primary/90 transition-colors">
-                    Download
-                  </button>
-                </div>
-
-                <div className="flex items-center justify-between p-4 bg-card rounded-lg shadow-sm">
-                  <div>
-                    <h3 className="font-bold">Kurikulum Sekolah</h3>
-                    <p className="text-sm text-muted-foreground mt-1">PDF, 3.2 MB</p>
-                  </div>
-                  <button className="px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm hover:bg-primary/90 transition-colors">
-                    Download
-                  </button>
-                </div>
+                <DownloadCard
+                  title="Kalender Akademik 2025/2026"
+                  fileFormat="PDF"
+                  fileSize="2.4 MB"
+                />
+                <DownloadCard
+                  title="Jadwal Pelajaran Semester Ganjil"
+                  fileFormat="PDF"
+                  fileSize="1.8 MB"
+                />
+                <DownloadCard
+                  title="Kurikulum Sekolah"
+                  fileFormat="PDF"
+                  fileSize="3.2 MB"
+                />
               </div>
             </SlideLeft>
 
             <SlideRight delay={0.1}>
               <h2 className="text-3xl font-bold text-foreground mb-6">Formulir & Pengumuman</h2>
               <div className="space-y-4">
-                <div className="flex items-center justify-between p-4 bg-card rounded-lg shadow-sm">
-                  <div>
-                    <h3 className="font-bold">Formulir Pendaftaran Siswa Baru</h3>
-                    <p className="text-sm text-muted-foreground mt-1">DOCX, 512 KB</p>
-                  </div>
-                  <button className="px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm hover:bg-primary/90 transition-colors">
-                    Download
-                  </button>
-                </div>
-
-                <div className="flex items-center justify-between p-4 bg-card rounded-lg shadow-sm">
-                  <div>
-                    <h3 className="font-bold">Panduan PPDB</h3>
-                    <p className="text-sm text-muted-foreground mt-1">PDF, 1.2 MB</p>
-                  </div>
-                  <button className="px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm hover:bg-primary/90 transition-colors">
-                    Download
-                  </button>
-                </div>
-
-                <div className="flex items-center justify-between p-4 bg-card rounded-lg shadow-sm">
-                  <div>
-                    <h3 className="font-bold">Surat Izin Orang Tua</h3>
-                    <p className="text-sm text-muted-foreground mt-1">DOCX, 256 KB</p>
-                  </div>
-                  <button className="px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm hover:bg-primary/90 transition-colors">
-                    Download
-                  </button>
-                </div>
+                <DownloadCard
+                  title="Formulir Pendaftaran Siswa Baru"
+                  fileFormat="DOCX"
+                  fileSize="512 KB"
+                />
+                <DownloadCard
+                  title="Panduan PPDB"
+                  fileFormat="PDF"
+                  fileSize="1.2 MB"
+                />
+                <DownloadCard
+                  title="Surat Izin Orang Tua"
+                  fileFormat="DOCX"
+                  fileSize="256 KB"
+                />
               </div>
             </SlideRight>
           </div>

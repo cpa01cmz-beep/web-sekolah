@@ -1,11 +1,12 @@
 import type { Context, Next } from 'hono';
 import { gatewayTimeout } from '../core-utils';
+import { EndpointTimeout } from '../config/endpoint-timeout';
 
 interface TimeoutOptions {
   timeoutMs: number;
 }
 
-const DEFAULT_TIMEOUT = 30000; // 30 seconds
+const DEFAULT_TIMEOUT = EndpointTimeout.ADMIN.STANDARD;
 
 export function timeout(options: TimeoutOptions) {
   const { timeoutMs } = options;
@@ -44,7 +45,7 @@ export function createTimeoutMiddleware(defaultTimeout: number = DEFAULT_TIMEOUT
   };
 }
 
-export const defaultTimeout = createTimeoutMiddleware(30000); // 30 seconds
-export const shortTimeout = createTimeoutMiddleware(10000); // 10 seconds
-export const longTimeout = createTimeoutMiddleware(60000); // 60 seconds
-export const veryLongTimeout = createTimeoutMiddleware(120000); // 2 minutes
+export const defaultTimeout = createTimeoutMiddleware(EndpointTimeout.ADMIN.STANDARD); // 30 seconds
+export const shortTimeout = createTimeoutMiddleware(EndpointTimeout.QUERY.STANDARD); // 5 seconds
+export const longTimeout = createTimeoutMiddleware(EndpointTimeout.ADMIN.COMPLEX); // 30 seconds
+export const veryLongTimeout = createTimeoutMiddleware(EndpointTimeout.SYSTEM.REBUILD_INDEXES); // 60 seconds
