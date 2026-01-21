@@ -9,17 +9,17 @@ import { createUserSchema, updateUserSchema, createGradeSchema, updateGradeSchem
 import type { Context } from 'hono';
 
 export function userRoutes(app: Hono<{ Bindings: Env }>) {
-  app.get('/api/users', ...withAuth('admin'), async (c: Context) => {
+  app.get('/api/users', ...withAuth('admin'), withErrorHandler('get users')(async (c: Context) => {
     const users = await UserService.getAllUsers(c.env);
     return ok(c, users);
-  });
+  }));
 
-  app.post('/api/users', ...withAuth('admin'), validateBody(createUserSchema), async (c: Context) => {
+  app.post('/api/users', ...withAuth('admin'), validateBody(createUserSchema), withErrorHandler('create user')(async (c: Context) => {
     const userData = c.get('validatedBody') as CreateUserData;
     const newUser = await UserService.createUser(c.env, userData);
     triggerWebhookSafely(c.env, 'user.created', newUser, { userId: newUser.id });
     return ok(c, newUser);
-  });
+  }));
 
   app.put('/api/users/:id', ...withAuth('admin'), validateParams(paramsSchema), validateBody(updateUserSchema), withErrorHandler('update user')(async (c: Context) => {
     const { id: userId } = c.get('validatedParams') as { id: string };
@@ -30,7 +30,7 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
     return ok(c, userWithoutPassword);
   }));
 
-  app.delete('/api/users/:id', ...withAuth('admin'), validateParams(paramsSchema), async (c: Context) => {
+  app.delete('/api/users/:id', ...withAuth('admin'), validateParams(paramsSchema), withErrorHandler('delete user')(async (c: Context) => {
     const { id: userId } = c.get('validatedParams') as { id: string };
     const user = await CommonDataService.getUserById(c.env, userId);
     const result = await UserService.deleteUser(c.env, userId);
@@ -38,7 +38,7 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
       triggerWebhookSafely(c.env, 'user.deleted', { id: userId, role: user.role }, { userId });
     }
     return ok(c, result);
-  });
+  }));
 
   app.put('/api/grades/:id', ...withAuth('teacher'), validateParams(paramsSchema), validateBody(updateGradeSchema), withErrorHandler('update grade')(async (c: Context) => {
     const { id: gradeId } = c.get('validatedParams') as { id: string };

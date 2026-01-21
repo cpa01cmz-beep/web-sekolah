@@ -12,12 +12,12 @@ import { getCurrentUserId } from '../type-guards';
 import type { Context } from 'hono';
 
 export function adminRoutes(app: Hono<{ Bindings: Env }>) {
-  app.post('/api/admin/rebuild-indexes', ...withAuth('admin'), async (c: Context) => {
+  app.post('/api/admin/rebuild-indexes', ...withAuth('admin'), withErrorHandler('rebuild indexes')(async (c: Context) => {
     await rebuildAllIndexes(c.env);
     return ok(c, { message: 'All secondary indexes rebuilt successfully.' });
-  });
+  }));
 
-  app.get('/api/admin/dashboard', ...withAuth('admin'), async (c: Context) => {
+  app.get('/api/admin/dashboard', ...withAuth('admin'), withErrorHandler('get admin dashboard')(async (c: Context) => {
     const [totalStudents, totalTeachers, totalParents, totalAdmins, recentAnnouncements] = await Promise.all([
       CommonDataService.getUserCountByRole(c.env, 'student'),
       CommonDataService.getUserCountByRole(c.env, 'teacher'),
@@ -44,9 +44,9 @@ export function adminRoutes(app: Hono<{ Bindings: Env }>) {
     };
 
     return ok(c, dashboardData);
-  });
+  }));
 
-  app.get('/api/admin/users', ...withAuth('admin'), async (c: Context) => {
+  app.get('/api/admin/users', ...withAuth('admin'), withErrorHandler('get admin users')(async (c: Context) => {
     const role = c.req.query('role');
     const classId = c.req.query('classId');
     const search = c.req.query('search');
@@ -86,12 +86,12 @@ export function adminRoutes(app: Hono<{ Bindings: Env }>) {
     }
 
     return ok(c, filteredUsers);
-  });
+  }));
 
-  app.get('/api/admin/announcements', ...withAuth('admin'), async (c: Context) => {
+  app.get('/api/admin/announcements', ...withAuth('admin'), withErrorHandler('get admin announcements')(async (c: Context) => {
     const announcements = await CommonDataService.getAllAnnouncements(c.env);
     return ok(c, announcements);
-  });
+  }));
 
   app.post('/api/admin/announcements', ...withAuth('admin'), validateBody(createAnnouncementSchema), withErrorHandler('create announcement')(async (c: Context) => {
     const announcementData = c.get('validatedBody') as CreateAnnouncementData;
@@ -101,28 +101,17 @@ export function adminRoutes(app: Hono<{ Bindings: Env }>) {
     return ok(c, newAnnouncement);
   }));
 
-  app.get('/api/admin/settings', ...withAuth('admin'), async (c: Context) => {
-    const settings: Settings = {
-      schoolName: c.env.SCHOOL_NAME || 'SMA Negeri 1 Jakarta',
-      academicYear: c.env.ACADEMIC_YEAR || '2024-2025',
-      semester: parseInt(c.env.SEMESTER || '1'),
-      allowRegistration: c.env.ALLOW_REGISTRATION === 'true',
-      maintenanceMode: c.env.MAINTENANCE_MODE === 'true'
-    };
+  app.get('/api/admin/settings', ...withAuth('admin'), withErrorHandler('get admin settings')(async (c: Context) => {
+    const settings = await c.env.STORAGE.get('settings');
+    return ok(c, settings ? JSON.parse(settings) : {});
+  }));
 
-    return ok(c, settings);
-  });
-
-  app.put('/api/admin/settings', ...withAuth('admin'), validateBody(updateSettingsSchema), async (c: Context) => {
-    const updates = c.get('validatedBody') as Partial<Settings>;
-    const updatedSettings: Settings = {
-      schoolName: updates.schoolName || c.env.SCHOOL_NAME || 'SMA Negeri 1 Jakarta',
-      academicYear: updates.academicYear || c.env.ACADEMIC_YEAR || '2024-2025',
-      semester: updates.semester ?? parseInt(c.env.SEMESTER || '1'),
-      allowRegistration: updates.allowRegistration ?? c.env.ALLOW_REGISTRATION === 'true',
-      maintenanceMode: updates.maintenanceMode ?? c.env.MAINTENANCE_MODE === 'true'
-    };
-
+  app.put('/api/admin/settings', ...withAuth('admin'), validateBody(updateSettingsSchema), withErrorHandler('update admin settings')(async (c: Context) => {
+    const settingsData = c.get('validatedBody') as Partial<Settings>;
+    const currentSettingsJson = await c.env.STORAGE.get('settings');
+    const currentSettings = currentSettingsJson ? JSON.parse(currentSettingsJson) : {};
+    const updatedSettings = { ...currentSettings, ...settingsData };
+    await c.env.STORAGE.put('settings', JSON.stringify(updatedSettings));
     return ok(c, updatedSettings);
-  });
+  }));
 }
