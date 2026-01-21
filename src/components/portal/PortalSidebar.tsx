@@ -3,7 +3,7 @@ import { useAuthStore } from '@/lib/authStore';
 import { Button } from '@/components/ui/button';
 import { LogOut, GraduationCap, ChevronLeft, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { navLinksMap, NavLink as NavLinkType } from '@/config/navigation';
 import { THEME_COLORS } from '@/theme/colors';
@@ -13,10 +13,16 @@ export function PortalSidebar() {
   const logout = useAuthStore((state) => state.logout);
   const navigate = useNavigate();
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const handleLogout = () => {
+
+  const handleLogout = useCallback(() => {
     logout();
     navigate('/login');
-  };
+  }, [logout, navigate]);
+
+  const handleToggleCollapse = useCallback(() => {
+    setIsCollapsed(prev => !prev);
+  }, []);
+
   if (!user) return null;
   const navLinks = navLinksMap[user.role as keyof typeof navLinksMap] || [];
   const basePortalPath = `/portal/${user.role}`;
@@ -35,7 +41,7 @@ export function PortalSidebar() {
               <span className="text-lg font-bold">Akademia Pro</span>
             </div>
           )}
-          <Button variant="ghost" size="icon" onClick={() => setIsCollapsed(!isCollapsed)} className="ml-auto" aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}>
+          <Button variant="ghost" size="icon" onClick={handleToggleCollapse} className="ml-auto" aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}>
             {isCollapsed ? <ChevronRight className="h-5 w-5" /> : <ChevronLeft className="h-5 w-5" />}
           </Button>
         </div>

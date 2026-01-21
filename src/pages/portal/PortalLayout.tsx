@@ -7,13 +7,17 @@ import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Menu, Bell, GraduationCap } from 'lucide-react';
 import { Toaster } from 'sonner';
 import { cn } from '@/lib/utils';
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { SkipLink } from '@/components/SkipLink';
 import { navLinksMap, NavLink as NavLinkType } from '@/config/navigation';
 import { THEME_COLORS } from '@/theme/colors';
 export function PortalLayout() {
   const user = useAuthStore((state) => state.user);
   const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  const handleMobileNavClose = useCallback(() => {
+    setMobileMenuOpen(false);
+  }, []);
   if (!user) {
     return <Navigate to="/login" replace />;
   }
@@ -44,7 +48,7 @@ export function PortalLayout() {
                       <NavLink
                         key={link.to}
                         to={`${basePortalPath}/${link.to}`}
-                        onClick={() => setMobileMenuOpen(false)}
+                        onClick={handleMobileNavClose}
                         className={({ isActive }) =>
                           cn(
                             'flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors',
