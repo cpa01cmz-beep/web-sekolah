@@ -94,6 +94,46 @@ export class CommonDataService {
     return allUsers.map(({ passwordHash: _, ...rest }) => rest);
   }
 
+  static async getUsersWithFilters(env: Env, filters: { role?: UserRole; classId?: string; search?: string }): Promise<SchoolUser[]> {
+    const { role, classId, search } = filters;
+
+    let users: SchoolUser[];
+
+    if (role && !search) {
+      const validRoles: UserRole[] = ['student', 'teacher', 'parent', 'admin'];
+      const typedRole = role as UserRole;
+      if (validRoles.includes(typedRole)) {
+        users = await UserEntity.getByRole(env, typedRole);
+      } else {
+        users = await this.getAllUsers(env);
+      }
+    } else if (classId && role === 'student' && !search) {
+      users = await UserEntity.getByClassId(env, classId);
+    } else {
+      users = await this.getAllUsers(env);
+    }
+
+    let filteredUsers = users;
+
+    if (role && search) {
+      filteredUsers = filteredUsers.filter(u => u.role === role);
+    }
+
+    if (classId && !search) {
+      filteredUsers = filteredUsers.filter(u => u.role === 'student' && 'classId' in u && u.classId === classId);
+    }
+
+    if (search) {
+      const searchLower = search.toLowerCase();
+      filteredUsers = filteredUsers.filter(u =>
+        u.name.toLowerCase().includes(searchLower) ||
+        u.email.toLowerCase().includes(searchLower)
+      );
+    }
+
+    return filteredUsers;
+  }
+
   static async getAllClasses(env: Env): Promise<SchoolClass[]> {
     const { items: allClasses } = await ClassEntity.list(env);
     return allClasses;

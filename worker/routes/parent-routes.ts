@@ -8,8 +8,16 @@ import type { Context } from 'hono';
 export function parentRoutes(app: Hono<{ Bindings: Env }>) {
   app.get('/api/parents/:id/dashboard', ...withUserValidation('parent', 'dashboard'), withErrorHandler('get parent dashboard')(async (c: Context) => {
     const requestedParentId = c.req.param('id');
-    const dashboardData = await ParentDashboardService.getDashboardData(c.env, requestedParentId);
-    return ok(c, dashboardData);
+    try {
+      const dashboardData = await ParentDashboardService.getDashboardData(c.env, requestedParentId);
+      return ok(c, dashboardData);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      if (errorMessage.includes('not found') || errorMessage.includes('no associated child')) {
+        return notFound(c, errorMessage);
+      }
+      throw error;
+    }
   }));
 
   app.get('/api/parents/:id/schedule', ...withUserValidation('parent', 'schedule'), withErrorHandler('get parent schedule')(async (c: Context) => {
