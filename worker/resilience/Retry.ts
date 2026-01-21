@@ -1,4 +1,5 @@
 import { RETRY_CONFIG } from '@shared/constants';
+import { logger } from '../logger';
 
 export interface RetryOptions {
   maxRetries?: number;
@@ -74,7 +75,7 @@ export async function withRetry<T>(
 
       const delay = calculateDelay(attempt, baseDelay, jitterMs);
       await sleep(delay).catch((error) => {
-        console.error('Retry: sleep delay failed', error);
+        logger.error('Retry sleep delay failed', error);
       });
     }
   }

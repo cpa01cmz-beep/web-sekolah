@@ -5,6 +5,7 @@ import { FormField } from '@/components/ui/form-field';
 import { FormSuccess } from '@/components/ui/form-success';
 import { useState, useMemo } from 'react';
 import { validateName, validateEmail, validateMessage } from '@/utils/validation';
+import { logger } from '@/lib/logger';
 
 interface ContactFormProps {
   onSubmit?: (data: { name: string; email: string; message: string }) => Promise<void> | void;
@@ -37,7 +38,7 @@ export function ContactForm({ onSubmit }: ContactFormProps) {
       setMessage('');
       setShowValidationErrors(false);
     } catch (error) {
-      console.error('Form submission error:', error);
+      logger.error('Contact form submission failed', error);
     } finally {
       setIsSubmitting(false);
     }
