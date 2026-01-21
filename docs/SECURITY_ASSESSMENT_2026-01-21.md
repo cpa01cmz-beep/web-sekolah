@@ -82,6 +82,8 @@ All security headers implemented in `worker/middleware/security-headers.ts`:
 | Cross-Origin-Opener-Policy | same-origin | Cross-origin opener control |
 | Cross-Origin-Resource-Policy | same-site | Cross-origin resource control |
 
+**Note**: X-XSS-Protection header is **deprecated** and not recommended for modern browsers. The CSP implementation provides sufficient XSS protection.
+
 ### 6. Secrets Management ✅
 - **Environment Variables**: All secrets in environment
   - JWT_SECRET (production)
@@ -196,7 +198,7 @@ None ✅ - All high-priority security issues resolved.
 
 ## Test Coverage
 
-**Overall Test Status**: 2434 tests passing, 5 skipped, 155 todo (79 test files)
+**Overall Test Status**: 2333 tests passing, 5 skipped, 155 todo (75 test files)
 
 **Security-Related Tests**:
 - ✅ Authentication tests (JWT, password hashing)
@@ -225,7 +227,7 @@ None ✅ - All high-priority security issues resolved.
 | Error handling | ✅ | Fail-secure, no data leakage |
 | Secrets management | ✅ | Environment variables, rotation guidance |
 | Webhook security | ✅ | HMAC-SHA256 signature verification |
-| Test coverage | ✅ | 2434 tests passing (79 test files) |
+| Test coverage | ✅ | 2333 tests passing (75 test files) |
 
 **Overall Status**: ✅ **PRODUCTION READY**
 
@@ -262,7 +264,7 @@ The Akademia Pro application demonstrates **exceptional security posture** with 
 - ✅ XSS prevention (React escaping, CSP)
 - ✅ All security headers implemented
 - ✅ No exposed secrets
-- ✅ High test coverage (2434 tests)
+- ✅ High test coverage (2333 tests)
 
 **Recommendations for Enhancement**:
 - 🟡 Update minor/patch dependencies for security hygiene
