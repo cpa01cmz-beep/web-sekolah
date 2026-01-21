@@ -4,7 +4,7 @@
 
 [![🤖 iFlow CLI Automation](https://img.shields.io/badge/iFlow--CLI-Automation-blue)](https://github.com/iflow-ai/iflow-cli-action)
 
-[![Tests: 2466 passing](https://img.shields.io/badge/Tests-2466%20passing-brightgreen)](https://github.com/cpa01cmz-beep/web-sekolah/actions)
+[![Tests: 2483 passing](https://img.shields.io/badge/Tests-2483%20passing-brightgreen)](https://github.com/cpa01cmz-beep/web-sekolah/actions)
 [![Security: 98/100](https://img.shields.io/badge/Security-98%2F100-success)](./docs/SECURITY_ASSESSMENT_2026-01-22.md)
 [![TypeScript: Strict](https://img.shields.io/badge/TypeScript-Strict-blue)](https://www.typescriptlang.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
@@ -65,7 +65,7 @@ The system is built on Cloudflare's high-performance serverless infrastructure, 
 - **Load Time**: < 2 seconds on 3G connection
 - **API Response**: < 100ms average (Cloudflare Workers)
 - **Security**: 98/100 score (Production Ready ✅)
-- **Test Coverage**: 2466 tests passing (5 skipped, 155 todo)
+- **Test Coverage**: 2483 tests passing (5 skipped, 155 todo)
 
 ## Technology Stack
 
@@ -191,28 +191,6 @@ After starting the application:
 
 Full documentation available in the [docs/](./docs/) directory.
 
-**Getting Started**
-- [Developer Guide](./docs/DEVELOPER_GUIDE.md) - Start here! Developer onboarding, architecture patterns, component creation, testing, and contribution guidelines
-- [Quick Start Guide](./docs/QUICK_START.md) - Get started quickly with step-by-step guides for students, teachers, parents, and admins
-
-**Architecture & API**
-- [API Blueprint](./docs/blueprint.md) - Complete API reference with endpoints, error codes, and integration patterns
-- [Integration Architecture](./docs/INTEGRATION_ARCHITECTURE.md) - Enterprise-grade resilience patterns, circuit breakers, retries, and webhook reliability
-- [State Management](./docs/STATE_MANAGEMENT.md) - Zustand state management patterns and examples
-
-**Security**
-- [Security Guide](./docs/SECURITY.md) - Security controls, best practices, and deployment checklist
-- [Security Assessment](./docs/SECURITY_ASSESSMENT_2026-01-22.md) - Current security status (98/100, Production Ready ✅)
-
-**Development Guides**
-- [Architectural Task List](./docs/task.md) - Implementation status and roadmap
-- [Validation Guide](./docs/VALIDATION_GUIDE.md) - Input validation patterns with Zod schemas
-
-**Accessibility & UI/UX**
-- [UI/UX Best Practices](./docs/UI_UX_BEST_PRACTICES.md) - Accessibility (WCAG AA), keyboard shortcuts, design system patterns, and responsive design
-- [Color Contrast Verification](./docs/COLOR_CONTRAST_VERIFICATION.md) - WCAG AA compliance verification for theme colors
-- [Table Responsiveness Verification](./docs/TABLE_RESPONSIVENESS_VERIFICATION.md) - Table design patterns and responsive behavior
-
 ## Development
 
 ### Running Tests
@@ -223,7 +201,7 @@ Run the test suite to verify everything is working:
 npm test
 ```
 
-All tests should pass (currently 2466 tests passing, 5 skipped, 155 todo).
+All tests should pass (currently 2483 tests passing, 5 skipped, 155 todo).
 
 ### Type Checking
 
@@ -354,7 +332,7 @@ git push origin feature/your-feature-name
 ```
 
 **Contribution Guidelines**
-- ✅ All tests passing (2466 tests)
+- ✅ All tests passing (2483 tests)
 - ✅ Zero linting errors
 - ✅ TypeScript compilation successful
 - ✅ Documentation updated for new features
