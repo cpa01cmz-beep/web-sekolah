@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { StatusCodeRanges, ValidationLimits } from '../config/validation';
+import type { Context } from 'hono';
 
 export const createUserSchema = z.object({
   name: z.string().min(ValidationLimits.USER_NAME_MIN_LENGTH, 'Name must be at least 2 characters').max(ValidationLimits.USER_NAME_MAX_LENGTH, 'Name must be less than 100 characters'),
@@ -79,4 +80,26 @@ export const clientErrorSchema = z.object({
   source: z.string().max(ValidationLimits.ERROR_SOURCE_MAX_LENGTH).optional(),
   lineno: z.number().int().optional(),
   colno: z.number().int().optional(),
+});
+
+export const updateSettingsSchema = z.object({
+  schoolName: z.string().min(2, 'School name must be at least 2 characters').max(100, 'School name must be less than 100 characters').optional(),
+  academicYear: z.string().regex(/^\d{4}-\d{4}$/, 'Academic year must be in format YYYY-YYYY').optional(),
+  semester: z.number().int().min(1, 'Semester must be 1 or 2').max(2, 'Semester must be 1 or 2').optional(),
+  allowRegistration: z.boolean().optional(),
+  maintenanceMode: z.boolean().optional(),
+});
+
+export const createWebhookConfigSchema = z.object({
+  url: z.string().url('Invalid webhook URL'),
+  events: z.array(z.string()).min(1, 'At least one event must be specified'),
+  secret: z.string().min(16, 'Webhook secret must be at least 16 characters').max(500, 'Webhook secret is too long'),
+  active: z.boolean().optional(),
+});
+
+export const updateWebhookConfigSchema = z.object({
+  url: z.string().url('Invalid webhook URL').optional(),
+  events: z.array(z.string()).min(1, 'At least one event must be specified').optional(),
+  secret: z.string().min(16, 'Webhook secret must be at least 16 characters').max(500, 'Webhook secret is too long').optional(),
+  active: z.boolean().optional(),
 });

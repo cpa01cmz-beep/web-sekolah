@@ -7,7 +7,7 @@ import type { CreateUserData, UpdateUserData, Announcement, CreateAnnouncementDa
 import { UserService, CommonDataService, AnnouncementService } from '../domain';
 import { withAuth, withErrorHandler, triggerWebhookSafely } from './route-utils';
 import { validateBody } from '../middleware/validation';
-import { createAnnouncementSchema } from '../middleware/schemas';
+import { createAnnouncementSchema, updateSettingsSchema } from '../middleware/schemas';
 import { getCurrentUserId } from '../type-guards';
 import type { Context } from 'hono';
 
@@ -113,8 +113,8 @@ export function adminRoutes(app: Hono<{ Bindings: Env }>) {
     return ok(c, settings);
   });
 
-  app.put('/api/admin/settings', ...withAuth('admin'), async (c: Context) => {
-    const updates = await c.req.json<Partial<Settings>>();
+  app.put('/api/admin/settings', ...withAuth('admin'), validateBody(updateSettingsSchema), async (c: Context) => {
+    const updates = c.get('validatedBody') as Partial<Settings>;
     const updatedSettings: Settings = {
       schoolName: updates.schoolName || c.env.SCHOOL_NAME || 'SMA Negeri 1 Jakarta',
       academicYear: updates.academicYear || c.env.ACADEMIC_YEAR || '2024-2025',
