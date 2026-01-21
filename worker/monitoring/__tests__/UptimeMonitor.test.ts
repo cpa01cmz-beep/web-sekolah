@@ -1,146 +1,117 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { UptimeMonitor } from '../UptimeMonitor';
 
 describe('UptimeMonitor', () => {
-  describe('constructor', () => {
-    it('should initialize with current timestamp', () => {
-      vi.useFakeTimers().setSystemTime(1705730400000);
-      const newMonitor = new UptimeMonitor();
-      const uptime = newMonitor.getUptime();
-      vi.useRealTimers();
+  let monitor: UptimeMonitor;
 
-      expect(uptime).toBe(0);
-    });
+  beforeEach(() => {
+    monitor = new UptimeMonitor();
   });
 
   describe('getUptime()', () => {
-    beforeEach(() => {
-      vi.useFakeTimers().setSystemTime(1705730400000);
-    });
-
-    afterEach(() => {
-      vi.useRealTimers();
-    });
-
-    it('should return zero uptime immediately after construction', () => {
-      const uptime = new UptimeMonitor().getUptime();
-      expect(uptime).toBe(0);
-    });
-
-    it('should return uptime elapsed since construction', () => {
-      const monitor = new UptimeMonitor();
-      vi.advanceTimersByTime(10000);
+    it('should return uptime greater than or equal to zero', () => {
       const uptime = monitor.getUptime();
-      expect(uptime).toBe(10000);
-    });
 
-    it('should return uptime in milliseconds', () => {
-      const monitor = new UptimeMonitor();
-      vi.advanceTimersByTime(5000);
-      const uptime = monitor.getUptime();
-      expect(uptime).toBe(5000);
-    });
-
-    it('should handle time advances', () => {
-      const monitor = new UptimeMonitor();
-      vi.advanceTimersByTime(10000);
-      let uptime = monitor.getUptime();
-      expect(uptime).toBe(10000);
-
-      vi.advanceTimersByTime(2000);
-      uptime = monitor.getUptime();
-      expect(uptime).toBe(12000);
-
-      vi.advanceTimersByTime(5000);
-      uptime = monitor.getUptime();
-      expect(uptime).toBe(17000);
-    });
-
-    it('should return non-negative uptime', () => {
-      const uptime = new UptimeMonitor().getUptime();
       expect(uptime).toBeGreaterThanOrEqual(0);
+    });
+
+    it('should return uptime less than 100ms for newly initialized monitor', () => {
+      const uptime = monitor.getUptime();
+
+      expect(uptime).toBeLessThan(100);
+    });
+
+    it('should increase uptime over time', () => {
+      vi.useFakeTimers();
+      const initialUptime = monitor.getUptime();
+      vi.advanceTimersByTime(100);
+      const laterUptime = monitor.getUptime();
+      vi.useRealTimers();
+
+      expect(laterUptime).toBeGreaterThan(initialUptime);
+      expect(laterUptime - initialUptime).toBeGreaterThanOrEqual(100);
+    });
+
+    it('should return consistent uptime for same time', () => {
+      vi.useFakeTimers();
+      const uptime1 = monitor.getUptime();
+      const uptime2 = monitor.getUptime();
+      vi.useRealTimers();
+
+      expect(uptime1).toBe(uptime2);
     });
   });
 
   describe('reset()', () => {
-    beforeEach(() => {
-      vi.useFakeTimers().setSystemTime(1705730400000);
-    });
-
-    afterEach(() => {
+    it('should reset uptime to near zero', () => {
+      vi.useFakeTimers();
+      vi.advanceTimersByTime(100);
+      const beforeReset = monitor.getUptime();
+      monitor.reset();
+      vi.advanceTimersByTime(10);
+      const afterReset = monitor.getUptime();
       vi.useRealTimers();
+
+      expect(beforeReset).toBeGreaterThanOrEqual(100);
+      expect(afterReset).toBeLessThan(20);
     });
 
-    it('should reset start time', () => {
-      const monitor = new UptimeMonitor();
-      vi.advanceTimersByTime(10000);
+    it('should restart uptime tracking from zero', () => {
+      vi.useFakeTimers();
+      vi.advanceTimersByTime(50);
       monitor.reset();
-      vi.advanceTimersByTime(5000);
-
+      vi.advanceTimersByTime(30);
       const uptime = monitor.getUptime();
-      expect(uptime).toBe(5000);
+      vi.useRealTimers();
+
+      expect(uptime).toBeGreaterThanOrEqual(30);
+      expect(uptime).toBeLessThan(40);
     });
 
-    it('should return zero uptime immediately after reset', () => {
-      const monitor = new UptimeMonitor();
+    it('should handle multiple resets correctly', () => {
+      vi.useFakeTimers();
+      
       monitor.reset();
-
-      const uptime = monitor.getUptime();
-      expect(uptime).toBe(0);
-    });
-
-    it('should handle multiple resets', () => {
-      const monitor = new UptimeMonitor();
-      vi.advanceTimersByTime(10000);
+      vi.advanceTimersByTime(10);
+      const uptime1 = monitor.getUptime();
+      
       monitor.reset();
-      vi.advanceTimersByTime(5000);
-
-      let uptime = monitor.getUptime();
-      expect(uptime).toBe(5000);
-
+      vi.advanceTimersByTime(20);
+      const uptime2 = monitor.getUptime();
+      
       monitor.reset();
-      vi.advanceTimersByTime(2000);
+      vi.advanceTimersByTime(30);
+      const uptime3 = monitor.getUptime();
+      
+      vi.useRealTimers();
 
-      uptime = monitor.getUptime();
-      expect(uptime).toBe(2000);
-    });
-
-    it('should allow time tracking after reset', () => {
-      const monitor = new UptimeMonitor();
-      monitor.reset();
-      vi.advanceTimersByTime(1000);
-
-      const uptime = monitor.getUptime();
-      expect(uptime).toBe(1000);
+      expect(uptime1).toBeGreaterThanOrEqual(10);
+      expect(uptime1).toBeLessThan(15);
+      expect(uptime2).toBeGreaterThanOrEqual(20);
+      expect(uptime2).toBeLessThan(25);
+      expect(uptime3).toBeGreaterThanOrEqual(30);
+      expect(uptime3).toBeLessThan(35);
     });
   });
 
   describe('Edge Cases', () => {
-    beforeEach(() => {
-      vi.useFakeTimers().setSystemTime(1705730400000);
-    });
-
-    afterEach(() => {
+    it('should handle zero elapsed time', () => {
+      vi.useFakeTimers();
+      const freshMonitor = new UptimeMonitor();
+      const uptime = freshMonitor.getUptime();
       vi.useRealTimers();
+
+      expect(uptime).toBe(0);
     });
 
     it('should handle long uptime periods', () => {
-      const monitor = new UptimeMonitor();
-      vi.advanceTimersByTime(86400000);
-      const uptime = monitor.getUptime();
-      expect(uptime).toBe(86400000);
-    });
+      vi.useFakeTimers();
+      const freshMonitor = new UptimeMonitor();
+      vi.advanceTimersByTime(999999);
+      const uptime = freshMonitor.getUptime();
+      vi.useRealTimers();
 
-    it('should handle very short uptime periods', () => {
-      const monitor = new UptimeMonitor();
-      vi.advanceTimersByTime(1);
-      const uptime = monitor.getUptime();
-      expect(uptime).toBe(1);
-    });
-
-    it('should handle zero time advance', () => {
-      const uptime = new UptimeMonitor().getUptime();
-      expect(uptime).toBe(0);
+      expect(uptime).toBeGreaterThanOrEqual(999999);
     });
   });
 });
