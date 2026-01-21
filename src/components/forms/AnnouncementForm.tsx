@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -22,13 +22,21 @@ export function AnnouncementForm({ open, onClose, onSave, isLoading }: Announcem
   const titleErrorMemo = useMemo(() => validateTitle(title, showValidationErrors, 5), [title, showValidationErrors]);
   const contentErrorMemo = useMemo(() => validateContent(content, showValidationErrors, 10), [content, showValidationErrors]);
 
-  useEffect(() => {
-    if (!open) {
+  const handleClose = useCallback(() => {
+    setTitle('');
+    setContent('');
+    setShowValidationErrors(false);
+    onClose();
+  }, [onClose]);
+
+  const handleOpenChange = useCallback((newOpen: boolean) => {
+    if (!newOpen) {
       setTitle('');
       setContent('');
       setShowValidationErrors(false);
+      onClose();
     }
-  }, [open]);
+  }, [onClose]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -42,9 +50,7 @@ export function AnnouncementForm({ open, onClose, onSave, isLoading }: Announcem
   };
 
   return (
-    <Dialog open={open} onOpenChange={(open) => {
-      if (!open) onClose();
-    }}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Create Announcement</DialogTitle>
@@ -99,7 +105,7 @@ export function AnnouncementForm({ open, onClose, onSave, isLoading }: Announcem
             </div>
           </div>
           <DialogFooter>
-            <Button type="button" variant="secondary" onClick={onClose}>
+            <Button type="button" variant="secondary" onClick={handleClose}>
               Cancel
             </Button>
             <Button type="submit" disabled={isLoading} aria-busy={isLoading}>
