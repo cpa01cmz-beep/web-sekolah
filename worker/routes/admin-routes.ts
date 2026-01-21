@@ -47,45 +47,13 @@ export function adminRoutes(app: Hono<{ Bindings: Env }>) {
   }));
 
   app.get('/api/admin/users', ...withAuth('admin'), withErrorHandler('get admin users')(async (c: Context) => {
-    const role = c.req.query('role');
+    const role = c.req.query('role') as UserRole | undefined;
     const classId = c.req.query('classId');
     const search = c.req.query('search');
 
-    let users: SchoolUser[];
+    const users = await CommonDataService.getUsersWithFilters(c.env, { role, classId, search });
 
-    if (role && !search) {
-      const validRoles: UserRole[] = ['student', 'teacher', 'parent', 'admin'];
-      const typedRole = role as UserRole;
-      if (validRoles.includes(typedRole)) {
-        users = await CommonDataService.getByRole(c.env, typedRole);
-      } else {
-        users = await CommonDataService.getAllUsers(c.env);
-      }
-    } else if (classId && role === 'student' && !search) {
-      users = await CommonDataService.getClassStudents(c.env, classId);
-    } else {
-      users = await CommonDataService.getAllUsers(c.env);
-    }
-
-    let filteredUsers = users;
-
-    if (role && search) {
-      filteredUsers = filteredUsers.filter(u => u.role === role);
-    }
-
-    if (classId && !search) {
-      filteredUsers = filteredUsers.filter(u => u.role === 'student' && 'classId' in u && u.classId === classId);
-    }
-
-    if (search) {
-      const searchLower = search.toLowerCase();
-      filteredUsers = filteredUsers.filter(u =>
-        u.name.toLowerCase().includes(searchLower) ||
-        u.email.toLowerCase().includes(searchLower)
-      );
-    }
-
-    return ok(c, filteredUsers);
+    return ok(c, users);
   }));
 
   app.get('/api/admin/announcements', ...withAuth('admin'), withErrorHandler('get admin announcements')(async (c: Context) => {
