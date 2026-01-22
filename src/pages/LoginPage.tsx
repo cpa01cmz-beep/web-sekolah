@@ -104,26 +104,7 @@ export function LoginPage() {
                   disabled={!!isLoading}
                 />
               </FormField>
-              <FormField
-                id="password"
-                label="Password"
-                helperText="Enter your password"
-                required
-                error={passwordError}
-              >
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="••••••"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  disabled={!!isLoading}
-                  aria-required="true"
-                  aria-invalid={!!passwordError}
-                  aria-describedby={passwordError ? 'password-error' : 'password-helper'}
-                />
-              </FormField>
+
             </CardContent>
             <CardFooter className="flex flex-col gap-4">
               <p className="text-sm text-muted-foreground">Select your role to login:</p>
