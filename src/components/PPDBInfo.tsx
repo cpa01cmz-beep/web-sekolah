@@ -1,4 +1,6 @@
-export function PPDBInfo() {
+import { memo } from 'react';
+
+export const PPDBInfo = memo(function PPDBInfo() {
   return (
     <div className="space-y-6">
       <h2 className="text-3xl font-bold text-foreground mb-6">Informasi PPDB</h2>
@@ -48,9 +50,10 @@ export function PPDBInfo() {
       </div>
     </div>
   );
-}
+});
+PPDBInfo.displayName = 'PPDBInfo';
 
-export function PPDBGuide() {
+export const PPDBGuide = memo(function PPDBGuide() {
   return (
     <div className="mt-8 bg-blue-50 rounded-lg p-6 border border-blue-200">
       <h3 className="text-lg font-bold text-blue-800 mb-2">Panduan Pendaftaran</h3>
@@ -59,4 +62,5 @@ export function PPDBGuide() {
       </p>
     </div>
   );
-}
+});
+PPDBGuide.displayName = 'PPDBGuide';

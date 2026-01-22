@@ -116,15 +116,11 @@ export function PPDBForm({ onSubmit }: PPDBFormProps) {
           required
         >
           <Input
-            id="name"
             placeholder="Masukkan nama lengkap"
             value={formData.name}
             onChange={(e) => handleInputChange('name', e.target.value)}
             disabled={isSubmitting}
             required
-            aria-required="true"
-            aria-invalid={!!nameError}
-            aria-describedby={nameError ? 'name-error' : 'name-helper'}
             aria-busy={isSubmitting}
           />
         </FormField>
@@ -138,15 +134,11 @@ export function PPDBForm({ onSubmit }: PPDBFormProps) {
             required
           >
             <Input
-              id="placeOfBirth"
               placeholder="Tempat lahir"
               value={formData.placeOfBirth}
               onChange={(e) => handleInputChange('placeOfBirth', e.target.value)}
               disabled={isSubmitting}
               required
-              aria-required="true"
-              aria-invalid={!!placeOfBirthError}
-              aria-describedby={placeOfBirthError ? 'placeOfBirth-error' : 'placeOfBirth-helper'}
             />
           </FormField>
           <FormField
@@ -157,15 +149,11 @@ export function PPDBForm({ onSubmit }: PPDBFormProps) {
             required
           >
             <Input
-              id="dateOfBirth"
               type="date"
               value={formData.dateOfBirth}
               onChange={(e) => handleInputChange('dateOfBirth', e.target.value)}
               disabled={isSubmitting}
               required
-              aria-required="true"
-              aria-invalid={!!dateOfBirthError}
-              aria-describedby={dateOfBirthError ? 'dateOfBirth-error' : 'dateOfBirth-helper'}
             />
           </FormField>
         </div>
@@ -178,15 +166,11 @@ export function PPDBForm({ onSubmit }: PPDBFormProps) {
           required
         >
           <Input
-            id="nisn"
             placeholder="Nomor Induk Siswa Nasional"
             value={formData.nisn}
             onChange={(e) => handleInputChange('nisn', e.target.value)}
             disabled={isSubmitting}
             required
-            aria-required="true"
-            aria-invalid={!!nisnError}
-            aria-describedby={nisnError ? 'nisn-error' : 'nisn-helper'}
             aria-busy={isSubmitting}
           />
         </FormField>
@@ -199,15 +183,11 @@ export function PPDBForm({ onSubmit }: PPDBFormProps) {
           required
         >
           <Input
-            id="school"
             placeholder="Nama sekolah sebelumnya"
             value={formData.school}
             onChange={(e) => handleInputChange('school', e.target.value)}
             disabled={isSubmitting}
             required
-            aria-required="true"
-            aria-invalid={!!schoolError}
-            aria-describedby={schoolError ? 'school-error' : 'school-helper'}
           />
         </FormField>
 
@@ -219,7 +199,7 @@ export function PPDBForm({ onSubmit }: PPDBFormProps) {
           required
         >
           <Select onValueChange={(value) => handleInputChange('level', value)}>
-            <SelectTrigger id="level" aria-label="Pilih jenjang pendidikan" aria-invalid={!!levelError} aria-describedby={levelError ? 'level-error' : 'level-helper'}>
+            <SelectTrigger id="level" aria-labelledby="level-label">
               <SelectValue placeholder="Pilih jenjang" />
             </SelectTrigger>
             <SelectContent>
@@ -237,16 +217,12 @@ export function PPDBForm({ onSubmit }: PPDBFormProps) {
           required
         >
           <Input
-            id="email"
             type="email"
             placeholder="email@contoh.com"
             value={formData.email}
             onChange={(e) => handleInputChange('email', e.target.value)}
             disabled={isSubmitting}
             required
-            aria-required="true"
-            aria-invalid={!!emailError}
-            aria-describedby={emailError ? 'email-error' : 'email-helper'}
             aria-busy={isSubmitting}
           />
         </FormField>
@@ -259,16 +235,12 @@ export function PPDBForm({ onSubmit }: PPDBFormProps) {
           required
         >
           <Input
-            id="phone"
             type="tel"
             placeholder="081234567890"
             value={formData.phone}
             onChange={(e) => handleInputChange('phone', e.target.value)}
             disabled={isSubmitting}
             required
-            aria-required="true"
-            aria-invalid={!!phoneError}
-            aria-describedby={phoneError ? 'phone-error' : 'phone-helper'}
             aria-busy={isSubmitting}
           />
         </FormField>

@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { Button } from '@/components/ui/button';
 import { UserRole } from '@shared/types';
 import { THEME_COLORS } from '@/theme/colors';
@@ -21,7 +22,7 @@ const DEFAULT_ROLES: RoleButton[] = [
   { role: 'admin', label: 'Admin', variant: 'secondary' },
 ];
 
-export function RoleButtonGrid({ loadingRole, onRoleSelect, buttonClassName }: RoleButtonGridProps) {
+export const RoleButtonGrid = memo(function RoleButtonGrid({ loadingRole, onRoleSelect, buttonClassName }: RoleButtonGridProps) {
   return (
     <div className="grid grid-cols-2 gap-3 w-full">
       {DEFAULT_ROLES.map((button) => {
@@ -50,4 +51,5 @@ export function RoleButtonGrid({ loadingRole, onRoleSelect, buttonClassName }: R
       })}
     </div>
   );
-}
+});
+RoleButtonGrid.displayName = 'RoleButtonGrid';

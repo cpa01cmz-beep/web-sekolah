@@ -1,4 +1,4 @@
-import { ReactNode } from 'react';
+import { ReactElement, ReactNode, cloneElement } from 'react';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
 import { AlertCircle } from 'lucide-react';
@@ -32,13 +32,23 @@ export function FormField({
   const safeError = error ? String(error) : undefined;
   const safeHelperText = helperText ? String(helperText) : undefined;
 
+  const child = React.Children.only(children) as ReactElement;
+  const childProps = child.props || {};
+
+  const enhancedChild = cloneElement(child, {
+    id: childProps.id || id,
+    'aria-required': childProps['aria-required'] ?? (required ? 'true' : undefined),
+    'aria-invalid': childProps['aria-invalid'] ?? (hasError ? 'true' : undefined),
+    'aria-describedby': childProps['aria-describedby'] ?? (hasError ? errorId : helperId),
+  });
+
   return (
     <div className={cn('space-y-2', className)}>
-      <Label htmlFor={id} className="text-sm font-medium">
+      <Label htmlFor={id} id={`${id}-label`} className="text-sm font-medium">
         {safeLabel}
-        {required && <span className="text-destructive ml-1" aria-label="required">*</span>}
+        {required && <span className="text-destructive ml-1">*</span>}
       </Label>
-      {children}
+      {enhancedChild}
       {safeHelperText && !hasError && (
         <p id={helperId} className="text-xs text-muted-foreground">{safeHelperText}</p>
       )}

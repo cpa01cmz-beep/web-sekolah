@@ -83,14 +83,10 @@ export function UserForm({ open, onClose, editingUser, onSave, isLoading }: User
                 className="col-span-3"
               >
                 <Input
-                  id="name"
                   name="name"
                   value={userName}
                   onChange={(e) => setUserName(e.target.value)}
                   required
-                  aria-required="true"
-                  aria-invalid={!!nameError}
-                  aria-describedby={nameError ? 'name-error' : 'name-helper'}
                 />
               </FormField>
             </div>
@@ -104,15 +100,11 @@ export function UserForm({ open, onClose, editingUser, onSave, isLoading }: User
                 className="col-span-3"
               >
                 <Input
-                  id="email"
                   name="email"
                   type="email"
                   value={userEmail}
                   onChange={(e) => setUserEmail(e.target.value)}
                   required
-                  aria-required="true"
-                  aria-invalid={!!emailError}
-                  aria-describedby={emailError ? 'email-error' : 'email-helper'}
                   placeholder="user@example.com"
                 />
               </FormField>
@@ -131,10 +123,8 @@ export function UserForm({ open, onClose, editingUser, onSave, isLoading }: User
                   value={userRole}
                   onValueChange={(value: UserRole) => setUserRole(value)}
                   required
-                  aria-required="true"
-                  aria-invalid={!!roleError}
                 >
-                  <SelectTrigger className="col-span-3"><SelectValue placeholder="Select a role" /></SelectTrigger>
+                  <SelectTrigger className="col-span-3" aria-labelledby="role-label"><SelectValue placeholder="Select a role" /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="student">Student</SelectItem>
                     <SelectItem value="teacher">Teacher</SelectItem>

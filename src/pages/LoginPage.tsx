@@ -80,16 +80,12 @@ export function LoginPage() {
                 error={emailError}
               >
                 <Input
-                  id="email"
                   type="email"
                   placeholder="user@example.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
                   disabled={!!isLoading}
-                  aria-required="true"
-                  aria-invalid={!!emailError}
-                  aria-describedby={emailError ? 'email-error' : 'email-helper'}
                 />
               </FormField>
               <FormField
@@ -100,18 +96,15 @@ export function LoginPage() {
                 error={passwordError}
               >
                 <Input
-                  id="password"
                   type="password"
-                  placeholder="••••••"
+                  placeholder="•••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
                   disabled={!!isLoading}
-                  aria-required="true"
-                  aria-invalid={!!passwordError}
-                  aria-describedby={passwordError ? 'password-error' : 'password-helper'}
                 />
               </FormField>
+
             </CardContent>
             <CardFooter className="flex flex-col gap-4">
               <p className="text-sm text-muted-foreground">Select your role to login:</p>

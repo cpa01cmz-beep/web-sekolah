@@ -3,7 +3,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { FormField } from '@/components/ui/form-field';
 import { FormSuccess } from '@/components/ui/form-success';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, memo } from 'react';
 import { validateName, validateEmail, validateMessage } from '@/utils/validation';
 import { logger } from '@/lib/logger';
 
@@ -11,7 +11,7 @@ interface ContactFormProps {
   onSubmit?: (data: { name: string; email: string; message: string }) => Promise<void> | void;
 }
 
-export function ContactForm({ onSubmit }: ContactFormProps) {
+export const ContactForm = memo(function ContactForm({ onSubmit }: ContactFormProps) {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState('');
@@ -72,17 +72,13 @@ export function ContactForm({ onSubmit }: ContactFormProps) {
         required
       >
         <Input
-          id="contact-name"
           type="text"
           placeholder="John Doe"
           value={name}
           onChange={(e) => setName(e.target.value)}
           required
           disabled={isSubmitting}
-          aria-required="true"
-          aria-invalid={!!nameError}
           aria-busy={isSubmitting}
-          aria-describedby={nameError ? 'contact-name-error' : 'contact-name-helper'}
         />
       </FormField>
       <FormField
@@ -93,17 +89,13 @@ export function ContactForm({ onSubmit }: ContactFormProps) {
         required
       >
         <Input
-          id="contact-email"
           type="email"
           placeholder="john.doe@example.com"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
           disabled={isSubmitting}
-          aria-required="true"
-          aria-invalid={!!emailError}
           aria-busy={isSubmitting}
-          aria-describedby={emailError ? 'contact-email-error' : 'contact-email-helper'}
         />
       </FormField>
       <FormField
@@ -114,17 +106,13 @@ export function ContactForm({ onSubmit }: ContactFormProps) {
         required
       >
         <Textarea
-          id="contact-message"
           placeholder="Your message..."
           rows={5}
           value={message}
           onChange={(e) => setMessage(e.target.value)}
           required
           disabled={isSubmitting}
-          aria-required="true"
-          aria-invalid={!!messageError}
           aria-busy={isSubmitting}
-          aria-describedby={messageError ? 'contact-message-error' : 'contact-message-helper'}
         />
       </FormField>
       <Button type="submit" className="w-full" disabled={isSubmitting} aria-busy={isSubmitting}>
@@ -132,4 +120,5 @@ export function ContactForm({ onSubmit }: ContactFormProps) {
       </Button>
     </form>
   );
-}
+});
+ContactForm.displayName = 'ContactForm';

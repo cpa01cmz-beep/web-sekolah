@@ -77,14 +77,10 @@ export function TeacherAnnouncementsPage() {
                   required
                 >
                   <Input
-                    id="title"
                     value={newTitle}
                     onChange={handleTitleChange}
                     placeholder="Announcement Title"
                     disabled={isPosting}
-                    aria-required="true"
-                    aria-invalid={!!titleError}
-                    aria-describedby={titleError ? 'title-error' : 'title-helper'}
                     aria-busy={isPosting}
                   />
                 </FormField>
@@ -96,15 +92,11 @@ export function TeacherAnnouncementsPage() {
                   required
                 >
                   <Textarea
-                    id="content"
                     value={newContent}
                     onChange={handleContentChange}
                     placeholder="Write your announcement here..."
                     rows={5}
                     disabled={isPosting}
-                    aria-required="true"
-                    aria-invalid={!!contentError}
-                    aria-describedby={contentError ? 'content-error' : 'content-helper'}
                     aria-busy={isPosting}
                   />
                 </FormField>
