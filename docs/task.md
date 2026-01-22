@@ -4,10 +4,11 @@
 
 ## Status Summary
 
-                                                     **Last Updated**: 2026-01-22 (UI/UX Engineer - Accessibility Improvements)
+                                                     **Last Updated**: 2026-01-22 (Code Reviewer - Initial Assessment)
 
                                                      **Overall Test Status**: 2574 tests passing, 5 skipped, 155 todo (82 test files)
                                                      **Overall Security Status**: STRONG - 0 critical vulnerabilities, 2 medium-priority recommendations
+                                                     **Pending Refactoring Tasks**: 5
 
                                              ### UI/UX Engineer - Accessibility Improvements (2026-01-22) - Completed ✅
 
@@ -26880,4 +26881,128 @@ describe('Edge Cases - Extreme Values', () => {
 - Error mapping confidence: Medium → High (verified by tests)
 
 **Success**: ✅ **CRITICAL PATH TESTING COMPLETE, ADDED 50 COMPREHENSIVE TESTS FOR ERROR-UTILS MODULE, ALL 2533 TESTS PASSING, ZERO REGRESSIONS**
+
+---
+
+### Code Reviewer - Navigation Data Extraction (2026-01-22) - Pending
+
+**Task**: Extract inline navigation data from SiteHeader to dedicated constants file
+
+**Location**: `src/components/SiteHeader.tsx`
+
+**Issue**:
+- Navigation link structure (43 lines) defined inline within component
+- Hardcoded URL paths mixed with UI logic
+- Violates Single Responsibility Principle (data concerns mixed with rendering)
+- Navigation data cannot be reused across the application
+- Harder to maintain navigation structure (requires editing component file)
+
+**Suggestion**:
+- Extract `navLinks` constant to `src/config/navigation.ts` or `src/constants/navigation.ts`
+- Create typed interface for navigation structure
+- Import navigation data in SiteHeader
+- Improves maintainability and separation of concerns
+
+**Priority**: Medium
+**Effort**: Small
+
+---
+
+### Code Reviewer - Page Content Data Extraction (2026-01-22) - Pending
+
+**Task**: Extract inline content data structures from public pages to dedicated constants
+
+**Location**: `src/pages/HomePage.tsx` (lines 10-36), `src/pages/ProfileSchoolPage.tsx` (inline content)
+
+**Issue**:
+- Multiple public pages have inline data structures (features, values, contactInfo)
+- Content data mixed with rendering logic
+- Violates separation of concerns (data vs. presentation)
+- Content cannot be easily updated or internationalized
+- Duplicates similar pattern across multiple page components
+
+**Suggestion**:
+- Extract content data to `src/constants/content.ts` or `src/config/content.ts`
+- Create typed interfaces for content structures
+- Import content in page components
+- Enables future internationalization support (i18n)
+- Improves content maintainability
+
+**Priority**: Medium
+**Effort**: Medium
+
+---
+
+### Code Reviewer - Route Configuration Pattern Extraction (2026-01-22) - Pending
+
+**Task**: Extract duplicate route lazy loading pattern to reusable utility
+
+**Location**: `src/routes/student.tsx`, `src/routes/teacher.tsx`, `src/routes/parent.tsx`, `src/routes/admin.tsx`
+
+**Issue**:
+- All route files use identical pattern: `const Page = lazy(() => import('...'))` + `{ path: '...', element: withSuspense(Page) }`
+- 4 files (17-19 lines each) contain duplicate code
+- Violates DRY principle
+- Adding new routes requires boilerplate code
+- Inconsistent route definitions if pattern changes
+
+**Suggestion**:
+- Create `src/router-utils.ts` helper: `createLazyRoute(path, componentPath)`
+- Accepts route path and component import path
+- Returns route object with lazy loading and suspense
+- Reduces route file from 17 lines to ~10 lines per file
+- Consistent route configuration across all role routes
+
+**Priority**: Low
+**Effort**: Small
+
+---
+
+### Code Reviewer - Inline Component Extraction (2026-01-22) - Pending
+
+**Task**: Extract inline AnnouncementItem component from AdminAnnouncementsPage
+
+**Location**: `src/pages/portal/admin/AdminAnnouncementsPage.tsx` (lines 15-38)
+
+**Issue**:
+- AnnouncementItem component defined inline within page component (24 lines)
+- Violates Single Responsibility Principle (page defines its own child components)
+- Component cannot be reused across the application
+- Harder to test inline component independently
+- Follows pattern of AdminDashboardPage refactoring (AnnouncementItem, EnrollmentChart extracted)
+
+**Suggestion**:
+- Extract AnnouncementItem to `src/components/announcements/AnnouncementItem.tsx`
+- Props: `{ ann: Announcement, index: number, total: number, onDelete: (id: string) => void }`
+- Use React.memo for performance (already inline)
+- Reusable for any announcement list (dashboard, announcements page, etc.)
+- Consistent with existing component architecture
+
+**Priority**: Medium
+**Effort**: Small
+
+---
+
+### Code Reviewer - Hook Pattern Abstraction (2026-01-22) - Pending
+
+**Task**: Abstract common hook pattern into generic utility
+
+**Location**: `src/hooks/useStudent.ts`, `src/hooks/useTeacher.ts`, `src/hooks/useParent.ts`, `src/hooks/useAdmin.ts`
+
+**Issue**:
+- All role-based hooks follow identical pattern: useTanstackQuery with queryKey, queryFn, createQueryOptions
+- Duplicate boilerplate across 4 hook files
+- Each hook has similar structure (47-105 lines)
+- Violates DRY principle
+- Adding new role hooks requires duplicating same pattern
+
+**Suggestion**:
+- Create generic hook factory: `createResourceQuery<Resource>(resourceType, entityId, resourceKey, queryFn, options)`
+- Accepts resource type, entity ID, query key, query function, and options
+- Returns configured useQuery hook with proper caching
+- Reduce hook files from 47-105 lines to ~30 lines
+- Consistent query configuration across all resource hooks
+
+**Priority**: Low
+**Effort**: Medium
 
