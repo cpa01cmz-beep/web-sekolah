@@ -80,16 +80,28 @@ export function LoginPage() {
                 error={emailError}
               >
                 <Input
-                  id="email"
                   type="email"
                   placeholder="user@example.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
                   disabled={!!isLoading}
-                  aria-required="true"
-                  aria-invalid={!!emailError}
-                  aria-describedby={emailError ? 'email-error' : 'email-helper'}
+                />
+              </FormField>
+              <FormField
+                id="password"
+                label="Password"
+                helperText="Enter your password"
+                required
+                error={passwordError}
+              >
+                <Input
+                  type="password"
+                  placeholder="•••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  disabled={!!isLoading}
                 />
               </FormField>
               <FormField

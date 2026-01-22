@@ -65,13 +65,9 @@ export function AnnouncementForm({ open, onClose, onSave, isLoading }: Announcem
               required
             >
               <Input
-                id="announcement-title"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="Announcement Title"
-                aria-required="true"
-                aria-invalid={!!titleErrorMemo}
-                aria-describedby={titleErrorMemo ? 'title-error' : 'title-helper'}
               />
             </FormField>
             <FormField
@@ -82,14 +78,10 @@ export function AnnouncementForm({ open, onClose, onSave, isLoading }: Announcem
               required
             >
               <Textarea
-                id="announcement-content"
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
                 placeholder="Write your announcement here..."
                 rows={5}
-                aria-required="true"
-                aria-invalid={!!contentErrorMemo}
-                aria-describedby={contentErrorMemo ? 'content-error' : 'content-helper'}
               />
             </FormField>
           </div>

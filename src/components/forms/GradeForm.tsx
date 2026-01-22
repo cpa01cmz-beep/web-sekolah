@@ -70,7 +70,6 @@ export function GradeForm({ open, onClose, editingStudent, onSave, isLoading }: 
                 className="col-span-3"
               >
                 <Input
-                  id="score"
                   type="number"
                   value={currentScore}
                   onChange={(e) => setCurrentScore(e.target.value)}
@@ -79,8 +78,6 @@ export function GradeForm({ open, onClose, editingStudent, onSave, isLoading }: 
                   min="0"
                   max="100"
                   step="1"
-                  aria-invalid={!!scoreError}
-                  aria-describedby={scoreError ? 'score-error' : 'score-helper'}
                 />
               </FormField>
             </div>
@@ -92,13 +89,11 @@ export function GradeForm({ open, onClose, editingStudent, onSave, isLoading }: 
                 className="col-span-3"
               >
                 <Textarea
-                  id="feedback"
                   value={currentFeedback}
                   onChange={(e) => setCurrentFeedback(e.target.value)}
                   className="col-span-3"
                   placeholder="Enter feedback..."
                   rows={3}
-                  aria-describedby="feedback-helper"
                 />
               </FormField>
             </div>
