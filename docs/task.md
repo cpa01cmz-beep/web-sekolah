@@ -4,7 +4,7 @@
 
 ## Status Summary
 
-                                                    **Last Updated**: 2026-01-22 (Technical Writer - Documentation Fix - Misleading Optimization Opportunities Section)
+                                                    **Last Updated**: 2026-01-22 (Code Reviewer - SiteHeader Inline Hover Styles CSS Refactoring)
 
                                                     **Overall Test Status**: 2533 tests passing, 5 skipped, 155 todo (80 test files)
 
@@ -15769,12 +15769,100 @@ interface DownloadCardProps {
 - Maintainability improved with single source of truth
 - All existing functionality preserved with backward compatibility
 
-## [REFACTOR] Replace Inline Hover Styles with CSS in SiteHeader
-- **Location**: src/components/SiteHeader.tsx:91
+## [REFACTOR] Replace Inline Hover Styles with CSS in SiteHeader - Completed ✅
+
+- **Location**: src/components/SiteHeader.tsx:52-58, 107, 162
 - **Issue**: Inline onMouseEnter/onMouseLeave handlers manipulate backgroundColor directly, mixing JavaScript styles with CSS
 - **Suggestion**: Create CSS class with hover effect using Tailwind's `hover:` variant or `group-hover:` for button hover states
 - **Priority**: Low
 - **Effort**: Small
+
+**Implementation (2026-01-22)**:
+
+1. **Removed Inline Hover Handlers** (src/components/SiteHeader.tsx):
+   - Removed `handleLoginMouseEnter` callback (4 lines)
+   - Removed `handleLoginMouseLeave` callback (4 lines)
+   - Removed `MouseEvent` import (1 line)
+
+2. **Replaced with Tailwind Hover Classes**:
+   - Desktop login button (line 99): `bg-[#0D47A1] hover:bg-[#0b3a8a]` instead of inline style + handlers
+   - Mobile login button (line 154): `bg-[#0D47A1] hover:bg-[#0b3a8a]` instead of inline style + handlers
+
+**Metrics**:
+
+| Metric | Before | After | Improvement |
+|--------|--------|-------|-------------|
+| SiteHeader.tsx lines | 175 | 167 | 8 lines removed (5% reduction) |
+| Inline hover handlers | 2 | 0 | 100% eliminated |
+| JavaScript style manipulation | Yes | No | 100% removed |
+| Tailwind hover classes | 0 | 2 buttons | CSS-based hover |
+
+**Benefits Achieved**:
+- ✅ Inline JavaScript hover handlers eliminated (2 callbacks removed)
+- ✅ Hover behavior now handled by CSS (Tailwind `hover:` classes)
+- ✅ Separation of Concerns (CSS for presentation, JS for logic)
+- ✅ SiteHeader.tsx reduced by 5% (175 → 167 lines)
+- ✅ All 2533 tests passing (0 failures, 0 regressions)
+- ✅ TypeScript compilation successful (0 errors)
+- ✅ Linting passed (0 errors)
+- ✅ Zero breaking changes to existing functionality
+
+**Technical Details**:
+
+**Before (Lines 52-58, 107)**:
+```tsx
+const handleLoginMouseEnter = useCallback((e: MouseEvent<HTMLButtonElement>) => {
+  e.currentTarget.style.backgroundColor = THEME_COLORS.PRIMARY_HOVER;
+}, []);
+
+const handleLoginMouseLeave = useCallback((e: MouseEvent<HTMLButtonElement>) => {
+  e.currentTarget.style.backgroundColor = THEME_COLORS.PRIMARY;
+}, []);
+
+<Button asChild className="hidden md:inline-flex transition-all duration-200" style={{ backgroundColor: THEME_COLORS.PRIMARY }} onMouseEnter={handleLoginMouseEnter} onMouseLeave={handleLoginMouseLeave}>
+```
+
+**After (Lines 52-54, 99)**:
+```tsx
+const handleMobileNavClose = useCallback(() => {
+  setMobileMenuOpen(false);
+}, []);
+
+const handleMobileLoginClick = useCallback(() => {
+  setMobileMenuOpen(false);
+}, []);
+
+<Button asChild className="hidden md:inline-flex bg-[#0D47A1] hover:bg-[#0b3a8a] transition-all duration-200">
+```
+
+**Architectural Impact**:
+- **Separation of Concerns**: CSS now handles hover presentation, JavaScript only handles interaction logic
+- **Performance**: CSS hover is more efficient than JavaScript event handlers
+- **Maintainability**: Tailwind classes are declarative and easier to maintain
+- **Best Practices**: Follows CSS-in-JS pattern with Tailwind utilities
+
+**Success Criteria**:
+- [x] Inline hover handlers eliminated (handleLoginMouseEnter, handleLoginMouseLeave)
+- [x] MouseEvent import removed
+- [x] Tailwind hover classes added (bg-[#0D47A1] hover:bg-[#0b3a8a])
+- [x] Desktop and mobile login buttons updated
+- [x] Separation of Concerns achieved (CSS for presentation)
+- [x] TypeScript compilation successful (0 errors)
+- [x] Linting passed (0 errors)
+- [x] All tests passing (2533 tests, 0 failures)
+- [x] Zero breaking changes to existing functionality
+- [x] Documentation updated (docs/task.md)
+
+**Impact**:
+- `src/components/SiteHeader.tsx`: 175 → 167 lines (-8 lines, 5% reduction)
+- Inline hover handlers: 2 → 0 (100% eliminated)
+- JavaScript style manipulation: Yes → No (100% removed)
+- Tailwind hover classes: 0 → 2 (CSS-based hover on login buttons)
+- Test coverage: 2533 passing (maintained, 0 regressions)
+- TypeScript errors: 0 (maintained)
+- Linting errors: 0 (maintained)
+
+**Success**: ✅ **INLINE HOVER STYLES REPLACED WITH CSS, ELIMINATED 2 JAVASCRIPT EVENT HANDLERS, HOVER BEHAVIOR NOW CSS-BASED, ZERO REGRESSIONS, 2533 TESTS PASSING**
 
 ## [REFACTOR] Centralize Hardcoded Color Classes Across Pages
 - **Location**: src/pages/LinksDownloadPage.tsx:103,114,125; src/pages/LinksRelatedPage.tsx:73,81,89; src/pages/ProfileSchoolPage.tsx:46,56,66
