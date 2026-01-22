@@ -199,7 +199,7 @@ export function PPDBForm({ onSubmit }: PPDBFormProps) {
           required
         >
           <Select onValueChange={(value) => handleInputChange('level', value)}>
-            <SelectTrigger id="level" aria-label="Pilih jenjang pendidikan">
+            <SelectTrigger id="level" aria-labelledby="level-label">
               <SelectValue placeholder="Pilih jenjang" />
             </SelectTrigger>
             <SelectContent>

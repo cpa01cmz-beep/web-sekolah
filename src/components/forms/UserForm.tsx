@@ -124,7 +124,7 @@ export function UserForm({ open, onClose, editingUser, onSave, isLoading }: User
                   onValueChange={(value: UserRole) => setUserRole(value)}
                   required
                 >
-                  <SelectTrigger className="col-span-3"><SelectValue placeholder="Select a role" /></SelectTrigger>
+                  <SelectTrigger className="col-span-3" aria-labelledby="role-label"><SelectValue placeholder="Select a role" /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="student">Student</SelectItem>
                     <SelectItem value="teacher">Teacher</SelectItem>

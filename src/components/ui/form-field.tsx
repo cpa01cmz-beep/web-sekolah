@@ -44,9 +44,9 @@ export function FormField({
 
   return (
     <div className={cn('space-y-2', className)}>
-      <Label htmlFor={id} className="text-sm font-medium">
+      <Label htmlFor={id} id={`${id}-label`} className="text-sm font-medium">
         {safeLabel}
-        {required && <span className="text-destructive ml-1" aria-label="required">*</span>}
+        {required && <span className="text-destructive ml-1">*</span>}
       </Label>
       {enhancedChild}
       {safeHelperText && !hasError && (
