@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, memo } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -13,7 +13,7 @@ interface AnnouncementFormProps {
   isLoading: boolean;
 }
 
-export function AnnouncementForm({ open, onClose, onSave, isLoading }: AnnouncementFormProps) {
+export const AnnouncementForm = memo(function AnnouncementForm({ open, onClose, onSave, isLoading }: AnnouncementFormProps) {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [showValidationErrors, setShowValidationErrors] = useState(false);
@@ -97,4 +97,5 @@ export function AnnouncementForm({ open, onClose, onSave, isLoading }: Announcem
       </DialogContent>
     </Dialog>
   );
-}
+});
+AnnouncementForm.displayName = 'AnnouncementForm';

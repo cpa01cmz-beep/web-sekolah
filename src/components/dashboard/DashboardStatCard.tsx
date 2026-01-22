@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 
@@ -10,7 +11,7 @@ interface DashboardStatCardProps {
   className?: string;
 }
 
-export function DashboardStatCard({
+export const DashboardStatCard = memo(function DashboardStatCard({
   title,
   value,
   icon,
@@ -34,4 +35,5 @@ export function DashboardStatCard({
       </CardContent>
     </Card>
   );
-}
+});
+DashboardStatCard.displayName = 'DashboardStatCard';

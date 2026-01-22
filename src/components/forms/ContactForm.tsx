@@ -3,7 +3,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { FormField } from '@/components/ui/form-field';
 import { FormSuccess } from '@/components/ui/form-success';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, memo } from 'react';
 import { validateName, validateEmail, validateMessage } from '@/utils/validation';
 import { logger } from '@/lib/logger';
 
@@ -11,7 +11,7 @@ interface ContactFormProps {
   onSubmit?: (data: { name: string; email: string; message: string }) => Promise<void> | void;
 }
 
-export function ContactForm({ onSubmit }: ContactFormProps) {
+export const ContactForm = memo(function ContactForm({ onSubmit }: ContactFormProps) {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState('');
@@ -120,4 +120,5 @@ export function ContactForm({ onSubmit }: ContactFormProps) {
       </Button>
     </form>
   );
-}
+});
+ContactForm.displayName = 'ContactForm';
