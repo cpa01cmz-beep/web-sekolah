@@ -67,6 +67,7 @@ export function GradeForm({ open, onClose, editingStudent, onSave, isLoading }: 
                 label="Score"
                 error={scoreError}
                 helperText="Enter a score between 0 and 100. Leave empty for no score."
+                required
                 className="col-span-3"
               >
                 <Input
@@ -78,6 +79,9 @@ export function GradeForm({ open, onClose, editingStudent, onSave, isLoading }: 
                   min="0"
                   max="100"
                   step="1"
+                  required
+                  disabled={isLoading}
+                  aria-busy={isLoading}
                 />
               </FormField>
             </div>
@@ -94,6 +98,8 @@ export function GradeForm({ open, onClose, editingStudent, onSave, isLoading }: 
                   className="col-span-3"
                   placeholder="Enter feedback..."
                   rows={3}
+                  disabled={isLoading}
+                  aria-busy={isLoading}
                 />
               </FormField>
             </div>

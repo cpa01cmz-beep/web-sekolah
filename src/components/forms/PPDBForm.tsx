@@ -139,6 +139,7 @@ export function PPDBForm({ onSubmit }: PPDBFormProps) {
               onChange={(e) => handleInputChange('placeOfBirth', e.target.value)}
               disabled={isSubmitting}
               required
+              aria-busy={isSubmitting}
             />
           </FormField>
           <FormField
@@ -154,6 +155,7 @@ export function PPDBForm({ onSubmit }: PPDBFormProps) {
               onChange={(e) => handleInputChange('dateOfBirth', e.target.value)}
               disabled={isSubmitting}
               required
+              aria-busy={isSubmitting}
             />
           </FormField>
         </div>
@@ -188,6 +190,7 @@ export function PPDBForm({ onSubmit }: PPDBFormProps) {
             onChange={(e) => handleInputChange('school', e.target.value)}
             disabled={isSubmitting}
             required
+            aria-busy={isSubmitting}
           />
         </FormField>
 
@@ -198,8 +201,8 @@ export function PPDBForm({ onSubmit }: PPDBFormProps) {
           helperText="Pilih jenjang pendidikan yang dituju"
           required
         >
-          <Select onValueChange={(value) => handleInputChange('level', value)}>
-            <SelectTrigger id="level" aria-labelledby="level-label">
+          <Select onValueChange={(value) => handleInputChange('level', value)} disabled={isSubmitting}>
+            <SelectTrigger id="level" aria-labelledby="level-label" aria-busy={isSubmitting}>
               <SelectValue placeholder="Pilih jenjang" />
             </SelectTrigger>
             <SelectContent>
