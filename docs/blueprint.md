@@ -96,6 +96,25 @@ This clears and rebuilds all secondary indexes from existing data.
 
 ### Data Integrity Constraints (2026-01-10)
 
+**Delete Strategy**: The application uses **hard delete** (permanent removal) for all entity operations
+- Records are permanently deleted from storage via `Entity.delete()`
+- Primary and secondary indexes are automatically cleaned up on deletion
+- Soft-delete functionality exists in `Entity.softDelete()` but is not used in routes/services
+- **Decision**: Hard delete chosen for simplicity and data hygiene
+
+**Soft-Delete Support (2026-01-22)**:
+To support future soft-delete requirements, `IndexedEntity` now includes:
+- `softDeleteWithIndexCleanup()`: Soft-deletes record and removes from all indexes
+- `restoreWithIndexCleanup()`: Restores soft-deleted record and re-adds to all indexes
+- These methods maintain index consistency when using soft-delete pattern
+- If soft-delete is enabled in routes, use these methods instead of base `Entity.softDelete()`
+
+**Index Cleanup Consistency**:
+- Hard delete (`delete()`): Removes from storage + all indexes (current implementation)
+- Soft delete (`softDeleteWithIndexCleanup()`): Sets deletedAt + removes from all indexes (future support)
+- Restore (`restoreWithIndexCleanup()`): Clears deletedAt + re-adds to all indexes (future support)
+- In-memory filters for `!deletedAt` remain as defensive coding against data corruption
+
 **Referential Integrity**: All critical entity relationships are validated before creation and updates:
 - `ReferentialIntegrity.validateGrade()`: Ensures grade references valid student, course, and enrollment
 - `ReferentialIntegrity.validateClass()`: Ensures class references valid teacher
