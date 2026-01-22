@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { GraduationCap, Menu } from 'lucide-react';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { useState, useCallback, MouseEvent, memo } from 'react';
+import { useState, useCallback, memo } from 'react';
 import { THEME_COLORS } from '@/theme/colors';
 
 const navLinks = [
@@ -47,14 +47,6 @@ export const SiteHeader = memo(function SiteHeader() {
 
   const handleMobileNavClose = useCallback(() => {
     setMobileMenuOpen(false);
-  }, []);
-
-  const handleLoginMouseEnter = useCallback((e: MouseEvent<HTMLButtonElement>) => {
-    e.currentTarget.style.backgroundColor = THEME_COLORS.PRIMARY_HOVER;
-  }, []);
-
-  const handleLoginMouseLeave = useCallback((e: MouseEvent<HTMLButtonElement>) => {
-    e.currentTarget.style.backgroundColor = THEME_COLORS.PRIMARY;
   }, []);
 
   const handleMobileLoginClick = useCallback(() => {
@@ -104,7 +96,7 @@ export const SiteHeader = memo(function SiteHeader() {
             ))}
           </nav>
           <div className="flex items-center gap-4">
-            <Button asChild className="hidden md:inline-flex transition-all duration-200" style={{ backgroundColor: THEME_COLORS.PRIMARY }} onMouseEnter={handleLoginMouseEnter} onMouseLeave={handleLoginMouseLeave}>
+            <Button asChild className="hidden md:inline-flex bg-[#0D47A1] hover:bg-[#0b3a8a] transition-all duration-200">
               <Link to="/login">Login</Link>
             </Button>
             <Sheet open={isMobileMenuOpen} onOpenChange={setMobileMenuOpen}>
@@ -159,7 +151,7 @@ export const SiteHeader = memo(function SiteHeader() {
                         </NavLink>
                       )
                     ))}
-                    <Button asChild className="w-full transition-all duration-200" style={{ backgroundColor: THEME_COLORS.PRIMARY }} onClick={handleMobileLoginClick}>
+                    <Button asChild className="w-full bg-[#0D47A1] hover:bg-[#0b3a8a] transition-all duration-200" onClick={handleMobileLoginClick}>
                       <Link to="/login" className="focus-visible:ring-offset-2">Login</Link>
                     </Button>
                   </div>

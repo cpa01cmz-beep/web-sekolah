@@ -1,86 +1,16 @@
-import { useState, useEffect, memo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { EmptyState } from '@/components/ui/empty-state';
 import { DashboardSkeleton } from '@/components/ui/loading-skeletons';
 import { PageHeader } from '@/components/PageHeader';
 import { DashboardStatCard } from '@/components/dashboard/DashboardStatCard';
-import { Users, GraduationCap, School, Megaphone, Activity, AlertTriangle, Inbox } from 'lucide-react';
+import { AnnouncementItem } from '@/components/dashboard/AnnouncementItem';
+import { EnrollmentChart } from '@/components/dashboard/EnrollmentChart';
+import { Users, GraduationCap, School, Megaphone, AlertTriangle, Inbox } from 'lucide-react';
 import { SlideUp } from '@/components/animations';
 import { useReducedMotion } from '@/hooks/use-reduced-motion';
 import { useAdminDashboard } from '@/hooks/useAdmin';
-import { THEME_COLORS } from '@/theme/colors';
-import { formatDate } from '@/utils/date';
 import type { AdminDashboardData } from '@shared/types';
-
-const AnnouncementItem = memo(({ ann }: { ann: AdminDashboardData['recentAnnouncements'][0] }) => (
-  <li className="flex items-start">
-    <Activity className="h-4 w-4 mt-1 mr-3 text-muted-foreground flex-shrink-0" />
-    <div>
-      <p className="text-sm font-medium">{ann.title}</p>
-      <p className="text-xs text-muted-foreground">{formatDate(ann.date)}</p>
-    </div>
-  </li>
-));
-AnnouncementItem.displayName = 'AnnouncementItem';
-
-interface ChartComponents {
-  BarChart: React.ComponentType<any>;
-  Bar: React.ComponentType<any>;
-  XAxis: React.ComponentType<any>;
-  YAxis: React.ComponentType<any>;
-  CartesianGrid: React.ComponentType<any>;
-  Tooltip: React.ComponentType<any>;
-  Legend: React.ComponentType<any>;
-  ResponsiveContainer: React.ComponentType<any>;
-}
-
-function EnrollmentChart({ data }: { data: Array<{ name: string; students: number }> }) {
-  const [Chart, setChart] = useState<ChartComponents | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    Promise.all([
-      import('recharts/es6/chart/BarChart'),
-      import('recharts/es6/cartesian/Bar'),
-      import('recharts/es6/cartesian/XAxis'),
-      import('recharts/es6/cartesian/YAxis'),
-      import('recharts/es6/cartesian/CartesianGrid'),
-      import('recharts/es6/component/Tooltip'),
-      import('recharts/es6/component/Legend'),
-      import('recharts/es6/component/ResponsiveContainer'),
-    ]).then(([BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer]) => {
-      setChart({
-        BarChart: BarChart.BarChart,
-        Bar: Bar.Bar,
-        XAxis: XAxis.XAxis,
-        YAxis: YAxis.YAxis,
-        CartesianGrid: CartesianGrid.CartesianGrid,
-        Tooltip: Tooltip.Tooltip,
-        Legend: Legend.Legend,
-        ResponsiveContainer: ResponsiveContainer.ResponsiveContainer,
-      });
-      setIsLoading(false);
-    });
-  }, []);
-
-  if (isLoading || !Chart) {
-    return <div className="h-[300px] animate-pulse bg-muted rounded-lg" />;
-  }
-
-  return (
-    <Chart.ResponsiveContainer width="100%" height={300}>
-      <Chart.BarChart data={data}>
-        <Chart.CartesianGrid strokeDasharray="3 3" />
-        <Chart.XAxis dataKey="name" />
-        <Chart.YAxis />
-        <Chart.Tooltip />
-        <Chart.Legend />
-        <Chart.Bar dataKey="students" fill={THEME_COLORS.PRIMARY} />
-      </Chart.BarChart>
-    </Chart.ResponsiveContainer>
-  );
-}
 
 export function AdminDashboardPage() {
   const prefersReducedMotion = useReducedMotion();
