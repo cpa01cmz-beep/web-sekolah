@@ -68,6 +68,7 @@ export const AnnouncementForm = memo(function AnnouncementForm({ open, onClose, 
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="Announcement Title"
+                aria-busy={isLoading}
               />
             </FormField>
             <FormField
@@ -82,6 +83,7 @@ export const AnnouncementForm = memo(function AnnouncementForm({ open, onClose, 
                 onChange={(e) => setContent(e.target.value)}
                 placeholder="Write your announcement here..."
                 rows={5}
+                aria-busy={isLoading}
               />
             </FormField>
           </div>

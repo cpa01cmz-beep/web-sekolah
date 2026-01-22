@@ -96,7 +96,7 @@ export const SiteHeader = memo(function SiteHeader() {
             ))}
           </nav>
           <div className="flex items-center gap-4">
-            <Button asChild className="hidden md:inline-flex bg-[#0D47A1] hover:bg-[#0b3a8a] transition-all duration-200">
+            <Button asChild className="hidden md:inline-flex transition-all duration-200" style={{ backgroundColor: THEME_COLORS.PRIMARY }}>
               <Link to="/login">Login</Link>
             </Button>
             <Sheet open={isMobileMenuOpen} onOpenChange={setMobileMenuOpen}>
@@ -151,7 +151,7 @@ export const SiteHeader = memo(function SiteHeader() {
                         </NavLink>
                       )
                     ))}
-                    <Button asChild className="w-full bg-[#0D47A1] hover:bg-[#0b3a8a] transition-all duration-200" onClick={handleMobileLoginClick}>
+                    <Button asChild className="w-full transition-all duration-200" style={{ backgroundColor: THEME_COLORS.PRIMARY }} onClick={handleMobileLoginClick}>
                       <Link to="/login" className="focus-visible:ring-offset-2">Login</Link>
                     </Button>
                   </div>

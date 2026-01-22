@@ -1474,6 +1474,120 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
+  /webhooks/{id}/deliveries:
+    get:
+      tags:
+        - Webhooks
+      summary: Get webhook deliveries
+      description: Retrieves delivery history for a specific webhook configuration
+      operationId: getWebhookDeliveries
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Webhook configuration ID
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Deliveries retrieved successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/WebhookDelivery'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Webhook not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /webhooks/events:
+    get:
+      tags:
+        - Webhooks
+      summary: List webhook events
+      description: Retrieves all webhook events
+      operationId: listWebhookEvents
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Events retrieved successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/WebhookEvent'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /webhooks/events/{id}:
+    get:
+      tags:
+        - Webhooks
+      summary: Get webhook event
+      description: Retrieves a specific webhook event by ID
+      operationId: getWebhookEvent
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Webhook event ID
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Event retrieved successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/WebhookEvent'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Event not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
   /admin/webhooks/process:
     post:
       tags:
@@ -2166,3 +2280,150 @@ components:
           type: number
         activeEntries:
           type: integer
+
+    TeacherDashboardData:
+      type: object
+      properties:
+        teacherId:
+          type: string
+          description: Teacher ID
+        name:
+          type: string
+          description: Teacher name
+        email:
+          type: string
+          format: email
+          description: Teacher email
+        totalClasses:
+          type: integer
+          description: Total number of classes taught
+        totalStudents:
+          type: integer
+          description: Total number of students across all classes
+        recentGrades:
+          type: array
+          items:
+            $ref: '#/components/schemas/Grade'
+          description: Recent grades submitted
+        recentAnnouncements:
+          type: array
+          items:
+            $ref: '#/components/schemas/Announcement'
+          description: Recent announcements
+
+    SubmitGradeData:
+      type: object
+      required:
+        - studentId
+        - courseId
+        - score
+        - feedback
+      properties:
+        studentId:
+          type: string
+          description: Student ID
+        courseId:
+          type: string
+          description: Course ID
+        score:
+          type: number
+          minimum: 0
+          maximum: 100
+          description: Grade score (0-100)
+        feedback:
+          type: string
+          description: Grade feedback or comments
+
+    Settings:
+      type: object
+      properties:
+        allowPublicRegistration:
+          type: boolean
+          description: Whether public user registration is allowed
+        maintenanceMode:
+          type: boolean
+          description: Whether the system is in maintenance mode
+        schoolName:
+          type: string
+          description: School name
+        academicYear:
+          type: string
+          description: Current academic year
+        semester:
+          type: integer
+          description: Current semester (1 or 2)
+
+    SeedResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Success message
+        recordsCreated:
+          type: integer
+          description: Total number of records created during seeding
+
+    WebhookDelivery:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Delivery ID
+        eventId:
+          type: string
+          description: Associated event ID
+        webhookConfigId:
+          type: string
+          description: Webhook configuration ID
+        status:
+          type: string
+          enum: [pending, delivered, failed]
+          description: Delivery status
+        attempts:
+          type: integer
+          description: Number of delivery attempts
+        statusCode:
+          type: integer
+          description: HTTP status code from webhook endpoint (if delivered)
+        errorMessage:
+          type: string
+          description: Error message if delivery failed
+        nextAttemptAt:
+          type: string
+          format: date-time
+          description: Timestamp for next retry attempt
+        idempotencyKey:
+          type: string
+          description: Unique key to prevent duplicate deliveries
+        createdAt:
+          type: string
+          format: date-time
+          description: Creation timestamp
+        updatedAt:
+          type: string
+          format: date-time
+          description: Last update timestamp
+
+    WebhookEvent:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Event ID
+        eventType:
+          type: string
+          description: Type of event (e.g., grade.created, user.created)
+        data:
+          type: object
+          description: Event payload data
+        processed:
+          type: boolean
+          description: Whether event has been processed
+        createdAt:
+          type: string
+          format: date-time
+          description: Creation timestamp
+        updatedAt:
+          type: string
+          format: date-time
+          description: Last update timestamp

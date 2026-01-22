@@ -69,6 +69,52 @@ export abstract class IndexedEntity<S extends { id: string }> extends Entity<S> 
     }
   }
 
+  static async softDeleteWithIndexCleanup<TCtor extends CtorAny>(this: HS<TCtor>, env: Env, id: string): Promise<boolean> {
+    const inst = new this(env, id);
+    const state = await inst.getState();
+
+    const softDeleted = await inst.softDelete();
+    if (!softDeleted) return false;
+
+    const idx = new Index<string>(env, this.indexName);
+    await idx.remove(id);
+
+    const secondaryIndexes = this.secondaryIndexes;
+    if (secondaryIndexes) {
+      const entityName = inst.entityName;
+      for (const config of secondaryIndexes) {
+        const idx = new SecondaryIndex<string>(env, entityName, config.fieldName as string);
+        const fieldValue = config.getValue(state);
+        await idx.remove(fieldValue, id);
+      }
+    }
+
+    return true;
+  }
+
+  static async restoreWithIndexCleanup<TCtor extends CtorAny>(this: HS<TCtor>, env: Env, id: string): Promise<boolean> {
+    const inst = new this(env, id);
+    const state = await inst.getState();
+
+    const restored = await inst.restore();
+    if (!restored) return false;
+
+    const idx = new Index<string>(env, this.indexName);
+    await idx.add(id);
+
+    const secondaryIndexes = this.secondaryIndexes;
+    if (secondaryIndexes) {
+      const entityName = inst.entityName;
+      for (const config of secondaryIndexes) {
+        const idx = new SecondaryIndex<string>(env, entityName, config.fieldName as string);
+        const fieldValue = config.getValue(state);
+        await idx.add(fieldValue, id);
+      }
+    }
+
+    return true;
+  }
+
   static async delete<TCtor extends CtorAny>(this: HS<TCtor>, env: Env, id: string): Promise<boolean> {
     const inst = new this(env, id);
     const state = await inst.getState();

@@ -41,6 +41,9 @@ export function EnrollmentChart({ data }: EnrollmentChartProps) {
         Legend: Legend.Legend,
         ResponsiveContainer: ResponsiveContainer.ResponsiveContainer,
       });
+    }).catch((error) => {
+      console.error('Failed to load chart components:', error);
+    }).finally(() => {
       setIsLoading(false);
     });
   }, []);
