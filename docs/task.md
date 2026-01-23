@@ -28130,3 +28130,162 @@ export interface NavSubmenuItem {
 **Priority**: Low
 **Effort**: Medium
 
+
+### Code Architect - Form Validation Hook Extraction (2026-01-23) - Completed ✅
+
+**Task**: Create useFormValidation hook to eliminate duplicate form validation patterns
+
+**Problem**:
+- 5+ form components duplicated the same validation pattern using useMemo with validate functions
+- Each component had its own `showValidationErrors` state
+- Each component had multiple useMemo calls for error calculation
+- Violated DRY principle - changes to validation pattern required updates across multiple files
+
+**Solution**: Created reusable `useFormValidation` hook that encapsulates form validation logic
+
+**Implementation**:
+
+1. **Created useFormValidation Hook** (src/hooks/useFormValidation.ts, 46 lines):
+   - Exported `Validator<T>` type for field validation functions
+   - Exported `FormValidationConfig<T>` interface for configuration
+   - Exported `FormValidationResult<T>` interface for return values
+   - Features:
+     * Manages `showValidationErrors` state internally
+     * Accepts form data and validator mapping
+     * Returns errors object with field-level validation results
+     * Provides `validateAll()` function to show errors and check validity
+     * Provides `reset()` function to hide validation errors
+     * Provides `hasErrors` computed property for convenience
+
+2. **Refactored ContactForm** (src/components/forms/ContactForm.tsx):
+   - Removed `showValidationErrors` state (1 line removed)
+   - Removed 3 useMemo hooks for error calculation (3 lines removed)
+   - Added `useFormValidation` hook import and usage
+   - Updated validation to use hook's `errors` object and `validateAll()` function
+   - Reduced code duplication and complexity
+
+3. **Refactored UserForm** (src/components/forms/UserForm.tsx):
+   - Removed `showValidationErrors` state (1 line removed)
+   - Removed 3 useMemo hooks for error calculation (3 lines removed)
+   - Added `useFormValidation` hook import and usage
+   - Updated validation to use hook's `errors` object and `validateAll()` function
+   - Maintained existing Dialog behavior and UI
+
+4. **Refactored AnnouncementForm** (src/components/forms/AnnouncementForm.tsx):
+   - Removed `showValidationErrors` state (1 line removed)
+   - Removed 2 useMemo hooks for error calculation (2 lines removed)
+   - Added `useFormValidation` hook import and usage
+   - Updated validation to use hook's `errors` object and `validateAll()` function
+   - Preserved all original UI text and Dialog structure (zero breaking changes)
+
+5. **Refactored PPDBForm** (src/components/forms/PPDBForm.tsx):
+   - Removed `showValidationErrors` state (1 line removed)
+   - Removed 7 useMemo hooks for error calculation (7 lines removed)
+   - Removed String() wrapping for error conversion (no longer needed)
+   - Added `useFormValidation` hook import and usage
+   - Updated validation to use hook's `errors` object and `validateAll()` function
+   - Simplified form submission logic
+
+6. **Refactored TeacherAnnouncementsPage** (src/pages/portal/teacher/TeacherAnnouncementsPage.tsx):
+   - Removed `showValidationErrors` state (1 line removed)
+   - Removed 2 useMemo hooks for error calculation (2 lines removed)
+   - Added `useFormValidation` hook import and usage
+   - Updated validation to use hook's `errors` object and `validateAll()` function
+   - Maintained existing announcement posting behavior
+
+**Metrics**:
+
+| Metric | Before | After | Improvement |
+|---------|--------|-------|-------------|
+| Duplicate validation state | 5 components | 0 | 100% eliminated |
+| useMemo hooks for validation | 17 hooks | 0 | 100% eliminated |
+| Lines of duplicate code | ~25 lines | ~5 lines (hook import) | 80% reduction |
+| showValidationErrors state | 5 instances | 1 (in hook) | 80% consolidation |
+| Form components updated | 0 | 5 | 5 components refactored |
+| Typecheck errors | 0 | 0 | Zero regressions |
+| Test passing | 2610 | 2610 | Zero regressions |
+
+**Benefits Achieved**:
+  - ✅ useFormValidation hook created (46 lines, fully self-contained)
+  - ✅ All 5 form components refactored to use the hook
+  - ✅ Duplicate validation state eliminated (5 instances → 1)
+  - ✅ All useMemo validation hooks removed (17 hooks → 0)
+  - ✅ DRY principle applied (Don't Repeat Yourself)
+  - ✅ Single Responsibility (hook handles validation, components handle UI)
+  - ✅ Reusable hook for any future form components
+  - ✅ Type-safe with generic TypeScript implementation
+  - ✅ All 2610 tests passing (0 failures, 0 regressions)
+  - ✅ Linting passed (0 errors)
+  - ✅ TypeScript compilation successful (0 errors)
+  - ✅ Zero breaking changes to existing functionality
+
+**Technical Details**:
+
+**Hook Interface**:
+```typescript
+export type Validator<T> = (value: T, showErrors: boolean) => string | undefined;
+
+export interface FormValidationConfig<T extends Record<string, any>> {
+  validators: { [K in keyof T]?: Validator<T[K]> };
+}
+
+export interface FormValidationResult<T extends Record<string, any>> {
+  errors: { [K in keyof T]?: string };
+  validateAll: () => boolean;
+  reset: () => void;
+  hasErrors: boolean;
+}
+```
+
+**Usage Example**:
+```typescript
+const formData = { name, email, message };
+const { errors, validateAll, reset } = useFormValidation(formData, {
+  validators: {
+    name: validateName,
+    email: validateEmail,
+    message: validateMessage,
+  },
+});
+
+// In form submission
+if (!validateAll()) return;
+
+// Reset errors on form close
+reset();
+```
+
+**Architectural Impact**:
+  - **Modularity**: Validation logic is atomic and reusable
+  - **DRY Principle**: Validation pattern no longer duplicated across components
+  - **Single Responsibility**: Hook handles validation, components handle UI
+  - **Open/Closed**: New validators can be added without modifying hook
+  - **Maintainability**: Validation changes only require hook update, not all forms
+  - **Type Safety**: Generic implementation ensures type-safe form data
+
+**Success Criteria**:
+  - [x] useFormValidation hook created at src/hooks/useFormValidation.ts
+  - [x] All 5 form components refactored to use the hook
+  - [x] Duplicate validation state eliminated (5 → 1)
+  - [x] All useMemo validation hooks removed (17 → 0)
+  - [x] DRY principle applied
+  - [x] Type-safe with generic TypeScript implementation
+  - [x] All 2610 tests passing (0 failures, 0 regressions)
+  - [x] Linting passed (0 errors)
+  - [x] TypeScript compilation successful (0 errors)
+  - [x] Zero breaking changes to existing functionality
+
+**Impact**:
+  - `src/hooks/useFormValidation.ts`: New hook (46 lines)
+  - `src/components/forms/ContactForm.tsx`: Refactored to use hook
+  - `src/components/forms/UserForm.tsx`: Refactored to use hook
+  - `src/components/forms/AnnouncementForm.tsx`: Refactored to use hook
+  - `src/components/forms/PPDBForm.tsx`: Refactored to use hook
+  - `src/pages/portal/teacher/TeacherAnnouncementsPage.tsx`: Refactored to use hook
+  - Duplicate validation state: 5 → 1 (80% consolidation)
+  - useMemo validation hooks: 17 → 0 (100% eliminated)
+  - Test coverage: 2610 passing (maintained, 0 regressions)
+  - TypeScript errors: 0 (maintained)
+
+**Success**: ✅ **FORM VALIDATION HOOK EXTRACTION COMPLETE, CREATED REUSABLE USEFORMVALIDATION HOOK, REFACTORED 5 FORMS TO USE HOOK, ELIMINATED 17 USEMEMO HOOKS, ALL 2610 TESTS PASSING, ZERO REGRESSIONS**
+

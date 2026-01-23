@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter, DialogClose } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { FormField } from '@/components/ui/form-field';
 import { UserRole, SchoolUser } from '@shared/types';
 import { validateName, validateEmail, validateRole } from '@/utils/validation';
+import { useFormValidation } from '@/hooks/useFormValidation';
 
 interface UserFormData {
   name: string;
@@ -25,32 +26,34 @@ export function UserForm({ open, onClose, editingUser, onSave, isLoading }: User
   const [userName, setUserName] = useState<string>(() => editingUser?.name || '');
   const [userEmail, setUserEmail] = useState<string>(() => editingUser?.email || '');
   const [userRole, setUserRole] = useState<UserRole>(() => editingUser?.role || 'student');
-  const [showValidationErrors, setShowValidationErrors] = useState(false);
+
+  const formData = { name: userName, email: userEmail, role: userRole };
+  const { errors, validateAll, reset: resetValidation } = useFormValidation(formData, {
+    validators: {
+      name: validateName,
+      email: validateEmail,
+      role: validateRole,
+    },
+  });
 
   const handleOpenChange = useCallback((newOpen: boolean) => {
     if (!newOpen) {
       setUserName('');
       setUserEmail('');
       setUserRole('student');
-      setShowValidationErrors(false);
+      resetValidation();
       onClose();
     } else if (editingUser) {
       setUserName(editingUser.name);
       setUserEmail(editingUser.email);
       setUserRole(editingUser.role);
-      setShowValidationErrors(false);
+      resetValidation();
     }
-  }, [editingUser, onClose]);
-
-  const nameError = useMemo(() => validateName(userName, showValidationErrors), [userName, showValidationErrors]);
-  const emailError = useMemo(() => validateEmail(userEmail, showValidationErrors), [userEmail, showValidationErrors]);
-  const roleError = useMemo(() => validateRole(userRole, showValidationErrors), [userRole, showValidationErrors]);
+  }, [editingUser, onClose, resetValidation]);
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setShowValidationErrors(true);
-
-    if (nameError || emailError || roleError) {
+    if (!validateAll()) {
       return;
     }
 
@@ -77,7 +80,7 @@ export function UserForm({ open, onClose, editingUser, onSave, isLoading }: User
               <FormField
                 id="name"
                 label="Name"
-                error={nameError}
+                error={errors.name}
                 helperText="Full name of user"
                 required
                 className="col-span-3"
@@ -94,7 +97,7 @@ export function UserForm({ open, onClose, editingUser, onSave, isLoading }: User
               <FormField
                 id="email"
                 label="Email"
-                error={emailError}
+                error={errors.email}
                 helperText="Valid email address for account access"
                 required
                 className="col-span-3"
@@ -113,7 +116,7 @@ export function UserForm({ open, onClose, editingUser, onSave, isLoading }: User
               <FormField
                 id="role"
                 label="Role"
-                error={roleError}
+                error={errors.role}
                 helperText="User role determines system access and permissions"
                 required
                 className="col-span-3"

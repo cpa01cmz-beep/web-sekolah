@@ -3,9 +3,10 @@ import { Input } from '@/components/ui/input';
 import { FormField } from '@/components/ui/form-field';
 import { FormSuccess } from '@/components/ui/form-success';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { toast } from 'sonner';
 import { validateName, validateEmail, validatePhone, validateNisn, validateRequired } from '@/utils/validation';
+import { useFormValidation } from '@/hooks/useFormValidation';
 
 interface PPDBFormData {
   name: string;
@@ -33,18 +34,21 @@ export function PPDBForm({ onSubmit }: PPDBFormProps) {
     email: '',
     phone: '',
   });
-  const [showValidationErrors, setShowValidationErrors] = useState<boolean>(false);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [isSuccess, setIsSuccess] = useState<boolean>(false);
 
-  const nameError = useMemo(() => String(validateName(formData.name, showValidationErrors, 3) || ''), [formData.name, showValidationErrors]);
-  const placeOfBirthError = useMemo(() => String(validateRequired(formData.placeOfBirth, showValidationErrors, 'Tempat lahir') || ''), [formData.placeOfBirth, showValidationErrors]);
-  const dateOfBirthError = useMemo(() => String(validateRequired(formData.dateOfBirth, showValidationErrors, 'Tanggal lahir') || ''), [formData.dateOfBirth, showValidationErrors]);
-  const nisnError = useMemo(() => String(validateNisn(formData.nisn, showValidationErrors, 10) || ''), [formData.nisn, showValidationErrors]);
-  const schoolError = useMemo(() => String(validateRequired(formData.school, showValidationErrors, 'Asal sekolah') || ''), [formData.school, showValidationErrors]);
-  const levelError = useMemo(() => String(validateRequired(formData.level, showValidationErrors, 'Jenjang pendidikan') || ''), [formData.level, showValidationErrors]);
-  const emailError = useMemo(() => String(validateEmail(formData.email, showValidationErrors) || ''), [formData.email, showValidationErrors]);
-  const phoneError = useMemo(() => String(validatePhone(formData.phone, showValidationErrors, 10, 13) || ''), [formData.phone, showValidationErrors]);
+  const { errors, validateAll, reset: resetValidation } = useFormValidation(formData, {
+    validators: {
+      name: (value, show) => validateName(value, show, 3),
+      placeOfBirth: (value, show) => validateRequired(value, show, 'Tempat lahir'),
+      dateOfBirth: (value, show) => validateRequired(value, show, 'Tanggal lahir'),
+      nisn: (value, show) => validateNisn(value, show, 10),
+      school: (value, show) => validateRequired(value, show, 'Asal sekolah'),
+      level: (value, show) => validateRequired(value, show, 'Jenjang pendidikan'),
+      email: validateEmail,
+      phone: (value, show) => validatePhone(value, show, 10, 13),
+    },
+  });
 
   const handleInputChange = useCallback((field: keyof PPDBFormData, value: string) => {
     setFormData(prev => ({ ...prev, [field]: String(value) }));
@@ -52,18 +56,12 @@ export function PPDBForm({ onSubmit }: PPDBFormProps) {
 
   const handleReset = () => {
     setIsSuccess(false);
-    setShowValidationErrors(false);
+    resetValidation();
   };
 
   const handleSubmit = useCallback(async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!showValidationErrors) {
-      setShowValidationErrors(true);
-    }
-
-    const errors = [nameError, placeOfBirthError, dateOfBirthError, nisnError, schoolError, levelError, emailError, phoneError].filter(Boolean);
-    
-    if (errors.length > 0) {
+    if (!validateAll()) {
       toast.error('Mohon lengkapi formulir dengan benar.');
       return;
     }
@@ -83,13 +81,13 @@ export function PPDBForm({ onSubmit }: PPDBFormProps) {
         email: '',
         phone: '',
       });
-      setShowValidationErrors(false);
+      resetValidation();
     } catch (error) {
       toast.error('Pendaftaran gagal. Silakan coba lagi.');
     } finally {
       setIsSubmitting(false);
     }
-  }, [nameError, placeOfBirthError, dateOfBirthError, nisnError, schoolError, levelError, emailError, phoneError, showValidationErrors, onSubmit, formData]);
+  }, [validateAll, onSubmit, formData, resetValidation]);
 
   if (isSuccess) {
     return (
@@ -111,7 +109,7 @@ export function PPDBForm({ onSubmit }: PPDBFormProps) {
         <FormField
           id="name"
           label="Nama Lengkap"
-          error={nameError}
+          error={errors.name}
           helperText="Masukkan nama lengkap sesuai akta kelahiran"
           required
         >
@@ -129,7 +127,7 @@ export function PPDBForm({ onSubmit }: PPDBFormProps) {
           <FormField
             id="placeOfBirth"
             label="Tempat Lahir"
-            error={placeOfBirthError}
+            error={errors.placeOfBirth}
             helperText="Kota tempat lahir"
             required
           >
@@ -145,7 +143,7 @@ export function PPDBForm({ onSubmit }: PPDBFormProps) {
           <FormField
             id="dateOfBirth"
             label="Tanggal Lahir"
-            error={dateOfBirthError}
+            error={errors.dateOfBirth}
             helperText="Tanggal lahir sesuai akta"
             required
           >
@@ -163,7 +161,7 @@ export function PPDBForm({ onSubmit }: PPDBFormProps) {
         <FormField
           id="nisn"
           label="NISN"
-          error={nisnError}
+          error={errors.nisn}
           helperText="Nomor Induk Siswa Nasional (10 digit)"
           required
         >
@@ -180,7 +178,7 @@ export function PPDBForm({ onSubmit }: PPDBFormProps) {
         <FormField
           id="school"
           label="Asal Sekolah"
-          error={schoolError}
+          error={errors.school}
           helperText="Nama sekolah sebelumnya"
           required
         >
@@ -197,7 +195,7 @@ export function PPDBForm({ onSubmit }: PPDBFormProps) {
         <FormField
           id="level"
           label="Jenjang yang Dituju"
-          error={levelError}
+          error={errors.level}
           helperText="Pilih jenjang pendidikan yang dituju"
           required
         >
@@ -215,7 +213,7 @@ export function PPDBForm({ onSubmit }: PPDBFormProps) {
         <FormField
           id="email"
           label="Email Orang Tua"
-          error={emailError}
+          error={errors.email}
           helperText="Email aktif untuk menerima konfirmasi"
           required
         >
@@ -233,7 +231,7 @@ export function PPDBForm({ onSubmit }: PPDBFormProps) {
         <FormField
           id="phone"
           label="Nomor Telepon"
-          error={phoneError}
+          error={errors.phone}
           helperText="Nomor WhatsApp yang bisa dihubungi"
           required
         >

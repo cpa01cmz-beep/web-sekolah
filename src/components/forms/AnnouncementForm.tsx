@@ -1,10 +1,11 @@
-import { useState, useMemo, useCallback, memo } from 'react';
+import { useState, useCallback, memo } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { FormField } from '@/components/ui/form-field';
 import { validateTitle, validateContent } from '@/utils/validation';
+import { useFormValidation } from '@/hooks/useFormValidation';
 
 interface AnnouncementFormProps {
   open: boolean;
@@ -16,32 +17,34 @@ interface AnnouncementFormProps {
 export const AnnouncementForm = memo(function AnnouncementForm({ open, onClose, onSave, isLoading }: AnnouncementFormProps) {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
-  const [showValidationErrors, setShowValidationErrors] = useState(false);
 
-  const titleErrorMemo = useMemo(() => validateTitle(title, showValidationErrors, 5), [title, showValidationErrors]);
-  const contentErrorMemo = useMemo(() => validateContent(content, showValidationErrors, 10), [content, showValidationErrors]);
+  const formData = { title, content };
+  const { errors, validateAll, reset: resetValidation } = useFormValidation(formData, {
+    validators: {
+      title: (value, show) => validateTitle(value, show, 5),
+      content: (value, show) => validateContent(value, show, 10),
+    },
+  });
 
   const handleClose = useCallback(() => {
     setTitle('');
     setContent('');
-    setShowValidationErrors(false);
+    resetValidation();
     onClose();
-  }, [onClose]);
+  }, [onClose, resetValidation]);
 
   const handleOpenChange = useCallback((newOpen: boolean) => {
     if (!newOpen) {
       setTitle('');
       setContent('');
-      setShowValidationErrors(false);
+      resetValidation();
       onClose();
     }
-  }, [onClose]);
+  }, [onClose, resetValidation]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setShowValidationErrors(true);
-
-    if (titleErrorMemo || contentErrorMemo) {
+    if (!validateAll()) {
       return;
     }
 
@@ -60,7 +63,7 @@ export const AnnouncementForm = memo(function AnnouncementForm({ open, onClose, 
             <FormField
               id="announcement-title"
               label="Title"
-              error={titleErrorMemo}
+              error={errors.title}
               helperText="Enter a descriptive title (minimum 5 characters)"
               required
             >
@@ -74,7 +77,7 @@ export const AnnouncementForm = memo(function AnnouncementForm({ open, onClose, 
             <FormField
               id="announcement-content"
               label="Content"
-              error={contentErrorMemo}
+              error={errors.content}
               helperText="Provide detailed information (minimum 10 characters)"
               required
             >

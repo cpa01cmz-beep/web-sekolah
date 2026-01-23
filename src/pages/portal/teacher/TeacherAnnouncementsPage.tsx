@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -13,23 +13,26 @@ import { formatDateLong } from '@/utils/date';
 import { validateTitle, validateContent } from '@/utils/validation';
 import { initialAnnouncements } from '@/mock-data/announcements';
 import type { Announcement } from '@/mock-data/announcements';
+import { useFormValidation } from '@/hooks/useFormValidation';
 
 export function TeacherAnnouncementsPage() {
   const user = useAuthStore((state) => state.user);
   const [announcements, setAnnouncements] = useState<Announcement[]>(initialAnnouncements);
   const [newTitle, setNewTitle] = useState('');
   const [newContent, setNewContent] = useState('');
-  const [showValidationErrors, setShowValidationErrors] = useState(false);
   const [isPosting, setIsPosting] = useState(false);
 
-  const titleError = useMemo(() => validateTitle(newTitle, showValidationErrors, 5), [newTitle, showValidationErrors]);
-  const contentError = useMemo(() => validateContent(newContent, showValidationErrors, 10), [newContent, showValidationErrors]);
+  const formData = { title: newTitle, content: newContent };
+  const { errors, validateAll, reset: resetValidation } = useFormValidation(formData, {
+    validators: {
+      title: (value, show) => validateTitle(value, show, 5),
+      content: (value, show) => validateContent(value, show, 10),
+    },
+  });
 
   const handlePostAnnouncement = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
-    setShowValidationErrors(true);
-
-    if (!user || titleError || contentError) {
+    if (!user || !validateAll()) {
       return;
     }
 
@@ -44,10 +47,10 @@ export function TeacherAnnouncementsPage() {
     setAnnouncements([newAnnouncement, ...announcements]);
     setNewTitle('');
     setNewContent('');
-    setShowValidationErrors(false);
+    resetValidation();
     setIsPosting(false);
     toast.success('Announcement posted successfully!');
-  }, [user, announcements, newTitle, newContent, titleError, contentError]);
+  }, [user, announcements, newTitle, newContent, validateAll, resetValidation]);
 
   const handleTitleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setNewTitle(e.target.value);
@@ -72,7 +75,7 @@ export function TeacherAnnouncementsPage() {
                 <FormField
                   id="title"
                   label="Title"
-                  error={titleError}
+                  error={errors.title}
                   helperText="Enter a descriptive title (minimum 5 characters)"
                   required
                 >
@@ -87,7 +90,7 @@ export function TeacherAnnouncementsPage() {
                 <FormField
                   id="content"
                   label="Content"
-                  error={contentError}
+                  error={errors.content}
                   helperText="Provide detailed information (minimum 10 characters)"
                   required
                 >
