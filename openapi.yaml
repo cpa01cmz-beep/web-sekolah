@@ -45,9 +45,9 @@ info:
     name: Proprietary
 
 servers:
-  - url: https://your-domain.workers.dev/api
+  - url: https://your-domain.workers.dev
     description: Production server
-  - url: https://staging.your-domain.workers.dev/api
+  - url: https://staging.your-domain.workers.dev
     description: Staging server
 
 tags:
@@ -69,7 +69,7 @@ tags:
     description: System monitoring and metrics
 
 paths:
-  /health:
+  /api/health:
     get:
       tags:
         - Health
@@ -84,7 +84,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/HealthResponse'
 
-  /seed:
+  /api/seed:
     post:
       tags:
         - Admin
@@ -115,7 +115,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
-  /auth/login:
+  /api/auth/login:
     post:
       tags:
         - Authentication
@@ -148,7 +148,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
-  /auth/verify:
+  /api/auth/verify:
     get:
       tags:
         - Authentication
@@ -176,7 +176,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
-  /students/{id}/dashboard:
+  /api/students/{id}/dashboard:
     get:
       tags:
         - Students
@@ -217,7 +217,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
-  /students/{id}/grades:
+  /api/students/{id}/grades:
     get:
       tags:
         - Students
@@ -260,7 +260,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
-  /students/{id}/schedule:
+  /api/students/{id}/schedule:
     get:
       tags:
         - Students
@@ -303,7 +303,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
-  /students/{id}/card:
+  /api/students/{id}/card:
     get:
       tags:
         - Students
@@ -344,7 +344,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
-  /parents/{id}/dashboard:
+  /api/parents/{id}/dashboard:
     get:
       tags:
         - Parents
@@ -385,7 +385,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
-  /teachers/{id}/dashboard:
+  /api/teachers/{id}/dashboard:
     get:
       tags:
         - Teachers
@@ -441,7 +441,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
-  /teachers/{id}/announcements:
+  /api/teachers/{id}/announcements:
     get:
       tags:
         - Teachers
@@ -478,7 +478,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
-  /teachers/announcements:
+  /api/teachers/announcements:
     post:
       tags:
         - Teachers
@@ -533,7 +533,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
-  /teachers/{id}/classes:
+  /api/teachers/{id}/classes:
     get:
       tags:
         - Teachers
@@ -570,7 +570,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
-  /classes/{id}/students:
+  /api/classes/{id}/students:
     get:
       tags:
         - Teachers
@@ -613,7 +613,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
-  /grades:
+  /api/grades:
     post:
       tags:
         - Teachers
@@ -653,7 +653,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
-  /grades/{id}:
+  /api/grades/{id}:
     put:
       tags:
         - Teachers
@@ -706,7 +706,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
-  /users:
+  /api/users:
     get:
       tags:
         - Admin
@@ -808,7 +808,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
-  /users/{id}:
+  /api/users/{id}:
     get:
       tags:
         - Admin
@@ -941,7 +941,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
-  /admin/dashboard:
+  /api/admin/dashboard:
     get:
       tags:
         - Admin
@@ -960,21 +960,8 @@ paths:
                   - $ref: '#/components/schemas/SuccessResponse'
                   - type: object
                     properties:
-                      data:
-                        type: object
-                        properties:
-                          totalStudents:
-                            type: integer
-                          totalTeachers:
-                            type: integer
-                          totalParents:
-                            type: integer
-                          totalAdmins:
-                            type: integer
-                          recentAnnouncements:
-                            type: array
-                            items:
-                              $ref: '#/components/schemas/Announcement'
+                       data:
+                         $ref: '#/components/schemas/AdminDashboardData'
         '401':
           description: Unauthorized
           content:
@@ -982,7 +969,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
-  /admin/users:
+  /api/admin/users:
     get:
       tags:
         - Admin
@@ -1029,7 +1016,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
-  /admin/announcements:
+  /api/admin/announcements:
     get:
       tags:
         - Admin
@@ -1113,7 +1100,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
-  /admin/settings:
+  /api/admin/settings:
     get:
       tags:
         - Admin
@@ -1195,7 +1182,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
-  /admin/rebuild-indexes:
+  /api/admin/rebuild-indexes:
     post:
       tags:
         - Admin
@@ -1228,7 +1215,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
-  /webhooks:
+  /api/webhooks:
     get:
       tags:
         - Webhooks
@@ -1297,7 +1284,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
-  /webhooks/{id}:
+  /api/webhooks/{id}:
     get:
       tags:
         - Webhooks
@@ -1429,7 +1416,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
-  /webhooks/test:
+  /api/webhooks/test:
     post:
       tags:
         - Webhooks
@@ -1474,7 +1461,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
-  /webhooks/{id}/deliveries:
+  /api/webhooks/{id}/deliveries:
     get:
       tags:
         - Webhooks
@@ -1517,7 +1504,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
-  /webhooks/events:
+  /api/webhooks/events:
     get:
       tags:
         - Webhooks
@@ -1547,7 +1534,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
-  /webhooks/events/{id}:
+  /api/webhooks/events/{id}:
     get:
       tags:
         - Webhooks
@@ -1588,7 +1575,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
-  /admin/webhooks/process:
+  /api/admin/webhooks/process:
     post:
       tags:
         - Monitoring
@@ -1613,7 +1600,7 @@ paths:
                           message:
                             type: string
 
-  /admin/webhooks/dead-letter-queue:
+  /api/admin/webhooks/dead-letter-queue:
     get:
       tags:
         - Monitoring
@@ -1637,7 +1624,7 @@ paths:
                         items:
                           $ref: '#/components/schemas/DeadLetterWebhook'
 
-  /admin/webhooks/dead-letter-queue/{id}:
+  /api/admin/webhooks/dead-letter-queue/{id}:
     delete:
       tags:
         - Monitoring
@@ -1671,7 +1658,7 @@ paths:
                           deleted:
                             type: boolean
 
-  /admin/metrics:
+  /api/admin/metrics:
     get:
       tags:
         - Monitoring
@@ -1688,7 +1675,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Metrics'
 
-  /admin/rate-limit:
+  /api/admin/rate-limit:
     get:
       tags:
         - Monitoring
@@ -2333,6 +2320,45 @@ components:
         feedback:
           type: string
           description: Grade feedback or comments
+
+    AdminDashboardData:
+      type: object
+      properties:
+        totalUsers:
+          type: integer
+          description: Total number of users
+        totalStudents:
+          type: integer
+          description: Total number of students
+        totalTeachers:
+          type: integer
+          description: Total number of teachers
+        totalParents:
+          type: integer
+          description: Total number of parents
+        totalClasses:
+          type: integer
+          description: Total number of classes
+        recentAnnouncements:
+          type: array
+          items:
+            $ref: '#/components/schemas/Announcement'
+          description: Recent announcements
+        userDistribution:
+          type: object
+          properties:
+            students:
+              type: integer
+              description: Number of students
+            teachers:
+              type: integer
+              description: Number of teachers
+            parents:
+              type: integer
+              description: Number of parents
+            admins:
+              type: integer
+              description: Number of admins
 
     Settings:
       type: object

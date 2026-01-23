@@ -40,7 +40,7 @@ export function GradeForm({ open, onClose, editingStudent, onSave, isLoading }: 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const scoreValue = currentScore === '' ? null : parseInt(currentScore, 10);
-    if (!isValidScore(scoreValue)) {
+    if (currentScore !== '' && !isValidScore(scoreValue)) {
       return;
     }
     onSave({ score: scoreValue, feedback: currentFeedback });
@@ -67,7 +67,6 @@ export function GradeForm({ open, onClose, editingStudent, onSave, isLoading }: 
                 label="Score"
                 error={scoreError}
                 helperText="Enter a score between 0 and 100. Leave empty for no score."
-                required
                 className="col-span-3"
               >
                 <Input
@@ -79,7 +78,6 @@ export function GradeForm({ open, onClose, editingStudent, onSave, isLoading }: 
                   min="0"
                   max="100"
                   step="1"
-                  required
                   disabled={isLoading}
                   aria-busy={isLoading}
                 />

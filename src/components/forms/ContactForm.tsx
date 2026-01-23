@@ -3,9 +3,10 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { FormField } from '@/components/ui/form-field';
 import { FormSuccess } from '@/components/ui/form-success';
-import { useState, useMemo, memo } from 'react';
+import { useState, memo } from 'react';
 import { validateName, validateEmail, validateMessage } from '@/utils/validation';
 import { logger } from '@/lib/logger';
+import { useFormValidation } from '@/hooks/useFormValidation';
 
 interface ContactFormProps {
   onSubmit?: (data: { name: string; email: string; message: string }) => Promise<void> | void;
@@ -15,18 +16,21 @@ export const ContactForm = memo(function ContactForm({ onSubmit }: ContactFormPr
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState('');
-  const [showValidationErrors, setShowValidationErrors] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
 
-  const nameError = useMemo(() => validateName(name, showValidationErrors), [name, showValidationErrors]);
-  const emailError = useMemo(() => validateEmail(email, showValidationErrors), [email, showValidationErrors]);
-  const messageError = useMemo(() => validateMessage(message, showValidationErrors), [message, showValidationErrors]);
+  const formData = { name, email, message };
+  const { errors, validateAll, reset: resetValidation } = useFormValidation(formData, {
+    validators: {
+      name: validateName,
+      email: validateEmail,
+      message: validateMessage,
+    },
+  });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setShowValidationErrors(true);
-    if (nameError || emailError || messageError) {
+    if (!validateAll()) {
       return;
     }
     setIsSubmitting(true);
@@ -36,7 +40,7 @@ export const ContactForm = memo(function ContactForm({ onSubmit }: ContactFormPr
       setName('');
       setEmail('');
       setMessage('');
-      setShowValidationErrors(false);
+      resetValidation();
     } catch (error) {
       logger.error('Contact form submission failed', error);
     } finally {
@@ -46,7 +50,7 @@ export const ContactForm = memo(function ContactForm({ onSubmit }: ContactFormPr
 
   const handleReset = () => {
     setIsSuccess(false);
-    setShowValidationErrors(false);
+    resetValidation();
   };
 
   if (isSuccess) {
@@ -67,7 +71,7 @@ export const ContactForm = memo(function ContactForm({ onSubmit }: ContactFormPr
       <FormField
         id="contact-name"
         label="Full Name"
-          error={nameError}
+          error={errors.name}
         helperText="Enter your full name"
         required
       >
@@ -84,7 +88,7 @@ export const ContactForm = memo(function ContactForm({ onSubmit }: ContactFormPr
       <FormField
         id="contact-email"
         label="Email"
-          error={emailError}
+          error={errors.email}
         helperText="We'll never share your email with anyone else"
         required
       >
@@ -101,7 +105,7 @@ export const ContactForm = memo(function ContactForm({ onSubmit }: ContactFormPr
       <FormField
         id="contact-message"
         label="Message"
-        error={messageError}
+        error={errors.message}
         helperText="How can we help you? Provide as much detail as possible"
         required
       >
