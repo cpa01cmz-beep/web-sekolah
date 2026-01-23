@@ -30,7 +30,7 @@ app.use('/api/*', async (c, next) => {
   const allowedOrigins = c.env.ALLOWED_ORIGINS?.split(',') || DefaultOrigins.LOCAL_DEV;
   const origin = c.req.header('Origin');
 
-  if (origin && allowedOrigins.includes(origin as 'http://localhost:3000' | 'http://localhost:4173')) {
+  if (origin && allowedOrigins.includes(origin)) {
     c.header('Access-Control-Allow-Origin', origin);
   } else if (allowedOrigins.length > 0) {
     c.header('Access-Control-Allow-Origin', allowedOrigins[0]);
