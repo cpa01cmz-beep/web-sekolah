@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, cleanup } from '@testing-library/react';
 import { GradeForm } from '@/components/forms/GradeForm';
 
 describe('GradeForm', () => {
@@ -10,6 +10,10 @@ describe('GradeForm', () => {
     feedback: 'Great work!',
     gradeId: 'grade123'
   };
+
+  afterEach(() => {
+    cleanup();
+  });
 
   describe('Rendering', () => {
     it('should render dialog with title including student name', () => {
@@ -267,7 +271,7 @@ describe('GradeForm', () => {
 
       fireEvent.change(screen.getByLabelText(/score/i), { target: { value: 'abc' } });
 
-      expect(screen.getByText(/valid score/)).toBeInTheDocument();
+      expect(screen.getByText('Please enter a valid score between 0 and 100')).toBeInTheDocument();
     });
 
     it('should show error when score is decimal', () => {
@@ -279,7 +283,7 @@ describe('GradeForm', () => {
 
       fireEvent.change(screen.getByLabelText(/score/i), { target: { value: '85.5' } });
 
-      expect(screen.getByText(/valid score/)).toBeInTheDocument();
+      expect(screen.getByText('Please enter a valid score between 0 and 100')).toBeInTheDocument();
     });
   });
 
@@ -358,14 +362,16 @@ describe('GradeForm', () => {
       const boundaryScores = [0, 100, 50];
       boundaryScores.forEach((score) => {
         onSave.mockClear();
-        render(
+        const { unmount } = render(
           <GradeForm open={true} onClose={onClose} editingStudent={defaultEditingStudent} onSave={onSave} isLoading={false} />
         );
 
-        fireEvent.change(screen.getByLabelText(/score/i), { target: { value: score.toString() } });
+        const scoreInput = screen.getByLabelText(/score/i);
+        fireEvent.change(scoreInput, { target: { value: score.toString() } });
         fireEvent.click(screen.getByRole('button', { name: /save changes/i }));
 
         expect(onSave).toHaveBeenCalledWith(expect.objectContaining({ score }));
+        unmount();
       });
     });
   });

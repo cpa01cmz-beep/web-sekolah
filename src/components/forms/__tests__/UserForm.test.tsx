@@ -107,7 +107,7 @@ describe('UserForm', () => {
 
       expect(screen.getByLabelText(/name/i)).toHaveValue('Jane Smith');
       expect(screen.getByLabelText(/email/i)).toHaveValue('jane@example.com');
-      expect(screen.getByLabelText(/role/i)).toHaveValue('admin');
+      expect(screen.getByRole('combobox')).toHaveAttribute('data-value', 'admin');
     });
   });
 
