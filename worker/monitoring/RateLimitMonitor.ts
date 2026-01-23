@@ -1,5 +1,6 @@
 import { IntegrationMonitor as IntegrationMonitorConfig } from '../config/time';
 import { logger } from '../logger';
+import type { IMonitor } from './IMonitor';
 
 export interface RateLimitStats {
   totalRequests: number;
@@ -8,7 +9,7 @@ export interface RateLimitStats {
   windowMs: number;
 }
 
-export class RateLimitMonitor {
+export class RateLimitMonitor implements IMonitor {
   private stats: RateLimitStats = {
     totalRequests: 0,
     blockedRequests: 0,

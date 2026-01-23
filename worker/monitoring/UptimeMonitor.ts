@@ -1,6 +1,7 @@
 import { logger } from '../logger';
+import type { IMonitor } from './IMonitor';
 
-export class UptimeMonitor {
+export class UptimeMonitor implements IMonitor {
   private startTime: number;
 
   constructor() {

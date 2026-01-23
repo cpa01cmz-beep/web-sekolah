@@ -1,5 +1,6 @@
 import { IntegrationMonitor as IntegrationMonitorConfig } from '../config/time';
 import { logger } from '../logger';
+import type { IMonitor } from './IMonitor';
 
 export interface ApiErrorStats {
   totalErrors: number;
@@ -13,7 +14,7 @@ export interface ApiErrorStats {
   }>;
 }
 
-export class ApiErrorMonitor {
+export class ApiErrorMonitor implements IMonitor {
   private stats: ApiErrorStats = {
     totalErrors: 0,
     errorsByCode: {},
