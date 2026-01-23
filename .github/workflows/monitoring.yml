@@ -35,7 +35,7 @@ jobs:
         run: npm run build
 
       - name: Run Tests
-        run: npm run test:run
+        run: npm run test -- --run
 
       - name: Check Test Flakiness
         id: flaky_tests
