@@ -3,6 +3,7 @@ import type {
   RateLimitStats,
   WebhookStats,
   ApiErrorStats,
+  ScheduledTaskStats,
 } from './monitoring';
 import {
   UptimeMonitor,
@@ -10,6 +11,7 @@ import {
   RateLimitMonitor,
   WebhookMonitor,
   ApiErrorMonitor,
+  ScheduledTaskMonitor,
 } from './monitoring';
 
 export interface IntegrationHealthMetrics {
@@ -19,6 +21,7 @@ export interface IntegrationHealthMetrics {
   rateLimit: RateLimitStats;
   webhook: WebhookStats;
   errors: ApiErrorStats;
+  scheduledTasks: ScheduledTaskStats;
 }
 
 class IntegrationMonitor {
@@ -27,6 +30,7 @@ class IntegrationMonitor {
   private readonly rateLimitMonitor: RateLimitMonitor;
   private readonly webhookMonitor: WebhookMonitor;
   private readonly apiErrorMonitor: ApiErrorMonitor;
+  private readonly scheduledTaskMonitor: ScheduledTaskMonitor;
 
   constructor() {
     this.uptimeMonitor = new UptimeMonitor();
@@ -34,6 +38,7 @@ class IntegrationMonitor {
     this.rateLimitMonitor = new RateLimitMonitor();
     this.webhookMonitor = new WebhookMonitor();
     this.apiErrorMonitor = new ApiErrorMonitor();
+    this.scheduledTaskMonitor = new ScheduledTaskMonitor();
   }
 
   getUptime(): number {
@@ -76,6 +81,10 @@ class IntegrationMonitor {
     this.apiErrorMonitor.recordError(code, status, endpoint);
   }
 
+  recordScheduledTaskExecution(name: string, success: boolean, duration: number): void {
+    this.scheduledTaskMonitor.recordExecution(name, success, duration);
+  }
+
   getWebhookSuccessRate(): number {
     return this.webhookMonitor.getSuccessRate();
   }
@@ -92,6 +101,7 @@ class IntegrationMonitor {
       rateLimit: this.rateLimitMonitor.getStats(),
       webhook: this.webhookMonitor.getStats(),
       errors: this.apiErrorMonitor.getStats(),
+      scheduledTasks: this.scheduledTaskMonitor.getStats(),
     };
   }
 
@@ -101,6 +111,7 @@ class IntegrationMonitor {
     this.rateLimitMonitor.reset();
     this.webhookMonitor.reset();
     this.apiErrorMonitor.reset();
+    this.scheduledTaskMonitor.reset();
   }
 }
 
