@@ -86,9 +86,6 @@ export default ({ mode }: { mode: string }) => {
         output: {
           manualChunks: (id) => {
             if (id.includes('node_modules')) {
-              if (id.includes('victory-vendor') || id.includes('d3-')) {
-                return 'charts-core';
-              }
               if (id.includes('recharts')) {
                 return 'recharts';
               }
