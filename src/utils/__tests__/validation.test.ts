@@ -20,8 +20,8 @@ describe('Validation Utilities', () => {
         expect(isValidScore(50)).toBe(true);
       });
 
-      it('should return true for decimal scores', () => {
-        expect(isValidScore(85.5)).toBe(true);
+      it('should return false for decimal scores (integers only)', () => {
+        expect(isValidScore(85.5)).toBe(false);
       });
     });
 
@@ -52,12 +52,12 @@ describe('Validation Utilities', () => {
     });
 
     describe('edge cases', () => {
-      it('should return true for score just above minimum (0.1)', () => {
-        expect(isValidScore(0.1)).toBe(true);
+      it('should return false for decimal score just above minimum (integers only)', () => {
+        expect(isValidScore(0.1)).toBe(false);
       });
 
-      it('should return true for score just below maximum (99.9)', () => {
-        expect(isValidScore(99.9)).toBe(true);
+      it('should return false for decimal score just below maximum (integers only)', () => {
+        expect(isValidScore(99.9)).toBe(false);
       });
 
       it('should return false for NaN', () => {
