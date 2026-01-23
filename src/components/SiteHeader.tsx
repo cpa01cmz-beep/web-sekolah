@@ -5,42 +5,7 @@ import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { useState, useCallback, memo } from 'react';
 import { THEME_COLORS } from '@/theme/colors';
-
-const navLinks = [
-  { name: 'Beranda', href: '/' },
-  { 
-    name: 'Berita', 
-    href: '#',
-    submenu: [
-      { name: 'Update', href: '/news/update' },
-      { name: 'Pengumuman', href: '/news/announcements' },
-      { name: 'Indeks', href: '/news/index' }
-    ]
-  },
-  { 
-    name: 'Profil', 
-    href: '#',
-    submenu: [
-      { name: 'Profil Sekolah', href: '/profile/school' },
-      { name: 'Layanan & Produk', href: '/profile/services' },
-      { name: 'Prestasi & Penghargaan', href: '/profile/achievements' },
-      { name: 'Ekstrakurikuler', href: '/profile/extracurricular' },
-      { name: 'Fasilitas Sarana dan Prasarana', href: '/profile/facilities' }
-    ]
-  },
-  { name: 'Karya', href: '/works' },
-  { name: 'Galeri', href: '/gallery' },
-  { 
-    name: 'Tautan', 
-    href: '#',
-    submenu: [
-      { name: 'Tautan Terkait', href: '/links/related' },
-      { name: 'Download', href: '/links/download' }
-    ]
-  },
-  { name: 'Kontak', href: '/contact' },
-  { name: 'PPDB', href: '/ppdb' },
-];
+import { navLinks } from '@/constants/navigation';
 
 export const SiteHeader = memo(function SiteHeader() {
   const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
