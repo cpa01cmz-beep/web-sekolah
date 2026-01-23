@@ -1,5 +1,6 @@
 import { IntegrationMonitor as IntegrationMonitorConfig } from '../config/time';
 import { logger } from '../logger';
+import type { IMonitor } from './IMonitor';
 
 export interface WebhookStats {
   totalEvents: number;
@@ -11,7 +12,7 @@ export interface WebhookStats {
   averageDeliveryTime: number;
 }
 
-export class WebhookMonitor {
+export class WebhookMonitor implements IMonitor {
   private stats: WebhookStats = {
     totalEvents: 0,
     pendingEvents: 0,

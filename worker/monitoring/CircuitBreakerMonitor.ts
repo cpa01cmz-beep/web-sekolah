@@ -1,4 +1,5 @@
 import { logger } from '../logger';
+import type { IMonitor } from './IMonitor';
 
 export interface CircuitBreakerStats {
   isOpen: boolean;
@@ -7,7 +8,7 @@ export interface CircuitBreakerStats {
   nextAttemptTime: number;
 }
 
-export class CircuitBreakerMonitor {
+export class CircuitBreakerMonitor implements IMonitor {
   private state: CircuitBreakerStats | null = null;
 
   setState(state: CircuitBreakerStats): void {
