@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { FormField } from '@/components/ui/form-field';
+import { FormFieldInput } from '@/components/ui/form-field-input';
 import { FormSuccess } from '@/components/ui/form-success';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useState, useCallback } from 'react';
@@ -106,91 +106,67 @@ export function PPDBForm({ onSubmit }: PPDBFormProps) {
     <div className="bg-card rounded-lg shadow-md p-6">
       <h2 className="text-2xl font-bold text-foreground mb-6">Formulir Pendaftaran</h2>
       <form onSubmit={handleSubmit} className="space-y-6" noValidate>
-        <FormField
+        <FormFieldInput
           id="name"
           label="Nama Lengkap"
           error={errors.name}
           helperText="Masukkan nama lengkap sesuai akta kelahiran"
+          placeholder="Masukkan nama lengkap"
+          value={formData.name}
+          onChange={(value) => handleInputChange('name', value)}
+          disabled={isSubmitting}
           required
-        >
-          <Input
-            placeholder="Masukkan nama lengkap"
-            value={formData.name}
-            onChange={(e) => handleInputChange('name', e.target.value)}
-            disabled={isSubmitting}
-            required
-            aria-busy={isSubmitting}
-          />
-        </FormField>
+        />
 
         <div className="grid grid-cols-2 gap-4">
-          <FormField
+          <FormFieldInput
             id="placeOfBirth"
             label="Tempat Lahir"
             error={errors.placeOfBirth}
             helperText="Kota tempat lahir"
+            placeholder="Tempat lahir"
+            value={formData.placeOfBirth}
+            onChange={(value) => handleInputChange('placeOfBirth', value)}
+            disabled={isSubmitting}
             required
-          >
-            <Input
-              placeholder="Tempat lahir"
-              value={formData.placeOfBirth}
-              onChange={(e) => handleInputChange('placeOfBirth', e.target.value)}
-              disabled={isSubmitting}
-              required
-              aria-busy={isSubmitting}
-            />
-          </FormField>
-          <FormField
+          />
+          <FormFieldInput
             id="dateOfBirth"
             label="Tanggal Lahir"
+            type="date"
             error={errors.dateOfBirth}
             helperText="Tanggal lahir sesuai akta"
+            placeholder="Tanggal lahir"
+            value={formData.dateOfBirth}
+            onChange={(value) => handleInputChange('dateOfBirth', value)}
+            disabled={isSubmitting}
             required
-          >
-            <Input
-              type="date"
-              value={formData.dateOfBirth}
-              onChange={(e) => handleInputChange('dateOfBirth', e.target.value)}
-              disabled={isSubmitting}
-              required
-              aria-busy={isSubmitting}
-            />
-          </FormField>
+          />
         </div>
 
-        <FormField
+        <FormFieldInput
           id="nisn"
           label="NISN"
           error={errors.nisn}
           helperText="Nomor Induk Siswa Nasional (10 digit)"
+          placeholder="Nomor Induk Siswa Nasional"
+          value={formData.nisn}
+          onChange={(value) => handleInputChange('nisn', value)}
+          disabled={isSubmitting}
           required
-        >
-          <Input
-            placeholder="Nomor Induk Siswa Nasional"
-            value={formData.nisn}
-            onChange={(e) => handleInputChange('nisn', e.target.value)}
-            disabled={isSubmitting}
-            required
-            aria-busy={isSubmitting}
-          />
-        </FormField>
+        />
 
-        <FormField
+        <FormFieldInput
           id="school"
           label="Asal Sekolah"
           error={errors.school}
           helperText="Nama sekolah sebelumnya"
+          placeholder="Nama sekolah sebelumnya"
+          value={formData.school}
+          onChange={(value) => handleInputChange('school', value)}
+          disabled={isSubmitting}
           required
-        >
-          <Input
-            placeholder="Nama sekolah sebelumnya"
-            value={formData.school}
-            onChange={(e) => handleInputChange('school', e.target.value)}
-            disabled={isSubmitting}
-            required
-            aria-busy={isSubmitting}
-          />
-        </FormField>
+        />
 
         <FormField
           id="level"
@@ -210,41 +186,31 @@ export function PPDBForm({ onSubmit }: PPDBFormProps) {
           </Select>
         </FormField>
 
-        <FormField
+        <FormFieldInput
           id="email"
           label="Email Orang Tua"
+          type="email"
           error={errors.email}
           helperText="Email aktif untuk menerima konfirmasi"
+          placeholder="email@contoh.com"
+          value={formData.email}
+          onChange={(value) => handleInputChange('email', value)}
+          disabled={isSubmitting}
           required
-        >
-          <Input
-            type="email"
-            placeholder="email@contoh.com"
-            value={formData.email}
-            onChange={(e) => handleInputChange('email', e.target.value)}
-            disabled={isSubmitting}
-            required
-            aria-busy={isSubmitting}
-          />
-        </FormField>
+        />
 
-        <FormField
+        <FormFieldInput
           id="phone"
           label="Nomor Telepon"
+          type="tel"
           error={errors.phone}
           helperText="Nomor WhatsApp yang bisa dihubungi"
+          placeholder="081234567890"
+          value={formData.phone}
+          onChange={(value) => handleInputChange('phone', value)}
+          disabled={isSubmitting}
           required
-        >
-          <Input
-            type="tel"
-            placeholder="081234567890"
-            value={formData.phone}
-            onChange={(e) => handleInputChange('phone', e.target.value)}
-            disabled={isSubmitting}
-            required
-            aria-busy={isSubmitting}
-          />
-        </FormField>
+        />
 
         <Button type="submit" className="w-full" disabled={isSubmitting} aria-busy={isSubmitting}>
           {isSubmitting ? 'Mengirim...' : 'Daftar Sekarang'}

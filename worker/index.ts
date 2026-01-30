@@ -10,7 +10,7 @@ import { adminMonitoringRoutes } from './admin-monitoring-routes';
 import { docsRoutes } from './docs-routes';
 import { Env, GlobalDurableObject, ok, notFound, serverError, bad } from './core-utils';
 import { logger as pinoLogger } from './logger';
-import { ClientErrorReport, CSPViolationReport } from './types';
+import { ClientErrorReport, CSPViolationReport } from './types/index';
 import { defaultRateLimiter, strictRateLimiter } from './middleware/rate-limit';
 import { defaultTimeout } from './middleware/timeout';
 import { securityHeaders } from './middleware/security-headers';
@@ -18,6 +18,7 @@ import { responseErrorMonitoring } from './middleware/error-monitoring';
 import { integrationMonitor } from './integration-monitor';
 import { HttpStatusCode, TimeConstants } from './config/time';
 import { DefaultOrigins } from './config/defaults';
+import { handleScheduled } from './scheduled';
 
 // Need to export GlobalDurableObject to make it available in wrangler
 export { GlobalDurableObject };
@@ -27,7 +28,7 @@ const app = new Hono<{ Bindings: Env }>();
 app.use('*', logger());
 
 app.use('/api/*', async (c, next) => {
-  const allowedOrigins = c.env.ALLOWED_ORIGINS?.split(',') || DefaultOrigins.LOCAL_DEV;
+  const allowedOrigins = (c.env.ALLOWED_ORIGINS?.split(',') || DefaultOrigins.LOCAL_DEV) as string[];
   const origin = c.req.header('Origin');
 
   if (origin && allowedOrigins.includes(origin)) {
@@ -135,4 +136,9 @@ app.onError((err, c) => { pinoLogger.error(`[ERROR] ${err}`); return serverError
 
 pinoLogger.info('Server is running');
 
-export default { fetch: app.fetch } satisfies ExportedHandler<Env>;
+export default {
+  fetch: app.fetch,
+  scheduled: (controller: ScheduledController, env: Env) => {
+    return handleScheduled(controller, env);
+  },
+} satisfies ExportedHandler<Env>;
