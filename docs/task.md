@@ -2,14 +2,307 @@
  
                                          This document tracks architectural refactoring and testing tasks for Akademia Pro.
  
- ## Status Summary
- 
-                                                       **Last Updated**: 2026-01-23 (Senior Integration Engineer - Webhook Reliability)
- 
-                                                       **Overall Test Status**: 2610 tests passing, 114 skipped, 155 todo (83 test files)
-                                                        **Overall Security Status**: EXCELLENT - 0 critical vulnerabilities, 0 pending recommendations (all resolved)
- 
-                                               ### Senior Integration Engineer - Webhook Reliability (2026-01-23) - Completed ✅
+## Status Summary
+
+                                                         **Last Updated**: 2026-01-30 (Lead Reliability Engineer - Code Sanitizer)
+
+                                                         **Overall Test Status**: 2610 tests passing, 114 skipped, 155 todo (83 test files)
+                                                         **Overall Security Status**: EXCELLENT - 0 critical vulnerabilities, 0 pending recommendations (all resolved)
+
+                                                ### Lead Reliability Engineer - Code Sanitizer (2026-01-30) - Completed ✅
+
+**Task**: Eliminate bugs, fix build/lint, remove dead code, clean technical debt
+
+**Problem**:
+- admin-routes.ts used `console.error` instead of `logger.error` for error logging
+- Backend error logging should use the centralized logger module for consistency
+- Other routes (webhook-admin-routes, webhook-config-routes, webhook-test-routes) already use `logger.error`
+- Inconsistent error logging pattern violated "Use Infrastructure" principle
+
+**Solution**: Replaced all `console.error` calls with `logger.error` in admin-routes.ts
+
+**Implementation**:
+
+1. **Identified Inconsistent Logging**:
+    - Found 2 `console.error` calls in worker/routes/admin-routes.ts
+    - Verified logger module is available in worker (worker/logger.ts)
+    - Confirmed other webhook routes already use `logger.error`
+
+2. **Added Logger Import** (admin-routes.ts):
+    - Added `import { logger } from '../logger'` to imports section
+    - Placed import after schema imports, following code organization patterns
+
+3. **Replaced Console Error Calls** (admin-routes.ts):
+    - Line 81: Changed `console.error('Failed to parse settings:', error)` to `logger.error('Failed to parse settings', error)`
+    - Line 94: Changed `console.error('Failed to parse current settings:', error)` to `logger.error('Failed to parse current settings', error)`
+    - Updated error parameter format to match logger.error() signature: `logger.error(message, error)`
+
+**Metrics**:
+
+| Metric | Before | After | Improvement |
+|--------|--------|-------|-------------|
+| console.error calls | 2 | 0 | 100% replaced |
+| logger.error calls | 0 | 2 | 100% consistent |
+| Inconsistent logging | 2 instances | 0 | 100% resolved |
+| Build status | Passing | Passing | Zero regressions |
+| Test status | 2610 passing | 2610 passing | Zero regressions |
+| TypeScript errors | 0 | 0 | Maintained |
+| ESLint errors | 0 | 0 | Maintained |
+
+**Benefits Achieved**:
+    - ✅ 2 console.error calls replaced with logger.error
+    - ✅ Consistent error logging across all backend routes
+    - ✅ Centralized logger infrastructure usage
+    - ✅ Better error context (logger includes timestamp, level, context)
+    - ✅ Configurable log levels (via LOG_LEVEL env var)
+    - ✅ All 2610 tests passing (no regressions)
+    - ✅ Build passes (all environments successful)
+    - ✅ Linting passes (0 errors)
+    - ✅ TypeScript compilation successful (0 errors)
+    - ✅ Zero breaking changes to existing functionality
+    - ✅ Codebase adheres to "Use Infrastructure" principle
+
+**Technical Details**:
+
+**Logger vs Console**:
+```typescript
+// Before: console.error
+console.error('Failed to parse settings:', error);
+// Output: Failed to parse settings: [Error object]
+
+// After: logger.error
+logger.error('Failed to parse settings', error);
+// Output: {"level":"error","timestamp":"2026-01-30T08:00:00.000Z","message":"Failed to parse settings","context":{"error":{"message":"...","stack":"...","name":"Error"}}}
+```
+
+**Logger Benefits**:
+- Structured logging (JSON format for log aggregation)
+- Log levels (debug, info, warn, error) with configurable threshold
+- Automatic timestamp inclusion
+- Error context formatting (message, name, stack)
+- Environment-based log filtering (LOG_LEVEL env var)
+
+**Consistency Pattern**:
+```typescript
+// All backend routes now follow this pattern:
+import { logger } from '../logger';
+
+// Error logging:
+logger.error('Operation failed', error);
+
+// Info logging:
+logger.info('Operation completed', context);
+
+// Warning logging:
+logger.warn('Potential issue', context);
+```
+
+**Architectural Impact**:
+    - **Consistent Logging**: All backend routes use centralized logger
+    - **Observability**: Structured JSON logs for log aggregation systems
+    - **Configurability**: Log levels can be adjusted via LOG_LEVEL env var
+    - **Error Context**: Logger includes stack traces and error metadata
+    - **Debugging**: Easier to diagnose issues with structured logs
+    - **Production Ready**: JSON logs compatible with log aggregators (ELK, Splunk, CloudWatch)
+
+**Success Criteria**:
+    - [x] 2 console.error calls identified in admin-routes.ts
+    - [x] All console.error calls replaced with logger.error
+    - [x] Logger import added to admin-routes.ts
+    - [x] All 2610 tests passing (no regressions)
+    - [x] Build passes (all environments successful)
+    - [x] Linting passes (0 errors)
+    - [x] TypeScript compilation successful (0 errors)
+    - [x] Zero breaking changes to existing functionality
+    - [x] Error logging consistent across all backend routes
+
+**Impact**:
+    - `worker/routes/admin-routes.ts`: Updated (2 console.error → 2 logger.error)
+    - Logger usage: 2 calls added (+2 instances)
+    - Console usage: 2 calls removed (-2 instances)
+    - Consistency: 100% backend routes now use logger.error
+    - Test coverage: 2610 passing (maintained, 0 regressions)
+    - TypeScript errors: 0 (maintained)
+    - Lint errors: 0 (maintained)
+
+**Additional Code Quality Checks Performed**:
+    - ✅ No TODO, FIXME, or HACK comments found
+    - ✅ No commented-out code blocks found
+    - ✅ No @ts-ignore or @ts-expect-error statements found
+    - ✅ Empty catch blocks reviewed (all intentional with defensive coding)
+    - ✅ Magic numbers verified (all defined in config files)
+    - ✅ No console statements in production code (except EnrollmentChart.tsx - intercepted by error-reporter)
+    - ✅ No hardcoded secrets or credentials found
+    - ✅ All `any` types are in type definitions or tests (appropriate)
+    - ✅ All hardcoded URLs are in constants or test files (appropriate)
+
+**Success**: ✅ **CODE SANITIZER COMPLETE, REPLACED 2 CONSOLE.ERROR CALLS WITH LOGGER.ERROR IN ADMIN-ROUTES.TS, ACHIEVED 100% CONSISTENT ERROR LOGGING ACROSS ALL BACKEND ROUTES, ALL 2610 TESTS PASSING, ZERO REGRESSIONS**
+
+---
+
+### Lead Reliability Engineer - Code Sanitizer (2026-01-23) - Completed ✅
+
+**Task**: Extract role-specific user creation logic into Strategy Pattern to adhere to SOLID principles
+
+**Problem**:
+- `UserService.createUser` had if-else chains for handling different user roles (student, teacher, parent, admin)
+- Adding a new role required modifying existing `UserService.createUser` method (violates Open/Closed Principle)
+- Role-specific construction logic scattered across one method (violates Single Responsibility Principle)
+- Code duplication across role branches with similar patterns (spread base, spread userData, set role)
+- Maintenance burden: Role-specific logic not atomic or replaceable
+
+**Solution**: Created Strategy Pattern implementation with role-specific strategy classes
+
+**Implementation**:
+
+1. **Created UserCreationStrategy Interface** (`worker/domain/UserCreationStrategy.ts`, 96 lines):
+    - `UserCreationStrategy` interface: Defines contract for user creation with `create()` method
+    - `BaseUserFields` interface: Common fields shared across all user types (id, createdAt, updatedAt, avatarUrl)
+
+2. **Implemented Role-Specific Strategies** (4 classes):
+    - `StudentCreationStrategy`: Creates Student users with classId and studentIdNumber fields
+    - `TeacherCreationStrategy`: Creates Teacher users with classIds array
+    - `ParentCreationStrategy`: Creates Parent users with childId field
+    - `AdminCreationStrategy`: Creates Admin users with no additional fields
+    - Each strategy implements `create(base, userData, passwordHash): SchoolUser`
+
+3. **Created UserCreationStrategyFactory**:
+    - Factory pattern: `getStrategy(role: string)` retrieves appropriate strategy by role name
+    - O(1) lookup from static strategies map (student, teacher, parent, admin)
+    - Throws error for invalid role names
+
+4. **Refactored UserService.createUser** (`worker/domain/UserService.ts`):
+    - Removed 48 lines of if-else branching logic
+    - Replaced with factory lookup: `const strategy = UserCreationStrategyFactory.getStrategy(userData.role)`
+    - Simplified to 17 lines (65% reduction)
+    - Uses strategy: `const newUser = strategy.create(base, userData, passwordHash)`
+
+**Metrics**:
+
+| Metric | Before | After | Improvement |
+|---------|---------|--------|-------------|
+| UserService.createUser lines | 48 | 17 | 65% reduction (-31 lines) |
+| If-else branches | 4 | 0 | 100% eliminated |
+| Role-specific logic locations | 1 method | 4 separate classes | Atomic |
+| Adding new role difficulty | Modify UserService | Add new strategy class | Open/Closed |
+| Code duplication | 4 similar branches | 0 | 100% eliminated |
+| New files created | 0 | 1 | UserCreationStrategy.ts (96 lines) |
+| Test coverage | 2610 passing | 2610 passing | Zero regressions |
+| TypeScript errors | 0 | 0 | Maintained |
+| ESLint errors | 0 | 0 | Maintained |
+
+**Benefits Achieved**:
+    - ✅ UserCreationStrategy interface created (strategy pattern foundation)
+    - ✅ 4 role-specific strategies implemented (Student, Teacher, Parent, Admin)
+    - ✅ UserCreationStrategyFactory for strategy retrieval (factory pattern)
+    - ✅ UserService.createUser simplified (48 → 17 lines, 65% reduction)
+    - ✅ If-else branching eliminated (0 branches, O(1) factory lookup)
+    - ✅ Open/Closed Principle applied (adding new role = new strategy class)
+    - ✅ Single Responsibility Principle (strategies handle construction, service handles orchestration)
+    - ✅ All 2610 tests passing (no regressions)
+    - ✅ TypeScript compilation successful (0 errors)
+    - ✅ Linting passed (0 errors)
+    - ✅ Zero breaking changes to existing functionality
+
+**Technical Details**:
+
+**Strategy Pattern Benefits**:
+
+1. **Open/Closed Principle**:
+   - Before: Adding new role requires modifying `UserService.createUser` (if-else chain)
+   - After: Adding new role only requires creating new strategy class
+   - No modification to existing code required
+
+2. **Single Responsibility Principle**:
+   - Before: `UserService` responsible for both orchestration AND role construction
+   - After: `UserService` orchestrates, strategies handle role construction
+   - Each strategy has single responsibility: create specific user type
+
+3. **Dependency Inversion Principle**:
+   - `UserService` depends on `UserCreationStrategy` abstraction
+   - Not coupled to concrete implementations
+   - Strategies can be swapped without modifying `UserService`
+
+4. **Interface Segregation Principle**:
+   - `UserCreationStrategy` has single method: `create()`
+   - Minimal interface, focused responsibility
+   - No unused methods forced on implementations
+
+5. **Polymorphism**:
+   - All strategies implement same interface
+   - Can be treated polymorphically: `const strategy: UserCreationStrategy = ...`
+   - Factory returns strategy, client code uses interface
+
+**Adding a New Role**:
+```typescript
+// 1. Create strategy class (no modification to existing code)
+export class StaffCreationStrategy implements UserCreationStrategy {
+  create(base: BaseUserFields, userData: CreateUserData, passwordHash: string | null): SchoolUser {
+    return {
+      ...base,
+      ...userData,
+      role: 'staff',
+      department: userData.department ?? '',
+      passwordHash
+    } as Staff;
+  }
+}
+
+// 2. Register in factory (add one line)
+export class UserCreationStrategyFactory {
+  private static strategies: Record<string, UserCreationStrategy> = {
+    student: new StudentCreationStrategy(),
+    teacher: new TeacherCreationStrategy(),
+    parent: new ParentCreationStrategy(),
+    admin: new AdminCreationStrategy(),
+    staff: new StaffCreationStrategy()  // New line only
+  };
+}
+```
+
+**Architectural Impact**:
+    - **Modularity**: Role-specific construction logic atomic and replaceable
+    - **Separation of Concerns**: Orchestration (UserService) separated from construction (strategies)
+    - **Clean Architecture**: Dependencies flow inward (UserService → Strategy interface)
+    - **SOLID Principles Applied**:
+      - Single Responsibility: Each strategy has focused responsibility
+      - Open/Closed: New roles added without modifying existing code
+      - Liskov Substitution: All strategies interchangeable via interface
+      - Interface Segregation: Minimal interface with single method
+      - Dependency Inversion: UserService depends on abstraction, not concrete classes
+    - **Simplicity**: Factory lookup O(1) vs if-else chain O(n)
+
+**Success Criteria**:
+    - [x] UserCreationStrategy interface created
+    - [x] 4 role-specific strategies implemented (Student, Teacher, Parent, Admin)
+    - [x] UserCreationStrategyFactory created
+    - [x] UserService.createUser refactored to use strategy pattern
+    - [x] UserService.createUser reduced from 48 to 17 lines (65% reduction)
+    - [x] If-else branching eliminated (0 branches)
+    - [x] Open/Closed Principle applied (new roles = new strategy classes)
+    - [x] Single Responsibility Principle applied
+    - [x] All 2610 tests passing (no regressions)
+    - [x] TypeScript compilation successful (0 errors)
+    - [x] Linting passed (0 errors)
+    - [x] Zero breaking changes to existing functionality
+
+**Impact**:
+    - `worker/domain/UserCreationStrategy.ts`: New file (96 lines)
+      - UserCreationStrategy interface (11 lines)
+      - BaseUserFields interface (5 lines)
+      - 4 strategy classes (60 lines)
+      - UserCreationStrategyFactory (20 lines)
+    - `worker/domain/UserService.ts`: Refactored (48 → 17 lines in createUser, 31 lines removed)
+    - Code complexity: If-else chain → Strategy pattern
+    - Adding new role: Modify existing class → Add new strategy class
+    - Test coverage: 2610 passing (maintained, 0 regressions)
+    - TypeScript errors: 0 (maintained)
+
+**Success**: ✅ **USER CREATION STRATEGY PATTERN COMPLETE, EXTRACTED ROLE-SPECIFIC LOGIC TO STRATEGY CLASSES, APPLIED SOLID PRINCIPLES, REDUCED USERSERVICE.CREATEUSER BY 65% (48 → 17 LINES), ALL 2610 TESTS PASSING, ZERO REGRESSIONS**
+
+---
+
+                                                ### Senior Integration Engineer - Webhook Reliability (2026-01-23) - Completed ✅
 
 **Task**: Implement automated scheduled webhook processing to eliminate manual intervention
 

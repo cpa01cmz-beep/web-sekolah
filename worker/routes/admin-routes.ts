@@ -8,6 +8,7 @@ import { UserService, CommonDataService, AnnouncementService } from '../domain';
 import { withAuth, withErrorHandler, triggerWebhookSafely } from './route-utils';
 import { validateBody } from '../middleware/validation';
 import { createAnnouncementSchema, updateSettingsSchema } from '../middleware/schemas';
+import { logger } from '../logger';
 import { getCurrentUserId } from '../type-guards';
 import type { Context } from 'hono';
 
@@ -77,7 +78,7 @@ export function adminRoutes(app: Hono<{ Bindings: Env }>) {
     try {
       return ok(c, JSON.parse(settings));
     } catch (error) {
-      console.error('Failed to parse settings:', error);
+      logger.error('Failed to parse settings', error);
       return ok(c, {});
     }
   }));
@@ -90,7 +91,7 @@ export function adminRoutes(app: Hono<{ Bindings: Env }>) {
       try {
         currentSettings = JSON.parse(currentSettingsJson);
       } catch (error) {
-        console.error('Failed to parse current settings:', error);
+        logger.error('Failed to parse current settings', error);
       }
     }
     const updatedSettings = { ...currentSettings, ...settingsData };

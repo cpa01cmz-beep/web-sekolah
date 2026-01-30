@@ -1,39 +1,43 @@
 import type { Env } from '../core-utils';
 import { UserEntity } from '../entities';
-import type { SchoolUser, Student, Teacher, Parent, Admin, CreateUserData, UpdateUserData } from '@shared/types';
+import type { SchoolUser, CreateUserData, UpdateUserData } from '@shared/types';
 import { hashPassword } from '../password-utils';
 import { ReferentialIntegrity } from '../referential-integrity';
+import { UserCreationStrategyFactory, type BaseUserFields } from './UserCreationStrategy';
 
 // UserService - Domain Service for User Business Logic
 // ==================================================
 // This service encapsulates all business logic for user operations.
 // It handles:
-// - User creation with role-specific fields
+// - User creation with role-specific fields (via Strategy Pattern)
 // - Password hashing and updates
 // - Referential integrity checking before deletion
 // - Password removal from user data for security
 
 export class UserService {
   /**
-   * Creates a new user with role-specific fields and password hashing
-   *
-   * @param env - Cloudflare Workers environment with Durable Object bindings
-   * @param userData - User data including role (student/teacher/parent/admin)
-   * @returns Created user object (without passwordHash)
-   *
-   * Role-specific fields:
-   * - student: classId, studentIdNumber
-   * - teacher: classIds (array)
-   * - parent: childId
-   * - admin: no additional fields
-   *
-   * Password handling:
-   * - If password provided, hashes using PBKDF2 with 100,000 iterations
-   * - If no password provided, sets passwordHash to null (for OAuth/future auth methods)
-   */
+    * Creates a new user with role-specific fields and password hashing
+    *
+    * @param env - Cloudflare Workers environment with Durable Object bindings
+    * @param userData - User data including role (student/teacher/parent/admin)
+    * @returns Created user object (without passwordHash)
+    *
+    * Role-specific fields:
+    * - student: classId, studentIdNumber
+    * - teacher: classIds (array)
+    * - parent: childId
+    * - admin: no additional fields
+    *
+    * Password handling:
+    * - If password provided, hashes using PBKDF2 with 100,000 iterations
+    * - If no password provided, sets passwordHash to null (for OAuth/future auth methods)
+    *
+    * Architecture note: Uses Strategy Pattern for role-specific creation logic.
+    * Adding new roles only requires creating a new strategy class (Open/Closed Principle).
+    */
   static async createUser(env: Env, userData: CreateUserData): Promise<SchoolUser> {
     const now = new Date().toISOString();
-    const base = { id: crypto.randomUUID(), createdAt: now, updatedAt: now, avatarUrl: '' };
+    const base: BaseUserFields = { id: crypto.randomUUID(), createdAt: now, updatedAt: now, avatarUrl: '' };
 
     let passwordHash = null;
     if (userData.password) {
@@ -41,40 +45,8 @@ export class UserService {
       passwordHash = hash;
     }
 
-    let newUser: SchoolUser;
-    if (userData.role === 'student') {
-      newUser = {
-        ...base,
-        ...userData,
-        role: 'student',
-        classId: userData.classId ?? '',
-        studentIdNumber: userData.studentIdNumber ?? '',
-        passwordHash
-      } as Student;
-    } else if (userData.role === 'teacher') {
-      newUser = {
-        ...base,
-        ...userData,
-        role: 'teacher',
-        classIds: userData.classIds ?? [],
-        passwordHash
-      } as Teacher;
-    } else if (userData.role === 'parent') {
-      newUser = {
-        ...base,
-        ...userData,
-        role: 'parent',
-        childId: userData.childId ?? '',
-        passwordHash
-      } as Parent;
-    } else {
-      newUser = {
-        ...base,
-        ...userData,
-        role: 'admin',
-        passwordHash
-      } as Admin;
-    }
+    const strategy = UserCreationStrategyFactory.getStrategy(userData.role);
+    const newUser = strategy.create(base, userData, passwordHash);
 
     await UserEntity.create(env, newUser);
     return newUser;
