@@ -1,64 +1,38 @@
 import { useState, useCallback } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { FormField } from '@/components/ui/form-field';
 import { Separator } from '@/components/ui/separator';
 import { PageHeader } from '@/components/PageHeader';
 import { useAuthStore } from '@/lib/authStore';
 import { SlideUp } from '@/components/animations';
 import { toast } from 'sonner';
 import { formatDateLong } from '@/utils/date';
-import { validateTitle, validateContent } from '@/utils/validation';
 import { initialAnnouncements } from '@/mock-data/announcements';
 import type { Announcement } from '@/mock-data/announcements';
-import { useFormValidation } from '@/hooks/useFormValidation';
+import { InlineAnnouncementForm } from '@/components/forms/InlineAnnouncementForm';
 
 export function TeacherAnnouncementsPage() {
   const user = useAuthStore((state) => state.user);
   const [announcements, setAnnouncements] = useState<Announcement[]>(initialAnnouncements);
-  const [newTitle, setNewTitle] = useState('');
-  const [newContent, setNewContent] = useState('');
   const [isPosting, setIsPosting] = useState(false);
 
-  const formData = { title: newTitle, content: newContent };
-  const { errors, validateAll, reset: resetValidation } = useFormValidation(formData, {
-    validators: {
-      title: (value, show) => validateTitle(value, show, 5),
-      content: (value, show) => validateContent(value, show, 10),
-    },
-  });
-
-  const handlePostAnnouncement = useCallback(async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!user || !validateAll()) {
+  const handlePostAnnouncement = useCallback((data: { title: string; content: string }) => {
+    if (!user) {
+      toast.error('You must be logged in to post announcements.');
       return;
     }
 
     setIsPosting(true);
     const newAnnouncement: Announcement = {
       id: `ann${announcements.length + 1}`,
-      title: newTitle.trim(),
-      content: newContent.trim(),
+      title: data.title,
+      content: data.content,
       author: user.name,
       date: new Date().toISOString(),
     };
     setAnnouncements([newAnnouncement, ...announcements]);
-    setNewTitle('');
-    setNewContent('');
-    resetValidation();
     setIsPosting(false);
     toast.success('Announcement posted successfully!');
-  }, [user, announcements, newTitle, newContent, validateAll, resetValidation]);
-
-  const handleTitleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setNewTitle(e.target.value);
-  }, []);
-
-  const handleContentChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setNewContent(e.target.value);
-  }, []);
+  }, [user, announcements]);
 
   return (
     <SlideUp className="space-y-6">
@@ -71,42 +45,7 @@ export function TeacherAnnouncementsPage() {
               <CardDescription>Post a new announcement for students and parents.</CardDescription>
             </CardHeader>
             <CardContent>
-              <form onSubmit={handlePostAnnouncement} className="space-y-4">
-                <FormField
-                  id="title"
-                  label="Title"
-                  error={errors.title}
-                  helperText="Enter a descriptive title (minimum 5 characters)"
-                  required
-                >
-                  <Input
-                    value={newTitle}
-                    onChange={handleTitleChange}
-                    placeholder="Announcement Title"
-                    disabled={isPosting}
-                    aria-busy={isPosting}
-                  />
-                </FormField>
-                <FormField
-                  id="content"
-                  label="Content"
-                  error={errors.content}
-                  helperText="Provide detailed information (minimum 10 characters)"
-                  required
-                >
-                  <Textarea
-                    value={newContent}
-                    onChange={handleContentChange}
-                    placeholder="Write your announcement here..."
-                    rows={5}
-                    disabled={isPosting}
-                    aria-busy={isPosting}
-                  />
-                </FormField>
-                <Button type="submit" className="w-full" disabled={isPosting} aria-busy={isPosting}>
-                  {isPosting ? 'Posting...' : 'Post Announcement'}
-                </Button>
-              </form>
+              <InlineAnnouncementForm onSave={handlePostAnnouncement} isLoading={isPosting} />
             </CardContent>
           </Card>
         </div>
