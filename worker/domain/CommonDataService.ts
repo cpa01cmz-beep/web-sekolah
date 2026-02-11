@@ -126,8 +126,8 @@ export class CommonDataService {
     if (search) {
       const searchLower = search.toLowerCase();
       filteredUsers = filteredUsers.filter(u =>
-        u.name.toLowerCase().includes(searchLower) ||
-        u.email.toLowerCase().includes(searchLower)
+        u.name?.toLowerCase().includes(searchLower) ||
+        u.email?.toLowerCase().includes(searchLower)
       );
     }
 
