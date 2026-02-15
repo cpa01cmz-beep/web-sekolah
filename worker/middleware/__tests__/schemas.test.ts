@@ -479,14 +479,14 @@ describe('Validation Schemas', () => {
         title: 'Important Announcement',
         content: 'This is a detailed announcement for the school community.',
         authorId: '990e8400-e29b-41d4-a716-446655440004',
-        targetAudience: 'all' as const,
+        targetRole: 'all' as const,
       };
 
       const result = createAnnouncementSchema.safeParse(data);
       expect(result.success).toBe(true);
     });
 
-    it('should use "all" as default targetAudience', () => {
+    it('should use "all" as default targetRole', () => {
       const data = {
         title: 'Important Announcement',
         content: 'This is a detailed announcement.',
@@ -496,7 +496,7 @@ describe('Validation Schemas', () => {
       const result = createAnnouncementSchema.safeParse(data);
       expect(result.success).toBe(true);
       if (result.success) {
-        expect(result.data.targetAudience).toBe('all');
+        expect(result.data.targetRole).toBe('all');
       }
     });
 
@@ -544,15 +544,15 @@ describe('Validation Schemas', () => {
       expect(result.success).toBe(false);
     });
 
-    it('should accept all valid targetAudience values', () => {
-      const validAudiences = ['all', 'students', 'teachers', 'parents'] as const;
-      
-      for (const audience of validAudiences) {
+    it('should accept all valid targetRole values', () => {
+      const validRoles = ['all', 'student', 'teacher', 'parent', 'admin'] as const;
+
+      for (const role of validRoles) {
         const data = {
           title: 'Important Announcement',
           content: 'This is a detailed announcement.',
           authorId: '990e8400-e29b-41d4-a716-446655440004',
-          targetAudience: audience,
+          targetRole: role,
         };
 
         const result = createAnnouncementSchema.safeParse(data);
