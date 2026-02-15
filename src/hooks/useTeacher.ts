@@ -52,7 +52,7 @@ export function useCreateAnnouncement(options?: UseMutationOptions<Announcement,
   });
 }
 
-export function useTeacherClassStudents(classId: string, options?: UseQueryOptions<Array<{
+export function useTeacherClassStudents(classId: string, teacherId: string, options?: UseQueryOptions<Array<{
   id: string;
   name: string;
   score: number | null;
@@ -61,14 +61,14 @@ export function useTeacherClassStudents(classId: string, options?: UseQueryOptio
 }>>) {
   return useTanstackQuery({
     queryKey: ['classes', classId, 'students'],
-    queryFn: () => teacherService.getClassStudentsWithGrades(classId),
+    queryFn: () => teacherService.getClassStudentsWithGrades(classId, teacherId),
     ...createQueryOptions<Array<{
       id: string;
       name: string;
       score: number | null;
       feedback: string;
       gradeId: string | null;
-    }>>({ enabled: !!classId, staleTime: CachingTime.FIVE_MINUTES }),
+    }>>({ enabled: !!classId && !!teacherId, staleTime: CachingTime.FIVE_MINUTES }),
     ...options,
   });
 }

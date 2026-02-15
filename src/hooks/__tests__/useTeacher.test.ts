@@ -529,7 +529,7 @@ describe('useTeacher Hooks', () => {
         json: vi.fn().mockResolvedValueOnce({ success: true, data: mockStudents })
       });
 
-      const { result } = renderHook(() => useTeacherClassStudents('class-1'), {
+      const { result } = renderHook(() => useTeacherClassStudents('class-1', 'teacher-1'), {
         wrapper: createWrapper()
       });
 
@@ -541,7 +541,7 @@ describe('useTeacher Hooks', () => {
     });
 
     it('should not execute query when classId is empty', () => {
-      const { result } = renderHook(() => useTeacherClassStudents(''), {
+      const { result } = renderHook(() => useTeacherClassStudents('', ''), {
         wrapper: createWrapper()
       });
       expect(result.current.fetchStatus).toBe('idle');
@@ -565,7 +565,7 @@ describe('useTeacher Hooks', () => {
         json: vi.fn().mockResolvedValueOnce({ success: true, data: mockStudents })
       });
 
-      const { result } = renderHook(() => useTeacherClassStudents('class-1'), {
+      const { result } = renderHook(() => useTeacherClassStudents('class-1', 'teacher-1'), {
         wrapper: createWrapper()
       });
 
@@ -585,7 +585,7 @@ describe('useTeacher Hooks', () => {
         json: vi.fn().mockResolvedValueOnce({ success: true, data: [] })
       });
 
-      const { result } = renderHook(() => useTeacherClassStudents('class-1'), {
+      const { result } = renderHook(() => useTeacherClassStudents('class-1', 'teacher-1'), {
         wrapper: createWrapper()
       });
 
