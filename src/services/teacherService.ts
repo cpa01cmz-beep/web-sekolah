@@ -21,7 +21,7 @@ export function createTeacherService(repository: IRepository = apiRepository): T
     },
 
     async submitGrade(gradeData: SubmitGradeData): Promise<Grade> {
-      return repository.post<Grade>(`/api/teachers/grades`, gradeData);
+      return repository.post<Grade>(`/api/grades`, gradeData);
     },
 
     async getAnnouncements(teacherId: string): Promise<Announcement[]> {
