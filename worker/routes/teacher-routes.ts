@@ -4,7 +4,7 @@ import { ok, bad, notFound } from '../core-utils';
 import { authenticate, authorize } from '../middleware/auth';
 import type { TeacherDashboardData, Announcement, CreateAnnouncementData, SubmitGradeData, Grade } from "@shared/types";
 
-import { GradeService, CommonDataService, AnnouncementService } from '../domain';
+import { GradeService, CommonDataService, AnnouncementService, TeacherService } from '../domain';
 import { withAuth, withUserValidation, withErrorHandler, triggerWebhookSafely } from './route-utils';
 import { validateBody } from '../middleware/validation';
 import { createGradeSchema, createAnnouncementSchema } from '../middleware/schemas';
@@ -44,6 +44,13 @@ export function teacherRoutes(app: Hono<{ Bindings: Env }>) {
   app.get('/api/teachers/:id/announcements', ...withUserValidation('teacher', 'announcements'), withErrorHandler('get teacher announcements')(async (c: Context) => {
     const filteredAnnouncements = await CommonDataService.getAnnouncementsByRole(c.env, 'teacher');
     return ok(c, filteredAnnouncements);
+  }));
+
+  app.get('/api/classes/:id/students', ...withAuth('teacher'), withErrorHandler('get class students')(async (c: Context) => {
+    const classId = c.req.param('id');
+    const teacherId = getCurrentUserId(c);
+    const students = await TeacherService.getClassStudentsWithGrades(c.env, classId, teacherId);
+    return ok(c, students);
   }));
 
   app.post('/api/teachers/grades', ...withAuth('teacher'), validateBody(createGradeSchema), withErrorHandler('create grade')(async (c: Context) => {
