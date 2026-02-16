@@ -4,7 +4,7 @@ import { ok, bad, notFound } from '../core-utils';
 import { authenticate, authorize } from '../middleware/auth';
 import type { TeacherDashboardData, Announcement, CreateAnnouncementData, SubmitGradeData, Grade } from "@shared/types";
 
-import { GradeService, CommonDataService, AnnouncementService } from '../domain';
+import { CommonDataService, AnnouncementService } from '../domain';
 import { withAuth, withUserValidation, withErrorHandler, triggerWebhookSafely } from './route-utils';
 import { validateBody } from '../middleware/validation';
 import { createGradeSchema, createAnnouncementSchema } from '../middleware/schemas';
@@ -25,7 +25,8 @@ export function teacherRoutes(app: Hono<{ Bindings: Env }>) {
       })
     ).then(counts => counts.reduce((sum, count) => sum + count, 0));
 
-    const recentGrades = await GradeService.getCourseGrades(c.env, teacherClasses[0]?.id || '');
+    const courseIds = teacherClasses.map(cls => cls.courseIds).flat();
+    const recentGrades = await CommonDataService.getRecentGradesForTeacherWithCourseNames(c.env, courseIds, 5);
     const filteredAnnouncements = await CommonDataService.getRecentAnnouncementsByRole(c.env, 'teacher', 5);
 
     const dashboardData: TeacherDashboardData = {

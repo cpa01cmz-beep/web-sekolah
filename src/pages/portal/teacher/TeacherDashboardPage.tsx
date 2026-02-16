@@ -16,7 +16,7 @@ const GradeItem = memo(({ grade }: { grade: TeacherDashboardData['recentGrades']
   <li className="text-sm">
     <p className="font-medium">{grade.studentId}</p>
     <p className="text-xs text-muted-foreground">
-      Score: {grade.score} - {grade.courseId}
+      Score: {grade.score} - {grade.courseName}
     </p>
   </li>
 ));

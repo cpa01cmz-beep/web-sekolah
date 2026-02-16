@@ -208,4 +208,30 @@ export class CommonDataService {
       courseName: gradeCoursesMap.get(grade.courseId)?.name || 'Unknown Course',
     }));
   }
+
+  static async getRecentGradesForTeacherWithCourseNames(env: Env, courseIds: string[], limit: number = 5): Promise<(Grade & { courseName: string })[]> {
+    const allGrades: Grade[] = [];
+    
+    for (const courseId of courseIds) {
+      const courseGrades = await GradeEntity.getByCourseId(env, courseId);
+      allGrades.push(...courseGrades);
+    }
+
+    if (allGrades.length === 0) {
+      return [];
+    }
+
+    const recentGrades = allGrades
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+      .slice(0, limit);
+
+    const uniqueCourseIds = Array.from(new Set(recentGrades.map(g => g.courseId)));
+    const courses = await Promise.all(uniqueCourseIds.map(id => new CourseEntity(env, id).getState()));
+    const coursesMap = new Map(courses.filter(c => c).map(c => [c!.id, c!]));
+
+    return recentGrades.map(grade => ({
+      ...grade,
+      courseName: coursesMap.get(grade.courseId)?.name || 'Unknown Course',
+    }));
+  }
 }
