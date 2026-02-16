@@ -170,7 +170,12 @@ export class CommonDataService {
     return scheduleState.items.map(item => ({
       ...item,
       courseName: coursesMap.get(item.courseId)?.name || 'Unknown Course',
-      teacherName: teachersMap.get(coursesMap.get(item.courseId)?.teacherId || '')?.name || 'Unknown Teacher',
+      teacherName: (() => {
+        const course = coursesMap.get(item.courseId);
+        if (!course?.teacherId) return 'Unknown Teacher';
+        const teacher = teachersMap.get(course.teacherId);
+        return teacher?.name || 'Unknown Teacher';
+      })(),
     }));
   }
 

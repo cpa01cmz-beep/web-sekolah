@@ -46,18 +46,21 @@ export function teacherRoutes(app: Hono<{ Bindings: Env }>) {
     return ok(c, filteredAnnouncements);
   }));
 
-  app.post('/api/teachers/grades', ...withAuth('teacher'), validateBody(createGradeSchema), withErrorHandler('create grade')(async (c: Context) => {
-    const gradeData = c.get('validatedBody') as SubmitGradeData;
-    const newGrade = await GradeService.createGrade(c.env, gradeData);
-    triggerWebhookSafely(c.env, 'grade.created', newGrade, { gradeId: newGrade.id });
-    return ok(c, newGrade);
-  }));
-
   app.post('/api/teachers/announcements', ...withAuth('teacher'), validateBody(createAnnouncementSchema), withErrorHandler('create announcement')(async (c: Context) => {
     const announcementData = c.get('validatedBody') as CreateAnnouncementData;
     const authorId = getCurrentUserId(c);
     const newAnnouncement = await AnnouncementService.createAnnouncement(c.env, announcementData, authorId);
     triggerWebhookSafely(c.env, 'announcement.created', newAnnouncement, { announcementId: newAnnouncement.id });
     return ok(c, newAnnouncement);
+  }));
+
+  app.get('/api/classes/:id/students', ...withUserValidation('teacher', 'classes'), withErrorHandler('get class students')(async (c: Context) => {
+    const classId = c.req.param('id');
+    const teacherId = c.req.query('teacherId');
+    if (!teacherId) {
+      return bad(c, 'teacherId query parameter is required');
+    }
+    const students = await TeacherService.getClassStudentsWithGrades(c.env, classId, teacherId);
+    return ok(c, students);
   }));
 }
