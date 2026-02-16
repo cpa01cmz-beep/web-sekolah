@@ -167,11 +167,18 @@ export class CommonDataService {
     const coursesMap = new Map(courses.filter(c => c).map(c => [c!.id, c!]));
     const teachersMap = new Map(teachers.filter(t => t).map(t => [t!.id, t!]));
 
-    return scheduleState.items.map(item => ({
-      ...item,
-      courseName: coursesMap.get(item.courseId)?.name || 'Unknown Course',
-      teacherName: teachersMap.get(coursesMap.get(item.courseId)?.teacherId || '')?.name || 'Unknown Teacher',
-    }));
+    return scheduleState.items.map(item => {
+      const course = coursesMap.get(item.courseId);
+      const courseName = course?.name || 'Unknown Course';
+      const teacherId = course?.teacherId;
+      const teacher = teacherId ? teachersMap.get(teacherId) : undefined;
+      const teacherName = teacher?.name || 'Unknown Teacher';
+      return {
+        ...item,
+        courseName,
+        teacherName,
+      };
+    });
   }
 
   static async getAnnouncementsWithAuthorNames(env: Env, limit: number): Promise<(Announcement & { authorName: string })[]> {
