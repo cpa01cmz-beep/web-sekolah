@@ -13,7 +13,7 @@ export interface TeacherDashboardData {
   email: string;
   totalClasses: number;
   totalStudents: number;
-  recentGrades: Grade[];
+  recentGrades: (Grade & { courseName: string })[];
   recentAnnouncements: Announcement[];
 }
 

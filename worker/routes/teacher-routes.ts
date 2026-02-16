@@ -26,6 +26,7 @@ export function teacherRoutes(app: Hono<{ Bindings: Env }>) {
     ).then(counts => counts.reduce((sum, count) => sum + count, 0));
 
     const recentGrades = await GradeService.getCourseGrades(c.env, teacherClasses[0]?.id || '');
+    const enrichedGrades = await CommonDataService.enrichGradesWithCourseNames(c.env, recentGrades.slice(-5).reverse());
     const filteredAnnouncements = await CommonDataService.getRecentAnnouncementsByRole(c.env, 'teacher', 5);
 
     const dashboardData: TeacherDashboardData = {
@@ -34,7 +35,7 @@ export function teacherRoutes(app: Hono<{ Bindings: Env }>) {
       email: teacher.email,
       totalClasses: teacherClasses.length,
       totalStudents: totalStudents,
-      recentGrades: recentGrades.slice(-5).reverse(),
+      recentGrades: enrichedGrades,
       recentAnnouncements: filteredAnnouncements
     };
 
