@@ -2,12 +2,12 @@ import { Hono } from "hono";
 import type { Env } from '../core-utils';
 import { ok, bad, notFound } from '../core-utils';
 import { authenticate, authorize } from '../middleware/auth';
-import type { TeacherDashboardData, Announcement, CreateAnnouncementData, SubmitGradeData, Grade } from "@shared/types";
+import type { TeacherDashboardData, Announcement, CreateAnnouncementData } from "@shared/types";
 
 import { GradeService, CommonDataService, AnnouncementService, TeacherService } from '../domain';
 import { withAuth, withUserValidation, withErrorHandler, triggerWebhookSafely } from './route-utils';
 import { validateBody } from '../middleware/validation';
-import { createGradeSchema, createAnnouncementSchema } from '../middleware/schemas';
+import { createAnnouncementSchema } from '../middleware/schemas';
 import { getCurrentUserId } from '../type-guards';
 import type { Context } from 'hono';
 
@@ -44,13 +44,6 @@ export function teacherRoutes(app: Hono<{ Bindings: Env }>) {
   app.get('/api/teachers/:id/announcements', ...withUserValidation('teacher', 'announcements'), withErrorHandler('get teacher announcements')(async (c: Context) => {
     const filteredAnnouncements = await CommonDataService.getAnnouncementsByRole(c.env, 'teacher');
     return ok(c, filteredAnnouncements);
-  }));
-
-  app.post('/api/teachers/grades', ...withAuth('teacher'), validateBody(createGradeSchema), withErrorHandler('create grade')(async (c: Context) => {
-    const gradeData = c.get('validatedBody') as SubmitGradeData;
-    const newGrade = await GradeService.createGrade(c.env, gradeData);
-    triggerWebhookSafely(c.env, 'grade.created', newGrade, { gradeId: newGrade.id });
-    return ok(c, newGrade);
   }));
 
   app.post('/api/teachers/announcements', ...withAuth('teacher'), validateBody(createAnnouncementSchema), withErrorHandler('create announcement')(async (c: Context) => {
