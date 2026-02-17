@@ -60,11 +60,4 @@ export function teacherRoutes(app: Hono<{ Bindings: Env }>) {
     triggerWebhookSafely(c.env, 'announcement.created', newAnnouncement, { announcementId: newAnnouncement.id });
     return ok(c, newAnnouncement);
   }));
-
-  app.get('/api/classes/:id/students', ...withAuth('teacher'), withErrorHandler('get class students with grades')(async (c: Context) => {
-    const classId = c.req.param('id');
-    const teacherId = getCurrentUserId(c);
-    const students = await TeacherService.getClassStudentsWithGrades(c.env, classId, teacherId);
-    return ok(c, students);
-  }));
 }
