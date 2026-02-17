@@ -12,8 +12,8 @@ export function createParentService(repository: IRepository = apiRepository): Pa
       return repository.get<ParentDashboardData>(`/api/parents/${parentId}/dashboard`);
     },
 
-    async getChildSchedule(_childId: string): Promise<ScheduleItem[]> {
-      return repository.get<ScheduleItem[]>(`/api/parents/me/schedule`);
+    async getChildSchedule(childId: string): Promise<ScheduleItem[]> {
+      return repository.get<ScheduleItem[]>(`/api/parents/${childId}/schedule`);
     }
   };
 }
