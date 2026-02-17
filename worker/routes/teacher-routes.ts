@@ -5,6 +5,7 @@ import { authenticate, authorize } from '../middleware/auth';
 import type { TeacherDashboardData, Announcement, CreateAnnouncementData, SubmitGradeData, Grade } from "@shared/types";
 
 import { GradeService, CommonDataService, AnnouncementService } from '../domain';
+import { CourseEntity } from '../entities';
 import { withAuth, withUserValidation, withErrorHandler, triggerWebhookSafely } from './route-utils';
 import { validateBody } from '../middleware/validation';
 import { createGradeSchema, createAnnouncementSchema } from '../middleware/schemas';
@@ -28,13 +29,23 @@ export function teacherRoutes(app: Hono<{ Bindings: Env }>) {
     const recentGrades = await GradeService.getCourseGrades(c.env, teacherClasses[0]?.id || '');
     const filteredAnnouncements = await CommonDataService.getRecentAnnouncementsByRole(c.env, 'teacher', 5);
 
+    const courseIds = teacherClasses.map(cls => cls.courseId).filter((id): id is string => id !== undefined);
+    const uniqueCourseIds = Array.from(new Set(courseIds));
+    const courses = await Promise.all(uniqueCourseIds.map(id => new CourseEntity(c.env, id).getState()));
+    const coursesMap = new Map(courses.filter(c => c).map(c => [c!.id, c!]));
+
+    const enrichedGrades = recentGrades.slice(-5).reverse().map(grade => ({
+      ...grade,
+      courseName: coursesMap.get(grade.courseId)?.name || 'Unknown Course'
+    }));
+
     const dashboardData: TeacherDashboardData = {
       teacherId: teacher.id,
       name: teacher.name,
       email: teacher.email,
       totalClasses: teacherClasses.length,
       totalStudents: totalStudents,
-      recentGrades: recentGrades.slice(-5).reverse(),
+      recentGrades: enrichedGrades,
       recentAnnouncements: filteredAnnouncements
     };
 
