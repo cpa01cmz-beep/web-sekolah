@@ -19474,7 +19474,7 @@ All 735 tests passing. Build successful with no errors.
 - No loading indicators for cached data
 - Smoother application feel
 
-**See `CACHING_OPTIMIZATION.md` for detailed performance analysis**
+**See [`./CACHING_OPTIMIZATION.md`](./CACHING_OPTIMIZATION.md) for detailed performance analysis**
 
 ### Asset Optimization (Remaining Pages) - Completed ✅
 
@@ -21679,7 +21679,7 @@ setInterval(async () => {
 7. **Environment Variables** - Added .env.example for secure configuration management
 8. **Documentation** - Created worker/SECURITY_IMPLEMENTATION.md with usage examples
 
-**Details**: See CHANGELOG-security-hardening.md for complete security implementation details.
+**Details**: See [`./archive/CHANGELOG-security-hardening.md`](./archive/CHANGELOG-security-hardening.md) for complete security implementation details.
 
 ## Test Suite Modernization (2026-01-07)
 

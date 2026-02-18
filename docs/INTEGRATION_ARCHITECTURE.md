@@ -770,7 +770,7 @@ Returns current system health:
 
 - [API Blueprint](./blueprint.md) - Complete API specification
 - [Task List](./task.md) - Architectural refactoring tasks
-- [Caching Optimization](./CACHING_OPTIMIZATION.md) - Caching strategies and performance analysis
+- [Caching Optimization](./CACHING_OPTIMIZATION.md) - Caching strategies and performance analysis (moved from root)
 
 ---
 

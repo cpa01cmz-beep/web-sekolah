@@ -70,7 +70,7 @@ As a user, I want the application to load quickly and respond instantly, so that
 - None
 
 **Implementation Notes**
-See `CACHING_OPTIMIZATION.md` for detailed performance analysis
+See [`./CACHING_OPTIMIZATION.md`](./CACHING_OPTIMIZATION.md) for detailed performance analysis
 
 ---
 

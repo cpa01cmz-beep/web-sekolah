@@ -439,7 +439,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - [API Blueprint](./docs/blueprint.md) - Complete API reference with endpoints, error codes, and integration patterns
 - [Architectural Task List](./docs/task.md) - Implementation status and roadmap
 - [User Guides](./wiki/User-Guides.md) - Instructions for students, teachers, parents, and admins
-- [Security Assessment](./SECURITY_ASSESSMENT.md) - Comprehensive security audit results
-- [Caching Optimization](./CACHING_OPTIMIZATION.md) - Performance optimization details
+- [Security Assessment](./docs/SECURITY_ASSESSMENT.md) - Comprehensive security audit results
+- [Caching Optimization](./docs/CACHING_OPTIMIZATION.md) - Performance optimization details
 - [Security Implementation](./worker/SECURITY_IMPLEMENTATION.md) - Security features and best practices
 - [GitHub Wiki](https://github.com/cpa01cmz-beep/web-sekolah/wiki) - Additional documentation and guides
