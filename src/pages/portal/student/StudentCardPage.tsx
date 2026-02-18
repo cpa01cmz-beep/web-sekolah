@@ -9,6 +9,7 @@ import { GraduationCap, QrCode, Printer, AlertTriangle } from 'lucide-react';
 import { SlideUp } from '@/components/animations';
 import { toast } from 'sonner';
 import { THEME_COLORS } from '@/theme/colors';
+import { MESSAGES } from '@/constants/messages';
 
 function CardSkeleton() {
   return (
@@ -32,9 +33,9 @@ export function StudentCardPage() {
   const { data: cardData, isLoading, error } = useStudentCard(user?.id || '');
 
   const handlePrint = () => {
-    toast.info('Opening print dialog...');
+    toast.info(MESSAGES.PRINT.OPENING);
     window.print();
-    toast.success('Print dialog opened. Select "Save as PDF" to save as file.');
+    toast.success(MESSAGES.PRINT.OPENED);
   };
 
   if (!user) return null;

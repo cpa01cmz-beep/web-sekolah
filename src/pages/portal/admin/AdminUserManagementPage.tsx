@@ -16,6 +16,7 @@ import { UserForm } from '@/components/forms/UserForm';
 import { ResponsiveTable } from '@/components/ui/responsive-table';
 import { UserActions } from '@/components/tables/UserActions';
 import { UserRoleBadge } from '@/components/tables/UserRoleBadge';
+import { MESSAGES } from '@/constants/messages';
 
 export function AdminUserManagementPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -23,30 +24,30 @@ export function AdminUserManagementPage() {
   const { data: users, isLoading, error } = useUsers();
   const createUserMutation = useCreateUser({
     onSuccess: () => {
-      toast.success('User created successfully.');
+      toast.success(MESSAGES.USER.CREATED);
       queryClient.invalidateQueries({ queryKey: ['users'] });
       setIsModalOpen(false);
       setEditingUser(null);
     },
-    onError: (err) => toast.error(`Failed to create user: ${err.message}`),
+    onError: (err) => toast.error(MESSAGES.USER.CREATE_FAILED(err.message)),
   });
   const updateUserMutation = useUpdateUser(editingUser?.id || '', {
     onSuccess: () => {
-      toast.success('User updated successfully.');
+      toast.success(MESSAGES.USER.UPDATED);
       queryClient.invalidateQueries({ queryKey: ['users'] });
       setIsModalOpen(false);
       setEditingUser(null);
     },
-    onError: (err) => toast.error(`Failed to update user: ${err.message}`),
+    onError: (err) => toast.error(MESSAGES.USER.UPDATE_FAILED(err.message)),
   });
   const [userIdToDelete, setUserIdToDelete] = useState<string | null>(null);
   const deleteUserMutation = useDeleteUser(userIdToDelete || '', {
     onSuccess: () => {
-      toast.success('User deleted successfully.');
+      toast.success(MESSAGES.USER.DELETED);
       queryClient.setQueryData(['users'], (oldData: SchoolUser[] | undefined) => oldData?.filter(u => u.id !== userIdToDelete) || []);
       setUserIdToDelete(null);
     },
-    onError: (err) => toast.error(`Failed to delete user: ${err.message}`),
+    onError: (err) => toast.error(MESSAGES.USER.DELETE_FAILED(err.message)),
   });
   const handleSaveUser = useCallback((data: { name: string; email: string; role: UserRole }) => {
     const userData = {

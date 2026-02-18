@@ -12,6 +12,7 @@ import { TableSkeleton } from '@/components/ui/loading-skeletons';
 import { GradeForm } from '@/components/forms/GradeForm';
 import { ResponsiveTable } from '@/components/ui/responsive-table';
 import { GradeActions } from '@/components/tables/GradeActions';
+import { MESSAGES } from '@/constants/messages';
 
 interface UpdateGradeData {
   score: number | null;
@@ -34,18 +35,18 @@ export function TeacherGradeManagementPage() {
   const gradeMutation = useMutation<UpdateGradeData, Error, UpdateGradeData>(['grades', editingStudent?.gradeId || ''], {
     method: 'PUT',
     onSuccess: () => {
-      toast.success(`Grade for ${editingStudent?.name} updated successfully.`);
+      toast.success(MESSAGES.GRADE.UPDATED(editingStudent?.name || 'student'));
       queryClient.invalidateQueries({ queryKey: ['classes', selectedClass || '', 'students'] });
       setEditingStudent(null);
     },
     onError: (error) => {
-      toast.error(`Failed to update grade: ${error.message}`);
+      toast.error(MESSAGES.GRADE.UPDATE_FAILED(error.message));
     },
   });
 
   const handleSaveGrade = useCallback((data: UpdateGradeData) => {
     if (!editingStudent || !editingStudent.gradeId) {
-      toast.error("Cannot save changes. No grade record exists for this student yet.");
+      toast.error(MESSAGES.GRADE.NO_RECORD);
       return;
     }
     gradeMutation.mutate(data);

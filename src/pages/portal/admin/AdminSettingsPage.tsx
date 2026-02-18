@@ -9,10 +9,11 @@ import { PageHeader } from '@/components/PageHeader';
 import { SlideUp } from '@/components/animations';
 import { toast } from 'sonner';
 import { THEME_COLORS } from '@/theme/colors';
+import { MESSAGES } from '@/constants/messages';
 export function AdminSettingsPage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    toast.success('Settings saved successfully!');
+    toast.success(MESSAGES.SETTINGS.SAVED);
   };
   return (
     <SlideUp className="space-y-6">

@@ -11,6 +11,7 @@ import { useAuthStore } from '@/lib/authStore';
 import { AnnouncementForm } from '@/components/forms/AnnouncementForm';
 import { initialAnnouncements } from '@/mock-data/announcements';
 import type { Announcement } from '@/mock-data/announcements';
+import { MESSAGES } from '@/constants/messages';
 
 const AnnouncementItem = memo(({ ann, index, total, onDelete }: { ann: Announcement; index: number; total: number; onDelete: (id: string) => void }) => {
   return (
@@ -46,7 +47,7 @@ export function AdminAnnouncementsPage() {
 
   const handlePostAnnouncement = useCallback((data: { title: string; content: string }) => {
     if (!user) {
-      toast.error('You must be logged in to post announcements.');
+      toast.error(MESSAGES.ANNOUNCEMENT.LOGIN_REQUIRED);
       return;
     }
 
@@ -61,12 +62,12 @@ export function AdminAnnouncementsPage() {
     setAnnouncements([newAnnouncement, ...announcements]);
     setIsFormOpen(false);
     setIsPosting(false);
-    toast.success('Announcement posted successfully!');
+    toast.success(MESSAGES.ANNOUNCEMENT.POSTED);
   }, [user, announcements]);
 
   const handleDelete = useCallback((id: string) => {
     setAnnouncements(announcements.filter(ann => ann.id !== id));
-    toast.success('Announcement deleted.');
+    toast.success(MESSAGES.ANNOUNCEMENT.DELETED);
   }, [announcements]);
 
   const handleCloseForm = useCallback(() => {

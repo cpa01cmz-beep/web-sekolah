@@ -9,6 +9,7 @@ import { formatDateLong } from '@/utils/date';
 import { initialAnnouncements } from '@/mock-data/announcements';
 import type { Announcement } from '@/mock-data/announcements';
 import { InlineAnnouncementForm } from '@/components/forms/InlineAnnouncementForm';
+import { MESSAGES } from '@/constants/messages';
 
 const AnnouncementItem = memo(({ ann, isLast }: { ann: Announcement; isLast: boolean }) => (
   <div>
@@ -31,7 +32,7 @@ export function TeacherAnnouncementsPage() {
 
   const handlePostAnnouncement = useCallback((data: { title: string; content: string }) => {
     if (!user) {
-      toast.error('You must be logged in to post announcements.');
+      toast.error(MESSAGES.ANNOUNCEMENT.LOGIN_REQUIRED);
       return;
     }
 
@@ -45,7 +46,7 @@ export function TeacherAnnouncementsPage() {
     };
     setAnnouncements([newAnnouncement, ...announcements]);
     setIsPosting(false);
-    toast.success('Announcement posted successfully!');
+    toast.success(MESSAGES.ANNOUNCEMENT.POSTED);
   }, [user, announcements]);
 
   return (

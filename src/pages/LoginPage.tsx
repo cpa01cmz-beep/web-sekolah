@@ -13,6 +13,7 @@ import { THEME_COLORS } from '@/theme/colors';
 import { RoleButtonGrid } from '@/components/forms/RoleButtonGrid';
 import { validateEmail, validatePassword } from '@/utils/validation';
 import { RetryDelay } from '@/config/time';
+import { MESSAGES } from '@/constants/messages';
 
 export function LoginPage() {
   const navigate = useNavigate();
@@ -34,12 +35,12 @@ export function LoginPage() {
     setIsLoading(role);
     try {
       await login(email, password, role);
-      toast.success(`Logged in as ${role}. Redirecting...`);
+      toast.success(MESSAGES.AUTH.LOGIN_SUCCESS(role));
       setTimeout(() => {
         navigate(`/portal/${role}/dashboard`);
       }, RetryDelay.ONE_SECOND);
     } catch (error) {
-      toast.error('Login failed. Please check your credentials.');
+      toast.error(MESSAGES.AUTH.LOGIN_FAILED);
       logger.error('Login error', error, { email, role });
     } finally {
       setIsLoading(null);
@@ -68,7 +69,7 @@ export function LoginPage() {
               e.preventDefault();
               setShowValidationErrors(true);
               if (!isLoading && email && password) {
-                toast.error('Please select your role to login.');
+                toast.error(MESSAGES.AUTH.ROLE_REQUIRED);
               }
             }}>
             <CardContent className="space-y-6">
