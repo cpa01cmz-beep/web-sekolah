@@ -193,16 +193,11 @@ cspDirectives: `default-src 'self'; script-src 'self' 'nonce-${nonce}'; style-sr
 
 ### Outdated Dependencies
 
-**Status**: 13 packages have newer versions available (no CVEs in current versions)
+**Status**: Dependencies are generally up to date. Minor version updates available (no CVEs).
 
-**Examples**:
-- `@types/node`: 22.19.3 → 25.0.3
-- `react-router-dom`: 6.30.0 → 7.12.0
-- `tailwindcss`: 3.4.19 → 4.1.18
+**Recommendation**: Regular `npm audit` and `npm outdated` checks during maintenance cycles.
 
-**Recommendation**: Update during next maintenance cycle
-
-**Impact**: Low effort (2-3 hours), no known vulnerabilities
+**Impact**: Low effort, no known vulnerabilities
 
 ---
 
