@@ -1,0 +1,225 @@
+# Vercel Deployment Guide
+
+Deploy Akademia Pro frontend to Vercel while using Cloudflare Workers for the backend API.
+
+## Overview
+
+This guide covers deploying the Vite React frontend to Vercel with the backend API running on Cloudflare Workers. This hybrid deployment approach provides:
+
+- **Vercel**: Serves the static frontend with global CDN and optimal performance
+- **Cloudflare Workers**: Handles API requests with Durable Objects for data storage
+
+## Architecture
+
+```
+┌─────────────────┐       ┌──────────────────────┐
+│   Vercel CDN    │       │  Cloudflare Workers  │
+│   (Frontend)    │──────▶│   (Backend API)      │
+│   Static Files  │  API  │   Durable Objects    │
+└─────────────────┘       └──────────────────────┘
+```
+
+## Prerequisites
+
+- Vercel account
+- Cloudflare account with Workers enabled
+- GitHub repository connected to Vercel
+
+## Deployment Steps
+
+### 1. Deploy Backend to Cloudflare Workers
+
+First, deploy the backend API to Cloudflare Workers:
+
+```bash
+npm run deploy:production
+```
+
+Note your Workers URL (e.g., `https://website-sekolah-production.your-account.workers.dev`)
+
+### 2. Configure Vercel Project
+
+1. Import your GitHub repository in Vercel
+2. Configure the following settings:
+
+| Setting | Value |
+|---------|-------|
+| Framework Preset | Vite |
+| Build Command | `npm run build` |
+| Output Directory | `dist` |
+| Install Command | `npm ci` |
+
+### 3. Configure Environment Variables
+
+Add the following environment variables in Vercel:
+
+| Variable | Description | Example |
+|----------|-------------|---------|
+| `VITE_API_URL` | Cloudflare Workers API URL | `https://website-sekolah-production.account.workers.dev` |
+| `VITE_ENVIRONMENT` | Environment name | `production` |
+| `VITE_ALLOWED_ORIGINS` | Allowed CORS origins | `https://your-app.vercel.app` |
+
+### 4. Configure API Rewrites
+
+The `vercel.json` file is pre-configured to proxy API requests:
+
+```json
+{
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "https://website-sekolah-production.:account.workers.dev/api/:path*"
+    }
+  ]
+}
+```
+
+Replace `:account` with your Cloudflare account ID or update the destination URL.
+
+### 5. Deploy to Vercel
+
+Push to the main branch or manually trigger deployment:
+
+```bash
+git push origin main
+```
+
+Or use Vercel CLI:
+
+```bash
+vercel --prod
+```
+
+## Configuration Details
+
+### vercel.json
+
+The `vercel.json` file contains:
+
+- **Build settings**: Framework detection and output directory
+- **Rewrites**: API proxy configuration and SPA routing
+- **Headers**: Security headers and caching policies
+
+### Security Headers
+
+Default security headers configured:
+
+- `X-Content-Type-Options: nosniff`
+- `X-Frame-Options: DENY`
+- `X-XSS-Protection: 1; mode=block`
+- `Referrer-Policy: strict-origin-when-cross-origin`
+- `Permissions-Policy: geolocation=(), microphone=(), camera=()`
+
+### Caching Strategy
+
+| Asset Type | Cache Duration |
+|------------|----------------|
+| JS/CSS bundles | 1 year (immutable) |
+| Static assets | 1 year (immutable) |
+| HTML | No cache |
+
+## Environment-Specific Configuration
+
+### Preview Deployments
+
+Preview deployments (pull requests) automatically use staging API:
+
+```json
+{
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "https://website-sekolah-staging.account.workers.dev/api/:path*"
+    }
+  ]
+}
+```
+
+Configure this in Vercel's preview deployment settings.
+
+### Production Deployments
+
+Production deployments use the production API endpoint.
+
+## Monitoring
+
+### Vercel Analytics
+
+Enable Vercel Analytics in project settings:
+1. Go to Project Settings → Analytics
+2. Enable Web Analytics
+3. View metrics in Vercel dashboard
+
+### Error Tracking
+
+Configure error tracking with:
+- Vercel's built-in error monitoring
+- Third-party services (Sentry, LogRocket)
+
+## Troubleshooting
+
+### API Requests Failing
+
+**Problem**: API requests return 404 or CORS errors
+
+**Solutions**:
+1. Verify `vercel.json` rewrites point to correct Workers URL
+2. Check `ALLOWED_ORIGINS` in Cloudflare Workers includes Vercel domain
+3. Verify Workers deployment is active
+
+### Build Fails
+
+**Problem**: Vercel build fails
+
+**Solutions**:
+1. Check Node.js version (requires v18+)
+2. Verify all dependencies are in `package.json`
+3. Check build logs for specific errors
+
+### SPA Routing Issues
+
+**Problem**: Page refresh shows 404
+
+**Solutions**:
+1. Verify rewrite rule for SPA fallback
+2. Check `vercel.json` rewrites configuration
+3. Ensure `trailingSlash: false` is set
+
+## Best Practices
+
+### Performance
+
+- Enable Vercel's Edge Network
+- Use Image Optimization for images
+- Configure proper cache headers
+
+### Security
+
+- Keep environment variables secure
+- Use HTTPS for all API requests
+- Configure CSP headers if needed
+
+### CI/CD
+
+- Run tests before deployment
+- Use preview deployments for PRs
+- Configure deployment protection
+
+## Cost Optimization
+
+### Vercel Pricing
+
+- Hobby: Free for personal projects
+- Pro: $20/month per member
+- Enterprise: Custom pricing
+
+### Cloudflare Workers
+
+- Free tier: 100,000 requests/day
+- Paid: $5/month for 10 million requests
+
+## Related Documentation
+
+- [Deployment Guide](./DEPLOYMENT.md) - Cloudflare Workers deployment
+- [Security Guide](./SECURITY.md) - Security best practices
+- [Developer Guide](./DEVELOPER_GUIDE.md) - Development workflows
