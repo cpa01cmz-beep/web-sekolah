@@ -11,15 +11,15 @@ export class MockRepository implements IRepository {
     this.mockData[path] = data;
   }
 
-  setMockError(path: string, error: Error) {
+  setMockError(path: string, error: Error): void {
     this.mockErrors[path] = error;
   }
 
-  setDelay(ms: number) {
+  setDelay(ms: number): void {
     this.delay = ms;
   }
 
-  reset() {
+  reset(): void {
     this.mockData = {};
     this.mockErrors = {};
     this.delay = 0;
