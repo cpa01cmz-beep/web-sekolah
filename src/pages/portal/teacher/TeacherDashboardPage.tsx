@@ -15,9 +15,9 @@ import type { TeacherDashboardData } from '@shared/types';
 
 const GradeItem = memo(({ grade }: { grade: TeacherDashboardData['recentGrades'][0] }) => (
   <li className="text-sm">
-    <p className="font-medium">{grade.studentId}</p>
+    <p className="font-medium">{grade.studentName}</p>
     <p className="text-xs text-muted-foreground">
-      Score: {grade.score} - {grade.courseId}
+      {grade.courseName}: Score {grade.score}
     </p>
   </li>
 ));
@@ -40,7 +40,7 @@ export function TeacherDashboardPage() {
   if (error) {
     return (
       <Alert variant="destructive">
-        <AlertTriangle className="h-4 w-4" />
+        <AlertTriangle className="h-4 w-4" aria-hidden="true" />
         <AlertTitle>Error</AlertTitle>
         <AlertDescription>Failed to load dashboard data. Please try again later.</AlertDescription>
       </Alert>
@@ -70,7 +70,7 @@ export function TeacherDashboardPage() {
           <DashboardStatCard
             title="Your Classes"
             value={data.totalClasses.toString()}
-            icon={<BookCopy className="h-4 w-4 text-muted-foreground" />}
+            icon={<BookCopy className="h-4 w-4 text-muted-foreground" aria-hidden="true" />}
             subtitle={`Total students: ${data.totalStudents}`}
             valueSize="3xl"
           />
@@ -79,7 +79,7 @@ export function TeacherDashboardPage() {
           <Card className="h-full hover:shadow-lg transition-shadow duration-200">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Recent Grades</CardTitle>
-              <Megaphone className="h-4 w-4 text-muted-foreground" />
+              <Megaphone className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
             </CardHeader>
             <CardContent>
               <ul className="space-y-2">
@@ -94,7 +94,7 @@ export function TeacherDashboardPage() {
           <Card className="h-full hover:shadow-lg transition-shadow duration-200">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Recent Announcements</CardTitle>
-              <Clock className="h-4 w-4 text-muted-foreground" />
+              <Clock className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
             </CardHeader>
             <CardContent>
               <ul className="space-y-2">

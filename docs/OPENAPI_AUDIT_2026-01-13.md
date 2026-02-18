@@ -52,18 +52,16 @@ The OpenAPI specification (`openapi.yaml`) has a **54% gap** in endpoint documen
 - `AdminDashboardData` - Dashboard metrics (totalUsers, totalStudents, totalTeachers, totalParents, totalClasses, recentAnnouncements, userDistribution)
 - `Settings` - System settings (schoolName, academicYear, semester, allowRegistration, maintenanceMode)
 
-### Teacher Routes (2 Missing)
+### Teacher Routes (1 Missing - Updated 2026-02-18)
 
-| Method | Path | Description |
-|--------|-------|-------------|
-| GET | `/api/teachers/:id/dashboard` | Get teacher dashboard data |
-| GET | `/api/teachers/:id/announcements` | Get teacher announcements |
-| POST | `/api/teachers/grades` | Submit a grade |
-| POST | `/api/teachers/announcements` | Create teacher announcement |
+| Method | Path | Description | Status |
+|--------|-------|-------------|--------|
+| GET | `/api/teachers/:id/dashboard` | Get teacher dashboard data | ✅ Documented |
+| GET | `/api/teachers/:id/announcements` | Get teacher announcements | ✅ Documented |
+| POST | `/api/teachers/grades` | Submit a grade | ✅ Added 2026-02-18 |
+| POST | `/api/teachers/announcements` | Create teacher announcement | ✅ Documented |
 
-**Missing Schemas**:
-- `TeacherDashboardData` - Teacher dashboard (teacherId, name, email, totalClasses, totalStudents, recentGrades, recentAnnouncements)
-- `SubmitGradeData` - Grade submission (studentId, courseId, score, feedback)
+**Note**: The `POST /api/teachers/grades` endpoint was added to openapi.yaml on 2026-02-18 by integration-engineer.
 
 ### Webhook Routes (3 Missing)
 
@@ -89,11 +87,15 @@ The OpenAPI specification (`openapi.yaml`) has a **54% gap** in endpoint documen
 
 ## Path Prefix Inconsistency
 
-### Issue
+### Issue (RESOLVED)
 
-The OpenAPI specification and code implementation use different path prefixes:
+~~The OpenAPI specification and code implementation use different path prefixes~~
 
-**OpenAPI Spec Paths**:
+**Status**: ✅ RESOLVED - The OpenAPI spec now uses `/api/` prefix consistently with the code implementation.
+
+**Original Issue**:
+
+**OpenAPI Spec Paths** (old):
 - `/auth/login`
 - `/auth/verify`
 - `/health`
@@ -222,14 +224,14 @@ The OpenAPI specification and code implementation use different path prefixes:
 
 ## Success Criteria
 
-- [ ] All 19 missing endpoints added to OpenAPI spec
+- [ ] All 19 missing endpoints added to OpenAPI spec (1 added 2026-02-18)
 - [ ] All 9 missing schemas added to OpenAPI spec
-- [ ] /api/ path prefix inconsistency resolved
+- [x] /api/ path prefix inconsistency resolved
 - [ ] Swagger UI functions correctly with updated spec
 - [ ] Code generation tools work with updated spec
-- [ ] All tests passing (no regression)
-- [ ] Linting passed
-- [ ] TypeScript compilation successful
+- [x] All tests passing (no regression)
+- [x] Linting passed
+- [x] TypeScript compilation successful
 
 ---
 
