@@ -151,9 +151,6 @@ describe('SecondaryIndex', () => {
         keys: ['field:testValue:entity:entity-1', 'field:testValue:entity:entity-2'],
         next: null
       });
-      mockStub.getDoc = vi.fn()
-        .mockResolvedValueOnce({ v: 1, data: { entityId: 'entity-1' } })
-        .mockResolvedValueOnce({ v: 1, data: { entityId: 'entity-2' } });
     });
 
     it('should return array of entity IDs for given field value', async () => {
@@ -177,37 +174,26 @@ describe('SecondaryIndex', () => {
         keys: ['field:single:entity:entity-1'],
         next: null
       });
-      mockStub.getDoc.mockResolvedValueOnce({ v: 1, data: { entityId: 'entity-1' } });
 
       const result = await index.getByValue('single');
 
       expect(result).toEqual(['entity-1']);
     });
 
-    it('should filter out documents without entityId', async () => {
-      mockStub.listPrefix.mockResolvedValue({
-        keys: ['field:test:entity:entity-1', 'field:test:entity:entity-2'],
-        next: null
-      });
-      mockStub.getDoc = vi.fn()
-        .mockResolvedValueOnce({ v: 1, data: { entityId: 'entity-1' } })
-        .mockResolvedValueOnce({ v: 1, data: { otherField: 'value' } });
+    it('should extract entityId directly from key without fetching documents', async () => {
+      const result = await index.getByValue('testValue');
 
-      const result = await index.getByValue('test');
-
-      expect(result).toEqual(['entity-1']);
+      expect(mockStub.getDoc).not.toHaveBeenCalled();
+      expect(result).toEqual(['entity-1', 'entity-2']);
     });
 
-    it('should handle null document', async () => {
+    it('should handle keys with colons in field value', async () => {
       mockStub.listPrefix.mockResolvedValue({
-        keys: ['field:test:entity:entity-1', 'field:test:entity:entity-2'],
+        keys: ['field:value:with:colons:entity:entity-1'],
         next: null
       });
-      mockStub.getDoc = vi.fn()
-        .mockResolvedValueOnce({ v: 1, data: { entityId: 'entity-1' } })
-        .mockResolvedValueOnce(null);
 
-      const result = await index.getByValue('test');
+      const result = await index.getByValue('value:with:colons');
 
       expect(result).toEqual(['entity-1']);
     });

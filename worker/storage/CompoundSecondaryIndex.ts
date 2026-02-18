@@ -1,5 +1,13 @@
-import type { Doc, Env } from '../types';
+import type { Env } from '../types';
 import { Entity } from '../entities/Entity';
+
+const ENTITY_KEY_PREFIX = ':entity:';
+
+function extractEntityIdFromKey(key: string): string | null {
+  const idx = key.indexOf(ENTITY_KEY_PREFIX);
+  if (idx === -1) return null;
+  return key.slice(idx + ENTITY_KEY_PREFIX.length);
+}
 
 export class CompoundSecondaryIndex extends Entity<unknown> {
   static readonly entityName = "sys-compound-secondary-index";
@@ -25,14 +33,9 @@ export class CompoundSecondaryIndex extends Entity<unknown> {
     const joinedKey = fieldValues.join(':');
     const prefix = `compound:${joinedKey}:entity:`;
     const { keys } = await this.stub.listPrefix(prefix);
-    const entityIds: string[] = [];
-    for (const key of keys) {
-      const doc = await this.stub.getDoc(key) as Doc<{ entityId: string }> | null;
-      if (doc && doc.data && doc.data.entityId) {
-        entityIds.push(doc.data.entityId);
-      }
-    }
-    return entityIds;
+    return keys
+      .map(key => extractEntityIdFromKey(key))
+      .filter((id): id is string => id !== null);
   }
 
   async countByValues(fieldValues: string[]): Promise<number> {

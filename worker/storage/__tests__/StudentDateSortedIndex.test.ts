@@ -111,10 +111,6 @@ describe('StudentDateSortedIndex', () => {
         `sort:${(Number.MAX_SAFE_INTEGER - tsOldest).toString().padStart(20, '0')}:grade-3`,
       ];
       mockStub.listPrefix.mockResolvedValue({ keys: mockKeys });
-      mockStub.getDoc.mockImplementation((key: string) => {
-        const gradeId = key.split(':')[2];
-        return Promise.resolve({ v: 1, data: { entityId: gradeId } });
-      });
       const index = new StudentDateSortedIndex(mockEnv, 'grade', 'student-123');
 
       const recentIds = await index.getRecent(2);
@@ -135,10 +131,6 @@ describe('StudentDateSortedIndex', () => {
         `sort:${(Number.MAX_SAFE_INTEGER - tsOldest).toString().padStart(20, '0')}:grade-3`,
       ];
       mockStub.listPrefix.mockResolvedValue({ keys: mockKeys });
-      mockStub.getDoc.mockImplementation((key: string) => {
-        const gradeId = key.split(':')[2];
-        return Promise.resolve({ v: 1, data: { entityId: gradeId } });
-      });
       const index = new StudentDateSortedIndex(mockEnv, 'grade', 'student-123');
 
       const recentIds = await index.getRecent(10);
@@ -154,32 +146,34 @@ describe('StudentDateSortedIndex', () => {
       const recentIds = await index.getRecent(5);
 
       expect(recentIds).toEqual([]);
-      expect(mockStub.getDoc).not.toHaveBeenCalled();
     });
 
-    it('should skip invalid documents', async () => {
+    it('should extract entityId directly from key without fetching documents', async () => {
       const tsNewest = new Date('2026-01-08T12:00:00.000Z').getTime();
-      const tsOldest = new Date('2026-01-07T15:00:00.000Z').getTime();
-
       const mockKeys = [
-        `sort:${(Number.MAX_SAFE_INTEGER - tsNewest).toString().padStart(20, '0')}:grade-2`,
-        `sort:${(Number.MAX_SAFE_INTEGER - tsOldest).toString().padStart(20, '0')}:grade-1`,
-        `sort:${(Number.MAX_SAFE_INTEGER - tsOldest).toString().padStart(20, '0')}:grade-3`,
+        `sort:${(Number.MAX_SAFE_INTEGER - tsNewest).toString().padStart(20, '0')}:grade-1`,
       ];
       mockStub.listPrefix.mockResolvedValue({ keys: mockKeys });
-      mockStub.getDoc.mockImplementation((key: string) => {
-        const gradeId = key.split(':')[2];
-        if (gradeId === 'grade-1') {
-          return Promise.resolve({ v: 1, data: null });
-        }
-        return Promise.resolve({ v: 1, data: { entityId: gradeId } });
-      });
       const index = new StudentDateSortedIndex(mockEnv, 'grade', 'student-123');
 
       const recentIds = await index.getRecent(5);
 
-      expect(recentIds).toEqual(['grade-2', 'grade-3']);
-      expect(recentIds).toHaveLength(2);
+      expect(mockStub.getDoc).not.toHaveBeenCalled();
+      expect(recentIds).toEqual(['grade-1']);
+    });
+
+    it('should sort keys lexicographically', async () => {
+      const mockKeys = [
+        'sort:90000000000000000003:grade-3',
+        'sort:90000000000000000001:grade-1',
+        'sort:90000000000000000002:grade-2',
+      ];
+      mockStub.listPrefix.mockResolvedValue({ keys: mockKeys });
+      const index = new StudentDateSortedIndex(mockEnv, 'grade', 'student-123');
+
+      const recentIds = await index.getRecent(3);
+
+      expect(recentIds).toEqual(['grade-1', 'grade-2', 'grade-3']);
     });
   });
 

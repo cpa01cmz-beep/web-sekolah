@@ -1,4 +1,4 @@
-import type { Doc, Env } from '../types';
+import type { Env } from '../types';
 import { Entity } from '../entities/Entity';
 
 function safeTimestamp(date: string): number {
@@ -7,6 +7,12 @@ function safeTimestamp(date: string): number {
     throw new Error(`Invalid date format: ${date}`);
   }
   return timestamp;
+}
+
+function extractEntityIdFromKey(key: string): string | null {
+  const lastColon = key.lastIndexOf(':');
+  if (lastColon === -1) return null;
+  return key.slice(lastColon + 1);
 }
 
 export class StudentDateSortedIndex extends Entity<unknown> {
@@ -37,10 +43,9 @@ export class StudentDateSortedIndex extends Entity<unknown> {
 
     const entityIds: string[] = [];
     for (let i = 0; i < Math.min(limit, sortedKeys.length); i++) {
-      const key = sortedKeys[i];
-      const doc = await this.stub.getDoc(key) as Doc<{ entityId: string }> | null;
-      if (doc && doc.data && doc.data.entityId) {
-        entityIds.push(doc.data.entityId);
+      const entityId = extractEntityIdFromKey(sortedKeys[i]);
+      if (entityId !== null) {
+        entityIds.push(entityId);
       }
     }
     return entityIds;
