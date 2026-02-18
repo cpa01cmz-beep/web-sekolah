@@ -1,6 +1,7 @@
 import { memo, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { useTheme } from '@/hooks/use-theme';
+import { Sun, Moon } from 'lucide-react';
 
 interface ThemeToggleProps {
   className?: string;
@@ -18,10 +19,14 @@ export const ThemeToggle = memo(function ThemeToggle({ className = "absolute top
       onClick={handleClick} 
       variant="ghost"
       size="icon"
-      className={`${className} text-2xl hover:scale-110 hover:rotate-12 transition-all duration-200 active:scale-90 z-50`}
+      className={`${className} hover:scale-110 transition-all duration-200 active:scale-90 z-50`}
       aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
     >
-      <span aria-hidden="true">{isDark ? '☀️' : '🌙'}</span>
+      {isDark ? (
+        <Sun className="h-5 w-5 transition-transform hover:rotate-12" aria-hidden="true" />
+      ) : (
+        <Moon className="h-5 w-5 transition-transform hover:-rotate-12" aria-hidden="true" />
+      )}
     </Button>
   );
 });
