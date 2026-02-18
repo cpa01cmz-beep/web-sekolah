@@ -171,7 +171,7 @@ Same as `createGradeSchema`, all fields optional.
   title: string (5-200 chars),
   content: string (10-5000 chars),
   authorId: string (UUID),
-  targetAudience: 'all' | 'students' | 'teachers' | 'parents' (default: 'all')
+  targetRole: 'all' | 'students' | 'teachers' | 'parents' (default: 'all')
 }
 ```
 
