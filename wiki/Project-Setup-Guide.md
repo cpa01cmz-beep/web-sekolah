@@ -5,7 +5,7 @@ This document outlines the steps to set up the Akademia Pro project based on the
 ## Prerequisites
 
 - Node.js (version 18 or higher)
-- Bun package manager
+- npm package manager
 - Cloudflare account
 - GitHub account
 
@@ -19,7 +19,7 @@ This document outlines the steps to set up the Akademia Pro project based on the
 
 2. Install dependencies:
    ```
-   bun install
+   npm install
    ```
 
 3. Set up environment variables:
