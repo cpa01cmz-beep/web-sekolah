@@ -51,7 +51,7 @@ export function UserForm({ open, onClose, editingUser, onSave, isLoading }: User
     }
   }, [editingUser, onClose, resetValidation]);
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = useCallback((e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!validateAll()) {
       return;
@@ -63,7 +63,7 @@ export function UserForm({ open, onClose, editingUser, onSave, isLoading }: User
       role: userRole,
     };
     onSave(userData);
-  };
+  }, [validateAll, userName, userEmail, userRole, onSave]);
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>

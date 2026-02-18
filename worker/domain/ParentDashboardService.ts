@@ -19,16 +19,7 @@ export class ParentDashboardService {
       throw new Error('Parent has no associated child');
     }
 
-    const child = await this.getChild(env, roleFields.childId);
-    const childSchedule = await this.getChildSchedule(env, roleFields.childId);
-    const childGrades = await CommonDataService.getRecentGradesWithCourseNames(env, roleFields.childId, 10);
-    const announcements = await CommonDataService.getAnnouncementsWithAuthorNames(env, 5);
-
-    return { child, childSchedule, childGrades, announcements };
-  }
-
-  private static async getChild(env: Env, childId: string): Promise<Student & { className: string }> {
-    const childEntity = new UserEntity(env, childId);
+    const childEntity = new UserEntity(env, roleFields.childId);
     const childState = await childEntity.getState();
 
     if (!childState || childState.role !== 'student') {
@@ -36,7 +27,17 @@ export class ParentDashboardService {
     }
 
     const childRoleFields = getRoleSpecificFields(childState);
+    const [child, childSchedule, childGrades, announcements] = await Promise.all([
+      this.buildChildWithClass(env, childState, childRoleFields),
+      childRoleFields.classId ? CommonDataService.getScheduleWithDetails(env, childRoleFields.classId) : Promise.resolve([]),
+      CommonDataService.getRecentGradesWithCourseNames(env, roleFields.childId, 10),
+      CommonDataService.getAnnouncementsWithAuthorNames(env, 5),
+    ]);
 
+    return { child, childSchedule, childGrades, announcements };
+  }
+
+  private static async buildChildWithClass(env: Env, childState: Student, childRoleFields: ReturnType<typeof getRoleSpecificFields>): Promise<Student & { className: string }> {
     let className = 'N/A';
     if (childRoleFields.classId) {
       const classEntity = new ClassEntity(env, childRoleFields.classId);
@@ -49,22 +50,5 @@ export class ParentDashboardService {
       ...childWithoutPassword,
       className
     } as Student & { className: string };
-  }
-
-  private static async getChildSchedule(env: Env, childId: string): Promise<(ScheduleItem & { courseName: string; teacherName: string })[]> {
-    const childEntity = new UserEntity(env, childId);
-    const childState = await childEntity.getState();
-
-    if (!childState || childState.role !== 'student') {
-      return [];
-    }
-
-    const childRoleFields = getRoleSpecificFields(childState);
-
-    if (!childRoleFields.classId) {
-      return [];
-    }
-
-    return CommonDataService.getScheduleWithDetails(env, childRoleFields.classId);
   }
 }

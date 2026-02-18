@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { Button } from '@/components/ui/button';
 import { useTheme } from '@/hooks/use-theme';
 
@@ -5,7 +6,7 @@ interface ThemeToggleProps {
   className?: string;
 }
 
-export function ThemeToggle({ className = "absolute top-4 right-4" }: ThemeToggleProps) {
+export const ThemeToggle = memo(function ThemeToggle({ className = "absolute top-4 right-4" }: ThemeToggleProps) {
   const { isDark, toggleTheme } = useTheme();
 
   return (
@@ -19,4 +20,4 @@ export function ThemeToggle({ className = "absolute top-4 right-4" }: ThemeToggl
       <span aria-hidden="true">{isDark ? '☀️' : '🌙'}</span>
     </Button>
   );
-}
+});
