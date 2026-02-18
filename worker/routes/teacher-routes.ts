@@ -2,7 +2,7 @@ import { Hono } from "hono";
 import type { Env } from '../core-utils';
 import { ok, bad, notFound } from '../core-utils';
 import { authenticate, authorize } from '../middleware/auth';
-import type { TeacherDashboardData, Announcement, CreateAnnouncementData, SubmitGradeData, Grade } from "@shared/types";
+import type { TeacherDashboardData, Announcement, CreateAnnouncementData, SubmitGradeData } from "@shared/types";
 
 import { GradeService, CommonDataService, AnnouncementService, TeacherService } from '../domain';
 import { withAuth, withUserValidation, withErrorHandler, triggerWebhookSafely } from './route-utils';
@@ -31,7 +31,7 @@ export function teacherRoutes(app: Hono<{ Bindings: Env }>) {
       })
     ).then(counts => counts.reduce((sum, count) => sum + count, 0));
 
-    const recentGrades = await GradeService.getCourseGrades(c.env, teacherClasses[0]?.id || '');
+    const recentGrades = await CommonDataService.getTeacherRecentGradesWithDetails(c.env, requestedTeacherId, 5);
     const filteredAnnouncements = await CommonDataService.getRecentAnnouncementsByRole(c.env, 'teacher', 5);
 
     const dashboardData: TeacherDashboardData = {
@@ -40,7 +40,7 @@ export function teacherRoutes(app: Hono<{ Bindings: Env }>) {
       email: teacher.email,
       totalClasses: teacherClasses.length,
       totalStudents: totalStudents,
-      recentGrades: recentGrades.slice(-5).reverse(),
+      recentGrades: recentGrades,
       recentAnnouncements: filteredAnnouncements
     };
 
