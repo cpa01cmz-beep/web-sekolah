@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { THEME_COLORS } from '@/theme/colors';
+import { logger } from '@/lib/logger';
 
 interface ChartComponents {
   BarChart: React.ComponentType<any>;
@@ -42,7 +43,7 @@ export function EnrollmentChart({ data }: EnrollmentChartProps) {
         ResponsiveContainer: ResponsiveContainer.ResponsiveContainer,
       });
     }).catch((error) => {
-      console.error('Failed to load chart components:', error);
+      logger.error('Failed to load chart components', error);
     }).finally(() => {
       setIsLoading(false);
     });

@@ -55,7 +55,7 @@ export function ParentDashboardPage() {
   if (error) {
     return (
       <Alert variant="destructive">
-        <AlertTriangle className="h-4 w-4" />
+        <AlertTriangle className="h-4 w-4" aria-hidden="true" />
         <AlertTitle>Error</AlertTitle>
         <AlertDescription>Failed to load dashboard data. Please try again later.</AlertDescription>
       </Alert>
@@ -87,7 +87,7 @@ export function ParentDashboardPage() {
           <Card className="h-full hover:shadow-lg transition-shadow duration-200">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Recent Grades</CardTitle>
-              <Award className="h-4 w-4 text-muted-foreground" />
+              <Award className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
             </CardHeader>
               <CardContent>
                 <ul className="space-y-3">
@@ -102,7 +102,7 @@ export function ParentDashboardPage() {
           <Card className="h-full hover:shadow-lg transition-shadow duration-200">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Child's Schedule</CardTitle>
-              <CalendarCheck className="h-4 w-4 text-muted-foreground" />
+              <CalendarCheck className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
             </CardHeader>
               <CardContent>
                 <ul className="space-y-2">
@@ -117,7 +117,7 @@ export function ParentDashboardPage() {
           <Card className="h-full hover:shadow-lg transition-shadow duration-200">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">School Announcements</CardTitle>
-              <Megaphone className="h-4 w-4 text-muted-foreground" />
+              <Megaphone className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
             </CardHeader>
               <CardContent>
                 <ul className="space-y-3">

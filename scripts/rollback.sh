@@ -59,9 +59,9 @@ if [ -n "${CLOUDFLARE_ACCOUNT_ID}" ]; then
 else
   echo "⚠️  CLOUDFLARE_ACCOUNT_ID not set, using worker names only"
   if [ "${ENVIRONMENT}" == "production" ]; then
-    BASE_URL="https://${WORKER_NAME_PRODUCTION}.workers.dev"
+    BASE_URL="${PRODUCTION_URL:-https://${WORKER_NAME_PRODUCTION}.workers.dev}"
   else
-    BASE_URL="https://${WORKER_NAME_STAGING}.workers.dev"
+    BASE_URL="${STAGING_URL:-https://${WORKER_NAME_STAGING}.workers.dev}"
   fi
 fi
 
