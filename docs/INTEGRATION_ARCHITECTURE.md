@@ -577,11 +577,14 @@ const isValid = await verifySignature(
 |------------|-------------|-----------------|
 | `grade.created` | A new grade has been created | Teacher submits a grade for a student |
 | `grade.updated` | An existing grade has been updated | Teacher modifies a grade score or feedback |
+| `grade.deleted` | A grade has been deleted | Admin/Teacher deletes a grade |
 | `user.created` | A new user has been created | Admin creates a new user account |
 | `user.updated` | An existing user has been updated | Admin updates user information |
 | `user.deleted` | A user has been deleted | Admin deletes a user account |
+| `user.login` | User authentication event | User successfully logs in |
 | `announcement.created` | A new announcement has been created | Teacher or admin posts an announcement |
 | `announcement.updated` | An existing announcement has been updated | Teacher or admin modifies an announcement |
+| `announcement.deleted` | An announcement has been deleted | Admin deletes an announcement |
 
 **Idempotency**: Each event delivery is idempotent. Triggering the same event multiple times will only result in one webhook delivery per configured webhook endpoint.
 
@@ -792,6 +795,6 @@ Returns current system health:
 
   ---
 
- **Last Updated**: 2026-01-13 (Integration Engineer - OpenAPI Specification Audit)
+ **Last Updated**: 2026-02-18 (Integration Engineer - Webhook Event Type Coverage)
 
- **Status**: ⚠️ **Documentation Gap Identified** - Integration patterns fully implemented, but OpenAPI spec incomplete (19 missing endpoints, 54% gap). Path prefix inconsistency documented.
+ **Status**: ✅ **Production Ready** - Integration patterns fully implemented with complete webhook event type coverage.

@@ -43,8 +43,11 @@ export interface DeadLetterQueueWebhook extends TimestampedEntity {
 export type WebhookEventType =
   | 'grade.created'
   | 'grade.updated'
+  | 'grade.deleted'
   | 'user.created'
   | 'user.updated'
   | 'user.deleted'
+  | 'user.login'
   | 'announcement.created'
-  | 'announcement.updated';
+  | 'announcement.updated'
+  | 'announcement.deleted';
