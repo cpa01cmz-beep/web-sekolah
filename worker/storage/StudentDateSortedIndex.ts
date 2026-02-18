@@ -1,6 +1,14 @@
 import type { Doc, Env } from '../types';
 import { Entity } from '../entities/Entity';
 
+function safeTimestamp(date: string): number {
+  const timestamp = new Date(date).getTime();
+  if (isNaN(timestamp)) {
+    throw new Error(`Invalid date format: ${date}`);
+  }
+  return timestamp;
+}
+
 export class StudentDateSortedIndex extends Entity<unknown> {
   static readonly entityName = "sys-student-date-sorted-index";
 
@@ -9,14 +17,14 @@ export class StudentDateSortedIndex extends Entity<unknown> {
   }
 
   async add(date: string, entityId: string): Promise<void> {
-    const timestamp = new Date(date).getTime();
+    const timestamp = safeTimestamp(date);
     const reversedTimestamp = Number.MAX_SAFE_INTEGER - timestamp;
     const key = `sort:${reversedTimestamp.toString().padStart(20, '0')}:${entityId}`;
     await this.stub.casPut(key, 0, { entityId });
   }
 
   async remove(date: string, entityId: string): Promise<boolean> {
-    const timestamp = new Date(date).getTime();
+    const timestamp = safeTimestamp(date);
     const reversedTimestamp = Number.MAX_SAFE_INTEGER - timestamp;
     const key = `sort:${reversedTimestamp.toString().padStart(20, '0')}:${entityId}`;
     return await this.stub.del(key);

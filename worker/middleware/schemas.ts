@@ -47,7 +47,7 @@ export const createAnnouncementSchema = z.object({
   title: z.string().min(ValidationLimits.ANNOUNCEMENT_TITLE_MIN_LENGTH).max(ValidationLimits.ANNOUNCEMENT_TITLE_MAX_LENGTH),
   content: z.string().min(ValidationLimits.ANNOUNCEMENT_CONTENT_MIN_LENGTH).max(ValidationLimits.ANNOUNCEMENT_CONTENT_MAX_LENGTH),
   authorId: z.string().uuid('Invalid author ID'),
-  targetAudience: z.enum(['all', 'students', 'teachers', 'parents']).default('all'),
+  targetRole: z.enum(['all', 'students', 'teachers', 'parents']).default('all'),
 });
 
 export const loginSchema = z.object({

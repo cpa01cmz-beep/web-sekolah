@@ -37,6 +37,12 @@ export class SecondaryIndex<T extends string> extends Entity<unknown> {
     return keys.length;
   }
 
+  async existsByValue(fieldValue: string): Promise<boolean> {
+    const prefix = `field:${fieldValue}:entity:`;
+    const { keys } = await this.stub.listPrefix(prefix);
+    return keys.length > 0;
+  }
+
   async clearValue(fieldValue: string): Promise<void> {
     const prefix = `field:${fieldValue}:entity:`;
     const { keys } = await this.stub.listPrefix(prefix);
