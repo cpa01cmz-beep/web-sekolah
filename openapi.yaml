@@ -67,6 +67,8 @@ tags:
     description: Webhook configuration and management
   - name: Monitoring
     description: System monitoring and metrics
+  - name: Public
+    description: Public website content endpoints (no authentication required)
 
 paths:
   /api/health:
@@ -1743,6 +1745,314 @@ paths:
                       data:
                         $ref: '#/components/schemas/RateLimitStats'
 
+  /api/public/profile:
+    get:
+      tags:
+        - Public
+      summary: Get school profile
+      description: Retrieves the school profile information for the public website
+      operationId: getSchoolProfile
+      responses:
+        '200':
+          description: School profile retrieved successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/SchoolProfile'
+        '404':
+          description: School profile not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/public/services:
+    get:
+      tags:
+        - Public
+      summary: Get school services
+      description: Retrieves list of school services offered
+      operationId: getSchoolServices
+      responses:
+        '200':
+          description: Services retrieved successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Service'
+
+  /api/public/achievements:
+    get:
+      tags:
+        - Public
+      summary: Get school achievements
+      description: Retrieves list of school achievements
+      operationId: getSchoolAchievements
+      responses:
+        '200':
+          description: Achievements retrieved successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Achievement'
+
+  /api/public/facilities:
+    get:
+      tags:
+        - Public
+      summary: Get school facilities
+      description: Retrieves list of school facilities
+      operationId: getSchoolFacilities
+      responses:
+        '200':
+          description: Facilities retrieved successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Facility'
+
+  /api/public/news:
+    get:
+      tags:
+        - Public
+      summary: Get school news
+      description: Retrieves list of school news articles
+      operationId: getSchoolNews
+      parameters:
+        - name: limit
+          in: query
+          description: Maximum number of news items to return
+          schema:
+            type: integer
+            default: 10
+      responses:
+        '200':
+          description: News retrieved successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/News'
+
+  /api/public/news/{id}:
+    get:
+      tags:
+        - Public
+      summary: Get news article by ID
+      description: Retrieves a specific news article by ID
+      operationId: getNewsById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: News article ID
+          schema:
+            type: string
+      responses:
+        '200':
+          description: News article retrieved successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/News'
+        '404':
+          description: News article not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/public/gallery:
+    get:
+      tags:
+        - Public
+      summary: Get gallery images
+      description: Retrieves list of gallery images
+      operationId: getGallery
+      responses:
+        '200':
+          description: Gallery retrieved successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/GalleryImage'
+
+  /api/public/work:
+    get:
+      tags:
+        - Public
+      summary: Get student works
+      description: Retrieves list of student works/projects
+      operationId: getStudentWorks
+      responses:
+        '200':
+          description: Works retrieved successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/StudentWork'
+
+  /api/public/links:
+    get:
+      tags:
+        - Public
+      summary: Get useful links
+      description: Retrieves list of useful external links
+      operationId: getUsefulLinks
+      responses:
+        '200':
+          description: Links retrieved successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Link'
+
+  /api/public/downloads:
+    get:
+      tags:
+        - Public
+      summary: Get downloadable files
+      description: Retrieves list of downloadable files
+      operationId: getDownloads
+      responses:
+        '200':
+          description: Downloads retrieved successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Download'
+
+  /api/parents/{id}/schedule:
+    get:
+      tags:
+        - Parents
+      summary: Get parent's child schedule
+      description: Retrieves the schedule of the parent's associated child
+      operationId: getParentChildSchedule
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Parent ID
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Schedule retrieved successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/ScheduleItem'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Parent or child not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/public/seed:
+    post:
+      tags:
+        - Public
+      summary: Seed public content
+      description: Seeds the database with sample public content for development/testing
+      operationId: seedPublicContent
+      responses:
+        '200':
+          description: Public content seeded successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          message:
+                            type: string
+
 components:
   securitySchemes:
     BearerAuth:
@@ -1885,56 +2195,62 @@ components:
         updatedAt:
           type: string
           format: date-time
+          description: Last update timestamp
 
-    StudentDashboard:
+    ScheduleItem:
       type: object
       properties:
-        schedule:
-          type: array
-          items:
-            type: object
-            properties:
-              day:
-                type: string
-                enum: [Senin, Selasa, Rabu, Kamis, Jumat]
-              time:
-                type: string
-                example: "08:00 - 09:30"
-              courseId:
-                type: string
-              courseName:
-                type: string
-              teacherName:
-                type: string
-        recentGrades:
-          type: array
-          items:
-            allOf:
-              - $ref: '#/components/schemas/Grade'
-              - type: object
-                properties:
-                  courseName:
-                    type: string
-        announcements:
-          type: array
-          items:
-            allOf:
-              - $ref: '#/components/schemas/Announcement'
-              - type: object
-                properties:
-                  authorName:
-                    type: string
-
-    Class:
-      type: object
-      properties:
-        id:
+        day:
           type: string
+          enum: [Senin, Selasa, Rabu, Kamis, Jumat]
+          description: Day of the week
+        time:
+          type: string
+          description: Time slot
+          example: "08:00 - 09:30"
+        courseId:
+          type: string
+          description: Course ID
+        courseName:
+          type: string
+          description: Course name
+        teacherName:
+          type: string
+          description: Teacher name
+
+    SchoolProfile:
+      type: object
+      properties:
         name:
           type: string
-          example: "11-A"
-        teacherId:
+          description: School name
+        address:
           type: string
+          description: School address
+        phone:
+          type: string
+          description: School phone number
+        email:
+          type: string
+          format: email
+          description: School email
+        website:
+          type: string
+          format: uri
+          description: School website URL
+        description:
+          type: string
+          description: School description
+        logoUrl:
+          type: string
+          format: uri
+          description: School logo URL
+        vision:
+          type: string
+          description: School vision statement
+        mission:
+          type: string
+          description: School mission statement
         createdAt:
           type: string
           format: date-time
@@ -1942,220 +2258,55 @@ components:
           type: string
           format: date-time
 
-    StudentWithGrade:
-      type: object
-      properties:
-        id:
-          type: string
-        name:
-          type: string
-        score:
-          type: number
-        feedback:
-          type: string
-        gradeId:
-          type: string
-
-    Grade:
-      type: object
-      properties:
-        id:
-          type: string
-        studentId:
-          type: string
-        courseId:
-          type: string
-        score:
-          type: number
-          minimum: 0
-          maximum: 100
-        feedback:
-          type: string
-        createdAt:
-          type: string
-          format: date-time
-        updatedAt:
-          type: string
-          format: date-time
-
-    CreateGradeRequest:
-      type: object
-      required:
-        - studentId
-        - courseId
-        - score
-        - feedback
-      properties:
-        studentId:
-          type: string
-        courseId:
-          type: string
-        score:
-          type: number
-          minimum: 0
-          maximum: 100
-        feedback:
-          type: string
-
-    UpdateGradeRequest:
-      type: object
-      required:
-        - score
-        - feedback
-      properties:
-        score:
-          type: number
-          minimum: 0
-          maximum: 100
-        feedback:
-          type: string
-
-    CreateStudentRequest:
-      type: object
-      required:
-        - name
-        - email
-        - role
-        - classId
-        - studentIdNumber
-      properties:
-        name:
-          type: string
-        email:
-          type: string
-          format: email
-        role:
-          type: string
-          enum: [student]
-        classId:
-          type: string
-        studentIdNumber:
-          type: string
-        password:
-          type: string
-          format: password
-          description: Optional password (if not provided, will be generated)
-
-    CreateTeacherRequest:
-      type: object
-      required:
-        - name
-        - email
-        - role
-        - classIds
-      properties:
-        name:
-          type: string
-        email:
-          type: string
-          format: email
-        role:
-          type: string
-          enum: [teacher]
-        classIds:
-          type: array
-          items:
-            type: string
-        password:
-          type: string
-          format: password
-          description: Optional password (if not provided, will be generated)
-
-    CreateParentRequest:
-      type: object
-      required:
-        - name
-        - email
-        - role
-        - childId
-      properties:
-        name:
-          type: string
-        email:
-          type: string
-          format: email
-        role:
-          type: string
-          enum: [parent]
-        childId:
-          type: string
-        password:
-          type: string
-          format: password
-          description: Optional password (if not provided, will be generated)
-
-    CreateAdminRequest:
-      type: object
-      required:
-        - name
-        - email
-        - role
-      properties:
-        name:
-          type: string
-        email:
-          type: string
-          format: email
-        role:
-          type: string
-          enum: [admin]
-        password:
-          type: string
-          format: password
-          description: Optional password (if not provided, will be generated)
-
-    UpdateUserRequest:
-      type: object
-      properties:
-        name:
-          type: string
-        email:
-          type: string
-          format: email
-        password:
-          type: string
-          format: password
-        classId:
-          type: string
-        studentIdNumber:
-          type: string
-        classIds:
-          type: array
-          items:
-            type: string
-        childId:
-          type: string
-
-    DeleteUserResponse:
-      type: object
-      properties:
-        id:
-          type: string
-        deleted:
-          type: boolean
-        warnings:
-          type: array
-          items:
-            type: string
-          description: Warnings if deletion was not complete
-
-    Announcement:
+    Service:
       type: object
       properties:
         id:
           type: string
         title:
           type: string
-        content:
+          description: Service title
+        description:
           type: string
+          description: Service description
+        icon:
+          type: string
+          description: Icon identifier
+        order:
+          type: integer
+          description: Display order
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    Achievement:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+          description: Achievement title
+        description:
+          type: string
+          description: Achievement description
         date:
           type: string
-          format: date-time
-        authorId:
+          format: date
+          description: Date of achievement
+        category:
           type: string
-        targetRole:
+          description: Achievement category
+        imageUrl:
           type: string
-          enum: [student, teacher, parent, admin, all]
+          format: uri
+          description: Achievement image URL
+        order:
+          type: integer
+          description: Display order
         createdAt:
           type: string
           format: date-time
@@ -2163,318 +2314,192 @@ components:
           type: string
           format: date-time
 
-    WebhookConfig:
+    Facility:
       type: object
       properties:
         id:
           type: string
-        url:
-          type: string
-          format: uri
-        events:
-          type: array
-          items:
-            type: string
-            enum:
-              - grade.created
-              - grade.updated
-              - user.created
-              - user.updated
-              - user.deleted
-              - announcement.created
-              - announcement.updated
-        secret:
-          type: string
-        active:
-          type: boolean
-        createdAt:
-          type: string
-          format: date-time
-        updatedAt:
-          type: string
-          format: date-time
-
-    CreateWebhookRequest:
-      type: object
-      required:
-        - url
-        - events
-        - secret
-      properties:
-        url:
-          type: string
-          format: uri
-        events:
-          type: array
-          items:
-            type: string
-        secret:
-          type: string
-        active:
-          type: boolean
-          default: true
-
-    UpdateWebhookRequest:
-      type: object
-      properties:
-        url:
-          type: string
-          format: uri
-        events:
-          type: array
-          items:
-            type: string
-        secret:
-          type: string
-        active:
-          type: boolean
-
-    TestWebhookRequest:
-      type: object
-      required:
-        - url
-        - secret
-      properties:
-        url:
-          type: string
-          format: uri
-        secret:
-          type: string
-
-    DeadLetterWebhook:
-      type: object
-      properties:
-        id:
-          type: string
-        eventId:
-          type: string
-        webhookConfigId:
-          type: string
-        eventType:
-          type: string
-        url:
-          type: string
-          format: uri
-        payload:
-          type: object
-        status:
-          type: integer
-        attempts:
-          type: integer
-        errorMessage:
-          type: string
-        failedAt:
-          type: string
-          format: date-time
-
-    Metrics:
-      type: object
-      properties:
-        requests:
-          type: object
-          properties:
-            total:
-              type: integer
-            errors:
-              type: integer
-            errorRate:
-              type: number
-            avgResponseTime:
-              type: number
-        circuitBreakers:
-          type: object
-          properties:
-            open:
-              type: integer
-            closed:
-              type: integer
-            halfOpen:
-              type: integer
-        webhooks:
-          type: object
-          properties:
-            total:
-              type: integer
-            successful:
-              type: integer
-            failed:
-              type: integer
-            pending:
-              type: integer
-
-    RateLimitStats:
-      type: object
-      properties:
-        totalRequests:
-          type: integer
-        blockedRequests:
-          type: integer
-        blockRate:
-          type: number
-        activeEntries:
-          type: integer
-
-    TeacherDashboardData:
-      type: object
-      properties:
-        teacherId:
-          type: string
-          description: Teacher ID
         name:
           type: string
-          description: Teacher name
-        email:
+          description: Facility name
+        description:
           type: string
-          format: email
-          description: Teacher email
-        totalClasses:
+          description: Facility description
+        imageUrl:
+          type: string
+          format: uri
+          description: Facility image URL
+        order:
           type: integer
-          description: Total number of classes taught
-        totalStudents:
-          type: integer
-          description: Total number of students across all classes
-        recentGrades:
-          type: array
-          items:
-            $ref: '#/components/schemas/Grade'
-          description: Recent grades submitted
-        recentAnnouncements:
-          type: array
-          items:
-            $ref: '#/components/schemas/Announcement'
-          description: Recent announcements
+          description: Display order
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
 
-    SubmitGradeData:
-      type: object
-      required:
-        - studentId
-        - courseId
-        - score
-        - feedback
-      properties:
-        studentId:
-          type: string
-          description: Student ID
-        courseId:
-          type: string
-          description: Course ID
-        score:
-          type: number
-          minimum: 0
-          maximum: 100
-          description: Grade score (0-100)
-        feedback:
-          type: string
-          description: Grade feedback or comments
-
-    AdminDashboardData:
-      type: object
-      properties:
-        totalUsers:
-          type: integer
-          description: Total number of users
-        totalStudents:
-          type: integer
-          description: Total number of students
-        totalTeachers:
-          type: integer
-          description: Total number of teachers
-        totalParents:
-          type: integer
-          description: Total number of parents
-        totalClasses:
-          type: integer
-          description: Total number of classes
-        recentAnnouncements:
-          type: array
-          items:
-            $ref: '#/components/schemas/Announcement'
-          description: Recent announcements
-        userDistribution:
-          type: object
-          properties:
-            students:
-              type: integer
-              description: Number of students
-            teachers:
-              type: integer
-              description: Number of teachers
-            parents:
-              type: integer
-              description: Number of parents
-            admins:
-              type: integer
-              description: Number of admins
-
-    Settings:
-      type: object
-      properties:
-        allowPublicRegistration:
-          type: boolean
-          description: Whether public user registration is allowed
-        maintenanceMode:
-          type: boolean
-          description: Whether the system is in maintenance mode
-        schoolName:
-          type: string
-          description: School name
-        academicYear:
-          type: string
-          description: Current academic year
-        semester:
-          type: integer
-          description: Current semester (1 or 2)
-
-    SeedResponse:
-      type: object
-      properties:
-        message:
-          type: string
-          description: Success message
-        recordsCreated:
-          type: integer
-          description: Total number of records created during seeding
-
-    WebhookDelivery:
+    News:
       type: object
       properties:
         id:
           type: string
-          description: Delivery ID
-        eventId:
+        title:
           type: string
-          description: Associated event ID
-        webhookConfigId:
+          description: News title
+        content:
           type: string
-          description: Webhook configuration ID
-        status:
+          description: News content
+        excerpt:
           type: string
-          enum: [pending, delivered, failed]
-          description: Delivery status
-        attempts:
-          type: integer
-          description: Number of delivery attempts
-        statusCode:
-          type: integer
-          description: HTTP status code from webhook endpoint (if delivered)
-        errorMessage:
+          description: Short excerpt
+        author:
           type: string
-          description: Error message if delivery failed
-        nextAttemptAt:
+          description: Author name
+        imageUrl:
+          type: string
+          format: uri
+          description: News image URL
+        category:
+          type: string
+          description: News category
+        publishedAt:
           type: string
           format: date-time
-          description: Timestamp for next retry attempt
-        idempotencyKey:
-          type: string
-          description: Unique key to prevent duplicate deliveries
+          description: Publication date
+        isPublished:
+          type: boolean
+          description: Whether the news is published
         createdAt:
           type: string
           format: date-time
-          description: Creation timestamp
         updatedAt:
           type: string
           format: date-time
-          description: Last update timestamp
+
+    GalleryImage:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+          description: Image title
+        description:
+          type: string
+          description: Image description
+        imageUrl:
+          type: string
+          format: uri
+          description: Image URL
+        category:
+          type: string
+          description: Gallery category
+        order:
+          type: integer
+          description: Display order
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    StudentWork:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+          description: Work title
+        description:
+          type: string
+          description: Work description
+        studentName:
+          type: string
+          description: Student name
+        class:
+          type: string
+          description: Student class
+        imageUrl:
+          type: string
+          format: uri
+          description: Work image URL
+        category:
+          type: string
+          description: Work category
+        order:
+          type: integer
+          description: Display order
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    Link:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+          description: Link title
+        url:
+          type: string
+          format: uri
+          description: Link URL
+        description:
+          type: string
+          description: Link description
+        category:
+          type: string
+          description: Link category
+        order:
+          type: integer
+          description: Display order
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    Download:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+          description: Download title
+        description:
+          type: string
+          description: Download description
+        fileUrl:
+          type: string
+          format: uri
+          description: File URL
+        fileType:
+          type: string
+          description: File type (e.g., PDF, DOC)
+        fileSize:
+          type: integer
+          description: File size in bytes
+        category:
+          type: string
+          description: Download category
+        order:
+          type: integer
+          description: Display order
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
 
     WebhookEvent:
       type: object
