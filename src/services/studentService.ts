@@ -7,23 +7,24 @@ import type {
 } from '@shared/types';
 import type { IRepository } from '@/repositories/IRepository';
 import { apiRepository } from '@/repositories/ApiRepository';
+import { API_ENDPOINTS } from '@/config/api-endpoints';
 
 export function createStudentService(repository: IRepository = apiRepository): StudentService {
   return {
     async getDashboard(studentId: string): Promise<StudentDashboardData> {
-      return repository.get<StudentDashboardData>(`/api/students/${studentId}/dashboard`);
+      return repository.get<StudentDashboardData>(API_ENDPOINTS.STUDENTS.DASHBOARD(studentId));
     },
 
     async getGrades(studentId: string): Promise<Grade[]> {
-      return repository.get<Grade[]>(`/api/students/${studentId}/grades`);
+      return repository.get<Grade[]>(API_ENDPOINTS.STUDENTS.GRADES(studentId));
     },
 
     async getSchedule(studentId: string): Promise<ScheduleItem[]> {
-      return repository.get<ScheduleItem[]>(`/api/students/${studentId}/schedule`);
+      return repository.get<ScheduleItem[]>(API_ENDPOINTS.STUDENTS.SCHEDULE(studentId));
     },
 
     async getCard(studentId: string): Promise<StudentCardData> {
-      return repository.get<StudentCardData>(`/api/students/${studentId}/card`);
+      return repository.get<StudentCardData>(API_ENDPOINTS.STUDENTS.CARD(studentId));
     }
   };
 }

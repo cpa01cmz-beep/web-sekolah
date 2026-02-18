@@ -11,11 +11,12 @@ import type {
 } from '@shared/types';
 import type { IRepository } from '@/repositories/IRepository';
 import { apiRepository } from '@/repositories/ApiRepository';
+import { API_ENDPOINTS } from '@/config/api-endpoints';
 
 export function createAdminService(repository: IRepository = apiRepository): AdminService {
   return {
     async getDashboard(): Promise<AdminDashboardData> {
-      return repository.get<AdminDashboardData>(`/api/admin/dashboard`);
+      return repository.get<AdminDashboardData>(API_ENDPOINTS.ADMIN.DASHBOARD);
     },
 
     async getUsers(filters?: UserFilters): Promise<SchoolUser[]> {
@@ -25,36 +26,36 @@ export function createAdminService(repository: IRepository = apiRepository): Adm
       if (filters?.search) queryParams.append('search', filters.search);
 
       const queryString = queryParams.toString();
-      const endpoint = queryString ? `/api/admin/users?${queryString}` : '/api/admin/users';
+      const endpoint = queryString ? `${API_ENDPOINTS.ADMIN.USERS}?${queryString}` : API_ENDPOINTS.ADMIN.USERS;
       return repository.get<SchoolUser[]>(endpoint);
     },
 
     async createUser(userData: CreateUserData): Promise<SchoolUser> {
-      return repository.post<SchoolUser>(`/api/admin/users`, userData);
+      return repository.post<SchoolUser>(API_ENDPOINTS.ADMIN.USERS, userData);
     },
 
     async updateUser(userId: string, userData: UpdateUserData): Promise<SchoolUser> {
-      return repository.put<SchoolUser>(`/api/admin/users/${userId}`, userData);
+      return repository.put<SchoolUser>(API_ENDPOINTS.ADMIN.USER(userId), userData);
     },
 
     async deleteUser(userId: string): Promise<void> {
-      return repository.delete<void>(`/api/admin/users/${userId}`);
+      return repository.delete<void>(API_ENDPOINTS.ADMIN.USER(userId));
     },
 
     async getAnnouncements(): Promise<Announcement[]> {
-      return repository.get<Announcement[]>(`/api/admin/announcements`);
+      return repository.get<Announcement[]>(API_ENDPOINTS.ADMIN.ANNOUNCEMENTS);
     },
 
     async createAnnouncement(announcement: CreateAnnouncementData): Promise<Announcement> {
-      return repository.post<Announcement>(`/api/admin/announcements`, announcement);
+      return repository.post<Announcement>(API_ENDPOINTS.ADMIN.ANNOUNCEMENTS, announcement);
     },
 
     async getSettings(): Promise<Settings> {
-      return repository.get<Settings>(`/api/admin/settings`);
+      return repository.get<Settings>(API_ENDPOINTS.ADMIN.SETTINGS);
     },
 
     async updateSettings(settings: Partial<Settings>): Promise<Settings> {
-      return repository.put<Settings>(`/api/admin/settings`, settings);
+      return repository.put<Settings>(API_ENDPOINTS.ADMIN.SETTINGS, settings);
     }
   };
 }

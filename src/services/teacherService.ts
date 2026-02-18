@@ -10,31 +10,32 @@ import type {
 } from '@shared/types';
 import type { IRepository } from '@/repositories/IRepository';
 import { apiRepository } from '@/repositories/ApiRepository';
+import { API_ENDPOINTS } from '@/config/api-endpoints';
 
 export function createTeacherService(repository: IRepository = apiRepository): TeacherService {
   return {
     async getDashboard(teacherId: string): Promise<TeacherDashboardData> {
-      return repository.get<TeacherDashboardData>(`/api/teachers/${teacherId}/dashboard`);
+      return repository.get<TeacherDashboardData>(API_ENDPOINTS.TEACHERS.DASHBOARD(teacherId));
     },
 
     async getClasses(teacherId: string): Promise<SchoolClass[]> {
-      return repository.get<SchoolClass[]>(`/api/teachers/${teacherId}/classes`);
+      return repository.get<SchoolClass[]>(API_ENDPOINTS.TEACHERS.CLASSES(teacherId));
     },
 
     async submitGrade(gradeData: SubmitGradeData): Promise<Grade> {
-      return repository.post<Grade>(`/api/teachers/grades`, gradeData);
+      return repository.post<Grade>(API_ENDPOINTS.TEACHERS.GRADES, gradeData);
     },
 
     async getAnnouncements(teacherId: string): Promise<Announcement[]> {
-      return repository.get<Announcement[]>(`/api/teachers/${teacherId}/announcements`);
+      return repository.get<Announcement[]>(API_ENDPOINTS.TEACHERS.ANNOUNCEMENTS(teacherId));
     },
 
     async createAnnouncement(announcement: CreateAnnouncementData): Promise<Announcement> {
-      return repository.post<Announcement>(`/api/teachers/announcements`, announcement);
+      return repository.post<Announcement>(API_ENDPOINTS.TEACHERS.CREATE_ANNOUNCEMENT, announcement);
     },
 
     async getClassStudentsWithGrades(classId: string): Promise<ClassStudentWithGrade[]> {
-      return repository.get<ClassStudentWithGrade[]>(`/api/classes/${classId}/students`);
+      return repository.get<ClassStudentWithGrade[]>(API_ENDPOINTS.CLASSES.STUDENTS(classId));
     }
   };
 }
