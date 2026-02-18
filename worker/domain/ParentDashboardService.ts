@@ -38,7 +38,7 @@ export class ParentDashboardService {
     return { child, childSchedule, childGrades, announcements };
   }
 
-  private static async getChildWithClass(env: Env, childState: any, classId?: string): Promise<Student & { className: string }> {
+  private static async getChildWithClass(env: Env, childState: Student, classId?: string): Promise<Student & { className: string }> {
     let className = 'N/A';
     if (classId) {
       const classEntity = new ClassEntity(env, classId);
