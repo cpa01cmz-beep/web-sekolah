@@ -3,11 +3,11 @@ import type { ApiResponse } from '@shared/types';
 import type { IRepository, ApiRequestOptions } from '@/repositories/IRepository';
 
 export class MockRepository implements IRepository {
-  private mockData: Record<string, any> = {};
+  private mockData: Record<string, unknown> = {};
   private mockErrors: Record<string, Error> = {};
   private delay: number = 0;
 
-  setMockData(path: string, data: any) {
+  setMockData<T>(path: string, data: T): void {
     this.mockData[path] = data;
   }
 
@@ -62,7 +62,7 @@ export class MockRepository implements IRepository {
   }
 }
 
-export const mockFetch = (data: any, status = 200) => {
+export const mockFetch = <T>(data: T, status = 200) => {
   return vi.fn().mockResolvedValue({
     ok: status >= 200 && status < 300,
     status,
