@@ -24,7 +24,8 @@ import type {
   GalleryItem,
   WorkItem,
   LinkItem,
-  DownloadItem
+  DownloadItem,
+  ClassStudentWithGrade
 } from '@shared/types';
 
 export interface StudentService {
@@ -40,18 +41,12 @@ export interface TeacherService {
   submitGrade(gradeData: SubmitGradeData): Promise<Grade>;
   getAnnouncements(teacherId: string): Promise<Announcement[]>;
   createAnnouncement(announcement: CreateAnnouncementData): Promise<Announcement>;
-  getClassStudentsWithGrades(classId: string): Promise<Array<{
-    id: string;
-    name: string;
-    score: number | null;
-    feedback: string;
-    gradeId: string | null;
-  }>>;
+  getClassStudentsWithGrades(classId: string): Promise<ClassStudentWithGrade[]>;
 }
 
 export interface ParentService {
   getDashboard(parentId: string): Promise<ParentDashboardData>;
-  getChildSchedule(childId: string): Promise<ScheduleItem[]>;
+  getChildSchedule(parentId: string): Promise<ScheduleItem[]>;
 }
 
 export interface AdminService {

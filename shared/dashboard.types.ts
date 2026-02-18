@@ -1,6 +1,14 @@
 import type { Grade, Announcement, ScheduleItem } from './entities.types';
 import type { Student } from './entities.types';
 
+export interface ClassStudentWithGrade {
+  id: string;
+  name: string;
+  score: number | null;
+  feedback: string;
+  gradeId: string | null;
+}
+
 export interface StudentDashboardData {
   schedule: (ScheduleItem & { courseName: string; teacherName: string })[];
   recentGrades: (Grade & { courseName: string })[];
