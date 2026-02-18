@@ -10,11 +10,26 @@ export async function generateSignature(payload: string, secret: string): Promis
   return `sha256=${hexArray.join('')}`;
 }
 
+function constantTimeCompare(a: string, b: string): boolean {
+  if (a.length !== b.length) {
+    return false;
+  }
+  
+  const aBuffer = new TextEncoder().encode(a);
+  const bBuffer = new TextEncoder().encode(b);
+  
+  let result = 0;
+  for (let i = 0; i < aBuffer.length; i++) {
+    result |= aBuffer[i] ^ bBuffer[i];
+  }
+  return result === 0;
+}
+
 export async function verifySignature(payload: string, signature: string, secret: string): Promise<boolean> {
   try {
     const expectedSignature = await generateSignature(payload, secret);
 
-    return signature === expectedSignature;
+    return constantTimeCompare(signature, expectedSignature);
   } catch {
     return false;
   }
