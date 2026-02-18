@@ -115,7 +115,7 @@ describe('TeacherService', () => {
         ...gradeData,
       };
 
-      mockRepository.setMockData('/api/teachers/grades', mockResult);
+      mockRepository.setMockData('/api/grades', mockResult);
       const teacherService = createTeacherService(mockRepository);
 
       const result = await teacherService.submitGrade(gradeData);
@@ -134,7 +134,7 @@ describe('TeacherService', () => {
       mockError.name = 'ApiError';
       (mockError as any).status = 400;
 
-      mockRepository.setMockError('/api/teachers/grades', mockError);
+      mockRepository.setMockError('/api/grades', mockError);
       const teacherService = createTeacherService(mockRepository);
 
       await expect(teacherService.submitGrade(gradeData)).rejects.toThrow('Invalid score');
@@ -150,7 +150,7 @@ describe('TeacherService', () => {
       mockError.name = 'ApiError';
       (mockError as any).status = 400;
 
-      mockRepository.setMockError('/api/teachers/grades', mockError);
+      mockRepository.setMockError('/api/grades', mockError);
       const teacherService = createTeacherService(mockRepository);
 
       await expect(teacherService.submitGrade(gradeData)).rejects.toThrow('Student ID is required');
