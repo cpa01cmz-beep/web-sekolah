@@ -107,14 +107,10 @@ describe('CompoundSecondaryIndex', () => {
 
   describe('getByValues', () => {
     beforeEach(() => {
-      mockStub.getDoc.mockReset();
       mockStub.listPrefix.mockResolvedValue({
         keys: ['compound:value1:value2:entity:entity-1', 'compound:value1:value2:entity:entity-2'],
         next: null,
       });
-      mockStub.getDoc
-        .mockResolvedValueOnce({ v: 1, data: { entityId: 'entity-1' } })
-        .mockResolvedValueOnce({ v: 1, data: { entityId: 'entity-2' } });
     });
 
     it('should retrieve entity IDs by field values', async () => {
@@ -132,47 +128,25 @@ describe('CompoundSecondaryIndex', () => {
       expect(result).toEqual([]);
     });
 
-    it('should handle malformed documents gracefully', async () => {
-      mockStub.getDoc.mockReset();
-      mockStub.listPrefix.mockResolvedValue({
-        keys: ['compound:value1:value2:entity:entity-1'],
-        next: null,
-      });
-      mockStub.getDoc.mockResolvedValueOnce({ v: 1, data: null });
-
+    it('should extract entityId directly from key without fetching documents', async () => {
       const result = await index.getByValues(['value1', 'value2']);
 
-      expect(result).toEqual([]);
+      expect(mockStub.getDoc).not.toHaveBeenCalled();
+      expect(result).toEqual(['entity-1', 'entity-2']);
     });
 
-    it('should handle documents missing entityId', async () => {
-      mockStub.getDoc.mockReset();
+    it('should handle keys with colons in field values', async () => {
       mockStub.listPrefix.mockResolvedValue({
-        keys: ['compound:value1:value2:entity:entity-1'],
+        keys: ['compound:value:1:value:2:entity:entity-1'],
         next: null,
       });
-      mockStub.getDoc.mockResolvedValueOnce({ v: 1, data: {} });
 
-      const result = await index.getByValues(['value1', 'value2']);
+      const result = await index.getByValues(['value:1', 'value:2']);
 
-      expect(result).toEqual([]);
-    });
-
-    it('should handle documents with missing data property', async () => {
-      mockStub.getDoc.mockReset();
-      mockStub.listPrefix.mockResolvedValue({
-        keys: ['compound:value1:value2:entity:entity-1'],
-        next: null,
-      });
-      mockStub.getDoc.mockResolvedValueOnce(null);
-
-      const result = await index.getByValues(['value1', 'value2']);
-
-      expect(result).toEqual([]);
+      expect(result).toEqual(['entity-1']);
     });
 
     it('should retrieve multiple entity IDs correctly', async () => {
-      mockStub.getDoc.mockReset();
       mockStub.listPrefix.mockResolvedValue({
         keys: [
           'compound:value1:value2:entity:entity-1',
@@ -181,10 +155,6 @@ describe('CompoundSecondaryIndex', () => {
         ],
         next: null,
       });
-      mockStub.getDoc
-        .mockResolvedValueOnce({ v: 1, data: { entityId: 'entity-1' } })
-        .mockResolvedValueOnce({ v: 1, data: { entityId: 'entity-2' } })
-        .mockResolvedValueOnce({ v: 1, data: { entityId: 'entity-3' } });
 
       const result = await index.getByValues(['value1', 'value2']);
 

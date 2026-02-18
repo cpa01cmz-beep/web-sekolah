@@ -1,5 +1,12 @@
-import type { Doc } from '../types';
 import { Entity } from '../entities/Entity';
+
+const ENTITY_KEY_PREFIX = ':entity:';
+
+function extractEntityIdFromKey(key: string): string | null {
+  const idx = key.indexOf(ENTITY_KEY_PREFIX);
+  if (idx === -1) return null;
+  return key.slice(idx + ENTITY_KEY_PREFIX.length);
+}
 
 export class SecondaryIndex<T extends string> extends Entity<unknown> {
   static readonly entityName = "sys-secondary-index";
@@ -21,14 +28,9 @@ export class SecondaryIndex<T extends string> extends Entity<unknown> {
   async getByValue(fieldValue: string): Promise<T[]> {
     const prefix = `field:${fieldValue}:entity:`;
     const { keys } = await this.stub.listPrefix(prefix);
-    const entityIds: T[] = [];
-    for (const key of keys) {
-      const doc = await this.stub.getDoc(key) as Doc<{ entityId: T }> | null;
-      if (doc && doc.data && doc.data.entityId) {
-        entityIds.push(doc.data.entityId);
-      }
-    }
-    return entityIds;
+    return keys
+      .map(key => extractEntityIdFromKey(key))
+      .filter((id): id is T => id !== null);
   }
 
   async countByValue(fieldValue: string): Promise<number> {

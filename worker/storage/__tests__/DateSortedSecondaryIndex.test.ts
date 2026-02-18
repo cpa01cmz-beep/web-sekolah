@@ -144,7 +144,6 @@ describe('DateSortedSecondaryIndex', () => {
 
   describe('getRecent', () => {
     beforeEach(() => {
-      mockStub.getDoc.mockReset();
       const now = Date.now();
       const keys = [
         `sort:${(Number.MAX_SAFE_INTEGER - now).toString().padStart(20, '0')}:entity-1`,
@@ -153,10 +152,6 @@ describe('DateSortedSecondaryIndex', () => {
       ];
 
       mockStub.listPrefix.mockResolvedValue({ keys, next: null });
-      mockStub.getDoc
-        .mockResolvedValueOnce({ v: 1, data: { entityId: 'entity-1' } })
-        .mockResolvedValueOnce({ v: 1, data: { entityId: 'entity-2' } })
-        .mockResolvedValueOnce({ v: 1, data: { entityId: 'entity-3' } });
     });
 
     it('should retrieve recent entity IDs in chronological order', async () => {
@@ -188,43 +183,11 @@ describe('DateSortedSecondaryIndex', () => {
       expect(result).toEqual(['entity-1']);
     });
 
-    it('should handle malformed documents gracefully', async () => {
-      mockStub.getDoc.mockReset();
-      mockStub.listPrefix.mockResolvedValue({
-        keys: ['sort:12345678901234567890:entity-1'],
-        next: null,
-      });
-      mockStub.getDoc.mockResolvedValueOnce({ v: 1, data: null });
+    it('should extract entityId directly from key without fetching documents', async () => {
+      const result = await index.getRecent(3);
 
-      const result = await index.getRecent(10);
-
-      expect(result).toEqual([]);
-    });
-
-    it('should handle documents missing entityId', async () => {
-      mockStub.getDoc.mockReset();
-      mockStub.listPrefix.mockResolvedValue({
-        keys: ['sort:12345678901234567890:entity-1'],
-        next: null,
-      });
-      mockStub.getDoc.mockResolvedValueOnce({ v: 1, data: {} });
-
-      const result = await index.getRecent(10);
-
-      expect(result).toEqual([]);
-    });
-
-    it('should handle documents with missing data property', async () => {
-      mockStub.getDoc.mockReset();
-      mockStub.listPrefix.mockResolvedValue({
-        keys: ['sort:12345678901234567890:entity-1'],
-        next: null,
-      });
-      mockStub.getDoc.mockResolvedValueOnce(null);
-
-      const result = await index.getRecent(10);
-
-      expect(result).toEqual([]);
+      expect(mockStub.getDoc).not.toHaveBeenCalled();
+      expect(result).toEqual(['entity-1', 'entity-2', 'entity-3']);
     });
 
     it('should sort keys lexicographically to maintain chronological order', async () => {
@@ -235,14 +198,10 @@ describe('DateSortedSecondaryIndex', () => {
       ];
 
       mockStub.listPrefix.mockResolvedValue({ keys: unsortedKeys, next: null });
-      mockStub.getDoc
-        .mockResolvedValueOnce({ v: 1, data: { entityId: 'entity-3' } })
-        .mockResolvedValueOnce({ v: 1, data: { entityId: 'entity-1' } })
-        .mockResolvedValueOnce({ v: 1, data: { entityId: 'entity-2' } });
 
       const result = await index.getRecent(3);
 
-      expect(mockStub.getDoc).toHaveBeenCalledTimes(3);
+      expect(result).toEqual(['entity-1', 'entity-2', 'entity-3']);
     });
 
     it('should handle limit larger than available entries', async () => {
@@ -256,7 +215,6 @@ describe('DateSortedSecondaryIndex', () => {
       const result = await index.getRecent(0);
 
       expect(result).toHaveLength(0);
-      expect(mockStub.getDoc).not.toHaveBeenCalled();
     });
   });
 
