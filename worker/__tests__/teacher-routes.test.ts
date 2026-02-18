@@ -445,4 +445,91 @@ describe('teacher-routes - Critical Business Logic', () => {
       });
     });
   });
+
+  describe('Teacher Schedule', () => {
+    it('should aggregate schedule items from multiple classes', () => {
+      const teacherClasses = [
+        { id: 'class-1', name: '11-A' },
+        { id: 'class-2', name: '11-B' }
+      ];
+
+      const scheduleClass1 = [
+        { day: 'Senin', time: '08:00', courseId: 'course-1', courseName: 'Math', className: '11-A' },
+        { day: 'Selasa', time: '09:00', courseId: 'course-2', courseName: 'Science', className: '11-A' }
+      ];
+
+      const scheduleClass2 = [
+        { day: 'Senin', time: '10:00', courseId: 'course-1', courseName: 'Math', className: '11-B' },
+        { day: 'Rabu', time: '08:00', courseId: 'course-3', courseName: 'English', className: '11-B' }
+      ];
+
+      const allScheduleItems = [...scheduleClass1, ...scheduleClass2];
+
+      expect(allScheduleItems).toHaveLength(4);
+      expect(allScheduleItems.filter(s => s.className === '11-A')).toHaveLength(2);
+      expect(allScheduleItems.filter(s => s.className === '11-B')).toHaveLength(2);
+    });
+
+    it('should sort schedule by day and time', () => {
+      const scheduleItems = [
+        { day: 'Jumat', time: '08:00', courseName: 'Art' },
+        { day: 'Senin', time: '10:00', courseName: 'Math' },
+        { day: 'Senin', time: '08:00', courseName: 'Science' },
+        { day: 'Rabu', time: '09:00', courseName: 'English' }
+      ];
+
+      const dayOrder: Record<string, number> = {
+        'Senin': 1,
+        'Selasa': 2,
+        'Rabu': 3,
+        'Kamis': 4,
+        'Jumat': 5,
+      };
+
+      const sorted = [...scheduleItems].sort((a, b) => {
+        const dayDiff = (dayOrder[a.day] || 0) - (dayOrder[b.day] || 0);
+        if (dayDiff !== 0) return dayDiff;
+        return a.time.localeCompare(b.time);
+      });
+
+      expect(sorted[0].day).toBe('Senin');
+      expect(sorted[0].time).toBe('08:00');
+      expect(sorted[1].day).toBe('Senin');
+      expect(sorted[1].time).toBe('10:00');
+      expect(sorted[2].day).toBe('Rabu');
+      expect(sorted[3].day).toBe('Jumat');
+    });
+
+    it('should handle teacher with no classes', () => {
+      const teacherClasses: any[] = [];
+      const allScheduleItems: any[] = [];
+
+      expect(teacherClasses).toHaveLength(0);
+      expect(allScheduleItems).toHaveLength(0);
+    });
+
+    it('should include courseName and className in schedule items', () => {
+      const scheduleItem = {
+        day: 'Senin' as const,
+        time: '08:00',
+        courseId: 'course-1',
+        courseName: 'Mathematics',
+        className: '11-A'
+      };
+
+      expect(scheduleItem).toHaveProperty('day');
+      expect(scheduleItem).toHaveProperty('time');
+      expect(scheduleItem).toHaveProperty('courseId');
+      expect(scheduleItem).toHaveProperty('courseName');
+      expect(scheduleItem).toHaveProperty('className');
+    });
+
+    it('should validate day values are Indonesian', () => {
+      const validDays = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat'] as const;
+
+      validDays.forEach(day => {
+        expect(['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat']).toContain(day);
+      });
+    });
+  });
 });

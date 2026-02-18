@@ -195,6 +195,42 @@ export class CommonDataService {
     }));
   }
 
+  static async getTeacherSchedule(env: Env, teacherId: string): Promise<(ScheduleItem & { courseName: string; className: string })[]> {
+    const teacherClasses = await ClassEntity.getByTeacherId(env, teacherId);
+    
+    if (teacherClasses.length === 0) {
+      return [];
+    }
+
+    const allScheduleItems: (ScheduleItem & { courseName: string; className: string })[] = [];
+    
+    for (const cls of teacherClasses) {
+      const scheduleWithDetails = await this.getScheduleWithDetails(env, cls.id);
+      for (const item of scheduleWithDetails) {
+        allScheduleItems.push({
+          ...item,
+          className: cls.name,
+        });
+      }
+    }
+
+    const dayOrder: Record<string, number> = {
+      'Senin': 1,
+      'Selasa': 2,
+      'Rabu': 3,
+      'Kamis': 4,
+      'Jumat': 5,
+    };
+
+    allScheduleItems.sort((a, b) => {
+      const dayDiff = (dayOrder[a.day] || 0) - (dayOrder[b.day] || 0);
+      if (dayDiff !== 0) return dayDiff;
+      return a.time.localeCompare(b.time);
+    });
+
+    return allScheduleItems;
+  }
+
   static async getRecentGradesWithCourseNames(env: Env, studentId: string, limit: number = 10): Promise<(Grade & { courseName: string })[]> {
     const studentGrades = await GradeEntity.getRecentForStudent(env, studentId, limit);
 
