@@ -1,4 +1,4 @@
-import { IntegrationMonitor as IntegrationMonitorConfig } from '../config/time';
+import { IntegrationMonitor as IntegrationMonitorConfig, TimeConstants } from '../config/time';
 import { logger } from '../logger';
 import type { IMonitor } from './IMonitor';
 
@@ -28,8 +28,8 @@ export class ApiErrorMonitor implements IMonitor {
   };
 
   private readonly maxRecentErrors: number = IntegrationMonitorConfig.MAX_RECENT_ERRORS;
-  private readonly oneMinuteMs: number = 60000;
-  private readonly oneHourMs: number = 3600000;
+  private readonly oneMinuteMs: number = TimeConstants.MINUTE_MS;
+  private readonly oneHourMs: number = TimeConstants.ONE_HOUR_MS;
 
   private calculateErrorRate(): { perMinute: number; perHour: number } {
     const now = Date.now();
