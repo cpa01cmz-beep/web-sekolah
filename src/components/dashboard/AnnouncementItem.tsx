@@ -9,7 +9,7 @@ interface AnnouncementItemProps {
 
 export const AnnouncementItem = memo(({ ann }: AnnouncementItemProps) => (
   <li className="flex items-start">
-    <Activity className="h-4 w-4 mt-1 mr-3 text-muted-foreground flex-shrink-0" />
+    <Activity className="h-4 w-4 mt-1 mr-3 text-muted-foreground flex-shrink-0" aria-hidden="true" />
     <div>
       <p className="text-sm font-medium">{ann.title}</p>
       <p className="text-xs text-muted-foreground">{formatDate(ann.date)}</p>
