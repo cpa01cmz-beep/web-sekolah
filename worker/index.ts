@@ -36,14 +36,12 @@ app.use('/api/*', async (c, next) => {
 
   if (origin && allowedOrigins.includes(origin)) {
     c.header('Access-Control-Allow-Origin', origin);
-  } else if (allowedOrigins.length > 0) {
-    c.header('Access-Control-Allow-Origin', allowedOrigins[0]);
+    c.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    c.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Request-ID');
+    c.header('Access-Control-Allow-Credentials', 'true');
+    c.header('Access-Control-Max-Age', (TimeConstants.ONE_DAY_MS / 1000).toString());
+    c.header('Access-Control-Expose-Headers', 'X-Request-ID, X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset');
   }
-  
-  c.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  c.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  c.header('Access-Control-Allow-Credentials', 'true');
-  c.header('Access-Control-Max-Age', (TimeConstants.ONE_DAY_MS / 1000).toString());
   
   if (c.req.method === 'OPTIONS') {
     return new Response(null, { status: HttpStatusCode.NO_CONTENT });
