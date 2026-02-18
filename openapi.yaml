@@ -533,6 +533,52 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
+  /api/teachers/grades:
+    post:
+      tags:
+        - Teachers
+      summary: Submit a grade
+      description: Creates a new grade for a student in a course
+      operationId: submitGrade
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateGradeRequest'
+      responses:
+        '200':
+          description: Grade submitted successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Grade'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Student or course not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
   /api/teachers/{id}/classes:
     get:
       tags:
