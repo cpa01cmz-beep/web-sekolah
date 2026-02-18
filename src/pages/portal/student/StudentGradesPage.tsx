@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { CardSkeleton } from '@/components/ui/loading-skeletons';
@@ -10,35 +11,26 @@ import { useAuthStore } from '@/lib/authStore';
 import { calculateAverageScore, getGradeColorClass, getGradeLetter } from '@/utils/grades';
 import { ResponsiveTable } from '@/components/ui/responsive-table';
 
+const TABLE_HEADERS = [
+  { key: 'no', label: 'No.' },
+  { key: 'subject', label: 'Mata Pelajaran' },
+  { key: 'score', label: 'Nilai', className: 'text-center' },
+  { key: 'grade', label: 'Predikat', className: 'text-center' },
+  { key: 'feedback', label: 'Keterangan' },
+];
+
 export function StudentGradesPage() {
   const user = useAuthStore((state) => state.user);
   const { data: dashboardData, isLoading, error } = useStudentDashboard(user?.id || '');
 
-  if (isLoading) return <CardSkeleton lines={5} showHeader />;
+  const grades = useMemo(() => dashboardData?.recentGrades ?? [], [dashboardData]);
 
-  if (error) {
-    return (
-      <Alert variant="destructive">
-        <AlertTriangle className="h-4 w-4" />
-        <AlertTitle>Error</AlertTitle>
-        <AlertDescription>Failed to load grades data. Please try again later.</AlertDescription>
-      </Alert>
-    );
-  }
+  const averageScore = useMemo(() => 
+    grades.length > 0 ? calculateAverageScore(grades) : '-',
+    [grades]
+  );
 
-  const grades = dashboardData?.recentGrades || [];
-
-  const averageScore = grades.length > 0 ? calculateAverageScore(grades) : '-';
-
-  const tableHeaders = [
-    { key: 'no', label: 'No.' },
-    { key: 'subject', label: 'Mata Pelajaran' },
-    { key: 'score', label: 'Nilai', className: 'text-center' },
-    { key: 'grade', label: 'Predikat', className: 'text-center' },
-    { key: 'feedback', label: 'Keterangan' },
-  ];
-
-  const tableRows = grades.map((grade, index) => ({
+  const tableRows = useMemo(() => grades.map((grade, index) => ({
     id: grade.id,
     cells: [
       { key: 'no', content: index + 1, className: 'font-medium' },
@@ -56,7 +48,19 @@ export function StudentGradesPage() {
       },
       { key: 'feedback', content: grade.feedback },
     ],
-  }));
+  })), [grades]);
+
+  if (isLoading) return <CardSkeleton lines={5} showHeader />;
+
+  if (error) {
+    return (
+      <Alert variant="destructive">
+        <AlertTriangle className="h-4 w-4" />
+        <AlertTitle>Error</AlertTitle>
+        <AlertDescription>Failed to load grades data. Please try again later.</AlertDescription>
+      </Alert>
+    );
+  }
 
   return (
     <SlideUp className="space-y-6">
@@ -69,7 +73,7 @@ export function StudentGradesPage() {
         <CardContent>
           {grades.length > 0 ? (
             <div className="space-y-4">
-              <ResponsiveTable headers={tableHeaders} rows={tableRows} />
+              <ResponsiveTable headers={TABLE_HEADERS} rows={tableRows} />
               <div className="md:hidden p-4 bg-muted/50 rounded-lg">
                 <div className="flex justify-between items-center">
                   <span className="font-bold text-lg">Rata-rata</span>
