@@ -1,6 +1,7 @@
 import type { Env } from '../core-utils';
 import { UserEntity, ClassEntity, AnnouncementEntity, ScheduleEntity, ClassScheduleState, CourseEntity, GradeEntity } from '../entities';
 import type { SchoolUser, SchoolClass, Announcement, Student, ScheduleItem, Grade, Course, UserRole } from '@shared/types';
+import { getUniqueIds, buildEntityMap, fetchAndMap } from './EntityMapUtils';
 
 export class CommonDataService {
   static async getStudentWithClassAndSchedule(env: Env, studentId: string): Promise<{
@@ -157,15 +158,16 @@ export class CommonDataService {
       return [];
     }
 
-    const courseIds = scheduleState.items.map(item => item.courseId);
-    const uniqueCourseIds = Array.from(new Set(courseIds));
-    const courses = await Promise.all(uniqueCourseIds.map(id => new CourseEntity(env, id).getState()));
-    const teacherIds = courses.map(course => course?.teacherId).filter((id): id is string => id !== undefined);
-    const uniqueTeacherIds = Array.from(new Set(teacherIds));
-    const teachers = await Promise.all(uniqueTeacherIds.map(id => new UserEntity(env, id).getState()));
+    const courseIds = getUniqueIds(scheduleState.items.map(item => item.courseId));
+    const teacherIds: string[] = [];
 
-    const coursesMap = new Map(courses.filter(c => c).map(c => [c!.id, c!]));
-    const teachersMap = new Map(teachers.filter(t => t).map(t => [t!.id, t!]));
+    const coursesMap = await fetchAndMap(courseIds, id => new CourseEntity(env, id).getState());
+    coursesMap.forEach(course => {
+      if (course.teacherId) teacherIds.push(course.teacherId);
+    });
+
+    const uniqueTeacherIds = getUniqueIds(teacherIds);
+    const teachersMap = await fetchAndMap(uniqueTeacherIds, id => new UserEntity(env, id).getState());
 
     return scheduleState.items.map(item => {
       const course = coursesMap.get(item.courseId);
@@ -185,9 +187,8 @@ export class CommonDataService {
       return [];
     }
 
-    const uniqueAuthorIds = Array.from(new Set(recentAnnouncements.map(a => a.authorId)));
-    const announcementAuthors = await Promise.all(uniqueAuthorIds.map(id => new UserEntity(env, id).getState()));
-    const authorsMap = new Map(announcementAuthors.filter(a => a).map(a => [a!.id, a!]));
+    const uniqueAuthorIds = getUniqueIds(recentAnnouncements.map(a => a.authorId));
+    const authorsMap = await fetchAndMap(uniqueAuthorIds, id => new UserEntity(env, id).getState());
 
     return recentAnnouncements.map(ann => ({
       ...ann,
@@ -202,10 +203,8 @@ export class CommonDataService {
       return [];
     }
 
-    const gradeCourseIds = studentGrades.map(g => g.courseId);
-    const uniqueCourseIds = Array.from(new Set(gradeCourseIds));
-    const gradeCourses = await Promise.all(uniqueCourseIds.map(id => new CourseEntity(env, id).getState()));
-    const gradeCoursesMap = new Map(gradeCourses.filter(c => c).map(c => [c!.id, c!]));
+    const uniqueCourseIds = getUniqueIds(studentGrades.map(g => g.courseId));
+    const gradeCoursesMap = await fetchAndMap(uniqueCourseIds, id => new CourseEntity(env, id).getState());
 
     return studentGrades.map(grade => ({
       ...grade,
@@ -235,16 +234,13 @@ export class CommonDataService {
       return [];
     }
 
-    const courseIds = Array.from(new Set(recentGrades.map(g => g.courseId)));
-    const studentIds = Array.from(new Set(recentGrades.map(g => g.studentId)));
+    const uniqueCourseIds = getUniqueIds(recentGrades.map(g => g.courseId));
+    const uniqueStudentIds = getUniqueIds(recentGrades.map(g => g.studentId));
 
-    const [courses, students] = await Promise.all([
-      Promise.all(courseIds.map(id => new CourseEntity(env, id).getState())),
-      Promise.all(studentIds.map(id => new UserEntity(env, id).getState()))
+    const [coursesMap, studentsMap] = await Promise.all([
+      fetchAndMap(uniqueCourseIds, id => new CourseEntity(env, id).getState()),
+      fetchAndMap(uniqueStudentIds, id => new UserEntity(env, id).getState())
     ]);
-
-    const coursesMap = new Map(courses.filter(c => c).map(c => [c!.id, c!]));
-    const studentsMap = new Map(students.filter(s => s).map(s => [s!.id, s!]));
 
     return recentGrades.map(grade => ({
       ...grade,

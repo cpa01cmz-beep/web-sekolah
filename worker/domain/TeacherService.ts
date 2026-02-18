@@ -1,6 +1,7 @@
 import type { Env } from '../core-utils';
 import { UserEntity, ClassEntity, CourseEntity, GradeEntity, ScheduleEntity } from '../entities';
 import type { Grade, SchoolClass, Teacher, ScheduleItem } from '@shared/types';
+import { getUniqueIds, buildEntityMap } from './EntityMapUtils';
 
 export class TeacherService {
   static async getClasses(env: Env, teacherId: string): Promise<SchoolClass[]> {
@@ -73,9 +74,9 @@ export class TeacherService {
       }
     }
 
-    const courseIds = Array.from(new Set(allScheduleItems.map(item => item.courseId)));
-    const courses = await Promise.all(courseIds.map(id => new CourseEntity(env, id).getState()));
-    const coursesMap = new Map(courses.filter(c => c).map(c => [c!.id, c!]));
+    const uniqueCourseIds = getUniqueIds(allScheduleItems.map(item => item.courseId));
+    const courses = await Promise.all(uniqueCourseIds.map(id => new CourseEntity(env, id).getState()));
+    const coursesMap = buildEntityMap(courses);
 
     return allScheduleItems.map(item => ({
       day: item.day,
