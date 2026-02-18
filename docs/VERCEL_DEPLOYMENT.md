@@ -19,6 +19,18 @@ This guide covers deploying the Vite React frontend to Vercel with the backend A
 └─────────────────┘       └──────────────────────┘
 ```
 
+## Vercel Configuration Features
+
+The `vercel.json` includes best-practice configurations:
+
+| Feature | Description |
+|---------|-------------|
+| **Edge Regions** | Deployed to Singapore (sin1), Tokyo (hnd1), and US East (iad1) |
+| **Image Optimization** | AVIF/WebP with 60s minimum cache TTL |
+| **Security Headers** | CSP, XSS Protection, Frame Options, Permissions Policy |
+| **Caching** | 1-year immutable cache for JS/CSS/assets |
+| **SPA Routing** | Client-side routing with index.html fallback |
+
 ## Prerequisites
 
 - Vercel account
@@ -97,18 +109,36 @@ vercel --prod
 The `vercel.json` file contains:
 
 - **Build settings**: Framework detection and output directory
+- **Regions**: Edge deployment regions for optimal latency
+- **Images**: Image optimization configuration
 - **Rewrites**: API proxy configuration and SPA routing
 - **Headers**: Security headers and caching policies
+
+### .vercelignore
+
+The `.vercelignore` file excludes unnecessary files from deployment:
+
+- `worker/` - Backend code (deployed separately to Cloudflare)
+- `wrangler.*` - Cloudflare configuration
+- `*.test.ts` - Test files
+- `__tests__/` - Test directories
+- `.github/` - GitHub workflows
+- Documentation files (wiki, prompts, changelogs)
+
+This reduces deployment size and improves build times.
 
 ### Security Headers
 
 Default security headers configured:
 
-- `X-Content-Type-Options: nosniff`
-- `X-Frame-Options: DENY`
-- `X-XSS-Protection: 1; mode=block`
-- `Referrer-Policy: strict-origin-when-cross-origin`
-- `Permissions-Policy: geolocation=(), microphone=(), camera=()`
+| Header | Value |
+|--------|-------|
+| `X-Content-Type-Options` | `nosniff` |
+| `X-Frame-Options` | `DENY` |
+| `X-XSS-Protection` | `1; mode=block` |
+| `Referrer-Policy` | `strict-origin-when-cross-origin` |
+| `Permissions-Policy` | `geolocation=(), microphone=(), camera=(), payment=(), usb=(), magnetometer=(), gyroscope=(), accelerometer=()` |
+| `Content-Security-Policy` | Restrictive policy for scripts, styles, images, and connections |
 
 ### Caching Strategy
 
@@ -116,7 +146,36 @@ Default security headers configured:
 |------------|----------------|
 | JS/CSS bundles | 1 year (immutable) |
 | Static assets | 1 year (immutable) |
-| HTML | No cache |
+| Fonts (.woff2) | 1 year (immutable) |
+| HTML (index.html) | No cache (must-revalidate) |
+
+### Edge Regions
+
+The frontend is deployed to multiple edge regions for optimal global performance:
+
+| Region | Code | Coverage |
+|--------|------|----------|
+| Singapore | sin1 | Southeast Asia, Oceania |
+| Tokyo | hnd1 | East Asia |
+| US East |iad1 | Americas |
+
+### Image Optimization
+
+Vercel Image Optimization is configured with:
+
+- **Formats**: AVIF (preferred), WebP (fallback)
+- **Remote Patterns**: All HTTPS sources allowed
+- **Minimum Cache TTL**: 60 seconds
+
+To use optimized images in components:
+
+```tsx
+<img 
+  src="/images/photo.jpg" 
+  alt="Description"
+  loading="lazy"
+/>
+```
 
 ## Environment-Specific Configuration
 
