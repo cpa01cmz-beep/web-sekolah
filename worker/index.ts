@@ -104,6 +104,14 @@ app.get('/api/health', async (c) => {
       blockedRequests: metrics.rateLimit.blockedRequests,
       currentEntries: metrics.rateLimit.currentEntries,
     },
+    errors: {
+      totalErrors: metrics.errors.totalErrors,
+      errorRate: {
+        perMinute: metrics.errors.errorRate.perMinute,
+        perHour: metrics.errors.errorRate.perHour,
+      },
+      errorsByCode: metrics.errors.errorsByCode,
+    },
   });
 });
 
