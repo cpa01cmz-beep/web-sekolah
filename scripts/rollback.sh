@@ -47,11 +47,25 @@ echo "🏥 Running health check after rollback..."
 max_retries=5
 retry_count=0
 
-if [ "${ENVIRONMENT}" == "production" ]; then
-  BASE_URL="https://your-domain.workers.dev"
+WORKER_NAME_STAGING="website-sekolah-staging"
+WORKER_NAME_PRODUCTION="website-sekolah-production"
+
+if [ -n "${CLOUDFLARE_ACCOUNT_ID}" ]; then
+  if [ "${ENVIRONMENT}" == "production" ]; then
+    BASE_URL="https://${WORKER_NAME_PRODUCTION}.${CLOUDFLARE_ACCOUNT_ID}.workers.dev"
+  else
+    BASE_URL="https://${WORKER_NAME_STAGING}.${CLOUDFLARE_ACCOUNT_ID}.workers.dev"
+  fi
 else
-  BASE_URL="https://staging.your-domain.workers.dev"
+  echo "⚠️  CLOUDFLARE_ACCOUNT_ID not set, using worker names only"
+  if [ "${ENVIRONMENT}" == "production" ]; then
+    BASE_URL="https://${WORKER_NAME_PRODUCTION}.workers.dev"
+  else
+    BASE_URL="https://${WORKER_NAME_STAGING}.workers.dev"
+  fi
 fi
+
+echo "🔗 Health check URL: ${BASE_URL}/api/health"
 
 while [ $retry_count -lt $max_retries ]; do
   echo "Health check attempt $((retry_count + 1)) of $max_retries"

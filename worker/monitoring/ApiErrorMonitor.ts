@@ -12,6 +12,10 @@ export interface ApiErrorStats {
     timestamp: number;
     endpoint: string;
   }>;
+  errorRate: {
+    perMinute: number;
+    perHour: number;
+  };
 }
 
 export class ApiErrorMonitor implements IMonitor {
@@ -20,9 +24,30 @@ export class ApiErrorMonitor implements IMonitor {
     errorsByCode: {},
     errorsByStatus: {},
     recentErrors: [],
+    errorRate: { perMinute: 0, perHour: 0 },
   };
 
   private readonly maxRecentErrors: number = IntegrationMonitorConfig.MAX_RECENT_ERRORS;
+  private readonly oneMinuteMs: number = 60000;
+  private readonly oneHourMs: number = 3600000;
+
+  private calculateErrorRate(): { perMinute: number; perHour: number } {
+    const now = Date.now();
+    const oneMinuteAgo = now - this.oneMinuteMs;
+    const oneHourAgo = now - this.oneHourMs;
+
+    const errorsLastMinute = this.stats.recentErrors.filter(
+      (e) => e.timestamp >= oneMinuteAgo
+    ).length;
+    const errorsLastHour = this.stats.recentErrors.filter(
+      (e) => e.timestamp >= oneHourAgo
+    ).length;
+
+    return {
+      perMinute: errorsLastMinute,
+      perHour: errorsLastHour,
+    };
+  }
 
   recordError(code: string, status: number, endpoint: string): void {
     this.stats.totalErrors++;
@@ -54,6 +79,7 @@ export class ApiErrorMonitor implements IMonitor {
       errorsByCode: { ...this.stats.errorsByCode },
       errorsByStatus: { ...this.stats.errorsByStatus },
       recentErrors: [...this.stats.recentErrors],
+      errorRate: this.calculateErrorRate(),
     };
   }
 
@@ -63,6 +89,7 @@ export class ApiErrorMonitor implements IMonitor {
       errorsByCode: {},
       errorsByStatus: {},
       recentErrors: [],
+      errorRate: { perMinute: 0, perHour: 0 },
     };
     logger.debug('API error monitor reset');
   }

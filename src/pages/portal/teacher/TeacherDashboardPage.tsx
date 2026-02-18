@@ -7,6 +7,7 @@ import { PageHeader } from '@/components/PageHeader';
 import { DashboardStatCard } from '@/components/dashboard/DashboardStatCard';
 import { BookCopy, Megaphone, Clock, AlertTriangle, Inbox } from 'lucide-react';
 import { SlideUp } from '@/components/animations';
+import { useReducedMotion } from '@/hooks/use-reduced-motion';
 import { useTeacherDashboard } from '@/hooks/useTeacher';
 import { useAuthStore } from '@/lib/authStore';
 import { formatDate } from '@/utils/date';
@@ -31,6 +32,7 @@ const AnnouncementItem = memo(({ ann }: { ann: TeacherDashboardData['recentAnnou
 AnnouncementItem.displayName = 'AnnouncementItem';
 
 export function TeacherDashboardPage() {
+  const prefersReducedMotion = useReducedMotion();
   const user = useAuthStore((state) => state.user);
   const { data, isLoading, error } = useTeacherDashboard(user?.id || '');
 
@@ -56,15 +58,15 @@ export function TeacherDashboardPage() {
   }
 
   return (
-    <SlideUp delay={0} className="space-y-6">
-      <SlideUp delay={0.1}>
+    <SlideUp delay={0} className="space-y-6" style={prefersReducedMotion ? { opacity: 1 } : {}}>
+      <SlideUp delay={0.1} style={prefersReducedMotion ? { opacity: 1 } : {}}>
         <PageHeader
           title="Teacher Dashboard"
           description={`Welcome back, ${data.name}! Here's a summary of your teaching activities and announcements.`}
         />
       </SlideUp>
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        <SlideUp delay={0.2}>
+        <SlideUp delay={0.2} style={prefersReducedMotion ? { opacity: 1 } : {}}>
           <DashboardStatCard
             title="Your Classes"
             value={data.totalClasses.toString()}
@@ -73,7 +75,7 @@ export function TeacherDashboardPage() {
             valueSize="3xl"
           />
         </SlideUp>
-        <SlideUp delay={0.3}>
+        <SlideUp delay={0.3} style={prefersReducedMotion ? { opacity: 1 } : {}}>
           <Card className="h-full hover:shadow-lg transition-shadow duration-200">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Recent Grades</CardTitle>
@@ -88,7 +90,7 @@ export function TeacherDashboardPage() {
             </CardContent>
           </Card>
         </SlideUp>
-        <SlideUp delay={0.4}>
+        <SlideUp delay={0.4} style={prefersReducedMotion ? { opacity: 1 } : {}}>
           <Card className="h-full hover:shadow-lg transition-shadow duration-200">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Recent Announcements</CardTitle>

@@ -4,7 +4,7 @@ import { ok, bad, notFound } from '../core-utils';
 import { authenticate, authorize } from '../middleware/auth';
 import type { TeacherDashboardData, Announcement, CreateAnnouncementData, SubmitGradeData, Grade } from "@shared/types";
 
-import { GradeService, CommonDataService, AnnouncementService } from '../domain';
+import { GradeService, CommonDataService, AnnouncementService, TeacherService } from '../domain';
 import { withAuth, withUserValidation, withErrorHandler, triggerWebhookSafely } from './route-utils';
 import { validateBody } from '../middleware/validation';
 import { createGradeSchema, createAnnouncementSchema } from '../middleware/schemas';
@@ -12,6 +12,12 @@ import { getCurrentUserId } from '../type-guards';
 import type { Context } from 'hono';
 
 export function teacherRoutes(app: Hono<{ Bindings: Env }>) {
+  app.get('/api/teachers/:id/classes', ...withUserValidation('teacher', 'classes'), withErrorHandler('get teacher classes')(async (c: Context) => {
+    const teacherId = c.req.param('id');
+    const classes = await TeacherService.getClasses(c.env, teacherId);
+    return ok(c, classes);
+  }));
+
   app.get('/api/teachers/:id/dashboard', ...withUserValidation('teacher', 'dashboard'), withErrorHandler('get teacher dashboard')(async (c: Context) => {
     const requestedTeacherId = c.req.param('id');
     const { teacher, classes: teacherClasses } = await CommonDataService.getTeacherWithClasses(c.env, requestedTeacherId);
@@ -39,6 +45,12 @@ export function teacherRoutes(app: Hono<{ Bindings: Env }>) {
     };
 
     return ok(c, dashboardData);
+  }));
+
+  app.get('/api/teachers/:id/classes', ...withUserValidation('teacher', 'classes'), withErrorHandler('get teacher classes')(async (c: Context) => {
+    const teacherId = c.req.param('id');
+    const classes = await TeacherService.getClasses(c.env, teacherId);
+    return ok(c, classes);
   }));
 
   app.get('/api/teachers/:id/announcements', ...withUserValidation('teacher', 'announcements'), withErrorHandler('get teacher announcements')(async (c: Context) => {
