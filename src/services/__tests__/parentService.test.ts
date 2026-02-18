@@ -82,7 +82,7 @@ describe('ParentService', () => {
 
   describe('getChildSchedule', () => {
     it('should fetch child schedule', async () => {
-      const childId = 'student-01';
+      const parentId = 'parent-01';
       const mockData = [
         {
           day: 'Senin',
@@ -96,37 +96,37 @@ describe('ParentService', () => {
         },
       ];
 
-       mockRepository.setMockData(`/api/parents/${childId}/schedule`, mockData);
+      mockRepository.setMockData(`/api/parents/${parentId}/schedule`, mockData);
       const parentService = createParentService(mockRepository);
 
-      const result = await parentService.getChildSchedule(childId);
+      const result = await parentService.getChildSchedule(parentId);
 
       expect(result).toEqual(mockData);
       expect(result).toHaveLength(2);
     });
 
     it('should handle empty schedule', async () => {
-      const childId = 'student-01';
+      const parentId = 'parent-01';
       const mockData: any[] = [];
 
-      mockRepository.setMockData(`/api/parents/${childId}/schedule`, mockData);
+      mockRepository.setMockData(`/api/parents/${parentId}/schedule`, mockData);
       const parentService = createParentService(mockRepository);
 
-      const result = await parentService.getChildSchedule(childId);
+      const result = await parentService.getChildSchedule(parentId);
 
       expect(result).toEqual([]);
     });
 
-    it('should handle invalid child ID', async () => {
-      const childId = 'invalid-child';
-      const mockError = new Error('Child not found');
+    it('should handle invalid parent ID', async () => {
+      const parentId = 'invalid-parent';
+      const mockError = new Error('Parent not found');
       mockError.name = 'ApiError';
       (mockError as any).status = 404;
 
-      mockRepository.setMockError(`/api/parents/${childId}/schedule`, mockError);
+      mockRepository.setMockError(`/api/parents/${parentId}/schedule`, mockError);
       const parentService = createParentService(mockRepository);
 
-      await expect(parentService.getChildSchedule(childId)).rejects.toThrow('Child not found');
+      await expect(parentService.getChildSchedule(parentId)).rejects.toThrow('Parent not found');
     });
   });
 });
