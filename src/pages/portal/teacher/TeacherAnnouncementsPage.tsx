@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, memo } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { PageHeader } from '@/components/PageHeader';
@@ -9,6 +9,20 @@ import { formatDateLong } from '@/utils/date';
 import { initialAnnouncements } from '@/mock-data/announcements';
 import type { Announcement } from '@/mock-data/announcements';
 import { InlineAnnouncementForm } from '@/components/forms/InlineAnnouncementForm';
+
+const AnnouncementItem = memo(({ ann, isLast }: { ann: Announcement; isLast: boolean }) => (
+  <div>
+    <div>
+      <h3 className="font-semibold">{ann.title}</h3>
+      <p className="text-sm text-muted-foreground">
+        By {ann.author} on {formatDateLong(ann.date)}
+      </p>
+      <p className="mt-2 text-sm">{ann.content}</p>
+    </div>
+    {!isLast && <Separator className="mt-6" />}
+  </div>
+));
+AnnouncementItem.displayName = 'AnnouncementItem';
 
 export function TeacherAnnouncementsPage() {
   const user = useAuthStore((state) => state.user);
@@ -57,16 +71,11 @@ export function TeacherAnnouncementsPage() {
             <CardContent className="space-y-6">
               {announcements.length > 0 ? (
                 announcements.map((ann, index) => (
-                  <div key={ann.id}>
-                    <div>
-                      <h3 className="font-semibold">{ann.title}</h3>
-                      <p className="text-sm text-muted-foreground">
-                        By {ann.author} on {formatDateLong(ann.date)}
-                      </p>
-                      <p className="mt-2 text-sm">{ann.content}</p>
-                    </div>
-                    {index < announcements.length - 1 && <Separator className="mt-6" />}
-                  </div>
+                  <AnnouncementItem
+                    key={ann.id}
+                    ann={ann}
+                    isLast={index === announcements.length - 1}
+                  />
                 ))
               ) : (
                 <p className="text-sm text-muted-foreground text-center py-8">No announcements posted yet.</p>
