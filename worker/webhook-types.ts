@@ -5,6 +5,7 @@ export type GradeUpdatedPayload = Grade;
 export type UserCreatedPayload = SchoolUser;
 export type UserUpdatedPayload = SchoolUser;
 export type UserDeletedPayload = { id: string; role: string };
+export type UserLoginPayload = { userId: string; email: string; role: string; loginMethod: string; timestamp: string };
 export type AnnouncementCreatedPayload = Announcement;
 export type AnnouncementUpdatedPayload = Announcement;
 
@@ -14,6 +15,7 @@ export type WebhookEventPayload =
   | UserCreatedPayload
   | UserUpdatedPayload
   | UserDeletedPayload
+  | UserLoginPayload
   | AnnouncementCreatedPayload
   | AnnouncementUpdatedPayload;
 

@@ -46,5 +46,6 @@ export type WebhookEventType =
   | 'user.created'
   | 'user.updated'
   | 'user.deleted'
+  | 'user.login'
   | 'announcement.created'
   | 'announcement.updated';
