@@ -36,9 +36,9 @@ export interface DurableObjectStorage {
 
 export interface DurableObjectTransaction {
   rollback(): Promise<void>;
-  get(key: string): Promise<any>;
-  put(key: string, value: any): Promise<void>;
-  delete(key: string): Promise<void>;
+  get<T = unknown>(key: string): Promise<T | undefined>;
+  put<T>(key: string, value: T): Promise<void>;
+  delete(key: string): Promise<boolean>;
 }
 
 export interface DurableObjectNamespace<T> {
