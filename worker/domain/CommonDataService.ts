@@ -212,4 +212,44 @@ export class CommonDataService {
       courseName: gradeCoursesMap.get(grade.courseId)?.name || 'Unknown Course',
     }));
   }
+
+  static async getTeacherRecentGradesWithDetails(env: Env, teacherId: string, limit: number = 5): Promise<(Grade & { courseName: string; studentName: string })[]> {
+    const teacherCourses = await CourseEntity.getByTeacherId(env, teacherId);
+    
+    if (teacherCourses.length === 0) {
+      return [];
+    }
+
+    const allGrades: Grade[] = [];
+    for (const course of teacherCourses) {
+      const courseGrades = await GradeEntity.getByCourseId(env, course.id);
+      allGrades.push(...courseGrades);
+    }
+
+    const sortedGrades = allGrades.sort((a, b) => 
+      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    );
+    const recentGrades = sortedGrades.slice(0, limit);
+
+    if (recentGrades.length === 0) {
+      return [];
+    }
+
+    const courseIds = Array.from(new Set(recentGrades.map(g => g.courseId)));
+    const studentIds = Array.from(new Set(recentGrades.map(g => g.studentId)));
+
+    const [courses, students] = await Promise.all([
+      Promise.all(courseIds.map(id => new CourseEntity(env, id).getState())),
+      Promise.all(studentIds.map(id => new UserEntity(env, id).getState()))
+    ]);
+
+    const coursesMap = new Map(courses.filter(c => c).map(c => [c!.id, c!]));
+    const studentsMap = new Map(students.filter(s => s).map(s => [s!.id, s!]));
+
+    return recentGrades.map(grade => ({
+      ...grade,
+      courseName: coursesMap.get(grade.courseId)?.name || 'Unknown Course',
+      studentName: studentsMap.get(grade.studentId)?.name || 'Unknown Student',
+    }));
+  }
 }
