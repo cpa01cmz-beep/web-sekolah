@@ -6,7 +6,7 @@ import { PageHeader } from '@/components/PageHeader';
 import { DashboardStatCard } from '@/components/dashboard/DashboardStatCard';
 import { AnnouncementItem } from '@/components/dashboard/AnnouncementItem';
 import { EnrollmentChart } from '@/components/dashboard/EnrollmentChart';
-import { Users, GraduationCap, School, Megaphone, AlertTriangle, Inbox } from 'lucide-react';
+import { Users, GraduationCap, School, Megaphone, AlertTriangle, Inbox, Activity } from 'lucide-react';
 import { SlideUp } from '@/components/animations';
 import { useReducedMotion } from '@/hooks/use-reduced-motion';
 import { useAdminDashboard } from '@/hooks/useAdmin';
@@ -105,7 +105,7 @@ export function AdminDashboardPage() {
               <CardContent>
                 <ul className="space-y-4">
                   {data.recentAnnouncements.map((ann) => (
-                    <AnnouncementItem key={ann.id} ann={ann} />
+                    <AnnouncementItem key={ann.id} title={ann.title} date={ann.date} icon={Activity} showIcon />
                   ))}
                 </ul>
               </CardContent>

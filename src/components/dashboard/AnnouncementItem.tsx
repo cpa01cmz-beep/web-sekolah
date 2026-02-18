@@ -1,18 +1,20 @@
 import { memo } from 'react';
-import { Activity } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 import { formatDate } from '@/utils/date';
-import type { AdminDashboardData } from '@shared/types';
 
-interface AnnouncementItemProps {
-  ann: AdminDashboardData['recentAnnouncements'][0];
+export interface AnnouncementItemProps {
+  title: string;
+  date: string;
+  icon?: LucideIcon;
+  showIcon?: boolean;
 }
 
-export const AnnouncementItem = memo(({ ann }: AnnouncementItemProps) => (
-  <li className="flex items-start">
-    <Activity className="h-4 w-4 mt-1 mr-3 text-muted-foreground flex-shrink-0" />
-    <div>
-      <p className="text-sm font-medium">{ann.title}</p>
-      <p className="text-xs text-muted-foreground">{formatDate(ann.date)}</p>
+export const AnnouncementItem = memo(({ title, date, icon: Icon, showIcon = false }: AnnouncementItemProps) => (
+  <li className={showIcon ? 'flex items-start' : 'text-sm'}>
+    {showIcon && Icon && <Icon className="h-4 w-4 mt-1 mr-3 text-muted-foreground flex-shrink-0" />}
+    <div className={showIcon ? '' : undefined}>
+      <p className={`font-medium ${showIcon ? 'text-sm' : 'truncate'}`}>{title}</p>
+      <p className="text-xs text-muted-foreground">{formatDate(date)}</p>
     </div>
   </li>
 ));

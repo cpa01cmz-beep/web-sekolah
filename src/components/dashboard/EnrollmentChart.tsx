@@ -19,6 +19,7 @@ interface EnrollmentChartProps {
 export function EnrollmentChart({ data }: EnrollmentChartProps) {
   const [Chart, setChart] = useState<ChartComponents | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [hasError, setHasError] = useState(false);
 
   useEffect(() => {
     Promise.all([
@@ -41,15 +42,23 @@ export function EnrollmentChart({ data }: EnrollmentChartProps) {
         Legend: Legend.Legend,
         ResponsiveContainer: ResponsiveContainer.ResponsiveContainer,
       });
-    }).catch((error) => {
-      console.error('Failed to load chart components:', error);
+    }).catch(() => {
+      setHasError(true);
     }).finally(() => {
       setIsLoading(false);
     });
   }, []);
 
-  if (isLoading || !Chart) {
+  if (isLoading) {
     return <div className="h-[300px] animate-pulse bg-muted rounded-lg" />;
+  }
+
+  if (hasError || !Chart) {
+    return (
+      <div className="h-[300px] flex items-center justify-center bg-muted rounded-lg">
+        <p className="text-muted-foreground text-sm">Chart unavailable</p>
+      </div>
+    );
   }
 
   return (

@@ -5,11 +5,11 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { EmptyState } from '@/components/ui/empty-state';
 import { DashboardSkeleton } from '@/components/ui/loading-skeletons';
 import { PageHeader } from '@/components/PageHeader';
+import { AnnouncementItem } from '@/components/dashboard/AnnouncementItem';
 import { Award, CalendarCheck, Megaphone, AlertTriangle, Inbox } from 'lucide-react';
 import { SlideUp } from '@/components/animations';
 import { useParentDashboard } from '@/hooks/useParent';
 import { useAuthStore } from '@/lib/authStore';
-import { formatDate } from '@/utils/date';
 import { getGradeBadgeVariant, getGradeLetter } from '@/utils/grades';
 import type { ParentDashboardData } from '@shared/types';
 
@@ -36,14 +36,6 @@ const ScheduleItem = memo(({ item }: { item: ParentDashboardData['childSchedule'
   </li>
 ));
 ScheduleItem.displayName = 'ScheduleItem';
-
-const AnnouncementItem = memo(({ ann }: { ann: ParentDashboardData['announcements'][0] }) => (
-  <li className="text-sm">
-    <p className="font-medium truncate">{ann.title}</p>
-    <p className="text-xs text-muted-foreground">{formatDate(ann.date)}</p>
-  </li>
-));
-AnnouncementItem.displayName = 'AnnouncementItem';
 
 export function ParentDashboardPage() {
   const user = useAuthStore((state) => state.user);
@@ -120,7 +112,7 @@ export function ParentDashboardPage() {
               <CardContent>
                 <ul className="space-y-3">
                   {data.announcements.map((ann) => (
-                    <AnnouncementItem key={ann.id} ann={ann} />
+                    <AnnouncementItem key={ann.id} title={ann.title} date={ann.date} />
                   ))}
                 </ul>
               </CardContent>

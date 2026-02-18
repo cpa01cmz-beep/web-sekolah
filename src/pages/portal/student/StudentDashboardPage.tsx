@@ -5,11 +5,11 @@ import { EmptyState } from '@/components/ui/empty-state';
 import { DashboardSkeleton } from '@/components/ui/loading-skeletons';
 import { PageHeader } from '@/components/PageHeader';
 import { SlideUp } from '@/components/animations';
+import { AnnouncementItem } from '@/components/dashboard/AnnouncementItem';
 import { Clock, BookOpen, Megaphone, AlertTriangle, Inbox } from 'lucide-react';
 import { useStudentDashboard } from '@/hooks/useStudent';
 import { useAuthStore } from '@/lib/authStore';
 import type { StudentDashboardData } from '@shared/types';
-import { formatDate } from '@/utils/date';
 import { memo } from 'react';
 
 const ScheduleItem = memo(({ item }: { item: StudentDashboardData['schedule'][0] }) => (
@@ -36,14 +36,6 @@ const GradeItem = memo(({ grade }: { grade: StudentDashboardData['recentGrades']
   );
 });
 GradeItem.displayName = 'GradeItem';
-
-const AnnouncementItem = memo(({ ann }: { ann: StudentDashboardData['announcements'][0] }) => (
-  <li className="text-sm">
-    <p className="font-medium truncate">{ann.title}</p>
-    <p className="text-xs text-muted-foreground">{formatDate(ann.date)}</p>
-  </li>
-));
-AnnouncementItem.displayName = 'AnnouncementItem';
 
 export function StudentDashboardPage() {
   const user = useAuthStore((state) => state.user);
@@ -119,7 +111,7 @@ export function StudentDashboardPage() {
               <CardContent>
                 <ul className="space-y-3">
                   {data.announcements.map((ann) => (
-                    <AnnouncementItem key={ann.id} ann={ann} />
+                    <AnnouncementItem key={ann.id} title={ann.title} date={ann.date} />
                   ))}
                 </ul>
               </CardContent>

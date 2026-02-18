@@ -5,11 +5,11 @@ import { EmptyState } from '@/components/ui/empty-state';
 import { DashboardSkeleton } from '@/components/ui/loading-skeletons';
 import { PageHeader } from '@/components/PageHeader';
 import { DashboardStatCard } from '@/components/dashboard/DashboardStatCard';
+import { AnnouncementItem } from '@/components/dashboard/AnnouncementItem';
 import { BookCopy, Megaphone, Clock, AlertTriangle, Inbox } from 'lucide-react';
 import { SlideUp } from '@/components/animations';
 import { useTeacherDashboard } from '@/hooks/useTeacher';
 import { useAuthStore } from '@/lib/authStore';
-import { formatDate } from '@/utils/date';
 import type { TeacherDashboardData } from '@shared/types';
 
 const GradeItem = memo(({ grade }: { grade: TeacherDashboardData['recentGrades'][0] }) => (
@@ -21,14 +21,6 @@ const GradeItem = memo(({ grade }: { grade: TeacherDashboardData['recentGrades']
   </li>
 ));
 GradeItem.displayName = 'GradeItem';
-
-const AnnouncementItem = memo(({ ann }: { ann: TeacherDashboardData['recentAnnouncements'][0] }) => (
-  <li className="text-sm">
-    <p className="font-medium truncate">{ann.title}</p>
-    <p className="text-xs text-muted-foreground">{formatDate(ann.date)}</p>
-  </li>
-));
-AnnouncementItem.displayName = 'AnnouncementItem';
 
 export function TeacherDashboardPage() {
   const user = useAuthStore((state) => state.user);
@@ -97,7 +89,7 @@ export function TeacherDashboardPage() {
             <CardContent>
               <ul className="space-y-2">
                 {data.recentAnnouncements.map((ann) => (
-                  <AnnouncementItem key={ann.id} ann={ann} />
+                  <AnnouncementItem key={ann.id} title={ann.title} date={ann.date} />
                 ))}
               </ul>
             </CardContent>
