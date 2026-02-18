@@ -6,8 +6,8 @@ import { rebuildAllIndexes } from "../index-rebuilder";
 import type { CreateUserData, UpdateUserData, Announcement, CreateAnnouncementData, AdminDashboardData, Settings, SchoolUser, UserRole } from "@shared/types";
 import { UserService, CommonDataService, AnnouncementService } from '../domain';
 import { withAuth, withErrorHandler, triggerWebhookSafely } from './route-utils';
-import { validateBody } from '../middleware/validation';
-import { createAnnouncementSchema, updateSettingsSchema } from '../middleware/schemas';
+import { validateBody, validateQuery } from '../middleware/validation';
+import { createAnnouncementSchema, updateSettingsSchema, adminUsersQuerySchema } from '../middleware/schemas';
 import { logger } from '../logger';
 import { getCurrentUserId } from '../type-guards';
 import type { Context } from 'hono';
@@ -47,10 +47,8 @@ export function adminRoutes(app: Hono<{ Bindings: Env }>) {
     return ok(c, dashboardData);
   }));
 
-  app.get('/api/admin/users', ...withAuth('admin'), withErrorHandler('get admin users')(async (c: Context) => {
-    const role = c.req.query('role') as UserRole | undefined;
-    const classId = c.req.query('classId');
-    const search = c.req.query('search');
+  app.get('/api/admin/users', ...withAuth('admin'), validateQuery(adminUsersQuerySchema), withErrorHandler('get admin users')(async (c: Context) => {
+    const { role, classId, search } = c.get('validatedQuery') as { role?: UserRole; classId?: string; search?: string };
 
     const users = await CommonDataService.getUsersWithFilters(c.env, { role, classId, search });
 

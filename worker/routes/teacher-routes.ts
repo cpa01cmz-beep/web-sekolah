@@ -12,6 +12,12 @@ import { getCurrentUserId } from '../type-guards';
 import type { Context } from 'hono';
 
 export function teacherRoutes(app: Hono<{ Bindings: Env }>) {
+  app.get('/api/teachers/:id/classes', ...withUserValidation('teacher', 'classes'), withErrorHandler('get teacher classes')(async (c: Context) => {
+    const teacherId = c.req.param('id');
+    const classes = await TeacherService.getClasses(c.env, teacherId);
+    return ok(c, classes);
+  }));
+
   app.get('/api/teachers/:id/dashboard', ...withUserValidation('teacher', 'dashboard'), withErrorHandler('get teacher dashboard')(async (c: Context) => {
     const requestedTeacherId = c.req.param('id');
     const { teacher, classes: teacherClasses } = await CommonDataService.getTeacherWithClasses(c.env, requestedTeacherId);

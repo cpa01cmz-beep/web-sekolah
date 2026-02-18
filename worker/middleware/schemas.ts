@@ -103,3 +103,11 @@ export const updateWebhookConfigSchema = z.object({
   secret: z.string().min(16, 'Webhook secret must be at least 16 characters').max(500, 'Webhook secret is too long').optional(),
   active: z.boolean().optional(),
 });
+
+export const adminUsersQuerySchema = z.object({
+  role: z.enum(['student', 'teacher', 'parent', 'admin'], {
+    message: 'Invalid role. Must be student, teacher, parent, or admin',
+  }).optional(),
+  classId: z.string().uuid('Invalid class ID format').optional(),
+  search: z.string().max(100, 'Search query must be less than 100 characters').optional(),
+});

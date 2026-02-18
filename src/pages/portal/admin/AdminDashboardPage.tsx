@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { EmptyState } from '@/components/ui/empty-state';
@@ -10,11 +11,40 @@ import { Users, GraduationCap, School, Megaphone, AlertTriangle, Inbox } from 'l
 import { SlideUp } from '@/components/animations';
 import { useReducedMotion } from '@/hooks/use-reduced-motion';
 import { useAdminDashboard } from '@/hooks/useAdmin';
-import type { AdminDashboardData } from '@shared/types';
 
 export function AdminDashboardPage() {
   const prefersReducedMotion = useReducedMotion();
   const { data, isLoading, error } = useAdminDashboard();
+
+  const stats = useMemo(() => data ? [
+    {
+      title: 'Total Students',
+      value: data.totalStudents.toString(),
+      icon: <Users className="h-6 w-6 text-blue-500" />,
+    },
+    {
+      title: 'Total Teachers',
+      value: data.totalTeachers.toString(),
+      icon: <GraduationCap className="h-6 w-6 text-green-500" />,
+    },
+    {
+      title: 'Total Parents',
+      value: data.totalParents.toString(),
+      icon: <School className="h-6 w-6 text-purple-500" />,
+    },
+    {
+      title: 'Total Classes',
+      value: data.totalClasses.toString(),
+      icon: <Megaphone className="h-6 w-6 text-orange-500" />,
+    },
+  ] : [], [data]);
+
+  const enrollmentData = useMemo(() => data ? [
+    { name: 'Students', students: data.userDistribution.students },
+    { name: 'Teachers', students: data.userDistribution.teachers },
+    { name: 'Parents', students: data.userDistribution.parents },
+    { name: 'Admins', students: data.userDistribution.admins },
+  ] : [], [data]);
 
   if (isLoading) return <DashboardSkeleton />;
   if (error) {
@@ -37,36 +67,6 @@ export function AdminDashboardPage() {
     );
   }
 
-  const stats = [
-    {
-      title: 'Total Students',
-      value: data.totalStudents.toString(),
-      icon: <Users className="h-6 w-6 text-blue-500" />,
-    },
-    {
-      title: 'Total Teachers',
-      value: data.totalTeachers.toString(),
-      icon: <GraduationCap className="h-6 w-6 text-green-500" />,
-    },
-    {
-      title: 'Total Parents',
-      value: data.totalParents.toString(),
-      icon: <School className="h-6 w-6 text-purple-500" />,
-    },
-    {
-      title: 'Total Classes',
-      value: data.totalClasses.toString(),
-      icon: <Megaphone className="h-6 w-6 text-orange-500" />,
-    },
-  ];
-
-  const enrollmentData = [
-    { name: 'Students', students: data.userDistribution.students },
-    { name: 'Teachers', students: data.userDistribution.teachers },
-    { name: 'Parents', students: data.userDistribution.parents },
-    { name: 'Admins', students: data.userDistribution.admins },
-  ];
-
   return (
     <SlideUp delay={0} className="space-y-6" style={prefersReducedMotion ? { opacity: 1 } : {}}>
       <SlideUp delay={0.1}>
@@ -76,8 +76,8 @@ export function AdminDashboardPage() {
         />
       </SlideUp>
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-        {stats.map((stat) => (
-          <SlideUp key={stat.title} delay={stats.indexOf(stat) * 0.1 + 0.2} style={prefersReducedMotion ? { opacity: 1 } : {}}>
+        {stats.map((stat, index) => (
+          <SlideUp key={stat.title} delay={index * 0.1 + 0.2} style={prefersReducedMotion ? { opacity: 1 } : {}}>
             <DashboardStatCard
               title={stat.title}
               value={stat.value}

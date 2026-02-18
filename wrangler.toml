@@ -1,6 +1,7 @@
+"$schema" = "./node_modules/wrangler/config-schema.json"
 name = "website-sekolah"
 main = "worker/index.ts"
-compatibility_date = "2025-04-24"
+compatibility_date = "2026-02-18"
 compatibility_flags = ["nodejs_compat"]
 
 [assets]
@@ -10,6 +11,18 @@ run_worker_first = ["/api/*", "!/api/docs/*"]
 
 [observability]
 enabled = true
+
+[observability.logs]
+enabled = true
+
+[triggers]
+crons = ["* * * * *"]
+
+[limits]
+cpu_ms = 50
+
+[placement]
+mode = "smart"
 
 [[durable_objects.bindings]]
 name = "GlobalDurableObject"
@@ -24,6 +37,15 @@ new_sqlite_classes = ["GlobalDurableObject"]
 name = "website-sekolah-staging"
 vars = { ENVIRONMENT = "staging" }
 
+[env.staging.triggers]
+crons = ["* * * * *"]
+
+[env.staging.limits]
+cpu_ms = 50
+
+[env.staging.placement]
+mode = "smart"
+
 [[env.staging.durable_objects.bindings]]
 name = "GlobalDurableObject"
 class_name = "GlobalDurableObject"
@@ -35,7 +57,17 @@ new_sqlite_classes = ["GlobalDurableObject"]
 # Production Environment
 [env.production]
 name = "website-sekolah-production"
+keep_vars = true
 vars = { ENVIRONMENT = "production" }
+
+[env.production.triggers]
+crons = ["* * * * *"]
+
+[env.production.limits]
+cpu_ms = 50
+
+[env.production.placement]
+mode = "smart"
 
 [[env.production.durable_objects.bindings]]
 name = "GlobalDurableObject"

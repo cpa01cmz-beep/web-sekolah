@@ -7,35 +7,35 @@ import { PageHeader } from '@/components/PageHeader';
 import { SlideUp } from '@/components/animations';
 import { useStudentSchedule } from '@/hooks/useStudent';
 import { useAuthStore } from '@/lib/authStore';
-import { useMemo } from 'react';
+import { useMemo, memo } from 'react';
 
-function ScheduleSkeleton() {
-  const days = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat'];
-  return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-      {days.map((day) => (
-        <Card key={day} className="h-full">
-          <CardHeader>
-            <Skeleton className="h-6 w-1/3" />
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="flex items-start space-x-3">
-                  <Skeleton className="h-12 w-24 flex-shrink-0" />
-                  <div className="flex-1 space-y-2">
-                    <Skeleton className="h-4 w-full" />
-                    <Skeleton className="h-3 w-2/3" />
-                  </div>
+const SKELETON_DAYS = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat'];
+
+const ScheduleSkeleton = memo(() => (
+  <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+    {SKELETON_DAYS.map((day) => (
+      <Card key={day} className="h-full">
+        <CardHeader>
+          <Skeleton className="h-6 w-1/3" />
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-3">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="flex items-start space-x-3">
+                <Skeleton className="h-12 w-24 flex-shrink-0" />
+                <div className="flex-1 space-y-2">
+                  <Skeleton className="h-4 w-full" />
+                  <Skeleton className="h-3 w-2/3" />
                 </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      ))}
-    </div>
-  );
-}
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    ))}
+  </div>
+));
+ScheduleSkeleton.displayName = 'ScheduleSkeleton';
 
 export function StudentSchedulePage() {
   const user = useAuthStore((state) => state.user);

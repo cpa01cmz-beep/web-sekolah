@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite --host 0.0.0.0 --port ${PORT:-3000}",
     "build": "vite build",
-    "lint": "eslint --cache -f json --quiet .",
+    "lint": "npx eslint --cache -f json --quiet .",
     "typecheck": "tsc --noEmit",
     "preview": "bun run build && vite preview --host 0.0.0.0 --port ${PORT:-4173}",
     "deploy": "npm run build && wrangler deploy",
@@ -14,7 +14,9 @@
     "test": "vitest",
     "test:run": "vitest run",
     "test:coverage": "vitest run --coverage",
-    "test:ui": "vitest --ui"
+    "test:ui": "vitest --ui",
+    "vercel:build": "vite build",
+    "vercel:preview": "vite preview --host 0.0.0.0 --port ${PORT:-4173}"
   },
   "dependencies": {
     "@radix-ui/react-avatar": "^1.1.10",
