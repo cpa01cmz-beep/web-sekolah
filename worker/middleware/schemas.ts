@@ -50,6 +50,8 @@ export const createAnnouncementSchema = z.object({
   targetRole: z.enum(['all', 'students', 'teachers', 'parents']).default('all'),
 });
 
+export const updateAnnouncementSchema = createAnnouncementSchema.partial().omit({ authorId: true });
+
 export const loginSchema = z.object({
   email: z.string().email('Invalid email address'),
   password: z.string().min(1, 'Password is required'),
