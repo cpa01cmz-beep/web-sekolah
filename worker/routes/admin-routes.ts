@@ -7,7 +7,7 @@ import type { CreateUserData, UpdateUserData, Announcement, CreateAnnouncementDa
 import { UserService, CommonDataService, AnnouncementService } from '../domain';
 import { withAuth, withErrorHandler, triggerWebhookSafely } from './route-utils';
 import { validateBody, validateQuery } from '../middleware/validation';
-import { createAnnouncementSchema, updateSettingsSchema, adminUsersQuerySchema } from '../middleware/schemas';
+import { createAnnouncementSchema, updateSettingsSchema, adminUsersQuerySchema, updateAnnouncementSchema } from '../middleware/schemas';
 import { logger } from '../logger';
 import { getCurrentUserId } from '../type-guards';
 import type { Context } from 'hono';
@@ -66,6 +66,14 @@ export function adminRoutes(app: Hono<{ Bindings: Env }>) {
     const newAnnouncement = await AnnouncementService.createAnnouncement(c.env, announcementData, authorId);
     triggerWebhookSafely(c.env, 'announcement.created', newAnnouncement, { announcementId: newAnnouncement.id });
     return ok(c, newAnnouncement);
+  }));
+
+  app.put('/api/admin/announcements/:id', ...withAuth('admin'), validateBody(updateAnnouncementSchema), withErrorHandler('update announcement')(async (c: Context) => {
+    const announcementId = c.req.param('id');
+    const updates = c.get('validatedBody') as Partial<CreateAnnouncementData>;
+    const updatedAnnouncement = await AnnouncementService.updateAnnouncement(c.env, announcementId, updates);
+    triggerWebhookSafely(c.env, 'announcement.updated', updatedAnnouncement, { announcementId: updatedAnnouncement.id });
+    return ok(c, updatedAnnouncement);
   }));
 
   app.get('/api/admin/settings', ...withAuth('admin'), withErrorHandler('get admin settings')(async (c: Context) => {

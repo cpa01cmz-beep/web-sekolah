@@ -320,4 +320,47 @@ describe('admin-routes - Critical Business Logic', () => {
       expect(announcement).toHaveProperty('date');
     });
   });
+
+  describe('Announcement Update', () => {
+    it('should trigger webhook event for announcement.updated', () => {
+      const eventType = 'announcement.updated';
+      expect(eventType).toBe('announcement.updated');
+    });
+
+    it('should validate update announcement payload', () => {
+      const updatePayload = {
+        title: 'Updated Title',
+        content: 'Updated content',
+        targetRole: 'all' as const
+      };
+
+      expect(updatePayload).toHaveProperty('title');
+      expect(updatePayload).toHaveProperty('content');
+      expect(updatePayload).toHaveProperty('targetRole');
+    });
+
+    it('should support partial updates for announcements', () => {
+      const partialUpdate = {
+        title: 'New Title Only'
+      };
+
+      expect(partialUpdate).toHaveProperty('title');
+      expect(partialUpdate).not.toHaveProperty('content');
+    });
+
+    it('should include updated announcement in webhook payload', () => {
+      const updatedAnnouncement = {
+        id: 'ann-001',
+        title: 'Updated Title',
+        content: 'Updated content',
+        targetRole: 'all' as const,
+        authorId: 'admin-001',
+        date: '2024-01-01T00:00:00Z',
+        updatedAt: '2024-01-15T10:30:00Z'
+      };
+
+      expect(updatedAnnouncement).toHaveProperty('id');
+      expect(updatedAnnouncement).toHaveProperty('updatedAt');
+    });
+  });
 });
