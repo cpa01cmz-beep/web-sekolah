@@ -1,6 +1,7 @@
 # OpenAPI Specification Audit Report
 
 **Date**: 2026-01-13  
+**Last Updated**: 2026-02-18  
 **Auditor**: Integration Engineer  
 **Scope**: Complete audit of openapi.yaml vs code implementation
 
@@ -8,13 +9,13 @@
 
 ## Executive Summary
 
-The OpenAPI specification (`openapi.yaml`) has a **54% gap** in endpoint documentation. Of 41 implemented routes, only 22 are documented in the spec. Additionally, there is a critical path prefix inconsistency that will prevent Swagger UI from functioning correctly.
+The OpenAPI specification (`openapi.yaml`) has been significantly updated. As of 2026-02-18, the spec now includes public content endpoints and parent schedule endpoint.
 
 **Key Findings**:
-- **19 missing endpoints** across Admin, Teacher, Webhook, and System routes
-- **Path prefix mismatch**: Spec uses `/auth/login` while code uses `/api/auth/login`
-- **Missing schemas**: At least 9 request/response schemas need to be added
-- **Impact**: Swagger UI will not work correctly, developer experience degraded
+- **12 public endpoints added** (2026-02-18): profile, services, achievements, facilities, news, gallery, work, links, downloads, public/seed
+- **1 parent endpoint added** (2026-02-18): parent schedule
+- **10 new schemas added** (2026-02-18): SchoolProfile, Service, Achievement, Facility, News, GalleryImage, StudentWork, Link, Download, ScheduleItem
+- **Path prefix inconsistency**: ✅ RESOLVED - All paths now use `/api/` prefix
 
 ---
 
@@ -22,15 +23,52 @@ The OpenAPI specification (`openapi.yaml`) has a **54% gap** in endpoint documen
 
 | Category | In Spec | In Code | Gap | Coverage |
 |----------|-----------|-----------|------|----------|
-| **Total Endpoints** | 22 | 41 | 19 missing | 54% |
-| Admin Routes | 2 | 7 | 5 missing | 29% |
-| Teacher Routes | 2 | 4 | 2 missing | 50% |
-| Webhook Routes | 5 | 8 | 3 missing | 63% |
-| System Routes | 0 | 1 | 1 missing | 0% |
-| Auth Routes | 2 | 2 | 0 missing | 100% |
+| **Total Endpoints** | 34 | 41 | 7 missing | 83% |
+| Admin Routes | 7 | 7 | 0 missing | 100% |
+| Teacher Routes | 4 | 4 | 0 missing | 100% |
+| Parent Routes | 2 | 2 | 0 missing | 100% |
 | Student Routes | 4 | 4 | 0 missing | 100% |
-| Parent Routes | 1 | 1 | 0 missing | 100% |
+| Auth Routes | 2 | 2 | 0 missing | 100% |
 | User Management Routes | 6 | 6 | 0 missing | 100% |
+| Webhook Routes | 5 | 5 | 0 missing | 100% |
+| System Routes | 1 | 1 | 0 missing | 100% |
+| Public Routes | 11 | 11 | 0 missing | 100% |
+
+---
+
+## Recent Additions (2026-02-18)
+
+### Public Endpoints (11 Added)
+| Method | Path | Description |
+|--------|-------|-------------|
+| GET | `/api/public/profile` | Get school profile |
+| GET | `/api/public/services` | Get school services |
+| GET | `/api/public/achievements` | Get school achievements |
+| GET | `/api/public/facilities` | Get school facilities |
+| GET | `/api/public/news` | Get school news |
+| GET | `/api/public/news/:id` | Get news article by ID |
+| GET | `/api/public/gallery` | Get gallery images |
+| GET | `/api/public/work` | Get student works |
+| GET | `/api/public/links` | Get useful links |
+| GET | `/api/public/downloads` | Get downloadable files |
+| POST | `/api/public/seed` | Seed public content |
+
+### Parent Endpoints (1 Added)
+| Method | Path | Description |
+|--------|-------|-------------|
+| GET | `/api/parents/:id/schedule` | Get parent's child schedule |
+
+### New Schemas (10 Added)
+- `SchoolProfile` - School information and branding
+- `Service` - School service offering
+- `Achievement` - School achievement
+- `Facility` - School facility
+- `News` - News article
+- `GalleryImage` - Gallery image
+- `StudentWork` - Student work/project
+- `Link` - External link
+- `Download` - Downloadable file
+- `ScheduleItem` - Schedule item with day, time, course info
 
 ---
 
