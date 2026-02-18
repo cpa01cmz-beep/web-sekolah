@@ -1,51 +1,57 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, memo } from 'react';
 import { THEME_COLORS } from '@/theme/colors';
+import { logger } from '@/lib/logger';
 
 interface ChartComponents {
-  BarChart: React.ComponentType<any>;
-  Bar: React.ComponentType<any>;
-  XAxis: React.ComponentType<any>;
-  YAxis: React.ComponentType<any>;
-  CartesianGrid: React.ComponentType<any>;
-  Tooltip: React.ComponentType<any>;
-  Legend: React.ComponentType<any>;
-  ResponsiveContainer: React.ComponentType<any>;
+  BarChart: React.ComponentType<Record<string, unknown>>;
+  Bar: React.ComponentType<Record<string, unknown>>;
+  XAxis: React.ComponentType<Record<string, unknown>>;
+  YAxis: React.ComponentType<Record<string, unknown>>;
+  CartesianGrid: React.ComponentType<Record<string, unknown>>;
+  Tooltip: React.ComponentType<Record<string, unknown>>;
+  Legend: React.ComponentType<Record<string, unknown>>;
+  ResponsiveContainer: React.ComponentType<Record<string, unknown>>;
 }
 
 interface EnrollmentChartProps {
   data: Array<{ name: string; students: number }>;
 }
 
-export function EnrollmentChart({ data }: EnrollmentChartProps) {
+export const EnrollmentChart = memo(function EnrollmentChart({ data }: EnrollmentChartProps) {
   const [Chart, setChart] = useState<ChartComponents | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    Promise.all([
-      import('recharts/es6/chart/BarChart'),
-      import('recharts/es6/cartesian/Bar'),
-      import('recharts/es6/cartesian/XAxis'),
-      import('recharts/es6/cartesian/YAxis'),
-      import('recharts/es6/cartesian/CartesianGrid'),
-      import('recharts/es6/component/Tooltip'),
-      import('recharts/es6/component/Legend'),
-      import('recharts/es6/component/ResponsiveContainer'),
-    ]).then(([BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer]) => {
-      setChart({
-        BarChart: BarChart.BarChart,
-        Bar: Bar.Bar,
-        XAxis: XAxis.XAxis,
-        YAxis: YAxis.YAxis,
-        CartesianGrid: CartesianGrid.CartesianGrid,
-        Tooltip: Tooltip.Tooltip,
-        Legend: Legend.Legend,
-        ResponsiveContainer: ResponsiveContainer.ResponsiveContainer,
-      });
-    }).catch((error) => {
-      console.error('Failed to load chart components:', error);
-    }).finally(() => {
-      setIsLoading(false);
-    });
+    const loadChartComponents = async () => {
+      try {
+        const [BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer] = await Promise.all([
+          import('recharts/es6/chart/BarChart'),
+          import('recharts/es6/cartesian/Bar'),
+          import('recharts/es6/cartesian/XAxis'),
+          import('recharts/es6/cartesian/YAxis'),
+          import('recharts/es6/cartesian/CartesianGrid'),
+          import('recharts/es6/component/Tooltip'),
+          import('recharts/es6/component/Legend'),
+          import('recharts/es6/component/ResponsiveContainer'),
+        ]);
+        setChart({
+          BarChart: BarChart.BarChart,
+          Bar: Bar.Bar,
+          XAxis: XAxis.XAxis,
+          YAxis: YAxis.YAxis,
+          CartesianGrid: CartesianGrid.CartesianGrid,
+          Tooltip: Tooltip.Tooltip,
+          Legend: Legend.Legend,
+          ResponsiveContainer: ResponsiveContainer.ResponsiveContainer,
+        });
+      } catch (error) {
+        logger.error('Failed to load chart components:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadChartComponents();
   }, []);
 
   if (isLoading || !Chart) {
@@ -64,4 +70,4 @@ export function EnrollmentChart({ data }: EnrollmentChartProps) {
       </Chart.BarChart>
     </Chart.ResponsiveContainer>
   );
-}
+});
