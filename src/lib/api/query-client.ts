@@ -22,14 +22,14 @@ export const queryClient = new QueryClient({
         if (error.code === 'VALIDATION_ERROR') return false;
         if (error.code === 'UNAUTHORIZED') return false;
         if (error.code === 'FORBIDDEN') return false;
-        return failureCount < 3;
+        return failureCount < RetryCount.THREE;
       },
       retryDelay: (attemptIndex) => Math.min(RetryDelay.ONE_SECOND * Math.pow(2, attemptIndex), RetryDelay.THIRTY_SECONDS),
     },
     mutations: {
       retry: (failureCount, error: ApiError) => {
         if (!error.retryable) return false;
-        return failureCount < 2;
+        return failureCount < RetryCount.TWO;
       },
     },
   },
