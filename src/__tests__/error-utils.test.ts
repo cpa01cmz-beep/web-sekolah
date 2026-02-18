@@ -9,6 +9,7 @@ describe('Error Utils - mapStatusToErrorCode', () => {
       [403, 'FORBIDDEN'],
       [404, 'NOT_FOUND'],
       [408, 'TIMEOUT'],
+      [409, 'CONFLICT'],
       [429, 'RATE_LIMIT_EXCEEDED'],
       [503, 'SERVICE_UNAVAILABLE'],
       [504, 'TIMEOUT'],
@@ -147,7 +148,7 @@ describe('Error Utils - mapStatusToErrorCode', () => {
 
   describe('Consistency - Return Type', () => {
     it('should return string for all inputs', () => {
-      const testCodes = [0, 100, 200, 300, 400, 401, 403, 404, 408, 429, 500, 503, 504, 999, -1];
+      const testCodes = [0, 100, 200, 300, 400, 401, 403, 404, 408, 409, 429, 500, 503, 504, 999, -1];
       
       testCodes.forEach(code => {
         const result = mapStatusToErrorCode(code);
@@ -156,7 +157,7 @@ describe('Error Utils - mapStatusToErrorCode', () => {
     });
 
     it('should not return undefined or null', () => {
-      const testCodes = [0, 100, 200, 300, 400, 401, 403, 404, 408, 429, 500, 503, 504, 999, -1];
+      const testCodes = [0, 100, 200, 300, 400, 401, 403, 404, 408, 409, 429, 500, 503, 504, 999, -1];
       
       testCodes.forEach(code => {
         const result = mapStatusToErrorCode(code);
@@ -174,6 +175,7 @@ describe('Error Utils - mapStatusToErrorCode', () => {
         [403, 'FORBIDDEN'],
         [404, 'NOT_FOUND'],
         [408, 'TIMEOUT'],
+        [409, 'CONFLICT'],
         [429, 'RATE_LIMIT_EXCEEDED'],
         [503, 'SERVICE_UNAVAILABLE'],
         [504, 'TIMEOUT'],
@@ -213,7 +215,7 @@ describe('Error Utils - mapStatusToErrorCode', () => {
     it('should handle multiple different inputs without side effects', () => {
       const results: string[] = [];
       
-      const testCodes = [400, 401, 403, 404, 408, 429, 500, 503, 504];
+      const testCodes = [400, 401, 403, 404, 408, 409, 429, 500, 503, 504];
       testCodes.forEach(code => {
         results.push(mapStatusToErrorCode(code));
       });
