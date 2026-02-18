@@ -9,7 +9,7 @@ import { logger } from './logger';
 import { verifyPassword } from './password-utils';
 import { UserService } from './domain';
 import { getRoleSpecificFields, getAuthUser } from './type-guards';
-import { withErrorHandler } from './routes/route-utils';
+import { withErrorHandler, triggerWebhookSafely } from './routes/route-utils';
 import type { Context } from 'hono';
 
 export function authRoutes(app: Hono<{ Bindings: Env }>) {
@@ -100,6 +100,14 @@ export function authRoutes(app: Hono<{ Bindings: Env }>) {
     };
 
     logger.info('[AUTH] User logged in successfully', { userId: user.id, email: user.email, role: user.role });
+
+    triggerWebhookSafely(c.env, 'user.login', {
+      userId: user.id,
+      email: user.email,
+      role: user.role,
+      loginMethod: 'password',
+      loginAt: new Date().toISOString()
+    }, { userId: user.id });
 
     return ok(c, {
       token,
