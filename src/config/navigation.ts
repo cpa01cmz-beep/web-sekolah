@@ -35,6 +35,7 @@ export const studentLinks: NavLink[] = [
 
 export const teacherLinks: NavLink[] = [
   createLink('dashboard', 'dashboard', 'Dashboard'),
+  createLink('schedule', 'calendar', 'Schedule'),
   createLink('grades', 'bookCopy', 'Grade Management'),
   createLink('announcements', 'megaphone', 'Announcements'),
 ];

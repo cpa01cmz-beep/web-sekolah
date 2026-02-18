@@ -7,7 +7,8 @@ import type {
   SubmitGradeData,
   Announcement,
   CreateAnnouncementData,
-  ClassStudentWithGrade
+  ClassStudentWithGrade,
+  ScheduleItem
 } from '@shared/types';
 import { CachingTime } from '@/config/time';
 import { createQueryOptions } from '@/config/query-config';
@@ -26,6 +27,15 @@ export function useTeacherClasses(teacherId: string, options?: UseQueryOptions<S
     queryKey: ['teachers', teacherId, 'classes'],
     queryFn: () => teacherService.getClasses(teacherId),
     ...createQueryOptions<SchoolClass[]>({ enabled: !!teacherId, staleTime: CachingTime.ONE_HOUR }),
+    ...options,
+  });
+}
+
+export function useTeacherSchedule(teacherId: string, options?: UseQueryOptions<(ScheduleItem & { className: string; courseName: string })[]>) {
+  return useTanstackQuery({
+    queryKey: ['teachers', teacherId, 'schedule'],
+    queryFn: () => teacherService.getSchedule(teacherId),
+    ...createQueryOptions<(ScheduleItem & { className: string; courseName: string })[]>({ enabled: !!teacherId, staleTime: CachingTime.ONE_HOUR }),
     ...options,
   });
 }

@@ -6,7 +6,8 @@ import type {
   Announcement,
   SubmitGradeData,
   CreateAnnouncementData,
-  ClassStudentWithGrade
+  ClassStudentWithGrade,
+  ScheduleItem
 } from '@shared/types';
 import type { IRepository } from '@/repositories/IRepository';
 import { apiRepository } from '@/repositories/ApiRepository';
@@ -20,6 +21,10 @@ export function createTeacherService(repository: IRepository = apiRepository): T
 
     async getClasses(teacherId: string): Promise<SchoolClass[]> {
       return repository.get<SchoolClass[]>(API_ENDPOINTS.TEACHERS.CLASSES(teacherId));
+    },
+
+    async getSchedule(teacherId: string): Promise<(ScheduleItem & { className: string; courseName: string })[]> {
+      return repository.get<(ScheduleItem & { className: string; courseName: string })[]>(API_ENDPOINTS.TEACHERS.SCHEDULE(teacherId));
     },
 
     async submitGrade(gradeData: SubmitGradeData): Promise<Grade> {
