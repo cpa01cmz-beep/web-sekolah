@@ -47,15 +47,17 @@ export function teacherRoutes(app: Hono<{ Bindings: Env }>) {
     return ok(c, dashboardData);
   }));
 
-  app.get('/api/teachers/:id/classes', ...withUserValidation('teacher', 'classes'), withErrorHandler('get teacher classes')(async (c: Context) => {
-    const teacherId = c.req.param('id');
-    const classes = await TeacherService.getClasses(c.env, teacherId);
-    return ok(c, classes);
-  }));
-
   app.get('/api/teachers/:id/announcements', ...withUserValidation('teacher', 'announcements'), withErrorHandler('get teacher announcements')(async (c: Context) => {
     const filteredAnnouncements = await CommonDataService.getAnnouncementsByRole(c.env, 'teacher');
     return ok(c, filteredAnnouncements);
+  }));
+
+  app.get('/api/classes/:id/students', ...withAuth('teacher'), withErrorHandler('get class students with grades')(async (c: Context) => {
+    const classId = c.req.param('id');
+    const teacherId = getCurrentUserId(c);
+
+    const studentsWithGrades = await TeacherService.getClassStudentsWithGrades(c.env, classId, teacherId);
+    return ok(c, studentsWithGrades);
   }));
 
   app.post('/api/teachers/grades', ...withAuth('teacher'), validateBody(createGradeSchema), withErrorHandler('create grade')(async (c: Context) => {
@@ -71,5 +73,12 @@ export function teacherRoutes(app: Hono<{ Bindings: Env }>) {
     const newAnnouncement = await AnnouncementService.createAnnouncement(c.env, announcementData, authorId);
     triggerWebhookSafely(c.env, 'announcement.created', newAnnouncement, { announcementId: newAnnouncement.id });
     return ok(c, newAnnouncement);
+  }));
+
+  app.get('/api/classes/:id/students', ...withAuth('teacher'), withErrorHandler('get class students with grades')(async (c: Context) => {
+    const classId = c.req.param('id');
+    const teacherId = getCurrentUserId(c);
+    const students = await TeacherService.getClassStudentsWithGrades(c.env, classId, teacherId);
+    return ok(c, students);
   }));
 }
