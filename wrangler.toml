@@ -14,6 +14,7 @@ enabled = true
 
 [observability.logs]
 enabled = true
+head_sampling = 0.1
 
 [triggers]
 crons = ["* * * * *"]
@@ -46,6 +47,13 @@ cpu_ms = 50
 [env.staging.placement]
 mode = "smart"
 
+[env.staging.observability]
+enabled = true
+
+[env.staging.observability.logs]
+enabled = true
+head_sampling = 0.2
+
 [[env.staging.durable_objects.bindings]]
 name = "GlobalDurableObject"
 class_name = "GlobalDurableObject"
@@ -68,6 +76,13 @@ cpu_ms = 50
 
 [env.production.placement]
 mode = "smart"
+
+[env.production.observability]
+enabled = true
+
+[env.production.observability.logs]
+enabled = true
+head_sampling = 0.05
 
 [[env.production.durable_objects.bindings]]
 name = "GlobalDurableObject"
