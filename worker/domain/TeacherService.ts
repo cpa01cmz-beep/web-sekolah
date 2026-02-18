@@ -1,19 +1,13 @@
 import type { Env } from '../core-utils';
 import { UserEntity, ClassEntity, CourseEntity, GradeEntity } from '../entities';
-import type { Grade, SchoolClass, Teacher } from '@shared/types';
+import type { Grade, SchoolClass, Teacher, ClassStudentWithGrade } from '@shared/types';
 
 export class TeacherService {
   static async getClasses(env: Env, teacherId: string): Promise<SchoolClass[]> {
     return await ClassEntity.getByTeacherId(env, teacherId);
   }
 
-  static async getClassStudentsWithGrades(env: Env, classId: string, teacherId: string): Promise<Array<{
-    id: string;
-    name: string;
-    score: number | null;
-    feedback: string;
-    gradeId: string | null;
-  }>> {
+  static async getClassStudentsWithGrades(env: Env, classId: string, teacherId: string): Promise<ClassStudentWithGrade[]> {
     const classEntity = new ClassEntity(env, classId);
     const classState = await classEntity.getState();
     
