@@ -32,7 +32,7 @@ export function createTeacherService(repository: IRepository = apiRepository): T
       return repository.post<Announcement>(`/api/teachers/announcements`, announcement);
     },
 
-    async getClassStudentsWithGrades(classId: string): Promise<Array<{
+    async getClassStudentsWithGrades(classId: string, teacherId: string): Promise<Array<{
       id: string;
       name: string;
       score: number | null;

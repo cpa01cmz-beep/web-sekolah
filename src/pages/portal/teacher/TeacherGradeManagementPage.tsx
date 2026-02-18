@@ -30,7 +30,7 @@ export function TeacherGradeManagementPage() {
   const [selectedClass, setSelectedClass] = useState<string | null>(null);
   const [editingStudent, setEditingStudent] = useState<StudentGrade | null>(null);
   const { data: classes, isLoading: isLoadingClasses } = useTeacherClasses(user?.id || '');
-  const { data: students, isLoading: isLoadingStudents } = useTeacherClassStudents(selectedClass || '');
+  const { data: students, isLoading: isLoadingStudents } = useTeacherClassStudents(selectedClass || '', user?.id || '');
   const gradeMutation = useMutation<UpdateGradeData, Error, UpdateGradeData>(['grades', editingStudent?.gradeId || ''], {
     method: 'PUT',
     onSuccess: () => {
