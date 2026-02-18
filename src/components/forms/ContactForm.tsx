@@ -3,7 +3,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { FormField } from '@/components/ui/form-field';
 import { FormSuccess } from '@/components/ui/form-success';
-import { useState, memo } from 'react';
+import { useState, memo, useCallback, useMemo } from 'react';
 import { validateName, validateEmail, validateMessage } from '@/utils/validation';
 import { logger } from '@/lib/logger';
 import { useFormValidation } from '@/hooks/useFormValidation';
@@ -48,20 +48,22 @@ export const ContactForm = memo(function ContactForm({ onSubmit }: ContactFormPr
     }
   };
 
-  const handleReset = () => {
+  const handleReset = useCallback(() => {
     setIsSuccess(false);
     resetValidation();
-  };
+  }, [resetValidation]);
+
+  const successAction = useMemo(() => ({
+    label: "Send Another Message",
+    onClick: handleReset,
+  }), [handleReset]);
 
   if (isSuccess) {
     return (
       <FormSuccess
         title="Message Sent Successfully!"
         description="Thank you for reaching out. We'll get back to you as soon as possible."
-        action={{
-          label: "Send Another Message",
-          onClick: handleReset,
-        }}
+        action={successAction}
       />
     );
   }

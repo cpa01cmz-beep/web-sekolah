@@ -42,14 +42,14 @@ export const AnnouncementForm = memo(function AnnouncementForm({ open, onClose, 
     }
   }, [onClose, resetValidation]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = useCallback((e: React.FormEvent) => {
     e.preventDefault();
     if (!validateAll()) {
       return;
     }
 
     onSave({ title: title.trim(), content: content.trim() });
-  };
+  }, [validateAll, title, content, onSave]);
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
