@@ -35,7 +35,7 @@ Please note that this project is released with a Contributor Code of Conduct. By
 
 2. Install dependencies:
    ```
-   bun install
+   npm install
    ```
 
 3. Create a feature branch:
