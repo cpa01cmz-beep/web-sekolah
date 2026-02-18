@@ -15,9 +15,9 @@ import type { TeacherDashboardData } from '@shared/types';
 
 const GradeItem = memo(({ grade }: { grade: TeacherDashboardData['recentGrades'][0] }) => (
   <li className="text-sm">
-    <p className="font-medium">{grade.studentId}</p>
+    <p className="font-medium">{grade.studentName}</p>
     <p className="text-xs text-muted-foreground">
-      Score: {grade.score} - {grade.courseId}
+      {grade.courseName}: Score {grade.score}
     </p>
   </li>
 ));
