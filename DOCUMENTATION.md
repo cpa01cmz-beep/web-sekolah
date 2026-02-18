@@ -401,9 +401,9 @@ npm run test:ui
 npm run lint
 ```
 
-**Test Statistics** (as of 2026-01-20):
-- Total tests: 2032 (2032 passing, 6 skipped, 155 todo)
-- Test files: 64
+**Test Statistics** (as of 2026-01-30):
+- Total tests: 2610 (2610 passing, 114 skipped, 155 todo)
+- Test files: 83
 - Coverage: Critical infrastructure, services, hooks, utilities, validation, domain services, rate limiting, query optimization
 
 For detailed testing strategy, see [docs/task.md](./docs/task.md).
