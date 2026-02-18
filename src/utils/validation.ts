@@ -12,7 +12,7 @@ export interface ValidationError {
   message?: string;
 }
 
-export interface ValidationRule<T = any> {
+export interface ValidationRule<T = unknown> {
   validate: (value: T) => boolean;
   message: string;
 }
