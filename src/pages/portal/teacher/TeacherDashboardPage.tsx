@@ -82,11 +82,15 @@ export function TeacherDashboardPage() {
               <Megaphone className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
             </CardHeader>
             <CardContent>
-              <ul className="space-y-2">
-                {data.recentGrades.map((grade) => (
-                  <GradeItem key={grade.id} grade={grade} />
-                ))}
-              </ul>
+              {data.recentGrades.length === 0 ? (
+                <p className="text-sm text-muted-foreground text-center py-4">No recent grades recorded.</p>
+              ) : (
+                <ul className="space-y-2">
+                  {data.recentGrades.map((grade) => (
+                    <GradeItem key={grade.id} grade={grade} />
+                  ))}
+                </ul>
+              )}
             </CardContent>
           </Card>
         </SlideUp>
@@ -97,11 +101,15 @@ export function TeacherDashboardPage() {
               <Clock className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
             </CardHeader>
             <CardContent>
-              <ul className="space-y-2">
-                {data.recentAnnouncements.map((ann) => (
-                  <AnnouncementItem key={ann.id} ann={ann} />
-                ))}
-              </ul>
+              {data.recentAnnouncements.length === 0 ? (
+                <p className="text-sm text-muted-foreground text-center py-4">No announcements available.</p>
+              ) : (
+                <ul className="space-y-2">
+                  {data.recentAnnouncements.map((ann) => (
+                    <AnnouncementItem key={ann.id} ann={ann} />
+                  ))}
+                </ul>
+              )}
             </CardContent>
           </Card>
         </SlideUp>
