@@ -1,6 +1,7 @@
 import type { Env } from './core-utils';
 import { logger } from './logger';
 import { integrationMonitor } from './integration-monitor';
+import { WebhookService } from './webhook-service';
 
 type ScheduledTask = (env: Env) => Promise<void>;
 
@@ -16,7 +17,6 @@ const SCHEDULED_TASKS: ScheduledTaskConfig[] = [
     cron: '* * * * *',
     handler: async (env: Env) => {
       logger.debug('Processing pending webhook deliveries (scheduled)');
-      const { WebhookService } = await import('./webhook-service');
       await WebhookService.processPendingDeliveries(env);
     },
   },
