@@ -1,6 +1,6 @@
 import type { Env } from '../core-utils';
-import { UserEntity, ClassEntity, CourseEntity, GradeEntity } from '../entities';
-import type { Grade, SchoolClass, Teacher } from '@shared/types';
+import { UserEntity, ClassEntity, CourseEntity, GradeEntity, ScheduleEntity } from '../entities';
+import type { Grade, SchoolClass, Teacher, ScheduleItem } from '@shared/types';
 
 export class TeacherService {
   static async getClasses(env: Env, teacherId: string): Promise<SchoolClass[]> {
@@ -53,5 +53,36 @@ export class TeacherService {
         gradeId: relevantGrade?.id ?? null,
       };
     });
+  }
+
+  static async getSchedule(env: Env, teacherId: string): Promise<(ScheduleItem & { className: string; courseName: string })[]> {
+    const teacherClasses = await ClassEntity.getByTeacherId(env, teacherId);
+    const allScheduleItems: (ScheduleItem & { className: string; courseId: string })[] = [];
+
+    for (const cls of teacherClasses) {
+      const scheduleEntity = new ScheduleEntity(env, cls.id);
+      const scheduleState = await scheduleEntity.getState();
+      if (scheduleState && scheduleState.items) {
+        for (const item of scheduleState.items) {
+          allScheduleItems.push({
+            ...item,
+            className: cls.name,
+            courseId: item.courseId,
+          });
+        }
+      }
+    }
+
+    const courseIds = Array.from(new Set(allScheduleItems.map(item => item.courseId)));
+    const courses = await Promise.all(courseIds.map(id => new CourseEntity(env, id).getState()));
+    const coursesMap = new Map(courses.filter(c => c).map(c => [c!.id, c!]));
+
+    return allScheduleItems.map(item => ({
+      day: item.day,
+      time: item.time,
+      courseId: item.courseId,
+      className: item.className,
+      courseName: coursesMap.get(item.courseId)?.name || 'Unknown Course',
+    }));
   }
 }

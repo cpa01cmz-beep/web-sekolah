@@ -13,6 +13,7 @@ export const API_ENDPOINTS = {
   TEACHERS: {
     DASHBOARD: (teacherId: string) => `/api/teachers/${teacherId}/dashboard`,
     CLASSES: (teacherId: string) => `/api/teachers/${teacherId}/classes`,
+    SCHEDULE: (teacherId: string) => `/api/teachers/${teacherId}/schedule`,
     GRADES: '/api/teachers/grades',
     ANNOUNCEMENTS: (teacherId: string) => `/api/teachers/${teacherId}/announcements`,
     CREATE_ANNOUNCEMENT: '/api/teachers/announcements',
