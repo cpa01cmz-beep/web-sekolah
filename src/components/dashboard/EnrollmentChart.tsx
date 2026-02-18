@@ -1,16 +1,26 @@
 import { useState, useEffect } from 'react';
 import { THEME_COLORS } from '@/theme/colors';
 import { logger } from '@/lib/logger';
+import type { 
+  BarChartProps, 
+  BarProps, 
+  XAxisProps, 
+  YAxisProps, 
+  CartesianGridProps,
+  TooltipProps,
+  LegendProps,
+  ResponsiveContainerProps 
+} from 'recharts';
 
 interface ChartComponents {
-  BarChart: React.ComponentType<any>;
-  Bar: React.ComponentType<any>;
-  XAxis: React.ComponentType<any>;
-  YAxis: React.ComponentType<any>;
-  CartesianGrid: React.ComponentType<any>;
-  Tooltip: React.ComponentType<any>;
-  Legend: React.ComponentType<any>;
-  ResponsiveContainer: React.ComponentType<any>;
+  BarChart: React.FC<BarChartProps>;
+  Bar: React.FC<BarProps>;
+  XAxis: React.FC<XAxisProps>;
+  YAxis: React.FC<YAxisProps>;
+  CartesianGrid: React.FC<CartesianGridProps>;
+  Tooltip: React.FC<TooltipProps<number, string>>;
+  Legend: React.FC<LegendProps>;
+  ResponsiveContainer: React.FC<ResponsiveContainerProps>;
 }
 
 interface EnrollmentChartProps {
