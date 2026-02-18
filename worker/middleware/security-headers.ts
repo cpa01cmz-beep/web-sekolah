@@ -92,5 +92,9 @@ export function securityHeaders(config: SecurityHeadersConfig = {}) {
     response.headers.set('X-XSS-Protection', '1; mode=block');
     response.headers.set('Cross-Origin-Opener-Policy', 'same-origin');
     response.headers.set('Cross-Origin-Resource-Policy', 'same-site');
+    response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+    response.headers.set('Pragma', 'no-cache');
+    response.headers.set('Expires', '0');
+    response.headers.set('Surrogate-Control', 'no-store');
   };
 }
