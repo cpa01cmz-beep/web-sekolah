@@ -10,6 +10,7 @@ import { useStudentDashboard } from '@/hooks/useStudent';
 import { useAuthStore } from '@/lib/authStore';
 import type { StudentDashboardData } from '@shared/types';
 import { formatDate } from '@/utils/date';
+import { getGradeLetter } from '@/utils/grades';
 import { memo } from 'react';
 
 const ScheduleItem = memo(({ item }: { item: StudentDashboardData['schedule'][0] }) => (
@@ -30,7 +31,7 @@ const GradeItem = memo(({ grade }: { grade: StudentDashboardData['recentGrades']
       <p className="text-sm font-medium">{grade.courseName}</p>
       <Badge className={isPassing ? 'bg-green-500 text-white' : 'bg-red-500 text-white'}>
         <span className="sr-only">{isPassing ? 'Passing grade: ' : 'Failing grade: '}</span>
-        {grade.score}
+        {getGradeLetter(grade.score)} ({grade.score})
       </Badge>
     </li>
   );

@@ -17,8 +17,8 @@ const GradeItem = memo(({ grade }: { grade: ParentDashboardData['childGrades'][0
   const isPassing = grade.score >= 70;
   return (
     <li className="flex items-center justify-between">
-      <p className="text-sm font-medium">{grade.courseId}</p>
-      <Badge variant={getGradeBadgeVariant(grade.score)} className="bg-green-500 text-white">
+      <p className="text-sm font-medium">{grade.courseName}</p>
+      <Badge variant={getGradeBadgeVariant(grade.score)} className={isPassing ? 'bg-green-500 text-white' : 'bg-red-500 text-white'}>
         <span className="sr-only">{isPassing ? 'Passing grade: ' : 'Failing grade: '}</span>
         {getGradeLetter(grade.score)} ({grade.score})
       </Badge>
