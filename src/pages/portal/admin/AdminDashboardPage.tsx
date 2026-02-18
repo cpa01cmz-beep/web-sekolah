@@ -101,11 +101,15 @@ export function AdminDashboardPage() {
               <CardTitle>Recent Announcements</CardTitle>
             </CardHeader>
               <CardContent>
-                <ul className="space-y-4">
-                  {data.recentAnnouncements.map((ann) => (
-                    <AnnouncementItem key={ann.id} ann={ann} />
-                  ))}
-                </ul>
+                {data.recentAnnouncements.length === 0 ? (
+                  <p className="text-sm text-muted-foreground text-center py-8">No announcements available.</p>
+                ) : (
+                  <ul className="space-y-4">
+                    {data.recentAnnouncements.map((ann) => (
+                      <AnnouncementItem key={ann.id} ann={ann} />
+                    ))}
+                  </ul>
+                )}
               </CardContent>
           </Card>
         </SlideUp>

@@ -90,11 +90,15 @@ export function StudentDashboardPage() {
                 <Clock className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
               </CardHeader>
               <CardContent>
-                <ul className="space-y-3">
-                  {data.schedule.slice(0, 3).map((item) => (
-                    <ScheduleItem key={`${item.courseId}-${item.time}`} item={item} />
-                  ))}
-                </ul>
+                {data.schedule.length === 0 ? (
+                  <p className="text-sm text-muted-foreground text-center py-4">No classes scheduled for today.</p>
+                ) : (
+                  <ul className="space-y-3">
+                    {data.schedule.slice(0, 3).map((item) => (
+                      <ScheduleItem key={`${item.courseId}-${item.time}`} item={item} />
+                    ))}
+                  </ul>
+                )}
               </CardContent>
             </Card>
           </SlideUp>
@@ -105,11 +109,15 @@ export function StudentDashboardPage() {
                 <BookOpen className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
               </CardHeader>
               <CardContent>
-                <ul className="space-y-3">
-                  {data.recentGrades.map((grade) => (
-                    <GradeItem key={grade.id} grade={grade} />
-                  ))}
-                </ul>
+                {data.recentGrades.length === 0 ? (
+                  <p className="text-sm text-muted-foreground text-center py-4">No grades recorded yet.</p>
+                ) : (
+                  <ul className="space-y-3">
+                    {data.recentGrades.map((grade) => (
+                      <GradeItem key={grade.id} grade={grade} />
+                    ))}
+                  </ul>
+                )}
               </CardContent>
             </Card>
           </SlideUp>
@@ -120,11 +128,15 @@ export function StudentDashboardPage() {
                 <Megaphone className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
               </CardHeader>
               <CardContent>
-                <ul className="space-y-3">
-                  {data.announcements.map((ann) => (
-                    <AnnouncementItem key={ann.id} ann={ann} />
-                  ))}
-                </ul>
+                {data.announcements.length === 0 ? (
+                  <p className="text-sm text-muted-foreground text-center py-4">No announcements available.</p>
+                ) : (
+                  <ul className="space-y-3">
+                    {data.announcements.map((ann) => (
+                      <AnnouncementItem key={ann.id} ann={ann} />
+                    ))}
+                  </ul>
+                )}
               </CardContent>
             </Card>
           </SlideUp>
