@@ -47,11 +47,4 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
     triggerWebhookSafely(c.env, 'grade.updated', updatedGrade, { gradeId });
     return ok(c, updatedGrade);
   }));
-
-  app.post('/api/grades', ...withAuth('teacher'), validateBody(createGradeSchema), withErrorHandler('create grade')(async (c: Context) => {
-    const validatedData = c.get('validatedBody') as typeof createGradeSchema._output;
-    const newGrade = await GradeService.createGrade(c.env, validatedData);
-    triggerWebhookSafely(c.env, 'grade.created', newGrade, { gradeId: newGrade.id });
-    return ok(c, newGrade);
-  }));
 }
