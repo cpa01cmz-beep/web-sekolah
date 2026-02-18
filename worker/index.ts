@@ -8,6 +8,7 @@ import { authRoutes } from './auth-routes';
 import { webhookRoutes } from './webhook-routes';
 import { adminMonitoringRoutes } from './admin-monitoring-routes';
 import { docsRoutes } from './docs-routes';
+import { publicRoutes } from './routes/public-routes';
 import { Env, GlobalDurableObject, ok, notFound, serverError, bad } from './core-utils';
 import { logger as pinoLogger } from './logger';
 import { ClientErrorReport, CSPViolationReport } from './types/index';
@@ -62,6 +63,7 @@ app.use('/api/*', responseErrorMonitoring());
 
 app.use('/api/client-errors', strictRateLimiter());
 app.use('/api/seed', strictRateLimiter());
+app.use('/api/public', defaultRateLimiter());
 app.use('/api/users', defaultRateLimiter());
 app.use('/api/grades', defaultRateLimiter());
 app.use('/api/students', defaultRateLimiter());
@@ -76,6 +78,7 @@ userRoutes(app);
 webhookRoutes(app);
 adminMonitoringRoutes(app);
 docsRoutes(app);
+publicRoutes(app);
 
 app.get('/api/health', async (c) => {
   const metrics = integrationMonitor.getHealthMetrics();
