@@ -35,6 +35,13 @@ export class CompoundSecondaryIndex extends Entity<unknown> {
     return entityIds;
   }
 
+  async countByValues(fieldValues: string[]): Promise<number> {
+    const joinedKey = fieldValues.join(':');
+    const prefix = `compound:${joinedKey}:entity:`;
+    const { keys } = await this.stub.listPrefix(prefix);
+    return keys.length;
+  }
+
   async clearValues(fieldValues: string[]): Promise<void> {
     const joinedKey = fieldValues.join(':');
     const prefix = `compound:${joinedKey}:entity:`;
