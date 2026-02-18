@@ -5,4 +5,5 @@ export { UserService } from './UserService';
 export { ParentDashboardService } from './ParentDashboardService';
 export { CommonDataService } from './CommonDataService';
 export { AnnouncementService } from './AnnouncementService';
+export { SettingsService } from './SettingsService';
 export { getRoleSpecificFields } from '../type-guards';

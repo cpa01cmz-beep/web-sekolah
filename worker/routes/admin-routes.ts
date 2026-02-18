@@ -4,11 +4,10 @@ import { ok, bad, notFound } from '../core-utils';
 import { AnnouncementEntity, ensureAllSeedData } from "../entities";
 import { rebuildAllIndexes } from "../index-rebuilder";
 import type { CreateUserData, UpdateUserData, Announcement, CreateAnnouncementData, AdminDashboardData, Settings, SchoolUser, UserRole } from "@shared/types";
-import { UserService, CommonDataService, AnnouncementService } from '../domain';
+import { UserService, CommonDataService, AnnouncementService, SettingsService } from '../domain';
 import { withAuth, withErrorHandler, triggerWebhookSafely } from './route-utils';
 import { validateBody } from '../middleware/validation';
 import { createAnnouncementSchema, updateSettingsSchema } from '../middleware/schemas';
-import { logger } from '../logger';
 import { getCurrentUserId } from '../type-guards';
 import type { Context } from 'hono';
 
@@ -71,31 +70,13 @@ export function adminRoutes(app: Hono<{ Bindings: Env }>) {
   }));
 
   app.get('/api/admin/settings', ...withAuth('admin'), withErrorHandler('get admin settings')(async (c: Context) => {
-    const settings = await c.env.STORAGE.get('settings');
-    if (!settings) {
-      return ok(c, {});
-    }
-    try {
-      return ok(c, JSON.parse(settings));
-    } catch (error) {
-      logger.error('Failed to parse settings', error);
-      return ok(c, {});
-    }
+    const settings = await SettingsService.getSettings(c.env);
+    return ok(c, settings);
   }));
 
   app.put('/api/admin/settings', ...withAuth('admin'), validateBody(updateSettingsSchema), withErrorHandler('update admin settings')(async (c: Context) => {
     const settingsData = c.get('validatedBody') as Partial<Settings>;
-    const currentSettingsJson = await c.env.STORAGE.get('settings');
-    let currentSettings = {};
-    if (currentSettingsJson) {
-      try {
-        currentSettings = JSON.parse(currentSettingsJson);
-      } catch (error) {
-        logger.error('Failed to parse current settings', error);
-      }
-    }
-    const updatedSettings = { ...currentSettings, ...settingsData };
-    await c.env.STORAGE.put('settings', JSON.stringify(updatedSettings));
+    const updatedSettings = await SettingsService.updateSettings(c.env, settingsData);
     return ok(c, updatedSettings);
   }));
 }
