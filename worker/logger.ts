@@ -11,12 +11,22 @@ interface LogEntry {
   context?: LogContext;
 }
 
-function getLogLevel(): LogLevel {
-  const level = process.env.LOG_LEVEL;
-  if (level && ['debug', 'info', 'warn', 'error'].includes(level)) {
-    return level as LogLevel;
+type EnvWithLogLevel = { LOG_LEVEL?: string };
+
+const VALID_LOG_LEVELS = ['debug', 'info', 'warn', 'error'] as const;
+const DEFAULT_LOG_LEVEL: LogLevel = 'info';
+
+function getLogLevel(env?: EnvWithLogLevel): LogLevel {
+  if (env?.LOG_LEVEL && VALID_LOG_LEVELS.includes(env.LOG_LEVEL as LogLevel)) {
+    return env.LOG_LEVEL as LogLevel;
   }
-  return 'info';
+  
+  const processLevel = typeof process !== 'undefined' ? process.env?.LOG_LEVEL : undefined;
+  if (processLevel && VALID_LOG_LEVELS.includes(processLevel as LogLevel)) {
+    return processLevel as LogLevel;
+  }
+  
+  return DEFAULT_LOG_LEVEL;
 }
 
 const logLevels: Record<LogLevel, number> = {
@@ -26,11 +36,25 @@ const logLevels: Record<LogLevel, number> = {
   error: 3
 };
 
-const currentLevel = getLogLevel();
-const currentLevelValue = logLevels[currentLevel];
+let cachedLogLevel: LogLevel | null = null;
+
+function getCurrentLogLevel(): LogLevel {
+  if (cachedLogLevel !== null) {
+    return cachedLogLevel;
+  }
+  return getLogLevel();
+}
+
+export function setLogLevel(level: LogLevel): void {
+  cachedLogLevel = level;
+}
+
+export function setLogLevelFromEnv(env?: EnvWithLogLevel): void {
+  cachedLogLevel = getLogLevel(env);
+}
 
 function shouldLog(level: LogLevel): boolean {
-  return logLevels[level] >= currentLevelValue;
+  return logLevels[level] >= logLevels[getCurrentLogLevel()];
 }
 
 function formatTimestamp(): string {
@@ -145,4 +169,5 @@ export const logger = {
 let testResetCount = 0;
 export function resetForTesting(): void {
   testResetCount++;
+  cachedLogLevel = null;
 }

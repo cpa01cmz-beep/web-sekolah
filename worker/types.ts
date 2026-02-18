@@ -6,6 +6,7 @@ export interface Env {
   JWT_SECRET?: string;
   DEFAULT_PASSWORD?: string;
   ENVIRONMENT?: 'development' | 'staging' | 'production';
+  LOG_LEVEL?: 'debug' | 'info' | 'warn' | 'error';
 }
 
 export class GlobalDurableObject extends DurableObject<Env, unknown> {
