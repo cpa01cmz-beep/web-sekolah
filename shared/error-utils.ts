@@ -26,6 +26,8 @@ export function mapStatusToErrorCode(status: number): string {
       return ErrorCode.TIMEOUT;
     case 409:
       return ErrorCode.CONFLICT;
+    case 422:
+      return ErrorCode.BAD_REQUEST;
     case 429:
       return ErrorCode.RATE_LIMIT_EXCEEDED;
     case 503:
