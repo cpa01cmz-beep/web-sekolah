@@ -150,6 +150,23 @@ export abstract class IndexedEntity<S extends { id: string }> extends Entity<S> 
     await idx.remove(id);
   }
 
+  static async count<TCtor extends CtorAny>(this: HS<TCtor>, env: Env): Promise<number> {
+    const idx = new Index<string>(env, this.indexName);
+    return await idx.count();
+  }
+
+  static async countBySecondaryIndex<TCtor extends CtorAny>(
+    this: HS<TCtor>,
+    env: Env,
+    fieldName: string,
+    value: string
+  ): Promise<number> {
+    const inst = new this(env, 'dummy');
+    const entityName = inst.entityName;
+    const idx = new SecondaryIndex<string>(env, entityName, fieldName);
+    return await idx.countByValue(value);
+  }
+
   static async getBySecondaryIndex<TCtor extends CtorAny>(
     this: HS<TCtor>,
     env: Env,
