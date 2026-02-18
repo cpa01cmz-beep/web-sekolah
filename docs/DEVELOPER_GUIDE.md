@@ -57,7 +57,7 @@ npm run test:coverage   # Run with coverage
 npm run test:ui         # Run tests with UI
 
 # Quality
-npx tsc --noEmit      # Check TypeScript types
+npm run typecheck      # Check TypeScript types
 npm run lint           # Run ESLint
 ```
 
