@@ -8,6 +8,7 @@
 #   --timeout=SECONDS  Maximum time to wait for health check (default: 60)
 #   --retries=N        Number of retry attempts (default: 5)
 #   --exit-on-fail     Exit with non-zero code on failure (default: true)
+#   --verbose          Enable verbose output
 #
 # Exit codes:
 #   0 - All health checks passed
@@ -22,6 +23,7 @@ OUTPUT_FORMAT="text"
 TIMEOUT=60
 RETRIES=5
 EXIT_ON_FAIL=true
+VERBOSE=false
 
 for arg in "$@"; do
   case $arg in
@@ -45,8 +47,18 @@ for arg in "$@"; do
       EXIT_ON_FAIL=false
       shift
       ;;
+    --verbose)
+      VERBOSE=true
+      shift
+      ;;
   esac
 done
+
+log_verbose() {
+  if [ "$VERBOSE" = true ]; then
+    echo "[DEBUG] $1"
+  fi
+}
 
 WORKER_NAME_STAGING="website-sekolah-staging"
 WORKER_NAME_PRODUCTION="website-sekolah-production"
@@ -77,11 +89,16 @@ check_health() {
   local start_time=""
   local end_time=""
 
+  log_verbose "Starting health check for ${url}/api/health"
+  log_verbose "Max retries: ${RETRIES}, Wait time: ${wait_time}s"
+
   while [ $retry_count -lt $RETRIES ]; do
     start_time=$(date +%s%N)
-    http_code=$(curl -f -s -o /dev/null -w "%{http_code}" --max-time "$wait_time" "${url}/api/health" 2>/dev/null) || http_code="000"
+    http_code=$(curl -f -s -o /dev/null -w "%{http_code}" --max-time "$wait_time" --connect-timeout 10 "${url}/api/health" 2>/dev/null) || http_code="000"
     end_time=$(date +%s%N)
     response_time=$(( (end_time - start_time) / 1000000 ))
+
+    log_verbose "Attempt $((retry_count + 1)): HTTP ${http_code}, Response time: ${response_time}ms"
 
     if [[ "${http_code}" == "200" || "${http_code}" == "404" ]]; then
       echo "${http_code}:${response_time}:success"
@@ -90,6 +107,7 @@ check_health() {
 
     retry_count=$((retry_count + 1))
     if [ $retry_count -lt $RETRIES ]; then
+      log_verbose "Retry in ${wait_time} seconds..."
       sleep "$wait_time"
     fi
   done

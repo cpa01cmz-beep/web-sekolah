@@ -6,12 +6,22 @@
 # Options:
 #   --non-interactive  Skip confirmation prompt (useful for CI/CD)
 #   --dry-run          Show what would be done without making changes
+#   --verbose          Enable verbose output
+#   --timeout=SECONDS  Maximum time to wait for health check after rollback (default: 60)
+#
+# Exit codes:
+#   0 - Rollback successful
+#   1 - Rollback failed
+#   2 - Invalid arguments
+#   3 - No previous deployment found
 
 set -e
 
 ENVIRONMENT=${1:-"production"}
 NON_INTERACTIVE=false
 DRY_RUN=false
+VERBOSE=false
+TIMEOUT=60
 
 for arg in "$@"; do
   case $arg in
@@ -23,8 +33,22 @@ for arg in "$@"; do
       DRY_RUN=true
       shift
       ;;
+    --verbose)
+      VERBOSE=true
+      shift
+      ;;
+    --timeout=*)
+      TIMEOUT="${arg#*=}"
+      shift
+      ;;
   esac
 done
+
+log_verbose() {
+  if [ "$VERBOSE" = true ]; then
+    echo "[DEBUG] $1"
+  fi
+}
 
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
 ROLLBACK_TAG="rollback_${TIMESTAMP}"
@@ -39,10 +63,13 @@ log() {
 
 log "🔄 Starting rollback to ${ENVIRONMENT}..."
 log "📝 Rollback tag: ${ROLLBACK_TAG}"
+log_verbose "Backup directory: ${BACKUP_DIR}"
+log_verbose "Log file: ${LOG_FILE}"
 
 mkdir -p "${BACKUP_DIR}"
 
 log "📊 Fetching current deployment information..."
+log_verbose "Running: wrangler deployment list --env ${ENVIRONMENT}"
 wrangler deployment list --env "${ENVIRONMENT}" > "${BACKUP_FILE}" 2>&1 || {
   log "❌ Error: Failed to fetch deployment information"
   exit 1
@@ -71,7 +98,8 @@ if [ "${NON_INTERACTIVE}" = false ]; then
 fi
 
 log "🚀 Performing rollback..."
-wrangler rollback --env "${ENVIRONMENT}" --deployment-id "${DEPLOYMENT_ID}" 2>&1 | tee -a "${LOG_FILE}" || {
+log_verbose "Running: wrangler rollback --env ${ENVIRONMENT}"
+wrangler rollback --env "${ENVIRONMENT}" 2>&1 | tee -a "${LOG_FILE}" || {
   log "❌ Rollback command failed"
   exit 1
 }
@@ -79,6 +107,7 @@ wrangler rollback --env "${ENVIRONMENT}" --deployment-id "${DEPLOYMENT_ID}" 2>&1
 log "🏥 Running health check after rollback..."
 max_retries=5
 retry_count=0
+wait_time=$((TIMEOUT / max_retries))
 
 WORKER_NAME_STAGING="website-sekolah-staging"
 WORKER_NAME_PRODUCTION="website-sekolah-production"
@@ -99,11 +128,13 @@ else
 fi
 
 log "🔗 Health check URL: ${BASE_URL}/api/health"
+log_verbose "Max retries: ${max_retries}, Wait time: ${wait_time}s"
 
 while [ $retry_count -lt $max_retries ]; do
   log "Health check attempt $((retry_count + 1)) of $max_retries"
+  log_verbose "Checking: ${BASE_URL}/api/health"
   
-  if curl -f -s -o /dev/null -w "%{http_code}" "${BASE_URL}/api/health" | grep -q "200\|404"; then
+  if curl -f -s -o /dev/null -w "%{http_code}" --max-time "${wait_time}" --connect-timeout 10 "${BASE_URL}/api/health" | grep -q "200\|404"; then
     log "✅ Health check passed after rollback"
     log "✅ Rollback completed successfully!"
     log "📋 Deployment backup saved to: ${BACKUP_FILE}"
@@ -112,8 +143,8 @@ while [ $retry_count -lt $max_retries ]; do
   fi
   
   retry_count=$((retry_count + 1))
-  log "Health check failed, retrying in 10 seconds..."
-  sleep 10
+  log_verbose "Health check failed, waiting ${wait_time} seconds..."
+  sleep "${wait_time}"
 done
 
 log "❌ Health check failed after rollback"
