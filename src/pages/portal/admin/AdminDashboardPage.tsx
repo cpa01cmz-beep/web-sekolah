@@ -9,9 +9,11 @@ import { AnnouncementItem } from '@/components/dashboard/AnnouncementItem';
 import { EnrollmentChart } from '@/components/dashboard/EnrollmentChart';
 import { Users, GraduationCap, School, Megaphone, AlertTriangle, Inbox } from 'lucide-react';
 import { SlideUp } from '@/components/animations';
+import { useReducedMotion } from '@/hooks/use-reduced-motion';
 import { useAdminDashboard } from '@/hooks/useAdmin';
 
 export function AdminDashboardPage() {
+  const prefersReducedMotion = useReducedMotion();
   const { data, isLoading, error } = useAdminDashboard();
 
   const stats = useMemo(() => data ? [
@@ -66,8 +68,8 @@ export function AdminDashboardPage() {
   }
 
   return (
-    <SlideUp delay={0} className="space-y-6">
-      <SlideUp delay={0.1}>
+    <SlideUp delay={0} className="space-y-6" style={prefersReducedMotion ? { opacity: 1 } : {}}>
+      <SlideUp delay={0.1} style={prefersReducedMotion ? { opacity: 1 } : {}}>
         <PageHeader
           title="Admin Dashboard"
           description="Overall school management and statistics."
@@ -75,7 +77,7 @@ export function AdminDashboardPage() {
       </SlideUp>
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         {stats.map((stat, index) => (
-          <SlideUp key={stat.title} delay={index * 0.1 + 0.2}>
+          <SlideUp key={stat.title} delay={index * 0.1 + 0.2} style={prefersReducedMotion ? { opacity: 1 } : {}}>
             <DashboardStatCard
               title={stat.title}
               value={stat.value}
@@ -85,7 +87,7 @@ export function AdminDashboardPage() {
         ))}
       </div>
       <div className="grid gap-6 lg:grid-cols-5">
-        <SlideUp delay={0.6} className="lg:col-span-3">
+        <SlideUp delay={0.6} className="lg:col-span-3" style={prefersReducedMotion ? { opacity: 1 } : {}}>
           <Card className="h-[400px] hover:shadow-lg transition-shadow duration-200">
             <CardHeader>
               <CardTitle>User Distribution</CardTitle>
@@ -95,7 +97,7 @@ export function AdminDashboardPage() {
             </CardContent>
           </Card>
         </SlideUp>
-        <SlideUp delay={0.7} className="lg:col-span-2">
+        <SlideUp delay={0.7} className="lg:col-span-2" style={prefersReducedMotion ? { opacity: 1 } : {}}>
           <Card className="h-[400px] hover:shadow-lg transition-shadow duration-200">
             <CardHeader>
               <CardTitle>Recent Announcements</CardTitle>
