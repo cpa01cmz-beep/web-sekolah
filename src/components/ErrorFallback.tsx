@@ -5,7 +5,7 @@ import { Card, CardContent } from '@/components/ui/card';
 export interface ErrorFallbackProps {
   title?: string;
   message?: string;
-  error?: Error | any;
+  error?: Error | unknown;
   onRetry?: () => void;
   onGoHome?: () => void;
   showErrorDetails?: boolean;
@@ -82,8 +82,8 @@ export function ErrorFallback({
                   Error details (Development only)
                 </summary>
                 <pre className="mt-3 text-xs overflow-auto max-h-40 text-muted-foreground">
-                  {error.message || error.toString()}
-                  {error.stack && '\n\n' + error.stack + '\n\n' + error.componentStack}
+                  {error instanceof Error ? (error.message || error.toString()) : String(error)}
+                  {error instanceof Error && error.stack && '\n\n' + error.stack + '\n\n' + (error as Error & { componentStack?: string }).componentStack}
                 </pre>
               </details>
             )}
