@@ -5,7 +5,8 @@ import type {
   Grade,
   Announcement,
   SubmitGradeData,
-  CreateAnnouncementData
+  CreateAnnouncementData,
+  ClassStudentWithGrade
 } from '@shared/types';
 import type { IRepository } from '@/repositories/IRepository';
 import { apiRepository } from '@/repositories/ApiRepository';
@@ -32,20 +33,8 @@ export function createTeacherService(repository: IRepository = apiRepository): T
       return repository.post<Announcement>(`/api/teachers/announcements`, announcement);
     },
 
-    async getClassStudentsWithGrades(classId: string): Promise<Array<{
-      id: string;
-      name: string;
-      score: number | null;
-      feedback: string;
-      gradeId: string | null;
-    }>> {
-      return repository.get<Array<{
-        id: string;
-        name: string;
-        score: number | null;
-        feedback: string;
-        gradeId: string | null;
-      }>>(`/api/classes/${classId}/students`);
+    async getClassStudentsWithGrades(classId: string): Promise<ClassStudentWithGrade[]> {
+      return repository.get<ClassStudentWithGrade[]>(`/api/classes/${classId}/students`);
     }
   };
 }

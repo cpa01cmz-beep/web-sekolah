@@ -13,11 +13,11 @@ export function useParentDashboard(parentId: string, options?: UseQueryOptions<P
   });
 }
 
-export function useChildSchedule(childId: string, options?: UseQueryOptions<ScheduleItem[]>) {
+export function useChildSchedule(parentId: string, options?: UseQueryOptions<ScheduleItem[]>) {
   return useTanstackQuery({
-    queryKey: ['students', childId, 'schedule'],
-    queryFn: () => parentService.getChildSchedule(childId),
-    ...createQueryOptions<ScheduleItem[]>({ enabled: !!childId, staleTime: CachingTime.ONE_HOUR }),
+    queryKey: ['parents', parentId, 'schedule'],
+    queryFn: () => parentService.getChildSchedule(parentId),
+    ...createQueryOptions<ScheduleItem[]>({ enabled: !!parentId, staleTime: CachingTime.ONE_HOUR }),
     ...options,
   });
 }
