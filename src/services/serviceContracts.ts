@@ -51,7 +51,7 @@ export interface TeacherService {
 
 export interface ParentService {
   getDashboard(parentId: string): Promise<ParentDashboardData>;
-  getChildSchedule(childId: string): Promise<ScheduleItem[]>;
+  getChildSchedule(parentId: string): Promise<ScheduleItem[]>;
 }
 
 export interface AdminService {
