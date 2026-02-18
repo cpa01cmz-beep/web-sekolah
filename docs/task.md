@@ -27134,7 +27134,6 @@ const createErrorResponse = (
 
 ### Test Engineer - ReferentialIntegrity Critical Path Testing (2026-01-20) - Completed ✅
 
-<<<<<<< HEAD
 **Task**: Add comprehensive input validation and edge case testing for ReferentialIntegrity module
 
 **Problem**:
