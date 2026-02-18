@@ -9,7 +9,7 @@ import { webhookRoutes } from './webhook-routes';
 import { adminMonitoringRoutes } from './admin-monitoring-routes';
 import { docsRoutes } from './docs-routes';
 import { publicRoutes } from './routes/public-routes';
-import { Env, GlobalDurableObject, ok, notFound, serverError, bad } from './core-utils';
+import { Env, GlobalDurableObject, ok, notFound, serverError } from './core-utils';
 import { logger as pinoLogger } from './logger';
 import { ClientErrorReport, CSPViolationReport } from './types/index';
 import { defaultRateLimiter, strictRateLimiter } from './middleware/rate-limit';
@@ -20,6 +20,8 @@ import { integrationMonitor } from './integration-monitor';
 import { HttpStatusCode, TimeConstants } from './config/time';
 import { DefaultOrigins } from './config/defaults';
 import { handleScheduled } from './scheduled';
+import { validateBody } from './middleware/validation';
+import { clientErrorSchema } from './middleware/schemas';
 
 // Need to export GlobalDurableObject to make it available in wrangler
 export { GlobalDurableObject };
@@ -63,6 +65,7 @@ app.use('/api/*', responseErrorMonitoring());
 
 app.use('/api/client-errors', strictRateLimiter());
 app.use('/api/seed', strictRateLimiter());
+app.use('/api/public/seed', strictRateLimiter());
 app.use('/api/public', defaultRateLimiter());
 app.use('/api/users', defaultRateLimiter());
 app.use('/api/grades', defaultRateLimiter());
@@ -118,10 +121,9 @@ app.get('/api/health', async (c) => {
   });
 });
 
-app.post('/api/client-errors', async (c) => {
+app.post('/api/client-errors', validateBody(clientErrorSchema), async (c) => {
   try {
-    const e = await c.req.json<ClientErrorReport>();
-    if (!e.message) return bad(c, 'Missing required fields');
+    const e = c.get('validatedBody') as ClientErrorReport;
     pinoLogger.error('[CLIENT ERROR]', { errorReport: e });
     return ok(c, {});
   } catch (error) {
