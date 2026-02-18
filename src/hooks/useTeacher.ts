@@ -6,7 +6,8 @@ import type {
   Grade,
   SubmitGradeData,
   Announcement,
-  CreateAnnouncementData
+  CreateAnnouncementData,
+  ClassStudentWithGrade
 } from '@shared/types';
 import { CachingTime } from '@/config/time';
 import { createQueryOptions } from '@/config/query-config';
@@ -52,23 +53,11 @@ export function useCreateAnnouncement(options?: UseMutationOptions<Announcement,
   });
 }
 
-export function useTeacherClassStudents(classId: string, options?: UseQueryOptions<Array<{
-  id: string;
-  name: string;
-  score: number | null;
-  feedback: string;
-  gradeId: string | null;
-}>>) {
+export function useTeacherClassStudents(classId: string, options?: UseQueryOptions<ClassStudentWithGrade[]>) {
   return useTanstackQuery({
     queryKey: ['classes', classId, 'students'],
     queryFn: () => teacherService.getClassStudentsWithGrades(classId),
-    ...createQueryOptions<Array<{
-      id: string;
-      name: string;
-      score: number | null;
-      feedback: string;
-      gradeId: string | null;
-    }>>({ enabled: !!classId, staleTime: CachingTime.FIVE_MINUTES }),
+    ...createQueryOptions<ClassStudentWithGrade[]>({ enabled: !!classId, staleTime: CachingTime.FIVE_MINUTES }),
     ...options,
   });
 }
