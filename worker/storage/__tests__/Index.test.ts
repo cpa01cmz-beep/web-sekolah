@@ -415,6 +415,59 @@ describe('Index', () => {
     });
   });
 
+  describe('count', () => {
+    it('should return count of items in index', async () => {
+      mockStub.listPrefix.mockResolvedValue({
+        keys: ['i:value1', 'i:value2', 'i:value3'],
+        next: null
+      });
+
+      const result = await index.count();
+
+      expect(result).toBe(3);
+    });
+
+    it('should return 0 for empty index', async () => {
+      mockStub.listPrefix.mockResolvedValue({
+        keys: [],
+        next: null
+      });
+
+      const result = await index.count();
+
+      expect(result).toBe(0);
+    });
+
+    it('should return 1 for single item', async () => {
+      mockStub.listPrefix.mockResolvedValue({
+        keys: ['i:single'],
+        next: null
+      });
+
+      const result = await index.count();
+
+      expect(result).toBe(1);
+    });
+
+    it('should handle large counts', async () => {
+      const keys = Array.from({ length: 10000 }, (_, i) => `i:value${i}`);
+      mockStub.listPrefix.mockResolvedValue({
+        keys,
+        next: null
+      });
+
+      const result = await index.count();
+
+      expect(result).toBe(10000);
+    });
+
+    it('should call listPrefix with correct prefix', async () => {
+      await index.count();
+
+      expect(mockStub.listPrefix).toHaveBeenCalledWith('i:');
+    });
+  });
+
   describe('Integration - Batch Operations', () => {
     it('should support add and remove batch operations', async () => {
       mockStub.indexAddBatch.mockResolvedValue(undefined);
