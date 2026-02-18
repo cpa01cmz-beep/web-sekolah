@@ -139,10 +139,43 @@ export abstract class IndexedEntity<S extends { id: string }> extends Entity<S> 
 
   static async deleteMany<TCtor extends CtorAny>(this: HS<TCtor>, env: Env, ids: string[]): Promise<number> {
     if (ids.length === 0) return 0;
-    const results = await Promise.all(ids.map(async (id) => new this(env, id).delete()));
+
+    const states = await Promise.all(
+      ids.map(async (id) => {
+        const inst = new this(env, id);
+        try {
+          const state = await inst.getState();
+          return { id, state, inst };
+        } catch {
+          return null;
+        }
+      })
+    );
+
+    const validStates = states.filter((s): s is NonNullable<typeof s> => s !== null);
+
+    const deleteResults = await Promise.all(
+      validStates.map(async ({ inst }) => inst.delete())
+    );
+
     const idx = new Index<string>(env, this.indexName);
     await idx.removeBatch(ids);
-    return results.filter(Boolean).length;
+
+    const secondaryIndexes = this.secondaryIndexes;
+    if (secondaryIndexes && validStates.length > 0) {
+      const entityName = validStates[0].inst.entityName;
+      for (const config of secondaryIndexes) {
+        const secIdx = new SecondaryIndex<string>(env, entityName, config.fieldName as string);
+        await Promise.all(
+          validStates.map(async ({ state, id }) => {
+            const fieldValue = config.getValue(state);
+            await secIdx.remove(fieldValue, id);
+          })
+        );
+      }
+    }
+
+    return deleteResults.filter(Boolean).length;
   }
 
   static async removeFromIndex<TCtor extends CtorAny>(this: HS<TCtor>, env: Env, id: string): Promise<void> {
