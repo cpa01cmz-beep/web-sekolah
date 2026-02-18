@@ -3,7 +3,7 @@ import { FormField } from '@/components/ui/form-field';
 import { FormFieldInput } from '@/components/ui/form-field-input';
 import { FormSuccess } from '@/components/ui/form-success';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { toast } from 'sonner';
 import { validateName, validateEmail, validatePhone, validateNisn, validateRequired } from '@/utils/validation';
 import { useFormValidation } from '@/hooks/useFormValidation';
@@ -54,10 +54,15 @@ export function PPDBForm({ onSubmit }: PPDBFormProps) {
     setFormData(prev => ({ ...prev, [field]: String(value) }));
   }, []);
 
-  const handleReset = () => {
+  const handleReset = useCallback(() => {
     setIsSuccess(false);
     resetValidation();
-  };
+  }, [resetValidation]);
+
+  const successAction = useMemo(() => ({
+    label: "Daftar Siswa Lain",
+    onClick: handleReset,
+  }), [handleReset]);
 
   const handleSubmit = useCallback(async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -94,10 +99,7 @@ export function PPDBForm({ onSubmit }: PPDBFormProps) {
       <FormSuccess
         title="Pendaftaran Berhasil!"
         description="Terima kasih telah mendaftar. Silakan cek email Anda untuk instruksi selanjutnya."
-        action={{
-          label: "Daftar Siswa Lain",
-          onClick: handleReset,
-        }}
+        action={successAction}
       />
     );
   }

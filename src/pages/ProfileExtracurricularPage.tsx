@@ -3,6 +3,13 @@ import { SiteFooter } from '@/components/SiteFooter';
 import { SlideUp } from '@/components/animations';
 import { ContentCard } from '@/components/ContentCard';
 
+const PRAMUKA_TAGS = ['Karakter', 'Kepemimpinan'] as const;
+const OLAHRAGA_TAGS = ['Basket', 'Sepak Bola', 'Bulu Tangkis'] as const;
+const MUSIK_TAGS = ['Gitar', 'Vokal', 'Piano'] as const;
+const ROBOTIKA_TAGS = ['STEM', 'Pemrograman'] as const;
+const DEBAT_TAGS = ['Public Speaking', 'Argumentasi'] as const;
+const JURNALISTIK_TAGS = ['Menulis', 'Fotografi'] as const;
+
 export function ProfileExtracurricularPage() {
   return (
     <div className="flex flex-col min-h-screen bg-background">
@@ -29,7 +36,7 @@ export function ProfileExtracurricularPage() {
                 gradient="bg-gradient-to-r from-blue-400 to-blue-600"
                 title="Pramuka"
                 description="Membentuk karakter, kemandirian, dan jiwa kepemimpinan siswa melalui kegiatan kepramukaan."
-                tags={['Karakter', 'Kepemimpinan']}
+                tags={PRAMUKA_TAGS}
                 badgeColor="bg-blue-100 text-blue-800"
               />
             </SlideUp>
@@ -39,7 +46,7 @@ export function ProfileExtracurricularPage() {
                 gradient="bg-gradient-to-r from-green-400 to-green-600"
                 title="Olahraga"
                 description="Berbagai cabang olahraga untuk menjaga kebugaran fisik dan mengembangkan semangat sportivitas."
-                tags={['Basket', 'Sepak Bola', 'Bulu Tangkis']}
+                tags={OLAHRAGA_TAGS}
                 badgeColor="bg-green-100 text-green-800"
               />
             </SlideUp>
@@ -49,7 +56,7 @@ export function ProfileExtracurricularPage() {
                 gradient="bg-gradient-to-r from-purple-400 to-purple-600"
                 title="Seni Musik"
                 description="Wadah untuk mengembangkan bakat musik siswa melalui berbagai instrumen dan vokal."
-                tags={['Gitar', 'Vokal', 'Piano']}
+                tags={MUSIK_TAGS}
                 badgeColor="bg-purple-100 text-purple-800"
               />
             </SlideUp>
@@ -59,7 +66,7 @@ export function ProfileExtracurricularPage() {
                 gradient="bg-gradient-to-r from-yellow-400 to-yellow-600"
                 title="Robotika"
                 description="Mengembangkan kemampuan teknologi dan pemrograman melalui pembuatan robot dan kompetisi."
-                tags={['STEM', 'Pemrograman']}
+                tags={ROBOTIKA_TAGS}
                 badgeColor="bg-yellow-100 text-yellow-800"
               />
             </SlideUp>
@@ -69,7 +76,7 @@ export function ProfileExtracurricularPage() {
                 gradient="bg-gradient-to-r from-red-400 to-red-600"
                 title="Debat"
                 description="Melatih kemampuan berbicara di depan umum dan kemampuan berpikir kritis siswa."
-                tags={['Public Speaking', 'Argumentasi']}
+                tags={DEBAT_TAGS}
                 badgeColor="bg-red-100 text-red-800"
               />
             </SlideUp>
@@ -79,7 +86,7 @@ export function ProfileExtracurricularPage() {
                 gradient="bg-gradient-to-r from-indigo-400 to-indigo-600"
                 title="Jurnalistik"
                 description="Mengembangkan kemampuan menulis dan jurnalisme siswa melalui kegiatan penerbitan majalah sekolah."
-                tags={['Menulis', 'Fotografi']}
+                tags={JURNALISTIK_TAGS}
                 badgeColor="bg-indigo-100 text-indigo-800"
               />
             </SlideUp>

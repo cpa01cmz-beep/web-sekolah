@@ -37,14 +37,14 @@ export function GradeForm({ open, onClose, editingStudent, onSave, isLoading }: 
     }
   }, [editingStudent, onClose]);
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = useCallback((e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const scoreValue = currentScore === '' ? null : parseInt(currentScore, 10);
     if (currentScore !== '' && !isValidScore(scoreValue)) {
       return;
     }
     onSave({ score: scoreValue, feedback: currentFeedback });
-  };
+  }, [currentScore, currentFeedback, onSave]);
 
   const scoreError = useMemo(() => {
     if (currentScore === '') return '';
