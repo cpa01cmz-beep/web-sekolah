@@ -37,4 +37,9 @@ export class Index<T extends string> extends Entity<unknown> {
     const { keys } = await this.stub.listPrefix('i:');
     return keys.map(k => k.slice(2) as T);
   }
+
+  async count(): Promise<number> {
+    const { keys } = await this.stub.listPrefix('i:');
+    return keys.length;
+  }
 }
