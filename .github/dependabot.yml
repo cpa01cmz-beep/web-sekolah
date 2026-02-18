@@ -1,9 +1,4 @@
 version: 2
-registries:
-  npm-registry:
-    type: npm-registry
-    url: https://registry.npmjs.org
-
 updates:
   - package-ecosystem: "npm"
     directory: "/"
@@ -33,8 +28,6 @@ updates:
     ignore:
       - dependency-name: "*"
         update-types: ["version-update:semver-major"]
-    reviewers:
-      - "cpa01cmz-beep"
     target-branch: "main"
 
   - package-ecosystem: "github-actions"
@@ -55,6 +48,4 @@ updates:
       github-actions:
         patterns:
           - "*"
-    reviewers:
-      - "cpa01cmz-beep"
     target-branch: "main"
