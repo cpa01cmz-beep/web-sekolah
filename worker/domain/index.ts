@@ -6,3 +6,5 @@ export { ParentDashboardService } from './ParentDashboardService';
 export { CommonDataService } from './CommonDataService';
 export { AnnouncementService } from './AnnouncementService';
 export { getRoleSpecificFields } from '../type-guards';
+export { getUniqueIds, buildEntityMap, fetchAndMap } from './EntityMapUtils';
+export type { EntityWithId } from './EntityMapUtils';
