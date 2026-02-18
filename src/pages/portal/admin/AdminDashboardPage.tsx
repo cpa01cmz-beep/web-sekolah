@@ -20,22 +20,22 @@ export function AdminDashboardPage() {
     {
       title: 'Total Students',
       value: data.totalStudents.toString(),
-      icon: <Users className="h-6 w-6 text-blue-500" />,
+      icon: <Users className="h-6 w-6 text-blue-500" aria-hidden="true" />,
     },
     {
       title: 'Total Teachers',
       value: data.totalTeachers.toString(),
-      icon: <GraduationCap className="h-6 w-6 text-green-500" />,
+      icon: <GraduationCap className="h-6 w-6 text-green-500" aria-hidden="true" />,
     },
     {
       title: 'Total Parents',
       value: data.totalParents.toString(),
-      icon: <School className="h-6 w-6 text-purple-500" />,
+      icon: <School className="h-6 w-6 text-purple-500" aria-hidden="true" />,
     },
     {
       title: 'Total Classes',
       value: data.totalClasses.toString(),
-      icon: <Megaphone className="h-6 w-6 text-orange-500" />,
+      icon: <Megaphone className="h-6 w-6 text-orange-500" aria-hidden="true" />,
     },
   ] : [], [data]);
 
