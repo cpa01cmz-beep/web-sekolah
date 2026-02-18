@@ -1,4 +1,5 @@
 import type { Context, Next } from 'hono';
+import { TimeConstants } from '../config/time';
 
 interface SecurityHeadersConfig {
   enableHSTS?: boolean;
@@ -48,7 +49,7 @@ const DEFAULT_SECURITY_HEADERS: SecurityHeadersConfig = {
   enableReferrerPolicy: true,
   enablePermissionsPolicy: true,
   cspDirectives: "default-src 'self'; script-src 'self' 'sha256-1LjDIY7ayXpv8ODYzP8xZXqNvuMhUBdo39lNMQ1oGHI=' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self'; frame-src 'self'; frame-ancestors 'none'; object-src 'none'; worker-src 'self'; base-uri 'self'; form-action 'self'; report-uri /api/csp-report;",
-  hstsMaxAge: 31536000,
+  hstsMaxAge: TimeConstants.ONE_YEAR_MS / 1000,
 };
 
 export function securityHeaders(config: SecurityHeadersConfig = {}) {

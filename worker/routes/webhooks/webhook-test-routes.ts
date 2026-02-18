@@ -52,7 +52,7 @@ export function webhookTestRoutes(app: Hono<{ Bindings: Env }>) {
                 'User-Agent': 'Akademia-Pro-Webhook/1.0'
               },
               body: JSON.stringify(testPayload),
-              signal: AbortSignal.timeout(30000)
+              signal: AbortSignal.timeout(RetryDelay.THIRTY_SECONDS_MS)
             });
           });
 

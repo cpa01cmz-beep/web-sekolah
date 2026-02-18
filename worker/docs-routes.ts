@@ -6,13 +6,13 @@ import { withErrorHandler } from './routes/route-utils';
 import { TimeConstants } from './config/time';
 import type { Context } from 'hono';
 
-const DOCS_TIMEOUT_MS = 30000;
+const DOCS_TIMEOUT_MS = TimeConstants.THIRTY_MINUTES_MS / 60;
 const DOCS_MAX_RETRIES = 3;
-const DOCS_BASE_RETRY_DELAY_MS = 1000;
+const DOCS_BASE_RETRY_DELAY_MS = TimeConstants.SECOND_MS;
 
 const docsCircuitBreaker = new CircuitBreaker('docs-api-spec', {
   failureThreshold: 5,
-  timeoutMs: 60000,
+  timeoutMs: TimeConstants.ONE_MINUTE_MS,
 });
 
 async function fetchWithRetry(url: string): Promise<Response> {

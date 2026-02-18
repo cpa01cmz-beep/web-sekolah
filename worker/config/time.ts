@@ -6,6 +6,12 @@ export const TimeConstants = {
   THIRTY_MINUTES_MS: 1000 * 60 * 30,
   ONE_HOUR_MS: 1000 * 60 * 60,
   ONE_DAY_MS: 1000 * 60 * 60 * 24,
+  ONE_YEAR_MS: 1000 * 60 * 60 * 24 * 365,
+} as const;
+
+export const HealthCheckDefaults = {
+  DEFAULT_TIMEOUT_MS: TimeConstants.SECOND_MS * 5,
+  FAILURE_THRESHOLD: 5,
 } as const;
 
 export const RateLimitWindow = {
