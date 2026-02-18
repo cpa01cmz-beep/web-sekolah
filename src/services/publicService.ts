@@ -12,48 +12,49 @@ import type {
 } from '@shared/types';
 import type { IRepository } from '@/repositories/IRepository';
 import { apiRepository } from '@/repositories/ApiRepository';
+import { API_ENDPOINTS } from '@/config/api-endpoints';
 
 export function createPublicService(repository: IRepository = apiRepository): PublicService {
   return {
     async getSchoolProfile(): Promise<SchoolProfile> {
-      return repository.get<SchoolProfile>(`/api/public/profile`);
+      return repository.get<SchoolProfile>(API_ENDPOINTS.PUBLIC.PROFILE);
     },
 
     async getServices(): Promise<Service[]> {
-      return repository.get<Service[]>(`/api/public/services`);
+      return repository.get<Service[]>(API_ENDPOINTS.PUBLIC.SERVICES);
     },
 
     async getAchievements(): Promise<Achievement[]> {
-      return repository.get<Achievement[]>(`/api/public/achievements`);
+      return repository.get<Achievement[]>(API_ENDPOINTS.PUBLIC.ACHIEVEMENTS);
     },
 
     async getFacilities(): Promise<Facility[]> {
-      return repository.get<Facility[]>(`/api/public/facilities`);
+      return repository.get<Facility[]>(API_ENDPOINTS.PUBLIC.FACILITIES);
     },
 
     async getNews(limit?: number): Promise<NewsItem[]> {
-      const endpoint = limit ? `/api/public/news?limit=${limit}` : `/api/public/news`;
+      const endpoint = limit ? `${API_ENDPOINTS.PUBLIC.NEWS}?limit=${limit}` : API_ENDPOINTS.PUBLIC.NEWS;
       return repository.get<NewsItem[]>(endpoint);
     },
 
     async getNewsDetails(id: string): Promise<NewsItem> {
-      return repository.get<NewsItem>(`/api/public/news/${id}`);
+      return repository.get<NewsItem>(API_ENDPOINTS.PUBLIC.NEWS_DETAIL(id));
     },
 
     async getGallery(): Promise<GalleryItem[]> {
-      return repository.get<GalleryItem[]>(`/api/public/gallery`);
+      return repository.get<GalleryItem[]>(API_ENDPOINTS.PUBLIC.GALLERY);
     },
 
     async getWorks(): Promise<WorkItem[]> {
-      return repository.get<WorkItem[]>(`/api/public/work`);
+      return repository.get<WorkItem[]>(API_ENDPOINTS.PUBLIC.WORKS);
     },
 
     async getLinks(): Promise<LinkItem[]> {
-      return repository.get<LinkItem[]>(`/api/public/links`);
+      return repository.get<LinkItem[]>(API_ENDPOINTS.PUBLIC.LINKS);
     },
 
     async getDownloads(): Promise<DownloadItem[]> {
-      return repository.get<DownloadItem[]>(`/api/public/downloads`);
+      return repository.get<DownloadItem[]>(API_ENDPOINTS.PUBLIC.DOWNLOADS);
     }
   };
 }

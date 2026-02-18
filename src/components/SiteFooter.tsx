@@ -1,6 +1,7 @@
 import { GraduationCap, Twitter, Facebook, Instagram } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { THEME_COLORS } from '@/theme/colors';
+import { APP_CONFIG } from '@/config/app-config';
 import { memo } from 'react';
 export const SiteFooter = memo(function SiteFooter() {
   return (
@@ -8,12 +9,12 @@ export const SiteFooter = memo(function SiteFooter() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div className="space-y-4">
-            <Link to="/" className="flex items-center gap-2" aria-label="Akademia Pro Home">
+            <Link to="/" className="flex items-center gap-2" aria-label={`${APP_CONFIG.NAME} Home`}>
               <GraduationCap className="h-8 w-8 text-[var(--color-primary)]" style={{ color: THEME_COLORS.PRIMARY }} aria-hidden="true" />
-              <span className="text-xl font-bold text-foreground">Akademia Pro</span>
+              <span className="text-xl font-bold text-foreground">{APP_CONFIG.NAME}</span>
             </Link>
             <p className="text-sm">
-              Modern school management for a brighter future.
+              {APP_CONFIG.TAGLINE}
             </p>
           </div>
           <nav aria-label="Footer quick links">
@@ -27,9 +28,9 @@ export const SiteFooter = memo(function SiteFooter() {
           <div>
             <h3 className="font-semibold text-foreground mb-4">Contact Us</h3>
             <address className="not-italic space-y-2 text-sm">
-              <p>Jl. Pendidikan No. 123, Jakarta</p>
-              <p>info@akademia.pro</p>
-              <p>(021) 123-4567</p>
+              <p>{APP_CONFIG.CONTACT.FOOTER_ADDRESS}</p>
+              <p>{APP_CONFIG.CONTACT.FOOTER_EMAIL}</p>
+              <p>{APP_CONFIG.CONTACT.PHONE}</p>
             </address>
           </div>
           <div>
@@ -48,8 +49,8 @@ export const SiteFooter = memo(function SiteFooter() {
           </div>
         </div>
         <div className="mt-8 pt-8 border-t text-center text-sm">
-          <p>&copy; {new Date().getFullYear()} Akademia Pro. All rights reserved.</p>
-          <p className="mt-1">Built with ❤️ at Cloudflare</p>
+          <p>&copy; {new Date().getFullYear()} {APP_CONFIG.NAME}. All rights reserved.</p>
+          <p className="mt-1">Built with Cloudflare</p>
         </div>
       </div>
     </footer>

@@ -6,33 +6,14 @@ import { SlideUp } from '@/components/animations';
 import { useReducedMotion } from '@/hooks/use-reduced-motion';
 import { FeatureCard } from '@/components/FeatureCard';
 import { THEME_COLORS } from '@/theme/colors';
+import { APP_CONFIG } from '@/config/app-config';
 
-const features = [
-  {
-    icon: BookOpen,
-    title: 'Unified Portal',
-    description: 'One platform for students, teachers, parents, and admins.',
-  },
-  {
-    icon: BarChart,
-    title: 'RDM Integration',
-    description: 'Seamlessly connect with Rapor Digital Madrasah for grade reporting.',
-  },
-  {
-    icon: Users,
-    title: 'Digital Student Cards',
-    description: 'Generate and manage official digital student identification cards.',
-  },
-];
-const values = [
-  { title: 'Excellence', description: 'Striving for the highest standards in education and technology.' },
-  { title: 'Collaboration', description: 'Fostering a connected community between all school stakeholders.' },
-  { title: 'Innovation', description: 'Continuously improving the educational experience with modern tools.' },
-];
+const featureIcons = [BookOpen, BarChart, Users];
+
 const contactInfo = [
-  { icon: <MapPin className="h-5 w-5" aria-hidden="true" />, text: 'Jl. Raya No. 123, Jakarta, Indonesia' },
-  { icon: <Phone className="h-5 w-5" aria-hidden="true" />, text: '(021) 123-4567' },
-  { icon: <Mail className="h-5 w-5" aria-hidden="true" />, text: 'info@akademiapro.sch.id' },
+  { icon: <MapPin className="h-5 w-5" aria-hidden="true" />, text: APP_CONFIG.CONTACT.ADDRESS },
+  { icon: <Phone className="h-5 w-5" aria-hidden="true" />, text: APP_CONFIG.CONTACT.PHONE },
+  { icon: <Mail className="h-5 w-5" aria-hidden="true" />, text: APP_CONFIG.CONTACT.EMAIL },
 ];
 export function HomePage() {
   const prefersReducedMotion = useReducedMotion();
@@ -46,12 +27,12 @@ export function HomePage() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 md:py-32 text-center relative">
             <SlideUp>
               <h1 id="hero-heading" className="text-4xl md:text-6xl font-bold tracking-tight">
-                Welcome to Akademia Pro
+                Welcome to {APP_CONFIG.NAME}
               </h1>
             </SlideUp>
             <SlideUp delay={0.2}>
               <p className="mt-4 max-w-2xl mx-auto text-lg md:text-xl text-blue-100">
-                The all-in-one school management system designed for modern educational era.
+                {APP_CONFIG.DESCRIPTION}
               </p>
             </SlideUp>
             <SlideUp delay={0.4}>
@@ -71,16 +52,16 @@ export function HomePage() {
       <section aria-labelledby="features-heading" className="py-16 md:py-24 bg-background">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <h2 id="features-heading" className="text-3xl md:text-4xl font-bold text-foreground">Why Choose Akademia Pro?</h2>
+            <h2 id="features-heading" className="text-3xl md:text-4xl font-bold text-foreground">Why Choose {APP_CONFIG.NAME}?</h2>
             <p className="mt-4 text-lg text-muted-foreground">
               Everything you need to manage your school, in one place.
             </p>
           </div>
           <div className="mt-12 grid gap-8 md:grid-cols-3">
-            {features.map((feature, index) => (
+            {APP_CONFIG.FEATURES.map((feature, index) => (
               <SlideUp key={feature.title} delay={prefersReducedMotion ? 0 : index * 0.1}>
                 <FeatureCard
-                  icon={feature.icon}
+                  icon={featureIcons[index]}
                   title={feature.title}
                   description={feature.description}
                 />
@@ -98,7 +79,7 @@ export function HomePage() {
               We are committed to empowering educational institutions through technology, guided by our core principles.
             </p>
             <ul className="mt-8 space-y-4">
-              {values.map((value) => (
+              {APP_CONFIG.VALUES.map((value) => (
                 <li key={value.title} className="flex items-start">
                   <CheckCircle className="h-6 w-6 mr-3 mt-1 flex-shrink-0" style={{ color: THEME_COLORS.SECONDARY }} aria-hidden="true" />
                   <div>
@@ -110,7 +91,7 @@ export function HomePage() {
             </ul>
           </div>
           <div className="hidden md:block">
-            <img src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?q=80&w=2070&auto=format&fit=crop" alt="Students collaborating in a classroom" className="rounded-lg shadow-lg" />
+            <img src={APP_CONFIG.HERO_IMAGE} alt="Students collaborating in a classroom" className="rounded-lg shadow-lg" />
           </div>
         </div>
       </section>
