@@ -62,6 +62,21 @@ function hexToBuffer(hex: string): Uint8Array {
   return bytes;
 }
 
+function constantTimeCompare(a: string, b: string): boolean {
+  if (a.length !== b.length) {
+    return false;
+  }
+  
+  const aBuffer = new TextEncoder().encode(a);
+  const bBuffer = new TextEncoder().encode(b);
+  
+  let result = 0;
+  for (let i = 0; i < aBuffer.length; i++) {
+    result |= aBuffer[i] ^ bBuffer[i];
+  }
+  return result === 0;
+}
+
 export async function hashPassword(password: string): Promise<HashedPassword> {
   const salt = await generateSalt();
   const hash = await deriveKey(password, salt);
@@ -98,7 +113,7 @@ export async function verifyPassword(
     }
 
     const actualHash = await deriveKey(password, salt);
-    const isValid = actualHash === expectedHash;
+    const isValid = constantTimeCompare(actualHash, expectedHash);
 
     if (isValid) {
       logger.debug('[Password] Password verified successfully');
