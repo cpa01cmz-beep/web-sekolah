@@ -1,0 +1,323 @@
+import { describe, it, expect } from 'vitest';
+import {
+  calculateAverage,
+  calculateSum,
+  calculateMin,
+  calculateMax,
+  calculateMedian,
+  calculateStandardDeviation,
+  getGradeLetter,
+  calculateGradeDistribution,
+  gradeDistributionToChartData,
+  calculateTrendDirection,
+  calculatePercentageChange,
+  groupByField,
+  aggregateByField,
+  normalizeData,
+  sortByValue,
+  topN,
+} from '../analytics';
+
+describe('Analytics Utilities', () => {
+  describe('calculateAverage', () => {
+    it('calculates average of numbers', () => {
+      expect(calculateAverage([10, 20, 30])).toBe(20);
+      expect(calculateAverage([1, 2, 3, 4, 5])).toBe(3);
+    });
+
+    it('returns 0 for empty array', () => {
+      expect(calculateAverage([])).toBe(0);
+    });
+
+    it('rounds to 2 decimal places', () => {
+      expect(calculateAverage([1, 2])).toBe(1.5);
+      expect(calculateAverage([1, 2, 3])).toBe(2);
+    });
+  });
+
+  describe('calculateSum', () => {
+    it('calculates sum of numbers', () => {
+      expect(calculateSum([1, 2, 3])).toBe(6);
+      expect(calculateSum([10, -5, 3])).toBe(8);
+    });
+
+    it('returns 0 for empty array', () => {
+      expect(calculateSum([])).toBe(0);
+    });
+  });
+
+  describe('calculateMin', () => {
+    it('returns minimum value', () => {
+      expect(calculateMin([5, 3, 8, 1, 9])).toBe(1);
+    });
+
+    it('returns 0 for empty array', () => {
+      expect(calculateMin([])).toBe(0);
+    });
+  });
+
+  describe('calculateMax', () => {
+    it('returns maximum value', () => {
+      expect(calculateMax([5, 3, 8, 1, 9])).toBe(9);
+    });
+
+    it('returns 0 for empty array', () => {
+      expect(calculateMax([])).toBe(0);
+    });
+  });
+
+  describe('calculateMedian', () => {
+    it('calculates median for odd length', () => {
+      expect(calculateMedian([1, 2, 3])).toBe(2);
+      expect(calculateMedian([1, 5, 3])).toBe(3);
+    });
+
+    it('calculates median for even length', () => {
+      expect(calculateMedian([1, 2, 3, 4])).toBe(2.5);
+    });
+
+    it('returns 0 for empty array', () => {
+      expect(calculateMedian([])).toBe(0);
+    });
+  });
+
+  describe('calculateStandardDeviation', () => {
+    it('calculates standard deviation', () => {
+      const result = calculateStandardDeviation([2, 4, 4, 4, 5, 5, 7, 9]);
+      expect(result).toBeCloseTo(2, 0);
+    });
+
+    it('returns 0 for empty array', () => {
+      expect(calculateStandardDeviation([])).toBe(0);
+    });
+  });
+
+  describe('getGradeLetter', () => {
+    it('returns A for scores 90-100', () => {
+      expect(getGradeLetter(90)).toBe('A');
+      expect(getGradeLetter(95)).toBe('A');
+      expect(getGradeLetter(100)).toBe('A');
+    });
+
+    it('returns B for scores 80-89', () => {
+      expect(getGradeLetter(80)).toBe('B');
+      expect(getGradeLetter(85)).toBe('B');
+      expect(getGradeLetter(89)).toBe('B');
+    });
+
+    it('returns C for scores 70-79', () => {
+      expect(getGradeLetter(70)).toBe('C');
+      expect(getGradeLetter(75)).toBe('C');
+    });
+
+    it('returns D for scores 60-69', () => {
+      expect(getGradeLetter(60)).toBe('D');
+      expect(getGradeLetter(65)).toBe('D');
+    });
+
+    it('returns E for scores 50-59', () => {
+      expect(getGradeLetter(50)).toBe('E');
+      expect(getGradeLetter(55)).toBe('E');
+    });
+
+    it('returns F for scores below 50', () => {
+      expect(getGradeLetter(0)).toBe('F');
+      expect(getGradeLetter(25)).toBe('F');
+      expect(getGradeLetter(49)).toBe('F');
+    });
+  });
+
+  describe('calculateGradeDistribution', () => {
+    it('calculates grade distribution', () => {
+      const scores = [95, 85, 75, 65, 55, 45];
+      const distribution = calculateGradeDistribution(scores);
+      
+      expect(distribution.A).toBe(1);
+      expect(distribution.B).toBe(1);
+      expect(distribution.C).toBe(1);
+      expect(distribution.D).toBe(1);
+      expect(distribution.E).toBe(1);
+      expect(distribution.F).toBe(1);
+    });
+
+    it('returns zeros for empty array', () => {
+      const distribution = calculateGradeDistribution([]);
+      expect(distribution).toEqual({ A: 0, B: 0, C: 0, D: 0, E: 0, F: 0 });
+    });
+  });
+
+  describe('gradeDistributionToChartData', () => {
+    it('converts distribution to chart data', () => {
+      const distribution = { A: 2, B: 3, C: 1, D: 0, E: 0, F: 0 };
+      const chartData = gradeDistributionToChartData(distribution);
+      
+      expect(chartData).toHaveLength(3);
+      expect(chartData[0]).toEqual({ name: 'A (90-100)', value: 2 });
+      expect(chartData[1]).toEqual({ name: 'B (80-89)', value: 3 });
+      expect(chartData[2]).toEqual({ name: 'C (70-79)', value: 1 });
+    });
+  });
+
+  describe('calculateTrendDirection', () => {
+    it('returns up for increasing trend', () => {
+      expect(calculateTrendDirection([10, 20, 30, 40])).toBe('up');
+    });
+
+    it('returns down for decreasing trend', () => {
+      expect(calculateTrendDirection([40, 30, 20, 10])).toBe('down');
+    });
+
+    it('returns stable for flat trend', () => {
+      expect(calculateTrendDirection([20, 20, 20, 20])).toBe('stable');
+    });
+
+    it('returns stable for single value', () => {
+      expect(calculateTrendDirection([50])).toBe('stable');
+    });
+
+    it('returns stable for empty array', () => {
+      expect(calculateTrendDirection([])).toBe('stable');
+    });
+  });
+
+  describe('calculatePercentageChange', () => {
+    it('calculates positive change', () => {
+      expect(calculatePercentageChange(100, 150)).toBe(50);
+    });
+
+    it('calculates negative change', () => {
+      expect(calculatePercentageChange(100, 50)).toBe(-50);
+    });
+
+    it('handles zero old value', () => {
+      expect(calculatePercentageChange(0, 100)).toBe(100);
+      expect(calculatePercentageChange(0, 0)).toBe(0);
+    });
+  });
+
+  describe('groupByField', () => {
+    it('groups data by field', () => {
+      const data = [
+        { category: 'A', value: 1 },
+        { category: 'B', value: 2 },
+        { category: 'A', value: 3 },
+      ];
+      
+      const grouped = groupByField(data, 'category');
+      
+      expect(grouped['A']).toHaveLength(2);
+      expect(grouped['B']).toHaveLength(1);
+    });
+  });
+
+  describe('aggregateByField', () => {
+    it('aggregates by sum', () => {
+      const data = [
+        { category: 'A', value: 10 },
+        { category: 'B', value: 20 },
+        { category: 'A', value: 30 },
+      ];
+      
+      const result = aggregateByField(data, 'category', 'value', 'sum');
+      
+      expect(result.find(r => r.name === 'A')?.value).toBe(40);
+      expect(result.find(r => r.name === 'B')?.value).toBe(20);
+    });
+
+    it('aggregates by avg', () => {
+      const data = [
+        { category: 'A', value: 10 },
+        { category: 'A', value: 20 },
+      ];
+      
+      const result = aggregateByField(data, 'category', 'value', 'avg');
+      
+      expect(result.find(r => r.name === 'A')?.value).toBe(15);
+    });
+
+    it('aggregates by count', () => {
+      const data = [
+        { category: 'A', value: 10 },
+        { category: 'A', value: 20 },
+        { category: 'B', value: 30 },
+      ];
+      
+      const result = aggregateByField(data, 'category', 'value', 'count');
+      
+      expect(result.find(r => r.name === 'A')?.value).toBe(2);
+      expect(result.find(r => r.name === 'B')?.value).toBe(1);
+    });
+  });
+
+  describe('normalizeData', () => {
+    it('normalizes data to max value', () => {
+      const data = [
+        { name: 'A', value: 50 },
+        { name: 'B', value: 100 },
+      ];
+      
+      const normalized = normalizeData(data, 100);
+      
+      expect(normalized[0].value).toBe(50);
+      expect(normalized[1].value).toBe(100);
+    });
+
+    it('returns data as-is when max is 0', () => {
+      const data = [
+        { name: 'A', value: 0 },
+        { name: 'B', value: 0 },
+      ];
+      
+      const normalized = normalizeData(data, 100);
+      
+      expect(normalized).toEqual(data);
+    });
+  });
+
+  describe('sortByValue', () => {
+    it('sorts descending by default', () => {
+      const data = [
+        { name: 'A', value: 10 },
+        { name: 'B', value: 30 },
+        { name: 'C', value: 20 },
+      ];
+      
+      const sorted = sortByValue(data);
+      
+      expect(sorted[0].value).toBe(30);
+      expect(sorted[1].value).toBe(20);
+      expect(sorted[2].value).toBe(10);
+    });
+
+    it('sorts ascending when specified', () => {
+      const data = [
+        { name: 'A', value: 10 },
+        { name: 'B', value: 30 },
+        { name: 'C', value: 20 },
+      ];
+      
+      const sorted = sortByValue(data, 'asc');
+      
+      expect(sorted[0].value).toBe(10);
+      expect(sorted[1].value).toBe(20);
+      expect(sorted[2].value).toBe(30);
+    });
+  });
+
+  describe('topN', () => {
+    it('returns top N items', () => {
+      const data = [
+        { name: 'A', value: 10 },
+        { name: 'B', value: 30 },
+        { name: 'C', value: 20 },
+        { name: 'D', value: 40 },
+      ];
+      
+      const top2 = topN(data, 2);
+      
+      expect(top2).toHaveLength(2);
+      expect(top2[0].value).toBe(40);
+      expect(top2[1].value).toBe(30);
+    });
+  });
+});
