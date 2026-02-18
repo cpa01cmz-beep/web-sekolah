@@ -5,11 +5,13 @@ import { EmptyState } from '@/components/ui/empty-state';
 import { DashboardSkeleton } from '@/components/ui/loading-skeletons';
 import { PageHeader } from '@/components/PageHeader';
 import { SlideUp } from '@/components/animations';
+import { useReducedMotion } from '@/hooks/use-reduced-motion';
 import { Clock, BookOpen, Megaphone, AlertTriangle, Inbox } from 'lucide-react';
 import { useStudentDashboard } from '@/hooks/useStudent';
 import { useAuthStore } from '@/lib/authStore';
 import type { StudentDashboardData } from '@shared/types';
 import { formatDate } from '@/utils/date';
+import { getGradeLetter } from '@/utils/grades';
 import { memo } from 'react';
 
 const ScheduleItem = memo(({ item }: { item: StudentDashboardData['schedule'][0] }) => (
@@ -30,7 +32,7 @@ const GradeItem = memo(({ grade }: { grade: StudentDashboardData['recentGrades']
       <p className="text-sm font-medium">{grade.courseName}</p>
       <Badge className={isPassing ? 'bg-green-500 text-white' : 'bg-red-500 text-white'}>
         <span className="sr-only">{isPassing ? 'Passing grade: ' : 'Failing grade: '}</span>
-        {grade.score}
+        {getGradeLetter(grade.score)} ({grade.score})
       </Badge>
     </li>
   );
@@ -46,6 +48,7 @@ const AnnouncementItem = memo(({ ann }: { ann: StudentDashboardData['announcemen
 AnnouncementItem.displayName = 'AnnouncementItem';
 
 export function StudentDashboardPage() {
+  const prefersReducedMotion = useReducedMotion();
   const user = useAuthStore((state) => state.user);
   const { data, isLoading, error } = useStudentDashboard(user?.id || '');
 
@@ -71,16 +74,16 @@ export function StudentDashboardPage() {
   }
 
   return (
-    <SlideUp delay={0}>
+    <SlideUp delay={0} style={prefersReducedMotion ? { opacity: 1 } : {}}>
       <div className="space-y-6">
-        <SlideUp delay={0.1}>
+        <SlideUp delay={0.1} style={prefersReducedMotion ? { opacity: 1 } : {}}>
           <PageHeader 
             title="Student Dashboard" 
             description="Here's a summary of your academic activities."
           />
         </SlideUp>
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          <SlideUp delay={0.2}>
+          <SlideUp delay={0.2} style={prefersReducedMotion ? { opacity: 1 } : {}}>
             <Card className="h-full hover:shadow-lg transition-shadow duration-200">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Today's Schedule</CardTitle>
@@ -95,7 +98,7 @@ export function StudentDashboardPage() {
               </CardContent>
             </Card>
           </SlideUp>
-          <SlideUp delay={0.3}>
+          <SlideUp delay={0.3} style={prefersReducedMotion ? { opacity: 1 } : {}}>
             <Card className="h-full hover:shadow-lg transition-shadow duration-200">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Recent Grades</CardTitle>
@@ -110,7 +113,7 @@ export function StudentDashboardPage() {
               </CardContent>
             </Card>
           </SlideUp>
-          <SlideUp delay={0.4}>
+          <SlideUp delay={0.4} style={prefersReducedMotion ? { opacity: 1 } : {}}>
             <Card className="h-full hover:shadow-lg transition-shadow duration-200">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Announcements</CardTitle>
