@@ -74,4 +74,13 @@ export default tseslint.config(
       'react-refresh/only-export-components': 'off',
     },
   },
+  // Warn about console.log and 'any' types in source files (not tests or logging utilities)
+  {
+    files: ['src/**/*.{ts,tsx}', 'worker/**/*.{ts,tsx}'],
+    ignores: ['**/__tests__/**', '**/*.test.*', '**/logger.ts', '**/test-utils.ts', 'vite.config.ts'],
+    rules: {
+      'no-console': ['warn', { allow: ['warn', 'error', 'debug'] }],
+      '@typescript-eslint/no-explicit-any': 'warn',
+    },
+  },
 )
