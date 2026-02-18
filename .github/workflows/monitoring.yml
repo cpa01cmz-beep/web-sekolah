@@ -1,248 +1,244 @@
-name: Monitoring & Alerts
+name: parallel
 
 on:
-  workflow_dispatch:
+  push:
+    branches:
+      - main # Architect runs on main changes
   schedule:
-    # Run daily at 9:00 AM UTC
-    - cron: '0 9 * * *'
-  pull_request:
-    types: [opened, reopened, synchronize]
+    - cron: "0 */4 * * *" # Routine check every 4 hours
+  workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
   issues: write
-  actions: read
+  pull-requests: write
+  actions: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
 
 jobs:
-  check-build-health:
-    name: Check Build Health
+  # ------------------------------------------------------------------
+  # STAGE 1: THE BRAIN (Architect & Manager)
+  # ------------------------------------------------------------------
+  architect:
+    name: "Architect: Strategy & Triage"
     runs-on: ubuntu-24.04-arm
-    
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      IFLOW_API_KEY: ${{ secrets.IFLOW_API_KEY }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+      API_KEY: ${{ secrets.GEMINI_API_KEY }}
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Setup Cache
+        uses: actions/cache@v5
+        with:
+          path: |
+            ~/.opencode
+            ~/.npm
+          key: opencode-${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}-v1
+          restore-keys: |
+            opencode-${{ runner.os }}-v1
+            opencode-${{ runner.os }}-
+      - name: Configure Git
+        run: |
+          git config --global user.name "${{ github.actor }}"
+          git config --global user.email "${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com"
+      - name: Install Node.js
+        continue-on-error: true
         uses: actions/setup-node@v4
         with:
-          node-version: 20
-          cache: 'npm'
-
+          node-version: "20"
       - name: Install Dependencies
+        continue-on-error: true
         run: npm ci
-
-      - name: Build
-        run: npm run build
-
-      - name: Run Tests
-        run: npm run test -- --run
-
-      - name: Check Test Flakiness
-        id: flaky_tests
+      - name: Install OpenCode CLI
         run: |
-          # This would ideally connect to a test tracking system
-          # For now, we'll just check if tests pass
-          echo "✅ All tests passed"
-          echo "flaky=0" >> $GITHUB_OUTPUT
-
-      - name: Check Build Time
-        id: build_time
+          curl -fsSL https://opencode.ai/install | bash
+          echo "$HOME/.opencode/bin" >> $GITHUB_PATH
+      - name: arsitek
+        timeout-minutes: 20
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # Measure build time
-          START=$(date +%s)
-          npm run build
-          END=$(date +%s)
-          BUILD_TIME=$((END - START))
+          max_retries=2
+          retry_count=0
+          echo "🏗️ Starting Architect Intelligence Cycle"
+          while [ $retry_count -lt $max_retries ]; do
+            echo "Attempt $((retry_count + 1)) of $max_retries"
+            if opencode run /ulw-loop "Anda adalah RepoKeeper. Tugas anda adalah menjaga repositori tetap efisien, teratur dan terorganisir, bersih dari file/folder redundant, sementara dan tidak digunakan lagi. Jaga dokumentasi tetap up to date dan sesuai dengan code. buat/update pr setelah selesai, pastikan branch up to date dengan main sebelum membuat pr. ketika build/lint, jika ada errors atau warnings (pre, existing atau potensial) walaupun hanya 1, maka anda gagal besar." \
+              --agent RepoKeeper \
+              --model opencode/kimi-k2.5-free \
+              --share false; then
+              echo "✅ Architect work completed successfully"
+              break
+            else
+              retry_count=$((retry_count + 1))
+              echo "❌ Architect execution failed, retrying in 30 seconds..."
+              sleep 30
+              if [ $retry_count -eq $max_retries ]; then
+                echo "❌ All retry attempts failed"
+                exit 1
+              fi
+            fi
+          done
+            
+  # ------------------------------------------------------------------
+  # STAGE 2: THE MUSCLE (Specialist Executors)
+  # ------------------------------------------------------------------
+  specialists:
+    name: "Specialist: ${{ matrix.role }}"
+    continue-on-error: true
+    needs: architect
+    runs-on: ubuntu-24.04-arm
+    strategy:
+      fail-fast: false
+      matrix:
+        role:
+          - frontend-engineer
+          - backend-engineer
+          - ai-agent-engineer
+          - DX-engineer
+          - security-engineer
+          - quality-assurance
+          - performance-engineer
+          - database-architect
+          - devops-engineer
+          - ui-ux-engineer
+          - technical-writer
+          - reliability-engineer
+          - integration-engineer
+          - vercel
+          - user-story-engineer
+          - modularity-engineer
+          - hardcoded-eliminator
+          - cloudflare
+          - repository manager
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Configure Git
+        run: |
+          git config --global user.name "${{ matrix.role }}"
+          git config --global user.email "${{ matrix.role }}@bank-sampah.sulhi.workers.dev"
+      - name: Setup Node & OpenCode
+        continue-on-error: true
+        uses: actions/setup-node@v5
+        with:
+          node-version: "20"
+      - name: Install OpenCode CLI
+        run: |
+          curl -fsSL https://opencode.ai/install | bash
+          echo "$HOME/.opencode/bin" >> $GITHUB_PATH
+      - name: Execute Work (Active or Proactive)
+        timeout-minutes: 30
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          IFLOW_API_KEY: ${{ secrets.IFLOW_API_KEY }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: |
+          # Specialist runs unconditionally:
+          # 1. Finds Issue -> Fixes it
+          # 2. No Issue -> Proactive Scan -> findings.md
+          echo "Starting specialist work for ${{ matrix.role }}"
           
-          echo "Build time: ${BUILD_TIME}s"
-          
-          if [ $BUILD_TIME -gt 60 ]; then
-            echo "⚠️  Build time exceeds 60s threshold: ${BUILD_TIME}s"
-            echo "build_slow=true" >> $GITHUB_OUTPUT
+          if opencode run /ulw-loop \
+            "You are ${{ matrix.role }} specialist. You work on branch ${{ matrix.role }}. Always do ${{ matrix.role }} best practice. you read documentations (*.md), check all open pr and open issues. your goal is to make small improvement within ${{ matrix.role }} without regression. confirm: build/lint/test success without warnings/errors. create/update pull request after your task done with label ${{ matrix.role }}, ensure up to date with default branch before create/update pr to minimaze conflicts." \
+            --model opencode/glm-5-free \
+            --share false; then
+            echo "✅ Specialist work completed successfully for ${{ matrix.role }}"
           else
-            echo "✅ Build time within acceptable range"
-            echo "build_slow=false" >> $GITHUB_OUTPUT
+            echo "❌ Specialist work failed or timed out for ${{ matrix.role }}"
+            echo "This may be expected if no issues were found or work took longer than timeout"
+            exit 0  # Don't fail the workflow, just log the issue
           fi
-
-      - name: Alert on Build Issues
-        if: steps.flaky_tests.outputs.flaky == '1' || steps.build_time.outputs.build_slow == 'true'
-        env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
-        run: |
-          # Create issue for build problems
-          gh issue create \
-            --title "⚠️ Build Health Alert - $(date +%Y-%m-%d)" \
-            --label "ci" \
-            --label "P2" \
-            --body "Build health check detected issues:
-            
-            - Flaky tests: ${{ steps.flaky_tests.outputs.flaky }}
-            - Slow build: ${{ steps.build_time.outputs.build_slow }}
-            - Build time: ${{ steps.build_time.outputs.build_time }}s
-            
-            This issue was automatically created by the monitoring workflow."
-
-  check-code-quality:
-    name: Check Code Quality
+  # ------------------------------------------------------------------
+  # STAGE 3: ISSUE MANAGER
+  # ------------------------------------------------------------------
+  PR-Handler:
+    name: "PR-Handler"
+    needs: specialists
     runs-on: ubuntu-24.04-arm
-    
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - name: Setup Node.js
+      - name: Configure Git
+        run: |
+          git config --global user.name "PR-Handler"
+          git config --global user.email "PR-Handler@bank-sampah.sulhi.workers.dev"
+      - name: Setup Node & OpenCode
         uses: actions/setup-node@v4
         with:
-          node-version: 20
-          cache: 'npm'
-
-      - name: Install Dependencies
-        run: npm ci
-
-      - name: Type Check
-        run: npm run typecheck
-
-      - name: Lint
-        run: npm run lint
-
-      - name: Check for Console Logs
-        id: console_logs
+          node-version: "20"
+      - name: Install OpenCode CLI
         run: |
-          # Count console.log statements (excluding tests)
-          CONSOLE_COUNT=$(grep -r "console.log" src --include="*.ts" --include="*.tsx" | wc -l)
-          echo "console_log_count=${CONSOLE_COUNT}" >> $GITHUB_OUTPUT
-          echo "Found ${CONSOLE_COUNT} console.log statements in source code"
-
-      - name: Check for Untyped Code
-        id: untyped
-        run: |
-          # Count 'any' type usages
-          ANY_COUNT=$(grep -r ": any" src --include="*.ts" --include="*.tsx" | wc -l)
-          echo "any_count=${ANY_COUNT}" >> $GITHUB_OUTPUT
-          echo "Found ${ANY_COUNT} 'any' type usages"
-
-      - name: Alert on Code Quality Issues
-        if: steps.console_logs.outputs.console_log_count > 10 || steps.untyped.outputs.any_count > 20
+          curl -fsSL https://opencode.ai/install | bash
+          echo "$HOME/.opencode/bin" >> $GITHUB_PATH
+      - name: Process Pull Requests
+        timeout-minutes: 60
+        continue-on-error: true
         env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          IFLOW_API_KEY: ${{ secrets.IFLOW_API_KEY }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: |
-          gh issue create \
-            --title "📊 Code Quality Alert - $(date +%Y-%m-%d)" \
-            --label "refactor" \
-            --label "P3" \
-            --body "Code quality check detected issues:
-
-            - Console log statements: ${{ steps.console_logs.outputs.console_log_count }}
-            - 'any' type usages: ${{ steps.untyped.outputs.any_count }}
-
-            Recommendations:
-            - Consider removing or replacing console.log statements with proper logging
-            - Replace 'any' types with specific types for better type safety
-
-            This issue was automatically created by the monitoring workflow."
-
-  check-dependencies:
-    name: Check Dependencies
+          opencode run /ulw-loop \
+            "You are **PR-Handler**, github PR manager work on this repository. **PR-Handler** love to manage PR, he work from latest open pr. **PR-Handler** Goal: manage ALL open pr begun from latest, merge without conflict, warnings, errors. If conflicts, close pr. confirm: build/lint/test/check success without warnings, up to date with default branch. remember, no errors or warnings." \
+            --model opencode/glm-5-free \
+            --share false
+  # ------------------------------------------------------------------
+  # STAGE 4: THE GATEKEEPER (Integrator)
+  # ------------------------------------------------------------------
+  integrator:
+    name: "Fixer"
+    needs: PR-Handler
     runs-on: ubuntu-24.04-arm
-    
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - name: Setup Node.js
+      - name: Configure Git
+        run: |
+          git config --global user.name "Fixer"
+          git config --global user.email "fixer@bank-sampah.sulhi.workers.dev"
+      - name: Setup Node & OpenCode
         uses: actions/setup-node@v4
         with:
-          node-version: 20
-          cache: 'npm'
-
+          node-version: "20"
       - name: Install Dependencies
+        continue-on-error: true
         run: npm ci
-
-      - name: Check for Vulnerabilities
-        id: audit
+      - name: Install OpenCode CLI
         run: |
-          npm audit --production 2>&1 | tee audit_report.txt || true
-          
-          VULNERABILITIES=$(grep -o "found [0-9]* vulnerabilities" audit_report.txt | grep -o "[0-9]*" || echo "0")
-          echo "vulnerability_count=${VULNERABILITIES}" >> $GITHUB_OUTPUT
-          echo "Found ${VULNERABILITIES} vulnerabilities"
-
-      - name: Check Outdated Dependencies
-        id: outdated
-        run: |
-          npm outdated 2>&1 | tee outdated_report.txt || true
-          
-          OUTDATED=$(grep -c " " outdated_report.txt || echo "0")
-          echo "outdated_count=${OUTDATED}" >> $GITHUB_OUTPUT
-          echo "Found ${OUTDATED} outdated dependencies"
-
-      - name: Alert on Security Issues
-        if: steps.audit.outputs.vulnerability_count > '0'
+          curl -fsSL https://opencode.ai/install | bash
+          echo "$HOME/.opencode/bin" >> $GITHUB_PATH
+      - name: Process Pull Requests
+        timeout-minutes: 60
+        continue-on-error: true
         env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          IFLOW_API_KEY: ${{ secrets.IFLOW_API_KEY }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: |
-          gh issue create \
-            --title "🔒 Security Alert - Vulnerabilities Detected - $(date +%Y-%m-%d)" \
-            --label "security" \
-            --label "P0" \
-            --body "Security audit detected vulnerabilities:
-            
-            - Vulnerabilities found: ${{ steps.audit.outputs.vulnerability_count }}
-            
-            Please review the audit report and update affected dependencies.
-            
-            Run 'npm audit fix' to automatically fix vulnerabilities.
-            
-            This issue was automatically created by the monitoring workflow."
-
-      - name: Alert on Outdated Dependencies
-        if: steps.outdated.outputs.outdated_count > '5'
-        env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
-        run: |
-          gh issue create \
-            --title "📦 Dependencies Alert - Outdated Packages - $(date +%Y-%m-%d)" \
-            --label "chore" \
-            --label "P3" \
-            --body "Dependencies check detected outdated packages:
-            
-            - Outdated dependencies: ${{ steps.outdated.outputs.outdated_count }}
-            
-            Please review and update outdated dependencies to ensure security and performance.
-            
-            Run 'npm outdated' to see which packages need updates.
-            
-            This issue was automatically created by the monitoring workflow."
-
-  summarize-findings:
-    name: Summarize Monitoring Findings
-    needs: [check-build-health, check-code-quality, check-dependencies]
-    if: always()
-    runs-on: ubuntu-24.04-arm
-    
-    steps:
-      - name: Create Summary
-        run: |
-          echo "# Monitoring & Alerting Report" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Date:** $(date -u)" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          
-          echo "## Build Health" >> $GITHUB_STEP_SUMMARY
-          echo "- Status: ${{ needs.check-build-health.result }}" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          
-          echo "## Code Quality" >> $GITHUB_STEP_SUMMARY
-          echo "- Status: ${{ needs.check-code-quality.result }}" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          
-          echo "## Dependencies" >> $GITHUB_STEP_SUMMARY
-          echo "- Status: ${{ needs.check-dependencies.result }}" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          
-          echo "## Overall Health" >> $GITHUB_STEP_SUMMARY
-          if [[ "${{ needs.check-build-health.result }}" == "success" && "${{ needs.check-code-quality.result }}" == "success" && "${{ needs.check-dependencies.result }}" == "success" ]]; then
-            echo "✅ All checks passed" >> $GITHUB_STEP_SUMMARY
-          else
-            echo "⚠️  Some checks failed. Please review the findings above." >> $GITHUB_STEP_SUMMARY
-          fi
+          opencode run /ulw-loop \
+            "Check all open pr, Select based created time, for each open pr: fix - verify- ensure build/lint success without errors/warnings - create/update pr linked to issues, ensure up to date with main before create/update pr - monitor comments and check status on pr - if all green, merge. if red, fix until green. merge only if build/lint success without error/warning. if any error/warning while build/lint, its big failure." \
+            --model opencode/glm-5-free \
+            --share false
