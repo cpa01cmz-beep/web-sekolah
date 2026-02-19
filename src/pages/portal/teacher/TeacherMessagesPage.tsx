@@ -143,20 +143,12 @@ function ComposeDialog({ parents, onSend, isLoading }: ComposeDialogProps) {
           </div>
           <Button
             onClick={handleSend}
-            disabled={!recipientId || !subject.trim() || !content.trim() || isLoading}
+            disabled={!recipientId || !subject.trim() || !content.trim()}
+            isLoading={isLoading}
             className="w-full"
           >
-            {isLoading ? (
-              <>
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                Sending...
-              </>
-            ) : (
-              <>
-                <Send className="h-4 w-4 mr-2" />
-                Send Message
-              </>
-            )}
+            <Send className="h-4 w-4 mr-2" />
+            {isLoading ? 'Sending...' : 'Send Message'}
           </Button>
         </div>
       </DialogContent>
