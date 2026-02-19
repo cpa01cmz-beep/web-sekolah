@@ -4,7 +4,8 @@ export {
   GRADE_C_THRESHOLD,
   GRADE_D_THRESHOLD,
   PASSING_SCORE_THRESHOLD,
-  GRADE_PRECISION_FACTOR
+  GRADE_PRECISION_FACTOR,
+  DisplayStrings
 } from '../shared/constants';
 
 export {
@@ -12,7 +13,9 @@ export {
   RateLimitWindow,
   RateLimitMaxRequests,
   IntegrationMonitor as IntegrationMonitorConfig,
-  HttpStatusCode
+  HttpStatusCode,
+  EntityRetryCount,
+  HealthCheckConfig
 } from './config/time';
 
 export { ValidationLimits, StatusCodeRanges } from './config/validation';

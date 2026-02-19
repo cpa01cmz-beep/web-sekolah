@@ -1,3 +1,6 @@
+import { HealthCheckConfig } from './constants';
+import { EndpointTimeout } from './config/endpoint-timeout';
+
 export interface HealthCheckResult {
   service: string;
   healthy: boolean;
@@ -18,7 +21,7 @@ export interface ServiceHealthStatus {
 const healthStatus = new Map<string, ServiceHealthStatus>();
 
 export class ExternalServiceHealth {
-  static async checkWebhookService(url: string, timeoutMs: number = 5000): Promise<HealthCheckResult> {
+  static async checkWebhookService(url: string, timeoutMs: number = EndpointTimeout.HEALTH.CHECK): Promise<HealthCheckResult> {
     const startTime = Date.now();
     const timestamp = new Date().toISOString();
 
@@ -60,7 +63,7 @@ export class ExternalServiceHealth {
     }
   }
 
-  static async checkDocsService(url: string, timeoutMs: number = 5000): Promise<HealthCheckResult> {
+  static async checkDocsService(url: string, timeoutMs: number = EndpointTimeout.HEALTH.CHECK): Promise<HealthCheckResult> {
     const startTime = Date.now();
     const timestamp = new Date().toISOString();
 
@@ -130,7 +133,7 @@ export class ExternalServiceHealth {
         lastSuccess: healthy ? timestamp : existing.lastSuccess,
         lastFailure: healthy ? existing.lastFailure : timestamp,
         consecutiveFailures,
-        isHealthy: consecutiveFailures < 5,
+        isHealthy: consecutiveFailures < HealthCheckConfig.FAILURE_THRESHOLD,
       });
     } else {
       healthStatus.set(service, {

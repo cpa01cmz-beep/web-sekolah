@@ -15,3 +15,11 @@ export const RETRY_CONFIG = {
   DEFAULT_BASE_DELAY_MS: 1000,
   DEFAULT_JITTER_MS: 0,
 } as const;
+
+export const DisplayStrings = {
+  UNKNOWN_COURSE: 'Unknown Course',
+  UNKNOWN_TEACHER: 'Unknown Teacher',
+  UNKNOWN_AUTHOR: 'Unknown Author',
+  UNKNOWN_STUDENT: 'Unknown Student',
+  NOT_AVAILABLE: 'N/A',
+} as const;

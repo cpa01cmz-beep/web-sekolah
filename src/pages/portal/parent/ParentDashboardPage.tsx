@@ -12,10 +12,11 @@ import { useParentDashboard } from '@/hooks/useParent';
 import { useAuthStore } from '@/lib/authStore';
 import { formatDate } from '@/utils/date';
 import { getGradeBadgeVariant, getGradeLetter } from '@/utils/grades';
+import { PASSING_SCORE_THRESHOLD } from '@/constants/grades';
 import type { ParentDashboardData } from '@shared/types';
 
 const GradeItem = memo(({ grade }: { grade: ParentDashboardData['childGrades'][0] }) => {
-  const isPassing = grade.score >= 70;
+  const isPassing = grade.score >= PASSING_SCORE_THRESHOLD;
   return (
     <li className="flex items-center justify-between">
       <p className="text-sm font-medium">{grade.courseName}</p>

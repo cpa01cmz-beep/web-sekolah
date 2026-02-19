@@ -1,4 +1,5 @@
 import type { Doc, Env, GlobalDurableObject } from '../types';
+import { EntityRetryCount } from '../constants';
 
 export interface EntityStatics<S, T extends Entity<S>> {
   new (env: Env, id: string): T;
@@ -38,7 +39,7 @@ export abstract class Entity<State> {
   }
 
   async save(next: State): Promise<void> {
-    for (let i = 0; i < 4; i++) {
+    for (let i = 0; i < EntityRetryCount.CAS_OPERATION; i++) {
       await this.ensureState();
       const res = await this.stub.casPut(this.key(), this._version, next);
       if (res.ok) {
@@ -64,7 +65,7 @@ export abstract class Entity<State> {
   }
 
   async mutate(updater: (current: State) => State): Promise<State> {
-    for (let i = 0; i < 4; i++) {
+    for (let i = 0; i < EntityRetryCount.CAS_OPERATION; i++) {
       const current = await this.ensureState();
       const startV = this._version;
       const next = updater(current);

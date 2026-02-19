@@ -9,6 +9,7 @@ import { SlideUp } from '@/components/animations';
 import { useStudentDashboard } from '@/hooks/useStudent';
 import { useAuthStore } from '@/lib/authStore';
 import { calculateAverageScore, getGradeColorClass, getGradeLetter } from '@/utils/grades';
+import { PASSING_SCORE_THRESHOLD } from '@/constants/grades';
 import { ResponsiveTable } from '@/components/ui/responsive-table';
 
 const TABLE_HEADERS = [
@@ -40,7 +41,7 @@ export function StudentGradesPage() {
         key: 'grade',
         content: (
           <Badge className={`text-white ${getGradeColorClass(grade.score)}`}>
-            <span className="sr-only">{grade.score >= 70 ? 'Passing grade: ' : 'Failing grade: '}</span>
+            <span className="sr-only">{grade.score >= PASSING_SCORE_THRESHOLD ? 'Passing grade: ' : 'Failing grade: '}</span>
             {getGradeLetter(grade.score)}
           </Badge>
         ),

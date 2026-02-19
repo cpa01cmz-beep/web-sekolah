@@ -36,6 +36,14 @@ export const RetryDelay = {
   ONE_MINUTE_MS: 1000 * 60,
 } as const;
 
+export const EntityRetryCount = {
+  CAS_OPERATION: 4,
+} as const;
+
+export const HealthCheckConfig = {
+  FAILURE_THRESHOLD: 5,
+} as const;
+
 export const HttpStatusCode = {
   CONTINUE: 100,
   SWITCHING_PROTOCOLS: 101,

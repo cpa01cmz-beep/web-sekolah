@@ -12,6 +12,7 @@ import { useAuthStore } from '@/lib/authStore';
 import type { StudentDashboardData } from '@shared/types';
 import { formatDate } from '@/utils/date';
 import { getGradeLetter } from '@/utils/grades';
+import { PASSING_SCORE_THRESHOLD } from '@/constants/grades';
 import { memo } from 'react';
 
 const ScheduleItem = memo(({ item }: { item: StudentDashboardData['schedule'][0] }) => (
@@ -26,7 +27,7 @@ const ScheduleItem = memo(({ item }: { item: StudentDashboardData['schedule'][0]
 ScheduleItem.displayName = 'ScheduleItem';
 
 const GradeItem = memo(({ grade }: { grade: StudentDashboardData['recentGrades'][0] }) => {
-  const isPassing = grade.score >= 70;
+  const isPassing = grade.score >= PASSING_SCORE_THRESHOLD;
   return (
     <li className="flex items-center justify-between">
       <p className="text-sm font-medium">{grade.courseName}</p>
