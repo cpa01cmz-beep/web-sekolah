@@ -1,20 +1,20 @@
-import { memo, useState, useEffect } from 'react';
-import { logger } from '@/lib/logger';
+import { memo } from 'react';
 import { CHART_COLORS, CHART_DEFAULTS, type MultiSeriesDataPoint } from './types';
 import { ChartSkeleton } from './ChartSkeleton';
+import { useChartComponents } from './chart-hooks';
 
 const ACTIVE_DOT_CONFIG = { r: 6 } as const;
 
-interface ChartComponents {
-  LineChart: React.ComponentType<Record<string, unknown>>;
-  Line: React.ComponentType<Record<string, unknown>>;
-  XAxis: React.ComponentType<Record<string, unknown>>;
-  YAxis: React.ComponentType<Record<string, unknown>>;
-  CartesianGrid: React.ComponentType<Record<string, unknown>>;
-  Tooltip: React.ComponentType<Record<string, unknown>>;
-  Legend: React.ComponentType<Record<string, unknown>>;
-  ResponsiveContainer: React.ComponentType<Record<string, unknown>>;
-}
+const LINE_CHART_COMPONENTS = [
+  'LineChart',
+  'Line',
+  'XAxis',
+  'YAxis',
+  'CartesianGrid',
+  'Tooltip',
+  'Legend',
+  'ResponsiveContainer',
+] as const;
 
 export interface LineSeries {
   dataKey: string;
@@ -50,41 +50,7 @@ export const LineChart = memo(function LineChart({
   ariaLabel = 'Line chart',
   emptyMessage = 'No data available',
 }: LineChartProps) {
-  const [Chart, setChart] = useState<ChartComponents | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    const loadChartComponents = async () => {
-      try {
-        const [LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer] = await Promise.all([
-          import('recharts/es6/chart/LineChart'),
-          import('recharts/es6/cartesian/Line'),
-          import('recharts/es6/cartesian/XAxis'),
-          import('recharts/es6/cartesian/YAxis'),
-          import('recharts/es6/cartesian/CartesianGrid'),
-          import('recharts/es6/component/Tooltip'),
-          import('recharts/es6/component/Legend'),
-          import('recharts/es6/component/ResponsiveContainer'),
-        ]);
-        setChart({
-          LineChart: LineChart.LineChart,
-          Line: Line.Line,
-          XAxis: XAxis.XAxis,
-          YAxis: YAxis.YAxis,
-          CartesianGrid: CartesianGrid.CartesianGrid,
-          Tooltip: Tooltip.Tooltip,
-          Legend: Legend.Legend,
-          ResponsiveContainer: ResponsiveContainer.ResponsiveContainer,
-        });
-      } catch (error) {
-        logger.error('Failed to load line chart components:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    loadChartComponents();
-  }, []);
+  const { components: Chart, isLoading } = useChartComponents(LINE_CHART_COMPONENTS);
 
   if (isLoading) {
     return <ChartSkeleton height={height} className={className} />;

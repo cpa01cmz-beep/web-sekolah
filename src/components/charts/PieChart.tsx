@@ -1,16 +1,16 @@
-import { memo, useState, useEffect } from 'react';
-import { logger } from '@/lib/logger';
+import { memo } from 'react';
 import { CHART_COLORS, CHART_DEFAULTS, type ChartDataPoint } from './types';
 import { ChartSkeleton } from './ChartSkeleton';
+import { useChartComponents } from './chart-hooks';
 
-interface ChartComponents {
-  PieChart: React.ComponentType<Record<string, unknown>>;
-  Pie: React.ComponentType<Record<string, unknown>>;
-  Cell: React.ComponentType<Record<string, unknown>>;
-  Tooltip: React.ComponentType<Record<string, unknown>>;
-  Legend: React.ComponentType<Record<string, unknown>>;
-  ResponsiveContainer: React.ComponentType<Record<string, unknown>>;
-}
+const PIE_CHART_COMPONENTS = [
+  'PieChart',
+  'Pie',
+  'Cell',
+  'Tooltip',
+  'Legend',
+  'ResponsiveContainer',
+] as const;
 
 export interface PieChartProps {
   data: ChartDataPoint[];
@@ -54,37 +54,7 @@ export const PieChart = memo(function PieChart({
   emptyMessage = 'No data available',
   colors = DEFAULT_COLORS,
 }: PieChartProps) {
-  const [Chart, setChart] = useState<ChartComponents | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    const loadChartComponents = async () => {
-      try {
-        const [PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer] = await Promise.all([
-          import('recharts/es6/chart/PieChart'),
-          import('recharts/es6/polar/Pie'),
-          import('recharts/es6/component/Cell'),
-          import('recharts/es6/component/Tooltip'),
-          import('recharts/es6/component/Legend'),
-          import('recharts/es6/component/ResponsiveContainer'),
-        ]);
-        setChart({
-          PieChart: PieChart.PieChart,
-          Pie: Pie.Pie,
-          Cell: Cell.Cell,
-          Tooltip: Tooltip.Tooltip,
-          Legend: Legend.Legend,
-          ResponsiveContainer: ResponsiveContainer.ResponsiveContainer,
-        });
-      } catch (error) {
-        logger.error('Failed to load pie chart components:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    loadChartComponents();
-  }, []);
+  const { components: Chart, isLoading } = useChartComponents(PIE_CHART_COMPONENTS);
 
   if (isLoading) {
     return <ChartSkeleton height={height} className={className} />;
