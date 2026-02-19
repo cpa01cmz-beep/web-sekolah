@@ -1,19 +1,19 @@
-import { memo, useState, useEffect, type ReactNode } from 'react';
-import { logger } from '@/lib/logger';
+import { memo } from 'react';
 import { CHART_COLORS, CHART_DEFAULTS, type ChartDataPoint } from './types';
 import { ChartSkeleton } from './ChartSkeleton';
+import { useChartComponents } from './chart-hooks';
 
-interface ChartComponents {
-  BarChart: React.ComponentType<Record<string, unknown>>;
-  Bar: React.ComponentType<Record<string, unknown>>;
-  XAxis: React.ComponentType<Record<string, unknown>>;
-  YAxis: React.ComponentType<Record<string, unknown>>;
-  CartesianGrid: React.ComponentType<Record<string, unknown>>;
-  Tooltip: React.ComponentType<Record<string, unknown>>;
-  Legend: React.ComponentType<Record<string, unknown>>;
-  ResponsiveContainer: React.ComponentType<Record<string, unknown>>;
-  Cell: React.ComponentType<Record<string, unknown>>;
-}
+const BAR_CHART_COMPONENTS = [
+  'BarChart',
+  'Bar',
+  'XAxis',
+  'YAxis',
+  'CartesianGrid',
+  'Tooltip',
+  'Legend',
+  'ResponsiveContainer',
+  'Cell',
+] as const;
 
 export interface BarChartProps {
   data: ChartDataPoint[];
@@ -42,43 +42,7 @@ export const BarChart = memo(function BarChart({
   ariaLabel = 'Bar chart',
   emptyMessage = 'No data available',
 }: BarChartProps) {
-  const [Chart, setChart] = useState<ChartComponents | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    const loadChartComponents = async () => {
-      try {
-        const [BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Cell] = await Promise.all([
-          import('recharts/es6/chart/BarChart'),
-          import('recharts/es6/cartesian/Bar'),
-          import('recharts/es6/cartesian/XAxis'),
-          import('recharts/es6/cartesian/YAxis'),
-          import('recharts/es6/cartesian/CartesianGrid'),
-          import('recharts/es6/component/Tooltip'),
-          import('recharts/es6/component/Legend'),
-          import('recharts/es6/component/ResponsiveContainer'),
-          import('recharts/es6/component/Cell'),
-        ]);
-        setChart({
-          BarChart: BarChart.BarChart,
-          Bar: Bar.Bar,
-          XAxis: XAxis.XAxis,
-          YAxis: YAxis.YAxis,
-          CartesianGrid: CartesianGrid.CartesianGrid,
-          Tooltip: Tooltip.Tooltip,
-          Legend: Legend.Legend,
-          ResponsiveContainer: ResponsiveContainer.ResponsiveContainer,
-          Cell: Cell.Cell,
-        });
-      } catch (error) {
-        logger.error('Failed to load bar chart components:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    loadChartComponents();
-  }, []);
+  const { components: Chart, isLoading } = useChartComponents(BAR_CHART_COMPONENTS);
 
   if (isLoading) {
     return <ChartSkeleton height={height} className={className} />;
