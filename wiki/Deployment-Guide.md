@@ -11,23 +11,30 @@
 
 ### 1. Configure Wrangler
 
-Ensure `wrangler.jsonc` is properly configured with your Cloudflare settings:
+Ensure `wrangler.toml` is properly configured with your Cloudflare settings:
 
-```json
-{
-  "name": "akademia-pro",
-  "main": "worker/index.ts",
-  "compatibility_date": "2023-10-01",
-  "account_id": "your_account_id",
-  "workers_dev": false,
-  "route": {
-    "pattern": "api.yourdomain.com/*",
-    "zone_id": "your_zone_id"
-  },
-  "vars": {
-    "NODE_ENV": "production"
-  }
-}
+```toml
+name = "akademia-pro"
+main = "worker/index.ts"
+compatibility_date = "2026-02-18"
+compatibility_flags = ["nodejs_compat"]
+
+[assets]
+directory = "dist/client"
+not_found_handling = "single-page-application"
+run_worker_first = ["/api/*", "!/api/docs/*"]
+
+[observability]
+enabled = true
+head_sampling_rate = 0.1
+
+[[durable_objects.bindings]]
+name = "GlobalDurableObject"
+class_name = "GlobalDurableObject"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["GlobalDurableObject"]
 ```
 
 ### 2. Set Environment Variables
@@ -139,10 +146,10 @@ In case of deployment issues:
 
 1. **Deployment fails with authentication error**
    - Verify Cloudflare API token permissions
-   - Check account ID in wrangler.jsonc
+   - Check account ID in wrangler.toml
 
 2. **API endpoints return 404**
-   - Verify route pattern in wrangler.jsonc
+   - Verify route pattern in wrangler.toml
    - Check domain configuration in Cloudflare
 
 3. **Frontend fails to load**

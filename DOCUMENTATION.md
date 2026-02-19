@@ -104,7 +104,7 @@ web-sekolah/
 ├── DOCUMENTATION.md      # Complete documentation
 ├── package.json          # Dependencies and scripts
 ├── vite.config.ts        # Vite configuration
-├── wrangler.jsonc       # Wrangler configuration
+├── wrangler.toml         # Wrangler configuration
 ├── tailwind.config.js    # Tailwind CSS configuration
 └── tsconfig.json         # TypeScript configuration
 ```
