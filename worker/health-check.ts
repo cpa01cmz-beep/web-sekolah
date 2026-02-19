@@ -1,3 +1,5 @@
+import { HealthCheckConfig } from './config/security';
+
 export interface HealthCheckResult {
   service: string;
   healthy: boolean;
@@ -21,7 +23,7 @@ export class ExternalServiceHealth {
   private static async checkService(
     serviceName: string,
     url: string,
-    timeoutMs: number = 5000
+    timeoutMs: number = HealthCheckConfig.DEFAULT_TIMEOUT_MS
   ): Promise<HealthCheckResult> {
     const startTime = Date.now();
     const timestamp = new Date().toISOString();
@@ -64,11 +66,11 @@ export class ExternalServiceHealth {
     }
   }
 
-  static async checkWebhookService(url: string, timeoutMs: number = 5000): Promise<HealthCheckResult> {
+  static async checkWebhookService(url: string, timeoutMs: number = HealthCheckConfig.DEFAULT_TIMEOUT_MS): Promise<HealthCheckResult> {
     return this.checkService('webhook', url, timeoutMs);
   }
 
-  static async checkDocsService(url: string, timeoutMs: number = 5000): Promise<HealthCheckResult> {
+  static async checkDocsService(url: string, timeoutMs: number = HealthCheckConfig.DEFAULT_TIMEOUT_MS): Promise<HealthCheckResult> {
     return this.checkService('docs', url, timeoutMs);
   }
 
@@ -100,7 +102,7 @@ export class ExternalServiceHealth {
         lastSuccess: healthy ? timestamp : existing.lastSuccess,
         lastFailure: healthy ? existing.lastFailure : timestamp,
         consecutiveFailures,
-        isHealthy: consecutiveFailures < 5,
+        isHealthy: consecutiveFailures < HealthCheckConfig.MAX_CONSECUTIVE_FAILURES,
       });
     } else {
       healthStatus.set(service, {
