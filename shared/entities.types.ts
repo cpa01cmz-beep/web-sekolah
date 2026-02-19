@@ -66,3 +66,22 @@ export interface ScheduleItem {
   time: string;
   courseId: string;
 }
+
+export interface Message extends TimestampedEntity {
+  id: string;
+  senderId: string;
+  senderRole: UserRole;
+  recipientId: string;
+  recipientRole: UserRole;
+  subject: string;
+  content: string;
+  isRead: boolean;
+  parentMessageId?: string | null;
+}
+
+export interface MessageThread {
+  message: Message;
+  replies: Message[];
+  sender: SchoolUser;
+  recipient: SchoolUser;
+}

@@ -2,7 +2,7 @@ import { Hono } from "hono";
 import type { Env } from '../core-utils';
 import { ok, bad, notFound } from '../core-utils';
 import { authenticate, authorize } from '../middleware/auth';
-import type { TeacherDashboardData, Announcement, CreateAnnouncementData, SubmitGradeData, ScheduleItem } from "@shared/types";
+import type { TeacherDashboardData, Announcement, CreateAnnouncementData, SubmitGradeData, ScheduleItem, Message } from "@shared/types";
 
 import { GradeService, CommonDataService, AnnouncementService, TeacherService } from '../domain';
 import { withAuth, withUserValidation, withErrorHandler, triggerWebhookSafely } from './route-utils';
@@ -10,6 +10,7 @@ import { validateBody } from '../middleware/validation';
 import { createGradeSchema, createAnnouncementSchema } from '../middleware/schemas';
 import { getCurrentUserId } from '../type-guards';
 import type { Context } from 'hono';
+import { MessageEntity } from '../entities';
 
 export function teacherRoutes(app: Hono<{ Bindings: Env }>) {
   app.get('/api/teachers/:id/classes', ...withUserValidation('teacher', 'classes'), withErrorHandler('get teacher classes')(async (c: Context) => {
@@ -86,5 +87,77 @@ export function teacherRoutes(app: Hono<{ Bindings: Env }>) {
     const teacherId = getCurrentUserId(c);
     const students = await TeacherService.getClassStudentsWithGrades(c.env, classId, teacherId);
     return ok(c, students);
+  }));
+
+  app.get('/api/teachers/:id/messages', ...withUserValidation('teacher', 'messages'), withErrorHandler('get teacher messages')(async (c: Context) => {
+    const teacherId = c.req.param('id');
+    const type = c.req.query('type') || 'inbox';
+
+    let messages: Message[];
+    if (type === 'sent') {
+      messages = await MessageEntity.getBySenderId(c.env, teacherId);
+    } else {
+      messages = await MessageEntity.getByRecipientId(c.env, teacherId);
+    }
+
+    const filteredMessages = messages
+      .filter(msg => !msg.deletedAt)
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+    return ok(c, filteredMessages);
+  }));
+
+  app.get('/api/teachers/:id/messages/unread-count', ...withUserValidation('teacher', 'messages'), withErrorHandler('get teacher unread count')(async (c: Context) => {
+    const teacherId = c.req.param('id');
+    const count = await MessageEntity.countUnread(c.env, teacherId);
+    return ok(c, { count });
+  }));
+
+  app.get('/api/teachers/:id/messages/:parentId/conversation', ...withUserValidation('teacher', 'messages'), withErrorHandler('get teacher conversation')(async (c: Context) => {
+    const teacherId = c.req.param('id');
+    const parentId = c.req.param('parentId');
+    const conversation = await MessageEntity.getConversation(c.env, teacherId, parentId);
+    return ok(c, conversation.filter(msg => !msg.deletedAt));
+  }));
+
+  app.post('/api/teachers/:id/messages', ...withAuth('teacher'), withErrorHandler('send teacher message')(async (c: Context) => {
+    const teacherId = getCurrentUserId(c);
+    const body = await c.req.json();
+    const { recipientId, subject, content, parentMessageId } = body;
+
+    if (!recipientId || !subject || !content) {
+      return bad(c, 'Recipient, subject, and content are required');
+    }
+
+    const recipient = await CommonDataService.getUserById(c.env, recipientId);
+    if (!recipient || recipient.role !== 'parent') {
+      return bad(c, 'Invalid recipient. Teachers can only message parents.');
+    }
+
+    const message = await MessageEntity.create(c.env, {
+      id: crypto.randomUUID(),
+      senderId: teacherId,
+      senderRole: 'teacher',
+      recipientId,
+      recipientRole: 'parent',
+      subject,
+      content,
+      isRead: false,
+      parentMessageId: parentMessageId || null,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      deletedAt: null
+    });
+
+    return ok(c, message);
+  }));
+
+  app.post('/api/teachers/:id/messages/:messageId/read', ...withAuth('teacher'), withErrorHandler('mark teacher message read')(async (c: Context) => {
+    const messageId = c.req.param('messageId');
+    const message = await MessageEntity.markAsRead(c.env, messageId);
+    if (!message) {
+      return notFound(c, 'Message not found');
+    }
+    return ok(c, message);
   }));
 }
