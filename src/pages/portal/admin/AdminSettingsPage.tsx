@@ -184,7 +184,7 @@ export function AdminSettingsPage() {
             </CardContent>
           </Card>
           <div className="flex justify-end">
-            <Button type="submit" disabled={isLoading || updateSettings.isPending}>
+            <Button type="submit" disabled={isLoading} isLoading={updateSettings.isPending}>
               {updateSettings.isPending ? 'Saving...' : 'Save All Settings'}
             </Button>
           </div>
