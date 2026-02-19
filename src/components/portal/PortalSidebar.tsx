@@ -37,12 +37,12 @@ export const PortalSidebar = memo(function PortalSidebar() {
         <div className="flex items-center justify-between h-16 border-b px-4">
           {!isCollapsed && (
             <div className="flex items-center gap-2">
-              <GraduationCap className="h-7 w-7" style={{ color: THEME_COLORS.PRIMARY }} />
+              <GraduationCap className="h-7 w-7" style={{ color: THEME_COLORS.PRIMARY }} aria-hidden="true" />
               <span className="text-lg font-bold">Akademia Pro</span>
             </div>
           )}
           <Button variant="ghost" size="icon" onClick={handleToggleCollapse} className="ml-auto" aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}>
-            {isCollapsed ? <ChevronRight className="h-5 w-5" /> : <ChevronLeft className="h-5 w-5" />}
+            {isCollapsed ? <ChevronRight className="h-5 w-5" aria-hidden="true" /> : <ChevronLeft className="h-5 w-5" aria-hidden="true" />}
           </Button>
         </div>
         <nav className="flex-grow p-2 space-y-2" role="navigation" aria-label={`${user.role} portal navigation`}>

@@ -72,7 +72,7 @@ export const EmptyState = memo(function EmptyState({
         <div className={cn('mb-4 flex h-16 w-16 items-center justify-center rounded-full', styles.iconBg)}>
           {(Icon || DefaultIcon) && (
             <div className="flex items-center justify-center">
-              {Icon ? <Icon className={cn('h-8 w-8', styles.iconColor)} /> : DefaultIcon && <DefaultIcon className={cn('h-8 w-8', styles.iconColor)} />}
+              {Icon ? <Icon className={cn('h-8 w-8', styles.iconColor)} aria-hidden="true" /> : DefaultIcon && <DefaultIcon className={cn('h-8 w-8', styles.iconColor)} aria-hidden="true" />}
             </div>
           )}
         </div>
