@@ -13,6 +13,10 @@ import { initialAnnouncements } from '@/mock-data/announcements';
 import type { Announcement } from '@/mock-data/announcements';
 
 const AnnouncementItem = memo(({ ann, index, total, onDelete }: { ann: Announcement; index: number; total: number; onDelete: (id: string) => void }) => {
+  const handleDelete = useCallback(() => {
+    onDelete(ann.id);
+  }, [onDelete, ann.id]);
+
   return (
     <div>
       <div className="flex justify-between items-start">
@@ -26,7 +30,7 @@ const AnnouncementItem = memo(({ ann, index, total, onDelete }: { ann: Announcem
           <Button variant="outline" size="icon" className="h-8 w-8" aria-label={`Edit announcement: ${ann.title}`}>
             <Edit className="h-4 w-4" />
           </Button>
-          <Button variant="destructive" size="icon" className="h-8 w-8" onClick={() => onDelete(ann.id)} aria-label={`Delete announcement: ${ann.title}`}>
+          <Button variant="destructive" size="icon" className="h-8 w-8" onClick={handleDelete} aria-label={`Delete announcement: ${ann.title}`}>
             <Trash2 className="h-4 w-4" />
           </Button>
         </div>
