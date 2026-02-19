@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { GradeForm } from '@/components/forms/GradeForm';
 
-describe.skip('GradeForm - Tests skipped due to React Testing Library compatibility issues. See issue #512.', () => {
+describe.skip('GradeForm - Requires userEvent migration for React 18+ (see issue #512)', () => {
   const defaultEditingStudent = {
     id: '1',
     name: 'John Doe',
