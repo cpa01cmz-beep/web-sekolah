@@ -6,8 +6,8 @@ import { rebuildAllIndexes } from "../index-rebuilder";
 import type { CreateUserData, UpdateUserData, Announcement, CreateAnnouncementData, AdminDashboardData, Settings, SchoolUser, UserRole } from "@shared/types";
 import { UserService, CommonDataService, AnnouncementService } from '../domain';
 import { withAuth, withErrorHandler, triggerWebhookSafely } from './route-utils';
-import { validateBody, validateQuery } from '../middleware/validation';
-import { createAnnouncementSchema, updateSettingsSchema, adminUsersQuerySchema, updateAnnouncementSchema } from '../middleware/schemas';
+import { validateBody, validateQuery, validateParams } from '../middleware/validation';
+import { createAnnouncementSchema, updateSettingsSchema, adminUsersQuerySchema, updateAnnouncementSchema, paramsSchema } from '../middleware/schemas';
 import { logger } from '../logger';
 import { getCurrentUserId } from '../type-guards';
 import type { Context } from 'hono';
@@ -68,8 +68,8 @@ export function adminRoutes(app: Hono<{ Bindings: Env }>) {
     return ok(c, newAnnouncement);
   }));
 
-  app.put('/api/admin/announcements/:id', ...withAuth('admin'), validateBody(updateAnnouncementSchema), withErrorHandler('update announcement')(async (c: Context) => {
-    const announcementId = c.req.param('id');
+  app.put('/api/admin/announcements/:id', ...withAuth('admin'), validateParams(paramsSchema), validateBody(updateAnnouncementSchema), withErrorHandler('update announcement')(async (c: Context) => {
+    const { id: announcementId } = c.get('validatedParams') as { id: string };
     const updates = c.get('validatedBody') as Partial<CreateAnnouncementData>;
     const updatedAnnouncement = await AnnouncementService.updateAnnouncement(c.env, announcementId, updates);
     triggerWebhookSafely(c.env, 'announcement.updated', updatedAnnouncement, { announcementId: updatedAnnouncement.id });
