@@ -31,12 +31,12 @@ export function AdminSettingsPage() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="academic-year">Current Academic Year</Label>
-                <Select defaultValue="2023-2024">
+                <Select defaultValue="2025-2026">
                   <SelectTrigger>
                     <SelectValue placeholder="Select year" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="2023-2024">2023-2024</SelectItem>
+                    <SelectItem value="2025-2026">2025-2026</SelectItem>
                     <SelectItem value="2024-2025">2024-2025</SelectItem>
                   </SelectContent>
                 </Select>
