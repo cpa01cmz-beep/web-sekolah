@@ -30,6 +30,8 @@ The `vercel.json` includes best-practice configurations:
 | **Security Headers** | CSP, XSS Protection, Frame Options, Permissions Policy |
 | **Caching** | 1-year immutable cache for JS/CSS/assets |
 | **SPA Routing** | Client-side routing with index.html fallback |
+| **Ignore Command** | Skips builds for documentation-only changes (md files, docs/, wiki/, etc.) |
+| **API Rewrite Caching** | Enabled caching for proxied API requests to Cloudflare Workers |
 
 ## Prerequisites
 

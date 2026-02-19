@@ -7,6 +7,7 @@
   "cleanUrls": true,
   "trailingSlash": false,
   "regions": ["sin1", "hnd1", "iad1"],
+  "ignoreCommand": "git diff --quiet $VERCEL_GIT_PREVIOUS_SHA $VERCEL_GIT_COMMIT_SHA -- . ':!*.md' ':!docs/' ':!wiki/' ':!prompts/' ':!.github/' ':!SECURITY*.md' ':!CHANGELOG*.md' ':!IFLOW.md' ':!ROADMAP.md' ':!DOCUMENTATION.md' ':!CACHING_OPTIMIZATION.md' 2>/dev/null || exit 1",
   "images": {
     "remotePatterns": [
       {
@@ -25,7 +26,10 @@
     },
     {
       "source": "/api/:path*",
-      "destination": "https://website-sekolah-production.:account.workers.dev/api/:path*"
+      "destination": "https://website-sekolah-production.:account.workers.dev/api/:path*",
+      "headers": {
+        "x-vercel-enable-rewrite-caching": "true"
+      }
     },
     {
       "source": "/((?!api|assets|favicon.ico|robots.txt|manifest.json|_next|__next|.*\\.(png|jpe?g|svg|webp|avif|ico|woff2?)).*)",
