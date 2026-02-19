@@ -82,13 +82,6 @@ export function teacherRoutes(app: Hono<{ Bindings: Env }>) {
     return ok(c, newAnnouncement);
   }));
 
-  app.get('/api/classes/:id/students', ...withAuth('teacher'), withErrorHandler('get class students with grades')(async (c: Context) => {
-    const classId = c.req.param('id');
-    const teacherId = getCurrentUserId(c);
-    const students = await TeacherService.getClassStudentsWithGrades(c.env, classId, teacherId);
-    return ok(c, students);
-  }));
-
   app.get('/api/teachers/:id/messages', ...withUserValidation('teacher', 'messages'), withErrorHandler('get teacher messages')(async (c: Context) => {
     const teacherId = c.req.param('id');
     const type = c.req.query('type') || 'inbox';
