@@ -1,6 +1,8 @@
 import { AlertTriangle, RefreshCw, Home } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { useReducedMotion } from '@/hooks/use-reduced-motion';
+import { cn } from '@/lib/utils';
 
 export interface ErrorFallbackProps {
   title?: string;
@@ -21,6 +23,8 @@ export function ErrorFallback({
   showErrorDetails = true,
   statusMessage = "Our team has been notified"
 }: ErrorFallbackProps) {
+  const prefersReducedMotion = useReducedMotion();
+
   const handleRetry = () => {
     if (onRetry) {
       onRetry();
@@ -38,7 +42,7 @@ export function ErrorFallback({
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-4">
+    <div className="min-h-screen flex items-center justify-center bg-background p-4" role="alert" aria-live="assertive">
       <div className="w-full max-w-md">
         {/* Animated background gradient */}
         <div className="absolute inset-0 bg-gradient-rainbow opacity-5 dark:opacity-10" />
@@ -58,7 +62,10 @@ export function ErrorFallback({
             {/* Status indicator */}
             {statusMessage && (
               <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
-                <div className="w-2 h-2 rounded-full bg-orange-500 animate-pulse" />
+                <div className={cn(
+                  "w-2 h-2 rounded-full bg-orange-500",
+                  prefersReducedMotion ? "opacity-100" : "animate-pulse"
+                )} />
                 <span>{statusMessage}</span>
               </div>
             )}
