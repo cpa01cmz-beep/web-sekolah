@@ -33,7 +33,7 @@ export const PortalLayout = memo(function PortalLayout() {
             <Sheet open={isMobileMenuOpen} onOpenChange={setMobileMenuOpen}>
               <SheetTrigger asChild>
                 <Button variant="outline" size="icon" aria-label="Open navigation menu">
-                  <Menu className="h-6 w-6" />
+                  <Menu className="h-6 w-6" aria-hidden="true" />
                 </Button>
               </SheetTrigger>
               <SheetContent side="left" className="p-0 w-64" role="dialog" aria-label="Mobile navigation menu">
@@ -72,7 +72,7 @@ export const PortalLayout = memo(function PortalLayout() {
           </div>
           <div className="flex items-center gap-4">
             <Button variant="ghost" size="icon" className="rounded-full" aria-label="View notifications">
-              <Bell className="h-5 w-5" />
+              <Bell className="h-5 w-5" aria-hidden="true" />
             </Button>
             <Avatar>
               <AvatarImage src={user.avatarUrl} alt={user.name} />

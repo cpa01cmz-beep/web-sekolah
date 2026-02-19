@@ -23,7 +23,7 @@ export const SiteHeader = memo(function SiteHeader() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
           <Link to="/" className="flex items-center gap-2">
-            <GraduationCap className="h-8 w-8" style={{ color: THEME_COLORS.PRIMARY }} />
+            <GraduationCap className="h-8 w-8" style={{ color: THEME_COLORS.PRIMARY }} aria-hidden="true" />
             <span className="text-xl font-bold text-foreground">Akademia Pro</span>
           </Link>
           <nav className="hidden md:flex items-center space-x-6" aria-label="Main navigation" role="navigation">
@@ -67,7 +67,7 @@ export const SiteHeader = memo(function SiteHeader() {
             <Sheet open={isMobileMenuOpen} onOpenChange={setMobileMenuOpen}>
               <SheetTrigger asChild className="md:hidden">
                 <Button variant="outline" size="icon" aria-label="Open navigation menu">
-                  <Menu className="h-6 w-6" />
+                  <Menu className="h-6 w-6" aria-hidden="true" />
                 </Button>
               </SheetTrigger>
                   <SheetContent side="left" role="dialog" aria-modal="true" aria-label="Mobile navigation menu">
