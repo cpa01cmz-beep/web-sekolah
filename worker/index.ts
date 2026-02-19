@@ -143,7 +143,10 @@ app.post('/api/csp-report', async (c) => {
 });
 
 app.notFound((c) => notFound(c));
-app.onError((err, c) => { pinoLogger.error(`[ERROR] ${err}`); return serverError(c, err instanceof Error ? err.message : 'Internal Server Error'); });
+app.onError((err, c) => {
+  pinoLogger.error(`[ERROR] ${err}`);
+  return serverError(c, 'Internal Server Error');
+});
 
 pinoLogger.info('Server is running');
 
