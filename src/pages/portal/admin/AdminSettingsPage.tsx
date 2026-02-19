@@ -7,13 +7,59 @@ import { Switch } from '@/components/ui/switch';
 import { Separator } from '@/components/ui/separator';
 import { PageHeader } from '@/components/PageHeader';
 import { SlideUp } from '@/components/animations';
+import { Skeleton } from '@/components/ui/skeleton';
+import { useSettings, useUpdateSettings } from '@/hooks/useAdmin';
+import type { Settings } from '@shared/types';
 import { toast } from 'sonner';
 import { THEME_COLORS } from '@/theme/colors';
+import { useState, useMemo } from 'react';
+
+const defaultSettings: Settings = {
+  schoolName: '',
+  academicYear: '2025-2026',
+  semester: 1,
+  allowRegistration: true,
+  maintenanceMode: false,
+};
+
 export function AdminSettingsPage() {
+  const { data: settings, isLoading, error } = useSettings();
+  const updateSettings = useUpdateSettings({
+    onSuccess: () => toast.success('Settings saved successfully!'),
+    onError: (err) => toast.error(`Failed to save settings: ${err.message}`),
+  });
+
+  const mergedSettings = useMemo(
+    () => ({ ...defaultSettings, ...settings }),
+    [settings]
+  );
+
+  const [localEdits, setLocalEdits] = useState<Partial<Settings>>({});
+
+  const formData = { ...mergedSettings, ...localEdits };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    toast.success('Settings saved successfully!');
+    updateSettings.mutate(formData);
   };
+
+  const updateField = <K extends keyof Settings>(field: K, value: Settings[K]) => {
+    setLocalEdits((prev) => ({ ...prev, [field]: value }));
+  };
+
+  if (error) {
+    return (
+      <SlideUp className="space-y-6">
+        <PageHeader title="School Settings" />
+        <Card>
+          <CardContent className="pt-6">
+            <p className="text-destructive">Failed to load settings. Please try again.</p>
+          </CardContent>
+        </Card>
+      </SlideUp>
+    );
+  }
+
   return (
     <SlideUp className="space-y-6">
       <PageHeader title="School Settings" />
@@ -27,19 +73,54 @@ export function AdminSettingsPage() {
             <CardContent className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="school-name">School Name</Label>
-                <Input id="school-name" defaultValue="Akademia Pro High School" />
+                {isLoading ? (
+                  <Skeleton className="h-10 w-full" />
+                ) : (
+                  <Input
+                    id="school-name"
+                    value={formData.schoolName}
+                    onChange={(e) => updateField('schoolName', e.target.value)}
+                    placeholder="Enter school name"
+                  />
+                )}
               </div>
               <div className="space-y-2">
                 <Label htmlFor="academic-year">Current Academic Year</Label>
-                <Select defaultValue="2025-2026">
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select year" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="2025-2026">2025-2026</SelectItem>
-                    <SelectItem value="2024-2025">2024-2025</SelectItem>
-                  </SelectContent>
-                </Select>
+                {isLoading ? (
+                  <Skeleton className="h-10 w-full" />
+                ) : (
+                  <Select
+                    value={formData.academicYear}
+                    onValueChange={(value) => updateField('academicYear', value)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select year" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="2025-2026">2025-2026</SelectItem>
+                      <SelectItem value="2024-2025">2024-2025</SelectItem>
+                    </SelectContent>
+                  </Select>
+                )}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="semester">Current Semester</Label>
+                {isLoading ? (
+                  <Skeleton className="h-10 w-full" />
+                ) : (
+                  <Select
+                    value={formData.semester.toString()}
+                    onValueChange={(value) => updateField('semester', parseInt(value, 10))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select semester" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="1">Semester 1</SelectItem>
+                      <SelectItem value="2">Semester 2</SelectItem>
+                    </SelectContent>
+                  </Select>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -61,33 +142,51 @@ export function AdminSettingsPage() {
           </Card>
           <Card>
             <CardHeader>
-              <CardTitle>Notifications</CardTitle>
-              <CardDescription>Manage automated notifications.</CardDescription>
+              <CardTitle>System Settings</CardTitle>
+              <CardDescription>Manage system-wide settings.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-center justify-between">
-                <Label htmlFor="grade-notif" className="flex flex-col space-y-1">
-                  <span>Grade Updates</span>
+                <Label htmlFor="allow-registration" className="flex flex-col space-y-1">
+                  <span>Allow Registration</span>
                   <span className="font-normal leading-snug text-muted-foreground">
-                    Send email notifications to parents when new grades are posted.
+                    Allow new users to register accounts.
                   </span>
                 </Label>
-                <Switch id="grade-notif" defaultChecked />
+                {isLoading ? (
+                  <Skeleton className="h-6 w-11" />
+                ) : (
+                  <Switch
+                    id="allow-registration"
+                    checked={formData.allowRegistration}
+                    onCheckedChange={(checked) => updateField('allowRegistration', checked)}
+                  />
+                )}
               </div>
               <Separator />
               <div className="flex items-center justify-between">
-                <Label htmlFor="announcement-notif" className="flex flex-col space-y-1">
-                  <span>New Announcements</span>
+                <Label htmlFor="maintenance-mode" className="flex flex-col space-y-1">
+                  <span>Maintenance Mode</span>
                   <span className="font-normal leading-snug text-muted-foreground">
-                    Notify all users when a school-wide announcement is made.
+                    Put the system in maintenance mode. Only admins can access.
                   </span>
                 </Label>
-                <Switch id="announcement-notif" defaultChecked />
+                {isLoading ? (
+                  <Skeleton className="h-6 w-11" />
+                ) : (
+                  <Switch
+                    id="maintenance-mode"
+                    checked={formData.maintenanceMode}
+                    onCheckedChange={(checked) => updateField('maintenanceMode', checked)}
+                  />
+                )}
               </div>
             </CardContent>
           </Card>
           <div className="flex justify-end">
-            <Button type="submit">Save All Settings</Button>
+            <Button type="submit" disabled={isLoading || updateSettings.isPending}>
+              {updateSettings.isPending ? 'Saving...' : 'Save All Settings'}
+            </Button>
           </div>
         </div>
       </form>
