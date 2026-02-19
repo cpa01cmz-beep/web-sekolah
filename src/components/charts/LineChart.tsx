@@ -3,6 +3,8 @@ import { logger } from '@/lib/logger';
 import { CHART_COLORS, CHART_DEFAULTS, type MultiSeriesDataPoint } from './types';
 import { ChartSkeleton } from './ChartSkeleton';
 
+const ACTIVE_DOT_CONFIG = { r: 6 } as const;
+
 interface ChartComponents {
   LineChart: React.ComponentType<Record<string, unknown>>;
   Line: React.ComponentType<Record<string, unknown>>;
@@ -131,7 +133,7 @@ export const LineChart = memo(function LineChart({
               stroke={s.color || defaultColors[index % defaultColors.length]}
               strokeWidth={s.strokeWidth || CHART_DEFAULTS.strokeWidth}
               dot={showDots}
-              activeDot={{ r: 6 }}
+              activeDot={ACTIVE_DOT_CONFIG}
             />
           ))}
         </Chart.LineChart>
