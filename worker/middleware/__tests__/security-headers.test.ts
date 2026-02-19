@@ -18,6 +18,7 @@ describe('Security Headers Middleware', () => {
     expect(res.headers.get('Referrer-Policy')).toBe('strict-origin-when-cross-origin');
     expect(res.headers.get('Permissions-Policy')).toBeDefined();
     expect(res.headers.get('X-XSS-Protection')).toBe('1; mode=block');
+    expect(res.headers.get('X-Permitted-Cross-Domain-Policies')).toBe('none');
     expect(res.headers.get('Cross-Origin-Opener-Policy')).toBe('same-origin');
     expect(res.headers.get('Cross-Origin-Resource-Policy')).toBe('same-site');
   });
@@ -163,6 +164,17 @@ describe('Security Headers Middleware', () => {
 
     expect(res.status).toBe(200);
     expect(res.headers.get('X-XSS-Protection')).toBe('1; mode=block');
+  });
+
+  it('should always include X-Permitted-Cross-Domain-Policies header', async () => {
+    const app = new Hono();
+    app.use('*', securityHeaders());
+    app.get('/test', (c) => c.json({ success: true }));
+
+    const res = await app.request('/test');
+
+    expect(res.status).toBe(200);
+    expect(res.headers.get('X-Permitted-Cross-Domain-Policies')).toBe('none');
   });
 
   it('should always include Cross-Origin-Opener-Policy header', async () => {

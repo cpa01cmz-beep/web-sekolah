@@ -35,6 +35,10 @@ interface SecurityHeadersConfig {
 // - ✅ Removed outdated reference to Chart.tsx in comments
 // - ✅ Documented style-src 'unsafe-inline' requirement for UI components
 //
+// SECURITY IMPROVEMENTS (2026-02-19):
+// - ✅ Added 'X-Permitted-Cross-Domain-Policies: none' for defense in depth
+// - ✅ Restricts Adobe Flash/PDF cross-domain access
+//
 // FUTURE IMPROVEMENTS:
 // - Consider nonce-based CSP for dynamic content (requires server-side rendering)
 // - Remove 'unsafe-eval' if React runtime no longer requires it
@@ -90,6 +94,7 @@ export function securityHeaders(config: SecurityHeadersConfig = {}) {
     }
 
     response.headers.set('X-XSS-Protection', '1; mode=block');
+    response.headers.set('X-Permitted-Cross-Domain-Policies', 'none');
     response.headers.set('Cross-Origin-Opener-Policy', 'same-origin');
     response.headers.set('Cross-Origin-Resource-Policy', 'same-site');
     response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
