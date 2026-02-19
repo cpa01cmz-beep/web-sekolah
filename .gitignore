@@ -23,7 +23,9 @@ tsconfig.tsbuildinfo
 !.env.example
 
 # IDE files
-.vscode/
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
 .idea/
 *.swp
 *.swo
