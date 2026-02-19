@@ -69,9 +69,10 @@ export class CommonDataService {
   }
 
   static async getRecentAnnouncementsByRole(env: Env, targetRole: string, limit: number): Promise<Announcement[]> {
-    const recentAnnouncements = await AnnouncementEntity.getRecent(env, limit * 2);
-    const roleAnnouncements = recentAnnouncements.filter(ann => ann.targetRole === targetRole || ann.targetRole === 'all');
-    return roleAnnouncements.slice(0, limit);
+    const roleAnnouncements = await AnnouncementEntity.getByTargetRole(env, targetRole);
+    const activeAnnouncements = roleAnnouncements.filter(ann => !ann.deletedAt);
+    activeAnnouncements.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    return activeAnnouncements.slice(0, limit);
   }
 
   static async getClassStudents(env: Env, classId: string): Promise<SchoolUser[]> {
