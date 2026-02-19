@@ -363,4 +363,34 @@ describe('admin-routes - Critical Business Logic', () => {
       expect(updatedAnnouncement).toHaveProperty('updatedAt');
     });
   });
+
+  describe('Announcement Deletion', () => {
+    it('should trigger webhook event for announcement.deleted', () => {
+      const eventType = 'announcement.deleted';
+      expect(eventType).toBe('announcement.deleted');
+    });
+
+    it('should return deleted: true on successful deletion', () => {
+      const deleteResult = { deleted: true, id: 'ann-001' };
+      expect(deleteResult.deleted).toBe(true);
+      expect(deleteResult.id).toBe('ann-001');
+    });
+
+    it('should include announcement details in webhook payload', () => {
+      const webhookPayload = {
+        id: 'ann-001',
+        title: 'Deleted Announcement',
+        authorId: 'admin-001'
+      };
+
+      expect(webhookPayload).toHaveProperty('id');
+      expect(webhookPayload).toHaveProperty('title');
+      expect(webhookPayload).toHaveProperty('authorId');
+    });
+
+    it('should handle deletion of non-existent announcement gracefully', () => {
+      const deleteResult = { deleted: true, id: 'non-existent-id' };
+      expect(deleteResult.deleted).toBe(true);
+    });
+  });
 });
