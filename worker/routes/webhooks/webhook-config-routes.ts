@@ -25,8 +25,8 @@ export function webhookConfigRoutes(app: Hono<{ Bindings: Env }>) {
     return ok(c, config);
   }));
 
-  app.post('/api/webhooks', withErrorHandler('create webhook')(async (c: Context) => {
-    const body = await c.req.json();
+  app.post('/api/webhooks', validateBody(createWebhookConfigSchema), withErrorHandler('create webhook')(async (c: Context) => {
+    const body = c.get('validatedBody') as { url: string; events: string[]; secret: string; active?: boolean };
 
     const id = `webhook-${crypto.randomUUID()}`;
     const now = new Date().toISOString();
@@ -48,9 +48,9 @@ export function webhookConfigRoutes(app: Hono<{ Bindings: Env }>) {
     return ok(c, config);
   }));
 
-   app.put('/api/webhooks/:id', withErrorHandler('update webhook')(async (c: Context) => {
+   app.put('/api/webhooks/:id', validateBody(updateWebhookConfigSchema), withErrorHandler('update webhook')(async (c: Context) => {
      const id = c.req.param('id');
-     const body = await c.req.json();
+     const body = c.get('validatedBody') as { url?: string; events?: string[]; secret?: string; active?: boolean };
 
      const existing = await new WebhookConfigEntity(c.env, id).getState();
 
@@ -75,8 +75,8 @@ export function webhookConfigRoutes(app: Hono<{ Bindings: Env }>) {
      return ok(c, updated);
    }));
 
-   app.delete('/api/webhooks/:id', withErrorHandler('delete webhook')(async (c: Context) => {
-     const id = c.req.param('id');
+   app.delete('/api/webhooks/:id', validateParams(paramsSchema), withErrorHandler('delete webhook')(async (c: Context) => {
+     const { id } = c.get('validatedParams') as { id: string };
      const existing = await new WebhookConfigEntity(c.env, id).getState();
 
      if (!existing || existing.deletedAt) {
