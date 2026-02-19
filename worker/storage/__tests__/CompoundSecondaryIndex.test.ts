@@ -162,6 +162,82 @@ describe('CompoundSecondaryIndex', () => {
     });
   });
 
+  describe('countByValues', () => {
+    it('should return count of entries for given field values', async () => {
+      mockStub.listPrefix.mockResolvedValue({
+        keys: ['compound:value1:value2:entity:entity-1', 'compound:value1:value2:entity:entity-2'],
+        next: null,
+      });
+
+      const result = await index.countByValues(['value1', 'value2']);
+
+      expect(mockStub.listPrefix).toHaveBeenCalledWith('compound:value1:value2:entity:');
+      expect(result).toBe(2);
+    });
+
+    it('should return 0 when no entries exist', async () => {
+      mockStub.listPrefix.mockResolvedValue({ keys: [], next: null });
+
+      const result = await index.countByValues(['value1', 'value2']);
+
+      expect(result).toBe(0);
+    });
+
+    it('should return correct count for large result sets', async () => {
+      const keys = Array.from({ length: 100 }, (_, i) => `compound:value1:value2:entity:entity-${i}`);
+      mockStub.listPrefix.mockResolvedValue({ keys, next: null });
+
+      const result = await index.countByValues(['value1', 'value2']);
+
+      expect(result).toBe(100);
+    });
+  });
+
+  describe('existsByValues', () => {
+    it('should return true when entries exist for given field values', async () => {
+      mockStub.listPrefix.mockResolvedValue({
+        keys: ['compound:value1:value2:entity:entity-1'],
+        next: null,
+      });
+
+      const result = await index.existsByValues(['value1', 'value2']);
+
+      expect(mockStub.listPrefix).toHaveBeenCalledWith('compound:value1:value2:entity:');
+      expect(result).toBe(true);
+    });
+
+    it('should return false when no entries exist', async () => {
+      mockStub.listPrefix.mockResolvedValue({ keys: [], next: null });
+
+      const result = await index.existsByValues(['value1', 'value2']);
+
+      expect(result).toBe(false);
+    });
+
+    it('should return true for multiple matching entries', async () => {
+      mockStub.listPrefix.mockResolvedValue({
+        keys: [
+          'compound:value1:value2:entity:entity-1',
+          'compound:value1:value2:entity:entity-2',
+        ],
+        next: null,
+      });
+
+      const result = await index.existsByValues(['value1', 'value2']);
+
+      expect(result).toBe(true);
+    });
+
+    it('should handle empty field array', async () => {
+      mockStub.listPrefix.mockResolvedValue({ keys: [], next: null });
+
+      const result = await index.existsByValues([]);
+
+      expect(mockStub.listPrefix).toHaveBeenCalledWith('compound::entity:');
+      expect(result).toBe(false);
+    });
+  });
+
   describe('clearValues', () => {
     it('should clear all entries for given field values', async () => {
       mockStub.listPrefix.mockResolvedValue({

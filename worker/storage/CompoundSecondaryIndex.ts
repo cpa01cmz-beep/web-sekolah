@@ -45,6 +45,13 @@ export class CompoundSecondaryIndex extends Entity<unknown> {
     return keys.length;
   }
 
+  async existsByValues(fieldValues: string[]): Promise<boolean> {
+    const joinedKey = fieldValues.join(':');
+    const prefix = `compound:${joinedKey}:entity:`;
+    const { keys } = await this.stub.listPrefix(prefix);
+    return keys.length > 0;
+  }
+
   async clearValues(fieldValues: string[]): Promise<void> {
     const joinedKey = fieldValues.join(':');
     const prefix = `compound:${joinedKey}:entity:`;
