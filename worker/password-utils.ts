@@ -1,10 +1,13 @@
 import { logger } from './logger';
+import { PasswordConfig } from './config/security';
 
-const PBKDF2_ITERATIONS = 100000;
-const SALT_LENGTH = 16;
-const HASH_LENGTH = 32;
-const ALGORITHM = 'PBKDF2';
-const HASH_ALGORITHM = 'SHA-256';
+const {
+  PBKDF2_ITERATIONS,
+  SALT_LENGTH,
+  HASH_LENGTH,
+  ALGORITHM,
+  HASH_ALGORITHM,
+} = PasswordConfig;
 
 export interface PasswordHash {
   salt: string;
