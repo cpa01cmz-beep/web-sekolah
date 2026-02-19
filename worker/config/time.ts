@@ -40,6 +40,12 @@ export const EntityRetryCount = {
   CAS_OPERATION: 4,
 } as const;
 
+export const RetryCount = {
+  STANDARD: 3,
+  AGGRESSIVE: 5,
+  MINIMAL: 1,
+} as const;
+
 export const HealthCheckConfig = {
   FAILURE_THRESHOLD: 5,
 } as const;

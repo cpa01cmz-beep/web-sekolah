@@ -3,16 +3,13 @@ import type { Env } from './core-utils';
 import { CircuitBreaker } from '@shared/CircuitBreaker';
 import { withRetry } from './resilience/Retry';
 import { withErrorHandler } from './routes/route-utils';
-import { TimeConstants } from './config/time';
+import { TimeConstants, RetryDelay, RetryCount, HealthCheckConfig } from './config/time';
+import { EndpointTimeout } from './config/endpoint-timeout';
 import type { Context } from 'hono';
 
-const DOCS_TIMEOUT_MS = 30000;
-const DOCS_MAX_RETRIES = 3;
-const DOCS_BASE_RETRY_DELAY_MS = 1000;
-
 const docsCircuitBreaker = new CircuitBreaker('docs-api-spec', {
-  failureThreshold: 5,
-  timeoutMs: 60000,
+  failureThreshold: HealthCheckConfig.FAILURE_THRESHOLD,
+  timeoutMs: TimeConstants.ONE_MINUTE_MS,
 });
 
 async function fetchWithRetry(url: string): Promise<Response> {
@@ -20,7 +17,7 @@ async function fetchWithRetry(url: string): Promise<Response> {
     async () => {
       const response = await docsCircuitBreaker.execute(async () => {
         return await fetch(url, {
-          signal: AbortSignal.timeout(DOCS_TIMEOUT_MS),
+          signal: AbortSignal.timeout(EndpointTimeout.EXTERNAL.DOCS),
         });
       });
 
@@ -31,10 +28,10 @@ async function fetchWithRetry(url: string): Promise<Response> {
       return response;
     },
     {
-      maxRetries: DOCS_MAX_RETRIES,
-      baseDelay: DOCS_BASE_RETRY_DELAY_MS,
+      maxRetries: RetryCount.STANDARD,
+      baseDelay: RetryDelay.ONE_SECOND_MS,
       jitterMs: TimeConstants.SECOND_MS,
-      timeout: DOCS_TIMEOUT_MS
+      timeout: EndpointTimeout.EXTERNAL.DOCS
     }
   );
 }

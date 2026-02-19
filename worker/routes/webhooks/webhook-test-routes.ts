@@ -4,7 +4,8 @@ import { ok, bad } from '../../core-utils';
 import { logger } from '../../logger';
 import { CircuitBreaker } from '@shared/CircuitBreaker';
 import { withRetry } from '../../resilience/Retry';
-import { RetryDelay } from '../../config/time';
+import { RetryDelay, RetryCount } from '../../config/time';
+import { WEBHOOK_CONFIG } from '../../webhook-constants';
 import type { Context } from 'hono';
 import { withErrorHandler } from '../route-utils';
 
@@ -52,7 +53,7 @@ export function webhookTestRoutes(app: Hono<{ Bindings: Env }>) {
                 'User-Agent': 'Akademia-Pro-Webhook/1.0'
               },
               body: JSON.stringify(testPayload),
-              signal: AbortSignal.timeout(30000)
+              signal: AbortSignal.timeout(WEBHOOK_CONFIG.REQUEST_TIMEOUT_MS)
             });
           });
 
@@ -63,7 +64,7 @@ export function webhookTestRoutes(app: Hono<{ Bindings: Env }>) {
           return await response.text();
         },
         {
-          maxRetries: 3,
+          maxRetries: RetryCount.STANDARD,
           baseDelay: RetryDelay.ONE_SECOND_MS,
           jitterMs: RetryDelay.ONE_SECOND_MS,
           shouldRetry: (error) => {
