@@ -30,6 +30,7 @@ export const API_ENDPOINTS = {
     USERS: '/api/admin/users',
     USER: (userId: string) => `/api/admin/users/${userId}`,
     ANNOUNCEMENTS: '/api/admin/announcements',
+    ANNOUNCEMENT: (announcementId: string) => `/api/admin/announcements/${announcementId}`,
     SETTINGS: '/api/admin/settings',
   },
   PUBLIC: {
