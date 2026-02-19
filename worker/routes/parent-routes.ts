@@ -2,7 +2,7 @@ import { Hono } from "hono";
 import type { Env } from '../core-utils';
 import { ok, notFound, bad } from '../core-utils';
 import { ParentDashboardService, CommonDataService, getRoleSpecificFields } from '../domain';
-import { withUserValidation, withErrorHandler, withAuth } from './route-utils';
+import { withUserValidation, withErrorHandler, withAuth, triggerWebhookSafely } from './route-utils';
 import { MessageEntity, CourseEntity } from '../entities';
 import type { Context } from 'hono';
 import type { Message } from '@shared/types';
@@ -106,15 +106,19 @@ export function parentRoutes(app: Hono<{ Bindings: Env }>) {
       deletedAt: null
     });
 
+    triggerWebhookSafely(c.env, 'message.created', message, { messageId: message.id });
+
     return ok(c, message);
   }));
 
   app.post('/api/parents/:id/messages/:messageId/read', ...withAuth('parent'), withErrorHandler('mark parent message read')(async (c: Context) => {
     const messageId = c.req.param('messageId');
+    const parentId = getCurrentUserId(c);
     const message = await MessageEntity.markAsRead(c.env, messageId);
     if (!message) {
       return notFound(c, 'Message not found');
     }
+    triggerWebhookSafely(c.env, 'message.read', { id: message.id, readAt: message.updatedAt, readBy: parentId }, { messageId: message.id });
     return ok(c, message);
   }));
 

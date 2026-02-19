@@ -2946,6 +2946,8 @@ Webhooks allow external systems to receive real-time notifications about events 
 | `user.deleted` | A user has been deleted | Admin deletes a user account |
 | `announcement.created` | A new announcement has been created | Teacher or admin posts an announcement |
 | `announcement.updated` | An existing announcement has been updated | Teacher or admin modifies an announcement |
+| `message.created` | A new message has been sent | Teacher or parent sends a message |
+| `message.read` | A message has been read | Teacher or parent marks a message as read |
 
 ### Webhook Payload Format
 
