@@ -186,10 +186,12 @@ async function rebuildMessageIndexes(env: Env): Promise<void> {
   const senderIdIndex = new SecondaryIndex<string>(env, MessageEntity.entityName, 'senderId');
   const recipientIdIndex = new SecondaryIndex<string>(env, MessageEntity.entityName, 'recipientId');
   const parentMessageIdIndex = new SecondaryIndex<string>(env, MessageEntity.entityName, 'parentMessageId');
+  const recipientIsReadCompoundIndex = new CompoundSecondaryIndex(env, MessageEntity.entityName, ['recipientId', 'isRead']);
 
   await senderIdIndex.clear();
   await recipientIdIndex.clear();
   await parentMessageIdIndex.clear();
+  await recipientIsReadCompoundIndex.clear();
 
   const { items: messages } = await MessageEntity.list(env);
   for (const message of messages) {
@@ -199,5 +201,6 @@ async function rebuildMessageIndexes(env: Env): Promise<void> {
     if (message.parentMessageId) {
       await parentMessageIdIndex.add(message.parentMessageId, message.id);
     }
+    await recipientIsReadCompoundIndex.add([message.recipientId, message.isRead.toString()], message.id);
   }
 }
