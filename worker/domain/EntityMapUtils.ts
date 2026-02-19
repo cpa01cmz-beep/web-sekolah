@@ -1,5 +1,12 @@
 export type EntityWithId = { id: string };
 
+export type EntityWithPassword = { passwordHash?: string | null };
+
+export function removePassword<T extends EntityWithPassword>(entity: T): Omit<T, 'passwordHash'> {
+  const { passwordHash: _, ...rest } = entity;
+  return rest;
+}
+
 export function getUniqueIds(ids: string[]): string[] {
   return Array.from(new Set(ids));
 }

@@ -1,7 +1,7 @@
 import type { Env } from '../core-utils';
 import { UserEntity, ClassEntity, AnnouncementEntity, ScheduleEntity, ClassScheduleState, CourseEntity, GradeEntity } from '../entities';
 import type { SchoolUser, SchoolClass, Announcement, Student, ScheduleItem, Grade, Course, UserRole } from '@shared/types';
-import { getUniqueIds, buildEntityMap, fetchAndMap } from './EntityMapUtils';
+import { getUniqueIds, buildEntityMap, fetchAndMap, removePassword } from './EntityMapUtils';
 
 export class CommonDataService {
   static async getStudentWithClassAndSchedule(env: Env, studentId: string): Promise<{
@@ -92,7 +92,7 @@ export class CommonDataService {
 
   static async getAllUsers(env: Env): Promise<SchoolUser[]> {
     const { items: allUsers } = await UserEntity.list(env);
-    return allUsers.map(({ passwordHash: _, ...rest }) => rest);
+    return allUsers.map(removePassword);
   }
 
   static async getUsersWithFilters(env: Env, filters: { role?: UserRole; classId?: string; search?: string }): Promise<SchoolUser[]> {
@@ -146,8 +146,7 @@ export class CommonDataService {
     if (!user) {
       return null;
     }
-    const { passwordHash: _, ...userWithoutPassword } = user;
-    return userWithoutPassword;
+    return removePassword(user);
   }
 
   static async getScheduleWithDetails(env: Env, classId: string): Promise<(ScheduleItem & { courseName: string; teacherName: string })[]> {

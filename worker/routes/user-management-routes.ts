@@ -7,6 +7,7 @@ import { withAuth, withErrorHandler, triggerWebhookSafely } from './route-utils'
 import { validateBody, validateParams } from '../middleware/validation';
 import { createUserSchema, updateUserSchema, updateGradeSchema, paramsSchema } from '../middleware/schemas';
 import type { Context } from 'hono';
+import { removePassword } from '../domain/EntityMapUtils';
 
 export function userRoutes(app: Hono<{ Bindings: Env }>) {
   app.get('/api/users', ...withAuth('admin'), withErrorHandler('get users')(async (c: Context) => {
@@ -26,8 +27,7 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
     const userData = c.get('validatedBody') as UpdateUserData;
     const updatedUser = await UserService.updateUser(c.env, userId, userData);
     triggerWebhookSafely(c.env, 'user.updated', updatedUser, { userId });
-    const { passwordHash: _, ...userWithoutPassword } = updatedUser;
-    return ok(c, userWithoutPassword);
+    return ok(c, removePassword(updatedUser));
   }));
 
   app.delete('/api/users/:id', ...withAuth('admin'), validateParams(paramsSchema), withErrorHandler('delete user')(async (c: Context) => {

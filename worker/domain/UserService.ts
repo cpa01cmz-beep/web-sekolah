@@ -2,6 +2,7 @@ import type { Env } from '../core-utils';
 import { UserEntity } from '../entities';
 import type { SchoolUser, CreateUserData, UpdateUserData } from '@shared/types';
 import { hashPassword } from '../password-utils';
+import { removePassword } from './EntityMapUtils';
 import { ReferentialIntegrity } from '../referential-integrity';
 import { UserCreationStrategyFactory, type BaseUserFields } from './UserCreationStrategy';
 
@@ -145,7 +146,7 @@ export class UserService {
    */
   static async getAllUsers(env: Env): Promise<SchoolUser[]> {
     const { items: users } = await UserEntity.list(env);
-    return users.map(({ passwordHash: _, ...rest }) => rest);
+    return users.map(removePassword);
   }
 
   /**
@@ -168,8 +169,7 @@ export class UserService {
       return null;
     }
 
-    const { passwordHash: _, ...userWithoutPassword } = user;
-    return userWithoutPassword;
+    return removePassword(user);
   }
 
   /**

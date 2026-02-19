@@ -3,6 +3,7 @@ import { UserEntity, ClassEntity } from '../entities';
 import type { ParentDashboardData, Student, ScheduleItem, SchoolUser } from '@shared/types';
 import { getRoleSpecificFields } from '../type-guards';
 import { CommonDataService } from './CommonDataService';
+import { removePassword } from './EntityMapUtils';
 
 export class ParentDashboardService {
   static async getDashboardData(env: Env, parentId: string): Promise<ParentDashboardData> {
@@ -46,9 +47,8 @@ export class ParentDashboardService {
       className = classState?.name || 'N/A';
     }
 
-    const { passwordHash: _, ...childWithoutPassword } = childState;
     return {
-      ...childWithoutPassword,
+      ...removePassword(childState),
       className
     } as Student & { className: string };
   }
