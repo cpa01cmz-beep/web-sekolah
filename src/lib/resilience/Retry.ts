@@ -36,7 +36,7 @@ export async function withRetry<T>(
   } = options;
 
   let lastError: Error | unknown;
-  let timeoutId: NodeJS.Timeout | undefined;
+  let timeoutId: ReturnType<typeof setTimeout> | undefined;
 
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     try {
