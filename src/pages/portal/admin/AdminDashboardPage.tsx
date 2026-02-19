@@ -1,14 +1,7 @@
-import { useMemo } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { PageHeader } from '@/components/PageHeader';
-import { DashboardStatCard } from '@/components/dashboard/DashboardStatCard';
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
-import { AnnouncementItem } from '@/components/dashboard/AnnouncementItem';
-import { EnrollmentChart } from '@/components/dashboard/EnrollmentChart';
-import { Users, GraduationCap, School, Megaphone } from 'lucide-react';
-import { SlideUp } from '@/components/animations';
 import { useReducedMotion } from '@/hooks/use-reduced-motion';
 import { useAdminDashboard } from '@/hooks/useAdmin';
+import { AdminDashboardContent } from './AdminDashboardContent';
 import type { AdminDashboardData } from '@shared/types';
 
 export function AdminDashboardPage() {
@@ -17,89 +10,7 @@ export function AdminDashboardPage() {
 
   return (
     <DashboardLayout<AdminDashboardData> isLoading={isLoading} error={error} data={data}>
-      {(data) => {
-        const stats = [
-          {
-            title: 'Total Students',
-            value: data.totalStudents.toString(),
-            icon: <Users className="h-6 w-6 text-blue-500" aria-hidden="true" />,
-          },
-          {
-            title: 'Total Teachers',
-            value: data.totalTeachers.toString(),
-            icon: <GraduationCap className="h-6 w-6 text-green-500" aria-hidden="true" />,
-          },
-          {
-            title: 'Total Parents',
-            value: data.totalParents.toString(),
-            icon: <School className="h-6 w-6 text-purple-500" aria-hidden="true" />,
-          },
-          {
-            title: 'Total Classes',
-            value: data.totalClasses.toString(),
-            icon: <Megaphone className="h-6 w-6 text-orange-500" aria-hidden="true" />,
-          },
-        ];
-
-        const enrollmentData = [
-          { name: 'Students', students: data.userDistribution.students },
-          { name: 'Teachers', students: data.userDistribution.teachers },
-          { name: 'Parents', students: data.userDistribution.parents },
-          { name: 'Admins', students: data.userDistribution.admins },
-        ];
-
-        return (
-          <SlideUp delay={0} className="space-y-6" style={prefersReducedMotion ? { opacity: 1 } : {}}>
-            <SlideUp delay={0.1} style={prefersReducedMotion ? { opacity: 1 } : {}}>
-              <PageHeader
-                title="Admin Dashboard"
-                description="Overall school management and statistics."
-              />
-            </SlideUp>
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-              {stats.map((stat, index) => (
-                <SlideUp key={stat.title} delay={index * 0.1 + 0.2} style={prefersReducedMotion ? { opacity: 1 } : {}}>
-                  <DashboardStatCard
-                    title={stat.title}
-                    value={stat.value}
-                    icon={stat.icon}
-                  />
-                </SlideUp>
-              ))}
-            </div>
-            <div className="grid gap-6 lg:grid-cols-5">
-              <SlideUp delay={0.6} className="lg:col-span-3" style={prefersReducedMotion ? { opacity: 1 } : {}}>
-                <Card className="h-[400px] hover:shadow-lg transition-shadow duration-200">
-                  <CardHeader>
-                    <CardTitle>User Distribution</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <EnrollmentChart data={enrollmentData} />
-                  </CardContent>
-                </Card>
-              </SlideUp>
-              <SlideUp delay={0.7} className="lg:col-span-2" style={prefersReducedMotion ? { opacity: 1 } : {}}>
-                <Card className="h-[400px] hover:shadow-lg transition-shadow duration-200">
-                  <CardHeader>
-                    <CardTitle>Recent Announcements</CardTitle>
-                  </CardHeader>
-                    <CardContent>
-                      {data.recentAnnouncements.length === 0 ? (
-                        <p className="text-sm text-muted-foreground text-center py-8">No announcements available.</p>
-                      ) : (
-                        <ul className="space-y-4">
-                          {data.recentAnnouncements.map((ann) => (
-                            <AnnouncementItem key={ann.id} ann={ann} />
-                          ))}
-                        </ul>
-                      )}
-                    </CardContent>
-                </Card>
-              </SlideUp>
-            </div>
-          </SlideUp>
-        );
-      }}
+      {(data) => <AdminDashboardContent data={data} prefersReducedMotion={prefersReducedMotion} />}
     </DashboardLayout>
   );
 }
