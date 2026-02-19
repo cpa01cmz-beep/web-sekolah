@@ -12,7 +12,7 @@ export const ChartSkeleton = memo(function ChartSkeleton({
 }: ChartSkeletonProps) {
   return (
     <div
-      className={`animate-pulse bg-muted rounded-lg ${className || ''}`}
+      className={`animate-pulse motion-reduce:animate-none bg-muted rounded-lg ${className || ''}`}
       style={{ height: `${height}px` }}
       role="status"
       aria-label="Loading chart"
