@@ -15,91 +15,74 @@ export interface ServiceHealthStatus {
   isHealthy: boolean;
 }
 
+export interface HealthCheckConfig {
+  serviceName: string;
+  url: string;
+  timeoutMs?: number;
+  method?: 'HEAD' | 'GET';
+}
+
+const DEFAULT_TIMEOUT_MS = 5000;
+const DEFAULT_METHOD = 'HEAD';
+
 const healthStatus = new Map<string, ServiceHealthStatus>();
 
+async function performHealthCheck(config: HealthCheckConfig): Promise<HealthCheckResult> {
+  const { serviceName, url, timeoutMs = DEFAULT_TIMEOUT_MS, method = DEFAULT_METHOD } = config;
+  const startTime = Date.now();
+  const timestamp = new Date().toISOString();
+
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
+    const response = await fetch(url, {
+      method,
+      signal: controller.signal,
+    });
+
+    clearTimeout(timeoutId);
+    const latency = Date.now() - startTime;
+
+    const result: HealthCheckResult = {
+      service: serviceName,
+      healthy: response.ok,
+      latency,
+      timestamp,
+    };
+
+    ExternalServiceHealth.updateHealthStatusInternal(serviceName, result.healthy, timestamp);
+    return result;
+  } catch (error) {
+    const latency = Date.now() - startTime;
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+
+    const result: HealthCheckResult = {
+      service: serviceName,
+      healthy: false,
+      latency,
+      timestamp,
+      error: errorMessage,
+    };
+
+    ExternalServiceHealth.updateHealthStatusInternal(serviceName, false, timestamp, errorMessage);
+    return result;
+  }
+}
+
 export class ExternalServiceHealth {
-  static async checkWebhookService(url: string, timeoutMs: number = 5000): Promise<HealthCheckResult> {
-    const startTime = Date.now();
-    const timestamp = new Date().toISOString();
+  private static readonly FAILURE_THRESHOLD = 5;
 
-    try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
-
-      const response = await fetch(url, {
-        method: 'HEAD',
-        signal: controller.signal,
-      });
-
-      clearTimeout(timeoutId);
-      const latency = Date.now() - startTime;
-
-      const result: HealthCheckResult = {
-        service: 'webhook',
-        healthy: response.ok,
-        latency,
-        timestamp,
-      };
-
-      this.updateHealthStatus('webhook', result.healthy, timestamp);
-      return result;
-    } catch (error) {
-      const latency = Date.now() - startTime;
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-
-      const result: HealthCheckResult = {
-        service: 'webhook',
-        healthy: false,
-        latency,
-        timestamp,
-        error: errorMessage,
-      };
-
-      this.updateHealthStatus('webhook', false, timestamp, errorMessage);
-      return result;
-    }
+  static async checkWebhookService(url: string, timeoutMs: number = DEFAULT_TIMEOUT_MS): Promise<HealthCheckResult> {
+    return performHealthCheck({ serviceName: 'webhook', url, timeoutMs });
   }
 
-  static async checkDocsService(url: string, timeoutMs: number = 5000): Promise<HealthCheckResult> {
-    const startTime = Date.now();
-    const timestamp = new Date().toISOString();
+  static async checkDocsService(url: string, timeoutMs: number = DEFAULT_TIMEOUT_MS): Promise<HealthCheckResult> {
+    return performHealthCheck({ serviceName: 'docs', url, timeoutMs });
+  }
 
-    try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
-
-      const response = await fetch(url, {
-        method: 'HEAD',
-        signal: controller.signal,
-      });
-
-      clearTimeout(timeoutId);
-      const latency = Date.now() - startTime;
-
-      const result: HealthCheckResult = {
-        service: 'docs',
-        healthy: response.ok,
-        latency,
-        timestamp,
-      };
-
-      this.updateHealthStatus('docs', result.healthy, timestamp);
-      return result;
-    } catch (error) {
-      const latency = Date.now() - startTime;
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-
-      const result: HealthCheckResult = {
-        service: 'docs',
-        healthy: false,
-        latency,
-        timestamp,
-        error: errorMessage,
-      };
-
-      this.updateHealthStatus('docs', false, timestamp, errorMessage);
-      return result;
-    }
+  static async checkService(config: HealthCheckConfig): Promise<HealthCheckResult> {
+    return performHealthCheck(config);
   }
 
   static getHealthStatus(service: string): ServiceHealthStatus | null {
@@ -118,7 +101,7 @@ export class ExternalServiceHealth {
     healthStatus.clear();
   }
 
-  private static updateHealthStatus(service: string, healthy: boolean, timestamp: string, error?: string): void {
+  static updateHealthStatusInternal(service: string, healthy: boolean, timestamp: string, error?: string): void {
     const existing = healthStatus.get(service);
     
     if (existing) {
@@ -130,7 +113,7 @@ export class ExternalServiceHealth {
         lastSuccess: healthy ? timestamp : existing.lastSuccess,
         lastFailure: healthy ? existing.lastFailure : timestamp,
         consecutiveFailures,
-        isHealthy: consecutiveFailures < 5,
+        isHealthy: consecutiveFailures < this.FAILURE_THRESHOLD,
       });
     } else {
       healthStatus.set(service, {

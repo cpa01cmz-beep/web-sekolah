@@ -65,6 +65,62 @@ describe('External Service Health Check', () => {
     });
   });
 
+  describe('checkService', () => {
+    it('should support custom service name', async () => {
+      global.fetch = vi.fn(() =>
+        Promise.resolve({
+          ok: true,
+        } as Response)
+      ) as any;
+
+      const result = await ExternalServiceHealth.checkService({
+        serviceName: 'custom-service',
+        url: 'https://example.com/custom',
+      });
+
+      expect(result.service).toBe('custom-service');
+      expect(result.healthy).toBe(true);
+    });
+
+    it('should support custom timeout', async () => {
+      global.fetch = vi.fn(() =>
+        Promise.resolve({
+          ok: true,
+        } as Response)
+      ) as any;
+
+      const result = await ExternalServiceHealth.checkService({
+        serviceName: 'custom-service',
+        url: 'https://example.com/custom',
+        timeoutMs: 10000,
+      });
+
+      expect(result.service).toBe('custom-service');
+      expect(result.healthy).toBe(true);
+    });
+
+    it('should support GET method', async () => {
+      global.fetch = vi.fn(() =>
+        Promise.resolve({
+          ok: true,
+        } as Response)
+      ) as any;
+
+      const result = await ExternalServiceHealth.checkService({
+        serviceName: 'custom-service',
+        url: 'https://example.com/custom',
+        method: 'GET',
+      });
+
+      expect(result.service).toBe('custom-service');
+      expect(result.healthy).toBe(true);
+      expect(global.fetch).toHaveBeenCalledWith(
+        'https://example.com/custom',
+        expect.objectContaining({ method: 'GET' })
+      );
+    });
+  });
+
   describe('Health Status Management', () => {
     it('should track health status after checks', async () => {
       global.fetch = vi.fn(() =>
