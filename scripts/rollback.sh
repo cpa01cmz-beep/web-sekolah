@@ -1,6 +1,7 @@
 #!/bin/bash
 
 # Rollback script for Cloudflare Workers deployment
+# Version: 1.0.0
 # Usage: ./scripts/rollback.sh [staging|production] [--non-interactive]
 #
 # Options:
@@ -8,12 +9,72 @@
 #   --dry-run          Show what would be done without making changes
 #   --verbose          Enable verbose output
 #   --timeout=SECONDS  Maximum time to wait for health check after rollback (default: 60)
+#   --help             Show this help message
+#   --version          Show version information
 #
 # Exit codes:
 #   0 - Rollback successful
 #   1 - Rollback failed
 #   2 - Invalid arguments
 #   3 - No previous deployment found
+
+SCRIPT_VERSION="1.0.0"
+
+show_help() {
+  cat << EOF
+Rollback Script for Cloudflare Workers Deployment
+Version: ${SCRIPT_VERSION}
+
+Usage: ./scripts/rollback.sh [staging|production] [options]
+
+Arguments:
+  staging             Rollback staging environment (default: production)
+  production          Rollback production environment
+
+Options:
+  --non-interactive   Skip confirmation prompt (useful for CI/CD)
+  --dry-run           Show what would be done without making changes
+  --verbose           Enable verbose output
+  --timeout=SECONDS   Maximum time to wait for health check after rollback (default: 60)
+  --help              Show this help message
+  --version           Show version information
+
+Examples:
+  ./scripts/rollback.sh production
+  ./scripts/rollback.sh staging --non-interactive
+  ./scripts/rollback.sh production --dry-run --verbose
+  ./scripts/rollback.sh staging --timeout=120
+
+Exit codes:
+  0 - Rollback successful
+  1 - Rollback failed
+  2 - Invalid arguments
+  3 - No previous deployment found
+
+Environment Variables:
+  CLOUDFLARE_ACCOUNT_ID   Cloudflare account ID for URL construction
+  CLOUDFLARE_API_TOKEN    Cloudflare API token (required)
+  STAGING_URL             Override staging URL
+  PRODUCTION_URL          Override production URL
+EOF
+}
+
+show_version() {
+  echo "rollback.sh version ${SCRIPT_VERSION}"
+}
+
+for arg in "$@"; do
+  case $arg in
+    --help)
+      show_help
+      exit 0
+      ;;
+    --version)
+      show_version
+      exit 0
+      ;;
+  esac
+done
 
 set -e
 

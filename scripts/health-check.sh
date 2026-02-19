@@ -1,6 +1,7 @@
 #!/bin/bash
 
 # Health Check Script for Cloudflare Workers Deployment
+# Version: 1.0.0
 # Usage: ./scripts/health-check.sh [staging|production] [--json] [--timeout=60]
 #
 # Options:
@@ -9,12 +10,72 @@
 #   --retries=N        Number of retry attempts (default: 5)
 #   --exit-on-fail     Exit with non-zero code on failure (default: true)
 #   --verbose          Enable verbose output
+#   --help             Show this help message
+#   --version          Show version information
 #
 # Exit codes:
 #   0 - All health checks passed
 #   1 - Health check failed
 #   2 - Invalid arguments
 #   3 - Network error
+
+SCRIPT_VERSION="1.0.0"
+
+show_help() {
+  cat << EOF
+Health Check Script for Cloudflare Workers Deployment
+Version: ${SCRIPT_VERSION}
+
+Usage: ./scripts/health-check.sh [staging|production] [options]
+
+Arguments:
+  staging             Check staging environment (default)
+  production          Check production environment
+
+Options:
+  --json              Output results in JSON format
+  --timeout=SECONDS   Maximum time to wait for health check (default: 60)
+  --retries=N         Number of retry attempts (default: 5)
+  --exit-on-fail      Exit with non-zero code on failure (default: true)
+  --no-exit-on-fail   Don't exit with non-zero code on failure
+  --verbose           Enable verbose output
+  --help              Show this help message
+  --version           Show version information
+
+Examples:
+  ./scripts/health-check.sh staging --json
+  ./scripts/health-check.sh production --timeout=120 --retries=10
+  ./scripts/health-check.sh staging --verbose --json
+
+Exit codes:
+  0 - All health checks passed
+  1 - Health check failed
+  2 - Invalid arguments
+  3 - Network error
+
+Environment Variables:
+  CLOUDFLARE_ACCOUNT_ID  Cloudflare account ID for URL construction
+  STAGING_URL            Override staging URL
+  PRODUCTION_URL         Override production URL
+EOF
+}
+
+show_version() {
+  echo "health-check.sh version ${SCRIPT_VERSION}"
+}
+
+for arg in "$@"; do
+  case $arg in
+    --help)
+      show_help
+      exit 0
+      ;;
+    --version)
+      show_version
+      exit 0
+      ;;
+  esac
+done
 
 set -e
 
