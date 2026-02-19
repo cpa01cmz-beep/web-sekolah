@@ -138,15 +138,19 @@ export function teacherRoutes(app: Hono<{ Bindings: Env }>) {
       deletedAt: null
     });
 
+    triggerWebhookSafely(c.env, 'message.created', message, { messageId: message.id });
+
     return ok(c, message);
   }));
 
   app.post('/api/teachers/:id/messages/:messageId/read', ...withAuth('teacher'), withErrorHandler('mark teacher message read')(async (c: Context) => {
     const messageId = c.req.param('messageId');
+    const teacherId = getCurrentUserId(c);
     const message = await MessageEntity.markAsRead(c.env, messageId);
     if (!message) {
       return notFound(c, 'Message not found');
     }
+    triggerWebhookSafely(c.env, 'message.read', { id: message.id, readAt: message.updatedAt, readBy: teacherId }, { messageId: message.id });
     return ok(c, message);
   }));
 }

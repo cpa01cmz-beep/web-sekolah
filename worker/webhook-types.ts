@@ -1,4 +1,4 @@
-import type { Grade, Announcement, SchoolUser } from '@shared/types';
+import type { Grade, Announcement, SchoolUser, Message } from '@shared/types';
 
 export type GradeCreatedPayload = Grade;
 export type GradeUpdatedPayload = Grade;
@@ -16,6 +16,8 @@ export type UserLoginPayload = {
 export type AnnouncementCreatedPayload = Announcement;
 export type AnnouncementUpdatedPayload = Announcement;
 export type AnnouncementDeletedPayload = { id: string; deletedAt: string };
+export type MessageCreatedPayload = Message;
+export type MessageReadPayload = { id: string; readAt: string; readBy: string };
 
 export type WebhookEventPayload =
   | GradeCreatedPayload
@@ -27,7 +29,9 @@ export type WebhookEventPayload =
   | UserLoginPayload
   | AnnouncementCreatedPayload
   | AnnouncementUpdatedPayload
-  | AnnouncementDeletedPayload;
+  | AnnouncementDeletedPayload
+  | MessageCreatedPayload
+  | MessageReadPayload;
 
 /**
  * Converts a typed webhook payload to Record<string, unknown> for storage.
