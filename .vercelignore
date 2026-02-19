@@ -26,3 +26,7 @@ DOCUMENTATION.md
 CACHING_OPTIMIZATION.md
 tsconfig.worker.json
 vitest.config.ts
+scripts/
+dist/
+.wrangler/
+.mf/
