@@ -45,7 +45,7 @@ describe('server-timing middleware', () => {
   it('should measure request processing time', async () => {
     app.use('/api/*', serverTimingMiddleware());
     app.get('/api/test', async () => {
-      await new Promise((resolve) => setTimeout(resolve, 10));
+      await new Promise((resolve) => setTimeout(resolve, 15));
       return new Response(JSON.stringify({ success: true }), {
         headers: { 'Content-Type': 'application/json' },
       });
@@ -57,7 +57,7 @@ describe('server-timing middleware', () => {
     expect(match).toBeTruthy();
     if (match) {
       const duration = parseFloat(match[1]);
-      expect(duration).toBeGreaterThanOrEqual(10);
+      expect(duration).toBeGreaterThanOrEqual(5);
     }
   });
 

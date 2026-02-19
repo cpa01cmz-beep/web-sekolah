@@ -18,6 +18,7 @@ import { securityHeaders } from './middleware/security-headers';
 import { responseErrorMonitoring } from './middleware/error-monitoring';
 import { serverTiming } from './middleware/server-timing';
 import { noCacheMiddleware } from './middleware/cache-control';
+import { cfContext } from './middleware/cf-context';
 import { integrationMonitor } from './integration-monitor';
 import { HttpStatusCode, TimeConstants } from './config/time';
 import { DefaultOrigins } from './config/defaults';
@@ -62,6 +63,8 @@ app.use('/api/*', async (c, next) => {
 app.use('/api/*', securityHeaders());
 
 app.use('/api/*', serverTiming());
+
+app.use('/api/*', cfContext());
 
 app.use('/api/*', noCacheMiddleware);
 
