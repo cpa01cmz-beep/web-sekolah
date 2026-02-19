@@ -49,7 +49,7 @@ export function ErrorFallback({
             {/* Icon and title */}
             <div className="text-center space-y-4">
               <div className="mx-auto w-16 h-16 rounded-2xl bg-destructive/10 flex items-center justify-center">
-                <AlertTriangle className="w-8 h-8 text-destructive" />
+                <AlertTriangle className="w-8 h-8 text-destructive" aria-hidden="true" />
               </div>
               <h1 className="text-2xl font-bold">{title}</h1>
               <p className="text-muted-foreground">{message}</p>
@@ -58,7 +58,7 @@ export function ErrorFallback({
             {/* Status indicator */}
             {statusMessage && (
               <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
-                <div className="w-2 h-2 rounded-full bg-orange-500 animate-pulse" />
+                <div className="w-2 h-2 rounded-full bg-orange-500 animate-pulse motion-reduce:animate-none" />
                 <span>{statusMessage}</span>
               </div>
             )}
@@ -66,11 +66,11 @@ export function ErrorFallback({
             {/* Action buttons */}
             <div className="space-y-3">
               <Button onClick={handleRetry} className="w-full">
-                <RefreshCw className="w-4 h-4 mr-2" />
+                <RefreshCw className="w-4 h-4 mr-2" aria-hidden="true" />
                 Try Again
               </Button>
               <Button onClick={handleGoHome} variant="secondary" className="w-full">
-                <Home className="w-4 h-4 mr-2" />
+                <Home className="w-4 h-4 mr-2" aria-hidden="true" />
                 Go to Homepage
               </Button>
             </div>

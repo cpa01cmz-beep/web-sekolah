@@ -19,7 +19,7 @@ export const GradeActions = memo(({ studentId, studentName, onEdit }: GradeActio
         onClick={handleEdit}
         aria-label={`Edit grade for ${studentName}`}
       >
-        <Edit className="h-4 w-4" />
+        <Edit className="h-4 w-4" aria-hidden="true" />
       </Button>
     </div>
   );
