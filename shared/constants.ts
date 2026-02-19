@@ -15,3 +15,9 @@ export const RETRY_CONFIG = {
   DEFAULT_BASE_DELAY_MS: 1000,
   DEFAULT_JITTER_MS: 0,
 } as const;
+
+export const AVATAR_BASE_URL = 'https://i.pravatar.cc/150';
+
+export const getAvatarUrl = (userId: string): string => {
+  return `${AVATAR_BASE_URL}?u=${encodeURIComponent(userId)}`;
+};
