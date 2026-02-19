@@ -200,6 +200,35 @@ export abstract class IndexedEntity<S extends { id: string }> extends Entity<S> 
     return await idx.countByValue(value);
   }
 
+  static async get<TCtor extends CtorAny>(this: HS<TCtor>, env: Env, id: string): Promise<IS<TCtor> | null> {
+    const inst = new this(env, id);
+    try {
+      const state = await inst.getState();
+      const r = state as Record<string, unknown>;
+      if ('deletedAt' in r && r.deletedAt !== null && r.deletedAt !== undefined) {
+        return null;
+      }
+      return state;
+    } catch {
+      return null;
+    }
+  }
+
+  static async update<TCtor extends CtorAny>(this: HS<TCtor>, env: Env, id: string, updates: Partial<IS<TCtor>>): Promise<IS<TCtor> | null> {
+    const inst = new this(env, id);
+    try {
+      const currentState = await inst.getState();
+      const r = currentState as Record<string, unknown>;
+      if ('deletedAt' in r && r.deletedAt !== null && r.deletedAt !== undefined) {
+        return null;
+      }
+      await inst.patch(updates as Partial<S>);
+      return await inst.getState();
+    } catch {
+      return null;
+    }
+  }
+
   static async getBySecondaryIndex<TCtor extends CtorAny>(
     this: HS<TCtor>,
     env: Env,

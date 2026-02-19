@@ -1,5 +1,5 @@
 import { SecondaryIndex, Index, type Env } from "./core-utils";
-import { UserEntity, ClassEntity, CourseEntity, GradeEntity, AnnouncementEntity, WebhookConfigEntity, WebhookEventEntity, WebhookDeliveryEntity, DeadLetterQueueWebhookEntity } from "./entities";
+import { UserEntity, ClassEntity, CourseEntity, GradeEntity, AnnouncementEntity, WebhookConfigEntity, WebhookEventEntity, WebhookDeliveryEntity, DeadLetterQueueWebhookEntity, MessageEntity } from "./entities";
 import { isStudent } from './type-guards';
 import { CompoundSecondaryIndex } from "./storage/CompoundSecondaryIndex";
 import { DateSortedSecondaryIndex } from "./storage/DateSortedSecondaryIndex";
@@ -15,6 +15,7 @@ export async function rebuildAllIndexes(env: Env): Promise<void> {
   await rebuildWebhookEventIndexes(env);
   await rebuildWebhookDeliveryIndexes(env);
   await rebuildDeadLetterQueueIndexes(env);
+  await rebuildMessageIndexes(env);
 }
 
 async function rebuildUserIndexes(env: Env): Promise<void> {
@@ -178,5 +179,25 @@ async function rebuildDeadLetterQueueIndexes(env: Env): Promise<void> {
     if (item.deletedAt) continue;
     await webhookConfigIdIndex.add(item.webhookConfigId, item.id);
     await eventTypeIndex.add(item.eventType, item.id);
+  }
+}
+
+async function rebuildMessageIndexes(env: Env): Promise<void> {
+  const senderIdIndex = new SecondaryIndex<string>(env, MessageEntity.entityName, 'senderId');
+  const recipientIdIndex = new SecondaryIndex<string>(env, MessageEntity.entityName, 'recipientId');
+  const parentMessageIdIndex = new SecondaryIndex<string>(env, MessageEntity.entityName, 'parentMessageId');
+
+  await senderIdIndex.clear();
+  await recipientIdIndex.clear();
+  await parentMessageIdIndex.clear();
+
+  const { items: messages } = await MessageEntity.list(env);
+  for (const message of messages) {
+    if (message.deletedAt) continue;
+    await senderIdIndex.add(message.senderId, message.id);
+    await recipientIdIndex.add(message.recipientId, message.id);
+    if (message.parentMessageId) {
+      await parentMessageIdIndex.add(message.parentMessageId, message.id);
+    }
   }
 }
