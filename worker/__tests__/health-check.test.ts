@@ -51,7 +51,7 @@ describe('External Service Health Check', () => {
       expect(result.timestamp).toBeTruthy();
     });
 
-    it('should return unhealthy when fetch throws error', async () => {
+    it('should return unhealthy when docs service fetch throws error', async () => {
       global.fetch = vi.fn(() =>
         Promise.reject(new Error('Connection refused'))
       ) as any;
@@ -62,6 +62,25 @@ describe('External Service Health Check', () => {
       expect(result.healthy).toBe(false);
       expect(result.error).toBe('Connection refused');
       expect(result.timestamp).toBeTruthy();
+    });
+  });
+
+  describe('Timeout Handling', () => {
+    it('should timeout when service takes too long', async () => {
+      global.fetch = vi.fn(() =>
+        new Promise((_, reject) => {
+          const controller = new AbortController();
+          setTimeout(() => {
+            controller.abort();
+            reject(new Error('The operation was aborted'));
+          }, 100);
+        })
+      ) as any;
+
+      const result = await ExternalServiceHealth.checkWebhookService('https://example.com/webhook', 50);
+
+      expect(result.healthy).toBe(false);
+      expect(result.error).toContain('aborted');
     });
   });
 
