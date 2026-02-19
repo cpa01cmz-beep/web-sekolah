@@ -25,8 +25,16 @@ import type {
   WorkItem,
   LinkItem,
   DownloadItem,
-  ClassStudentWithGrade
+  ClassStudentWithGrade,
+  Message
 } from '@shared/types';
+
+export interface SendMessageData {
+  recipientId: string;
+  subject: string;
+  content: string;
+  parentMessageId?: string;
+}
 
 export interface StudentService {
   getDashboard(studentId: string): Promise<StudentDashboardData>;
@@ -43,11 +51,22 @@ export interface TeacherService {
   getAnnouncements(teacherId: string): Promise<Announcement[]>;
   createAnnouncement(announcement: CreateAnnouncementData): Promise<Announcement>;
   getClassStudentsWithGrades(classId: string): Promise<ClassStudentWithGrade[]>;
+  getMessages(teacherId: string, type?: 'inbox' | 'sent'): Promise<Message[]>;
+  getUnreadCount(teacherId: string): Promise<number>;
+  getConversation(teacherId: string, parentId: string): Promise<Message[]>;
+  sendMessage(teacherId: string, data: SendMessageData): Promise<Message>;
+  markAsRead(teacherId: string, messageId: string): Promise<Message>;
 }
 
 export interface ParentService {
   getDashboard(parentId: string): Promise<ParentDashboardData>;
   getChildSchedule(parentId: string): Promise<ScheduleItem[]>;
+  getMessages(parentId: string, type?: 'inbox' | 'sent'): Promise<Message[]>;
+  getUnreadCount(parentId: string): Promise<number>;
+  getConversation(parentId: string, teacherId: string): Promise<Message[]>;
+  sendMessage(parentId: string, data: SendMessageData): Promise<Message>;
+  markAsRead(parentId: string, messageId: string): Promise<Message>;
+  getChildTeachers(parentId: string): Promise<SchoolUser[]>;
 }
 
 export interface AdminService {
