@@ -9,7 +9,7 @@ import { useReducedMotion } from '@/hooks/use-reduced-motion';
 import { useParentDashboard } from '@/hooks/useParent';
 import { useAuthStore } from '@/lib/authStore';
 import { formatDate } from '@/utils/date';
-import { getGradeBadgeVariant, getGradeLetter } from '@/utils/grades';
+import { getGradeColorClass, getGradeLetter } from '@/utils/grades';
 import type { ParentDashboardData } from '@shared/types';
 
 const GradeItem = memo(({ grade }: { grade: ParentDashboardData['childGrades'][0] }) => {
@@ -17,7 +17,7 @@ const GradeItem = memo(({ grade }: { grade: ParentDashboardData['childGrades'][0
   return (
     <li className="flex items-center justify-between">
       <p className="text-sm font-medium">{grade.courseName}</p>
-      <Badge variant={getGradeBadgeVariant(grade.score)} className={isPassing ? 'bg-green-500 text-white' : 'bg-red-500 text-white'}>
+      <Badge className={`text-white ${getGradeColorClass(grade.score)}`}>
         <span className="sr-only">{isPassing ? 'Passing grade: ' : 'Failing grade: '}</span>
         {getGradeLetter(grade.score)} ({grade.score})
       </Badge>
