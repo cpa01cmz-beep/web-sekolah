@@ -203,8 +203,9 @@ describe('useReducedMotion() - Accessibility Hook', () => {
     it('should handle MediaQueryListEvent correctly', () => {
       // Arrange
       const listeners: Array<(event: MediaQueryListEvent) => void> = [];
+      let mediaQueryMatches = false;
       window.matchMedia = vi.fn().mockImplementation((query) => ({
-        matches: false,
+        matches: mediaQueryMatches,
         media: query,
         onchange: null,
         addEventListener: vi.fn((event, listener) => {
@@ -218,7 +219,17 @@ describe('useReducedMotion() - Accessibility Hook', () => {
 
       const { result } = renderHook(() => useReducedMotion());
 
-      // Act
+      // Act - Update the mock's matches value before triggering the event
+      mediaQueryMatches = true;
+      window.matchMedia = vi.fn().mockImplementation((query) => ({
+        matches: mediaQueryMatches,
+        media: query,
+        onchange: null,
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+        dispatchEvent: vi.fn(),
+      }));
+
       act(() => {
         listeners.forEach(listener => {
           const event = {

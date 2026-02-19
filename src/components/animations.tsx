@@ -1,4 +1,4 @@
-import { memo } from 'react';
+import { memo, useMemo } from 'react';
 import { useReducedMotion } from '@/hooks/use-reduced-motion';
 
 interface AnimationProps {
@@ -11,15 +11,14 @@ interface AnimationProps {
 export const FadeIn = memo(function FadeIn({ children, delay = 0, className, style }: AnimationProps) {
   const prefersReducedMotion = useReducedMotion();
   
+  const computedStyle = useMemo(() => ({
+    animation: prefersReducedMotion ? 'none' : `fadeIn 0.5s ease-out ${delay}s forwards`,
+    opacity: prefersReducedMotion ? 1 : 0,
+    ...style,
+  }), [prefersReducedMotion, delay, style]);
+  
   return (
-    <div
-      className={className}
-      style={{
-        animation: prefersReducedMotion ? 'none' : `fadeIn 0.5s ease-out ${delay}s forwards`,
-        opacity: prefersReducedMotion ? 1 : 0,
-        ...style,
-      }}
-    >
+    <div className={className} style={computedStyle}>
       {children}
     </div>
   );
@@ -28,15 +27,14 @@ export const FadeIn = memo(function FadeIn({ children, delay = 0, className, sty
 export const SlideUp = memo(function SlideUp({ children, delay = 0, className, style }: AnimationProps) {
   const prefersReducedMotion = useReducedMotion();
   
+  const computedStyle = useMemo(() => ({
+    animation: prefersReducedMotion ? 'none' : `slideUp 0.5s ease-out ${delay}s forwards`,
+    opacity: prefersReducedMotion ? 1 : 0,
+    ...style,
+  }), [prefersReducedMotion, delay, style]);
+  
   return (
-    <div
-      className={className}
-      style={{
-        animation: prefersReducedMotion ? 'none' : `slideUp 0.5s ease-out ${delay}s forwards`,
-        opacity: prefersReducedMotion ? 1 : 0,
-        ...style,
-      }}
-    >
+    <div className={className} style={computedStyle}>
       {children}
     </div>
   );
@@ -45,15 +43,14 @@ export const SlideUp = memo(function SlideUp({ children, delay = 0, className, s
 export const SlideLeft = memo(function SlideLeft({ children, delay = 0, className, style }: AnimationProps) {
   const prefersReducedMotion = useReducedMotion();
   
+  const computedStyle = useMemo(() => ({
+    animation: prefersReducedMotion ? 'none' : `slideLeft 0.5s ease-out ${delay}s forwards`,
+    opacity: prefersReducedMotion ? 1 : 0,
+    ...style,
+  }), [prefersReducedMotion, delay, style]);
+  
   return (
-    <div
-      className={className}
-      style={{
-        animation: prefersReducedMotion ? 'none' : `slideLeft 0.5s ease-out ${delay}s forwards`,
-        opacity: prefersReducedMotion ? 1 : 0,
-        ...style,
-      }}
-    >
+    <div className={className} style={computedStyle}>
       {children}
     </div>
   );
@@ -62,15 +59,14 @@ export const SlideLeft = memo(function SlideLeft({ children, delay = 0, classNam
 export const SlideRight = memo(function SlideRight({ children, delay = 0, className, style }: AnimationProps) {
   const prefersReducedMotion = useReducedMotion();
   
+  const computedStyle = useMemo(() => ({
+    animation: prefersReducedMotion ? 'none' : `slideRight 0.5s ease-out ${delay}s forwards`,
+    opacity: prefersReducedMotion ? 1 : 0,
+    ...style,
+  }), [prefersReducedMotion, delay, style]);
+  
   return (
-    <div
-      className={className}
-      style={{
-        animation: prefersReducedMotion ? 'none' : `slideRight 0.5s ease-out ${delay}s forwards`,
-        opacity: prefersReducedMotion ? 1 : 0,
-        ...style,
-      }}
-    >
+    <div className={className} style={computedStyle}>
       {children}
     </div>
   );
