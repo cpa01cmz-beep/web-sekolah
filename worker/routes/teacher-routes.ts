@@ -88,16 +88,12 @@ export function teacherRoutes(app: Hono<{ Bindings: Env }>) {
 
     let messages: Message[];
     if (type === 'sent') {
-      messages = await MessageEntity.getBySenderId(c.env, teacherId);
+      messages = await MessageEntity.getRecentForSender(c.env, teacherId);
     } else {
-      messages = await MessageEntity.getByRecipientId(c.env, teacherId);
+      messages = await MessageEntity.getRecentForRecipient(c.env, teacherId);
     }
 
-    const filteredMessages = messages
-      .filter(msg => !msg.deletedAt)
-      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-
-    return ok(c, filteredMessages);
+    return ok(c, messages);
   }));
 
   app.get('/api/teachers/:id/messages/unread-count', ...withUserValidation('teacher', 'messages'), withErrorHandler('get teacher unread count')(async (c: Context) => {

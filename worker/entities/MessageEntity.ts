@@ -1,4 +1,4 @@
-import { IndexedEntity, SecondaryIndex, CompoundSecondaryIndex, type Env } from "../core-utils";
+import { IndexedEntity, SecondaryIndex, CompoundSecondaryIndex, UserDateSortedIndex, type Env } from "../core-utils";
 import type { Message, UserRole } from "@shared/types";
 
 export class MessageEntity extends IndexedEntity<Message> {
@@ -98,6 +98,72 @@ export class MessageEntity extends IndexedEntity<Message> {
   }
 
   static async updateWithCompoundIndex(env: Env, id: string, updates: Partial<Message>): Promise<Message | null> {
+    const inst = new this(env, id);
+    const currentState = await inst.getState() as Message | null;
+    if (!currentState || currentState.deletedAt) return null;
+
+    if (updates.isRead !== undefined && updates.isRead !== currentState.isRead) {
+      const compoundIndex = new CompoundSecondaryIndex(env, this.entityName, ['recipientId', 'isRead']);
+      await compoundIndex.remove([currentState.recipientId, currentState.isRead.toString()], id);
+      await compoundIndex.add([currentState.recipientId, updates.isRead.toString()], id);
+    }
+
+    return await super.update(env, id, updates);
+  }
+
+  static async getRecentForSender(env: Env, senderId: string, limit?: number): Promise<Message[]> {
+    const dateIndex = new UserDateSortedIndex(env, this.entityName, senderId, 'sent');
+    const messageIds = limit ? await dateIndex.getRecent(limit) : await dateIndex.getAll();
+    if (messageIds.length === 0) {
+      return [];
+    }
+    const messages = await Promise.all(messageIds.map(id => new this(env, id).getState()));
+    return messages.filter(m => m && !m.deletedAt) as Message[];
+  }
+
+  static async getRecentForRecipient(env: Env, recipientId: string, limit?: number): Promise<Message[]> {
+    const dateIndex = new UserDateSortedIndex(env, this.entityName, recipientId, 'received');
+    const messageIds = limit ? await dateIndex.getRecent(limit) : await dateIndex.getAll();
+    if (messageIds.length === 0) {
+      return [];
+    }
+    const messages = await Promise.all(messageIds.map(id => new this(env, id).getState()));
+    return messages.filter(m => m && !m.deletedAt) as Message[];
+  }
+
+  static async createWithAllIndexes(env: Env, state: Message): Promise<Message> {
+    const created = await super.create(env, state);
+    
+    const compoundIndex = new CompoundSecondaryIndex(env, this.entityName, ['recipientId', 'isRead']);
+    await compoundIndex.add([state.recipientId, state.isRead.toString()], state.id);
+    
+    const sentDateIndex = new UserDateSortedIndex(env, this.entityName, state.senderId, 'sent');
+    await sentDateIndex.add(state.createdAt, state.id);
+    
+    const receivedDateIndex = new UserDateSortedIndex(env, this.entityName, state.recipientId, 'received');
+    await receivedDateIndex.add(state.createdAt, state.id);
+    
+    return created;
+  }
+
+  static async deleteWithAllIndexes(env: Env, id: string): Promise<boolean> {
+    const inst = new this(env, id);
+    const state = await inst.getState() as Message | null;
+    if (!state) return false;
+
+    const compoundIndex = new CompoundSecondaryIndex(env, this.entityName, ['recipientId', 'isRead']);
+    await compoundIndex.remove([state.recipientId, state.isRead.toString()], id);
+    
+    const sentDateIndex = new UserDateSortedIndex(env, this.entityName, state.senderId, 'sent');
+    await sentDateIndex.remove(state.createdAt, id);
+    
+    const receivedDateIndex = new UserDateSortedIndex(env, this.entityName, state.recipientId, 'received');
+    await receivedDateIndex.remove(state.createdAt, id);
+    
+    return await super.delete(env, id);
+  }
+
+  static async updateWithAllIndexes(env: Env, id: string, updates: Partial<Message>): Promise<Message | null> {
     const inst = new this(env, id);
     const currentState = await inst.getState() as Message | null;
     if (!currentState || currentState.deletedAt) return null;

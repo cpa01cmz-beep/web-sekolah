@@ -56,16 +56,12 @@ export function parentRoutes(app: Hono<{ Bindings: Env }>) {
     
     let messages: Message[];
     if (type === 'sent') {
-      messages = await MessageEntity.getBySenderId(c.env, parentId);
+      messages = await MessageEntity.getRecentForSender(c.env, parentId);
     } else {
-      messages = await MessageEntity.getByRecipientId(c.env, parentId);
+      messages = await MessageEntity.getRecentForRecipient(c.env, parentId);
     }
     
-    const filteredMessages = messages
-      .filter(msg => !msg.deletedAt)
-      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-    
-    return ok(c, filteredMessages);
+    return ok(c, messages);
   }));
 
   app.get('/api/parents/:id/messages/unread-count', ...withUserValidation('parent', 'messages'), withErrorHandler('get parent unread count')(async (c: Context) => {

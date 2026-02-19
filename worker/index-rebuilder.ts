@@ -1,4 +1,4 @@
-import { SecondaryIndex, Index, type Env } from "./core-utils";
+import { SecondaryIndex, Index, UserDateSortedIndex, type Env } from "./core-utils";
 import { UserEntity, ClassEntity, CourseEntity, GradeEntity, AnnouncementEntity, WebhookConfigEntity, WebhookEventEntity, WebhookDeliveryEntity, DeadLetterQueueWebhookEntity, MessageEntity } from "./entities";
 import { isStudent } from './type-guards';
 import { CompoundSecondaryIndex } from "./storage/CompoundSecondaryIndex";
@@ -193,7 +193,11 @@ async function rebuildMessageIndexes(env: Env): Promise<void> {
   await parentMessageIdIndex.clear();
   await recipientIsReadCompoundIndex.clear();
 
-  const { items: messages } = await MessageEntity.list(env);
+  const { items: messages } = await MessageEntity.list(env, undefined, undefined, true);
+  
+  const messagesBySender = new Map<string, typeof messages>();
+  const messagesByRecipient = new Map<string, typeof messages>();
+  
   for (const message of messages) {
     if (message.deletedAt) continue;
     await senderIdIndex.add(message.senderId, message.id);
@@ -202,5 +206,29 @@ async function rebuildMessageIndexes(env: Env): Promise<void> {
       await parentMessageIdIndex.add(message.parentMessageId, message.id);
     }
     await recipientIsReadCompoundIndex.add([message.recipientId, message.isRead.toString()], message.id);
+    
+    const senderMessages = messagesBySender.get(message.senderId) || [];
+    senderMessages.push(message);
+    messagesBySender.set(message.senderId, senderMessages);
+    
+    const recipientMessages = messagesByRecipient.get(message.recipientId) || [];
+    recipientMessages.push(message);
+    messagesByRecipient.set(message.recipientId, recipientMessages);
+  }
+
+  for (const [senderId, senderMessages] of messagesBySender) {
+    const sentDateIndex = new UserDateSortedIndex(env, MessageEntity.entityName, senderId, 'sent');
+    await sentDateIndex.clear();
+    for (const message of senderMessages) {
+      await sentDateIndex.add(message.createdAt, message.id);
+    }
+  }
+
+  for (const [recipientId, recipientMessages] of messagesByRecipient) {
+    const receivedDateIndex = new UserDateSortedIndex(env, MessageEntity.entityName, recipientId, 'received');
+    await receivedDateIndex.clear();
+    for (const message of recipientMessages) {
+      await receivedDateIndex.add(message.createdAt, message.id);
+    }
   }
 }
