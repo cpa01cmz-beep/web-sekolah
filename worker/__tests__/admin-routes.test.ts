@@ -286,7 +286,7 @@ describe('admin-routes - Critical Business Logic', () => {
     it('should validate settings structure', () => {
       const settings = {
         schoolName: 'Test School',
-        academicYear: '2024-2025',
+        academicYear: '2025-2026',
         semester: 1,
         allowRegistration: true,
         maintenanceMode: false
