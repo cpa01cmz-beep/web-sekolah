@@ -50,6 +50,10 @@ export function createAdminService(repository: IRepository = apiRepository): Adm
       return repository.post<Announcement>(API_ENDPOINTS.ADMIN.ANNOUNCEMENTS, announcement);
     },
 
+    async deleteAnnouncement(announcementId: string): Promise<void> {
+      return repository.delete<void>(API_ENDPOINTS.ADMIN.ANNOUNCEMENT(announcementId));
+    },
+
     async getSettings(): Promise<Settings> {
       return repository.get<Settings>(API_ENDPOINTS.ADMIN.SETTINGS);
     },

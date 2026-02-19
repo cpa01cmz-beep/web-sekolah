@@ -77,6 +77,7 @@ export interface AdminService {
   deleteUser(userId: string): Promise<void>;
   getAnnouncements(): Promise<Announcement[]>;
   createAnnouncement(announcement: CreateAnnouncementData): Promise<Announcement>;
+  deleteAnnouncement(announcementId: string): Promise<void>;
   getSettings(): Promise<Settings>;
   updateSettings(settings: Partial<Settings>): Promise<Settings>;
 }
