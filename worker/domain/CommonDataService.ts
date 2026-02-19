@@ -219,11 +219,10 @@ export class CommonDataService {
       return [];
     }
 
-    const allGrades: Grade[] = [];
-    for (const course of teacherCourses) {
-      const courseGrades = await GradeEntity.getByCourseId(env, course.id);
-      allGrades.push(...courseGrades);
-    }
+    const courseGradeResults = await Promise.all(
+      teacherCourses.map(course => GradeEntity.getByCourseId(env, course.id))
+    );
+    const allGrades: Grade[] = courseGradeResults.flat();
 
     const sortedGrades = allGrades.sort((a, b) => 
       new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
