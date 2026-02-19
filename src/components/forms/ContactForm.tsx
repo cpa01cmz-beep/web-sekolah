@@ -28,7 +28,7 @@ export const ContactForm = memo(function ContactForm({ onSubmit }: ContactFormPr
     },
   });
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validateAll()) {
       return;
@@ -46,7 +46,7 @@ export const ContactForm = memo(function ContactForm({ onSubmit }: ContactFormPr
     } finally {
       setIsSubmitting(false);
     }
-  };
+  }, [validateAll, onSubmit, name, email, message, resetValidation]);
 
   const handleReset = useCallback(() => {
     setIsSuccess(false);

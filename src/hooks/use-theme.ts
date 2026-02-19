@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { STORAGE_KEYS } from '@/constants/storage-keys';
 import { storage } from '@/lib/storage';
 
@@ -18,9 +18,9 @@ export function useTheme() {
     }
   }, [isDark]);
 
-  const toggleTheme = () => {
-    setIsDark(!isDark);
-  };
+  const toggleTheme = useCallback(() => {
+    setIsDark(prev => !prev);
+  }, []);
 
   return { isDark, toggleTheme };
 }

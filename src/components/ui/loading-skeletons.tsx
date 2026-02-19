@@ -1,7 +1,8 @@
+import { memo } from 'react';
 import { Skeleton } from './skeleton';
 import { Card, CardContent, CardHeader } from './card';
 
-export function TableSkeleton({
+export const TableSkeleton = memo(function TableSkeleton({
   columns = 4,
   rows = 5,
   showHeader = true,
@@ -37,9 +38,9 @@ export function TableSkeleton({
       ))}
     </div>
   );
-}
+});
 
-export function DashboardSkeleton({
+export const DashboardSkeleton = memo(function DashboardSkeleton({
   cards = 3,
   showTitle = true,
   showSubtitle = true,
@@ -76,9 +77,9 @@ export function DashboardSkeleton({
       </div>
     </div>
   );
-}
+});
 
-export function CardSkeleton({
+export const CardSkeleton = memo(function CardSkeleton({
   lines = 3,
   showHeader = true,
 }: {
@@ -102,4 +103,4 @@ export function CardSkeleton({
       </CardContent>
     </Card>
   );
-}
+});
