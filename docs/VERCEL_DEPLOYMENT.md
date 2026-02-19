@@ -109,6 +109,8 @@ vercel --prod
 The `vercel.json` file contains:
 
 - **Build settings**: Framework detection and output directory
+- **Dev command**: Local development server configuration
+- **Ignore command**: Smart build skipping for non-frontend changes
 - **Regions**: Edge deployment regions for optimal latency
 - **Images**: Image optimization configuration
 - **Rewrites**: API proxy configuration and SPA routing
@@ -126,6 +128,20 @@ The `.vercelignore` file excludes unnecessary files from deployment:
 - Documentation files (wiki, prompts, changelogs)
 
 This reduces deployment size and improves build times.
+
+### Smart Build Skipping
+
+The `ignoreCommand` configuration uses `scripts/vercel-ignore.sh` to skip unnecessary builds:
+
+- **Production builds**: Always run (never skipped)
+- **Preview builds**: Skipped when only non-frontend files change:
+  - `docs/`, `wiki/`, `prompts/` - Documentation
+  - `worker/` - Backend code (deployed to Cloudflare)
+  - `*.md` - Markdown files
+  - `.github/` - GitHub workflows
+  - `__tests__/`, `*.test.ts` - Test files
+
+This saves build minutes and reduces deployment queue time for documentation-only changes.
 
 ### Security Headers
 
