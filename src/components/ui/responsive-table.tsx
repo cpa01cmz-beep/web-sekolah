@@ -73,7 +73,7 @@ const MobileCardRow = memo(({
 });
 MobileCardRow.displayName = "MobileCardRow"
 
-export function ResponsiveTable({ 
+export const ResponsiveTable = memo(function ResponsiveTable({ 
   headers, 
   rows, 
   mobileCardClassName,
@@ -116,6 +116,6 @@ export function ResponsiveTable({
         ))}
       </div>
     </>
-  )
-}
+  );
+});
 ResponsiveTable.displayName = "ResponsiveTable"

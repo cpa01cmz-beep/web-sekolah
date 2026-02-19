@@ -70,6 +70,13 @@ export function useCreateAnnouncement(options?: UseMutationOptions<Announcement,
   });
 }
 
+export function useDeleteAnnouncement(options?: UseMutationOptions<void, Error, string>) {
+  return useTanstackMutation({
+    mutationFn: (announcementId: string) => adminService.deleteAnnouncement(announcementId),
+    ...options,
+  });
+}
+
 export function useSettings(options?: UseQueryOptions<Settings>) {
   return useTanstackQuery({
     queryKey: ['admin', 'settings'],
