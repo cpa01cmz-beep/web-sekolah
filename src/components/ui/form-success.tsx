@@ -30,7 +30,7 @@ export const FormSuccess = memo(function FormSuccess({
       aria-live="polite"
     >
       <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/20">
-        <Icon className="h-8 w-8 text-green-600 dark:text-green-400" />
+        <Icon className="h-8 w-8 text-green-600 dark:text-green-400" aria-hidden="true" />
       </div>
       <h3 className="text-lg font-semibold text-foreground">{title}</h3>
       {description && (
