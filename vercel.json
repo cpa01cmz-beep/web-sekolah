@@ -4,6 +4,7 @@
   "outputDirectory": "dist/client",
   "framework": "vite",
   "installCommand": "npm ci --prefer-offline --no-audit",
+  "devCommand": "npm run dev",
   "cleanUrls": true,
   "trailingSlash": false,
   "regions": ["sin1", "hnd1", "iad1"],
@@ -20,10 +21,6 @@
     "sizes": [640, 750, 828, 1080, 1200, 1920, 2048, 3840]
   },
   "rewrites": [
-    {
-      "source": "/api/health",
-      "destination": "/api/health"
-    },
     {
       "source": "/api/:path*",
       "destination": "https://website-sekolah-production.:account.workers.dev/api/:path*",
