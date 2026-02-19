@@ -64,4 +64,10 @@ export class GradeService {
     await GradeEntity.deleteWithAllIndexes(env, gradeId);
     return true;
   }
+
+  static async getGradeById(env: Env, gradeId: string): Promise<Grade | null> {
+    const gradeEntity = new GradeEntity(env, gradeId);
+    const grade = await gradeEntity.getState();
+    return grade && !grade.deletedAt ? grade : null;
+  }
 }

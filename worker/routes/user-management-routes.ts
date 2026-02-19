@@ -48,4 +48,14 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
     return ok(c, updatedGrade);
   }));
 
+  app.delete('/api/grades/:id', ...withAuth('teacher'), validateParams(paramsSchema), withErrorHandler('delete grade')(async (c: Context) => {
+    const { id: gradeId } = c.get('validatedParams') as { id: string };
+    const grade = await GradeService.getGradeById(c.env, gradeId);
+    if (grade) {
+      await GradeService.deleteGrade(c.env, gradeId);
+      triggerWebhookSafely(c.env, 'grade.deleted', { id: gradeId, studentId: grade.studentId, courseId: grade.courseId }, { gradeId });
+    }
+    return ok(c, { deleted: true, id: gradeId });
+  }));
+
 }

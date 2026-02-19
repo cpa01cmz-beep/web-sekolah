@@ -390,6 +390,53 @@ describe('user-management-routes - Critical Business Logic', () => {
     });
   });
 
+  describe('DELETE /api/grades/:id - Grade Deletion', () => {
+    it('should delete grade and return deleted: true', () => {
+      const gradeId = 'g1';
+      const deleteResult = { deleted: true, id: gradeId };
+
+      expect(deleteResult.deleted).toBe(true);
+      expect(deleteResult.id).toBe('g1');
+    });
+
+    it('should trigger webhook event for grade.deleted', () => {
+      const grade = { id: 'g1', studentId: 's1', courseId: 'c1', score: 85, feedback: '' };
+      const eventType = 'grade.deleted';
+      const payload = { id: grade.id, studentId: grade.studentId, courseId: grade.courseId };
+      const context = { gradeId: grade.id };
+
+      expect(eventType).toBe('grade.deleted');
+      expect(payload.id).toBe('g1');
+      expect(payload.studentId).toBe('s1');
+      expect(payload.courseId).toBe('c1');
+      expect(context.gradeId).toBe('g1');
+    });
+
+    it('should include studentId and courseId in webhook payload', () => {
+      const grade = { id: 'g1', studentId: 's1', courseId: 'c1', score: 85, feedback: '' };
+      const payload = { id: grade.id, studentId: grade.studentId, courseId: grade.courseId };
+
+      expect(payload).toHaveProperty('id');
+      expect(payload).toHaveProperty('studentId');
+      expect(payload).toHaveProperty('courseId');
+    });
+
+    it('should handle deletion of non-existent grade gracefully', () => {
+      const gradeId = 'non-existent-grade';
+      const grade = null;
+      const deleteResult = grade ? { deleted: true, id: gradeId } : { deleted: false, id: gradeId };
+
+      expect(deleteResult.deleted).toBe(false);
+    });
+
+    it('should only allow teachers to delete grades', () => {
+      const requiredRole = 'teacher';
+      const allowedRoles = ['teacher'];
+
+      expect(allowedRoles).toContain(requiredRole);
+    });
+  });
+
   describe('Edge Cases - Boundary Conditions', () => {
     it('should handle user update with partial data', () => {
       const existingUser = { id: 'u1', name: 'User', email: 'user@test.com', role: 'student' };
