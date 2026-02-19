@@ -48,45 +48,45 @@ export function webhookConfigRoutes(app: Hono<{ Bindings: Env }>) {
     return ok(c, config);
   }));
 
-   app.put('/api/webhooks/:id', withErrorHandler('update webhook')(async (c: Context) => {
-     const id = c.req.param('id');
-     const body = await c.req.json();
+  app.put('/api/webhooks/:id', withErrorHandler('update webhook')(async (c: Context) => {
+    const id = c.req.param('id');
+    const body = await c.req.json();
 
-     const existing = await new WebhookConfigEntity(c.env, id).getState();
+    const existing = await new WebhookConfigEntity(c.env, id).getState();
 
-     if (!existing || existing.deletedAt) {
-       return notFound(c, 'Webhook configuration not found');
-     }
+    if (!existing || existing.deletedAt) {
+      return notFound(c, 'Webhook configuration not found');
+    }
 
-     const updated = {
-       ...existing,
-       url: body.url ?? existing.url,
-       events: body.events ?? existing.events,
-       secret: body.secret ?? existing.secret,
-       active: body.active ?? existing.active,
-       updatedAt: new Date().toISOString()
-     };
+    const updated = {
+      ...existing,
+      url: body.url ?? existing.url,
+      events: body.events ?? existing.events,
+      secret: body.secret ?? existing.secret,
+      active: body.active ?? existing.active,
+      updatedAt: new Date().toISOString()
+    };
 
-     const entity = new WebhookConfigEntity(c.env, id);
-     await entity.patch(updated);
+    const entity = new WebhookConfigEntity(c.env, id);
+    await entity.patch(updated);
 
-     logger.info('Webhook configuration updated', { id });
+    logger.info('Webhook configuration updated', { id });
 
-     return ok(c, updated);
-   }));
+    return ok(c, updated);
+  }));
 
-   app.delete('/api/webhooks/:id', withErrorHandler('delete webhook')(async (c: Context) => {
-     const id = c.req.param('id');
-     const existing = await new WebhookConfigEntity(c.env, id).getState();
+  app.delete('/api/webhooks/:id', withErrorHandler('delete webhook')(async (c: Context) => {
+    const id = c.req.param('id');
+    const existing = await new WebhookConfigEntity(c.env, id).getState();
 
-     if (!existing || existing.deletedAt) {
-       return notFound(c, 'Webhook configuration not found');
-     }
+    if (!existing || existing.deletedAt) {
+      return notFound(c, 'Webhook configuration not found');
+    }
 
-     await WebhookConfigEntity.delete(c.env, id);
+    await WebhookConfigEntity.delete(c.env, id);
 
-     logger.info('Webhook configuration deleted', { id });
+    logger.info('Webhook configuration deleted', { id });
 
-     return ok(c, { id, deleted: true });
-   }));
+    return ok(c, { id, deleted: true });
+  }));
 }
