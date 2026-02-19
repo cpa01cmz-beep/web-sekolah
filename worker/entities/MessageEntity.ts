@@ -1,4 +1,4 @@
-import { IndexedEntity, SecondaryIndex, type Env } from "../core-utils";
+import { IndexedEntity, SecondaryIndex, CompoundSecondaryIndex, type Env } from "../core-utils";
 import type { Message, UserRole } from "@shared/types";
 
 export class MessageEntity extends IndexedEntity<Message> {
@@ -66,7 +66,48 @@ export class MessageEntity extends IndexedEntity<Message> {
   }
 
   static async countUnread(env: Env, recipientId: string): Promise<number> {
-    const messages = await this.getByRecipientId(env, recipientId);
-    return messages.filter(msg => !msg.isRead && !msg.deletedAt).length;
+    const compoundIndex = new CompoundSecondaryIndex(env, this.entityName, ['recipientId', 'isRead']);
+    return await compoundIndex.countByValues([recipientId, 'false']);
+  }
+
+  static async getUnreadByRecipient(env: Env, recipientId: string): Promise<Message[]> {
+    const compoundIndex = new CompoundSecondaryIndex(env, this.entityName, ['recipientId', 'isRead']);
+    const messageIds = await compoundIndex.getByValues([recipientId, 'false']);
+    if (messageIds.length === 0) {
+      return [];
+    }
+    const messages = await Promise.all(messageIds.map(id => new this(env, id).getState()));
+    return messages.filter(m => m && !m.deletedAt) as Message[];
+  }
+
+  static async createWithCompoundIndex(env: Env, state: Message): Promise<Message> {
+    const created = await super.create(env, state);
+    const compoundIndex = new CompoundSecondaryIndex(env, this.entityName, ['recipientId', 'isRead']);
+    await compoundIndex.add([state.recipientId, state.isRead.toString()], state.id);
+    return created;
+  }
+
+  static async deleteWithCompoundIndex(env: Env, id: string): Promise<boolean> {
+    const inst = new this(env, id);
+    const state = await inst.getState() as Message | null;
+    if (!state) return false;
+
+    const compoundIndex = new CompoundSecondaryIndex(env, this.entityName, ['recipientId', 'isRead']);
+    await compoundIndex.remove([state.recipientId, state.isRead.toString()], id);
+    return await super.delete(env, id);
+  }
+
+  static async updateWithCompoundIndex(env: Env, id: string, updates: Partial<Message>): Promise<Message | null> {
+    const inst = new this(env, id);
+    const currentState = await inst.getState() as Message | null;
+    if (!currentState || currentState.deletedAt) return null;
+
+    if (updates.isRead !== undefined && updates.isRead !== currentState.isRead) {
+      const compoundIndex = new CompoundSecondaryIndex(env, this.entityName, ['recipientId', 'isRead']);
+      await compoundIndex.remove([currentState.recipientId, currentState.isRead.toString()], id);
+      await compoundIndex.add([currentState.recipientId, updates.isRead.toString()], id);
+    }
+
+    return await super.update(env, id, updates);
   }
 }
