@@ -41,6 +41,7 @@ app.use('/api/*', async (c, next) => {
     c.header('Access-Control-Allow-Credentials', 'true');
     c.header('Access-Control-Max-Age', (TimeConstants.ONE_DAY_MS / 1000).toString());
     c.header('Access-Control-Expose-Headers', 'X-Request-ID, X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset');
+    c.header('Vary', 'Origin');
   }
   
   if (c.req.method === 'OPTIONS') {
