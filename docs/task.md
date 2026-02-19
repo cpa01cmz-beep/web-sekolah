@@ -354,11 +354,11 @@ export class UserCreationStrategyFactory {
    - Task handler imports `WebhookService` and calls `processPendingDeliveries(env)`
    - Automatic webhook delivery processing every minute without manual intervention
 
-7. **Updated wrangler.toml Configuration** (TODO - needs to be added by DevOps):
-   ```toml
-   [triggers]
-   crons = ["* * * * *"]  # Every minute
-   ```
+7. **Updated wrangler.toml Configuration** (✅ Complete):
+    ```toml
+    [triggers]
+    crons = ["* * * * *"]  # Every minute
+    ```
 
 **Metrics**:
 
