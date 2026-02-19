@@ -1,4 +1,5 @@
 import type { SchoolData } from "@shared/types";
+import { AVATAR_BASE_URL } from "@shared/constants";
 
 const now = new Date().toISOString();
 
@@ -9,7 +10,7 @@ export const seedData: SchoolData = {
       name: 'Budi Hartono',
       email: 'budi@example.com',
       role: 'student',
-      avatarUrl: 'https://i.pravatar.cc/150?u=student01',
+      avatarUrl: `${AVATAR_BASE_URL}?u=student01`,
       classId: '11-A',
       studentIdNumber: '12345',
       createdAt: now,
@@ -20,7 +21,7 @@ export const seedData: SchoolData = {
       name: 'Ani Suryani',
       email: 'ani@example.com',
       role: 'student',
-      avatarUrl: 'https://i.pravatar.cc/150?u=student02',
+      avatarUrl: `${AVATAR_BASE_URL}?u=student02`,
       classId: '11-A',
       studentIdNumber: '12346',
       createdAt: now,
@@ -31,7 +32,7 @@ export const seedData: SchoolData = {
       name: 'Ibu Siti',
       email: 'siti@example.com',
       role: 'teacher',
-      avatarUrl: 'https://i.pravatar.cc/150?u=teacher01',
+      avatarUrl: `${AVATAR_BASE_URL}?u=teacher01`,
       classIds: ['11-A'],
       createdAt: now,
       updatedAt: now
@@ -41,7 +42,7 @@ export const seedData: SchoolData = {
       name: 'Bapak Agus',
       email: 'agus@example.com',
       role: 'teacher',
-      avatarUrl: 'https://i.pravatar.cc/150?u=teacher02',
+      avatarUrl: `${AVATAR_BASE_URL}?u=teacher02`,
       classIds: ['12-B'],
       createdAt: now,
       updatedAt: now
@@ -51,7 +52,7 @@ export const seedData: SchoolData = {
       name: 'Ayah Budi',
       email: 'ayah.budi@example.com',
       role: 'parent',
-      avatarUrl: 'https://i.pravatar.cc/150?u=parent01',
+      avatarUrl: `${AVATAR_BASE_URL}?u=parent01`,
       childId: 'student-01',
       createdAt: now,
       updatedAt: now
@@ -61,7 +62,7 @@ export const seedData: SchoolData = {
       name: 'Admin Sekolah',
       email: 'admin@example.com',
       role: 'admin',
-      avatarUrl: 'https://i.pravatar.cc/150?u=admin01',
+      avatarUrl: `${AVATAR_BASE_URL}?u=admin01`,
       createdAt: now,
       updatedAt: now
     }
