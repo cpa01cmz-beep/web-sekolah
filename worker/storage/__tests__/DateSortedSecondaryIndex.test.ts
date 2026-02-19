@@ -253,6 +253,52 @@ describe('DateSortedSecondaryIndex', () => {
     });
   });
 
+  describe('getAll', () => {
+    it('should return all entity IDs sorted', async () => {
+      const tsNewest = new Date('2026-01-08T12:00:00.000Z').getTime();
+      const tsMiddle = new Date('2026-01-08T10:00:00.000Z').getTime();
+      const tsOldest = new Date('2026-01-07T15:00:00.000Z').getTime();
+
+      const mockKeys = [
+        `sort:${(Number.MAX_SAFE_INTEGER - tsNewest).toString().padStart(20, '0')}:entity-2`,
+        `sort:${(Number.MAX_SAFE_INTEGER - tsMiddle).toString().padStart(20, '0')}:entity-1`,
+        `sort:${(Number.MAX_SAFE_INTEGER - tsOldest).toString().padStart(20, '0')}:entity-3`,
+      ];
+      mockStub.listPrefix.mockResolvedValue({ keys: mockKeys });
+
+      const allIds = await index.getAll();
+
+      expect(allIds).toEqual(['entity-2', 'entity-1', 'entity-3']);
+    });
+
+    it('should return empty array when no entries exist', async () => {
+      mockStub.listPrefix.mockResolvedValue({ keys: [] });
+
+      const allIds = await index.getAll();
+
+      expect(allIds).toEqual([]);
+    });
+  });
+
+  describe('count', () => {
+    it('should return count of entries', async () => {
+      const keys = ['sort:key1', 'sort:key2', 'sort:key3'];
+      mockStub.listPrefix.mockResolvedValue({ keys });
+
+      const result = await index.count();
+
+      expect(result).toBe(3);
+    });
+
+    it('should return 0 when no entries exist', async () => {
+      mockStub.listPrefix.mockResolvedValue({ keys: [] });
+
+      const result = await index.count();
+
+      expect(result).toBe(0);
+    });
+  });
+
   describe('edge cases', () => {
     it('should handle invalid date string', () => {
       const invalidDate = 'not-a-date';

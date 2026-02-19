@@ -203,4 +203,54 @@ describe('StudentDateSortedIndex', () => {
       expect(mockStub.del).not.toHaveBeenCalled();
     });
   });
+
+  describe('getAll', () => {
+    it('should return all grade IDs sorted', async () => {
+      const tsNewest = new Date('2026-01-08T12:00:00.000Z').getTime();
+      const tsMiddle = new Date('2026-01-08T10:00:00.000Z').getTime();
+      const tsOldest = new Date('2026-01-07T15:00:00.000Z').getTime();
+
+      const mockKeys = [
+        `sort:${(Number.MAX_SAFE_INTEGER - tsNewest).toString().padStart(20, '0')}:grade-2`,
+        `sort:${(Number.MAX_SAFE_INTEGER - tsMiddle).toString().padStart(20, '0')}:grade-1`,
+        `sort:${(Number.MAX_SAFE_INTEGER - tsOldest).toString().padStart(20, '0')}:grade-3`,
+      ];
+      mockStub.listPrefix.mockResolvedValue({ keys: mockKeys });
+      const index = new StudentDateSortedIndex(mockEnv, 'grade', 'student-123');
+
+      const allIds = await index.getAll();
+
+      expect(allIds).toEqual(['grade-2', 'grade-1', 'grade-3']);
+    });
+
+    it('should return empty array when no grades exist', async () => {
+      mockStub.listPrefix.mockResolvedValue({ keys: [] });
+      const index = new StudentDateSortedIndex(mockEnv, 'grade', 'student-123');
+
+      const allIds = await index.getAll();
+
+      expect(allIds).toEqual([]);
+    });
+  });
+
+  describe('count', () => {
+    it('should return count of grade entries', async () => {
+      const keys = ['sort:key1', 'sort:key2', 'sort:key3'];
+      mockStub.listPrefix.mockResolvedValue({ keys });
+      const index = new StudentDateSortedIndex(mockEnv, 'grade', 'student-123');
+
+      const result = await index.count();
+
+      expect(result).toBe(3);
+    });
+
+    it('should return 0 when no grades exist', async () => {
+      mockStub.listPrefix.mockResolvedValue({ keys: [] });
+      const index = new StudentDateSortedIndex(mockEnv, 'grade', 'student-123');
+
+      const result = await index.count();
+
+      expect(result).toBe(0);
+    });
+  });
 });

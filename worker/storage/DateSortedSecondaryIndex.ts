@@ -51,6 +51,21 @@ export class DateSortedSecondaryIndex extends Entity<unknown> {
     return entityIds;
   }
 
+  async getAll(): Promise<string[]> {
+    const prefix = `sort:`;
+    const { keys } = await this.stub.listPrefix(prefix);
+    const sortedKeys = keys.sort();
+
+    return sortedKeys
+      .map(key => extractEntityIdFromKey(key))
+      .filter((id): id is string => id !== null);
+  }
+
+  async count(): Promise<number> {
+    const { keys } = await this.stub.listPrefix('sort:');
+    return keys.length;
+  }
+
   async clear(): Promise<void> {
     const { keys } = await this.stub.listPrefix('sort:');
     await Promise.all(keys.map((key: string) => this.stub.del(key)));

@@ -201,6 +201,27 @@ describe('UserDateSortedIndex', () => {
     });
   });
 
+  describe('count', () => {
+    it('should return count of message entries', async () => {
+      const keys = ['sort:key1', 'sort:key2', 'sort:key3'];
+      mockStub.listPrefix.mockResolvedValue({ keys });
+      const index = new UserDateSortedIndex(mockEnv, 'message', 'user-123', 'sent');
+
+      const result = await index.count();
+
+      expect(result).toBe(3);
+    });
+
+    it('should return 0 when no messages exist', async () => {
+      mockStub.listPrefix.mockResolvedValue({ keys: [] });
+      const index = new UserDateSortedIndex(mockEnv, 'message', 'user-123', 'sent');
+
+      const result = await index.count();
+
+      expect(result).toBe(0);
+    });
+  });
+
   describe('clear', () => {
     it('should clear all message IDs from date-sorted index', async () => {
       const mockKeys = ['sort:key1', 'sort:key2', 'sort:key3'];
