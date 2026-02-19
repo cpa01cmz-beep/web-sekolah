@@ -1,4 +1,4 @@
-import { LayoutDashboard, Calendar, Award, User, BookCopy, Megaphone, Users, Settings } from 'lucide-react';
+import { LayoutDashboard, Calendar, Award, User, BookCopy, Megaphone, Users, Settings, Mail } from 'lucide-react';
 import type { ComponentType } from 'react';
 
 export interface NavLink {
@@ -16,6 +16,7 @@ const iconMap = {
   megaphone: Megaphone,
   users: Users,
   settings: Settings,
+  mail: Mail,
 } as const;
 
 type IconKey = keyof typeof iconMap;
@@ -38,11 +39,13 @@ export const teacherLinks: NavLink[] = [
   createLink('schedule', 'calendar', 'Schedule'),
   createLink('grades', 'bookCopy', 'Grade Management'),
   createLink('announcements', 'megaphone', 'Announcements'),
+  createLink('messages', 'mail', 'Messages'),
 ];
 
 export const parentLinks: NavLink[] = [
   createLink('dashboard', 'dashboard', 'Dashboard'),
   createLink('schedule', 'calendar', 'Student Schedule'),
+  createLink('messages', 'mail', 'Messages'),
 ];
 
 export const adminLinks: NavLink[] = [

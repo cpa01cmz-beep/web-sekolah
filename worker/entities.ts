@@ -8,4 +8,5 @@ export { WebhookConfigEntity } from './entities/WebhookConfigEntity';
 export { WebhookEventEntity } from './entities/WebhookEventEntity';
 export { WebhookDeliveryEntity } from './entities/WebhookDeliveryEntity';
 export { DeadLetterQueueWebhookEntity } from './entities/DeadLetterQueueWebhookEntity';
+export { MessageEntity } from './entities/MessageEntity';
 export { ensureAllSeedData } from './entities/seed-data-init';
