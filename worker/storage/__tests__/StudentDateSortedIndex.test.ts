@@ -115,7 +115,7 @@ describe('StudentDateSortedIndex', () => {
 
       const recentIds = await index.getRecent(2);
 
-      expect(mockStub.listPrefix).toHaveBeenCalledWith('sort:');
+      expect(mockStub.listPrefix).toHaveBeenCalledWith('sort:', null, 2);
       expect(recentIds).toEqual(['grade-2', 'grade-1']);
       expect(recentIds).toHaveLength(2);
     });
@@ -145,6 +145,7 @@ describe('StudentDateSortedIndex', () => {
 
       const recentIds = await index.getRecent(5);
 
+      expect(mockStub.listPrefix).toHaveBeenCalledWith('sort:', null, 5);
       expect(recentIds).toEqual([]);
     });
 
@@ -174,6 +175,15 @@ describe('StudentDateSortedIndex', () => {
       const recentIds = await index.getRecent(3);
 
       expect(recentIds).toEqual(['grade-1', 'grade-2', 'grade-3']);
+    });
+
+    it('should handle limit of 0', async () => {
+      const index = new StudentDateSortedIndex(mockEnv, 'grade', 'student-123');
+
+      const recentIds = await index.getRecent(0);
+
+      expect(mockStub.listPrefix).not.toHaveBeenCalled();
+      expect(recentIds).toEqual([]);
     });
   });
 

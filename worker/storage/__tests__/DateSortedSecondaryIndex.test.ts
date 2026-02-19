@@ -157,7 +157,7 @@ describe('DateSortedSecondaryIndex', () => {
     it('should retrieve recent entity IDs in chronological order', async () => {
       const result = await index.getRecent(3);
 
-      expect(mockStub.listPrefix).toHaveBeenCalledWith('sort:');
+      expect(mockStub.listPrefix).toHaveBeenCalledWith('sort:', null, 3);
       expect(result).toEqual(['entity-1', 'entity-2', 'entity-3']);
     });
 
@@ -173,6 +173,7 @@ describe('DateSortedSecondaryIndex', () => {
 
       const result = await index.getRecent(10);
 
+      expect(mockStub.listPrefix).toHaveBeenCalledWith('sort:', null, 10);
       expect(result).toEqual([]);
     });
 
@@ -214,6 +215,7 @@ describe('DateSortedSecondaryIndex', () => {
     it('should handle limit of 0', async () => {
       const result = await index.getRecent(0);
 
+      expect(mockStub.listPrefix).not.toHaveBeenCalled();
       expect(result).toHaveLength(0);
     });
   });

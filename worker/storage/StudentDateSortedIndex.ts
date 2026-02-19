@@ -37,8 +37,9 @@ export class StudentDateSortedIndex extends Entity<unknown> {
   }
 
   async getRecent(limit: number): Promise<string[]> {
+    if (limit <= 0) return [];
     const prefix = `sort:`;
-    const { keys } = await this.stub.listPrefix(prefix);
+    const { keys } = await this.stub.listPrefix(prefix, null, limit);
     const sortedKeys = keys.sort();
 
     const entityIds: string[] = [];
