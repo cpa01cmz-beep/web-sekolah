@@ -218,6 +218,75 @@ describe('DateSortedSecondaryIndex', () => {
     });
   });
 
+  describe('getAll', () => {
+    it('should return all entity IDs sorted chronologically', async () => {
+      const ts1 = new Date('2026-01-08T12:00:00.000Z').getTime();
+      const ts2 = new Date('2026-01-08T10:00:00.000Z').getTime();
+      const ts3 = new Date('2026-01-07T15:00:00.000Z').getTime();
+
+      mockStub.listPrefix.mockResolvedValue({
+        keys: [
+          `sort:${(Number.MAX_SAFE_INTEGER - ts1).toString().padStart(20, '0')}:entity-1`,
+          `sort:${(Number.MAX_SAFE_INTEGER - ts2).toString().padStart(20, '0')}:entity-2`,
+          `sort:${(Number.MAX_SAFE_INTEGER - ts3).toString().padStart(20, '0')}:entity-3`,
+        ],
+        next: null
+      });
+
+      const result = await index.getAll();
+
+      expect(mockStub.listPrefix).toHaveBeenCalledWith('sort:');
+      expect(result).toEqual(['entity-1', 'entity-2', 'entity-3']);
+    });
+
+    it('should return empty array when no entries exist', async () => {
+      mockStub.listPrefix.mockResolvedValue({ keys: [], next: null });
+
+      const result = await index.getAll();
+
+      expect(result).toEqual([]);
+    });
+
+    it('should sort keys lexicographically', async () => {
+      const unsortedKeys = [
+        'sort:90000000000000000003:entity-3',
+        'sort:90000000000000000001:entity-1',
+        'sort:90000000000000000002:entity-2',
+      ];
+      mockStub.listPrefix.mockResolvedValue({ keys: unsortedKeys, next: null });
+
+      const result = await index.getAll();
+
+      expect(result).toEqual(['entity-1', 'entity-2', 'entity-3']);
+    });
+  });
+
+  describe('count', () => {
+    it('should return count of entries', async () => {
+      mockStub.listPrefix.mockResolvedValue({
+        keys: [
+          'sort:90000000000000000001:entity-1',
+          'sort:90000000000000000002:entity-2',
+          'sort:90000000000000000003:entity-3',
+        ],
+        next: null
+      });
+
+      const result = await index.count();
+
+      expect(mockStub.listPrefix).toHaveBeenCalledWith('sort:');
+      expect(result).toBe(3);
+    });
+
+    it('should return 0 when no entries exist', async () => {
+      mockStub.listPrefix.mockResolvedValue({ keys: [], next: null });
+
+      const result = await index.count();
+
+      expect(result).toBe(0);
+    });
+  });
+
   describe('clear', () => {
     it('should clear all date-sorted index entries', async () => {
       const now = Date.now();
