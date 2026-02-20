@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, memo, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -75,6 +75,8 @@ function MessageThread({ messages, currentUserId, onMarkAsRead }: MessageThreadP
   );
 }
 
+const MemoizedMessageThread = memo(MessageThread);
+
 interface ComposeDialogProps {
   teachers: SchoolUser[];
   onSend: (recipientId: string, subject: string, content: string) => void;
@@ -87,14 +89,14 @@ function ComposeDialog({ teachers, onSend, isLoading }: ComposeDialogProps) {
   const [subject, setSubject] = useState('');
   const [content, setContent] = useState('');
 
-  const handleSend = () => {
+  const handleSend = useCallback(() => {
     if (!recipientId || !subject.trim() || !content.trim()) return;
     onSend(recipientId, subject.trim(), content.trim());
     setOpen(false);
     setRecipientId('');
     setSubject('');
     setContent('');
-  };
+  }, [recipientId, subject, content, onSend]);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -156,6 +158,8 @@ function ComposeDialog({ teachers, onSend, isLoading }: ComposeDialogProps) {
   );
 }
 
+const MemoizedComposeDialog = memo(ComposeDialog);
+
 export function ParentMessagesPage() {
   const prefersReducedMotion = useReducedMotion();
   const user = useAuthStore((state) => state.user);
@@ -212,6 +216,10 @@ export function ParentMessagesPage() {
     },
   });
 
+  const handleSendMessage = useCallback((recipientId: string, subject: string, content: string) => {
+    sendMessageMutation.mutate({ recipientId, subject, content });
+  }, [sendMessageMutation]);
+
   if (messagesError) {
     return (
       <Alert variant="destructive">
@@ -221,10 +229,6 @@ export function ParentMessagesPage() {
       </Alert>
     );
   }
-
-  const handleSendMessage = (recipientId: string, subject: string, content: string) => {
-    sendMessageMutation.mutate({ recipientId, subject, content });
-  };
 
   return (
     <SlideUp delay={0} className="space-y-6" style={prefersReducedMotion ? { opacity: 1 } : {}}>
@@ -242,7 +246,7 @@ export function ParentMessagesPage() {
             {unreadCount} unread
           </Badge>
         </div>
-        <ComposeDialog
+        <MemoizedComposeDialog
           teachers={teachers}
           onSend={handleSendMessage}
           isLoading={sendMessageMutation.isPending}
@@ -377,7 +381,7 @@ export function ParentMessagesPage() {
                   <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
                 </div>
               ) : (
-                <MessageThread
+                <MemoizedMessageThread
                   messages={conversation}
                   currentUserId={parentId}
                   onMarkAsRead={(messageId) => markAsReadMutation.mutate(messageId)}

@@ -1,4 +1,4 @@
-import { memo } from 'react';
+import { memo, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Edit, Trash2 } from 'lucide-react';
 
@@ -10,8 +10,8 @@ interface UserActionsProps {
 }
 
 export const UserActions = memo(({ userId, userName, onEdit, onDelete }: UserActionsProps) => {
-  const handleEdit = () => onEdit(userId, userName);
-  const handleDelete = () => onDelete(userId);
+  const handleEdit = useCallback(() => onEdit(userId, userName), [userId, userName, onEdit]);
+  const handleDelete = useCallback(() => onDelete(userId), [userId, onDelete]);
 
   return (
     <div className="flex gap-2 justify-end">
