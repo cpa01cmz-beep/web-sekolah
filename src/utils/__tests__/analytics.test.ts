@@ -20,6 +20,8 @@ import {
   calculateMode,
   calculateRange,
   calculateGPA,
+  calculateClassRank,
+  calculatePerformanceSummary,
 } from '../analytics';
 
 describe('Analytics Utilities', () => {
@@ -430,6 +432,90 @@ describe('Analytics Utilities', () => {
     it('handles single grade', () => {
       expect(calculateGPA([90])).toBe(4.0);
       expect(calculateGPA([80])).toBe(3.0);
+    });
+  });
+
+  describe('calculateClassRank', () => {
+    it('returns rank 0 for empty array', () => {
+      const result = calculateClassRank(85, []);
+      expect(result).toEqual({ rank: 0, totalStudents: 0, percentile: 0 });
+    });
+
+    it('calculates rank for top student', () => {
+      const result = calculateClassRank(95, [85, 90, 95, 80, 75]);
+      expect(result.rank).toBe(1);
+      expect(result.totalStudents).toBe(5);
+      expect(result.percentile).toBe(80);
+    });
+
+    it('calculates rank for middle student', () => {
+      const result = calculateClassRank(85, [95, 90, 85, 80, 75]);
+      expect(result.rank).toBe(3);
+      expect(result.totalStudents).toBe(5);
+      expect(result.percentile).toBe(40);
+    });
+
+    it('calculates rank for bottom student', () => {
+      const result = calculateClassRank(70, [95, 90, 85, 80, 70]);
+      expect(result.rank).toBe(5);
+      expect(result.totalStudents).toBe(5);
+      expect(result.percentile).toBe(0);
+    });
+
+    it('handles single student', () => {
+      const result = calculateClassRank(85, [85]);
+      expect(result.rank).toBe(1);
+      expect(result.totalStudents).toBe(1);
+      expect(result.percentile).toBe(0);
+    });
+
+    it('handles duplicate scores', () => {
+      const result = calculateClassRank(85, [85, 85, 85]);
+      expect(result.rank).toBe(1);
+      expect(result.totalStudents).toBe(3);
+    });
+
+    it('returns last rank for score not in array', () => {
+      const result = calculateClassRank(60, [95, 90, 85, 80, 75]);
+      expect(result.rank).toBe(5);
+      expect(result.totalStudents).toBe(5);
+    });
+  });
+
+  describe('calculatePerformanceSummary', () => {
+    it('returns complete summary for valid scores', () => {
+      const summary = calculatePerformanceSummary([85, 90, 75, 80, 95]);
+      
+      expect(summary.average).toBe(85);
+      expect(summary.median).toBe(85);
+      expect(summary.min).toBe(75);
+      expect(summary.max).toBe(95);
+      expect(summary.standardDeviation).toBeCloseTo(7, 0);
+      expect(summary.gpa).toBeCloseTo(3.2, 1);
+      expect(summary.gradeDistribution).toBeDefined();
+    });
+
+    it('returns zeros for empty array', () => {
+      const summary = calculatePerformanceSummary([]);
+      
+      expect(summary.average).toBe(0);
+      expect(summary.median).toBe(0);
+      expect(summary.min).toBe(0);
+      expect(summary.max).toBe(0);
+      expect(summary.standardDeviation).toBe(0);
+      expect(summary.gpa).toBe(0);
+      expect(summary.gradeDistribution).toEqual({ A: 0, B: 0, C: 0, D: 0, E: 0, F: 0 });
+    });
+
+    it('calculates grade distribution correctly', () => {
+      const summary = calculatePerformanceSummary([95, 85, 75, 65, 55]);
+      
+      expect(summary.gradeDistribution.A).toBe(1);
+      expect(summary.gradeDistribution.B).toBe(1);
+      expect(summary.gradeDistribution.C).toBe(1);
+      expect(summary.gradeDistribution.D).toBe(1);
+      expect(summary.gradeDistribution.E).toBe(1);
+      expect(summary.gradeDistribution.F).toBe(0);
     });
   });
 });

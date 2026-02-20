@@ -237,3 +237,51 @@ export function calculateGPA(scores: number[]): number {
   
   return Math.round((totalPoints / scores.length) * 100) / 100;
 }
+
+export interface ClassRankResult {
+  rank: number;
+  totalStudents: number;
+  percentile: number;
+}
+
+export function calculateClassRank(
+  studentScore: number,
+  allScores: number[]
+): ClassRankResult {
+  if (allScores.length === 0) {
+    return { rank: 0, totalStudents: 0, percentile: 0 };
+  }
+
+  const sortedScores = [...allScores].sort((a, b) => b - a);
+  const rank = sortedScores.findIndex(score => score === studentScore) + 1;
+  const actualRank = rank > 0 ? rank : allScores.length;
+  const percentile = Math.round(((allScores.length - actualRank) / allScores.length) * 100);
+
+  return {
+    rank: actualRank,
+    totalStudents: allScores.length,
+    percentile,
+  };
+}
+
+export interface PerformanceSummary {
+  average: number;
+  median: number;
+  min: number;
+  max: number;
+  standardDeviation: number;
+  gpa: number;
+  gradeDistribution: GradeDistribution;
+}
+
+export function calculatePerformanceSummary(scores: number[]): PerformanceSummary {
+  return {
+    average: calculateAverage(scores),
+    median: calculateMedian(scores),
+    min: calculateMin(scores),
+    max: calculateMax(scores),
+    standardDeviation: calculateStandardDeviation(scores),
+    gpa: calculateGPA(scores),
+    gradeDistribution: calculateGradeDistribution(scores),
+  };
+}

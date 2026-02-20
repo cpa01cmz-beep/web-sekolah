@@ -3,6 +3,7 @@ import type { Env } from '../core-utils';
 import { ok, notFound } from '../core-utils';
 import { withErrorHandler } from './route-utils';
 import type { Context } from 'hono';
+import { strictRateLimiter } from '../middleware/rate-limit';
 import { 
   SchoolProfileEntity, 
   ServiceEntity, 
@@ -78,7 +79,7 @@ export function publicRoutes(app: Hono<{ Bindings: Env }>) {
     return ok(c, items);
   }));
 
-  app.post('/api/public/seed', withErrorHandler('seed public content')(async (c: Context) => {
+  app.post('/api/public/seed', strictRateLimiter(), withErrorHandler('seed public content')(async (c: Context) => {
     await ensurePublicContentSeeds(c.env);
     return ok(c, { message: 'Public content seeded successfully' });
   }));

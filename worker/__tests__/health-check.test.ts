@@ -82,6 +82,7 @@ describe('External Service Health Check', () => {
       expect(status?.lastFailure).toBeNull();
       expect(status?.consecutiveFailures).toBe(0);
       expect(status?.isHealthy).toBe(true);
+      expect(status?.lastError).toBeNull();
     });
 
     it('should track consecutive failures', async () => {
@@ -112,6 +113,18 @@ describe('External Service Health Check', () => {
       const status = ExternalServiceHealth.getHealthStatus('webhook');
       expect(status?.consecutiveFailures).toBe(5);
       expect(status?.isHealthy).toBe(false);
+      expect(status?.lastError).toBe('Network error');
+    });
+
+    it('should store last error message in health status', async () => {
+      global.fetch = vi.fn(() =>
+        Promise.reject(new Error('Connection timeout'))
+      ) as any;
+
+      await ExternalServiceHealth.checkWebhookService('https://example.com/webhook');
+
+      const status = ExternalServiceHealth.getHealthStatus('webhook');
+      expect(status?.lastError).toBe('Connection timeout');
     });
 
     it('should reset consecutive failures on successful check', async () => {
@@ -134,6 +147,7 @@ describe('External Service Health Check', () => {
       expect(status?.consecutiveFailures).toBe(0);
       expect(status?.isHealthy).toBe(true);
       expect(status?.lastSuccess).toBeTruthy();
+      expect(status?.lastError).toBeNull();
     });
 
     it('should return null for unknown service', () => {
