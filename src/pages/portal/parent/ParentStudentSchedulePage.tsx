@@ -8,6 +8,7 @@ import { CardSkeleton } from '@/components/ui/loading-skeletons';
 import { useAuthStore } from '@/lib/authStore';
 import { useChildSchedule } from '@/hooks/useParent';
 import { AlertTriangle, RefreshCw } from 'lucide-react';
+import { useMemo } from 'react';
 
 type ScheduleItem = {
   day: 'Senin' | 'Selasa' | 'Rabu' | 'Kamis' | 'Jumat';
@@ -29,6 +30,11 @@ export function ParentStudentSchedulePage() {
   const parentId = user?.id ?? '';
 
   const { data: scheduleData, isLoading, error, refetch } = useChildSchedule(parentId);
+
+  const groupedSchedule = useMemo(() => 
+    scheduleData ? groupByDay(scheduleData) : {}, 
+    [scheduleData]
+  );
 
   if (isLoading) {
     return (
@@ -65,8 +71,6 @@ export function ParentStudentSchedulePage() {
       </SlideUp>
     );
   }
-
-  const groupedSchedule = scheduleData ? groupByDay(scheduleData) : {};
 
   return (
     <SlideUp className="space-y-6">
