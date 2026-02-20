@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { PageHeader } from '@/components/PageHeader';
 import { DashboardStatCard } from '@/components/dashboard/DashboardStatCard';
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
-import { BookCopy, Megaphone, Clock } from 'lucide-react';
+import { BookCopy, Megaphone, Award } from 'lucide-react';
 import { SlideUp } from '@/components/animations';
 import { useReducedMotion } from '@/hooks/use-reduced-motion';
 import { useTeacherDashboard } from '@/hooks/useTeacher';
@@ -58,7 +58,7 @@ export function TeacherDashboardPage() {
               <Card className="h-full hover:shadow-lg transition-shadow duration-200">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle id="grades-heading" className="text-sm font-medium">Recent Grades</CardTitle>
-                  <Megaphone className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
+                  <Award className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
                 </CardHeader>
                 <CardContent>
                   {data.recentGrades.length === 0 ? (
@@ -77,7 +77,7 @@ export function TeacherDashboardPage() {
               <Card className="h-full hover:shadow-lg transition-shadow duration-200">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle id="announcements-heading" className="text-sm font-medium">Recent Announcements</CardTitle>
-                  <Clock className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
+                  <Megaphone className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
                 </CardHeader>
                 <CardContent>
                   {data.recentAnnouncements.length === 0 ? (
