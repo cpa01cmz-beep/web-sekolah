@@ -1,6 +1,6 @@
 import { IMonitor, type MonitorStats } from './IMonitor';
 
-interface ScheduledTaskStats {
+interface InternalScheduledTaskStats {
   totalExecutions: number;
   successfulExecutions: number;
   failedExecutions: number;
@@ -11,7 +11,18 @@ interface ScheduledTaskStats {
   taskExecutions: Map<string, TaskExecutionStats>;
 }
 
-interface TaskExecutionStats {
+export interface ScheduledTaskStats {
+  totalExecutions: number;
+  successfulExecutions: number;
+  failedExecutions: number;
+  totalDuration: number;
+  lastExecution?: string;
+  lastSuccess?: string;
+  lastFailure?: string;
+  taskExecutions: Record<string, TaskExecutionStats>;
+}
+
+export interface TaskExecutionStats {
   name: string;
   totalExecutions: number;
   successfulExecutions: number;
@@ -23,7 +34,7 @@ interface TaskExecutionStats {
 }
 
 export class ScheduledTaskMonitor implements IMonitor {
-  private stats: ScheduledTaskStats = {
+  private stats: InternalScheduledTaskStats = {
     totalExecutions: 0,
     successfulExecutions: 0,
     failedExecutions: 0,
@@ -72,6 +83,11 @@ export class ScheduledTaskMonitor implements IMonitor {
   }
 
   getStats(): ScheduledTaskStats {
+    const taskExecutionsRecord: Record<string, TaskExecutionStats> = {};
+    this.stats.taskExecutions.forEach((value, key) => {
+      taskExecutionsRecord[key] = value;
+    });
+    
     return {
       totalExecutions: this.stats.totalExecutions,
       successfulExecutions: this.stats.successfulExecutions,
@@ -80,7 +96,7 @@ export class ScheduledTaskMonitor implements IMonitor {
       lastExecution: this.stats.lastExecution,
       lastSuccess: this.stats.lastSuccess,
       lastFailure: this.stats.lastFailure,
-      taskExecutions: new Map(this.stats.taskExecutions),
+      taskExecutions: taskExecutionsRecord,
     };
   }
 
@@ -99,5 +115,3 @@ export class ScheduledTaskMonitor implements IMonitor {
     };
   }
 }
-
-export type { ScheduledTaskStats, TaskExecutionStats };
