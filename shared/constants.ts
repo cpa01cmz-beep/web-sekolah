@@ -24,17 +24,26 @@ export const StatusCodeRanges = {
   CLIENT_ERROR_MIN: 400,
 } as const;
 
-export const GRADE_A_THRESHOLD = 90;
+export const GradeThresholds = {
+  A: 90,
+  B: 80,
+  C: 70,
+  D: 60,
+  PASSING_SCORE: 60,
+  PRECISION_FACTOR: 10,
+} as const;
 
-export const GRADE_B_THRESHOLD = 80;
+export const GRADE_A_THRESHOLD = GradeThresholds.A;
 
-export const GRADE_C_THRESHOLD = 70;
+export const GRADE_B_THRESHOLD = GradeThresholds.B;
 
-export const GRADE_D_THRESHOLD = 60;
+export const GRADE_C_THRESHOLD = GradeThresholds.C;
 
-export const PASSING_SCORE_THRESHOLD = 60;
+export const GRADE_D_THRESHOLD = GradeThresholds.D;
 
-export const GRADE_PRECISION_FACTOR = 10;
+export const PASSING_SCORE_THRESHOLD = GradeThresholds.PASSING_SCORE;
+
+export const GRADE_PRECISION_FACTOR = GradeThresholds.PRECISION_FACTOR;
 
 export const RETRY_CONFIG = {
   DEFAULT_MAX_RETRIES: 3,
