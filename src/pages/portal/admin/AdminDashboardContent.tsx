@@ -4,7 +4,7 @@ import { PageHeader } from '@/components/PageHeader';
 import { DashboardStatCard } from '@/components/dashboard/DashboardStatCard';
 import { AnnouncementItem } from '@/components/dashboard/AnnouncementItem';
 import { EnrollmentChart } from '@/components/dashboard/EnrollmentChart';
-import { Users, GraduationCap, School, Megaphone } from 'lucide-react';
+import { Users, GraduationCap, School, BookCopy } from 'lucide-react';
 import { SlideUp } from '@/components/animations';
 import type { AdminDashboardData } from '@shared/types';
 
@@ -56,7 +56,7 @@ const AdminDashboardContent = memo(function AdminDashboardContent({
     {
       title: 'Total Classes',
       value: data.totalClasses.toString(),
-      icon: <Megaphone className="h-6 w-6 text-orange-500" aria-hidden="true" />,
+      icon: <BookCopy className="h-6 w-6 text-orange-500" aria-hidden="true" />,
     },
   ], [data.totalStudents, data.totalTeachers, data.totalParents, data.totalClasses]);
 

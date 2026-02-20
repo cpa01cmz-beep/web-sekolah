@@ -1,5 +1,4 @@
-import type { Grade, Announcement, ScheduleItem } from './entities.types';
-import type { Student } from './entities.types';
+import type { Grade, Announcement, ScheduleItem, Student } from './entities.types';
 
 export interface ClassStudentWithGrade {
   id: string;
