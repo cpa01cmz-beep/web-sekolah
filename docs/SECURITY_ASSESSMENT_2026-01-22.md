@@ -153,7 +153,7 @@ All major dependencies are up to date. No outdated packages with security implic
 ### 5. XSS Prevention
 
 #### React Default Escaping
-- **Framework**: React 18.3.1
+- **Framework**: React 19.2.3
 - **Escaping**: Automatic by default
 - **Dangerous Content**: None detected
 - **Status**: ✅ PASSED
