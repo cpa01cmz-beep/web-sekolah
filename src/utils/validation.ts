@@ -129,6 +129,20 @@ export const validationRules = {
       message: `Content must be at least ${min} characters`,
     }),
   },
+  subject: {
+    required: {
+      validate: (value: string) => value.trim().length > 0,
+      message: 'Subject is required',
+    },
+    minLength: (min: number) => ({
+      validate: (value: string) => value.trim().length >= min,
+      message: `Subject must be at least ${min} characters`,
+    }),
+    maxLength: (max: number) => ({
+      validate: (value: string) => value.trim().length <= max,
+      message: `Subject must be at most ${max} characters`,
+    }),
+  },
 };
 
 export function validateName(value: string, showErrors: boolean, minLength: number = 2): string | undefined {
@@ -185,6 +199,14 @@ export function validateContent(value: string, showErrors: boolean, minLength: n
   return validateField(value, [
     validationRules.content.required,
     validationRules.content.minLength(minLength),
+  ], { showErrors });
+}
+
+export function validateSubject(value: string, showErrors: boolean, minLength: number = 3, maxLength: number = 100): string | undefined {
+  return validateField(value, [
+    validationRules.subject.required,
+    validationRules.subject.minLength(minLength),
+    validationRules.subject.maxLength(maxLength),
   ], { showErrors });
 }
 
