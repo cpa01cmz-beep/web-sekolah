@@ -3,5 +3,5 @@ export { CircuitBreakerMonitor, type CircuitBreakerStats } from './CircuitBreake
 export { RateLimitMonitor, type RateLimitStats } from './RateLimitMonitor';
 export { WebhookMonitor, type WebhookStats } from './WebhookMonitor';
 export { ApiErrorMonitor, type ApiErrorStats } from './ApiErrorMonitor';
-export { ScheduledTaskMonitor, type ScheduledTaskStats } from './ScheduledTaskMonitor';
+export { ScheduledTaskMonitor, type ScheduledTaskStats, type TaskExecutionStats } from './ScheduledTaskMonitor';
 export { type IMonitor, type MonitorStats } from './IMonitor';
