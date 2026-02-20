@@ -190,3 +190,50 @@ export function calculatePercentile(values: number[], percentile: number): numbe
   const weight = index - lower;
   return Math.round((sorted[lower] * (1 - weight) + sorted[upper] * weight) * 100) / 100;
 }
+
+export function calculateMode(values: number[]): number | null {
+  if (values.length === 0) return null;
+  
+  const frequency: Map<number, number> = new Map();
+  let maxFreq = 0;
+  let mode: number | null = null;
+  
+  for (const value of values) {
+    const freq = (frequency.get(value) || 0) + 1;
+    frequency.set(value, freq);
+    
+    if (freq > maxFreq) {
+      maxFreq = freq;
+      mode = value;
+    }
+  }
+  
+  if (maxFreq === 1) return null;
+  
+  return mode;
+}
+
+export function calculateRange(values: number[]): number {
+  if (values.length === 0) return 0;
+  return calculateMax(values) - calculateMin(values);
+}
+
+const GRADE_POINTS: Record<string, number> = {
+  A: 4.0,
+  B: 3.0,
+  C: 2.0,
+  D: 1.0,
+  E: 0.5,
+  F: 0.0,
+};
+
+export function calculateGPA(scores: number[]): number {
+  if (scores.length === 0) return 0;
+  
+  const totalPoints = scores.reduce((sum, score) => {
+    const grade = getGradeLetter(score);
+    return sum + GRADE_POINTS[grade];
+  }, 0);
+  
+  return Math.round((totalPoints / scores.length) * 100) / 100;
+}
