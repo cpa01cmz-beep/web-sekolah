@@ -50,4 +50,6 @@ export type WebhookEventType =
   | 'user.login'
   | 'announcement.created'
   | 'announcement.updated'
-  | 'announcement.deleted';
+  | 'announcement.deleted'
+  | 'message.created'
+  | 'message.read';

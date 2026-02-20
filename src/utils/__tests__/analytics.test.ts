@@ -17,6 +17,9 @@ import {
   sortByValue,
   topN,
   calculatePercentile,
+  calculateMode,
+  calculateRange,
+  calculateGPA,
 } from '../analytics';
 
 describe('Analytics Utilities', () => {
@@ -362,6 +365,71 @@ describe('Analytics Utilities', () => {
 
     it('works with unsorted input', () => {
       expect(calculatePercentile([50, 10, 40, 20, 30], 50)).toBe(30);
+    });
+  });
+
+  describe('calculateMode', () => {
+    it('returns null for empty array', () => {
+      expect(calculateMode([])).toBeNull();
+    });
+
+    it('returns null when all values are unique', () => {
+      expect(calculateMode([1, 2, 3, 4, 5])).toBeNull();
+    });
+
+    it('returns the most frequent value', () => {
+      expect(calculateMode([1, 2, 2, 3, 4])).toBe(2);
+    });
+
+    it('handles multiple modes by returning first encountered', () => {
+      const result = calculateMode([1, 1, 2, 2, 3]);
+      expect(result).toBe(1);
+    });
+
+    it('handles single value repeated', () => {
+      expect(calculateMode([5, 5, 5, 5])).toBe(5);
+    });
+  });
+
+  describe('calculateRange', () => {
+    it('returns 0 for empty array', () => {
+      expect(calculateRange([])).toBe(0);
+    });
+
+    it('calculates range of values', () => {
+      expect(calculateRange([10, 20, 30, 40, 50])).toBe(40);
+    });
+
+    it('handles negative values', () => {
+      expect(calculateRange([-10, 0, 10])).toBe(20);
+    });
+
+    it('returns 0 for single value', () => {
+      expect(calculateRange([42])).toBe(0);
+    });
+  });
+
+  describe('calculateGPA', () => {
+    it('returns 0 for empty array', () => {
+      expect(calculateGPA([])).toBe(0);
+    });
+
+    it('calculates GPA for all A grades', () => {
+      expect(calculateGPA([95, 98, 92, 100])).toBe(4.0);
+    });
+
+    it('calculates GPA for mixed grades', () => {
+      const result = calculateGPA([95, 85, 75, 65]);
+      expect(result).toBe(2.5);
+    });
+
+    it('calculates GPA for all F grades', () => {
+      expect(calculateGPA([20, 30, 40])).toBe(0);
+    });
+
+    it('handles single grade', () => {
+      expect(calculateGPA([90])).toBe(4.0);
+      expect(calculateGPA([80])).toBe(3.0);
     });
   });
 });
