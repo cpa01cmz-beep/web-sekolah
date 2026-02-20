@@ -295,6 +295,81 @@ describe('SecondaryIndex', () => {
     });
   });
 
+  describe('addBatch', () => {
+    it('should add multiple entries in a single call', async () => {
+      const items = [
+        { fieldValue: 'value1', entityId: 'entity-1' },
+        { fieldValue: 'value2', entityId: 'entity-2' },
+        { fieldValue: 'value3', entityId: 'entity-3' },
+      ];
+
+      await index.addBatch(items);
+
+      expect(mockStub.casPut).toHaveBeenCalledTimes(3);
+      expect(mockStub.casPut).toHaveBeenCalledWith('field:value1:entity:entity-1', 0, { entityId: 'entity-1' });
+      expect(mockStub.casPut).toHaveBeenCalledWith('field:value2:entity:entity-2', 0, { entityId: 'entity-2' });
+      expect(mockStub.casPut).toHaveBeenCalledWith('field:value3:entity:entity-3', 0, { entityId: 'entity-3' });
+    });
+
+    it('should return immediately for empty array', async () => {
+      await index.addBatch([]);
+
+      expect(mockStub.casPut).not.toHaveBeenCalled();
+    });
+
+    it('should add entries concurrently', async () => {
+      const items = [
+        { fieldValue: 'value1', entityId: 'entity-1' },
+        { fieldValue: 'value2', entityId: 'entity-2' },
+      ];
+
+      await index.addBatch(items);
+
+      expect(mockStub.casPut).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  describe('removeBatch', () => {
+    it('should remove multiple entries and return count of successful removals', async () => {
+      mockStub.del.mockResolvedValue(true);
+      const items = [
+        { fieldValue: 'value1', entityId: 'entity-1' },
+        { fieldValue: 'value2', entityId: 'entity-2' },
+      ];
+
+      const result = await index.removeBatch(items);
+
+      expect(result).toBe(2);
+      expect(mockStub.del).toHaveBeenCalledTimes(2);
+      expect(mockStub.del).toHaveBeenCalledWith('field:value1:entity:entity-1');
+      expect(mockStub.del).toHaveBeenCalledWith('field:value2:entity:entity-2');
+    });
+
+    it('should return 0 for empty array', async () => {
+      const result = await index.removeBatch([]);
+
+      expect(result).toBe(0);
+      expect(mockStub.del).not.toHaveBeenCalled();
+    });
+
+    it('should return count of partial failures', async () => {
+      mockStub.del
+        .mockResolvedValueOnce(true)
+        .mockResolvedValueOnce(false)
+        .mockResolvedValueOnce(true);
+
+      const items = [
+        { fieldValue: 'value1', entityId: 'entity-1' },
+        { fieldValue: 'value2', entityId: 'entity-2' },
+        { fieldValue: 'value3', entityId: 'entity-3' },
+      ];
+
+      const result = await index.removeBatch(items);
+
+      expect(result).toBe(2);
+    });
+  });
+
   describe('integration scenarios', () => {
     beforeEach(() => {
       vi.clearAllMocks();

@@ -20,9 +20,30 @@ export class SecondaryIndex<T extends string> extends Entity<unknown> {
     await this.stub.casPut(key, 0, { entityId });
   }
 
+  async addBatch(items: Array<{ fieldValue: string; entityId: T }>): Promise<void> {
+    if (items.length === 0) return;
+    await Promise.all(
+      items.map(({ fieldValue, entityId }) => {
+        const key = `field:${fieldValue}:entity:${entityId}`;
+        return this.stub.casPut(key, 0, { entityId });
+      })
+    );
+  }
+
   async remove(fieldValue: string, entityId: T): Promise<boolean> {
     const key = `field:${fieldValue}:entity:${entityId}`;
     return await this.stub.del(key);
+  }
+
+  async removeBatch(items: Array<{ fieldValue: string; entityId: T }>): Promise<number> {
+    if (items.length === 0) return 0;
+    const results = await Promise.all(
+      items.map(({ fieldValue, entityId }) => {
+        const key = `field:${fieldValue}:entity:${entityId}`;
+        return this.stub.del(key);
+      })
+    );
+    return results.filter(Boolean).length;
   }
 
   async getByValue(fieldValue: string): Promise<T[]> {
