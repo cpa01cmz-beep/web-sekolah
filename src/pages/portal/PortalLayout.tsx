@@ -4,6 +4,7 @@ import { PortalSidebar } from '@/components/portal/PortalSidebar';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Menu, Bell, GraduationCap } from 'lucide-react';
 import { Toaster } from 'sonner';
 import { cn } from '@/lib/utils';
@@ -71,9 +72,16 @@ export const PortalLayout = memo(function PortalLayout() {
             <h2 className="text-lg font-semibold">Welcome, {user.name}!</h2>
           </div>
           <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon" className="rounded-full" aria-label="View notifications">
-              <Bell className="h-5 w-5" aria-hidden="true" />
-            </Button>
+            <TooltipProvider delayDuration={200}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button variant="ghost" size="icon" className="rounded-full" aria-label="View notifications">
+                    <Bell className="h-5 w-5" aria-hidden="true" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="bottom">Notifications</TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
             <Avatar>
               <AvatarImage src={user.avatarUrl} alt={user.name} />
               <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
