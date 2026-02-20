@@ -134,6 +134,14 @@ export class CircuitBreaker {
     return { ...this.state };
   }
 
+  isOpen(): boolean {
+    if (!this.state.isOpen) {
+      return false;
+    }
+    const now = Date.now();
+    return now < this.state.nextAttemptTime;
+  }
+
   reset(): void {
     this.logger?.info('[CircuitBreaker] Circuit manually reset', {
       key: this.key,
