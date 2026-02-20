@@ -61,18 +61,18 @@ export function ParentDashboardPage() {
               }
             />
           </SlideUp>
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3" role="region" aria-label="Parent dashboard overview">
             <SlideUp delay={0.2} style={prefersReducedMotion ? { opacity: 1 } : {}}>
               <Card className="h-full hover:shadow-lg transition-shadow duration-200">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Recent Grades</CardTitle>
+                  <CardTitle id="grades-heading" className="text-sm font-medium">Recent Grades</CardTitle>
                   <Award className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
                 </CardHeader>
                   <CardContent>
                     {data.childGrades.length === 0 ? (
-                      <p className="text-sm text-muted-foreground text-center py-4">No grades recorded yet.</p>
+                      <p className="text-sm text-muted-foreground text-center py-4" role="status">No grades recorded yet.</p>
                     ) : (
-                      <ul className="space-y-3">
+                      <ul className="space-y-3" aria-labelledby="grades-heading" aria-label={`${data.childGrades.length} recent grades`}>
                         {data.childGrades.map((grade) => (
                           <GradeItem key={grade.id} grade={grade} />
                         ))}
@@ -84,14 +84,14 @@ export function ParentDashboardPage() {
             <SlideUp delay={0.3} style={prefersReducedMotion ? { opacity: 1 } : {}}>
               <Card className="h-full hover:shadow-lg transition-shadow duration-200">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Child's Schedule</CardTitle>
+                  <CardTitle id="schedule-heading" className="text-sm font-medium">Child's Schedule</CardTitle>
                   <CalendarCheck className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
                 </CardHeader>
                   <CardContent>
                     {data.childSchedule.length === 0 ? (
-                      <p className="text-sm text-muted-foreground text-center py-4">No schedule available.</p>
+                      <p className="text-sm text-muted-foreground text-center py-4" role="status">No schedule available.</p>
                     ) : (
-                      <ul className="space-y-2">
+                      <ul className="space-y-2" aria-labelledby="schedule-heading" aria-label={`${Math.min(data.childSchedule.length, 5)} scheduled classes`}>
                         {data.childSchedule.slice(0, 5).map((item) => (
                           <ScheduleItem key={`${item.courseId}-${item.time}`} item={item} />
                         ))}
@@ -103,14 +103,14 @@ export function ParentDashboardPage() {
             <SlideUp delay={0.4} style={prefersReducedMotion ? { opacity: 1 } : {}}>
               <Card className="h-full hover:shadow-lg transition-shadow duration-200">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">School Announcements</CardTitle>
+                  <CardTitle id="announcements-heading" className="text-sm font-medium">School Announcements</CardTitle>
                   <Megaphone className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
                 </CardHeader>
                   <CardContent>
                     {data.announcements.length === 0 ? (
-                      <p className="text-sm text-muted-foreground text-center py-4">No announcements available.</p>
+                      <p className="text-sm text-muted-foreground text-center py-4" role="status">No announcements available.</p>
                     ) : (
-                      <ul className="space-y-3">
+                      <ul className="space-y-3" aria-labelledby="announcements-heading" aria-label={`${data.announcements.length} announcements`}>
                         {data.announcements.map((ann) => (
                           <AnnouncementItem key={ann.id} ann={ann} />
                         ))}

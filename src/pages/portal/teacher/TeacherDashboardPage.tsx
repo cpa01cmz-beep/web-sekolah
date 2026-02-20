@@ -44,7 +44,7 @@ export function TeacherDashboardPage() {
               description={`Welcome back, ${data.name}! Here's a summary of your teaching activities and announcements.`}
             />
           </SlideUp>
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3" role="region" aria-label="Teacher dashboard overview">
             <SlideUp delay={0.2} style={prefersReducedMotion ? { opacity: 1 } : {}}>
               <DashboardStatCard
                 title="Your Classes"
@@ -57,14 +57,14 @@ export function TeacherDashboardPage() {
             <SlideUp delay={0.3} style={prefersReducedMotion ? { opacity: 1 } : {}}>
               <Card className="h-full hover:shadow-lg transition-shadow duration-200">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Recent Grades</CardTitle>
+                  <CardTitle id="grades-heading" className="text-sm font-medium">Recent Grades</CardTitle>
                   <Megaphone className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
                 </CardHeader>
                 <CardContent>
                   {data.recentGrades.length === 0 ? (
-                    <p className="text-sm text-muted-foreground text-center py-4">No recent grades recorded.</p>
+                    <p className="text-sm text-muted-foreground text-center py-4" role="status">No recent grades recorded.</p>
                   ) : (
-                    <ul className="space-y-2">
+                    <ul className="space-y-2" aria-labelledby="grades-heading" aria-label={`${data.recentGrades.length} recent grades`}>
                       {data.recentGrades.map((grade) => (
                         <GradeItem key={grade.id} grade={grade} />
                       ))}
@@ -76,14 +76,14 @@ export function TeacherDashboardPage() {
             <SlideUp delay={0.4} style={prefersReducedMotion ? { opacity: 1 } : {}}>
               <Card className="h-full hover:shadow-lg transition-shadow duration-200">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Recent Announcements</CardTitle>
+                  <CardTitle id="announcements-heading" className="text-sm font-medium">Recent Announcements</CardTitle>
                   <Clock className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
                 </CardHeader>
                 <CardContent>
                   {data.recentAnnouncements.length === 0 ? (
-                    <p className="text-sm text-muted-foreground text-center py-4">No announcements available.</p>
+                    <p className="text-sm text-muted-foreground text-center py-4" role="status">No announcements available.</p>
                   ) : (
-                    <ul className="space-y-2">
+                    <ul className="space-y-2" aria-labelledby="announcements-heading" aria-label={`${data.recentAnnouncements.length} announcements`}>
                       {data.recentAnnouncements.map((ann) => (
                         <AnnouncementItem key={ann.id} ann={ann} />
                       ))}
