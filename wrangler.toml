@@ -59,8 +59,10 @@ new_sqlite_classes = ["GlobalDurableObject"]
 # Production Environment
 [env.production]
 name = "website-sekolah-production"
+workers_dev = false
 keep_vars = true
 vars = { ENVIRONMENT = "production" }
+logpush = true
 
 [env.production.triggers]
 crons = ["* * * * *"]
