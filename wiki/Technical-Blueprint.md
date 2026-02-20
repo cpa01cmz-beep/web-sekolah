@@ -18,12 +18,12 @@ Akademia Pro follows a modern, scalable architecture leveraging Cloudflare's edg
 ## Technology Stack
 
 ### Frontend
-- **Framework**: React 18 with TypeScript
-- **Build Tool**: Vite
-- **Routing**: React Router v6
-- **Styling**: Tailwind CSS with shadcn/ui components
+- **Framework**: React 19 with TypeScript
+- **Build Tool**: Vite 7
+- **Routing**: React Router 7
+- **Styling**: Tailwind CSS 4 with shadcn/ui components
 - **State Management**: Zustand
-- **Animations**: Framer Motion
+- **Animations**: CSS Animations
 - **Data Visualization**: Recharts
 - **Form Handling**: React Hook Form with Zod validation
 
@@ -39,7 +39,7 @@ Akademia Pro follows a modern, scalable architecture leveraging Cloudflare's edg
 
 ### Development & Deployment
 - **Language**: TypeScript (end-to-end)
-- **Package Manager**: Bun
+- **Package Manager**: npm
 - **Deployment**: Cloudflare Workers via Wrangler
 - **CI/CD**: GitHub Actions
 

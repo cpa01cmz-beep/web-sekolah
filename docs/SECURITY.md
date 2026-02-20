@@ -194,12 +194,12 @@ cspDirectives: `default-src 'self'; script-src 'self' 'nonce-${nonce}'; style-sr
 
 ### Outdated Dependencies
 
-**Status**: 13 packages have newer versions available (no CVEs in current versions)
+**Status**: Minor version updates available (no CVEs in current versions)
 
-**Examples**:
-- `@types/node`: 22.19.3 → 25.0.3
-- `react-router-dom`: 6.30.0 → 7.12.0
-- `tailwindcss`: 3.4.19 → 4.1.18
+**Examples** (as of 2026-02-20):
+- `@cloudflare/vite-plugin`: 1.21.2 → 1.25.2
+- `@types/node`: 25.0.10 → 25.3.0
+- `eslint`: 9.39.2 → 10.0.0
 
 **Recommendation**: Update during next maintenance cycle
 
