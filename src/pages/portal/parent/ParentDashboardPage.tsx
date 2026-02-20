@@ -3,12 +3,12 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { PageHeader } from '@/components/PageHeader';
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
+import { AnnouncementItem } from '@/components/dashboard/AnnouncementItem';
 import { Award, CalendarCheck, Megaphone } from 'lucide-react';
 import { SlideUp } from '@/components/animations';
 import { useReducedMotion } from '@/hooks/use-reduced-motion';
 import { useParentDashboard } from '@/hooks/useParent';
 import { useAuthStore } from '@/lib/authStore';
-import { formatDate } from '@/utils/date';
 import { getGradeColorClass, getGradeLetter } from '@/utils/grades';
 import type { ParentDashboardData } from '@shared/types';
 
@@ -35,14 +35,6 @@ const ScheduleItem = memo(({ item }: { item: ParentDashboardData['childSchedule'
   </li>
 ));
 ScheduleItem.displayName = 'ScheduleItem';
-
-const AnnouncementItem = memo(({ ann }: { ann: ParentDashboardData['announcements'][0] }) => (
-  <li className="text-sm">
-    <p className="font-medium truncate">{ann.title}</p>
-    <p className="text-xs text-muted-foreground">{formatDate(ann.date)}</p>
-  </li>
-));
-AnnouncementItem.displayName = 'AnnouncementItem';
 
 export function ParentDashboardPage() {
   const prefersReducedMotion = useReducedMotion();
@@ -112,7 +104,7 @@ export function ParentDashboardPage() {
                     ) : (
                       <ul className="space-y-3" aria-labelledby="announcements-heading" aria-label={`${data.announcements.length} announcements`}>
                         {data.announcements.map((ann) => (
-                          <AnnouncementItem key={ann.id} ann={ann} />
+                          <AnnouncementItem key={ann.id} announcement={ann} variant="simple" />
                         ))}
                       </ul>
                     )}

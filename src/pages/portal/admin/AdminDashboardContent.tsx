@@ -109,7 +109,7 @@ const AdminDashboardContent = memo(function AdminDashboardContent({
                 ) : (
                   <ul className="space-y-4" aria-labelledby="announcements-heading" aria-label={`${data.recentAnnouncements.length} announcements`}>
                     {data.recentAnnouncements.map((ann) => (
-                      <AnnouncementItem key={ann.id} ann={ann} />
+                      <AnnouncementItem key={ann.id} announcement={ann} />
                     ))}
                   </ul>
                 )}

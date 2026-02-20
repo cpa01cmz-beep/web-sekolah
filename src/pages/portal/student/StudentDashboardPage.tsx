@@ -3,12 +3,12 @@ import { Badge } from '@/components/ui/badge';
 import { PageHeader } from '@/components/PageHeader';
 import { SlideUp } from '@/components/animations';
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
+import { AnnouncementItem } from '@/components/dashboard/AnnouncementItem';
 import { useReducedMotion } from '@/hooks/use-reduced-motion';
 import { Clock, BookOpen, Megaphone } from 'lucide-react';
 import { useStudentDashboard } from '@/hooks/useStudent';
 import { useAuthStore } from '@/lib/authStore';
 import type { StudentDashboardData } from '@shared/types';
-import { formatDate } from '@/utils/date';
 import { getGradeColorClass, getGradeLetter } from '@/utils/grades';
 import { memo } from 'react';
 
@@ -36,14 +36,6 @@ const GradeItem = memo(({ grade }: { grade: StudentDashboardData['recentGrades']
   );
 });
 GradeItem.displayName = 'GradeItem';
-
-const AnnouncementItem = memo(({ ann }: { ann: StudentDashboardData['announcements'][0] }) => (
-  <li className="text-sm">
-    <p className="font-medium truncate">{ann.title}</p>
-    <p className="text-xs text-muted-foreground">{formatDate(ann.date)}</p>
-  </li>
-));
-AnnouncementItem.displayName = 'AnnouncementItem';
 
 export function StudentDashboardPage() {
   const prefersReducedMotion = useReducedMotion();
@@ -112,7 +104,7 @@ export function StudentDashboardPage() {
                     ) : (
                       <ul className="space-y-3" aria-labelledby="announcements-heading" aria-label={`${data.announcements.length} announcements`}>
                         {data.announcements.map((ann) => (
-                          <AnnouncementItem key={ann.id} ann={ann} />
+                          <AnnouncementItem key={ann.id} announcement={ann} variant="simple" />
                         ))}
                       </ul>
                     )}
