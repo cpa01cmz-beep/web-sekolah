@@ -16,3 +16,5 @@ export {
 } from './config/time';
 
 export { ValidationLimits, StatusCodeRanges } from './config/validation';
+
+export { JwtConfig, PasswordConfig, HealthCheckConfig } from './config/security';

@@ -11,6 +11,7 @@ import { UserService } from './domain';
 import { getRoleSpecificFields, getAuthUser } from './type-guards';
 import { withErrorHandler, triggerWebhookSafely } from './routes/route-utils';
 import type { Context } from 'hono';
+import { JwtConfig } from './config/security';
 
 export function authRoutes(app: Hono<{ Bindings: Env }>) {
   app.get('/api/auth/verify', withErrorHandler('verify auth token')(async (c: Context) => {
@@ -82,7 +83,7 @@ export function authRoutes(app: Hono<{ Bindings: Env }>) {
         role: user.role,
       },
       secret,
-      '24h'
+      JwtConfig.LOGIN_EXPIRES_IN
     );
 
     const roleFields = getRoleSpecificFields(user);

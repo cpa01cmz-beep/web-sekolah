@@ -1,3 +1,8 @@
+export const JwtConfig = {
+  DEFAULT_EXPIRES_IN: '1h',
+  LOGIN_EXPIRES_IN: '24h',
+} as const;
+
 export const PasswordConfig = {
   PBKDF2_ITERATIONS: 100000,
   SALT_LENGTH: 16,

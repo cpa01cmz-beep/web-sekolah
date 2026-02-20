@@ -5,6 +5,7 @@ import { logger } from '../logger';
 import { getAuthUser, setAuthUser } from '../type-guards';
 import type { AuthUser } from '../types';
 import { unauthorized, serverError, notFound, forbidden } from '../core-utils';
+import { JwtConfig } from '../config/security';
 
 export interface JwtPayload extends JWTPayload {
   sub: string;
@@ -27,7 +28,7 @@ async function getSecretKey(secret: string): Promise<CryptoKey> {
 export async function generateToken(
   payload: Omit<JwtPayload, 'iat' | 'exp'>,
   secret: string,
-  expiresIn: string = '1h'
+  expiresIn: string = JwtConfig.DEFAULT_EXPIRES_IN
 ): Promise<string> {
   const key = await getSecretKey(secret);
   const token = await new SignJWT(payload)
