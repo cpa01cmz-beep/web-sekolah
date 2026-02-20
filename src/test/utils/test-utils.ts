@@ -1,4 +1,5 @@
 import { QueryClient } from '@tanstack/react-query';
+import { vi } from 'vitest';
 
 export const createMockQueryClient = () => {
   return new QueryClient({
@@ -36,5 +37,3 @@ export const mockConsoleMethods = () => {
     },
   };
 };
-
-import { vi } from 'vitest';
