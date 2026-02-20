@@ -40,7 +40,7 @@ app.use('/api/*', async (c, next) => {
     c.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Request-ID');
     c.header('Access-Control-Allow-Credentials', 'true');
     c.header('Access-Control-Max-Age', (TimeConstants.ONE_DAY_MS / 1000).toString());
-    c.header('Access-Control-Expose-Headers', 'X-Request-ID, X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset');
+    c.header('Access-Control-Expose-Headers', 'X-Request-ID, X-CF-Ray, X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset');
     c.header('Vary', 'Origin');
   }
   
@@ -52,7 +52,14 @@ app.use('/api/*', async (c, next) => {
 });
 
 app.use('/api/*', async (c, next) => {
-  c.header('X-Request-ID', crypto.randomUUID());
+  const requestId = c.req.header('cf-request-id') || c.req.header('X-Request-ID') || crypto.randomUUID();
+  c.header('X-Request-ID', requestId);
+  
+  const cfRay = c.req.header('CF-Ray');
+  if (cfRay) {
+    c.header('X-CF-Ray', cfRay);
+  }
+  
   await next();
 });
 
