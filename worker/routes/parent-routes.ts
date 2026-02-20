@@ -5,8 +5,10 @@ import { ParentDashboardService, CommonDataService, getRoleSpecificFields } from
 import { withUserValidation, withErrorHandler, withAuth, triggerWebhookSafely } from './route-utils';
 import { MessageEntity, CourseEntity } from '../entities';
 import type { Context } from 'hono';
-import type { Message } from '@shared/types';
+import type { Message, CreateMessageData } from '@shared/types';
 import { getCurrentUserId } from '../type-guards';
+import { validateBody } from '../middleware/validation';
+import { createMessageSchema } from '../middleware/schemas';
 
 export function parentRoutes(app: Hono<{ Bindings: Env }>) {
   app.get('/api/parents/:id/dashboard', ...withUserValidation('parent', 'dashboard'), withErrorHandler('get parent dashboard')(async (c: Context) => {
@@ -77,14 +79,10 @@ export function parentRoutes(app: Hono<{ Bindings: Env }>) {
     return ok(c, conversation.filter(msg => !msg.deletedAt));
   }));
 
-  app.post('/api/parents/:id/messages', ...withAuth('parent'), withErrorHandler('send parent message')(async (c: Context) => {
+  app.post('/api/parents/:id/messages', ...withAuth('parent'), validateBody(createMessageSchema), withErrorHandler('send parent message')(async (c: Context) => {
     const parentId = getCurrentUserId(c);
-    const body = await c.req.json();
+    const body = c.get('validatedBody') as CreateMessageData;
     const { recipientId, subject, content, parentMessageId } = body;
-
-    if (!recipientId || !subject || !content) {
-      return bad(c, 'Recipient, subject, and content are required');
-    }
 
     const recipient = await CommonDataService.getUserById(c.env, recipientId);
     if (!recipient || recipient.role !== 'teacher') {

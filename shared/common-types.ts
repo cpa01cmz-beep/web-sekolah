@@ -23,6 +23,13 @@ export enum ErrorCode {
 export type UserRole = 'student' | 'teacher' | 'parent' | 'admin';
 export type AnnouncementTargetRole = UserRole | 'all';
 
+export interface CreateMessageData {
+  recipientId: string;
+  subject: string;
+  content: string;
+  parentMessageId?: string | null;
+}
+
 export interface TimestampedEntity {
   createdAt: string;
   updatedAt: string;
