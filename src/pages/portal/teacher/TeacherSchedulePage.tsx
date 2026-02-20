@@ -5,37 +5,12 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { AlertTriangle, CalendarDays } from 'lucide-react';
 import { PageHeader } from '@/components/PageHeader';
 import { SlideUp } from '@/components/animations';
+import { ScheduleSkeleton } from '@/components/ui/loading-skeletons';
 import { useTeacherSchedule } from '@/hooks/useTeacher';
 import { useAuthStore } from '@/lib/authStore';
-import { useMemo, memo } from 'react';
+import { useMemo } from 'react';
 
-const SKELETON_DAYS = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat'];
-
-const ScheduleSkeleton = memo(() => (
-  <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-    {SKELETON_DAYS.map((day) => (
-      <Card key={day} className="h-full">
-        <CardHeader>
-          <Skeleton className="h-6 w-1/3" />
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-3">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="flex items-start space-x-3">
-                <Skeleton className="h-12 w-24 flex-shrink-0" />
-                <div className="flex-1 space-y-2">
-                  <Skeleton className="h-4 w-full" />
-                  <Skeleton className="h-3 w-2/3" />
-                </div>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-    ))}
-  </div>
-));
-ScheduleSkeleton.displayName = 'ScheduleSkeleton';
+const WEEKDAYS = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat'] as const;
 
 export function TeacherSchedulePage() {
   const user = useAuthStore((state) => state.user);
@@ -60,7 +35,7 @@ export function TeacherSchedulePage() {
   if (isLoading) return (
     <SlideUp className="space-y-6">
       <Skeleton className="h-9 w-1/3" />
-      <ScheduleSkeleton />
+      <ScheduleSkeleton days={WEEKDAYS} />
     </SlideUp>
   );
 
@@ -86,7 +61,7 @@ export function TeacherSchedulePage() {
             <Card className="h-full hover:shadow-lg transition-shadow duration-200">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <CalendarDays className="h-5 w-5" />
+                  <CalendarDays className="h-5 w-5" aria-hidden="true" />
                   {day}
                 </CardTitle>
               </CardHeader>
