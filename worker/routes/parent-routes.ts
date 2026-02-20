@@ -135,9 +135,9 @@ export function parentRoutes(app: Hono<{ Bindings: Env }>) {
       return notFound(c, 'Parent has no associated child');
     }
 
-    const { schoolClass, schedule } = await CommonDataService.getStudentWithClassAndSchedule(c.env, roleFields.childId);
+    const { classData, schedule } = await CommonDataService.getStudentWithClassAndSchedule(c.env, roleFields.childId);
     
-    if (!schoolClass) {
+    if (!classData) {
       return ok(c, []);
     }
 
