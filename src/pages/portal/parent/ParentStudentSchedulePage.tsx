@@ -4,50 +4,26 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { PageHeader } from '@/components/PageHeader';
 import { SlideUp } from '@/components/animations';
-import { CardSkeleton } from '@/components/ui/loading-skeletons';
+import { ScheduleSkeleton } from '@/components/ui/loading-skeletons';
 import { useAuthStore } from '@/lib/authStore';
 import { useChildSchedule } from '@/hooks/useParent';
+import { useScheduleGrouping } from '@/hooks/useScheduleGrouping';
 import { AlertTriangle, RefreshCw } from 'lucide-react';
-import { useMemo } from 'react';
-
-type ScheduleItem = {
-  day: 'Senin' | 'Selasa' | 'Rabu' | 'Kamis' | 'Jumat';
-  time: string;
-  courseId: string;
-};
-
-const groupByDay = (schedule: ScheduleItem[]) => {
-  return schedule.reduce((acc, item) => {
-    const day = item.day;
-    if (!acc[day]) acc[day] = [];
-    acc[day].push(item);
-    return acc;
-  }, {} as Record<string, ScheduleItem[]>);
-};
+import { Skeleton } from '@/components/ui/skeleton';
 
 export function ParentStudentSchedulePage() {
   const user = useAuthStore((state) => state.user);
   const parentId = user?.id ?? '';
 
-  const { data: scheduleData, isLoading, error, refetch } = useChildSchedule(parentId);
+  const { data: scheduleData = [], isLoading, error, refetch } = useChildSchedule(parentId);
 
-  const groupedSchedule = useMemo(() => 
-    scheduleData ? groupByDay(scheduleData) : {}, 
-    [scheduleData]
-  );
+  const groupedSchedule = useScheduleGrouping(scheduleData);
 
   if (isLoading) {
     return (
       <SlideUp className="space-y-6">
-        <PageHeader
-          title="Jadwal Pelajaran Anak Anda"
-          description="Memuat jadwal pelajaran..."
-        />
-        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-          {[1, 2, 3].map((i) => (
-            <CardSkeleton key={i} lines={4} />
-          ))}
-        </div>
+        <Skeleton className="h-9 w-1/3" />
+        <ScheduleSkeleton />
       </SlideUp>
     );
   }
