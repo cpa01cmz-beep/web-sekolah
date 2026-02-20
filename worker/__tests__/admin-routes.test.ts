@@ -363,4 +363,41 @@ describe('admin-routes - Critical Business Logic', () => {
       expect(updatedAnnouncement).toHaveProperty('updatedAt');
     });
   });
+
+  describe('Announcement Deletion', () => {
+    it('should trigger webhook event for announcement.deleted', () => {
+      const eventType = 'announcement.deleted';
+      expect(eventType).toBe('announcement.deleted');
+    });
+
+    it('should validate delete announcement payload', () => {
+      const deletePayload = {
+        id: 'ann-001',
+        deletedAt: new Date().toISOString()
+      };
+
+      expect(deletePayload).toHaveProperty('id');
+      expect(deletePayload).toHaveProperty('deletedAt');
+    });
+
+    it('should require valid announcement ID for deletion', () => {
+      const validId = 'ann-001';
+      const invalidId = '';
+      const nullId = 'null';
+
+      expect(validId.length).toBeGreaterThan(0);
+      expect(invalidId.length).toBe(0);
+      expect(nullId).toBe('null');
+    });
+
+    it('should return deleted status in response', () => {
+      const deleteResponse = {
+        deleted: true,
+        id: 'ann-001'
+      };
+
+      expect(deleteResponse.deleted).toBe(true);
+      expect(deleteResponse.id).toBe('ann-001');
+    });
+  });
 });

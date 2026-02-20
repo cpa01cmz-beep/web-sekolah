@@ -6,8 +6,8 @@ import { rebuildAllIndexes } from "../index-rebuilder";
 import type { CreateUserData, UpdateUserData, Announcement, CreateAnnouncementData, AdminDashboardData, Settings, SchoolUser, UserRole } from "@shared/types";
 import { UserService, CommonDataService, AnnouncementService } from '../domain';
 import { withAuth, withErrorHandler, triggerWebhookSafely } from './route-utils';
-import { validateBody, validateQuery } from '../middleware/validation';
-import { createAnnouncementSchema, updateSettingsSchema, adminUsersQuerySchema, updateAnnouncementSchema } from '../middleware/schemas';
+import { validateBody, validateQuery, validateParams } from '../middleware/validation';
+import { createAnnouncementSchema, updateSettingsSchema, adminUsersQuerySchema, updateAnnouncementSchema, paramsSchema } from '../middleware/schemas';
 import { logger } from '../logger';
 import { getCurrentUserId } from '../type-guards';
 import type { Context } from 'hono';
@@ -74,6 +74,19 @@ export function adminRoutes(app: Hono<{ Bindings: Env }>) {
     const updatedAnnouncement = await AnnouncementService.updateAnnouncement(c.env, announcementId, updates);
     triggerWebhookSafely(c.env, 'announcement.updated', updatedAnnouncement, { announcementId: updatedAnnouncement.id });
     return ok(c, updatedAnnouncement);
+  }));
+
+  app.delete('/api/admin/announcements/:id', ...withAuth('admin'), validateParams(paramsSchema), withErrorHandler('delete announcement')(async (c: Context) => {
+    const { id: announcementId } = c.get('validatedParams') as { id: string };
+    const announcement = await AnnouncementService.getAnnouncementById(c.env, announcementId);
+    if (!announcement) {
+      return notFound(c, 'Announcement not found');
+    }
+    const deleted = await AnnouncementService.deleteAnnouncement(c.env, announcementId);
+    if (deleted) {
+      triggerWebhookSafely(c.env, 'announcement.deleted', { id: announcementId, deletedAt: new Date().toISOString() }, { announcementId });
+    }
+    return ok(c, { deleted, id: announcementId });
   }));
 
   app.get('/api/admin/settings', ...withAuth('admin'), withErrorHandler('get admin settings')(async (c: Context) => {
