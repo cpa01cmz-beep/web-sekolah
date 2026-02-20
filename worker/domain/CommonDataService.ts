@@ -2,6 +2,7 @@ import type { Env } from '../core-utils';
 import { UserEntity, ClassEntity, AnnouncementEntity, ScheduleEntity, ClassScheduleState, CourseEntity, GradeEntity } from '../entities';
 import type { SchoolUser, SchoolClass, Announcement, Student, ScheduleItem, Grade, Course, UserRole } from '@shared/types';
 import { getUniqueIds, buildEntityMap, fetchAndMap } from './EntityMapUtils';
+import { UnknownEntityFallback } from '@shared/constants';
 
 export class CommonDataService {
   static async getStudentWithClassAndSchedule(env: Env, studentId: string): Promise<{
@@ -174,8 +175,8 @@ export class CommonDataService {
       const teacher = course ? teachersMap.get(course.teacherId) : undefined;
       return {
         ...item,
-        courseName: course?.name || 'Unknown Course',
-        teacherName: teacher?.name || 'Unknown Teacher',
+        courseName: course?.name || UnknownEntityFallback.COURSE,
+        teacherName: teacher?.name || UnknownEntityFallback.TEACHER,
       };
     });
   }
@@ -192,7 +193,7 @@ export class CommonDataService {
 
     return recentAnnouncements.map(ann => ({
       ...ann,
-      authorName: authorsMap.get(ann.authorId)?.name || 'Unknown Author',
+      authorName: authorsMap.get(ann.authorId)?.name || UnknownEntityFallback.AUTHOR,
     }));
   }
 
@@ -208,7 +209,7 @@ export class CommonDataService {
 
     return studentGrades.map(grade => ({
       ...grade,
-      courseName: gradeCoursesMap.get(grade.courseId)?.name || 'Unknown Course',
+      courseName: gradeCoursesMap.get(grade.courseId)?.name || UnknownEntityFallback.COURSE,
     }));
   }
 
@@ -243,8 +244,8 @@ export class CommonDataService {
 
     return recentGrades.map(grade => ({
       ...grade,
-      courseName: coursesMap.get(grade.courseId)?.name || 'Unknown Course',
-      studentName: studentsMap.get(grade.studentId)?.name || 'Unknown Student',
+      courseName: coursesMap.get(grade.courseId)?.name || UnknownEntityFallback.COURSE,
+      studentName: studentsMap.get(grade.studentId)?.name || UnknownEntityFallback.STUDENT,
     }));
   }
 }

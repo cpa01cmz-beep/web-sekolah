@@ -47,3 +47,11 @@ export const AVATAR_BASE_URL = 'https://i.pravatar.cc/150';
 export const getAvatarUrl = (userId: string): string => {
   return `${AVATAR_BASE_URL}?u=${encodeURIComponent(userId)}`;
 };
+
+export const UnknownEntityFallback = {
+  COURSE: 'Unknown Course',
+  TEACHER: 'Unknown Teacher',
+  STUDENT: 'Unknown Student',
+  AUTHOR: 'Unknown Author',
+  USER: 'Unknown User',
+} as const;

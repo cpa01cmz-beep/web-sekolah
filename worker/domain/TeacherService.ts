@@ -2,6 +2,7 @@ import type { Env } from '../core-utils';
 import { UserEntity, ClassEntity, CourseEntity, GradeEntity, ScheduleEntity } from '../entities';
 import type { Grade, SchoolClass, Teacher, ScheduleItem } from '@shared/types';
 import { getUniqueIds, buildEntityMap } from './EntityMapUtils';
+import { UnknownEntityFallback } from '@shared/constants';
 
 export class TeacherService {
   static async getClasses(env: Env, teacherId: string): Promise<SchoolClass[]> {
@@ -83,7 +84,7 @@ export class TeacherService {
       time: item.time,
       courseId: item.courseId,
       className: item.className,
-      courseName: coursesMap.get(item.courseId)?.name || 'Unknown Course',
+      courseName: coursesMap.get(item.courseId)?.name || UnknownEntityFallback.COURSE,
     }));
   }
 }
