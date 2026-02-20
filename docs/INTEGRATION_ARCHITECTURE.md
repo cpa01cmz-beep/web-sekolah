@@ -573,18 +573,20 @@ const isValid = await verifySignature(
 
 ### Webhook Events
 
-| Event Type | Description | Triggered When |
-|------------|-------------|-----------------|
-| `grade.created` | A new grade has been created | Teacher submits a grade for a student |
-| `grade.updated` | An existing grade has been updated | Teacher modifies a grade score or feedback |
-| `grade.deleted` | A grade has been deleted | Admin/Teacher deletes a grade |
-| `user.created` | A new user has been created | Admin creates a new user account |
-| `user.updated` | An existing user has been updated | Admin updates user information |
-| `user.deleted` | A user has been deleted | Admin deletes a user account |
-| `user.login` | User authentication event | User successfully logs in |
-| `announcement.created` | A new announcement has been created | Teacher or admin posts an announcement |
-| `announcement.updated` | An existing announcement has been updated | Teacher or admin modifies an announcement |
-| `announcement.deleted` | An announcement has been deleted | Admin deletes an announcement |
+| Event Type | Description | Triggered When | Status |
+|------------|-------------|-----------------|--------|
+| `grade.created` | A new grade has been created | Teacher submits a grade for a student | ✅ Active |
+| `grade.updated` | An existing grade has been updated | Teacher modifies a grade score or feedback | ✅ Active |
+| `grade.deleted` | A grade has been deleted | Admin/Teacher deletes a grade | ✅ Active |
+| `user.created` | A new user has been created | Admin creates a new user account | ✅ Active |
+| `user.updated` | An existing user has been updated | Admin updates user information | ✅ Active |
+| `user.deleted` | A user has been deleted | Admin deletes a user account | ✅ Active |
+| `user.login` | User authentication event | User successfully logs in | ✅ Active |
+| `announcement.created` | A new announcement has been created | Teacher or admin posts an announcement | ✅ Active |
+| `announcement.updated` | An existing announcement has been updated | Teacher or admin modifies an announcement | ✅ Active |
+| `announcement.deleted` | An announcement has been deleted | Admin deletes an announcement | ⏳ Pending DELETE endpoint |
+| `message.created` | A new message has been created | Teacher/Parent sends a message | ✅ Active |
+| `message.read` | A message has been read | Teacher/Parent marks message as read | ✅ Active |
 
 **Idempotency**: Each event delivery is idempotent. Triggering the same event multiple times will only result in one webhook delivery per configured webhook endpoint.
 
@@ -795,6 +797,6 @@ Returns current system health:
 
   ---
 
- **Last Updated**: 2026-02-18 (Integration Engineer - Webhook Event Type Coverage)
+ **Last Updated**: 2026-02-20 (Integration Engineer - Webhook Event Documentation Accuracy)
 
- **Status**: ✅ **Production Ready** - Integration patterns fully implemented with complete webhook event type coverage.
+ **Status**: ✅ **Production Ready** - Integration patterns fully implemented. Note: `announcement.deleted` webhook pending DELETE endpoint implementation (tracked in issue #550).
