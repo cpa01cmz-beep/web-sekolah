@@ -194,7 +194,7 @@ cspDirectives: `default-src 'self'; script-src 'self' 'nonce-${nonce}'; style-sr
 
 ### Outdated Dependencies
 
-**Status**: 13 packages have newer versions available (no CVEs in current versions)
+**Status**: 13 packages have newer versions available
 
 **Examples**:
 - `@types/node`: 22.19.3 → 25.0.3
@@ -203,7 +203,21 @@ cspDirectives: `default-src 'self'; script-src 'self' 'nonce-${nonce}'; style-sr
 
 **Recommendation**: Update during next maintenance cycle
 
-**Impact**: Low effort (2-3 hours), no known vulnerabilities
+**Impact**: Low effort (2-3 hours)
+
+### Dev Dependency Vulnerabilities
+
+**Status**: 12 vulnerabilities in dev dependencies (ESLint ecosystem)
+
+**Details**:
+- `ajv` <8.18.0: ReDoS when using `$data` option (moderate severity)
+- `minimatch` <10.2.1: ReDoS via repeated wildcards with non-matching literal (high severity)
+
+**Affected Packages**: eslint, typescript-eslint, eslint-plugin-import
+
+**Impact**: Development-time only, no production risk. ESLint is not used in runtime.
+
+**Recommendation**: Update to ESLint 10.x when stable (breaking change required)
 
 ---
 
@@ -211,7 +225,8 @@ cspDirectives: `default-src 'self'; script-src 'self' 'nonce-${nonce}'; style-sr
 
 | Date | Score | Status | Notes |
 |------|-------|--------|-------|
-| 2026-01-22 | 98/100 (A+) | Secure | Zero vulnerabilities, CSP improvements, all controls verified |
+| 2026-02-20 | 98/100 (A+) | Secure | 0 production vulnerabilities, 12 dev dependency vulnerabilities (ReDoS in ESLint ecosystem), CSP improvements, all controls verified |
+| 2026-01-22 | 98/100 (A+) | Secure | Zero production vulnerabilities, CSP improvements, all controls verified |
 | 2026-01-08 | 95/100 (A+) | Secure | Zero vulnerabilities, comprehensive controls |
 | 2026-01-07 | 94/100 (A+) | Secure | Security headers implemented |
 
