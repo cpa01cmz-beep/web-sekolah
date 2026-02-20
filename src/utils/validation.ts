@@ -37,6 +37,12 @@ export function validateField<T>(
 }
 
 export const validationRules = {
+  recipient: {
+    required: {
+      validate: (value: string) => value.trim().length > 0,
+      message: 'Please select a recipient',
+    },
+  },
   name: {
     required: {
       validate: (value: string) => value.trim().length > 0,
@@ -216,6 +222,12 @@ export function validatePassword(value: string, showErrors: boolean, minLength: 
   return validateField(value, [
     validationRules.password.required,
     validationRules.password.minLength(minLength),
+  ], { showErrors });
+}
+
+export function validateRecipient(value: string, showErrors: boolean): string | undefined {
+  return validateField(value, [
+    validationRules.recipient.required,
   ], { showErrors });
 }
 

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { isValidScore, MIN_SCORE, MAX_SCORE, validateSubject, validationRules } from '@/utils/validation';
+import { isValidScore, MIN_SCORE, MAX_SCORE, validateSubject, validateRecipient, validationRules } from '@/utils/validation';
 
 describe('Validation Utilities', () => {
   describe('isValidScore', () => {
@@ -171,6 +171,58 @@ describe('Validation Utilities', () => {
       expect(rule.message).toBe('Subject must be at most 10 characters');
       expect(rule.validate('testing testing')).toBe(false);
       expect(rule.validate('test')).toBe(true);
+    });
+  });
+
+  describe('validateRecipient', () => {
+    describe('valid recipients', () => {
+      it('should return undefined for valid recipient ID', () => {
+        expect(validateRecipient('user-123', true)).toBeUndefined();
+      });
+
+      it('should return undefined for alphanumeric recipient ID', () => {
+        expect(validateRecipient('abc123xyz', true)).toBeUndefined();
+      });
+    });
+
+    describe('invalid recipients', () => {
+      it('should return error for empty recipient', () => {
+        expect(validateRecipient('', true)).toBeDefined();
+        expect(validateRecipient('', true)).toBe('Please select a recipient');
+      });
+
+      it('should return error for whitespace-only recipient', () => {
+        expect(validateRecipient('   ', true)).toBeDefined();
+      });
+    });
+
+    describe('showErrors option', () => {
+      it('should return undefined when showErrors is false', () => {
+        expect(validateRecipient('', false)).toBeUndefined();
+      });
+
+      it('should return undefined for valid recipient when showErrors is false', () => {
+        expect(validateRecipient('user-123', false)).toBeUndefined();
+      });
+    });
+  });
+
+  describe('validationRules.recipient', () => {
+    it('should have required rule', () => {
+      expect(validationRules.recipient.required).toBeDefined();
+      expect(validationRules.recipient.required.message).toBe('Please select a recipient');
+    });
+
+    it('should validate empty string as false', () => {
+      expect(validationRules.recipient.required.validate('')).toBe(false);
+    });
+
+    it('should validate whitespace as false', () => {
+      expect(validationRules.recipient.required.validate('   ')).toBe(false);
+    });
+
+    it('should validate valid ID as true', () => {
+      expect(validationRules.recipient.required.validate('user-123')).toBe(true);
     });
   });
 });
