@@ -75,7 +75,7 @@ const AdminDashboardContent = memo(function AdminDashboardContent({
           description="Overall school management and statistics."
         />
       </SlideUp>
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4" role="region" aria-label="School statistics">
         {stats.map((stat, index) => (
           <StatCard
             key={stat.title}
@@ -87,27 +87,27 @@ const AdminDashboardContent = memo(function AdminDashboardContent({
           />
         ))}
       </div>
-      <div className="grid gap-6 lg:grid-cols-5">
+      <div className="grid gap-6 lg:grid-cols-5" role="region" aria-label="Dashboard charts and announcements">
         <SlideUp delay={0.6} className="lg:col-span-3" style={prefersReducedMotion ? { opacity: 1 } : {}}>
           <Card className="h-[400px] hover:shadow-lg transition-shadow duration-200">
             <CardHeader>
-              <CardTitle>User Distribution</CardTitle>
+              <CardTitle id="distribution-heading">User Distribution</CardTitle>
             </CardHeader>
             <CardContent>
-              <EnrollmentChart data={enrollmentData} />
+              <EnrollmentChart data={enrollmentData} aria-labelledby="distribution-heading" />
             </CardContent>
           </Card>
         </SlideUp>
         <SlideUp delay={0.7} className="lg:col-span-2" style={prefersReducedMotion ? { opacity: 1 } : {}}>
           <Card className="h-[400px] hover:shadow-lg transition-shadow duration-200">
             <CardHeader>
-              <CardTitle>Recent Announcements</CardTitle>
+              <CardTitle id="announcements-heading">Recent Announcements</CardTitle>
             </CardHeader>
               <CardContent>
                 {data.recentAnnouncements.length === 0 ? (
-                  <p className="text-sm text-muted-foreground text-center py-8">No announcements available.</p>
+                  <p className="text-sm text-muted-foreground text-center py-8" role="status">No announcements available.</p>
                 ) : (
-                  <ul className="space-y-4">
+                  <ul className="space-y-4" aria-labelledby="announcements-heading" aria-label={`${data.recentAnnouncements.length} announcements`}>
                     {data.recentAnnouncements.map((ann) => (
                       <AnnouncementItem key={ann.id} ann={ann} />
                     ))}
