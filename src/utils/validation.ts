@@ -1,6 +1,8 @@
-export const MIN_SCORE = 0;
+import { ValidationLimits } from '../../shared/constants';
 
-export const MAX_SCORE = 100;
+export const MIN_SCORE = ValidationLimits.GRADE_MIN_SCORE;
+
+export const MAX_SCORE = ValidationLimits.GRADE_MAX_SCORE;
 
 export function isValidScore(score: number | null | undefined): score is number {
   if (score === null || score === undefined) return false;
@@ -131,7 +133,7 @@ export const validationRules = {
   },
 };
 
-export function validateName(value: string, showErrors: boolean, minLength: number = 2): string | undefined {
+export function validateName(value: string, showErrors: boolean, minLength: number = ValidationLimits.USER_NAME_MIN_LENGTH): string | undefined {
   return validateField(value, [
     validationRules.name.required,
     validationRules.name.minLength(minLength),
@@ -145,7 +147,7 @@ export function validateEmail(value: string, showErrors: boolean): string | unde
   ], { showErrors });
 }
 
-export function validatePhone(value: string, showErrors: boolean, min: number = 10, max: number = 13): string | undefined {
+export function validatePhone(value: string, showErrors: boolean, min: number = ValidationLimits.PHONE_MIN_LENGTH, max: number = ValidationLimits.PHONE_MAX_LENGTH): string | undefined {
   return validateField(value, [
     validationRules.phone.required,
     validationRules.phone.numeric,
@@ -153,7 +155,7 @@ export function validatePhone(value: string, showErrors: boolean, min: number = 
   ], { showErrors });
 }
 
-export function validateNisn(value: string, showErrors: boolean, length: number = 10): string | undefined {
+export function validateNisn(value: string, showErrors: boolean, length: number = ValidationLimits.NISN_LENGTH): string | undefined {
   return validateField(value, [
     validationRules.nisn.required,
     validationRules.nisn.numeric,
@@ -161,7 +163,7 @@ export function validateNisn(value: string, showErrors: boolean, length: number 
   ], { showErrors });
 }
 
-export function validateMessage(value: string, showErrors: boolean, minLength: number = 10): string | undefined {
+export function validateMessage(value: string, showErrors: boolean, minLength: number = ValidationLimits.ANNOUNCEMENT_CONTENT_MIN_LENGTH): string | undefined {
   return validateField(value, [
     validationRules.message.required,
     validationRules.message.minLength(minLength),
@@ -174,21 +176,21 @@ export function validateRole(value: string, showErrors: boolean): string | undef
   ], { showErrors });
 }
 
-export function validateTitle(value: string, showErrors: boolean, minLength: number = 5): string | undefined {
+export function validateTitle(value: string, showErrors: boolean, minLength: number = ValidationLimits.ANNOUNCEMENT_TITLE_MIN_LENGTH): string | undefined {
   return validateField(value, [
     validationRules.title.required,
     validationRules.title.minLength(minLength),
   ], { showErrors });
 }
 
-export function validateContent(value: string, showErrors: boolean, minLength: number = 10): string | undefined {
+export function validateContent(value: string, showErrors: boolean, minLength: number = ValidationLimits.ANNOUNCEMENT_CONTENT_MIN_LENGTH): string | undefined {
   return validateField(value, [
     validationRules.content.required,
     validationRules.content.minLength(minLength),
   ], { showErrors });
 }
 
-export function validatePassword(value: string, showErrors: boolean, minLength: number = 6): string | undefined {
+export function validatePassword(value: string, showErrors: boolean, minLength: number = ValidationLimits.PASSWORD_MIN_LENGTH): string | undefined {
   return validateField(value, [
     validationRules.password.required,
     validationRules.password.minLength(minLength),
