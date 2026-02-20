@@ -188,18 +188,17 @@ Monitor your child's academic progress and school activities.
 ### Checking Child's Grades
 
 1. **Log in** as a parent
-2. Navigate to **Grades** in the sidebar
-3. View all grades with:
+2. Go to **Dashboard** (the default page after login)
+3. View recent grades in the "Recent Grades" card with:
    - Course name
    - Score
-   - Teacher feedback
-   - Date graded
+   - Grade letter
 
 ### Viewing School Announcements
 
 1. **Log in** as a parent
-2. Navigate to **Announcements** in the sidebar
-3. Stay updated on:
+2. Go to **Dashboard** (the default page after login)
+3. View announcements in the "School Announcements" card with:
    - School events
    - Parent-teacher meetings
    - Important notices

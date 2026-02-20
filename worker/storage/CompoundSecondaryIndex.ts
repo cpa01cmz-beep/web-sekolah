@@ -1,89 +1,22 @@
 import type { Env } from '../types';
-import { Entity } from '../entities/Entity';
+import { BaseSecondaryIndex } from './BaseSecondaryIndex';
 
-const ENTITY_KEY_PREFIX = ':entity:';
-
-function extractEntityIdFromKey(key: string): string | null {
-  const idx = key.indexOf(ENTITY_KEY_PREFIX);
-  if (idx === -1) return null;
-  return key.slice(idx + ENTITY_KEY_PREFIX.length);
-}
-
-export class CompoundSecondaryIndex extends Entity<unknown> {
+export class CompoundSecondaryIndex extends BaseSecondaryIndex {
   static readonly entityName = "sys-compound-secondary-index";
+  protected readonly keyPrefix = 'compound:';
 
   constructor(env: Env, entityName: string, fieldNames: string[]) {
     const joinedFields = fieldNames.join(':');
     super(env, `compound-index:${entityName}:${joinedFields}`);
   }
 
-  async add(fieldValues: string[], entityId: string): Promise<void> {
+  protected buildFieldKey(fieldValues: string[]): string {
     const joinedKey = fieldValues.join(':');
-    const key = `compound:${joinedKey}:entity:${entityId}`;
-    await this.stub.casPut(key, 0, { entityId });
+    return `compound:${joinedKey}:entity:`;
   }
 
-  async addBatch(items: Array<{ fieldValues: string[]; entityId: string }>): Promise<void> {
-    if (items.length === 0) return;
-    await Promise.all(
-      items.map(({ fieldValues, entityId }) => {
-        const joinedKey = fieldValues.join(':');
-        const key = `compound:${joinedKey}:entity:${entityId}`;
-        return this.stub.casPut(key, 0, { entityId });
-      })
-    );
-  }
-
-  async remove(fieldValues: string[], entityId: string): Promise<boolean> {
+  protected buildFieldValueKey(fieldValues: string[], entityId: string): string {
     const joinedKey = fieldValues.join(':');
-    const key = `compound:${joinedKey}:entity:${entityId}`;
-    return await this.stub.del(key);
-  }
-
-  async removeBatch(items: Array<{ fieldValues: string[]; entityId: string }>): Promise<number> {
-    if (items.length === 0) return 0;
-    const results = await Promise.all(
-      items.map(({ fieldValues, entityId }) => {
-        const joinedKey = fieldValues.join(':');
-        const key = `compound:${joinedKey}:entity:${entityId}`;
-        return this.stub.del(key);
-      })
-    );
-    return results.filter(Boolean).length;
-  }
-
-  async getByValues(fieldValues: string[]): Promise<string[]> {
-    const joinedKey = fieldValues.join(':');
-    const prefix = `compound:${joinedKey}:entity:`;
-    const { keys } = await this.stub.listPrefix(prefix);
-    return keys
-      .map(key => extractEntityIdFromKey(key))
-      .filter((id): id is string => id !== null);
-  }
-
-  async countByValues(fieldValues: string[]): Promise<number> {
-    const joinedKey = fieldValues.join(':');
-    const prefix = `compound:${joinedKey}:entity:`;
-    const { keys } = await this.stub.listPrefix(prefix);
-    return keys.length;
-  }
-
-  async existsByValues(fieldValues: string[]): Promise<boolean> {
-    const joinedKey = fieldValues.join(':');
-    const prefix = `compound:${joinedKey}:entity:`;
-    const { keys } = await this.stub.listPrefix(prefix);
-    return keys.length > 0;
-  }
-
-  async clearValues(fieldValues: string[]): Promise<void> {
-    const joinedKey = fieldValues.join(':');
-    const prefix = `compound:${joinedKey}:entity:`;
-    const { keys } = await this.stub.listPrefix(prefix);
-    await Promise.all(keys.map((key: string) => this.stub.del(key)));
-  }
-
-  async clear(): Promise<void> {
-    const { keys } = await this.stub.listPrefix('compound:');
-    await Promise.all(keys.map((key: string) => this.stub.del(key)));
+    return `compound:${joinedKey}:entity:${entityId}`;
   }
 }
