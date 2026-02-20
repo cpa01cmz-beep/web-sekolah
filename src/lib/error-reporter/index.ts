@@ -1,6 +1,6 @@
 export { ErrorReporter } from './ErrorReporter';
 export { globalDeduplication } from './deduplication';
-export {
+export type {
   BaseErrorData,
   ErrorReport,
   ErrorFilterResult,
