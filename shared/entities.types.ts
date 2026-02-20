@@ -1,5 +1,4 @@
-import type { TimestampedEntity } from './common-types';
-import type { UserRole, AnnouncementTargetRole } from './common-types';
+import type { TimestampedEntity, UserRole, AnnouncementTargetRole } from './common-types';
 
 export interface BaseUser extends TimestampedEntity {
   id: string;
