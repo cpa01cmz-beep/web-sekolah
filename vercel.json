@@ -27,7 +27,7 @@
       "destination": "https://website-sekolah-production.:account.workers.dev/api/:path*"
     },
     {
-      "source": "/((?!api|assets|favicon.ico|robots.txt|manifest.json|_next|__next|.*\\.(png|jpe?g|svg|webp|avif|ico|woff2?)).*)",
+      "source": "/((?!api|assets|favicon.ico|robots.txt|manifest.json|sitemap.xml|_next|__next|.*\\.(png|jpe?g|svg|webp|avif|ico|woff2?)).*)",
       "destination": "/index.html"
     }
   ],
@@ -141,6 +141,23 @@
         {
           "key": "CDN-Cache-Control",
           "value": "public, max-age=86400"
+        }
+      ]
+    },
+    {
+      "source": "/sitemap.xml",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=86400, stale-while-revalidate=604800"
+        },
+        {
+          "key": "CDN-Cache-Control",
+          "value": "public, max-age=86400"
+        },
+        {
+          "key": "Content-Type",
+          "value": "application/xml"
         }
       ]
     },
