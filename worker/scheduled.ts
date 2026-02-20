@@ -11,6 +11,13 @@ interface ScheduledTaskConfig {
   handler: ScheduledTask;
 }
 
+interface TaskExecutionResult {
+  name: string;
+  success: boolean;
+  duration: number;
+  error?: string;
+}
+
 const SCHEDULED_TASKS: ScheduledTaskConfig[] = [
   {
     name: 'process-webhook-deliveries',
@@ -22,7 +29,7 @@ const SCHEDULED_TASKS: ScheduledTaskConfig[] = [
   },
 ];
 
-async function executeTask(task: ScheduledTaskConfig, env: Env): Promise<void> {
+async function executeTask(task: ScheduledTaskConfig, env: Env): Promise<TaskExecutionResult> {
   const startTime = Date.now();
   try {
     logger.info(`Executing scheduled task: ${task.name}`, { cron: task.cron });
@@ -30,16 +37,24 @@ async function executeTask(task: ScheduledTaskConfig, env: Env): Promise<void> {
     const duration = Date.now() - startTime;
     logger.info(`Scheduled task completed: ${task.name}`, { duration: `${duration}ms` });
     integrationMonitor.recordScheduledTaskExecution(task.name, true, duration);
+    return { name: task.name, success: true, duration };
   } catch (error) {
     const duration = Date.now() - startTime;
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    logger.error(`Scheduled task failed: ${task.name}`, { error: errorMessage, duration: `${duration}ms` });
+    const errorStack = error instanceof Error ? error.stack : undefined;
+    logger.error(`Scheduled task failed: ${task.name}`, { 
+      error: errorMessage, 
+      stack: errorStack,
+      duration: `${duration}ms` 
+    });
     integrationMonitor.recordScheduledTaskExecution(task.name, false, duration);
+    return { name: task.name, success: false, duration, error: errorMessage };
   }
 }
 
 export async function handleScheduled(controller: ScheduledController, env: Env): Promise<void> {
   const cron = controller.cron;
+  const startTime = Date.now();
   logger.info('Scheduled event received', { cron });
 
   const matchingTasks = SCHEDULED_TASKS.filter(task => task.cron === cron);
@@ -49,9 +64,21 @@ export async function handleScheduled(controller: ScheduledController, env: Env)
     return;
   }
 
-  for (const task of matchingTasks) {
-    await executeTask(task, env);
-  }
+  const results = await Promise.allSettled(
+    matchingTasks.map(task => executeTask(task, env))
+  );
+
+  const totalDuration = Date.now() - startTime;
+  const successCount = results.filter(r => r.status === 'fulfilled' && r.value.success).length;
+  const failureCount = results.length - successCount;
+
+  logger.info('Scheduled batch completed', {
+    cron,
+    totalTasks: results.length,
+    successCount,
+    failureCount,
+    totalDuration: `${totalDuration}ms`,
+  });
 }
 
-export { type ScheduledTask, type ScheduledTaskConfig };
+export { type ScheduledTask, type ScheduledTaskConfig, type TaskExecutionResult };
