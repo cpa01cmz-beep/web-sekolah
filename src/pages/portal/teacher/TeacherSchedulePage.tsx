@@ -7,35 +7,19 @@ import { PageHeader } from '@/components/PageHeader';
 import { SlideUp } from '@/components/animations';
 import { ScheduleSkeleton } from '@/components/ui/loading-skeletons';
 import { useTeacherSchedule } from '@/hooks/useTeacher';
+import { useScheduleGrouping } from '@/hooks/useScheduleGrouping';
 import { useAuthStore } from '@/lib/authStore';
-import { useMemo } from 'react';
-
-const WEEKDAYS = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat'] as const;
 
 export function TeacherSchedulePage() {
   const user = useAuthStore((state) => state.user);
   const { data: schedule = [], isLoading, error } = useTeacherSchedule(user?.id || '');
 
-  const scheduleByDay = useMemo(() => {
-    const grouped: Record<string, typeof schedule> = {
-      Senin: [],
-      Selasa: [],
-      Rabu: [],
-      Kamis: [],
-      Jumat: [],
-    };
-    schedule.forEach((item) => {
-      if (grouped[item.day]) {
-        grouped[item.day].push(item);
-      }
-    });
-    return grouped;
-  }, [schedule]);
+  const scheduleByDay = useScheduleGrouping(schedule);
 
   if (isLoading) return (
     <SlideUp className="space-y-6">
       <Skeleton className="h-9 w-1/3" />
-      <ScheduleSkeleton days={WEEKDAYS} />
+      <ScheduleSkeleton />
     </SlideUp>
   );
 

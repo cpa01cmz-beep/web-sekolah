@@ -16,11 +16,16 @@ set -e
 SCRIPT_VERSION="1.0.0"
 ENVIRONMENT=${1:-"staging"}
 VERBOSE=false
+RUN_AUDIT=false
 
 for arg in "$@"; do
   case $arg in
     --verbose|-v)
       VERBOSE=true
+      shift
+      ;;
+    --audit|-a)
+      RUN_AUDIT=true
       shift
       ;;
     --help|-h)
@@ -36,6 +41,7 @@ Arguments:
 
 Options:
   --verbose, -v       Enable verbose output
+  --audit, -a         Include security audit check
   --help, -h          Show this help message
 
 Exit codes:
@@ -94,6 +100,21 @@ run_check "TypeScript Type Check" "npm run typecheck"
 run_check "ESLint Check" "npm run lint"
 run_check "Unit Tests" "npm run test:run"
 run_check "Build" "npm run build"
+
+if [ "$RUN_AUDIT" = true ]; then
+  echo ""
+  log "Running Security Audit..."
+  if npm audit --audit-level=moderate > /tmp/audit_output.txt 2>&1; then
+    log "✅ PASSED: Security Audit - No moderate/high vulnerabilities found"
+    PASS_COUNT=$((PASS_COUNT + 1))
+  else
+    log "⚠️  WARNING: Security Audit found vulnerabilities"
+    if [ "$VERBOSE" = true ]; then
+      cat /tmp/audit_output.txt
+    fi
+    echo "  Run 'npm audit' for details or 'npm audit fix' to attempt fixes"
+  fi
+fi
 
 echo ""
 echo "========================================"
