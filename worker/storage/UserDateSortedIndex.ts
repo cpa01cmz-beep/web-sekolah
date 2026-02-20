@@ -38,25 +38,18 @@ export class UserDateSortedIndex extends Entity<unknown> {
 
   async getRecent(limit: number): Promise<string[]> {
     const prefix = `sort:`;
-    const { keys } = await this.stub.listPrefix(prefix);
-    const sortedKeys = keys.sort();
+    const { keys } = await this.stub.listPrefix(prefix, limit);
 
-    const entityIds: string[] = [];
-    for (let i = 0; i < Math.min(limit, sortedKeys.length); i++) {
-      const entityId = extractEntityIdFromKey(sortedKeys[i]);
-      if (entityId !== null) {
-        entityIds.push(entityId);
-      }
-    }
-    return entityIds;
+    return keys
+      .map(key => extractEntityIdFromKey(key))
+      .filter((id): id is string => id !== null);
   }
 
   async getAll(): Promise<string[]> {
     const prefix = `sort:`;
     const { keys } = await this.stub.listPrefix(prefix);
-    const sortedKeys = keys.sort();
 
-    return sortedKeys
+    return keys
       .map(key => extractEntityIdFromKey(key))
       .filter((id): id is string => id !== null);
   }

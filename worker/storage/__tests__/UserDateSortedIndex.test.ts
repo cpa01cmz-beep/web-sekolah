@@ -117,14 +117,13 @@ describe('UserDateSortedIndex', () => {
       const mockKeys = [
         `sort:${(Number.MAX_SAFE_INTEGER - tsNewest).toString().padStart(20, '0')}:message-2`,
         `sort:${(Number.MAX_SAFE_INTEGER - tsMiddle).toString().padStart(20, '0')}:message-1`,
-        `sort:${(Number.MAX_SAFE_INTEGER - tsOldest).toString().padStart(20, '0')}:message-3`,
       ];
       mockStub.listPrefix.mockResolvedValue({ keys: mockKeys });
       const index = new UserDateSortedIndex(mockEnv, 'message', 'user-123', 'sent');
 
       const recentIds = await index.getRecent(2);
 
-      expect(mockStub.listPrefix).toHaveBeenCalledWith('sort:');
+      expect(mockStub.listPrefix).toHaveBeenCalledWith('sort:', 2);
       expect(recentIds).toEqual(['message-2', 'message-1']);
       expect(recentIds).toHaveLength(2);
     });
@@ -144,6 +143,7 @@ describe('UserDateSortedIndex', () => {
 
       const recentIds = await index.getRecent(10);
 
+      expect(mockStub.listPrefix).toHaveBeenCalledWith('sort:', 10);
       expect(recentIds).toHaveLength(3);
       expect(recentIds).toEqual(['message-2', 'message-1', 'message-3']);
     });
@@ -154,20 +154,22 @@ describe('UserDateSortedIndex', () => {
 
       const recentIds = await index.getRecent(5);
 
+      expect(mockStub.listPrefix).toHaveBeenCalledWith('sort:', 5);
       expect(recentIds).toEqual([]);
     });
 
-    it('should sort keys lexicographically', async () => {
+    it('should rely on lexicographic ordering from listPrefix', async () => {
       const mockKeys = [
-        'sort:90000000000000000003:message-3',
         'sort:90000000000000000001:message-1',
         'sort:90000000000000000002:message-2',
+        'sort:90000000000000000003:message-3',
       ];
       mockStub.listPrefix.mockResolvedValue({ keys: mockKeys });
       const index = new UserDateSortedIndex(mockEnv, 'message', 'user-123', 'sent');
 
       const recentIds = await index.getRecent(3);
 
+      expect(mockStub.listPrefix).toHaveBeenCalledWith('sort:', 3);
       expect(recentIds).toEqual(['message-1', 'message-2', 'message-3']);
     });
   });

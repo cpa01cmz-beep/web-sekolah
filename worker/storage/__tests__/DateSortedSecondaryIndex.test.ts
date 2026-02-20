@@ -157,13 +157,21 @@ describe('DateSortedSecondaryIndex', () => {
     it('should retrieve recent entity IDs in chronological order', async () => {
       const result = await index.getRecent(3);
 
-      expect(mockStub.listPrefix).toHaveBeenCalledWith('sort:');
+      expect(mockStub.listPrefix).toHaveBeenCalledWith('sort:', 3);
       expect(result).toEqual(['entity-1', 'entity-2', 'entity-3']);
     });
 
     it('should limit results to requested count', async () => {
+      const now = Date.now();
+      const keys = [
+        `sort:${(Number.MAX_SAFE_INTEGER - now).toString().padStart(20, '0')}:entity-1`,
+        `sort:${(Number.MAX_SAFE_INTEGER - (now - 1000)).toString().padStart(20, '0')}:entity-2`,
+      ];
+      mockStub.listPrefix.mockResolvedValue({ keys, next: null });
+
       const result = await index.getRecent(2);
 
+      expect(mockStub.listPrefix).toHaveBeenCalledWith('sort:', 2);
       expect(result).toHaveLength(2);
       expect(result).toEqual(['entity-1', 'entity-2']);
     });
@@ -173,12 +181,20 @@ describe('DateSortedSecondaryIndex', () => {
 
       const result = await index.getRecent(10);
 
+      expect(mockStub.listPrefix).toHaveBeenCalledWith('sort:', 10);
       expect(result).toEqual([]);
     });
 
     it('should return single entry when limit is 1', async () => {
+      const now = Date.now();
+      const keys = [
+        `sort:${(Number.MAX_SAFE_INTEGER - now).toString().padStart(20, '0')}:entity-1`,
+      ];
+      mockStub.listPrefix.mockResolvedValue({ keys, next: null });
+
       const result = await index.getRecent(1);
 
+      expect(mockStub.listPrefix).toHaveBeenCalledWith('sort:', 1);
       expect(result).toHaveLength(1);
       expect(result).toEqual(['entity-1']);
     });
@@ -190,14 +206,14 @@ describe('DateSortedSecondaryIndex', () => {
       expect(result).toEqual(['entity-1', 'entity-2', 'entity-3']);
     });
 
-    it('should sort keys lexicographically to maintain chronological order', async () => {
-      const unsortedKeys = [
-        'sort:90000000000000000003:entity-3',
+    it('should rely on lexicographic ordering from listPrefix', async () => {
+      const sortedKeys = [
         'sort:90000000000000000001:entity-1',
         'sort:90000000000000000002:entity-2',
+        'sort:90000000000000000003:entity-3',
       ];
 
-      mockStub.listPrefix.mockResolvedValue({ keys: unsortedKeys, next: null });
+      mockStub.listPrefix.mockResolvedValue({ keys: sortedKeys, next: null });
 
       const result = await index.getRecent(3);
 
@@ -207,13 +223,17 @@ describe('DateSortedSecondaryIndex', () => {
     it('should handle limit larger than available entries', async () => {
       const result = await index.getRecent(100);
 
+      expect(mockStub.listPrefix).toHaveBeenCalledWith('sort:', 100);
       expect(result).toHaveLength(3);
       expect(result).toEqual(['entity-1', 'entity-2', 'entity-3']);
     });
 
     it('should handle limit of 0', async () => {
+      mockStub.listPrefix.mockResolvedValue({ keys: [], next: null });
+
       const result = await index.getRecent(0);
 
+      expect(mockStub.listPrefix).toHaveBeenCalledWith('sort:', 0);
       expect(result).toHaveLength(0);
     });
   });
