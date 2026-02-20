@@ -25,6 +25,7 @@ The `vercel.json` includes best-practice configurations:
 
 | Feature | Description |
 |---------|-------------|
+| **Fluid Compute** | Enabled by default for optimal serverless performance (April 2025+) |
 | **Edge Regions** | Deployed to Singapore (sin1), Tokyo (hnd1), and US East (iad1) |
 | **Image Optimization** | AVIF/WebP with 60s minimum cache TTL |
 | **Security Headers** | CSP, XSS Protection, Frame Options, Permissions Policy |

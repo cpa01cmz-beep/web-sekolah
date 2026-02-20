@@ -3,10 +3,11 @@
   "buildCommand": "npm run build",
   "outputDirectory": "dist/client",
   "framework": "vite",
-  "installCommand": "npm ci --prefer-offline --no-audit",
+  "installCommand": "npm ci --prefer-offline --no-audit --no-optional",
   "devCommand": "npm run dev",
   "cleanUrls": true,
   "trailingSlash": false,
+  "fluid": true,
   "regions": ["sin1", "hnd1", "iad1"],
   "ignoreCommand": "git diff --quiet $VERCEL_GIT_PREVIOUS_SHA $VERCEL_GIT_COMMIT_SHA -- . ':!*.md' ':!docs/' ':!wiki/' ':!prompts/' ':!.github/' ':!SECURITY*.md' ':!CHANGELOG*.md' ':!IFLOW.md' ':!ROADMAP.md' ':!DOCUMENTATION.md' ':!CACHING_OPTIMIZATION.md' 2>/dev/null || exit 1",
   "images": {
