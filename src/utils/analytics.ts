@@ -171,3 +171,22 @@ export function sortByValue(
 export function topN(data: ChartDataPoint[], n: number): ChartDataPoint[] {
   return sortByValue(data, 'desc').slice(0, n);
 }
+
+export function calculatePercentile(values: number[], percentile: number): number {
+  if (values.length === 0) return 0;
+  if (percentile < 0 || percentile > 100) return 0;
+  
+  const sorted = [...values].sort((a, b) => a - b);
+  
+  if (percentile === 0) return sorted[0];
+  if (percentile === 100) return sorted[sorted.length - 1];
+  
+  const index = (percentile / 100) * (sorted.length - 1);
+  const lower = Math.floor(index);
+  const upper = Math.ceil(index);
+  
+  if (lower === upper) return sorted[lower];
+  
+  const weight = index - lower;
+  return Math.round((sorted[lower] * (1 - weight) + sorted[upper] * weight) * 100) / 100;
+}
