@@ -584,7 +584,7 @@ const isValid = await verifySignature(
 | `user.login` | User authentication event | User successfully logs in | ✅ Active |
 | `announcement.created` | A new announcement has been created | Teacher or admin posts an announcement | ✅ Active |
 | `announcement.updated` | An existing announcement has been updated | Teacher or admin modifies an announcement | ✅ Active |
-| `announcement.deleted` | An announcement has been deleted | Admin deletes an announcement | ⏳ Pending DELETE endpoint |
+| `announcement.deleted` | An announcement has been deleted | Admin deletes an announcement | ✅ Active |
 | `message.created` | A new message has been created | Teacher/Parent sends a message | ✅ Active |
 | `message.read` | A message has been read | Teacher/Parent marks message as read | ✅ Active |
 
@@ -799,4 +799,4 @@ Returns current system health:
 
  **Last Updated**: 2026-02-20 (Integration Engineer - Webhook Event Documentation Accuracy)
 
- **Status**: ✅ **Production Ready** - Integration patterns fully implemented. Note: `announcement.deleted` webhook pending DELETE endpoint implementation (tracked in issue #550).
+ **Status**: ✅ **Production Ready** - Integration patterns fully implemented.
