@@ -20,6 +20,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { formatDistanceToNow } from '@/utils/date';
 import type { Message, SchoolUser, Teacher } from '@shared/types';
 import { logger } from '@/lib/logger';
+import { PollingInterval } from '@/config/time';
 
 interface MessageThreadProps {
   messages: Message[];
@@ -175,7 +176,7 @@ export function ParentMessagesPage() {
     queryKey: ['parent-unread-count', parentId],
     queryFn: () => parentService.getUnreadCount(parentId),
     enabled: !!parentId,
-    refetchInterval: 30000,
+    refetchInterval: PollingInterval.THIRTY_SECONDS,
   });
 
   const { data: teachers = [], isLoading: teachersLoading } = useQuery({

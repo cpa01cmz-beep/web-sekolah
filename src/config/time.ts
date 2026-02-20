@@ -37,3 +37,9 @@ export const CircuitBreakerConfig = {
   TIMEOUT_MS: 1000 * 60,
   RESET_TIMEOUT_MS: 1000 * 30,
 };
+
+export const PollingInterval = {
+  THIRTY_SECONDS: 1000 * 30,
+  ONE_MINUTE: 1000 * 60,
+  FIVE_MINUTES: 1000 * 60 * 5,
+};
