@@ -4,6 +4,7 @@ import { logger } from '../logger';
 export interface AuditLogEntry {
   timestamp: string;
   requestId: string;
+  cfRay?: string;
   action: string;
   userId?: string;
   userRole?: string;
@@ -34,6 +35,7 @@ export function auditLog(action: string) {
   return async (c: Context, next: Next) => {
     const startTime = Date.now();
     const requestId = c.req.header('X-Request-ID') || crypto.randomUUID();
+    const cfRay = c.req.header('CF-Ray');
     const ip = c.req.header('cf-connecting-ip') || c.req.header('x-real-ip') || 'unknown';
     const userAgent = c.req.header('user-agent') || 'unknown';
     const user = c.get('user');
@@ -48,6 +50,7 @@ export function auditLog(action: string) {
       const logEntry: AuditLogEntry = {
         timestamp: new Date().toISOString(),
         requestId,
+        cfRay,
         action,
         userId: user?.id,
         userRole: user?.role,
@@ -69,6 +72,7 @@ export function auditLog(action: string) {
       const logEntry: AuditLogEntry = {
         timestamp: new Date().toISOString(),
         requestId,
+        cfRay,
         action,
         userId: user?.id,
         userRole: user?.role,
