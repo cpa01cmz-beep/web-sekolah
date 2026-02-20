@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -224,6 +224,8 @@ export function TeacherMessagesPage() {
     enabled: !!teacherId,
   });
 
+  const classIds = useMemo(() => classes.map(c => c.id), [classes]);
+
   const { data: conversation = [], isLoading: conversationLoading } = useQuery({
     queryKey: ['teacher-conversation', teacherId, selectedParentId],
     queryFn: () => teacherService.getConversation(teacherId, selectedParentId!),
@@ -231,14 +233,13 @@ export function TeacherMessagesPage() {
   });
 
   const { data: parents = [] } = useQuery({
-    queryKey: ['class-parents', classes.map(c => c.id)],
+    queryKey: ['class-parents', classIds],
     queryFn: async () => {
       const allParents: SchoolUser[] = [];
       for (const cls of classes) {
         const students = await teacherService.getClassStudentsWithGrades(cls.id);
         for (const student of students) {
           if (student.parentId) {
-            // Fetch parent details
             const parent = await fetch(`/api/users/${student.parentId}`).then(r => r.json());
             if (parent && !allParents.find(p => p.id === parent.id)) {
               allParents.push(parent);
@@ -273,6 +274,15 @@ export function TeacherMessagesPage() {
     },
   });
 
+  const handleSendMessage = useCallback((recipientId: string, subject: string, content: string) => {
+    sendMessageMutation.mutate({ recipientId, subject, content });
+  }, [sendMessageMutation]);
+
+  const uniqueParents = useMemo(() => 
+    parents.filter((parent, index, self) =>
+      index === self.findIndex((p) => p.id === parent.id)
+    ), [parents]);
+
   if (messagesError) {
     return (
       <Alert variant="destructive">
@@ -282,14 +292,6 @@ export function TeacherMessagesPage() {
       </Alert>
     );
   }
-
-  const handleSendMessage = (recipientId: string, subject: string, content: string) => {
-    sendMessageMutation.mutate({ recipientId, subject, content });
-  };
-
-  const uniqueParents = parents.filter((parent, index, self) =>
-    index === self.findIndex((p) => p.id === parent.id)
-  );
 
   return (
     <SlideUp delay={0} className="space-y-6" style={prefersReducedMotion ? { opacity: 1 } : {}}>
