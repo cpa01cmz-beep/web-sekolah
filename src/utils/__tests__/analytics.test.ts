@@ -16,6 +16,7 @@ import {
   normalizeData,
   sortByValue,
   topN,
+  calculatePercentile,
 } from '../analytics';
 
 describe('Analytics Utilities', () => {
@@ -318,6 +319,49 @@ describe('Analytics Utilities', () => {
       expect(top2).toHaveLength(2);
       expect(top2[0].value).toBe(40);
       expect(top2[1].value).toBe(30);
+    });
+  });
+
+  describe('calculatePercentile', () => {
+    it('returns 0 for empty array', () => {
+      expect(calculatePercentile([], 50)).toBe(0);
+    });
+
+    it('returns 0 for invalid percentile (negative)', () => {
+      expect(calculatePercentile([1, 2, 3], -10)).toBe(0);
+    });
+
+    it('returns 0 for invalid percentile (> 100)', () => {
+      expect(calculatePercentile([1, 2, 3], 150)).toBe(0);
+    });
+
+    it('returns minimum for 0th percentile', () => {
+      expect(calculatePercentile([10, 20, 30, 40, 50], 0)).toBe(10);
+    });
+
+    it('returns maximum for 100th percentile', () => {
+      expect(calculatePercentile([10, 20, 30, 40, 50], 100)).toBe(50);
+    });
+
+    it('calculates 50th percentile (median)', () => {
+      expect(calculatePercentile([10, 20, 30, 40, 50], 50)).toBe(30);
+    });
+
+    it('calculates 25th percentile', () => {
+      expect(calculatePercentile([10, 20, 30, 40, 50], 25)).toBe(20);
+    });
+
+    it('calculates 75th percentile', () => {
+      expect(calculatePercentile([10, 20, 30, 40, 50], 75)).toBe(40);
+    });
+
+    it('interpolates between values', () => {
+      const result = calculatePercentile([10, 20, 30, 40], 50);
+      expect(result).toBe(25);
+    });
+
+    it('works with unsorted input', () => {
+      expect(calculatePercentile([50, 10, 40, 20, 30], 50)).toBe(30);
     });
   });
 });
