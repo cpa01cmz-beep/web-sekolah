@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, memo } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter, DialogClose } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -22,7 +22,7 @@ interface GradeFormProps {
   isLoading: boolean;
 }
 
-export function GradeForm({ open, onClose, editingStudent, onSave, isLoading }: GradeFormProps) {
+export const GradeForm = memo(function GradeForm({ open, onClose, editingStudent, onSave, isLoading }: GradeFormProps) {
   const [currentScore, setCurrentScore] = useState<string>(() => editingStudent?.score?.toString() || '');
   const [currentFeedback, setCurrentFeedback] = useState<string>(() => editingStudent?.feedback || '');
 
@@ -112,4 +112,5 @@ export function GradeForm({ open, onClose, editingStudent, onSave, isLoading }: 
       </DialogContent>
     </Dialog>
   );
-}
+});
+GradeForm.displayName = 'GradeForm';

@@ -276,8 +276,8 @@ export const publicSeedData = {
     },
     {
       id: "dl-02",
-      title: "Kalender Akademik 2024/2025",
-      description: "Kalender akademik tahun ajaran 2024/2025",
+      title: "Kalender Akademik 2025/2026",
+      description: "Kalender akademik tahun ajaran 2025/2026",
       fileUrl: "/files/kalender-akademik.pdf",
       fileSize: "500 KB",
       fileType: "PDF",
@@ -295,7 +295,7 @@ export const publicSeedData = {
     {
       id: "dl-04",
       title: "Jadwal Ujian Semester",
-      description: "Jadwal ujian semester genap tahun ajaran 2024/2025",
+      description: "Jadwal ujian semester genap tahun ajaran 2025/2026",
       fileUrl: "/files/jadwal-ujian.pdf",
       fileSize: "200 KB",
       fileType: "PDF",

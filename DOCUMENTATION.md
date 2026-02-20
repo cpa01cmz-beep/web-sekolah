@@ -401,9 +401,9 @@ npm run test:ui
 npm run lint
 ```
 
-**Test Statistics** (as of 2026-02-19):
-- Total tests: 2802 (2802 passing, 5 skipped, 155 todo)
-- Test files: 88
+**Test Statistics** (as of 2026-02-20):
+- Total tests: 2862 (2862 passing, 5 skipped, 155 todo)
+- Test files: 91
 - Coverage: Critical infrastructure, services, hooks, utilities, validation, domain services, rate limiting, query optimization
 
 For detailed testing strategy, see [docs/task.md](./docs/task.md).
@@ -439,7 +439,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - [API Blueprint](./docs/blueprint.md) - Complete API reference with endpoints, error codes, and integration patterns
 - [Architectural Task List](./docs/task.md) - Implementation status and roadmap
 - [User Guides](./wiki/User-Guides.md) - Instructions for students, teachers, parents, and admins
-- [Security Assessment](./SECURITY_ASSESSMENT.md) - Comprehensive security audit results
+- [Security Assessment](./docs/SECURITY_ASSESSMENT_2026-01-22.md) - Comprehensive security audit results (98/100 score)
 - [Caching Optimization](./CACHING_OPTIMIZATION.md) - Performance optimization details
 - [Security Implementation](./worker/SECURITY_IMPLEMENTATION.md) - Security features and best practices
 - [GitHub Wiki](https://github.com/cpa01cmz-beep/web-sekolah/wiki) - Additional documentation and guides
