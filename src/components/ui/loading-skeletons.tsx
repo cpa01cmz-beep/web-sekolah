@@ -104,3 +104,43 @@ export const CardSkeleton = memo(function CardSkeleton({
     </Card>
   );
 });
+
+const SCHEDULE_DAYS = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat'] as const;
+
+export const ScheduleSkeleton = memo(function ScheduleSkeleton({
+  days = SCHEDULE_DAYS,
+  itemsPerDay = 3,
+}: {
+  days?: readonly string[];
+  itemsPerDay?: number;
+}) {
+  return (
+    <div
+      className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6"
+      role="status"
+      aria-label="Loading schedule data"
+      aria-live="polite"
+    >
+      {days.map((day) => (
+        <Card key={day} className="h-full">
+          <CardHeader>
+            <Skeleton className="h-6 w-1/3" aria-hidden="true" />
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {Array.from({ length: itemsPerDay }).map((_, i) => (
+                <div key={i} className="flex items-start space-x-3">
+                  <Skeleton className="h-12 w-24 flex-shrink-0" aria-hidden="true" />
+                  <div className="flex-1 space-y-2">
+                    <Skeleton className="h-4 w-full" aria-hidden="true" />
+                    <Skeleton className="h-3 w-2/3" aria-hidden="true" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  );
+});
