@@ -1,4 +1,4 @@
-import { memo } from 'react';
+import { memo, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { UserRole } from '@shared/types';
 import { THEME_COLORS } from '@/theme/colors';
@@ -22,23 +22,35 @@ const DEFAULT_ROLES: RoleButton[] = [
   { role: 'admin', label: 'Admin', variant: 'secondary' },
 ];
 
+const PRIMARY_STYLE: React.CSSProperties = {
+  '--bg-color': THEME_COLORS.PRIMARY,
+  '--bg-hover-color': THEME_COLORS.PRIMARY_HOVER,
+  '--bg-focus-color': THEME_COLORS.PRIMARY_HOVER,
+} as React.CSSProperties;
+
+const SECONDARY_STYLE: React.CSSProperties = {
+  '--bg-color': THEME_COLORS.SECONDARY,
+  '--bg-hover-color': THEME_COLORS.SECONDARY_HOVER,
+  '--bg-focus-color': THEME_COLORS.SECONDARY_HOVER,
+} as React.CSSProperties;
+
 export const RoleButtonGrid = memo(function RoleButtonGrid({ loadingRole, onRoleSelect, buttonClassName }: RoleButtonGridProps) {
+  const handleButtonClick = useCallback((role: UserRole) => {
+    onRoleSelect(role);
+  }, [onRoleSelect]);
+
   return (
     <div className="grid grid-cols-2 gap-3 w-full">
       {DEFAULT_ROLES.map((button) => {
         const isPrimary = button.variant === 'primary';
-        const style = {
-          '--bg-color': isPrimary ? THEME_COLORS.PRIMARY : THEME_COLORS.SECONDARY,
-          '--bg-hover-color': isPrimary ? THEME_COLORS.PRIMARY_HOVER : THEME_COLORS.SECONDARY_HOVER,
-          '--bg-focus-color': isPrimary ? THEME_COLORS.PRIMARY_HOVER : THEME_COLORS.SECONDARY_HOVER,
-        } as React.CSSProperties;
+        const style = isPrimary ? PRIMARY_STYLE : SECONDARY_STYLE;
 
         return (
           <Button
             key={button.role}
             size="lg"
             variant={isPrimary ? 'default' : 'secondary'}
-            onClick={() => onRoleSelect(button.role)}
+            onClick={() => handleButtonClick(button.role)}
             disabled={loadingRole === button.role}
             aria-busy={loadingRole === button.role}
             aria-label={`Login as ${button.label.toLowerCase()}`}
