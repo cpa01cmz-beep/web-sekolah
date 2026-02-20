@@ -1,23 +1,23 @@
-import { Entity } from '../entities/Entity';
+import { BaseSecondaryIndex } from './BaseSecondaryIndex';
 
-const ENTITY_KEY_PREFIX = ':entity:';
-
-function extractEntityIdFromKey(key: string): string | null {
-  const idx = key.indexOf(ENTITY_KEY_PREFIX);
-  if (idx === -1) return null;
-  return key.slice(idx + ENTITY_KEY_PREFIX.length);
-}
-
-export class SecondaryIndex<T extends string> extends Entity<unknown> {
+export class SecondaryIndex<T extends string> extends BaseSecondaryIndex {
   static readonly entityName = "sys-secondary-index";
+  protected readonly keyPrefix = 'field:';
 
   constructor(env: Env, entityName: string, fieldName: string) {
     super(env, `secondary-index:${entityName}:${fieldName}`);
   }
 
+  protected buildFieldKey(fieldValues: string[]): string {
+    return `field:${fieldValues[0]}:entity:`;
+  }
+
+  protected buildFieldValueKey(fieldValues: string[], entityId: string): string {
+    return `field:${fieldValues[0]}:entity:${entityId}`;
+  }
+
   async add(fieldValue: string, entityId: T): Promise<void> {
-    const key = `field:${fieldValue}:entity:${entityId}`;
-    await this.stub.casPut(key, 0, { entityId });
+    await super.add([fieldValue], entityId);
   }
 
   async addBatch(items: Array<{ fieldValue: string; entityId: T }>): Promise<void> {
@@ -31,8 +31,7 @@ export class SecondaryIndex<T extends string> extends Entity<unknown> {
   }
 
   async remove(fieldValue: string, entityId: T): Promise<boolean> {
-    const key = `field:${fieldValue}:entity:${entityId}`;
-    return await this.stub.del(key);
+    return await super.remove([fieldValue], entityId);
   }
 
   async removeBatch(items: Array<{ fieldValue: string; entityId: T }>): Promise<number> {
@@ -47,33 +46,18 @@ export class SecondaryIndex<T extends string> extends Entity<unknown> {
   }
 
   async getByValue(fieldValue: string): Promise<T[]> {
-    const prefix = `field:${fieldValue}:entity:`;
-    const { keys } = await this.stub.listPrefix(prefix);
-    return keys
-      .map(key => extractEntityIdFromKey(key))
-      .filter((id): id is T => id !== null);
+    return super.getByValues([fieldValue]) as Promise<T[]>;
   }
 
   async countByValue(fieldValue: string): Promise<number> {
-    const prefix = `field:${fieldValue}:entity:`;
-    const { keys } = await this.stub.listPrefix(prefix);
-    return keys.length;
+    return super.countByValues([fieldValue]);
   }
 
   async existsByValue(fieldValue: string): Promise<boolean> {
-    const prefix = `field:${fieldValue}:entity:`;
-    const { keys } = await this.stub.listPrefix(prefix);
-    return keys.length > 0;
+    return super.existsByValues([fieldValue]);
   }
 
   async clearValue(fieldValue: string): Promise<void> {
-    const prefix = `field:${fieldValue}:entity:`;
-    const { keys } = await this.stub.listPrefix(prefix);
-    await Promise.all(keys.map((key) => this.stub.del(key)));
-  }
-
-  async clear(): Promise<void> {
-    const { keys } = await this.stub.listPrefix('field:');
-    await Promise.all(keys.map((key) => this.stub.del(key)));
+    return super.clearValues([fieldValue]);
   }
 }
