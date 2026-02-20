@@ -38,11 +38,7 @@ export function shouldRetryError(error: ApiError): boolean {
 }
 
 export async function parseErrorResponse(response: Response): Promise<Record<string, unknown>> {
-  try {
-    return await response.json().catch(() => ({}));
-  } catch {
-    return {};
-  }
+  return response.json().catch(() => ({}));
 }
 
 export async function handleErrorResponse(

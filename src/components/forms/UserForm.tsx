@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, memo } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter, DialogClose } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -22,7 +22,7 @@ interface UserFormProps {
   isLoading: boolean;
 }
 
-export function UserForm({ open, onClose, editingUser, onSave, isLoading }: UserFormProps) {
+export const UserForm = memo(function UserForm({ open, onClose, editingUser, onSave, isLoading }: UserFormProps) {
   const [userName, setUserName] = useState<string>(() => editingUser?.name || '');
   const [userEmail, setUserEmail] = useState<string>(() => editingUser?.email || '');
   const [userRole, setUserRole] = useState<UserRole>(() => editingUser?.role || 'student');
@@ -148,4 +148,5 @@ export function UserForm({ open, onClose, editingUser, onSave, isLoading }: User
       </DialogContent>
     </Dialog>
   );
-}
+});
+UserForm.displayName = 'UserForm';
