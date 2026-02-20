@@ -9,6 +9,13 @@ interface CloudflareRequestContext {
   colo?: string;
   asn?: number;
   asOrganization?: string;
+  continent?: string;
+  region?: string;
+  httpProtocol?: string;
+  tlsVersion?: string;
+  postalCode?: string;
+  latitude?: string;
+  longitude?: string;
 }
 
 declare module 'hono' {
@@ -19,17 +26,24 @@ declare module 'hono' {
 
 function extractCloudflareContext(c: Context): CloudflareRequestContext {
   const req = c.req.raw;
-  const cf = (req as any).cf as Record<string, unknown> | undefined;
+  const cf = (req as Request<unknown, IncomingRequestCfProperties>).cf;
 
   return {
     rayId: c.req.header('cf-ray'),
     connectingIp: c.req.header('cf-connecting-ip'),
-    country: cf?.country as string | undefined || c.req.header('cf-ipcountry'),
-    city: cf?.city as string | undefined,
-    timezone: cf?.timezone as string | undefined,
-    colo: cf?.colo as string | undefined,
-    asn: cf?.asn as number | undefined,
-    asOrganization: cf?.asOrganization as string | undefined,
+    country: cf?.country || c.req.header('cf-ipcountry'),
+    city: cf?.city,
+    timezone: cf?.timezone,
+    colo: cf?.colo,
+    asn: cf?.asn,
+    asOrganization: cf?.asOrganization,
+    continent: cf?.continent,
+    region: cf?.region,
+    httpProtocol: cf?.httpProtocol,
+    tlsVersion: cf?.tlsVersion,
+    postalCode: cf?.postalCode,
+    latitude: cf?.latitude,
+    longitude: cf?.longitude,
   };
 }
 

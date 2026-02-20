@@ -75,4 +75,55 @@ describe('cf-context middleware', () => {
     const body = await res.json();
     expect(body.ctx).toBeUndefined();
   });
+
+  it('should extract additional Cloudflare properties from cf object', async () => {
+    app.use('/api/*', cfContext());
+    app.get('/api/test', (c) => {
+      const ctx = getCloudflareContext(c);
+      return c.json({ ctx });
+    });
+
+    const mockRequest = new Request('http://localhost/api/test', {
+      headers: {
+        'cf-ray': 'test-ray',
+        'cf-connecting-ip': '5.6.7.8',
+      },
+    });
+
+    Object.defineProperty(mockRequest, 'cf', {
+      value: {
+        country: 'GB',
+        city: 'London',
+        timezone: 'Europe/London',
+        colo: 'LHR',
+        asn: 12345,
+        asOrganization: 'Test ISP',
+        continent: 'EU',
+        region: 'England',
+        httpProtocol: 'HTTP/2',
+        tlsVersion: 'TLSv1.3',
+        postalCode: 'SW1A',
+        latitude: '51.5074',
+        longitude: '-0.1278',
+      },
+      writable: false,
+    });
+
+    const res = await app.request(mockRequest as any);
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.ctx.country).toBe('GB');
+    expect(body.ctx.city).toBe('London');
+    expect(body.ctx.timezone).toBe('Europe/London');
+    expect(body.ctx.colo).toBe('LHR');
+    expect(body.ctx.asn).toBe(12345);
+    expect(body.ctx.asOrganization).toBe('Test ISP');
+    expect(body.ctx.continent).toBe('EU');
+    expect(body.ctx.region).toBe('England');
+    expect(body.ctx.httpProtocol).toBe('HTTP/2');
+    expect(body.ctx.tlsVersion).toBe('TLSv1.3');
+    expect(body.ctx.postalCode).toBe('SW1A');
+    expect(body.ctx.latitude).toBe('51.5074');
+    expect(body.ctx.longitude).toBe('-0.1278');
+  });
 });
