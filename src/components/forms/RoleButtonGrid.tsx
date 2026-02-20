@@ -39,13 +39,12 @@ export const RoleButtonGrid = memo(function RoleButtonGrid({ loadingRole, onRole
             size="lg"
             variant={isPrimary ? 'default' : 'secondary'}
             onClick={() => onRoleSelect(button.role)}
-            disabled={loadingRole === button.role}
-            aria-busy={loadingRole === button.role}
+            isLoading={loadingRole === button.role}
             aria-label={`Login as ${button.label.toLowerCase()}`}
             className={`${buttonClassName} min-h-[44px] bg-[--bg-color] hover:bg-[--bg-hover-color] focus-visible:bg-[--bg-focus-color]`}
             style={style}
           >
-            {loadingRole === button.role ? 'Logging in...' : button.label}
+            {button.label}
           </Button>
         );
       })}

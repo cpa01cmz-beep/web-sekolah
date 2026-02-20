@@ -70,15 +70,17 @@ describe('RoleButtonGrid', () => {
       expect(teacherButton).not.toBeDisabled();
     });
 
-    it('should display loading text for button matching loadingRole', () => {
+    it('should display loading spinner for button matching loadingRole', () => {
       const onRoleSelect = vi.fn();
       render(<RoleButtonGrid loadingRole="teacher" onRoleSelect={onRoleSelect} />);
 
       const teacherButton = screen.getByRole('button', { name: /login as teacher/i });
-      expect(teacherButton).toHaveTextContent('Logging in...');
+      expect(teacherButton).toHaveTextContent('Teacher');
+      expect(teacherButton).toBeDisabled();
 
       const studentButton = screen.getByRole('button', { name: /login as student/i });
       expect(studentButton).toHaveTextContent('Student');
+      expect(studentButton).not.toBeDisabled();
     });
 
     it('should set aria-busy attribute on loading button', () => {
@@ -87,9 +89,10 @@ describe('RoleButtonGrid', () => {
 
       const loadingButton = screen.getByRole('button', { name: /login as parent/i });
       expect(loadingButton).toHaveAttribute('aria-busy', 'true');
+      expect(loadingButton).toBeDisabled();
 
       const teacherButton = screen.getByRole('button', { name: /login as teacher/i });
-      expect(teacherButton).toHaveAttribute('aria-busy', 'false');
+      expect(teacherButton).not.toBeDisabled();
     });
   });
 
