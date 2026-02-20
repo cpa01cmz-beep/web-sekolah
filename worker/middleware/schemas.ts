@@ -113,3 +113,10 @@ export const adminUsersQuerySchema = z.object({
   classId: z.string().uuid('Invalid class ID format').optional(),
   search: z.string().max(100, 'Search query must be less than 100 characters').optional(),
 });
+
+export const createMessageSchema = z.object({
+  recipientId: z.string().uuid('Invalid recipient ID'),
+  subject: z.string().min(ValidationLimits.MESSAGE_SUBJECT_MIN_LENGTH, 'Subject is required').max(ValidationLimits.MESSAGE_SUBJECT_MAX_LENGTH, 'Subject must be less than 200 characters'),
+  content: z.string().min(ValidationLimits.MESSAGE_CONTENT_MIN_LENGTH, 'Content is required').max(ValidationLimits.MESSAGE_CONTENT_MAX_LENGTH, 'Content must be less than 10000 characters'),
+  parentMessageId: z.string().uuid('Invalid parent message ID').optional().nullable(),
+});

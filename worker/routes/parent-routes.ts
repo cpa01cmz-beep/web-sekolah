@@ -1,8 +1,10 @@
 import { Hono } from "hono";
 import type { Env } from '../core-utils';
 import { ok, notFound, bad } from '../core-utils';
-import { ParentDashboardService, CommonDataService, getRoleSpecificFields } from '../domain';
+import { ParentDashboardService, CommonDataService, getRoleSpecificFields, getUniqueIds, fetchAndMap } from '../domain';
 import { withUserValidation, withErrorHandler, withAuth, triggerWebhookSafely } from './route-utils';
+import { validateBody } from '../middleware/validation';
+import { createMessageSchema } from '../middleware/schemas';
 import { MessageEntity, CourseEntity } from '../entities';
 import type { Context } from 'hono';
 import type { Message } from '@shared/types';
@@ -77,14 +79,9 @@ export function parentRoutes(app: Hono<{ Bindings: Env }>) {
     return ok(c, conversation.filter(msg => !msg.deletedAt));
   }));
 
-  app.post('/api/parents/:id/messages', ...withAuth('parent'), withErrorHandler('send parent message')(async (c: Context) => {
+  app.post('/api/parents/:id/messages', ...withAuth('parent'), validateBody(createMessageSchema), withErrorHandler('send parent message')(async (c: Context) => {
     const parentId = getCurrentUserId(c);
-    const body = await c.req.json();
-    const { recipientId, subject, content, parentMessageId } = body;
-
-    if (!recipientId || !subject || !content) {
-      return bad(c, 'Recipient, subject, and content are required');
-    }
+    const { recipientId, subject, content, parentMessageId } = c.get('validatedBody');
 
     const recipient = await CommonDataService.getUserById(c.env, recipientId);
     if (!recipient || recipient.role !== 'teacher') {
@@ -141,16 +138,14 @@ export function parentRoutes(app: Hono<{ Bindings: Env }>) {
       return ok(c, []);
     }
 
+    const courseIds = schedule?.items?.map(item => item.courseId) || [];
+    const uniqueCourseIds = getUniqueIds(courseIds);
+    const coursesMap = await fetchAndMap(uniqueCourseIds, id => new CourseEntity(c.env, id).getState());
+
     const teacherIds = new Set<string>();
-    if (schedule && schedule.items) {
-      for (const item of schedule.items) {
-        const courseEntity = new CourseEntity(c.env, item.courseId);
-        const course = await courseEntity.getState();
-        if (course && course.teacherId) {
-          teacherIds.add(course.teacherId);
-        }
-      }
-    }
+    coursesMap.forEach(course => {
+      if (course.teacherId) teacherIds.add(course.teacherId);
+    });
 
     const teachers = await Promise.all(
       Array.from(teacherIds).map(id => CommonDataService.getUserById(c.env, id))
