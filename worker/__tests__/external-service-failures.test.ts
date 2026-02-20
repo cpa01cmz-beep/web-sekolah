@@ -1,6 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { withFallback } from '../fallback';
-import { FallbackHandler } from '../fallback';
+import { withFallback, FallbackHandler } from '../fallback';
 
 describe('External Service Failures - Integration Testing', () => {
   beforeEach(() => {
