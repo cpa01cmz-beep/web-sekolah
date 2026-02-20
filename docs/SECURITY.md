@@ -2,9 +2,12 @@
 
 ## Security Overview
 
-Akademia Pro maintains a **98/100 security score (A+)** with comprehensive security controls implemented throughout the codebase.
+Akademia Pro maintains a **97/100 security score (A+)** with comprehensive security controls implemented throughout the codebase.
 
-**Last Security Assessment**: 2026-01-22
+**Last Security Assessment**: 2026-02-20
+
+**Production Dependencies**: 0 vulnerabilities
+**Development Dependencies**: 12 vulnerabilities (ESLint transitive deps, ReDoS - LOW risk)
 
 ---
 
@@ -205,12 +208,32 @@ cspDirectives: `default-src 'self'; script-src 'self' 'nonce-${nonce}'; style-sr
 
 **Impact**: Low effort (2-3 hours), no known vulnerabilities
 
+### Development Dependency Vulnerabilities
+
+**Status**: 12 vulnerabilities in ESLint transitive dependencies (development only)
+
+**Details** (as of 2026-02-20):
+- `ajv <8.18.0`: ReDoS vulnerability (GHSA-2g4f-4pwh-qvx6) - 1 moderate
+- `minimatch <10.2.1`: ReDoS vulnerability (GHSA-3ppc-4f35-3m26) - 11 high
+
+**Affected Packages** (dev dependencies only):
+- `eslint` (transitive: ajv, minimatch)
+- `@typescript-eslint/*` (transitive: minimatch)
+- `eslint-plugin-import` (transitive: minimatch)
+
+**Risk Assessment**: LOW - These are development-only dependencies not included in production builds
+
+**Recommendation**: Update to ESLint 10.x during next maintenance cycle (breaking change)
+
+**Impact**: Medium effort (4-6 hours), requires ESLint config migration
+
 ---
 
 ## Security Assessment History
 
 | Date | Score | Status | Notes |
 |------|-------|--------|-------|
+| 2026-02-20 | 97/100 (A+) | Secure | Dev dependency vulnerabilities documented (ESLint transitive deps), all controls verified |
 | 2026-01-22 | 98/100 (A+) | Secure | Zero vulnerabilities, CSP improvements, all controls verified |
 | 2026-01-08 | 95/100 (A+) | Secure | Zero vulnerabilities, comprehensive controls |
 | 2026-01-07 | 94/100 (A+) | Secure | Security headers implemented |

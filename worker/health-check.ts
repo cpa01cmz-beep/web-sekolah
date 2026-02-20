@@ -15,6 +15,7 @@ export interface ServiceHealthStatus {
   lastFailure: string | null;
   consecutiveFailures: number;
   isHealthy: boolean;
+  lastError: string | null;
 }
 
 const healthStatus = new Map<string, ServiceHealthStatus>();
@@ -103,6 +104,7 @@ export class ExternalServiceHealth {
         lastFailure: healthy ? existing.lastFailure : timestamp,
         consecutiveFailures,
         isHealthy: consecutiveFailures < HealthCheckConfig.MAX_CONSECUTIVE_FAILURES,
+        lastError: error ?? null,
       });
     } else {
       healthStatus.set(service, {
@@ -112,6 +114,7 @@ export class ExternalServiceHealth {
         lastFailure: healthy ? null : timestamp,
         consecutiveFailures: healthy ? 0 : 1,
         isHealthy: healthy,
+        lastError: error ?? null,
       });
     }
   }
