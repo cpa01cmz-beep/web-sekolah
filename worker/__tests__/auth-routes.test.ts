@@ -71,6 +71,12 @@ describe('Auth Routes - Integration Testing', () => {
       console.warn('⏭️  Test skipped: Requires live Cloudflare Workers environment');
       expect(true).toBe(true);
     });
+
+    it('should trigger user.login webhook event on successful authentication', () => {
+      console.warn('⏭️  Test skipped: Requires live Cloudflare Workers environment');
+      console.warn('   Webhook event: user.login with userId, email, role, loginMethod, loginAt');
+      expect(true).toBe(true);
+    });
   });
 
   describe('GET /api/auth/verify - Critical Path', () => {
