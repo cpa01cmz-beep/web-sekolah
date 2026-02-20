@@ -143,10 +143,10 @@ app.post('/api/csp-report', async (c) => {
     const report = await c.req.json<CSPViolationReport>();
     const violation = report['csp-report'];
     pinoLogger.warn('[CSP VIOLATION]', { violation });
-    return new Response(null, { status: 204 });
+    return new Response(null, { status: HttpStatusCode.NO_CONTENT });
   } catch (error) {
     pinoLogger.error('[CSP REPORT HANDLER] Failed', error);
-    return new Response(null, { status: 204 });
+    return new Response(null, { status: HttpStatusCode.NO_CONTENT });
   }
 });
 

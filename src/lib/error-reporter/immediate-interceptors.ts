@@ -3,6 +3,7 @@ import { categorizeError, formatConsoleArgs } from './utils';
 import { globalDeduplication } from './deduplication';
 import { ApiTimeout, RetryDelay, RetryCount } from '../../config/time';
 import { withRetry } from '../resilience/Retry';
+import { API_ENDPOINTS } from '@/config/api-endpoints';
 
 const createImmediateErrorPayload = (
   message: string,
@@ -63,7 +64,7 @@ const shouldReportImmediate = (context: ErrorContext): boolean => {
 const sendImmediateError = async (payload: ImmediatePayload): Promise<void> => {
   await withRetry(
     async () => {
-      const response = await fetch("/api/client-errors", {
+      const response = await fetch(API_ENDPOINTS.CLIENT_ERRORS, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),

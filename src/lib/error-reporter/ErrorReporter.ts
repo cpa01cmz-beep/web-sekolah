@@ -11,6 +11,7 @@ import { ErrorQueue } from './ErrorQueue';
 import { ConsoleInterceptor } from './ConsoleInterceptor';
 import { GlobalErrorHandler } from './GlobalErrorHandler';
 import { ErrorSender } from './ErrorSender';
+import { API_ENDPOINTS } from '@/config/api-endpoints';
 
 class ErrorReporter {
   private errorFilter!: ErrorFilter;
@@ -27,7 +28,7 @@ class ErrorReporter {
 
     this.errorFilter = new ErrorFilter();
     this.errorSender = new ErrorSender(
-      '/api/client-errors',
+      API_ENDPOINTS.CLIENT_ERRORS,
       ERROR_REPORTER_CONFIG.MAX_RETRIES,
       ERROR_REPORTER_CONFIG.BASE_RETRY_DELAY_MS,
       ERROR_REPORTER_CONFIG.REQUEST_TIMEOUT_MS

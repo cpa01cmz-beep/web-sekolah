@@ -4,6 +4,7 @@ export const API_ENDPOINTS = {
     VERIFY: '/api/auth/verify',
     LOGOUT: '/api/auth/logout',
   },
+  CLIENT_ERRORS: '/api/client-errors',
   STUDENTS: {
     DASHBOARD: (studentId: string) => `/api/students/${studentId}/dashboard`,
     GRADES: (studentId: string) => `/api/students/${studentId}/grades`,
