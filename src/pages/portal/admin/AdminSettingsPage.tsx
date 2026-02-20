@@ -16,7 +16,7 @@ import { useState, useMemo } from 'react';
 
 const defaultSettings: Settings = {
   schoolName: '',
-  academicYear: '2025-2026',
+  academicYear: '2026-2027',
   semester: 1,
   allowRegistration: true,
   maintenanceMode: false,
@@ -97,6 +97,7 @@ export function AdminSettingsPage() {
                       <SelectValue placeholder="Select year" />
                     </SelectTrigger>
                     <SelectContent>
+                      <SelectItem value="2026-2027">2026-2027</SelectItem>
                       <SelectItem value="2025-2026">2025-2026</SelectItem>
                       <SelectItem value="2024-2025">2024-2025</SelectItem>
                     </SelectContent>
