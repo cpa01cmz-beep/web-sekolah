@@ -3,12 +3,12 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { PageHeader } from '@/components/PageHeader';
 import { DashboardStatCard } from '@/components/dashboard/DashboardStatCard';
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
+import { AnnouncementItem } from '@/components/dashboard/AnnouncementItem';
 import { BookCopy, Megaphone, Award } from 'lucide-react';
 import { SlideUp } from '@/components/animations';
 import { useReducedMotion } from '@/hooks/use-reduced-motion';
 import { useTeacherDashboard } from '@/hooks/useTeacher';
 import { useAuthStore } from '@/lib/authStore';
-import { formatDate } from '@/utils/date';
 import type { TeacherDashboardData } from '@shared/types';
 
 const GradeItem = memo(({ grade }: { grade: TeacherDashboardData['recentGrades'][0] }) => (
@@ -20,14 +20,6 @@ const GradeItem = memo(({ grade }: { grade: TeacherDashboardData['recentGrades']
   </li>
 ));
 GradeItem.displayName = 'GradeItem';
-
-const AnnouncementItem = memo(({ ann }: { ann: TeacherDashboardData['recentAnnouncements'][0] }) => (
-  <li className="text-sm">
-    <p className="font-medium truncate">{ann.title}</p>
-    <p className="text-xs text-muted-foreground">{formatDate(ann.date)}</p>
-  </li>
-));
-AnnouncementItem.displayName = 'AnnouncementItem';
 
 export function TeacherDashboardPage() {
   const prefersReducedMotion = useReducedMotion();
@@ -85,7 +77,7 @@ export function TeacherDashboardPage() {
                   ) : (
                     <ul className="space-y-2" aria-labelledby="announcements-heading" aria-label={`${data.recentAnnouncements.length} announcements`}>
                       {data.recentAnnouncements.map((ann) => (
-                        <AnnouncementItem key={ann.id} ann={ann} />
+                        <AnnouncementItem key={ann.id} announcement={ann} variant="simple" />
                       ))}
                     </ul>
                   )}
