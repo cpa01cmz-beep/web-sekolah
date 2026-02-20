@@ -17,6 +17,7 @@ export const API_ENDPOINTS = {
     GRADES: '/api/teachers/grades',
     ANNOUNCEMENTS: (teacherId: string) => `/api/teachers/${teacherId}/announcements`,
     CREATE_ANNOUNCEMENT: '/api/teachers/announcements',
+    MESSAGES: (teacherId: string) => `/api/teachers/${teacherId}/messages`,
   },
   CLASSES: {
     STUDENTS: (classId: string) => `/api/classes/${classId}/students`,
@@ -24,6 +25,7 @@ export const API_ENDPOINTS = {
   PARENTS: {
     DASHBOARD: (parentId: string) => `/api/parents/${parentId}/dashboard`,
     SCHEDULE: (parentId: string) => `/api/parents/${parentId}/schedule`,
+    MESSAGES: (parentId: string) => `/api/parents/${parentId}/messages`,
   },
   ADMIN: {
     DASHBOARD: '/api/admin/dashboard',

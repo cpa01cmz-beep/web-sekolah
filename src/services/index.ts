@@ -4,10 +4,12 @@ export { teacherService } from './teacherService';
 export { parentService } from './parentService';
 export { adminService } from './adminService';
 export { publicService } from './publicService';
+export { createMessagingService } from './messagingService';
 export type {
   StudentService,
   TeacherService,
   ParentService,
   AdminService,
-  PublicService
+  PublicService,
+  MessagingService
 } from './serviceContracts';

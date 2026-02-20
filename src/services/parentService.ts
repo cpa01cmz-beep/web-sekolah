@@ -8,6 +8,7 @@ import type {
 import type { IRepository } from '@/repositories/IRepository';
 import { apiRepository } from '@/repositories/ApiRepository';
 import { API_ENDPOINTS } from '@/config/api-endpoints';
+import { createMessagingService } from './messagingService';
 
 export function createParentService(repository: IRepository = apiRepository): ParentService {
   return {
@@ -20,34 +21,28 @@ export function createParentService(repository: IRepository = apiRepository): Pa
     },
 
     async getMessages(parentId: string, type: 'inbox' | 'sent' = 'inbox'): Promise<Message[]> {
-      return repository.get<Message[]>(`${API_ENDPOINTS.PARENTS.DASHBOARD(parentId).replace('/dashboard', '/messages')}?type=${type}`);
+      const messaging = createMessagingService(repository, API_ENDPOINTS.PARENTS.MESSAGES(parentId));
+      return messaging.getMessages(type);
     },
 
     async getUnreadCount(parentId: string): Promise<number> {
-      const result = await repository.get<{ count: number }>(
-        API_ENDPOINTS.PARENTS.DASHBOARD(parentId).replace('/dashboard', '/messages/unread-count')
-      );
-      return result.count;
+      const messaging = createMessagingService(repository, API_ENDPOINTS.PARENTS.MESSAGES(parentId));
+      return messaging.getUnreadCount();
     },
 
     async getConversation(parentId: string, teacherId: string): Promise<Message[]> {
-      return repository.get<Message[]>(
-        `${API_ENDPOINTS.PARENTS.DASHBOARD(parentId).replace('/dashboard', '/messages')}/${teacherId}/conversation`
-      );
+      const messaging = createMessagingService(repository, API_ENDPOINTS.PARENTS.MESSAGES(parentId));
+      return messaging.getConversation(teacherId);
     },
 
     async sendMessage(parentId: string, data: SendMessageData): Promise<Message> {
-      return repository.post<Message>(
-        API_ENDPOINTS.PARENTS.DASHBOARD(parentId).replace('/dashboard', '/messages'),
-        data
-      );
+      const messaging = createMessagingService(repository, API_ENDPOINTS.PARENTS.MESSAGES(parentId));
+      return messaging.sendMessage(data);
     },
 
     async markAsRead(parentId: string, messageId: string): Promise<Message> {
-      return repository.post<Message>(
-        `${API_ENDPOINTS.PARENTS.DASHBOARD(parentId).replace('/dashboard', '/messages')}/${messageId}/read`,
-        {}
-      );
+      const messaging = createMessagingService(repository, API_ENDPOINTS.PARENTS.MESSAGES(parentId));
+      return messaging.markAsRead(messageId);
     },
 
     async getChildTeachers(parentId: string): Promise<SchoolUser[]> {

@@ -13,6 +13,7 @@ import type {
 import type { IRepository } from '@/repositories/IRepository';
 import { apiRepository } from '@/repositories/ApiRepository';
 import { API_ENDPOINTS } from '@/config/api-endpoints';
+import { createMessagingService } from './messagingService';
 
 export function createTeacherService(repository: IRepository = apiRepository): TeacherService {
   return {
@@ -45,34 +46,28 @@ export function createTeacherService(repository: IRepository = apiRepository): T
     },
 
     async getMessages(teacherId: string, type: 'inbox' | 'sent' = 'inbox'): Promise<Message[]> {
-      return repository.get<Message[]>(`${API_ENDPOINTS.TEACHERS.DASHBOARD(teacherId).replace('/dashboard', '/messages')}?type=${type}`);
+      const messaging = createMessagingService(repository, API_ENDPOINTS.TEACHERS.MESSAGES(teacherId));
+      return messaging.getMessages(type);
     },
 
     async getUnreadCount(teacherId: string): Promise<number> {
-      const result = await repository.get<{ count: number }>(
-        API_ENDPOINTS.TEACHERS.DASHBOARD(teacherId).replace('/dashboard', '/messages/unread-count')
-      );
-      return result.count;
+      const messaging = createMessagingService(repository, API_ENDPOINTS.TEACHERS.MESSAGES(teacherId));
+      return messaging.getUnreadCount();
     },
 
     async getConversation(teacherId: string, parentId: string): Promise<Message[]> {
-      return repository.get<Message[]>(
-        `${API_ENDPOINTS.TEACHERS.DASHBOARD(teacherId).replace('/dashboard', '/messages')}/${parentId}/conversation`
-      );
+      const messaging = createMessagingService(repository, API_ENDPOINTS.TEACHERS.MESSAGES(teacherId));
+      return messaging.getConversation(parentId);
     },
 
     async sendMessage(teacherId: string, data: SendMessageData): Promise<Message> {
-      return repository.post<Message>(
-        API_ENDPOINTS.TEACHERS.DASHBOARD(teacherId).replace('/dashboard', '/messages'),
-        data
-      );
+      const messaging = createMessagingService(repository, API_ENDPOINTS.TEACHERS.MESSAGES(teacherId));
+      return messaging.sendMessage(data);
     },
 
     async markAsRead(teacherId: string, messageId: string): Promise<Message> {
-      return repository.post<Message>(
-        `${API_ENDPOINTS.TEACHERS.DASHBOARD(teacherId).replace('/dashboard', '/messages')}/${messageId}/read`,
-        {}
-      );
+      const messaging = createMessagingService(repository, API_ENDPOINTS.TEACHERS.MESSAGES(teacherId));
+      return messaging.markAsRead(messageId);
     }
   };
 }

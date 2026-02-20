@@ -36,6 +36,14 @@ export interface SendMessageData {
   parentMessageId?: string;
 }
 
+export interface MessagingService {
+  getMessages(type?: 'inbox' | 'sent'): Promise<Message[]>;
+  getUnreadCount(): Promise<number>;
+  getConversation(otherUserId: string): Promise<Message[]>;
+  sendMessage(data: SendMessageData): Promise<Message>;
+  markAsRead(messageId: string): Promise<Message>;
+}
+
 export interface StudentService {
   getDashboard(studentId: string): Promise<StudentDashboardData>;
   getGrades(studentId: string): Promise<Grade[]>;
