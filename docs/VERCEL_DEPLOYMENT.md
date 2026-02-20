@@ -31,7 +31,10 @@ The `vercel.json` includes best-practice configurations:
 | **Caching** | 1-year immutable cache for JS/CSS/assets |
 | **SPA Routing** | Client-side routing with index.html fallback |
 | **Ignore Command** | Skips builds for documentation-only changes (md files, docs/, wiki/, etc.) |
-| **API Rewrite Caching** | Enabled caching for proxied API requests to Cloudflare Workers |
+| **CDN-Cache-Control** | Direct control over Vercel CDN caching for static assets |
+| **stale-while-revalidate** | Background revalidation for improved cache hit rates |
+| **Cross-Origin Headers** | COOP and CORP headers for enhanced security |
+| **Vary Header** | Proper cache key variation for API requests |
 
 ## Prerequisites
 

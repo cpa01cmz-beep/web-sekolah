@@ -23,10 +23,7 @@
   "rewrites": [
     {
       "source": "/api/:path*",
-      "destination": "https://website-sekolah-production.:account.workers.dev/api/:path*",
-      "headers": {
-        "x-vercel-enable-rewrite-caching": "true"
-      }
+      "destination": "https://website-sekolah-production.:account.workers.dev/api/:path*"
     },
     {
       "source": "/((?!api|assets|favicon.ico|robots.txt|manifest.json|_next|__next|.*\\.(png|jpe?g|svg|webp|avif|ico|woff2?)).*)",
@@ -40,6 +37,10 @@
         {
           "key": "Cache-Control",
           "value": "public, max-age=31536000, immutable"
+        },
+        {
+          "key": "CDN-Cache-Control",
+          "value": "public, max-age=31536000, immutable"
         }
       ]
     },
@@ -48,6 +49,10 @@
       "headers": [
         {
           "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        },
+        {
+          "key": "CDN-Cache-Control",
           "value": "public, max-age=31536000, immutable"
         }
       ]
@@ -58,6 +63,10 @@
         {
           "key": "Cache-Control",
           "value": "public, max-age=31536000, immutable"
+        },
+        {
+          "key": "CDN-Cache-Control",
+          "value": "public, max-age=31536000, immutable"
         }
       ]
     },
@@ -66,6 +75,10 @@
       "headers": [
         {
           "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        },
+        {
+          "key": "CDN-Cache-Control",
           "value": "public, max-age=31536000, immutable"
         },
         {
@@ -82,6 +95,10 @@
           "value": "public, max-age=31536000, immutable"
         },
         {
+          "key": "CDN-Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        },
+        {
           "key": "Access-Control-Allow-Origin",
           "value": "*"
         }
@@ -93,6 +110,10 @@
         {
           "key": "Cache-Control",
           "value": "public, max-age=31536000, immutable"
+        },
+        {
+          "key": "CDN-Cache-Control",
+          "value": "public, max-age=31536000, immutable"
         }
       ]
     },
@@ -101,6 +122,10 @@
       "headers": [
         {
           "key": "Cache-Control",
+          "value": "public, max-age=86400, stale-while-revalidate=604800"
+        },
+        {
+          "key": "CDN-Cache-Control",
           "value": "public, max-age=86400"
         }
       ]
@@ -110,6 +135,10 @@
       "headers": [
         {
           "key": "Cache-Control",
+          "value": "public, max-age=86400, stale-while-revalidate=604800"
+        },
+        {
+          "key": "CDN-Cache-Control",
           "value": "public, max-age=86400"
         }
       ]
@@ -117,6 +146,23 @@
     {
       "source": "/index.html",
       "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=0, must-revalidate"
+        },
+        {
+          "key": "CDN-Cache-Control",
+          "value": "public, max-age=0, must-revalidate"
+        }
+      ]
+    },
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        {
+          "key": "Vary",
+          "value": "Accept, Accept-Encoding, Origin"
+        },
         {
           "key": "Cache-Control",
           "value": "public, max-age=0, must-revalidate"
@@ -157,6 +203,14 @@
         {
           "key": "X-DNS-Prefetch-Control",
           "value": "on"
+        },
+        {
+          "key": "Cross-Origin-Opener-Policy",
+          "value": "same-origin"
+        },
+        {
+          "key": "Cross-Origin-Resource-Policy",
+          "value": "same-origin"
         }
       ]
     }
