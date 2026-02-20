@@ -9,6 +9,8 @@ interface SecurityHeadersConfig {
   enablePermissionsPolicy?: boolean;
   cspDirectives?: string;
   hstsMaxAge?: number;
+  cacheControl?: string;
+  cdnCacheControl?: string;
 }
 
 // CSP SECURITY NOTES:
@@ -53,6 +55,8 @@ const DEFAULT_SECURITY_HEADERS: SecurityHeadersConfig = {
   enablePermissionsPolicy: true,
   cspDirectives: "default-src 'self'; script-src 'self' 'sha256-1LjDIY7ayXpv8ODYzP8xZXqNvuMhUBdo39lNMQ1oGHI=' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self'; frame-src 'self'; frame-ancestors 'none'; object-src 'none'; worker-src 'self'; base-uri 'self'; form-action 'self'; report-uri /api/csp-report;",
   hstsMaxAge: 31536000,
+  cacheControl: 'no-store, no-cache, must-revalidate, proxy-revalidate',
+  cdnCacheControl: 'no-store',
 };
 
 export function securityHeaders(config: SecurityHeadersConfig = {}) {
@@ -97,7 +101,15 @@ export function securityHeaders(config: SecurityHeadersConfig = {}) {
     response.headers.set('X-Permitted-Cross-Domain-Policies', 'none');
     response.headers.set('Cross-Origin-Opener-Policy', 'same-origin');
     response.headers.set('Cross-Origin-Resource-Policy', 'same-site');
-    response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+    
+    if (!response.headers.has('Cache-Control') && finalConfig.cacheControl) {
+      response.headers.set('Cache-Control', finalConfig.cacheControl);
+    }
+    
+    if (!response.headers.has('CDN-Cache-Control') && finalConfig.cdnCacheControl) {
+      response.headers.set('CDN-Cache-Control', finalConfig.cdnCacheControl);
+    }
+    
     response.headers.set('Pragma', 'no-cache');
     response.headers.set('Expires', '0');
     response.headers.set('Surrogate-Control', 'no-store');
