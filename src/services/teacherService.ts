@@ -13,8 +13,18 @@ import type {
 import type { IRepository } from '@/repositories/IRepository';
 import { apiRepository } from '@/repositories/ApiRepository';
 import { API_ENDPOINTS } from '@/config/api-endpoints';
+import { createMessageService } from './messageService';
+
+const teacherMessageEndpoints = {
+  messages: API_ENDPOINTS.TEACHERS.MESSAGES,
+  messageRead: API_ENDPOINTS.TEACHERS.MESSAGE_READ,
+  messageConversation: API_ENDPOINTS.TEACHERS.MESSAGE_CONVERSATION,
+  unreadCount: API_ENDPOINTS.TEACHERS.UNREAD_COUNT,
+};
 
 export function createTeacherService(repository: IRepository = apiRepository): TeacherService {
+  const messageService = createMessageService(repository, teacherMessageEndpoints);
+
   return {
     async getDashboard(teacherId: string): Promise<TeacherDashboardData> {
       return repository.get<TeacherDashboardData>(API_ENDPOINTS.TEACHERS.DASHBOARD(teacherId));
@@ -44,36 +54,11 @@ export function createTeacherService(repository: IRepository = apiRepository): T
       return repository.get<ClassStudentWithGrade[]>(API_ENDPOINTS.CLASSES.STUDENTS(classId));
     },
 
-    async getMessages(teacherId: string, type: 'inbox' | 'sent' = 'inbox'): Promise<Message[]> {
-      return repository.get<Message[]>(`${API_ENDPOINTS.TEACHERS.DASHBOARD(teacherId).replace('/dashboard', '/messages')}?type=${type}`);
-    },
-
-    async getUnreadCount(teacherId: string): Promise<number> {
-      const result = await repository.get<{ count: number }>(
-        API_ENDPOINTS.TEACHERS.DASHBOARD(teacherId).replace('/dashboard', '/messages/unread-count')
-      );
-      return result.count;
-    },
-
-    async getConversation(teacherId: string, parentId: string): Promise<Message[]> {
-      return repository.get<Message[]>(
-        `${API_ENDPOINTS.TEACHERS.DASHBOARD(teacherId).replace('/dashboard', '/messages')}/${parentId}/conversation`
-      );
-    },
-
-    async sendMessage(teacherId: string, data: SendMessageData): Promise<Message> {
-      return repository.post<Message>(
-        API_ENDPOINTS.TEACHERS.DASHBOARD(teacherId).replace('/dashboard', '/messages'),
-        data
-      );
-    },
-
-    async markAsRead(teacherId: string, messageId: string): Promise<Message> {
-      return repository.post<Message>(
-        `${API_ENDPOINTS.TEACHERS.DASHBOARD(teacherId).replace('/dashboard', '/messages')}/${messageId}/read`,
-        {}
-      );
-    }
+    getMessages: (teacherId: string, type?: 'inbox' | 'sent') => messageService.getMessages(teacherId, type),
+    getUnreadCount: (teacherId: string) => messageService.getUnreadCount(teacherId),
+    getConversation: (teacherId: string, parentId: string) => messageService.getConversation(teacherId, parentId),
+    sendMessage: (teacherId: string, data: SendMessageData) => messageService.sendMessage(teacherId, data),
+    markAsRead: (teacherId: string, messageId: string) => messageService.markAsRead(teacherId, messageId),
   };
 }
 
