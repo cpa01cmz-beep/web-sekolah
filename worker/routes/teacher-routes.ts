@@ -7,7 +7,7 @@ import type { TeacherDashboardData, Announcement, CreateAnnouncementData, Submit
 import { GradeService, CommonDataService, AnnouncementService, TeacherService } from '../domain';
 import { withAuth, withUserValidation, withErrorHandler, triggerWebhookSafely } from './route-utils';
 import { validateBody } from '../middleware/validation';
-import { createGradeSchema, createAnnouncementSchema } from '../middleware/schemas';
+import { createGradeSchema, createAnnouncementSchema, createMessageSchema } from '../middleware/schemas';
 import { getCurrentUserId } from '../type-guards';
 import type { Context } from 'hono';
 import { MessageEntity } from '../entities';
@@ -109,14 +109,9 @@ export function teacherRoutes(app: Hono<{ Bindings: Env }>) {
     return ok(c, conversation.filter(msg => !msg.deletedAt));
   }));
 
-  app.post('/api/teachers/:id/messages', ...withAuth('teacher'), withErrorHandler('send teacher message')(async (c: Context) => {
+  app.post('/api/teachers/:id/messages', ...withAuth('teacher'), validateBody(createMessageSchema), withErrorHandler('send teacher message')(async (c: Context) => {
     const teacherId = getCurrentUserId(c);
-    const body = await c.req.json();
-    const { recipientId, subject, content, parentMessageId } = body;
-
-    if (!recipientId || !subject || !content) {
-      return bad(c, 'Recipient, subject, and content are required');
-    }
+    const { recipientId, subject, content, parentMessageId } = c.get('validatedBody');
 
     const recipient = await CommonDataService.getUserById(c.env, recipientId);
     if (!recipient || recipient.role !== 'parent') {
