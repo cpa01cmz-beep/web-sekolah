@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { isValidScore, MIN_SCORE, MAX_SCORE } from '@/utils/validation';
+import { isValidScore, MIN_SCORE, MAX_SCORE, validateSubject, validateRecipient, validationRules } from '@/utils/validation';
 
 describe('Validation Utilities', () => {
   describe('isValidScore', () => {
@@ -100,6 +100,129 @@ describe('Validation Utilities', () => {
 
     it('should have correct MAX_SCORE value', () => {
       expect(MAX_SCORE).toBe(100);
+    });
+  });
+
+  describe('validateSubject', () => {
+    describe('valid subjects', () => {
+      it('should return undefined for valid subject', () => {
+        expect(validateSubject('Test Subject', true)).toBeUndefined();
+      });
+
+      it('should return undefined for subject at minimum length', () => {
+        expect(validateSubject('abc', true)).toBeUndefined();
+      });
+
+      it('should return undefined for subject at maximum length', () => {
+        expect(validateSubject('a'.repeat(100), true)).toBeUndefined();
+      });
+    });
+
+    describe('invalid subjects', () => {
+      it('should return error for empty subject', () => {
+        expect(validateSubject('', true)).toBeDefined();
+      });
+
+      it('should return error for whitespace-only subject', () => {
+        expect(validateSubject('   ', true)).toBeDefined();
+      });
+
+      it('should return error for subject below minimum length', () => {
+        expect(validateSubject('ab', true)).toBeDefined();
+      });
+
+      it('should return error for subject above maximum length', () => {
+        expect(validateSubject('a'.repeat(101), true)).toBeDefined();
+      });
+    });
+
+    describe('showErrors option', () => {
+      it('should return undefined when showErrors is false', () => {
+        expect(validateSubject('', false)).toBeUndefined();
+      });
+    });
+
+    describe('custom length options', () => {
+      it('should accept custom minimum length', () => {
+        expect(validateSubject('a', true, 1)).toBeUndefined();
+      });
+
+      it('should accept custom maximum length', () => {
+        expect(validateSubject('test', true, 3, 10)).toBeUndefined();
+      });
+    });
+  });
+
+  describe('validationRules.subject', () => {
+    it('should have required rule', () => {
+      expect(validationRules.subject.required).toBeDefined();
+      expect(validationRules.subject.required.message).toBe('Subject is required');
+    });
+
+    it('should have minLength rule factory', () => {
+      const rule = validationRules.subject.minLength(5);
+      expect(rule.message).toBe('Subject must be at least 5 characters');
+      expect(rule.validate('test')).toBe(false);
+      expect(rule.validate('testing')).toBe(true);
+    });
+
+    it('should have maxLength rule factory', () => {
+      const rule = validationRules.subject.maxLength(10);
+      expect(rule.message).toBe('Subject must be at most 10 characters');
+      expect(rule.validate('testing testing')).toBe(false);
+      expect(rule.validate('test')).toBe(true);
+    });
+  });
+
+  describe('validateRecipient', () => {
+    describe('valid recipients', () => {
+      it('should return undefined for valid recipient ID', () => {
+        expect(validateRecipient('user-123', true)).toBeUndefined();
+      });
+
+      it('should return undefined for alphanumeric recipient ID', () => {
+        expect(validateRecipient('abc123xyz', true)).toBeUndefined();
+      });
+    });
+
+    describe('invalid recipients', () => {
+      it('should return error for empty recipient', () => {
+        expect(validateRecipient('', true)).toBeDefined();
+        expect(validateRecipient('', true)).toBe('Please select a recipient');
+      });
+
+      it('should return error for whitespace-only recipient', () => {
+        expect(validateRecipient('   ', true)).toBeDefined();
+      });
+    });
+
+    describe('showErrors option', () => {
+      it('should return undefined when showErrors is false', () => {
+        expect(validateRecipient('', false)).toBeUndefined();
+      });
+
+      it('should return undefined for valid recipient when showErrors is false', () => {
+        expect(validateRecipient('user-123', false)).toBeUndefined();
+      });
+    });
+  });
+
+  describe('validationRules.recipient', () => {
+    it('should have required rule', () => {
+      expect(validationRules.recipient.required).toBeDefined();
+      expect(validationRules.recipient.required.message).toBe('Please select a recipient');
+    });
+
+    it('should validate empty string as false', () => {
+      expect(validationRules.recipient.required.validate('')).toBe(false);
+    });
+
+    it('should validate whitespace as false', () => {
+      expect(validationRules.recipient.required.validate('   ')).toBe(false);
+    });
+
+    it('should validate valid ID as true', () => {
+      expect(validationRules.recipient.required.validate('user-123')).toBe(true);
     });
   });
 });
