@@ -16,6 +16,15 @@ const LINE_CHART_COMPONENTS = [
   'ResponsiveContainer',
 ] as const;
 
+const DEFAULT_COLORS = [
+  CHART_COLORS.primary,
+  CHART_COLORS.secondary,
+  CHART_COLORS.success,
+  CHART_COLORS.warning,
+  CHART_COLORS.purple,
+  CHART_COLORS.teal,
+] as const;
+
 export interface LineSeries {
   dataKey: string;
   name?: string;
@@ -72,15 +81,6 @@ export const LineChart = memo(function LineChart({
     return <ChartSkeleton height={height} className={className} />;
   }
 
-  const defaultColors = [
-    CHART_COLORS.primary,
-    CHART_COLORS.secondary,
-    CHART_COLORS.success,
-    CHART_COLORS.warning,
-    CHART_COLORS.purple,
-    CHART_COLORS.teal,
-  ];
-
   return (
     <div className={className} role="img" aria-label={ariaLabel}>
       <Chart.ResponsiveContainer width="100%" height={height}>
@@ -96,7 +96,7 @@ export const LineChart = memo(function LineChart({
               type="monotone"
               dataKey={s.dataKey}
               name={s.name || s.dataKey}
-              stroke={s.color || defaultColors[index % defaultColors.length]}
+              stroke={s.color || DEFAULT_COLORS[index % DEFAULT_COLORS.length]}
               strokeWidth={s.strokeWidth || CHART_DEFAULTS.strokeWidth}
               dot={showDots}
               activeDot={ACTIVE_DOT_CONFIG}
