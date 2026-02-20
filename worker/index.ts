@@ -63,6 +63,7 @@ app.use('/api/*', defaultTimeout());
 app.use('/api/*', responseErrorMonitoring());
 
 app.use('/api/client-errors', strictRateLimiter());
+app.use('/api/csp-report', strictRateLimiter());
 app.use('/api/seed', strictRateLimiter());
 app.use('/api/public/seed', strictRateLimiter());
 app.use('/api/public', defaultRateLimiter());

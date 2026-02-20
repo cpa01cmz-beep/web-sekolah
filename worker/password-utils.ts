@@ -66,16 +66,15 @@ function hexToBuffer(hex: string): Uint8Array {
 }
 
 function constantTimeCompare(a: string, b: string): boolean {
-  if (a.length !== b.length) {
-    return false;
-  }
-  
   const aBuffer = new TextEncoder().encode(a);
   const bBuffer = new TextEncoder().encode(b);
   
-  let result = 0;
-  for (let i = 0; i < aBuffer.length; i++) {
-    result |= aBuffer[i] ^ bBuffer[i];
+  let result = aBuffer.length ^ bBuffer.length;
+  const maxLen = Math.max(aBuffer.length, bBuffer.length);
+  for (let i = 0; i < maxLen; i++) {
+    const aByte = i < aBuffer.length ? aBuffer[i] : 0;
+    const bByte = i < bBuffer.length ? bBuffer[i] : 0;
+    result |= aByte ^ bByte;
   }
   return result === 0;
 }
