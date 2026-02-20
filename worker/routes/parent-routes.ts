@@ -91,7 +91,7 @@ export function parentRoutes(app: Hono<{ Bindings: Env }>) {
       return bad(c, 'Invalid recipient. Parents can only message teachers.');
     }
 
-    const message = await MessageEntity.create(c.env, {
+    const message = await MessageEntity.createWithAllIndexes(c.env, {
       id: crypto.randomUUID(),
       senderId: parentId,
       senderRole: 'parent',
