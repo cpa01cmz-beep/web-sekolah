@@ -17,6 +17,10 @@ export const API_ENDPOINTS = {
     GRADES: '/api/teachers/grades',
     ANNOUNCEMENTS: (teacherId: string) => `/api/teachers/${teacherId}/announcements`,
     CREATE_ANNOUNCEMENT: '/api/teachers/announcements',
+    MESSAGES: (teacherId: string) => `/api/teachers/${teacherId}/messages`,
+    MESSAGE_READ: (teacherId: string, messageId: string) => `/api/teachers/${teacherId}/messages/${messageId}/read`,
+    MESSAGE_CONVERSATION: (teacherId: string, otherUserId: string) => `/api/teachers/${teacherId}/messages/${otherUserId}/conversation`,
+    UNREAD_COUNT: (teacherId: string) => `/api/teachers/${teacherId}/messages/unread-count`,
   },
   CLASSES: {
     STUDENTS: (classId: string) => `/api/classes/${classId}/students`,
@@ -24,6 +28,11 @@ export const API_ENDPOINTS = {
   PARENTS: {
     DASHBOARD: (parentId: string) => `/api/parents/${parentId}/dashboard`,
     SCHEDULE: (parentId: string) => `/api/parents/${parentId}/schedule`,
+    MESSAGES: (parentId: string) => `/api/parents/${parentId}/messages`,
+    MESSAGE_READ: (parentId: string, messageId: string) => `/api/parents/${parentId}/messages/${messageId}/read`,
+    MESSAGE_CONVERSATION: (parentId: string, otherUserId: string) => `/api/parents/${parentId}/messages/${otherUserId}/conversation`,
+    UNREAD_COUNT: (parentId: string) => `/api/parents/${parentId}/messages/unread-count`,
+    TEACHERS: (parentId: string) => `/api/parents/${parentId}/teachers`,
   },
   ADMIN: {
     DASHBOARD: '/api/admin/dashboard',
