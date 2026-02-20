@@ -41,10 +41,14 @@ npm run test:coverage
 
 Before committing changes, always run:
 ```bash
+npm run validate
+```
+This runs typecheck, lint, and tests. All three must pass without errors.
+
+Alternatively, run individually:
+```bash
 npm run typecheck && npm run lint && npm run test:run
 ```
-
-All three must pass without errors.
 
 ## Project Structure
 
