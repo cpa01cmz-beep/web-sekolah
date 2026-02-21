@@ -1,8 +1,29 @@
 {
-  "name": "vite-cf-do-v2-runner",
+  "name": "akademia-pro",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.2.0",
+  "description": "A modern, all-in-one school management portal for students, teachers, parents, and administrators",
   "type": "module",
+  "keywords": [
+    "school-management",
+    "education",
+    "student-portal",
+    "teacher-portal",
+    "admin-portal",
+    "react",
+    "cloudflare-workers",
+    "typescript"
+  ],
+  "author": "Akademia Pro Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cpa01cmz-beep/web-sekolah.git"
+  },
+  "bugs": {
+    "url": "https://github.com/cpa01cmz-beep/web-sekolah/issues"
+  },
+  "homepage": "https://github.com/cpa01cmz-beep/web-sekolah#readme",
   "engines": {
     "node": ">=18.0.0"
   },
