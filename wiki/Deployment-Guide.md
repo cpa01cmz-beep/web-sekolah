@@ -2,93 +2,121 @@
 
 ## Prerequisites
 
-- Cloudflare account with Workers paid plan
-- Domain configured in Cloudflare
+- Cloudflare account with Workers enabled
+- Domain configured in Cloudflare (optional for workers.dev)
 - GitHub repository with the code
-- Bun package manager installed
+- Node.js v18+ and npm installed
+- Wrangler CLI installed globally
 
 ## Deployment Steps
 
 ### 1. Configure Wrangler
 
-Ensure `wrangler.jsonc` is properly configured with your Cloudflare settings:
+Ensure `wrangler.toml` is properly configured with your Cloudflare settings:
 
-```json
-{
-  "name": "akademia-pro",
-  "main": "worker/index.ts",
-  "compatibility_date": "2023-10-01",
-  "account_id": "your_account_id",
-  "workers_dev": false,
-  "route": {
-    "pattern": "api.yourdomain.com/*",
-    "zone_id": "your_zone_id"
-  },
-  "vars": {
-    "NODE_ENV": "production"
-  }
-}
+```toml
+name = "website-sekolah"
+main = "worker/index.ts"
+compatibility_date = "2026-02-18"
+compatibility_flags = ["nodejs_compat"]
+
+[assets]
+directory = "dist/client"
+not_found_handling = "single-page-application"
+run_worker_first = ["/api/*", "!/api/docs/*"]
 ```
 
 ### 2. Set Environment Variables
 
-⚠️ **CRITICAL SECURITY WARNING**: The application currently uses mock authentication tokens for development purposes. DO NOT deploy to production without implementing proper JWT authentication.
-
-In a production environment, you would need to configure secrets in Cloudflare Workers:
+In production, configure secrets in Cloudflare Workers or via wrangler:
 
 ```bash
-wrangler secret put JWT_SECRET
-wrangler secret put CLOUDFLARE_API_TOKEN
+# Set production secrets
+wrangler secret put JWT_SECRET --env production
+wrangler secret put CLOUDFLARE_API_TOKEN --env production
 ```
 
-### 3. Build the Frontend
+Or configure via GitHub Actions secrets for CI/CD deployment:
+- `JWT_SECRET` - Production JWT signing secret
+- `STAGING_JWT_SECRET` - Staging JWT signing secret
+- `CLOUDFLARE_ACCOUNT_ID` - Your Cloudflare account ID
+- `CLOUDFLARE_API_TOKEN` - API token with Workers permissions
+
+### 3. Build the Application
 
 ```bash
-bun run build
+npm run build
 ```
 
 ### 4. Deploy the Worker
 
 ```bash
-wrangler deploy
+# Deploy to staging
+npm run deploy:staging
+
+# Deploy to production
+npm run deploy:production
 ```
 
-### 5. Deploy Static Assets
+Or use wrangler directly:
 
-Upload the contents of the `dist` folder to your web hosting provider or Cloudflare Pages.
+```bash
+# Staging
+wrangler deploy --env staging
+
+# Production
+wrangler deploy --env production
+```
 
 ## CI/CD Pipeline
 
 The project uses GitHub Actions for continuous integration and deployment. The workflow is defined in `.github/workflows/deploy.yml`.
 
+### Automated Deployment
+
+- **Staging**: Automatic deployment on push to `main` branch
+- **Production**: Manual deployment via workflow dispatch with approval
+
 ### Workflow Steps
 
 1. Checkout code
-2. Setup Bun environment
-3. Install dependencies
-4. Run tests
-5. Build frontend
-6. Deploy to Cloudflare Workers
-7. Deploy static assets
+2. Setup Node.js environment
+3. Install dependencies (`npm ci`)
+4. Run tests (`npm run test:run`)
+5. Run type check (`npm run typecheck`)
+6. Run lint (`npm run lint`)
+7. Build application (`npm run build`)
+8. Deploy to target environment
+9. Health check verification
+
+### Health Check
+
+After each deployment, a health check is performed:
+- Endpoint: `/api/health`
+- Expected status: `200` or `404`
+- Retries: 5 attempts with 10s intervals
 
 ## Environment Configuration
 
 ### Production Environment
 
-Create a `.env.production` file with production-specific variables:
+Environment-specific configuration in `wrangler.toml`:
 
-```
-NODE_ENV=production
-CLOUDFLARE_ACCOUNT_ID=your_production_account_id
+```toml
+[env.production]
+name = "website-sekolah-production"
+workers_dev = false
+keep_vars = true
+vars = { ENVIRONMENT = "production" }
+logpush = true
 ```
 
 ### Staging Environment
 
-Create a `.env.staging` file with staging-specific variables:
-
-```
-NODE_ENV=staging
-CLOUDFLARE_ACCOUNT_ID=your_staging_account_id
+```toml
+[env.staging]
+name = "website-sekolah-staging"
+vars = { ENVIRONMENT = "staging" }
 ```
 
 ## Monitoring and Logging
@@ -99,39 +127,91 @@ CLOUDFLARE_ACCOUNT_ID=your_staging_account_id
 - Monitor request volume, latency, and error rates
 - Set up alerts for anomalies
 
-### Custom Logging
+### Observability
 
-- Implement structured logging in the worker
-- Use a logging service like Logflare or Datadog
-- Monitor for security events and errors
+The project has observability enabled:
+
+```toml
+[observability]
+enabled = true
+head_sampling_rate = 0.1
+```
+
+### Health Endpoints
+
+Monitor deployment health:
+
+```bash
+# Staging
+curl https://website-sekolah-staging.<account>.workers.dev/api/health
+
+# Production
+curl https://website-sekolah-production.<account>.workers.dev/api/health
+```
 
 ## Rollback Procedure
 
-In case of deployment issues:
+### Using Rollback Script
 
-1. Identify the last stable deployment:
-   ```bash
-   wrangler versions list
-   ```
+```bash
+# Interactive rollback
+./scripts/rollback.sh production
 
-2. Rollback to the previous version:
-   ```bash
-   wrangler versions deploy <version-id>
-   ```
+# Non-interactive (for CI/CD)
+./scripts/rollback.sh staging --non-interactive
+```
+
+### Manual Rollback
+
+```bash
+# List recent deployments
+wrangler deployment list --env production
+
+# Rollback to specific deployment
+wrangler rollback --env production
+```
+
+## Deployment Scripts
+
+The project includes helper scripts in `scripts/`:
+
+| Script | Purpose |
+|--------|---------|
+| `health-check.sh` | Verify deployment health |
+| `pre-deploy-check.sh` | Run pre-deployment validation |
+| `rollback.sh` | Rollback to previous deployment |
+| `deployment-status.sh` | Check deployment status |
+| `validate-env.sh` | Validate environment configuration |
+
+### Example Usage
+
+```bash
+# Pre-deployment checks
+npm run predeploy:staging
+
+# Check deployment health
+npm run health:staging -- --json
+
+# Validate environment
+npm run validate:env:production
+
+# Check deployment status
+npm run status:production -- --json
+```
 
 ## Performance Optimization
 
 ### Caching Strategy
 
-- Configure Cache-Control headers for static assets
-- Use Cloudflare's CDN for global content delivery
-- Implement browser caching for frontend resources
+- Static assets served via Cloudflare's CDN
+- Cache-Control headers configured for optimal caching
+- SPA routing with worker-first API handling
 
-### Asset Optimization
+### Build Optimization
 
-- Minify CSS, JavaScript, and HTML
-- Optimize images with WebP format
-- Use code splitting for JavaScript bundles
+- Vite for fast builds and optimized bundles
+- Tree-shaking for unused code elimination
+- Code splitting for efficient loading
 
 ## Troubleshooting
 
@@ -139,18 +219,27 @@ In case of deployment issues:
 
 1. **Deployment fails with authentication error**
    - Verify Cloudflare API token permissions
-   - Check account ID in wrangler.jsonc
+   - Check `CLOUDFLARE_ACCOUNT_ID` in GitHub secrets
+   - Ensure `CLOUDFLARE_API_TOKEN` has Workers deployment permissions
 
 2. **API endpoints return 404**
-   - Verify route pattern in wrangler.jsonc
-   - Check domain configuration in Cloudflare
+   - Verify worker is deployed correctly
+   - Check routing configuration in `wrangler.toml`
+   - Ensure `run_worker_first` includes `/api/*`
 
-3. **Frontend fails to load**
-   - Verify static asset deployment
-   - Check CORS configuration
+3. **Health check fails after deployment**
+   - Check worker logs: `wrangler tail --env staging`
+   - Verify `/api/health` endpoint is accessible
+   - Check for runtime errors in Cloudflare dashboard
+
+4. **Build fails with TypeScript errors**
+   - Run `npm run typecheck` locally first
+   - Fix any type errors before deploying
+   - Ensure all dependencies are installed
 
 ### Debugging
 
 - Use `wrangler dev` for local development and testing
 - Check Cloudflare Workers logs in the dashboard
-- Enable debug logging in the worker for detailed information
+- Enable verbose logging in deployment scripts: `--verbose`
+- Monitor with `wrangler tail --env staging`
