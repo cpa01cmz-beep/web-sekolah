@@ -1,5 +1,25 @@
 export type DateFormat = 'short' | 'long' | 'time' | 'month-year' | 'full-date';
 
+const DATE_FORMAT_OPTIONS: Record<DateFormat, Intl.DateTimeFormatOptions> = {
+  short: { year: 'numeric', month: 'numeric', day: 'numeric' },
+  long: { year: 'numeric', month: 'long', day: 'numeric' },
+  time: { hour: 'numeric', minute: 'numeric' },
+  'month-year': { month: 'short', year: 'numeric' },
+  'full-date': { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' },
+};
+
+const formatterCache = new Map<string, Intl.DateTimeFormat>();
+
+function getCachedFormatter(locale: string, options: Intl.DateTimeFormatOptions): Intl.DateTimeFormat {
+  const key = `${locale}:${JSON.stringify(options)}`;
+  let formatter = formatterCache.get(key);
+  if (!formatter) {
+    formatter = new Intl.DateTimeFormat(locale, options);
+    formatterCache.set(key, formatter);
+  }
+  return formatter;
+}
+
 export function formatDate(date: string | Date, format: DateFormat = 'short'): string {
   const dateObj = typeof date === 'string' ? new Date(date) : date;
   
@@ -7,40 +27,8 @@ export function formatDate(date: string | Date, format: DateFormat = 'short'): s
     return 'Invalid Date';
   }
 
-  const options: Intl.DateTimeFormatOptions = {};
-
-  switch (format) {
-    case 'short':
-      options.year = 'numeric';
-      options.month = 'numeric';
-      options.day = 'numeric';
-      break;
-    case 'long':
-      options.year = 'numeric';
-      options.month = 'long';
-      options.day = 'numeric';
-      break;
-    case 'time':
-      options.hour = 'numeric';
-      options.minute = 'numeric';
-      break;
-    case 'month-year':
-      options.month = 'short';
-      options.year = 'numeric';
-      break;
-    case 'full-date':
-      options.year = 'numeric';
-      options.month = 'long';
-      options.day = 'numeric';
-      options.weekday = 'long';
-      break;
-    default:
-      options.year = 'numeric';
-      options.month = 'numeric';
-      options.day = 'numeric';
-  }
-
-  return dateObj.toLocaleDateString('en-US', options);
+  const options = DATE_FORMAT_OPTIONS[format] ?? DATE_FORMAT_OPTIONS.short;
+  return getCachedFormatter('en-US', options).format(dateObj);
 }
 
 export function formatDateShort(date: string | Date): string {
@@ -58,10 +46,7 @@ export function formatTime(date: string | Date): string {
     return 'Invalid Time';
   }
 
-  return dateObj.toLocaleTimeString('en-US', {
-    hour: 'numeric',
-    minute: 'numeric'
-  });
+  return getCachedFormatter('en-US', { hour: 'numeric', minute: 'numeric' }).format(dateObj);
 }
 
 export function formatDistanceToNow(date: string | Date): string {

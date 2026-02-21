@@ -1,4 +1,4 @@
-import { memo } from 'react';
+import { memo, useMemo } from 'react';
 import { useReducedMotion } from '@/hooks/use-reduced-motion';
 
 interface AnimationProps {
@@ -10,19 +10,25 @@ interface AnimationProps {
 
 type AnimationType = 'fadeIn' | 'slideUp' | 'slideLeft' | 'slideRight';
 
+const REDUCED_MOTION_STYLE: React.CSSProperties = { opacity: 1 };
+
 function createAnimationComponent(animationType: AnimationType) {
   return memo(function Animation({ children, delay = 0, className, style }: AnimationProps) {
     const prefersReducedMotion = useReducedMotion();
     
+    const combinedStyle = useMemo(() => {
+      if (prefersReducedMotion) {
+        return style ? { ...REDUCED_MOTION_STYLE, ...style } : REDUCED_MOTION_STYLE;
+      }
+      return {
+        animation: `${animationType} 0.5s ease-out ${delay}s forwards`,
+        opacity: 0,
+        ...style,
+      };
+    }, [prefersReducedMotion, delay, style]);
+    
     return (
-      <div
-        className={className}
-        style={{
-          animation: prefersReducedMotion ? 'none' : `${animationType} 0.5s ease-out ${delay}s forwards`,
-          opacity: prefersReducedMotion ? 1 : 0,
-          ...style,
-        }}
-      >
+      <div className={className} style={combinedStyle}>
         {children}
       </div>
     );
