@@ -177,6 +177,41 @@ describe('StudentDateSortedIndex', () => {
     });
   });
 
+  describe('count', () => {
+    it('should return the count of grade IDs in the index', async () => {
+      const mockKeys = [
+        'sort:90000000000000000001:grade-1',
+        'sort:90000000000000000002:grade-2',
+        'sort:90000000000000000003:grade-3',
+      ];
+      mockStub.listPrefix.mockResolvedValue({ keys: mockKeys });
+      const index = new StudentDateSortedIndex(mockEnv, 'grade', 'student-123');
+
+      const result = await index.count();
+
+      expect(mockStub.listPrefix).toHaveBeenCalledWith('sort:');
+      expect(result).toBe(3);
+    });
+
+    it('should return 0 when index is empty', async () => {
+      mockStub.listPrefix.mockResolvedValue({ keys: [] });
+      const index = new StudentDateSortedIndex(mockEnv, 'grade', 'student-123');
+
+      const result = await index.count();
+
+      expect(result).toBe(0);
+    });
+
+    it('should return correct count for single entry', async () => {
+      mockStub.listPrefix.mockResolvedValue({ keys: ['sort:90000000000000000001:grade-1'] });
+      const index = new StudentDateSortedIndex(mockEnv, 'grade', 'student-123');
+
+      const result = await index.count();
+
+      expect(result).toBe(1);
+    });
+  });
+
   describe('clear', () => {
     it('should clear all grade IDs from date-sorted index', async () => {
       const mockKeys = ['sort:key1', 'sort:key2', 'sort:key3'];
