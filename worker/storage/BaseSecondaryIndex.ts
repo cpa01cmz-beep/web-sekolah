@@ -66,7 +66,7 @@ export abstract class BaseSecondaryIndex extends Entity<unknown> {
 
   async existsByValues(fieldValues: string[]): Promise<boolean> {
     const prefix = this.buildFieldKey(fieldValues);
-    const { keys } = await this.stub.listPrefix(prefix);
+    const { keys } = await this.stub.listPrefix(prefix, null, 1);
     return keys.length > 0;
   }
 
