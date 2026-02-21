@@ -54,19 +54,19 @@ export function authRoutes(app: Hono<{ Bindings: Env }>) {
 
     if (!user || user.role !== role) {
       logger.warn('[AUTH] Login failed - user not found', { email, role });
-      return bad(c, 'Invalid email or role combination');
+      return bad(c, 'Invalid credentials');
     }
 
     if (!user.passwordHash) {
       logger.warn('[AUTH] Login failed - user has no password hash set', { email, role });
-      return bad(c, 'User account not properly configured. Please contact administrator.');
+      return bad(c, 'Invalid credentials');
     }
 
     const isPasswordValid = await verifyPassword(password, user.passwordHash);
 
     if (!isPasswordValid) {
       logger.warn('[AUTH] Login failed - invalid password', { email, role });
-      return bad(c, 'Invalid email, role, or password');
+      return bad(c, 'Invalid credentials');
     }
 
     const secret = c.env.JWT_SECRET;

@@ -6,8 +6,8 @@ import type { TeacherDashboardData, Announcement, CreateAnnouncementData, Submit
 
 import { GradeService, CommonDataService, AnnouncementService, TeacherService } from '../domain';
 import { withAuth, withUserValidation, withErrorHandler, triggerWebhookSafely } from './route-utils';
-import { validateBody } from '../middleware/validation';
-import { createGradeSchema, createAnnouncementSchema, createMessageSchema } from '../middleware/schemas';
+import { validateBody, validateQuery } from '../middleware/validation';
+import { createGradeSchema, createAnnouncementSchema, createMessageSchema, messageTypeQuerySchema } from '../middleware/schemas';
 import { getCurrentUserId } from '../type-guards';
 import type { Context } from 'hono';
 import { MessageEntity } from '../entities';
@@ -82,9 +82,9 @@ export function teacherRoutes(app: Hono<{ Bindings: Env }>) {
     return ok(c, newAnnouncement);
   }));
 
-  app.get('/api/teachers/:id/messages', ...withUserValidation('teacher', 'messages'), withErrorHandler('get teacher messages')(async (c: Context) => {
+  app.get('/api/teachers/:id/messages', ...withUserValidation('teacher', 'messages'), validateQuery(messageTypeQuerySchema), withErrorHandler('get teacher messages')(async (c: Context) => {
     const teacherId = c.req.param('id');
-    const type = c.req.query('type') || 'inbox';
+    const { type } = c.get('validatedQuery') as { type: 'inbox' | 'sent' };
 
     let messages: Message[];
     if (type === 'sent') {

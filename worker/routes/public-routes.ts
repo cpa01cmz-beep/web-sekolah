@@ -4,6 +4,8 @@ import { ok, notFound } from '../core-utils';
 import { withErrorHandler } from './route-utils';
 import type { Context } from 'hono';
 import { strictRateLimiter } from '../middleware/rate-limit';
+import { validateQuery } from '../middleware/validation';
+import { newsLimitQuerySchema } from '../middleware/schemas';
 import { 
   SchoolProfileEntity, 
   ServiceEntity, 
@@ -44,10 +46,10 @@ export function publicRoutes(app: Hono<{ Bindings: Env }>) {
     return ok(c, items);
   }));
 
-  app.get('/api/public/news', withErrorHandler('get news')(async (c: Context) => {
-    const limitParam = c.req.query('limit');
-    const limit = limitParam ? parseInt(limitParam, 10) : PaginationDefaults.DEFAULT_NEWS_LIMIT;
-    const { items } = await NewsEntity.list(c.env, undefined, limit);
+  app.get('/api/public/news', validateQuery(newsLimitQuerySchema), withErrorHandler('get news')(async (c: Context) => {
+    const validatedQuery = c.get('validatedQuery') as { limit?: number } | undefined;
+    const limit = validatedQuery?.limit ?? PaginationDefaults.DEFAULT_NEWS_LIMIT;
+    const items = await NewsEntity.getRecent(c.env, limit);
     return ok(c, items);
   }));
 
