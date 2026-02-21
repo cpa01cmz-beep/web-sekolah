@@ -1,5 +1,6 @@
 import { SiteHeader } from '@/components/SiteHeader';
 import { SiteFooter } from '@/components/SiteFooter';
+import { SkipLink } from '@/components/SkipLink';
 import { SlideUp } from '@/components/animations';
 import { ContentCard } from '@/components/ContentCard';
 import { EXTRACURRICULAR_ACTIVITIES, EXTRACURRICULAR_PAGE_CONTENT } from '@/constants/extracurricular';
@@ -7,8 +8,9 @@ import { EXTRACURRICULAR_ACTIVITIES, EXTRACURRICULAR_PAGE_CONTENT } from '@/cons
 export function ProfileExtracurricularPage() {
   return (
     <div className="flex flex-col min-h-screen bg-background">
+      <SkipLink targetId="main-content" />
       <SiteHeader />
-      <main className="flex-grow">
+      <main id="main-content" className="flex-grow">
         <div className="bg-primary/5">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24 text-center">
             <SlideUp>

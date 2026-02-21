@@ -42,7 +42,7 @@ export function AboutPage() {
             <SlideUp delay={0.2}>
               <div className="flex items-start gap-4">
                 <div className="flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-lg bg-primary text-primary-foreground">
-                  <Target className="h-6 w-6" />
+                  <Target className="h-6 w-6" aria-hidden="true" />
                 </div>
                 <div>
                   <h3 className="text-xl font-semibold">Our Mission</h3>
@@ -53,7 +53,7 @@ export function AboutPage() {
             <SlideUp delay={0.4}>
               <div className="flex items-start gap-4">
                 <div className="flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-lg bg-primary text-primary-foreground">
-                  <Eye className="h-6 w-6" />
+                  <Eye className="h-6 w-6" aria-hidden="true" />
                 </div>
                 <div>
                   <h3 className="text-xl font-semibold">Our Vision</h3>
