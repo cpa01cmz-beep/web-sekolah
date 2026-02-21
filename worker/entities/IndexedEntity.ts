@@ -200,6 +200,18 @@ export abstract class IndexedEntity<S extends { id: string }> extends Entity<S> 
     return await idx.countByValue(value);
   }
 
+  static async existsBySecondaryIndex<TCtor extends CtorAny>(
+    this: HS<TCtor>,
+    env: Env,
+    fieldName: string,
+    value: string
+  ): Promise<boolean> {
+    const inst = new this(env, 'dummy');
+    const entityName = inst.entityName;
+    const idx = new SecondaryIndex<string>(env, entityName, fieldName);
+    return await idx.existsByValue(value);
+  }
+
   static async get<TCtor extends CtorAny>(this: HS<TCtor>, env: Env, id: string): Promise<IS<TCtor> | null> {
     const inst = new this(env, id);
     try {

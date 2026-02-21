@@ -169,4 +169,41 @@ describe('IndexedEntity', () => {
       vi.useRealTimers();
     });
   });
+
+  describe('existsBySecondaryIndex', () => {
+    it('should return true when entities exist with the given field value', async () => {
+      mockStub.listPrefix.mockResolvedValue({ keys: ['field:cat-a:entity:id-1'] });
+
+      const result = await TestIndexedEntity.existsBySecondaryIndex(mockEnv, 'category', 'cat-a');
+
+      expect(result).toBe(true);
+      expect(mockStub.listPrefix).toHaveBeenCalledWith('field:cat-a:entity:');
+    });
+
+    it('should return false when no entities exist with the given field value', async () => {
+      mockStub.listPrefix.mockResolvedValue({ keys: [] });
+
+      const result = await TestIndexedEntity.existsBySecondaryIndex(mockEnv, 'category', 'nonexistent');
+
+      expect(result).toBe(false);
+    });
+  });
+
+  describe('countBySecondaryIndex', () => {
+    it('should return the count of entities with the given field value', async () => {
+      mockStub.listPrefix.mockResolvedValue({ keys: ['field:cat-a:entity:id-1', 'field:cat-a:entity:id-2'] });
+
+      const result = await TestIndexedEntity.countBySecondaryIndex(mockEnv, 'category', 'cat-a');
+
+      expect(result).toBe(2);
+    });
+
+    it('should return 0 when no entities exist with the given field value', async () => {
+      mockStub.listPrefix.mockResolvedValue({ keys: [] });
+
+      const result = await TestIndexedEntity.countBySecondaryIndex(mockEnv, 'category', 'nonexistent');
+
+      expect(result).toBe(0);
+    });
+  });
 });

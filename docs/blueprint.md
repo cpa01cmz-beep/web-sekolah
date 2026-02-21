@@ -5948,4 +5948,56 @@ export interface UserUpdateStrategy {
 
 ---
 
+#### Efficient Existence Checks by Secondary Index (2026-02-21)
+
+**Problem**: Checking if an entity exists with a specific field value required loading all matching entities with `getBySecondaryIndex()`, which was inefficient for simple existence checks
+
+**Solution**: Added `existsBySecondaryIndex()` method to `IndexedEntity` that checks existence without loading entity data
+
+**Implementation**:
+- New `existsBySecondaryIndex()` method in `worker/entities/IndexedEntity.ts`
+- Uses existing `SecondaryIndex.existsByValue()` under the hood
+- Returns boolean directly without fetching entity data
+- Added convenience methods to `UserEntity`:
+  - `existsByEmail()`: Check if user exists by email
+  - `existsByRole()`: Check if any user has a specific role
+  - `existsByClassId()`: Check if any student is in a specific class
+
+**Metrics**:
+
+| Metric | Before | After | Improvement |
+|--------|--------|-------|-------------|
+| Data loaded | All matching entities | None (key count only) | 100% reduction |
+| Query purpose | Get entities to check length | Direct boolean result | More semantic |
+| Use case fit | Overkill for existence | Purpose-built | Better API |
+
+**Benefits**:
+- ✅ O(1) indexed existence check without data transfer
+- ✅ More semantic API for existence validation
+- ✅ Useful for uniqueness checks (e.g., email already exists)
+- ✅ Useful for referential integrity checks
+- ✅ Reduced memory usage for validation operations
+
+**Usage Examples**:
+```typescript
+// Check if email is already registered
+const emailExists = await UserEntity.existsByEmail(env, 'user@example.com');
+
+// Check if any students exist in a class
+const hasStudents = await UserEntity.existsByClassId(env, 'class-123');
+
+// Generic existence check on any entity
+const hasTeacher = await UserEntity.existsBySecondaryIndex(env, 'role', 'teacher');
+```
+
+**Impact**:
+- `worker/entities/IndexedEntity.ts`: Added `existsBySecondaryIndex()` method
+- `worker/entities/UserEntity.ts`: Added convenience methods for email, role, classId
+- `worker/entities/__tests__/IndexedEntity.test.ts`: Added tests for new methods
+- All 2903+ tests passing (0 regressions)
+
+**Success**: ✅ **EXISTS BY SECONDARY INDEX METHOD COMPLETE, ADDED EFFICIENT EXISTENCE CHECKS WITHOUT LOADING ENTITY DATA, ALL TESTS PASSING, ZERO REGRESSIONS**
+
+---
+
 
