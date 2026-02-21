@@ -1,6 +1,11 @@
 import { z } from 'zod';
 import { StatusCodeRanges, ValidationLimits } from '../config/validation';
 import type { Context } from 'hono';
+import { WEBHOOK_EVENT_TYPES } from '@shared/webhook.types';
+
+const webhookEventTypeSchema = z.enum(WEBHOOK_EVENT_TYPES, {
+  message: `Invalid event type. Must be one of: ${WEBHOOK_EVENT_TYPES.join(', ')}`,
+});
 
 export const createUserSchema = z.object({
   name: z.string().min(ValidationLimits.USER_NAME_MIN_LENGTH, 'Name must be at least 2 characters').max(ValidationLimits.USER_NAME_MAX_LENGTH, 'Name must be less than 100 characters'),
@@ -94,14 +99,14 @@ export const updateSettingsSchema = z.object({
 
 export const createWebhookConfigSchema = z.object({
   url: z.string().url('Invalid webhook URL'),
-  events: z.array(z.string()).min(1, 'At least one event must be specified'),
+  events: z.array(webhookEventTypeSchema).min(1, 'At least one event must be specified'),
   secret: z.string().min(16, 'Webhook secret must be at least 16 characters').max(500, 'Webhook secret is too long'),
   active: z.boolean().optional(),
 });
 
 export const updateWebhookConfigSchema = z.object({
   url: z.string().url('Invalid webhook URL').optional(),
-  events: z.array(z.string()).min(1, 'At least one event must be specified').optional(),
+  events: z.array(webhookEventTypeSchema).min(1, 'At least one event must be specified').optional(),
   secret: z.string().min(16, 'Webhook secret must be at least 16 characters').max(500, 'Webhook secret is too long').optional(),
   active: z.boolean().optional(),
 });
