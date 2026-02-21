@@ -10,10 +10,12 @@ import { useReducedMotion } from '@/hooks/use-reduced-motion';
 import { useParentDashboard } from '@/hooks/useParent';
 import { useAuthStore } from '@/lib/authStore';
 import { getGradeColorClass, getGradeLetter } from '@/utils/grades';
+import { GRADE_C_THRESHOLD } from '@/constants/grades';
+import { DashboardDisplayLimits } from '@/config/dashboard';
 import type { ParentDashboardData } from '@shared/types';
 
 const GradeItem = memo(({ grade }: { grade: ParentDashboardData['childGrades'][0] }) => {
-  const isPassing = grade.score >= 70;
+  const isPassing = grade.score >= GRADE_C_THRESHOLD;
   return (
     <li className="flex items-center justify-between">
       <p className="text-sm font-medium">{grade.courseName}</p>
@@ -83,8 +85,8 @@ export function ParentDashboardPage() {
                     {data.childSchedule.length === 0 ? (
                       <p className="text-sm text-muted-foreground text-center py-4" role="status">No schedule available.</p>
                     ) : (
-                      <ul className="space-y-2" aria-labelledby="schedule-heading" aria-label={`${Math.min(data.childSchedule.length, 5)} scheduled classes`}>
-                        {data.childSchedule.slice(0, 5).map((item) => (
+                      <ul className="space-y-2" aria-labelledby="schedule-heading" aria-label={`${Math.min(data.childSchedule.length, DashboardDisplayLimits.SCHEDULE_ITEMS_PARENT)} scheduled classes`}>
+                        {data.childSchedule.slice(0, DashboardDisplayLimits.SCHEDULE_ITEMS_PARENT).map((item) => (
                           <ScheduleItem key={`${item.courseId}-${item.time}`} item={item} />
                         ))}
                       </ul>

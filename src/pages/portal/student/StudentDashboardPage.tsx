@@ -10,6 +10,8 @@ import { useStudentDashboard } from '@/hooks/useStudent';
 import { useAuthStore } from '@/lib/authStore';
 import type { StudentDashboardData } from '@shared/types';
 import { getGradeColorClass, getGradeLetter } from '@/utils/grades';
+import { GRADE_C_THRESHOLD } from '@/constants/grades';
+import { DashboardDisplayLimits } from '@/config/dashboard';
 import { memo } from 'react';
 
 const ScheduleItem = memo(({ item }: { item: StudentDashboardData['schedule'][0] }) => (
@@ -24,7 +26,7 @@ const ScheduleItem = memo(({ item }: { item: StudentDashboardData['schedule'][0]
 ScheduleItem.displayName = 'ScheduleItem';
 
 const GradeItem = memo(({ grade }: { grade: StudentDashboardData['recentGrades'][0] }) => {
-  const isPassing = grade.score >= 70;
+  const isPassing = grade.score >= GRADE_C_THRESHOLD;
   return (
     <li className="flex items-center justify-between">
       <p className="text-sm font-medium">{grade.courseName}</p>
@@ -65,7 +67,7 @@ export function StudentDashboardPage() {
                       <p className="text-sm text-muted-foreground text-center py-4" role="status">No classes scheduled for today.</p>
                     ) : (
                       <ul className="space-y-3" aria-labelledby="schedule-heading" aria-label={`${data.schedule.length} scheduled classes`}>
-                        {data.schedule.slice(0, 3).map((item) => (
+                        {data.schedule.slice(0, DashboardDisplayLimits.SCHEDULE_ITEMS_STUDENT).map((item) => (
                           <ScheduleItem key={`${item.courseId}-${item.time}`} item={item} />
                         ))}
                       </ul>
