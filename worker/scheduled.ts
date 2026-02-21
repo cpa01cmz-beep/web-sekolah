@@ -2,6 +2,7 @@ import type { Env } from './core-utils';
 import { logger } from './logger';
 import { integrationMonitor } from './integration-monitor';
 import { WebhookService } from './webhook-service';
+import { ScheduledTaskConfig as TaskConfig } from './config/time';
 
 type ScheduledTask = (env: Env) => Promise<void>;
 
@@ -29,11 +30,37 @@ const SCHEDULED_TASKS: ScheduledTaskConfig[] = [
   },
 ];
 
+async function withTimeout<T>(
+  fn: () => Promise<T>,
+  timeoutMs: number,
+  taskName: string
+): Promise<T> {
+  return new Promise((resolve, reject) => {
+    const timeoutId = setTimeout(() => {
+      reject(new Error(`Task '${taskName}' timed out after ${timeoutMs}ms`));
+    }, timeoutMs);
+
+    fn()
+      .then((result) => {
+        clearTimeout(timeoutId);
+        resolve(result);
+      })
+      .catch((error) => {
+        clearTimeout(timeoutId);
+        reject(error);
+      });
+  });
+}
+
 async function executeTask(task: ScheduledTaskConfig, env: Env): Promise<TaskExecutionResult> {
   const startTime = Date.now();
   try {
     logger.info(`Executing scheduled task: ${task.name}`, { cron: task.cron });
-    await task.handler(env);
+    await withTimeout(
+      () => task.handler(env),
+      TaskConfig.DEFAULT_TIMEOUT_MS,
+      task.name
+    );
     const duration = Date.now() - startTime;
     logger.info(`Scheduled task completed: ${task.name}`, { duration: `${duration}ms` });
     integrationMonitor.recordScheduledTaskExecution(task.name, true, duration);
