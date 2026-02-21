@@ -1,5 +1,5 @@
 import type { Env } from '../core-utils';
-import { GradeEntity } from '../entities';
+import { GradeEntity, CourseEntity } from '../entities';
 import type { Grade } from '@shared/types';
 import { ReferentialIntegrity } from '../referential-integrity';
 
@@ -69,5 +69,23 @@ export class GradeService {
     const gradeEntity = new GradeEntity(env, gradeId);
     const grade = await gradeEntity.getState();
     return grade && !grade.deletedAt ? grade : null;
+  }
+
+  static async verifyTeacherOwnership(env: Env, gradeId: string, teacherId: string): Promise<{ valid: boolean; error?: string }> {
+    const grade = await this.getGradeById(env, gradeId);
+    if (!grade) {
+      return { valid: false, error: 'Grade not found' };
+    }
+
+    const course = await new CourseEntity(env, grade.courseId).getState();
+    if (!course) {
+      return { valid: false, error: 'Course not found' };
+    }
+
+    if (course.teacherId !== teacherId) {
+      return { valid: false, error: 'You can only modify grades for courses you teach' };
+    }
+
+    return { valid: true };
   }
 }

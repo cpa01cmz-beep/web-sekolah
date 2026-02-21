@@ -1,12 +1,13 @@
 import { Hono } from "hono";
 import type { Env } from '../core-utils';
-import { ok, bad, notFound } from '../core-utils';
+import { ok, bad, notFound, forbidden } from '../core-utils';
 import type { CreateUserData, UpdateUserData, Grade } from "@shared/types";
 import { UserService, CommonDataService, GradeService } from '../domain';
 import { withAuth, withErrorHandler, triggerWebhookSafely } from './route-utils';
 import { validateBody, validateParams } from '../middleware/validation';
 import { createUserSchema, updateUserSchema, updateGradeSchema, paramsSchema } from '../middleware/schemas';
 import type { Context } from 'hono';
+import { getCurrentUserId } from '../type-guards';
 
 export function userRoutes(app: Hono<{ Bindings: Env }>) {
   app.get('/api/users', ...withAuth('admin'), withErrorHandler('get users')(async (c: Context) => {
@@ -43,6 +44,13 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
   app.put('/api/grades/:id', ...withAuth('teacher'), validateParams(paramsSchema), validateBody(updateGradeSchema), withErrorHandler('update grade')(async (c: Context) => {
     const { id: gradeId } = c.get('validatedParams') as { id: string };
     const validatedData = c.get('validatedBody') as { score: number; feedback: string };
+    const teacherId = getCurrentUserId(c);
+
+    const ownership = await GradeService.verifyTeacherOwnership(c.env, gradeId, teacherId);
+    if (!ownership.valid) {
+      return forbidden(c, ownership.error!);
+    }
+
     const updatedGrade = await GradeService.updateGrade(c.env, gradeId, { score: validatedData.score, feedback: validatedData.feedback });
     triggerWebhookSafely(c.env, 'grade.updated', updatedGrade, { gradeId });
     return ok(c, updatedGrade);
@@ -50,6 +58,13 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
 
   app.delete('/api/grades/:id', ...withAuth('teacher'), validateParams(paramsSchema), withErrorHandler('delete grade')(async (c: Context) => {
     const { id: gradeId } = c.get('validatedParams') as { id: string };
+    const teacherId = getCurrentUserId(c);
+
+    const ownership = await GradeService.verifyTeacherOwnership(c.env, gradeId, teacherId);
+    if (!ownership.valid) {
+      return forbidden(c, ownership.error!);
+    }
+
     const grade = await GradeService.getGradeById(c.env, gradeId);
     if (grade) {
       await GradeService.deleteGrade(c.env, gradeId);
