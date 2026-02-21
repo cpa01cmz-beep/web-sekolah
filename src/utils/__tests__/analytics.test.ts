@@ -22,6 +22,8 @@ import {
   calculateGPA,
   calculateClassRank,
   calculatePerformanceSummary,
+  detectAnomalies,
+  analyzeTrend,
 } from '../analytics';
 
 describe('Analytics Utilities', () => {
@@ -516,6 +518,89 @@ describe('Analytics Utilities', () => {
       expect(summary.gradeDistribution.D).toBe(1);
       expect(summary.gradeDistribution.E).toBe(1);
       expect(summary.gradeDistribution.F).toBe(0);
+    });
+  });
+
+  describe('detectAnomalies', () => {
+    it('returns empty result for arrays with less than 4 values', () => {
+      expect(detectAnomalies([])).toEqual({ outliers: [], lowerBound: 0, upperBound: 0, iqr: 0 });
+      expect(detectAnomalies([1])).toEqual({ outliers: [], lowerBound: 0, upperBound: 0, iqr: 0 });
+      expect(detectAnomalies([1, 2])).toEqual({ outliers: [], lowerBound: 0, upperBound: 0, iqr: 0 });
+      expect(detectAnomalies([1, 2, 3])).toEqual({ outliers: [], lowerBound: 0, upperBound: 0, iqr: 0 });
+    });
+
+    it('detects no outliers in normal data', () => {
+      const result = detectAnomalies([10, 12, 14, 16, 18, 20]);
+      expect(result.outliers).toHaveLength(0);
+      expect(result.iqr).toBeGreaterThan(0);
+    });
+
+    it('detects lower outliers', () => {
+      const result = detectAnomalies([10, 12, 14, 16, 18, 20, -100]);
+      expect(result.outliers).toContain(-100);
+    });
+
+    it('detects upper outliers', () => {
+      const result = detectAnomalies([10, 12, 14, 16, 18, 20, 100]);
+      expect(result.outliers).toContain(100);
+    });
+
+    it('calculates IQR correctly', () => {
+      const result = detectAnomalies([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+      expect(result.iqr).toBeGreaterThan(0);
+    });
+
+    it('returns correct bounds', () => {
+      const result = detectAnomalies([10, 12, 14, 16, 18, 20]);
+      expect(result.lowerBound).toBeLessThan(10);
+      expect(result.upperBound).toBeGreaterThan(20);
+    });
+  });
+
+  describe('analyzeTrend', () => {
+    it('returns stable for arrays with less than 2 values', () => {
+      expect(analyzeTrend([])).toEqual({ direction: 'stable', slope: 0, confidence: 0 });
+      expect(analyzeTrend([50])).toEqual({ direction: 'stable', slope: 0, confidence: 0 });
+    });
+
+    it('detects upward trend', () => {
+      const result = analyzeTrend([10, 20, 30, 40, 50]);
+      expect(result.direction).toBe('up');
+      expect(result.slope).toBeGreaterThan(0);
+    });
+
+    it('detects downward trend', () => {
+      const result = analyzeTrend([50, 40, 30, 20, 10]);
+      expect(result.direction).toBe('down');
+      expect(result.slope).toBeLessThan(0);
+    });
+
+    it('detects stable trend', () => {
+      const result = analyzeTrend([50, 50, 50, 50, 50]);
+      expect(result.direction).toBe('stable');
+      expect(Math.abs(result.slope)).toBeLessThan(0.1);
+    });
+
+    it('calculates slope correctly', () => {
+      const result = analyzeTrend([0, 10, 20, 30, 40]);
+      expect(result.slope).toBeCloseTo(10, 0);
+    });
+
+    it('returns confidence between 0 and 100', () => {
+      const result = analyzeTrend([10, 20, 30, 40, 50]);
+      expect(result.confidence).toBeGreaterThanOrEqual(0);
+      expect(result.confidence).toBeLessThanOrEqual(100);
+    });
+
+    it('provides prediction for 3+ values', () => {
+      const result = analyzeTrend([10, 20, 30, 40, 50]);
+      expect(result.prediction).toBeDefined();
+      expect(result.prediction).toBeGreaterThan(50);
+    });
+
+    it('does not provide prediction for less than 3 values', () => {
+      const result = analyzeTrend([10, 20]);
+      expect(result.prediction).toBeUndefined();
     });
   });
 });

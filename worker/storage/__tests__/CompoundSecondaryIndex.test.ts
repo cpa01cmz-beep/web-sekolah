@@ -202,7 +202,7 @@ describe('CompoundSecondaryIndex', () => {
 
       const result = await index.existsByValues(['value1', 'value2']);
 
-      expect(mockStub.listPrefix).toHaveBeenCalledWith('compound:value1:value2:entity:');
+      expect(mockStub.listPrefix).toHaveBeenCalledWith('compound:value1:value2:entity:', null, 1);
       expect(result).toBe(true);
     });
 
@@ -233,7 +233,7 @@ describe('CompoundSecondaryIndex', () => {
 
       const result = await index.existsByValues([]);
 
-      expect(mockStub.listPrefix).toHaveBeenCalledWith('compound::entity:');
+      expect(mockStub.listPrefix).toHaveBeenCalledWith('compound::entity:', null, 1);
       expect(result).toBe(false);
     });
   });
