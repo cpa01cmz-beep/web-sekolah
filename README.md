@@ -177,7 +177,7 @@ After starting the application:
 
 **🔒 Security**
 - [Security Guide](./docs/SECURITY.md) - Security controls and deployment checklist
-- [Security Assessment](./docs/SECURITY_ASSESSMENT_2026-01-22.md) - 98/100 score, production ready
+- [Security Assessment](./docs/SECURITY.md) - 97/100 score, production ready
 
 **🚀 Deployment**
 - [Deployment Guide](./docs/DEPLOYMENT.md) - CI/CD procedures, environments, and rollback
