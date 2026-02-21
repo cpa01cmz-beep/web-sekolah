@@ -218,6 +218,39 @@ describe('DateSortedSecondaryIndex', () => {
     });
   });
 
+  describe('count', () => {
+    it('should return the count of entries in the index', async () => {
+      const keys = [
+        'sort:90000000000000000001:entity-1',
+        'sort:90000000000000000002:entity-2',
+        'sort:90000000000000000003:entity-3',
+      ];
+
+      mockStub.listPrefix.mockResolvedValue({ keys, next: null });
+
+      const result = await index.count();
+
+      expect(mockStub.listPrefix).toHaveBeenCalledWith('sort:');
+      expect(result).toBe(3);
+    });
+
+    it('should return 0 when index is empty', async () => {
+      mockStub.listPrefix.mockResolvedValue({ keys: [], next: null });
+
+      const result = await index.count();
+
+      expect(result).toBe(0);
+    });
+
+    it('should return correct count for single entry', async () => {
+      mockStub.listPrefix.mockResolvedValue({ keys: ['sort:90000000000000000001:entity-1'], next: null });
+
+      const result = await index.count();
+
+      expect(result).toBe(1);
+    });
+  });
+
   describe('clear', () => {
     it('should clear all date-sorted index entries', async () => {
       const now = Date.now();
