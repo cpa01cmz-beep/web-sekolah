@@ -1,0 +1,73 @@
+name: 'Health Check'
+description: 'Perform health check on deployed Cloudflare Worker'
+author: 'DevOps Team'
+
+inputs:
+  url:
+    description: 'Deployed URL to check'
+    required: true
+  max-retries:
+    description: 'Maximum number of retry attempts'
+    required: false
+    default: '5'
+  retry-interval:
+    description: 'Seconds to wait between retries'
+    required: false
+    default: '10'
+  timeout:
+    description: 'Maximum time in seconds for each request'
+    required: false
+    default: '15'
+
+outputs:
+  status:
+    description: 'Health check status (success/failed)'
+    value: ${{ steps.health-check.outputs.status }}
+  response-code:
+    description: 'HTTP response code from health endpoint'
+    value: ${{ steps.health-check.outputs.response-code }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Health Check
+      id: health-check
+      shell: bash
+      run: |
+        max_retries=${{ inputs.max-retries }}
+        retry_interval=${{ inputs.retry-interval }}
+        timeout=${{ inputs.timeout }}
+        deployed_url="${{ inputs.url }}"
+        retry_count=0
+        
+        echo "Starting health check for ${deployed_url}/api/health"
+        echo "Max retries: ${max_retries}, Interval: ${retry_interval}s, Timeout: ${timeout}s"
+        
+        while [ $retry_count -lt $max_retries ]; do
+          echo "Health check attempt $((retry_count + 1)) of $max_retries"
+          
+          http_code=$(curl -f -s -o /dev/null -w "%{http_code}" \
+            --max-time "${timeout}" \
+            --connect-timeout 10 \
+            "${deployed_url}/api/health" 2>/dev/null) || http_code="000"
+          
+          echo "Response code: ${http_code}"
+          
+          if [[ "${http_code}" == "200" || "${http_code}" == "404" ]]; then
+            echo "✅ Health check passed"
+            echo "status=success" >> $GITHUB_OUTPUT
+            echo "response-code=${http_code}" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          
+          retry_count=$((retry_count + 1))
+          if [ $retry_count -lt $max_retries ]; then
+            echo "Health check failed, retrying in ${retry_interval} seconds..."
+            sleep "${retry_interval}"
+          fi
+        done
+        
+        echo "❌ Health check failed after $max_retries attempts"
+        echo "status=failed" >> $GITHUB_OUTPUT
+        echo "response-code=${http_code}" >> $GITHUB_OUTPUT
+        exit 1
