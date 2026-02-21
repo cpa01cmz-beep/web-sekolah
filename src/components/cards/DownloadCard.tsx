@@ -29,7 +29,7 @@ export const DownloadCard = memo(function DownloadCard({
 
   if (variant === 'vertical') {
     return (
-      <div className={`bg-card rounded-lg shadow-sm p-6 ${className}`}>
+      <div className={`bg-card rounded-lg shadow-sm p-6 hover:shadow-lg transition-shadow duration-200 ${className}`}>
         <div className={`w-12 h-12 rounded-lg flex items-center justify-center mb-4 ${iconColorClasses[iconColor]}`} aria-hidden="true">
           <span className="font-bold">{fileFormat}</span>
         </div>
@@ -43,7 +43,7 @@ export const DownloadCard = memo(function DownloadCard({
   }
 
   return (
-    <div className={`flex items-center justify-between p-4 bg-card rounded-lg shadow-sm ${className}`}>
+    <div className={`flex items-center justify-between p-4 bg-card rounded-lg shadow-sm hover:shadow-lg transition-shadow duration-200 ${className}`}>
       <div>
         <h3 className="font-bold">{title}</h3>
         <p className="text-sm text-muted-foreground mt-1">{fileFormat}, {fileSize}</p>
