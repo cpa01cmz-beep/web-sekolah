@@ -11,6 +11,7 @@
   "regions": ["sin1", "hnd1", "iad1"],
   "functions": {
     "api/**": {
+      "memory": 1024,
       "maxDuration": 10
     }
   },
