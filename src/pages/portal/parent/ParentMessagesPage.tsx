@@ -1,200 +1,22 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { EmptyState } from '@/components/ui/empty-state';
 import { PageHeader } from '@/components/PageHeader';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { FormField } from '@/components/ui/form-field';
-import { Mail, Send, Inbox, MessageSquare, User, AlertTriangle, Loader2 } from 'lucide-react';
+import { Mail, Send, Inbox, User, AlertTriangle, Loader2 } from 'lucide-react';
 import { SlideUp } from '@/components/animations';
 import { useReducedMotion } from '@/hooks/use-reduced-motion';
 import { useAuthStore } from '@/lib/authStore';
 import { parentService } from '@/services/parentService';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { formatDistanceToNow } from '@/utils/date';
-import { validateRecipient, validateSubject, validateMessage } from '@/utils/validation';
-import { useFormValidation } from '@/hooks/useFormValidation';
-import type { Message, SchoolUser, Teacher } from '@shared/types';
 import { logger } from '@/lib/logger';
 import { PollingInterval } from '@/config/time';
-
-interface MessageThreadProps {
-  messages: Message[];
-  currentUserId: string;
-  onMarkAsRead: (messageId: string) => void;
-}
-
-function MessageThread({ messages, currentUserId, onMarkAsRead }: MessageThreadProps) {
-  useEffect(() => {
-    messages.forEach(msg => {
-      if (!msg.isRead && msg.recipientId === currentUserId) {
-        onMarkAsRead(msg.id);
-      }
-    });
-  }, [messages, currentUserId, onMarkAsRead]);
-
-  if (messages.length === 0) {
-    return (
-      <EmptyState
-        icon={MessageSquare}
-        title="No messages"
-        description="Start a conversation by sending a message."
-      />
-    );
-  }
-
-  return (
-    <div className="space-y-4">
-      {messages.map((message) => {
-        const isSent = message.senderId === currentUserId;
-        return (
-          <div
-            key={message.id}
-            className={`flex ${isSent ? 'justify-end' : 'justify-start'}`}
-          >
-            <div
-              className={`max-w-[80%] rounded-lg p-3 ${
-                isSent
-                  ? 'bg-primary text-primary-foreground'
-                  : 'bg-muted'
-              }`}
-            >
-              <p className="text-sm font-medium mb-1">{message.subject}</p>
-              <p className="text-sm whitespace-pre-wrap">{message.content}</p>
-              <p className={`text-xs mt-2 ${isSent ? 'text-primary-foreground/70' : 'text-muted-foreground'}`}>
-                {formatDistanceToNow(message.createdAt)}
-              </p>
-            </div>
-          </div>
-        );
-      })}
-    </div>
-  );
-}
-
-interface ComposeDialogProps {
-  teachers: SchoolUser[];
-  onSend: (recipientId: string, subject: string, content: string) => void;
-  isLoading: boolean;
-}
-
-function ComposeDialog({ teachers, onSend, isLoading }: ComposeDialogProps) {
-  const [open, setOpen] = useState(false);
-  const [recipientId, setRecipientId] = useState('');
-  const [subject, setSubject] = useState('');
-  const [content, setContent] = useState('');
-
-  const formData = { recipientId, subject, content };
-  const { errors, validateAll, reset: resetValidation } = useFormValidation(formData, {
-    validators: {
-      recipientId: validateRecipient,
-      subject: (value, show) => validateSubject(value, show, 3, 100),
-      content: (value, show) => validateMessage(value, show, 10),
-    },
-  });
-
-  const handleClose = useCallback(() => {
-    setRecipientId('');
-    setSubject('');
-    setContent('');
-    resetValidation();
-    setOpen(false);
-  }, [resetValidation]);
-
-  const handleOpenChange = useCallback((newOpen: boolean) => {
-    if (!newOpen) {
-      handleClose();
-    } else {
-      setOpen(true);
-    }
-  }, [handleClose]);
-
-  const handleSend = () => {
-    if (!validateAll()) return;
-    onSend(recipientId, subject.trim(), content.trim());
-    handleClose();
-  };
-
-  return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogTrigger asChild>
-        <Button>
-          <Send className="h-4 w-4 mr-2" />
-          New Message
-        </Button>
-      </DialogTrigger>
-      <DialogContent className="sm:max-w-[500px]">
-        <DialogHeader>
-          <DialogTitle>Compose Message</DialogTitle>
-        </DialogHeader>
-        <div className="space-y-4 py-4">
-          <FormField
-            id="recipient"
-            label="To (Teacher)"
-            error={errors.recipientId}
-            required
-          >
-            <Select value={recipientId} onValueChange={setRecipientId}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select a teacher" />
-              </SelectTrigger>
-              <SelectContent>
-                {teachers.map((teacher) => (
-                  <SelectItem key={teacher.id} value={teacher.id}>
-                    {teacher.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </FormField>
-          <FormField
-            id="message-subject"
-            label="Subject"
-            error={errors.subject}
-            helperText="Enter a brief subject (3-100 characters)"
-            required
-          >
-            <Input
-              placeholder="Enter subject..."
-              value={subject}
-              onChange={(e) => setSubject(e.target.value)}
-            />
-          </FormField>
-          <FormField
-            id="message-content"
-            label="Message"
-            error={errors.content}
-            helperText="Type your message (minimum 10 characters)"
-            required
-          >
-            <Textarea
-              placeholder="Type your message..."
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-              rows={5}
-            />
-          </FormField>
-          <Button
-            onClick={handleSend}
-            disabled={!recipientId || !subject.trim() || !content.trim()}
-            isLoading={isLoading}
-            className="w-full"
-          >
-            <Send className="h-4 w-4 mr-2" />
-            {isLoading ? 'Sending...' : 'Send Message'}
-          </Button>
-        </div>
-      </DialogContent>
-    </Dialog>
-  );
-}
+import { MessageThread, ComposeDialog } from '@/components/messages';
 
 export function ParentMessagesPage() {
   const prefersReducedMotion = useReducedMotion();
@@ -283,7 +105,9 @@ export function ParentMessagesPage() {
           </Badge>
         </div>
         <ComposeDialog
-          teachers={teachers}
+          recipients={teachers}
+          recipientLabel="To (Teacher)"
+          recipientPlaceholder="Select a teacher"
           onSend={handleSendMessage}
           isLoading={sendMessageMutation.isPending}
         />
