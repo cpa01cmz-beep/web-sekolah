@@ -38,7 +38,8 @@
     "format": "prettier --write \"src/**/*.{ts,tsx,css}\" \"worker/**/*.{ts,tsx}\" \"shared/**/*.{ts,tsx}\"",
     "format:check": "prettier --check \"src/**/*.{ts,tsx,css}\" \"worker/**/*.{ts,tsx}\" \"shared/**/*.{ts,tsx}\"",
     "vercel:build": "vite build",
-    "vercel:preview": "vite preview --host 0.0.0.0 --port ${PORT:-4173}"
+    "vercel:preview": "vite preview --host 0.0.0.0 --port ${PORT:-4173}",
+    "prepare": "husky"
   },
   "dependencies": {
     "@radix-ui/react-avatar": "^1.1.10",
@@ -92,7 +93,9 @@
     "eslint-plugin-react-refresh": "^0.4.19",
     "globals": "^17.0.0",
     "happy-dom": "^20.3.7",
+    "husky": "^9.1.7",
     "jsdom": "^27.4.0",
+    "lint-staged": "^16.2.7",
     "postcss": "^8.5.6",
     "prettier": "^3.8.1",
     "tailwindcss": "^4.1.18",
@@ -101,5 +104,11 @@
     "vite": "^7.3.1",
     "vitest": "^4.0.18",
     "wrangler": "^4.60.0"
+  },
+  "lint-staged": {
+    "*.{ts,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ]
   }
 }

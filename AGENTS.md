@@ -37,9 +37,20 @@ npm run test:run
 npm run test:coverage
 ```
 
-## Pre-commit Requirements
+## Pre-commit Hook
 
-Before committing changes, always run:
+This project uses husky + lint-staged for automatic pre-commit checks:
+- **ESLint**: Auto-fixes linting issues on staged TypeScript files
+- **Prettier**: Auto-formats staged TypeScript files
+
+The pre-commit hook runs automatically when you commit. To bypass it (not recommended):
+```bash
+git commit --no-verify
+```
+
+## Manual Validation
+
+Before committing changes, you can also run:
 ```bash
 npm run validate
 ```
@@ -83,7 +94,7 @@ npm run typecheck && npm run lint && npm run test:run
 - Vitest is the test framework
 - Test files use `.test.ts` suffix
 - Tests are co-located with source files in `__tests__/` directories
-- All 2873 tests should pass
+- All 2888 tests should pass
 
 ## Architecture Patterns
 
