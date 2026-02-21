@@ -234,6 +234,67 @@ describe('DashboardStatCard', () => {
     });
   });
 
+  describe('Loading State', () => {
+    it('should render skeleton when loading is true', () => {
+      const { container } = render(
+        <DashboardStatCard title="Total Students" value={150} loading />
+      );
+
+      expect(container.querySelector('.animate-pulse')).toBeInTheDocument();
+    });
+
+    it('should not render value when loading', () => {
+      render(<DashboardStatCard title="Total Students" value={150} loading />);
+
+      expect(screen.queryByText('150')).not.toBeInTheDocument();
+    });
+
+    it('should not render title when loading', () => {
+      render(<DashboardStatCard title="Total Students" value={150} loading />);
+
+      expect(screen.queryByText('Total Students')).not.toBeInTheDocument();
+    });
+
+    it('should render skeleton for icon slot when loading with icon', () => {
+      const icon = <span data-testid="test-icon">Icon</span>;
+      const { container } = render(
+        <DashboardStatCard title="Users" value={100} icon={icon} loading />
+      );
+
+      const skeletons = container.querySelectorAll('.animate-pulse');
+      expect(skeletons.length).toBeGreaterThan(0);
+    });
+
+    it('should render skeleton for subtitle slot when loading with subtitle', () => {
+      const { container } = render(
+        <DashboardStatCard title="Revenue" value={5000} subtitle="Growth" loading />
+      );
+
+      const skeletons = container.querySelectorAll('.animate-pulse');
+      expect(skeletons.length).toBeGreaterThan(0);
+    });
+
+    it('should respect valueSize when loading', () => {
+      const { container: container2xl } = render(
+        <DashboardStatCard title="Count" value={42} valueSize="2xl" loading />
+      );
+      const { container: container3xl } = render(
+        <DashboardStatCard title="Count" value={42} valueSize="3xl" loading />
+      );
+
+      expect(container2xl.querySelector('.h-8')).toBeInTheDocument();
+      expect(container3xl.querySelector('.h-8')).toBeInTheDocument();
+    });
+
+    it('should apply custom className when loading', () => {
+      const { container } = render(
+        <DashboardStatCard title="Count" value={42} className="custom-loading" loading />
+      );
+
+      expect(container.querySelector('.custom-loading')).toBeInTheDocument();
+    });
+  });
+
   describe('Accessibility', () => {
     it('should have accessible title text', () => {
       render(<DashboardStatCard title="Total Students" value={150} />);
