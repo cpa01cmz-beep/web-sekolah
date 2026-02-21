@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { EmptyState } from '@/components/ui/empty-state';
 import { DashboardSkeleton } from '@/components/ui/loading-skeletons';
@@ -10,7 +11,7 @@ interface DashboardLayoutProps<T> {
   children: React.ReactNode | ((data: T) => React.ReactNode);
 }
 
-export function DashboardLayout<T>({
+function DashboardLayoutInner<T>({
   isLoading,
   error,
   data,
@@ -47,3 +48,9 @@ export function DashboardLayout<T>({
 
   return <>{children}</>;
 }
+
+export const DashboardLayout = memo(DashboardLayoutInner) as <T>(
+  props: DashboardLayoutProps<T>
+) => React.ReactElement;
+
+DashboardLayout.displayName = 'DashboardLayout';
