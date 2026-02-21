@@ -363,4 +363,104 @@ describe('DateSortedSecondaryIndex', () => {
       expect(reversedTimestamps[0] > reversedTimestamps[2]).toBe(true);
     });
   });
+
+  describe('addBatch', () => {
+    it('should add multiple entries in parallel', async () => {
+      const items = [
+        { date: '2026-01-07T12:00:00.000Z', entityId: 'entity-1' },
+        { date: '2026-01-07T13:00:00.000Z', entityId: 'entity-2' },
+        { date: '2026-01-07T14:00:00.000Z', entityId: 'entity-3' },
+      ];
+
+      await index.addBatch(items);
+
+      expect(mockStub.casPut).toHaveBeenCalledTimes(3);
+    });
+
+    it('should handle empty array', async () => {
+      await index.addBatch([]);
+
+      expect(mockStub.casPut).not.toHaveBeenCalled();
+    });
+
+    it('should add entries with correct reversed timestamps', async () => {
+      const testDate = '2026-01-07T12:00:00.000Z';
+      const items = [
+        { date: testDate, entityId: 'entity-1' },
+        { date: testDate, entityId: 'entity-2' },
+      ];
+
+      await index.addBatch(items);
+
+      const timestamp = new Date(testDate).getTime();
+      const reversedTimestamp = Number.MAX_SAFE_INTEGER - timestamp;
+      const expectedKey = `sort:${reversedTimestamp.toString().padStart(20, '0')}`;
+
+      expect(mockStub.casPut).toHaveBeenCalledWith(
+        `${expectedKey}:entity-1`,
+        0,
+        { entityId: 'entity-1' }
+      );
+      expect(mockStub.casPut).toHaveBeenCalledWith(
+        `${expectedKey}:entity-2`,
+        0,
+        { entityId: 'entity-2' }
+      );
+    });
+  });
+
+  describe('removeBatch', () => {
+    it('should remove multiple entries in parallel', async () => {
+      mockStub.del.mockResolvedValue(true);
+      const items = [
+        { date: '2026-01-07T12:00:00.000Z', entityId: 'entity-1' },
+        { date: '2026-01-07T13:00:00.000Z', entityId: 'entity-2' },
+      ];
+
+      const result = await index.removeBatch(items);
+
+      expect(result).toBe(2);
+      expect(mockStub.del).toHaveBeenCalledTimes(2);
+    });
+
+    it('should handle empty array', async () => {
+      const result = await index.removeBatch([]);
+
+      expect(result).toBe(0);
+      expect(mockStub.del).not.toHaveBeenCalled();
+    });
+
+    it('should return count of successfully removed entries', async () => {
+      mockStub.del
+        .mockResolvedValueOnce(true)
+        .mockResolvedValueOnce(false)
+        .mockResolvedValueOnce(true);
+
+      const items = [
+        { date: '2026-01-07T12:00:00.000Z', entityId: 'entity-1' },
+        { date: '2026-01-07T13:00:00.000Z', entityId: 'entity-2' },
+        { date: '2026-01-07T14:00:00.000Z', entityId: 'entity-3' },
+      ];
+
+      const result = await index.removeBatch(items);
+
+      expect(result).toBe(2);
+    });
+
+    it('should remove entries with correct keys', async () => {
+      mockStub.del.mockResolvedValue(true);
+      const testDate = '2026-01-07T12:00:00.000Z';
+      const items = [
+        { date: testDate, entityId: 'entity-1' },
+      ];
+
+      await index.removeBatch(items);
+
+      const timestamp = new Date(testDate).getTime();
+      const reversedTimestamp = Number.MAX_SAFE_INTEGER - timestamp;
+      const expectedKey = `sort:${reversedTimestamp.toString().padStart(20, '0')}:entity-1`;
+
+      expect(mockStub.del).toHaveBeenCalledWith(expectedKey);
+    });
+  });
 });
