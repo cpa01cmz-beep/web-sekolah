@@ -119,6 +119,28 @@ export function parentRoutes(app: Hono<{ Bindings: Env }>) {
     return ok(c, message);
   }));
 
+  app.delete('/api/parents/:id/messages/:messageId', ...withAuth('parent'), withErrorHandler('delete parent message')(async (c: Context) => {
+    const messageId = c.req.param('messageId');
+    const parentId = getCurrentUserId(c);
+    
+    const message = await MessageEntity.get(c.env, messageId);
+    if (!message) {
+      return notFound(c, 'Message not found');
+    }
+    
+    if (message.senderId !== parentId && message.recipientId !== parentId) {
+      return notFound(c, 'Message not found');
+    }
+    
+    const deleted = await MessageEntity.softDelete(c.env, messageId);
+    if (!deleted) {
+      return notFound(c, 'Message not found');
+    }
+    
+    triggerWebhookSafely(c.env, 'message.deleted', { id: messageId, deletedBy: parentId }, { messageId });
+    return ok(c, { deleted: true, id: messageId });
+  }));
+
   app.get('/api/parents/:id/teachers', ...withUserValidation('parent', 'messages'), withErrorHandler('get child teachers')(async (c: Context) => {
     const parentId = c.req.param('id');
     const parent = await CommonDataService.getUserById(c.env, parentId);

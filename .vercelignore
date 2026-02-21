@@ -16,7 +16,7 @@ node_modules/.cache/
 .env.*
 !.env.example
 .github/
-docs/wiki/
+wiki/
 prompts/
 SECURITY*.md
 CHANGELOG*.md
