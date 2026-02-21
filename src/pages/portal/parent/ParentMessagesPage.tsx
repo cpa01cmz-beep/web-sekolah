@@ -1,22 +1,19 @@
 import { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { EmptyState } from '@/components/ui/empty-state';
 import { PageHeader } from '@/components/PageHeader';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Mail, Send, Inbox, User, AlertTriangle, Loader2 } from 'lucide-react';
+import { Mail, Send, Inbox, AlertTriangle, Loader2 } from 'lucide-react';
 import { SlideUp } from '@/components/animations';
 import { useReducedMotion } from '@/hooks/use-reduced-motion';
 import { useAuthStore } from '@/lib/authStore';
 import { parentService } from '@/services/parentService';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { formatDistanceToNow } from '@/utils/date';
 import { logger } from '@/lib/logger';
 import { PollingInterval } from '@/config/time';
-import { MessageThread, ComposeDialog } from '@/components/messages';
+import { MessageThread, ComposeDialog, MessageList } from '@/components/messages';
 
 export function ParentMessagesPage() {
   const prefersReducedMotion = useReducedMotion();
@@ -40,7 +37,7 @@ export function ParentMessagesPage() {
     refetchInterval: PollingInterval.THIRTY_SECONDS,
   });
 
-  const { data: teachers = [], isLoading: teachersLoading } = useQuery({
+  const { data: teachers = [] } = useQuery({
     queryKey: ['parent-teachers', parentId],
     queryFn: () => parentService.getChildTeachers(parentId),
     enabled: !!parentId,
@@ -126,104 +123,32 @@ export function ParentMessagesPage() {
         </TabsList>
 
         <TabsContent value="inbox" className="mt-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Inbox</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {messagesLoading ? (
-                <div className="flex justify-center py-8">
-                  <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-                </div>
-              ) : messages.length === 0 ? (
-                <EmptyState
-                  icon={Inbox}
-                  title="No messages"
-                  description="Your inbox is empty. Messages from teachers will appear here."
-                />
-              ) : (
-                <ScrollArea className="h-[400px]">
-                  <div className="space-y-2">
-                    {messages.map((message) => (
-                      <button
-                        key={message.id}
-                        onClick={() => setSelectedTeacherId(message.senderId)}
-                        className={`w-full text-left p-3 rounded-lg transition-colors ${
-                          !message.isRead && message.recipientId === parentId
-                            ? 'bg-primary/5 hover:bg-primary/10'
-                            : 'hover:bg-muted'
-                        }`}
-                      >
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <User className="h-4 w-4 text-muted-foreground" />
-                            <span className="font-medium">
-                              {teachers.find(t => t.id === message.senderId)?.name || 'Teacher'}
-                            </span>
-                            {!message.isRead && message.recipientId === parentId && (
-                              <Badge variant="default" className="text-xs">New</Badge>
-                            )}
-                          </div>
-                          <span className="text-xs text-muted-foreground">
-                            {formatDistanceToNow(message.createdAt)}
-                          </span>
-                        </div>
-                        <p className="text-sm font-medium mt-1 truncate">{message.subject}</p>
-                        <p className="text-sm text-muted-foreground truncate">{message.content}</p>
-                      </button>
-                    ))}
-                  </div>
-                </ScrollArea>
-              )}
-            </CardContent>
-          </Card>
+          <MessageList
+            title="Inbox"
+            messages={messages}
+            isLoading={messagesLoading}
+            contacts={teachers}
+            currentUserId={parentId}
+            emptyIcon={Inbox}
+            emptyTitle="No messages"
+            emptyDescription="Your inbox is empty. Messages from teachers will appear here."
+            onSelectMessage={setSelectedTeacherId}
+          />
         </TabsContent>
 
         <TabsContent value="sent" className="mt-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Sent Messages</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {messagesLoading ? (
-                <div className="flex justify-center py-8">
-                  <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-                </div>
-              ) : messages.length === 0 ? (
-                <EmptyState
-                  icon={Send}
-                  title="No sent messages"
-                  description="Messages you send will appear here."
-                />
-              ) : (
-                <ScrollArea className="h-[400px]">
-                  <div className="space-y-2">
-                    {messages.map((message) => (
-                      <button
-                        key={message.id}
-                        onClick={() => setSelectedTeacherId(message.recipientId)}
-                        className="w-full text-left p-3 rounded-lg hover:bg-muted transition-colors"
-                      >
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <User className="h-4 w-4 text-muted-foreground" />
-                            <span className="font-medium">
-                              To: {teachers.find(t => t.id === message.recipientId)?.name || 'Teacher'}
-                            </span>
-                          </div>
-                          <span className="text-xs text-muted-foreground">
-                            {formatDistanceToNow(message.createdAt)}
-                          </span>
-                        </div>
-                        <p className="text-sm font-medium mt-1 truncate">{message.subject}</p>
-                        <p className="text-sm text-muted-foreground truncate">{message.content}</p>
-                      </button>
-                    ))}
-                  </div>
-                </ScrollArea>
-              )}
-            </CardContent>
-          </Card>
+          <MessageList
+            title="Sent Messages"
+            messages={messages}
+            isLoading={messagesLoading}
+            contacts={teachers}
+            currentUserId={parentId}
+            emptyIcon={Send}
+            emptyTitle="No sent messages"
+            emptyDescription="Messages you send will appear here."
+            isSentFolder
+            onSelectMessage={setSelectedTeacherId}
+          />
         </TabsContent>
       </Tabs>
 
