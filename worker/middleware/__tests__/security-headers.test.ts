@@ -213,4 +213,77 @@ describe('Security Headers Middleware', () => {
     expect(permissionsPolicy).toContain('camera=()');
     expect(permissionsPolicy).toContain('payment=()');
   });
+
+  it('should add Cache-Control header to prevent sensitive data caching', async () => {
+    const app = new Hono();
+    app.use('*', securityHeaders());
+    app.get('/test', (c) => c.json({ success: true }));
+
+    const res = await app.request('/test');
+
+    expect(res.status).toBe(200);
+    const cacheControl = res.headers.get('Cache-Control');
+    expect(cacheControl).toBe('no-store, no-cache, must-revalidate, proxy-revalidate');
+  });
+
+  it('should add Pragma header for legacy HTTP/1.0 compatibility', async () => {
+    const app = new Hono();
+    app.use('*', securityHeaders());
+    app.get('/test', (c) => c.json({ success: true }));
+
+    const res = await app.request('/test');
+
+    expect(res.status).toBe(200);
+    expect(res.headers.get('Pragma')).toBe('no-cache');
+  });
+
+  it('should add Expires header to prevent caching', async () => {
+    const app = new Hono();
+    app.use('*', securityHeaders());
+    app.get('/test', (c) => c.json({ success: true }));
+
+    const res = await app.request('/test');
+
+    expect(res.status).toBe(200);
+    expect(res.headers.get('Expires')).toBe('0');
+  });
+
+  it('should add Surrogate-Control header for CDN caching control', async () => {
+    const app = new Hono();
+    app.use('*', securityHeaders());
+    app.get('/test', (c) => c.json({ success: true }));
+
+    const res = await app.request('/test');
+
+    expect(res.status).toBe(200);
+    expect(res.headers.get('Surrogate-Control')).toBe('no-store');
+  });
+
+  it('should include all cache-related headers for sensitive API responses', async () => {
+    const app = new Hono();
+    app.use('*', securityHeaders());
+    app.get('/api/user', (c) => c.json({ user: { id: '1', email: 'test@example.com' } }));
+
+    const res = await app.request('/api/user');
+
+    expect(res.status).toBe(200);
+    expect(res.headers.get('Cache-Control')).toBe('no-store, no-cache, must-revalidate, proxy-revalidate');
+    expect(res.headers.get('Pragma')).toBe('no-cache');
+    expect(res.headers.get('Expires')).toBe('0');
+    expect(res.headers.get('Surrogate-Control')).toBe('no-store');
+  });
+
+  it('should include usb in Permissions-Policy restrictions', async () => {
+    const app = new Hono();
+    app.use('*', securityHeaders());
+    app.get('/test', (c) => c.json({ success: true }));
+
+    const res = await app.request('/test');
+
+    expect(res.status).toBe(200);
+    const permissionsPolicy = res.headers.get('Permissions-Policy');
+    expect(permissionsPolicy).toContain('usb=()');
+    expect(permissionsPolicy).toContain('magnetometer=()');
+    expect(permissionsPolicy).toContain('gyroscope=()');
+  });
 });
