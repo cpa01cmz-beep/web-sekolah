@@ -243,11 +243,35 @@ const students = await UserEntity.getByRole(env, 'student');
 ### Index Rebuild
 
 Secondary indexes can be rebuilt using:
+
+**Rebuild all indexes:**
 ```
 POST /api/admin/rebuild-indexes
 ```
 
 This clears and rebuilds all secondary indexes from existing data.
+
+**Rebuild indexes for a specific entity:**
+```
+POST /api/admin/rebuild-indexes/:entity
+```
+
+Supported entity names: `user`, `class`, `course`, `grade`, `announcement`, `webhookConfig`, `webhookEvent`, `webhookDelivery`, `deadLetterQueue`, `message`, `publicContent`
+
+Example:
+```
+POST /api/admin/rebuild-indexes/user
+POST /api/admin/rebuild-indexes/grade
+```
+
+**Get list of supported entities:**
+```
+GET /api/admin/rebuild-indexes/entities
+```
+
+Returns: `{ "success": true, "data": { "entities": ["user", "class", ...] } }`
+
+This allows selective index rebuilding for maintenance and debugging purposes without the overhead of rebuilding all indexes.
 
 ### Data Model Design Notes
 

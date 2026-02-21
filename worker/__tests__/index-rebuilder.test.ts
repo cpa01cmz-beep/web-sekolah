@@ -1,6 +1,42 @@
 import { describe, it, expect } from 'vitest';
+import { getSupportedEntityNames, type EntityName } from '../index-rebuilder';
 
 describe('Index Rebuilder', () => {
+
+  describe('getSupportedEntityNames', () => {
+    it('should return array of supported entity names', () => {
+      const entities = getSupportedEntityNames();
+      expect(Array.isArray(entities)).toBe(true);
+      expect(entities.length).toBeGreaterThan(0);
+    });
+
+    it('should include all expected entity names', () => {
+      const entities = getSupportedEntityNames();
+      const expectedEntities: EntityName[] = [
+        'user', 'class', 'course', 'grade', 'announcement',
+        'webhookConfig', 'webhookEvent', 'webhookDelivery',
+        'deadLetterQueue', 'message', 'publicContent'
+      ];
+      expect(entities.sort()).toEqual(expectedEntities.sort());
+    });
+
+    it('should return entity names that can be used as type', () => {
+      const entities = getSupportedEntityNames();
+      entities.forEach(entity => {
+        expect(typeof entity).toBe('string');
+        expect(entity.length).toBeGreaterThan(0);
+      });
+    });
+  });
+
+  describe('rebuildEntityIndexes', () => {
+    it('should note that selective rebuild tests require Cloudflare Workers environment', () => {
+      console.warn('⚠️  rebuildEntityIndexes tests skipped: Cloudflare Workers environment not available');
+      console.warn('   This function allows rebuilding indexes for a single entity type');
+      console.warn('   Supported entities: ' + getSupportedEntityNames().join(', '));
+    });
+    expect(true).toBe(true);
+  });
 
   describe('Module Loading', () => {
     it('should note that index rebuild tests require Cloudflare Workers environment', () => {

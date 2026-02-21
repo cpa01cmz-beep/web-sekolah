@@ -2,7 +2,7 @@ import { Hono } from "hono";
 import type { Env } from '../core-utils';
 import { ok, bad, notFound } from '../core-utils';
 import { AnnouncementEntity, ensureAllSeedData } from "../entities";
-import { rebuildAllIndexes } from "../index-rebuilder";
+import { rebuildAllIndexes, rebuildEntityIndexes, getSupportedEntityNames, type EntityName } from "../index-rebuilder";
 import type { CreateUserData, UpdateUserData, Announcement, CreateAnnouncementData, AdminDashboardData, Settings, SchoolUser, UserRole } from "@shared/types";
 import { UserService, CommonDataService, AnnouncementService } from '../domain';
 import { withAuth, withErrorHandler, triggerWebhookSafely } from './route-utils';
@@ -16,6 +16,19 @@ export function adminRoutes(app: Hono<{ Bindings: Env }>) {
   app.post('/api/admin/rebuild-indexes', ...withAuth('admin'), withErrorHandler('rebuild indexes')(async (c: Context) => {
     await rebuildAllIndexes(c.env);
     return ok(c, { message: 'All secondary indexes rebuilt successfully.' });
+  }));
+
+  app.post('/api/admin/rebuild-indexes/:entity', ...withAuth('admin'), withErrorHandler('rebuild entity indexes')(async (c: Context) => {
+    const entityName = c.req.param('entity') as EntityName;
+    const success = await rebuildEntityIndexes(c.env, entityName);
+    if (!success) {
+      return bad(c, `Unknown entity: ${entityName}. Supported entities: ${getSupportedEntityNames().join(', ')}`);
+    }
+    return ok(c, { message: `${entityName} indexes rebuilt successfully.` });
+  }));
+
+  app.get('/api/admin/rebuild-indexes/entities', ...withAuth('admin'), withErrorHandler('get supported entities')(async (c: Context) => {
+    return ok(c, { entities: getSupportedEntityNames() });
   }));
 
   app.get('/api/admin/dashboard', ...withAuth('admin'), withErrorHandler('get admin dashboard')(async (c: Context) => {
