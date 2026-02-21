@@ -68,8 +68,8 @@ export function adminRoutes(app: Hono<{ Bindings: Env }>) {
     return ok(c, newAnnouncement);
   }));
 
-  app.put('/api/admin/announcements/:id', ...withAuth('admin'), validateBody(updateAnnouncementSchema), withErrorHandler('update announcement')(async (c: Context) => {
-    const announcementId = c.req.param('id');
+  app.put('/api/admin/announcements/:id', ...withAuth('admin'), validateParams(paramsSchema), validateBody(updateAnnouncementSchema), withErrorHandler('update announcement')(async (c: Context) => {
+    const { id: announcementId } = c.get('validatedParams') as { id: string };
     const updates = c.get('validatedBody') as Partial<CreateAnnouncementData>;
     const updatedAnnouncement = await AnnouncementService.updateAnnouncement(c.env, announcementId, updates);
     triggerWebhookSafely(c.env, 'announcement.updated', updatedAnnouncement, { announcementId: updatedAnnouncement.id });
