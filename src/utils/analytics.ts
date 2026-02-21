@@ -285,3 +285,73 @@ export function calculatePerformanceSummary(scores: number[]): PerformanceSummar
     gradeDistribution: calculateGradeDistribution(scores),
   };
 }
+
+export interface AnomalyDetectionResult {
+  outliers: number[];
+  lowerBound: number;
+  upperBound: number;
+  iqr: number;
+}
+
+export function detectAnomalies(values: number[]): AnomalyDetectionResult {
+  if (values.length < 4) {
+    return { outliers: [], lowerBound: 0, upperBound: 0, iqr: 0 };
+  }
+
+  const sorted = [...values].sort((a, b) => a - b);
+  const q1 = calculatePercentile(sorted, 25);
+  const q3 = calculatePercentile(sorted, 75);
+  const iqr = q3 - q1;
+  const lowerBound = q1 - 1.5 * iqr;
+  const upperBound = q3 + 1.5 * iqr;
+  const outliers = values.filter(v => v < lowerBound || v > upperBound);
+
+  return {
+    outliers,
+    lowerBound: Math.round(lowerBound * 100) / 100,
+    upperBound: Math.round(upperBound * 100) / 100,
+    iqr: Math.round(iqr * 100) / 100,
+  };
+}
+
+export interface TrendAnalysis {
+  direction: 'up' | 'down' | 'stable';
+  slope: number;
+  confidence: number;
+  prediction?: number;
+}
+
+export function analyzeTrend(values: number[]): TrendAnalysis {
+  if (values.length < 2) {
+    return { direction: 'stable', slope: 0, confidence: 0 };
+  }
+
+  const n = values.length;
+  const xMean = (n - 1) / 2;
+  const yMean = calculateAverage(values);
+
+  let numerator = 0;
+  let denominator = 0;
+
+  for (let i = 0; i < n; i++) {
+    numerator += (i - xMean) * (values[i] - yMean);
+    denominator += Math.pow(i - xMean, 2);
+  }
+
+  const slope = denominator === 0 ? 0 : numerator / denominator;
+  const slopeAbs = Math.abs(slope);
+  const stdDev = calculateStandardDeviation(values);
+  const confidence = stdDev > 0 ? Math.min(slopeAbs / stdDev * 10, 100) : 0;
+
+  const direction: 'up' | 'down' | 'stable' =
+    slopeAbs < 0.1 ? 'stable' : slope > 0 ? 'up' : 'down';
+
+  const prediction = values.length >= 3 ? Math.round((yMean + slope * n) * 100) / 100 : undefined;
+
+  return {
+    direction,
+    slope: Math.round(slope * 100) / 100,
+    confidence: Math.round(confidence),
+    prediction,
+  };
+}
