@@ -3,6 +3,9 @@ import { Link } from 'react-router-dom';
 import { THEME_COLORS } from '@/theme/colors';
 import { APP_CONFIG } from '@/config/app-config';
 import { memo } from 'react';
+
+const CURRENT_YEAR = new Date().getFullYear();
+
 export const SiteFooter = memo(function SiteFooter() {
   return (
     <footer className="bg-muted text-muted-foreground">
@@ -49,7 +52,7 @@ export const SiteFooter = memo(function SiteFooter() {
           </div>
         </div>
         <div className="mt-8 pt-8 border-t text-center text-sm">
-          <p>&copy; {new Date().getFullYear()} {APP_CONFIG.NAME}. All rights reserved.</p>
+          <p>&copy; {CURRENT_YEAR} {APP_CONFIG.NAME}. All rights reserved.</p>
           <p className="mt-1">Built with Cloudflare</p>
         </div>
       </div>

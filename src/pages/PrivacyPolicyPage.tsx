@@ -3,6 +3,8 @@ import { SiteFooter } from '@/components/SiteFooter';
 import { SlideUp } from '@/components/animations';
 import { formatDate } from '@/utils/date';
 
+const LAST_UPDATED_DATE = formatDate(new Date(), 'long');
+
 export function PrivacyPolicyPage() {
   return (
     <div className="flex flex-col min-h-screen bg-background">
@@ -17,7 +19,7 @@ export function PrivacyPolicyPage() {
             </SlideUp>
             <SlideUp delay={0.2}>
               <p className="mt-4 max-w-2xl mx-auto text-lg text-muted-foreground">
-                Last updated: {formatDate(new Date(), 'long')}
+                Last updated: {LAST_UPDATED_DATE}
               </p>
             </SlideUp>
           </div>
