@@ -163,6 +163,26 @@ export class MessageEntity extends IndexedEntity<Message> {
     return await super.delete(env, id);
   }
 
+  static async softDelete(env: Env, id: string): Promise<Message | null> {
+    const inst = new this(env, id);
+    const state = await inst.getState() as Message | null;
+    if (!state || state.deletedAt) return null;
+
+    const now = new Date().toISOString();
+    
+    const compoundIndex = new CompoundSecondaryIndex(env, this.entityName, ['recipientId', 'isRead']);
+    await compoundIndex.remove([state.recipientId, state.isRead.toString()], id);
+    
+    const sentDateIndex = new UserDateSortedIndex(env, this.entityName, state.senderId, 'sent');
+    await sentDateIndex.remove(state.createdAt, id);
+    
+    const receivedDateIndex = new UserDateSortedIndex(env, this.entityName, state.recipientId, 'received');
+    await receivedDateIndex.remove(state.createdAt, id);
+
+    const updated = await super.update(env, id, { deletedAt: now, updatedAt: now });
+    return updated;
+  }
+
   static async updateWithAllIndexes(env: Env, id: string, updates: Partial<Message>): Promise<Message | null> {
     const inst = new this(env, id);
     const currentState = await inst.getState() as Message | null;
