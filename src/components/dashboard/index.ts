@@ -3,3 +3,4 @@ export { DashboardLayout } from './DashboardLayout';
 export { AnnouncementItem } from './AnnouncementItem';
 export { EnrollmentChart } from './EnrollmentChart';
 export { GradeListItem } from './GradeListItem';
+export { DashboardCardEmptyState } from './DashboardCardEmptyState';

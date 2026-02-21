@@ -4,6 +4,7 @@ import { PageHeader } from '@/components/PageHeader';
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
 import { AnnouncementItem } from '@/components/dashboard/AnnouncementItem';
 import { GradeListItem } from '@/components/dashboard/GradeListItem';
+import { DashboardCardEmptyState } from '@/components/dashboard/DashboardCardEmptyState';
 import { Award, CalendarCheck, Megaphone } from 'lucide-react';
 import { SlideUp } from '@/components/animations';
 import { useReducedMotion } from '@/hooks/use-reduced-motion';
@@ -47,7 +48,7 @@ export function ParentDashboardPage() {
                 </CardHeader>
                   <CardContent>
                     {data.childGrades.length === 0 ? (
-                      <p className="text-sm text-muted-foreground text-center py-4" role="status">No grades recorded yet.</p>
+                      <DashboardCardEmptyState message="No grades recorded yet." />
                     ) : (
                       <ul className="space-y-3" aria-labelledby="grades-heading" aria-label={`${data.childGrades.length} recent grades`}>
                         {data.childGrades.map((grade) => (
@@ -66,7 +67,7 @@ export function ParentDashboardPage() {
                 </CardHeader>
                   <CardContent>
                     {data.childSchedule.length === 0 ? (
-                      <p className="text-sm text-muted-foreground text-center py-4" role="status">No schedule available.</p>
+                      <DashboardCardEmptyState message="No schedule available." />
                     ) : (
                       <ul className="space-y-2" aria-labelledby="schedule-heading" aria-label={`${Math.min(data.childSchedule.length, 5)} scheduled classes`}>
                         {data.childSchedule.slice(0, 5).map((item) => (
@@ -85,7 +86,7 @@ export function ParentDashboardPage() {
                 </CardHeader>
                   <CardContent>
                     {data.announcements.length === 0 ? (
-                      <p className="text-sm text-muted-foreground text-center py-4" role="status">No announcements available.</p>
+                      <DashboardCardEmptyState message="No announcements available." />
                     ) : (
                       <ul className="space-y-3" aria-labelledby="announcements-heading" aria-label={`${data.announcements.length} announcements`}>
                         {data.announcements.map((ann) => (
