@@ -6018,7 +6018,7 @@ const hasTeacher = await UserEntity.existsBySecondaryIndex(env, 'role', 'teacher
 - `worker/entities/IndexedEntity.ts`: Added `existsBySecondaryIndex()` method
 - `worker/entities/UserEntity.ts`: Added convenience methods for email, role, classId
 - `worker/entities/__tests__/IndexedEntity.test.ts`: Added tests for new methods
-- All 2903+ tests passing (0 regressions)
+- All 2936+ tests passing (0 regressions)
 
 **Success**: ✅ **EXISTS BY SECONDARY INDEX METHOD COMPLETE, ADDED EFFICIENT EXISTENCE CHECKS WITHOUT LOADING ENTITY DATA, ALL TESTS PASSING, ZERO REGRESSIONS**
 
