@@ -85,6 +85,11 @@ export abstract class BaseDateSortedIndex extends Entity<unknown> {
       .filter((id): id is string => id !== null);
   }
 
+  async count(): Promise<number> {
+    const { keys } = await this.stub.listPrefix(SORT_PREFIX);
+    return keys.length;
+  }
+
   async clear(): Promise<void> {
     const { keys } = await this.stub.listPrefix(SORT_PREFIX);
     await Promise.all(keys.map((key: string) => this.stub.del(key)));
