@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { getGradeLetter, getGradeColorClass, getGradeBadgeVariant, calculateAverageScore } from '../grades';
+import { getGradeLetter, getGradeColorClass, getGradeBadgeVariant, calculateAverageScore, getGradeDistribution, getPassingGradeCount, getPassingRate } from '../grades';
 
 describe('Grade Utility Functions', () => {
   describe('getGradeLetter', () => {
@@ -143,6 +143,105 @@ describe('Grade Utility Functions', () => {
         { score: 84.666 }
       ];
       expect(calculateAverageScore(grades)).toBe('85.00');
+    });
+  });
+
+  describe('getGradeDistribution', () => {
+    it('should return correct distribution for mixed grades', () => {
+      const grades = [
+        { score: 95 },
+        { score: 85 },
+        { score: 75 },
+        { score: 65 },
+        { score: 55 }
+      ];
+      expect(getGradeDistribution(grades)).toEqual({ A: 1, B: 1, C: 1, D: 1, F: 1 });
+    });
+
+    it('should return all zeros for empty array', () => {
+      expect(getGradeDistribution([])).toEqual({ A: 0, B: 0, C: 0, D: 0, F: 0 });
+    });
+
+    it('should handle all A grades', () => {
+      const grades = [
+        { score: 90 },
+        { score: 95 },
+        { score: 100 }
+      ];
+      expect(getGradeDistribution(grades)).toEqual({ A: 3, B: 0, C: 0, D: 0, F: 0 });
+    });
+
+    it('should handle boundary values correctly', () => {
+      const grades = [
+        { score: 90 },
+        { score: 80 },
+        { score: 70 },
+        { score: 60 },
+        { score: 59 }
+      ];
+      expect(getGradeDistribution(grades)).toEqual({ A: 1, B: 1, C: 1, D: 1, F: 1 });
+    });
+  });
+
+  describe('getPassingGradeCount', () => {
+    it('should return count of passing grades (A, B, C, D)', () => {
+      const distribution = { A: 2, B: 3, C: 1, D: 1, F: 2 };
+      expect(getPassingGradeCount(distribution)).toBe(7);
+    });
+
+    it('should return 0 for all F grades', () => {
+      const distribution = { A: 0, B: 0, C: 0, D: 0, F: 5 };
+      expect(getPassingGradeCount(distribution)).toBe(0);
+    });
+
+    it('should return total for all passing grades', () => {
+      const distribution = { A: 5, B: 0, C: 0, D: 0, F: 0 };
+      expect(getPassingGradeCount(distribution)).toBe(5);
+    });
+  });
+
+  describe('getPassingRate', () => {
+    it('should calculate passing rate correctly', () => {
+      const grades = [
+        { score: 90 },
+        { score: 80 },
+        { score: 70 },
+        { score: 50 },
+        { score: 55 }
+      ];
+      expect(getPassingRate(grades)).toBe('60.0');
+    });
+
+    it('should return 100.0 for all passing grades', () => {
+      const grades = [
+        { score: 90 },
+        { score: 80 },
+        { score: 70 }
+      ];
+      expect(getPassingRate(grades)).toBe('100.0');
+    });
+
+    it('should return 0.0 for all failing grades', () => {
+      const grades = [
+        { score: 50 },
+        { score: 55 },
+        { score: 30 }
+      ];
+      expect(getPassingRate(grades)).toBe('0.0');
+    });
+
+    it('should return 0.00 for empty array', () => {
+      expect(getPassingRate([])).toBe('0.00');
+    });
+
+    it('should handle boundary at 60', () => {
+      const grades = [{ score: 60 }];
+      expect(getPassingRate(grades)).toBe('100.0');
+    });
+
+    it('should handle boundary at 59', () => {
+      const grades = [{ score: 59 }];
+      expect(getPassingRate(grades)).toBe('0.0');
     });
   });
 });

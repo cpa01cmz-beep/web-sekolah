@@ -8,7 +8,7 @@ import { PageHeader } from '@/components/PageHeader';
 import { SlideUp } from '@/components/animations';
 import { useStudentDashboard } from '@/hooks/useStudent';
 import { useAuthStore } from '@/lib/authStore';
-import { calculateAverageScore, getGradeColorClass, getGradeLetter } from '@/utils/grades';
+import { calculateAverageScore, getGradeColorClass, getGradeLetter, getGradeDistribution, getPassingRate } from '@/utils/grades';
 import { ResponsiveTable } from '@/components/ui/responsive-table';
 
 const TABLE_HEADERS = [
@@ -29,6 +29,10 @@ export function StudentGradesPage() {
     grades.length > 0 ? calculateAverageScore(grades) : '-',
     [grades]
   );
+
+  const gradeDistribution = useMemo(() => getGradeDistribution(grades), [grades]);
+  
+  const passingRate = useMemo(() => getPassingRate(grades), [grades]);
 
   const tableRows = useMemo(() => grades.map((grade, index) => ({
     id: grade.id,
@@ -65,6 +69,41 @@ export function StudentGradesPage() {
   return (
     <SlideUp className="space-y-6">
       <PageHeader title="Rapor Akademik" />
+      {grades.length > 0 && (
+        <div className="grid gap-4 md:grid-cols-4">
+          <Card>
+            <CardHeader className="pb-2">
+              <CardDescription>Rata-rata Nilai</CardDescription>
+              <CardTitle className="text-2xl">{averageScore}</CardTitle>
+            </CardHeader>
+          </Card>
+          <Card>
+            <CardHeader className="pb-2">
+              <CardDescription>Tingkat Kelulusan</CardDescription>
+              <CardTitle className="text-2xl">{passingRate}%</CardTitle>
+            </CardHeader>
+          </Card>
+          <Card className="md:col-span-2">
+            <CardHeader className="pb-2">
+              <CardDescription>Distribusi Nilai</CardDescription>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <div className="flex gap-2 flex-wrap">
+                {(['A', 'B', 'C', 'D', 'F'] as const).map((letter) => {
+                  const count = gradeDistribution[letter];
+                  if (count === 0) return null;
+                  const scoreMap = { A: 95, B: 85, C: 75, D: 65, F: 50 };
+                  return (
+                    <Badge key={letter} className={`text-white ${getGradeColorClass(scoreMap[letter])}`}>
+                      {letter}: {count}
+                    </Badge>
+                  );
+                })}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
       <Card className="overflow-hidden">
         <CardHeader>
           <CardTitle>Laporan Hasil Belajar</CardTitle>
