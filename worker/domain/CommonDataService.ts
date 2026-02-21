@@ -1,6 +1,7 @@
 import type { Env } from '../core-utils';
 import { UserEntity, ClassEntity, AnnouncementEntity, ScheduleEntity, ClassScheduleState, CourseEntity, GradeEntity } from '../entities';
 import type { SchoolUser, SchoolClass, Announcement, Student, ScheduleItem, Grade, Course, UserRole } from '@shared/types';
+import { USER_ROLES } from '@shared/constants';
 import { getUniqueIds, buildEntityMap, fetchAndMap } from './EntityMapUtils';
 
 export class CommonDataService {
@@ -101,7 +102,7 @@ export class CommonDataService {
     let users: SchoolUser[];
 
     if (role && !search) {
-      const validRoles: UserRole[] = ['student', 'teacher', 'parent', 'admin'];
+      const validRoles: UserRole[] = [...USER_ROLES];
       const typedRole = role as UserRole;
       if (validRoles.includes(typedRole)) {
         users = await UserEntity.getByRole(env, typedRole);

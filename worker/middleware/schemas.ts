@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { StatusCodeRanges, ValidationLimits } from '../config/validation';
+import { StatusCodeRanges, ValidationLimits, USER_ROLES } from '../config/validation';
 import type { Context } from 'hono';
 import { WEBHOOK_EVENT_TYPES } from '@shared/webhook.types';
 
@@ -10,8 +10,8 @@ const webhookEventTypeSchema = z.enum(WEBHOOK_EVENT_TYPES, {
 export const createUserSchema = z.object({
   name: z.string().min(ValidationLimits.USER_NAME_MIN_LENGTH, 'Name must be at least 2 characters').max(ValidationLimits.USER_NAME_MAX_LENGTH, 'Name must be less than 100 characters'),
   email: z.string().email('Invalid email address'),
-  role: z.enum(['student', 'teacher', 'parent', 'admin'], {
-    message: 'Invalid role. Must be student, teacher, parent, or admin',
+  role: z.enum(USER_ROLES, {
+    message: `Invalid role. Must be one of: ${USER_ROLES.join(', ')}`,
   }),
   password: z.string().min(8, 'Password must be at least 8 characters')
     .regex(/[A-Z]/, 'Password must contain at least one uppercase letter')
@@ -60,8 +60,8 @@ export const updateAnnouncementSchema = createAnnouncementSchema.partial().omit(
 export const loginSchema = z.object({
   email: z.string().email('Invalid email address'),
   password: z.string().min(1, 'Password is required'),
-  role: z.enum(['student', 'teacher', 'parent', 'admin'], {
-    message: 'Invalid role. Must be student, teacher, parent, or admin',
+  role: z.enum(USER_ROLES, {
+    message: `Invalid role. Must be one of: ${USER_ROLES.join(', ')}`,
   }),
 });
 
@@ -92,7 +92,7 @@ export const clientErrorSchema = z.object({
 export const updateSettingsSchema = z.object({
   schoolName: z.string().min(2, 'School name must be at least 2 characters').max(100, 'School name must be less than 100 characters').optional(),
   academicYear: z.string().regex(/^\d{4}-\d{4}$/, 'Academic year must be in format YYYY-YYYY').optional(),
-  semester: z.number().int().min(1, 'Semester must be 1 or 2').max(2, 'Semester must be 1 or 2').optional(),
+  semester: z.number().int().min(ValidationLimits.SEMESTER_MIN, `Semester must be ${ValidationLimits.SEMESTER_MIN} or ${ValidationLimits.SEMESTER_MAX}`).max(ValidationLimits.SEMESTER_MAX, `Semester must be ${ValidationLimits.SEMESTER_MIN} or ${ValidationLimits.SEMESTER_MAX}`).optional(),
   allowRegistration: z.boolean().optional(),
   maintenanceMode: z.boolean().optional(),
 });
@@ -100,14 +100,14 @@ export const updateSettingsSchema = z.object({
 export const createWebhookConfigSchema = z.object({
   url: z.string().url('Invalid webhook URL'),
   events: z.array(webhookEventTypeSchema).min(1, 'At least one event must be specified'),
-  secret: z.string().min(16, 'Webhook secret must be at least 16 characters').max(500, 'Webhook secret is too long'),
+  secret: z.string().min(ValidationLimits.WEBHOOK_SECRET_MIN_LENGTH, `Webhook secret must be at least ${ValidationLimits.WEBHOOK_SECRET_MIN_LENGTH} characters`).max(ValidationLimits.WEBHOOK_SECRET_MAX_LENGTH, 'Webhook secret is too long'),
   active: z.boolean().optional(),
 });
 
 export const updateWebhookConfigSchema = z.object({
   url: z.string().url('Invalid webhook URL').optional(),
   events: z.array(webhookEventTypeSchema).min(1, 'At least one event must be specified').optional(),
-  secret: z.string().min(16, 'Webhook secret must be at least 16 characters').max(500, 'Webhook secret is too long').optional(),
+  secret: z.string().min(ValidationLimits.WEBHOOK_SECRET_MIN_LENGTH, `Webhook secret must be at least ${ValidationLimits.WEBHOOK_SECRET_MIN_LENGTH} characters`).max(ValidationLimits.WEBHOOK_SECRET_MAX_LENGTH, 'Webhook secret is too long').optional(),
   active: z.boolean().optional(),
 });
 

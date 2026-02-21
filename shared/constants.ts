@@ -20,6 +20,10 @@ export const ValidationLimits = {
   MESSAGE_SUBJECT_MAX_LENGTH: 200,
   MESSAGE_CONTENT_MIN_LENGTH: 1,
   MESSAGE_CONTENT_MAX_LENGTH: 10000,
+  WEBHOOK_SECRET_MIN_LENGTH: 16,
+  WEBHOOK_SECRET_MAX_LENGTH: 500,
+  SEMESTER_MIN: 1,
+  SEMESTER_MAX: 2,
 } as const;
 
 export const StatusCodeRanges = {
@@ -58,6 +62,8 @@ export const RETRY_CONFIG = {
 export const DEFAULT_LOCALE = 'en-US' as const;
 
 export const AVATAR_BASE_URL = 'https://i.pravatar.cc/150';
+
+export const USER_ROLES = ['student', 'teacher', 'parent', 'admin'] as const;
 
 export const getAvatarUrl = (userId: string): string => {
   return `${AVATAR_BASE_URL}?u=${encodeURIComponent(userId)}`;
