@@ -16,6 +16,8 @@ import { defaultRateLimiter, strictRateLimiter } from './middleware/rate-limit';
 import { defaultTimeout } from './middleware/timeout';
 import { securityHeaders } from './middleware/security-headers';
 import { responseErrorMonitoring } from './middleware/error-monitoring';
+import { cfContext } from './middleware/cf-context';
+import { healthCheckCache } from './middleware/cloudflare-cache';
 import { integrationMonitor } from './integration-monitor';
 import { HttpStatusCode, TimeConstants } from './config/time';
 import { DefaultOrigins } from './config/defaults';
@@ -54,14 +56,10 @@ app.use('/api/*', async (c, next) => {
 app.use('/api/*', async (c, next) => {
   const requestId = c.req.header('cf-request-id') || c.req.header('X-Request-ID') || crypto.randomUUID();
   c.header('X-Request-ID', requestId);
-  
-  const cfRay = c.req.header('CF-Ray');
-  if (cfRay) {
-    c.header('X-CF-Ray', cfRay);
-  }
-  
   await next();
 });
+
+app.use('/api/*', cfContext());
 
 app.use('/api/*', securityHeaders());
 
@@ -89,7 +87,7 @@ adminMonitoringRoutes(app);
 docsRoutes(app);
 publicRoutes(app);
 
-app.get('/api/health', async (c) => {
+app.get('/api/health', healthCheckCache(), async (c) => {
   const metrics = integrationMonitor.getHealthMetrics();
   const webhookSuccessRate = integrationMonitor.getWebhookSuccessRate();
   const rateLimitBlockRate = integrationMonitor.getRateLimitBlockRate();
