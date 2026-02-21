@@ -6,6 +6,22 @@ import { CompoundSecondaryIndex } from "./storage/CompoundSecondaryIndex";
 import { DateSortedSecondaryIndex } from "./storage/DateSortedSecondaryIndex";
 import { StudentDateSortedIndex } from "./storage/StudentDateSortedIndex";
 
+export type EntityName = 'user' | 'class' | 'course' | 'grade' | 'announcement' | 'webhookConfig' | 'webhookEvent' | 'webhookDelivery' | 'deadLetterQueue' | 'message' | 'publicContent';
+
+const ENTITY_REBUILDERS: Record<EntityName, (env: Env) => Promise<void>> = {
+  user: rebuildUserIndexes,
+  class: rebuildClassIndexes,
+  course: rebuildCourseIndexes,
+  grade: rebuildGradeIndexes,
+  announcement: rebuildAnnouncementIndexes,
+  webhookConfig: rebuildWebhookConfigIndexes,
+  webhookEvent: rebuildWebhookEventIndexes,
+  webhookDelivery: rebuildWebhookDeliveryIndexes,
+  deadLetterQueue: rebuildDeadLetterQueueIndexes,
+  message: rebuildMessageIndexes,
+  publicContent: rebuildPublicContentIndexes,
+};
+
 export async function rebuildAllIndexes(env: Env): Promise<void> {
   await rebuildUserIndexes(env);
   await rebuildClassIndexes(env);
@@ -18,6 +34,19 @@ export async function rebuildAllIndexes(env: Env): Promise<void> {
   await rebuildDeadLetterQueueIndexes(env);
   await rebuildMessageIndexes(env);
   await rebuildPublicContentIndexes(env);
+}
+
+export async function rebuildEntityIndexes(env: Env, entityName: EntityName): Promise<boolean> {
+  const rebuilder = ENTITY_REBUILDERS[entityName];
+  if (!rebuilder) {
+    return false;
+  }
+  await rebuilder(env);
+  return true;
+}
+
+export function getSupportedEntityNames(): EntityName[] {
+  return Object.keys(ENTITY_REBUILDERS) as EntityName[];
 }
 
 async function rebuildUserIndexes(env: Env): Promise<void> {

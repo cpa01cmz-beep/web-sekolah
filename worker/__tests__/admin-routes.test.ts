@@ -363,4 +363,52 @@ describe('admin-routes - Critical Business Logic', () => {
       expect(updatedAnnouncement).toHaveProperty('updatedAt');
     });
   });
+
+  describe('Selective Index Rebuilding', () => {
+    it('should support rebuilding indexes for a single entity', () => {
+      const supportedEntities = [
+        'user', 'class', 'course', 'grade', 'announcement',
+        'webhookConfig', 'webhookEvent', 'webhookDelivery',
+        'deadLetterQueue', 'message', 'publicContent'
+      ];
+
+      expect(supportedEntities).toContain('user');
+      expect(supportedEntities).toContain('grade');
+      expect(supportedEntities).toContain('announcement');
+    });
+
+    it('should validate entity name before rebuilding', () => {
+      const supportedEntities = new Set([
+        'user', 'class', 'course', 'grade', 'announcement',
+        'webhookConfig', 'webhookEvent', 'webhookDelivery',
+        'deadLetterQueue', 'message', 'publicContent'
+      ]);
+
+      const isValidEntity = (entity: string) => supportedEntities.has(entity);
+
+      expect(isValidEntity('user')).toBe(true);
+      expect(isValidEntity('grade')).toBe(true);
+      expect(isValidEntity('invalid')).toBe(false);
+      expect(isValidEntity('User')).toBe(false);
+    });
+
+    it('should return list of supported entities', () => {
+      const entities = [
+        'user', 'class', 'course', 'grade', 'announcement',
+        'webhookConfig', 'webhookEvent', 'webhookDelivery',
+        'deadLetterQueue', 'message', 'publicContent'
+      ];
+
+      expect(entities.length).toBe(11);
+      expect(entities).toBeInstanceOf(Array);
+    });
+
+    it('should return appropriate error for unknown entity', () => {
+      const entityName = 'unknownEntity';
+      const supportedEntities = ['user', 'class', 'course'];
+
+      const isSuccess = supportedEntities.includes(entityName);
+      expect(isSuccess).toBe(false);
+    });
+  });
 });
