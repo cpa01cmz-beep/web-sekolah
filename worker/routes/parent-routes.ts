@@ -3,8 +3,8 @@ import type { Env } from '../core-utils';
 import { ok, notFound, bad } from '../core-utils';
 import { ParentDashboardService, CommonDataService, getRoleSpecificFields, getUniqueIds, fetchAndMap } from '../domain';
 import { withUserValidation, withErrorHandler, withAuth, triggerWebhookSafely } from './route-utils';
-import { validateBody } from '../middleware/validation';
-import { createMessageSchema } from '../middleware/schemas';
+import { validateBody, validateQuery } from '../middleware/validation';
+import { createMessageSchema, messageTypeQuerySchema } from '../middleware/schemas';
 import { MessageEntity, CourseEntity } from '../entities';
 import type { Context } from 'hono';
 import type { Message } from '@shared/types';
@@ -52,9 +52,9 @@ export function parentRoutes(app: Hono<{ Bindings: Env }>) {
     return ok(c, schedule.items || []);
   }));
 
-  app.get('/api/parents/:id/messages', ...withUserValidation('parent', 'messages'), withErrorHandler('get parent messages')(async (c: Context) => {
+  app.get('/api/parents/:id/messages', ...withUserValidation('parent', 'messages'), validateQuery(messageTypeQuerySchema), withErrorHandler('get parent messages')(async (c: Context) => {
     const parentId = c.req.param('id');
-    const type = c.req.query('type') || 'inbox';
+    const { type } = c.get('validatedQuery') as { type: 'inbox' | 'sent' };
     
     let messages: Message[];
     if (type === 'sent') {

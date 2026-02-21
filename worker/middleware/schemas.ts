@@ -120,3 +120,19 @@ export const createMessageSchema = z.object({
   content: z.string().min(ValidationLimits.MESSAGE_CONTENT_MIN_LENGTH, 'Content is required').max(ValidationLimits.MESSAGE_CONTENT_MAX_LENGTH, 'Content must be less than 10000 characters'),
   parentMessageId: z.string().uuid('Invalid parent message ID').optional().nullable(),
 });
+
+export const messageTypeQuerySchema = z.object({
+  type: z.enum(['inbox', 'sent'], {
+    message: 'Invalid message type. Must be inbox or sent',
+  }).default('inbox'),
+});
+
+export const newsLimitQuerySchema = z.object({
+  limit: z.string()
+    .regex(/^\d+$/, 'Limit must be a positive number')
+    .transform((val) => {
+      const num = parseInt(val, 10);
+      return Math.min(Math.max(num, 1), 100);
+    })
+    .optional(),
+});
