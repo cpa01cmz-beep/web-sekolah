@@ -16,6 +16,7 @@ import { defaultRateLimiter, strictRateLimiter } from './middleware/rate-limit';
 import { defaultTimeout } from './middleware/timeout';
 import { securityHeaders } from './middleware/security-headers';
 import { responseErrorMonitoring } from './middleware/error-monitoring';
+import { healthCheckCache } from './middleware/cloudflare-cache';
 import { integrationMonitor } from './integration-monitor';
 import { HttpStatusCode, TimeConstants } from './config/time';
 import { DefaultOrigins } from './config/defaults';
@@ -89,7 +90,7 @@ adminMonitoringRoutes(app);
 docsRoutes(app);
 publicRoutes(app);
 
-app.get('/api/health', async (c) => {
+app.get('/api/health', healthCheckCache(), async (c) => {
   const metrics = integrationMonitor.getHealthMetrics();
   const webhookSuccessRate = integrationMonitor.getWebhookSuccessRate();
   const rateLimitBlockRate = integrationMonitor.getRateLimitBlockRate();
