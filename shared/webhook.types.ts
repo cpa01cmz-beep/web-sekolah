@@ -53,3 +53,18 @@ export type WebhookEventType =
   | 'announcement.deleted'
   | 'message.created'
   | 'message.read';
+
+export const WEBHOOK_EVENT_TYPES: readonly WebhookEventType[] = [
+  'grade.created',
+  'grade.updated',
+  'grade.deleted',
+  'user.created',
+  'user.updated',
+  'user.deleted',
+  'user.login',
+  'announcement.created',
+  'announcement.updated',
+  'announcement.deleted',
+  'message.created',
+  'message.read',
+] as const;
