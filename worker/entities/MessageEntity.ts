@@ -62,7 +62,7 @@ export class MessageEntity extends IndexedEntity<Message> {
     const message = await this.get(env, messageId);
     if (!message) return null;
     
-    return this.update(env, messageId, { isRead: true });
+    return this.updateWithCompoundIndex(env, messageId, { isRead: true });
   }
 
   static async countUnread(env: Env, recipientId: string): Promise<number> {

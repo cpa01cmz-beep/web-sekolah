@@ -1,5 +1,6 @@
 import { SecondaryIndex, Index, UserDateSortedIndex, type Env } from "./core-utils";
 import { UserEntity, ClassEntity, CourseEntity, GradeEntity, AnnouncementEntity, WebhookConfigEntity, WebhookEventEntity, WebhookDeliveryEntity, DeadLetterQueueWebhookEntity, MessageEntity } from "./entities";
+import { NewsEntity } from "./entities/PublicContentEntity";
 import { isStudent } from './type-guards';
 import { CompoundSecondaryIndex } from "./storage/CompoundSecondaryIndex";
 import { DateSortedSecondaryIndex } from "./storage/DateSortedSecondaryIndex";
@@ -16,6 +17,7 @@ export async function rebuildAllIndexes(env: Env): Promise<void> {
   await rebuildWebhookDeliveryIndexes(env);
   await rebuildDeadLetterQueueIndexes(env);
   await rebuildMessageIndexes(env);
+  await rebuildPublicContentIndexes(env);
 }
 
 async function rebuildUserIndexes(env: Env): Promise<void> {
@@ -229,4 +231,15 @@ async function rebuildMessageIndexes(env: Env): Promise<void> {
       await receivedDateIndex.addBatch(recipientMessages.map(m => ({ date: m.createdAt, entityId: m.id })));
     })
   ]);
+}
+
+async function rebuildPublicContentIndexes(env: Env): Promise<void> {
+  const newsDateIndex = new DateSortedSecondaryIndex(env, NewsEntity.entityName);
+
+  await newsDateIndex.clear();
+
+  const { items: newsItems } = await NewsEntity.list(env);
+  const validNewsItems = newsItems.filter(n => !n.deletedAt && n.date);
+  
+  await newsDateIndex.addBatch(validNewsItems.map(n => ({ date: n.date, entityId: n.id })));
 }
