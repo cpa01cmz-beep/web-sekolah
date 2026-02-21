@@ -1,3 +1,5 @@
+import { DEFAULT_LOCALE } from '@shared/constants';
+
 export type DateFormat = 'short' | 'long' | 'time' | 'month-year' | 'full-date';
 
 export function formatDate(date: string | Date, format: DateFormat = 'short'): string {
@@ -40,7 +42,7 @@ export function formatDate(date: string | Date, format: DateFormat = 'short'): s
       options.day = 'numeric';
   }
 
-  return dateObj.toLocaleDateString('en-US', options);
+  return dateObj.toLocaleDateString(DEFAULT_LOCALE, options);
 }
 
 export function formatDateShort(date: string | Date): string {
@@ -58,7 +60,7 @@ export function formatTime(date: string | Date): string {
     return 'Invalid Time';
   }
 
-  return dateObj.toLocaleTimeString('en-US', {
+  return dateObj.toLocaleTimeString(DEFAULT_LOCALE, {
     hour: 'numeric',
     minute: 'numeric'
   });

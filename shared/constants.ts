@@ -55,6 +55,8 @@ export const RETRY_CONFIG = {
   DEFAULT_JITTER_MS: 0,
 } as const;
 
+export const DEFAULT_LOCALE = 'en-US' as const;
+
 export const AVATAR_BASE_URL = 'https://i.pravatar.cc/150';
 
 export const getAvatarUrl = (userId: string): string => {
