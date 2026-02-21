@@ -574,4 +574,72 @@ describe('Retry Utility', () => {
       expect(fn).toHaveBeenCalledTimes(4);
     });
   });
+
+  describe('Max Delay Cap', () => {
+    it('should cap delay at 30 seconds (MAX_DELAY_MS)', async () => {
+      const fn = vi.fn()
+        .mockRejectedValueOnce(new Error('Error 1'))
+        .mockRejectedValueOnce(new Error('Error 2'))
+        .mockRejectedValueOnce(new Error('Error 3'))
+        .mockRejectedValueOnce(new Error('Error 4'))
+        .mockRejectedValueOnce(new Error('Error 5'))
+        .mockResolvedValue('success');
+
+      const promise = withRetry(fn, { maxRetries: 10, baseDelay: 1000 });
+
+      await vi.advanceTimersByTimeAsync(1000);
+      await vi.advanceTimersByTimeAsync(2000);
+      await vi.advanceTimersByTimeAsync(4000);
+      await vi.advanceTimersByTimeAsync(8000);
+      await vi.advanceTimersByTimeAsync(16000);
+
+      const result = await promise;
+      expect(result).toBe('success');
+      expect(fn).toHaveBeenCalledTimes(6);
+    });
+
+    it('should not exceed max delay even with high attempt count', async () => {
+      const fn = vi.fn()
+        .mockRejectedValueOnce(new Error('Error'))
+        .mockResolvedValue('success');
+
+      const promise = withRetry(fn, { maxRetries: 20, baseDelay: 1000 });
+
+      await vi.advanceTimersByTimeAsync(30000);
+
+      const result = await promise;
+      expect(result).toBe('success');
+      expect(fn).toHaveBeenCalledTimes(2);
+    });
+
+    it('should cap exponential backoff to prevent extreme delays', async () => {
+      const fn = vi.fn()
+        .mockRejectedValueOnce(new Error('Error 1'))
+        .mockRejectedValueOnce(new Error('Error 2'))
+        .mockRejectedValueOnce(new Error('Error 3'))
+        .mockRejectedValueOnce(new Error('Error 4'))
+        .mockRejectedValueOnce(new Error('Error 5'))
+        .mockResolvedValue('success');
+
+      const promise = withRetry(fn, { maxRetries: 10, baseDelay: 1000 });
+
+      await vi.advanceTimersByTimeAsync(1000);
+      expect(fn).toHaveBeenCalledTimes(2);
+
+      await vi.advanceTimersByTimeAsync(2000);
+      expect(fn).toHaveBeenCalledTimes(3);
+
+      await vi.advanceTimersByTimeAsync(4000);
+      expect(fn).toHaveBeenCalledTimes(4);
+
+      await vi.advanceTimersByTimeAsync(8000);
+      expect(fn).toHaveBeenCalledTimes(5);
+
+      await vi.advanceTimersByTimeAsync(16000);
+      expect(fn).toHaveBeenCalledTimes(6);
+
+      const result = await promise;
+      expect(result).toBe('success');
+    });
+  });
 });

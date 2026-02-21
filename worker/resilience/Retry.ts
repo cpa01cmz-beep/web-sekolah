@@ -12,6 +12,7 @@ export interface RetryOptions {
 const DEFAULT_MAX_RETRIES = RETRY_CONFIG.DEFAULT_MAX_RETRIES;
 const DEFAULT_BASE_DELAY_MS = RETRY_CONFIG.DEFAULT_BASE_DELAY_MS;
 const DEFAULT_JITTER_MS = RETRY_CONFIG.DEFAULT_JITTER_MS;
+const MAX_DELAY_MS = 30000;
 
 async function sleep(ms: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, ms));
@@ -19,8 +20,9 @@ async function sleep(ms: number): Promise<void> {
 
 function calculateDelay(attempt: number, baseDelay: number, jitterMs: number): number {
   const exponentialDelay = baseDelay * Math.pow(2, attempt);
+  const cappedDelay = Math.min(exponentialDelay, MAX_DELAY_MS);
   const jitter = Math.random() * jitterMs;
-  return exponentialDelay + jitter;
+  return cappedDelay + jitter;
 }
 
 export async function withRetry<T>(
