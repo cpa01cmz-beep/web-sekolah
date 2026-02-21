@@ -48,23 +48,35 @@ export function StudentDashboardPage() {
         <SlideUp delay={0} style={prefersReducedMotion ? { opacity: 1 } : {}}>
           <div className="space-y-6">
             <SlideUp delay={0.1} style={prefersReducedMotion ? { opacity: 1 } : {}}>
-              <PageHeader 
-                title="Student Dashboard" 
+              <PageHeader
+                title="Student Dashboard"
                 description="Here's a summary of your academic activities."
               />
             </SlideUp>
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3" role="region" aria-label="Student dashboard overview">
+            <div
+              className="grid gap-6 md:grid-cols-2 lg:grid-cols-3"
+              role="region"
+              aria-label="Student dashboard overview"
+            >
               <SlideUp delay={0.2} style={prefersReducedMotion ? { opacity: 1 } : {}}>
                 <Card className="h-full hover:shadow-lg transition-shadow duration-200">
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle id="schedule-heading" className="text-sm font-medium">Today's Schedule</CardTitle>
+                    <CardTitle id="schedule-heading" className="text-sm font-medium">
+                      Today's Schedule
+                    </CardTitle>
                     <Clock className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
                   </CardHeader>
                   <CardContent>
                     {data.schedule.length === 0 ? (
-                      <p className="text-sm text-muted-foreground text-center py-4" role="status">No classes scheduled for today.</p>
+                      <p className="text-sm text-muted-foreground text-center py-4" role="status">
+                        No classes scheduled for today.
+                      </p>
                     ) : (
-                      <ul className="space-y-3" aria-labelledby="schedule-heading" aria-label={`${data.schedule.length} scheduled classes`}>
+                      <ul
+                        className="space-y-3"
+                        aria-labelledby="schedule-heading"
+                        aria-label={`${data.schedule.length} scheduled classes`}
+                      >
                         {data.schedule.slice(0, 3).map((item) => (
                           <ScheduleItem key={`${item.courseId}-${item.time}`} item={item} />
                         ))}
@@ -76,14 +88,22 @@ export function StudentDashboardPage() {
               <SlideUp delay={0.3} style={prefersReducedMotion ? { opacity: 1 } : {}}>
                 <Card className="h-full hover:shadow-lg transition-shadow duration-200">
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle id="grades-heading" className="text-sm font-medium">Recent Grades</CardTitle>
+                    <CardTitle id="grades-heading" className="text-sm font-medium">
+                      Recent Grades
+                    </CardTitle>
                     <BookOpen className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
                   </CardHeader>
                   <CardContent>
                     {data.recentGrades.length === 0 ? (
-                      <p className="text-sm text-muted-foreground text-center py-4" role="status">No grades recorded yet.</p>
+                      <p className="text-sm text-muted-foreground text-center py-4" role="status">
+                        No grades recorded yet.
+                      </p>
                     ) : (
-                      <ul className="space-y-3" aria-labelledby="grades-heading" aria-label={`${data.recentGrades.length} recent grades`}>
+                      <ul
+                        className="space-y-3"
+                        aria-labelledby="grades-heading"
+                        aria-label={`${data.recentGrades.length} recent grades`}
+                      >
                         {data.recentGrades.map((grade) => (
                           <GradeItem key={grade.id} grade={grade} />
                         ))}
@@ -95,14 +115,22 @@ export function StudentDashboardPage() {
               <SlideUp delay={0.4} style={prefersReducedMotion ? { opacity: 1 } : {}}>
                 <Card className="h-full hover:shadow-lg transition-shadow duration-200">
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle id="announcements-heading" className="text-sm font-medium">Announcements</CardTitle>
+                    <CardTitle id="announcements-heading" className="text-sm font-medium">
+                      Announcements
+                    </CardTitle>
                     <Megaphone className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
                   </CardHeader>
                   <CardContent>
                     {data.announcements.length === 0 ? (
-                      <p className="text-sm text-muted-foreground text-center py-4" role="status">No announcements available.</p>
+                      <p className="text-sm text-muted-foreground text-center py-4" role="status">
+                        No announcements available.
+                      </p>
                     ) : (
-                      <ul className="space-y-3" aria-labelledby="announcements-heading" aria-label={`${data.announcements.length} announcements`}>
+                      <ul
+                        className="space-y-3"
+                        aria-labelledby="announcements-heading"
+                        aria-label={`${data.announcements.length} announcements`}
+                      >
                         {data.announcements.map((ann) => (
                           <AnnouncementItem key={ann.id} announcement={ann} variant="simple" />
                         ))}

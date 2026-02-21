@@ -34,10 +34,17 @@ const SECONDARY_STYLE: React.CSSProperties = {
   '--bg-focus-color': THEME_COLORS.SECONDARY_HOVER,
 } as React.CSSProperties;
 
-export const RoleButtonGrid = memo(function RoleButtonGrid({ loadingRole, onRoleSelect, buttonClassName }: RoleButtonGridProps) {
-  const handleButtonClick = useCallback((role: UserRole) => {
-    onRoleSelect(role);
-  }, [onRoleSelect]);
+export const RoleButtonGrid = memo(function RoleButtonGrid({
+  loadingRole,
+  onRoleSelect,
+  buttonClassName,
+}: RoleButtonGridProps) {
+  const handleButtonClick = useCallback(
+    (role: UserRole) => {
+      onRoleSelect(role);
+    },
+    [onRoleSelect]
+  );
 
   return (
     <div className="grid grid-cols-2 gap-3 w-full">

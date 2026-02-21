@@ -29,7 +29,7 @@ describe('useQuery hook', () => {
         },
       },
     });
-    
+
     return function Wrapper({ children }: { children: React.ReactNode }) {
       return React.createElement(QueryClientProvider, { client: testQueryClient }, children);
     };
@@ -107,12 +107,9 @@ describe('useQuery hook', () => {
 
     global.fetch = vi.fn().mockResolvedValue(createMockResponse(mockResponse));
 
-    const { result } = renderHook(
-      () => useQuery(['students', '123', 'grades']),
-      {
-        wrapper: createWrapper(),
-      }
-    );
+    const { result } = renderHook(() => useQuery(['students', '123', 'grades']), {
+      wrapper: createWrapper(),
+    });
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
@@ -129,7 +126,7 @@ describe('useMutation hook', () => {
         },
       },
     });
-    
+
     return function Wrapper({ children }: { children: React.ReactNode }) {
       return React.createElement(QueryClientProvider, { client: testQueryClient }, children);
     };
@@ -153,7 +150,10 @@ describe('useMutation hook', () => {
     global.fetch = vi.fn().mockResolvedValue(createMockResponse(mockResponse));
 
     const { result } = renderHook(
-      () => useMutation<typeof mockData, Error, { name: string }>(['test', 'create'], { method: 'POST' }),
+      () =>
+        useMutation<typeof mockData, Error, { name: string }>(['test', 'create'], {
+          method: 'POST',
+        }),
       {
         wrapper: createWrapper(),
       }
@@ -163,10 +163,13 @@ describe('useMutation hook', () => {
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
-    expect(fetch).toHaveBeenCalledWith('/api/test/create', expect.objectContaining({
-      method: 'POST',
-      body: JSON.stringify({ name: 'Test' }),
-    }));
+    expect(fetch).toHaveBeenCalledWith(
+      '/api/test/create',
+      expect.objectContaining({
+        method: 'POST',
+        body: JSON.stringify({ name: 'Test' }),
+      })
+    );
   });
 
   it('should send PUT request with body', async () => {
@@ -179,7 +182,10 @@ describe('useMutation hook', () => {
     global.fetch = vi.fn().mockResolvedValue(createMockResponse(mockResponse));
 
     const { result } = renderHook(
-      () => useMutation<typeof mockData, Error, { name: string }>(['test', 'update'], { method: 'PUT' }),
+      () =>
+        useMutation<typeof mockData, Error, { name: string }>(['test', 'update'], {
+          method: 'PUT',
+        }),
       {
         wrapper: createWrapper(),
       }
@@ -189,10 +195,13 @@ describe('useMutation hook', () => {
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
-    expect(fetch).toHaveBeenCalledWith('/api/test/update', expect.objectContaining({
-      method: 'PUT',
-      body: JSON.stringify({ name: 'Updated' }),
-    }));
+    expect(fetch).toHaveBeenCalledWith(
+      '/api/test/update',
+      expect.objectContaining({
+        method: 'PUT',
+        body: JSON.stringify({ name: 'Updated' }),
+      })
+    );
   });
 
   it('should not send body for GET requests', async () => {
@@ -246,9 +255,12 @@ describe('useMutation hook', () => {
 
     global.fetch = vi.fn().mockResolvedValue(createMockResponse(mockResponse));
 
-    const { result } = renderHook(() => useMutation<typeof mockData, Error, { name: string }>(['test', 'create']), {
-      wrapper: createWrapper(),
-    });
+    const { result } = renderHook(
+      () => useMutation<typeof mockData, Error, { name: string }>(['test', 'create']),
+      {
+        wrapper: createWrapper(),
+      }
+    );
 
     result.current.mutate({ name: 'Test' });
 
@@ -272,7 +284,10 @@ describe('useMutation hook', () => {
     global.fetch = vi.fn().mockResolvedValue(createMockResponse(mockResponse));
 
     const { result } = renderHook(
-      () => useMutation<typeof mockData, Error, { score: number }>(['students', 'grades'], { method: 'POST' }),
+      () =>
+        useMutation<typeof mockData, Error, { score: number }>(['students', 'grades'], {
+          method: 'POST',
+        }),
       {
         wrapper: createWrapper(),
       }
@@ -282,8 +297,11 @@ describe('useMutation hook', () => {
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
-    expect(fetch).toHaveBeenCalledWith('/api/students/grades', expect.objectContaining({
-      method: 'POST',
-    }));
+    expect(fetch).toHaveBeenCalledWith(
+      '/api/students/grades',
+      expect.objectContaining({
+        method: 'POST',
+      })
+    );
   });
 });

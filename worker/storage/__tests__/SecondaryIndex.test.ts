@@ -52,41 +52,33 @@ describe('SecondaryIndex', () => {
     it('should add entry with correct key pattern', async () => {
       await index.add('field-value', 'entity-123');
 
-      expect(mockStub.casPut).toHaveBeenCalledWith(
-        'field:field-value:entity:entity-123',
-        0,
-        { entityId: 'entity-123' }
-      );
+      expect(mockStub.casPut).toHaveBeenCalledWith('field:field-value:entity:entity-123', 0, {
+        entityId: 'entity-123',
+      });
     });
 
     it('should add entry with empty field value', async () => {
       await index.add('', 'entity-123');
 
-      expect(mockStub.casPut).toHaveBeenCalledWith(
-        'field::entity:entity-123',
-        0,
-        { entityId: 'entity-123' }
-      );
+      expect(mockStub.casPut).toHaveBeenCalledWith('field::entity:entity-123', 0, {
+        entityId: 'entity-123',
+      });
     });
 
     it('should add entry with special characters in field value', async () => {
       await index.add('value:with:colons', 'entity-123');
 
-      expect(mockStub.casPut).toHaveBeenCalledWith(
-        'field:value:with:colons:entity:entity-123',
-        0,
-        { entityId: 'entity-123' }
-      );
+      expect(mockStub.casPut).toHaveBeenCalledWith('field:value:with:colons:entity:entity-123', 0, {
+        entityId: 'entity-123',
+      });
     });
 
     it('should add entry with numeric field value', async () => {
       await index.add('12345', 'entity-123');
 
-      expect(mockStub.casPut).toHaveBeenCalledWith(
-        'field:12345:entity:entity-123',
-        0,
-        { entityId: 'entity-123' }
-      );
+      expect(mockStub.casPut).toHaveBeenCalledWith('field:12345:entity:entity-123', 0, {
+        entityId: 'entity-123',
+      });
     });
 
     it('should add multiple entries with different field values', async () => {
@@ -95,12 +87,15 @@ describe('SecondaryIndex', () => {
       await index.add('value3', 'entity-3');
 
       expect(mockStub.casPut).toHaveBeenCalledTimes(3);
-      expect(mockStub.casPut).toHaveBeenNthCalledWith(1,
-        'field:value1:entity:entity-1', 0, { entityId: 'entity-1' });
-      expect(mockStub.casPut).toHaveBeenNthCalledWith(2,
-        'field:value2:entity:entity-2', 0, { entityId: 'entity-2' });
-      expect(mockStub.casPut).toHaveBeenNthCalledWith(3,
-        'field:value3:entity:entity-3', 0, { entityId: 'entity-3' });
+      expect(mockStub.casPut).toHaveBeenNthCalledWith(1, 'field:value1:entity:entity-1', 0, {
+        entityId: 'entity-1',
+      });
+      expect(mockStub.casPut).toHaveBeenNthCalledWith(2, 'field:value2:entity:entity-2', 0, {
+        entityId: 'entity-2',
+      });
+      expect(mockStub.casPut).toHaveBeenNthCalledWith(3, 'field:value3:entity:entity-3', 0, {
+        entityId: 'entity-3',
+      });
     });
   });
 
@@ -108,9 +103,7 @@ describe('SecondaryIndex', () => {
     it('should remove entry with correct key', async () => {
       await index.remove('field-value', 'entity-123');
 
-      expect(mockStub.del).toHaveBeenCalledWith(
-        'field:field-value:entity:entity-123'
-      );
+      expect(mockStub.del).toHaveBeenCalledWith('field:field-value:entity:entity-123');
     });
 
     it('should return true when removal succeeds', async () => {
@@ -130,9 +123,7 @@ describe('SecondaryIndex', () => {
     it('should remove entry with empty field value', async () => {
       await index.remove('', 'entity-123');
 
-      expect(mockStub.del).toHaveBeenCalledWith(
-        'field::entity:entity-123'
-      );
+      expect(mockStub.del).toHaveBeenCalledWith('field::entity:entity-123');
     });
 
     it('should remove multiple entries', async () => {
@@ -149,7 +140,7 @@ describe('SecondaryIndex', () => {
     beforeEach(() => {
       mockStub.listPrefix = vi.fn().mockResolvedValue({
         keys: ['field:testValue:entity:entity-1', 'field:testValue:entity:entity-2'],
-        next: null
+        next: null,
       });
     });
 
@@ -172,7 +163,7 @@ describe('SecondaryIndex', () => {
     it('should handle single entry', async () => {
       mockStub.listPrefix.mockResolvedValue({
         keys: ['field:single:entity:entity-1'],
-        next: null
+        next: null,
       });
 
       const result = await index.getByValue('single');
@@ -190,7 +181,7 @@ describe('SecondaryIndex', () => {
     it('should handle keys with colons in field value', async () => {
       mockStub.listPrefix.mockResolvedValue({
         keys: ['field:value:with:colons:entity:entity-1'],
-        next: null
+        next: null,
       });
 
       const result = await index.getByValue('value:with:colons');
@@ -205,9 +196,9 @@ describe('SecondaryIndex', () => {
         keys: [
           'field:testValue:entity:entity-1',
           'field:testValue:entity:entity-2',
-          'field:testValue:entity:entity-3'
+          'field:testValue:entity:entity-3',
         ],
-        next: null
+        next: null,
       });
     });
 
@@ -254,9 +245,9 @@ describe('SecondaryIndex', () => {
           'field:value2:entity:entity-2',
           'field:value3:entity:entity-3',
           'field:value4:entity:entity-4',
-          'field:value5:entity:entity-5'
+          'field:value5:entity:entity-5',
         ],
-        next: null
+        next: null,
       });
     });
 
@@ -279,7 +270,7 @@ describe('SecondaryIndex', () => {
     it('should handle single entry index', async () => {
       mockStub.listPrefix.mockResolvedValue({
         keys: ['field:value1:entity:entity-1'],
-        next: null
+        next: null,
       });
 
       await index.clear();
@@ -306,9 +297,15 @@ describe('SecondaryIndex', () => {
       await index.addBatch(items);
 
       expect(mockStub.casPut).toHaveBeenCalledTimes(3);
-      expect(mockStub.casPut).toHaveBeenCalledWith('field:value1:entity:entity-1', 0, { entityId: 'entity-1' });
-      expect(mockStub.casPut).toHaveBeenCalledWith('field:value2:entity:entity-2', 0, { entityId: 'entity-2' });
-      expect(mockStub.casPut).toHaveBeenCalledWith('field:value3:entity:entity-3', 0, { entityId: 'entity-3' });
+      expect(mockStub.casPut).toHaveBeenCalledWith('field:value1:entity:entity-1', 0, {
+        entityId: 'entity-1',
+      });
+      expect(mockStub.casPut).toHaveBeenCalledWith('field:value2:entity:entity-2', 0, {
+        entityId: 'entity-2',
+      });
+      expect(mockStub.casPut).toHaveBeenCalledWith('field:value3:entity:entity-3', 0, {
+        entityId: 'entity-3',
+      });
     });
 
     it('should return immediately for empty array', async () => {
@@ -386,7 +383,7 @@ describe('SecondaryIndex', () => {
     it('should support complete add-query-remove lifecycle', async () => {
       mockStub.listPrefix = vi.fn().mockResolvedValue({
         keys: ['field:role:student:entity:student-1'],
-        next: null
+        next: null,
       });
       mockStub.getDoc.mockResolvedValueOnce({ v: 1, data: { entityId: 'student-1' } });
 
@@ -402,7 +399,7 @@ describe('SecondaryIndex', () => {
       const operations = [
         index.add('value1', 'entity-1'),
         index.add('value2', 'entity-2'),
-        index.add('value3', 'entity-3')
+        index.add('value3', 'entity-3'),
       ];
 
       await Promise.all(operations);

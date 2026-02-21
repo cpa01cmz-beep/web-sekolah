@@ -230,12 +230,7 @@ describe('Type Guards', () => {
     });
 
     it('should work with SchoolUser union type', () => {
-      const users: SchoolUser[] = [
-        studentUser,
-        teacherUser,
-        parentUser,
-        adminUser,
-      ];
+      const users: SchoolUser[] = [studentUser, teacherUser, parentUser, adminUser];
 
       const studentFields = getRoleSpecificFields(users[0]);
       const teacherFields = getRoleSpecificFields(users[1]);

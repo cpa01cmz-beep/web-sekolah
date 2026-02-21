@@ -12,7 +12,7 @@ interface MessageThreadProps {
 
 export function MessageThread({ messages, currentUserId, onMarkAsRead }: MessageThreadProps) {
   useEffect(() => {
-    messages.forEach(msg => {
+    messages.forEach((msg) => {
       if (!msg.isRead && msg.recipientId === currentUserId) {
         onMarkAsRead(msg.id);
       }
@@ -34,20 +34,17 @@ export function MessageThread({ messages, currentUserId, onMarkAsRead }: Message
       {messages.map((message) => {
         const isSent = message.senderId === currentUserId;
         return (
-          <div
-            key={message.id}
-            className={`flex ${isSent ? 'justify-end' : 'justify-start'}`}
-          >
+          <div key={message.id} className={`flex ${isSent ? 'justify-end' : 'justify-start'}`}>
             <div
               className={`max-w-[80%] rounded-lg p-3 ${
-                isSent
-                  ? 'bg-primary text-primary-foreground'
-                  : 'bg-muted'
+                isSent ? 'bg-primary text-primary-foreground' : 'bg-muted'
               }`}
             >
               <p className="text-sm font-medium mb-1">{message.subject}</p>
               <p className="text-sm whitespace-pre-wrap">{message.content}</p>
-              <p className={`text-xs mt-2 ${isSent ? 'text-primary-foreground/70' : 'text-muted-foreground'}`}>
+              <p
+                className={`text-xs mt-2 ${isSent ? 'text-primary-foreground/70' : 'text-muted-foreground'}`}
+              >
                 {formatDistanceToNow(message.createdAt)}
               </p>
             </div>

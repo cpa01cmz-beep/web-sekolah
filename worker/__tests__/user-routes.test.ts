@@ -975,9 +975,13 @@ describe('User Routes - Integration Testing', () => {
       console.warn('✅ Critical Paths Already Tested:');
       console.warn('   - GradeService: worker/domain/__tests__/GradeService.test.ts');
       console.warn('   - UserService: worker/domain/__tests__/UserService.test.ts');
-      console.warn('   - StudentDashboardService: worker/domain/__tests__/StudentDashboardService.test.ts');
+      console.warn(
+        '   - StudentDashboardService: worker/domain/__tests__/StudentDashboardService.test.ts'
+      );
       console.warn('   - TeacherService: worker/domain/__tests__/TeacherService.test.ts');
-      console.warn('   - ParentDashboardService: worker/domain/__tests__/ParentDashboardService.test.ts');
+      console.warn(
+        '   - ParentDashboardService: worker/domain/__tests__/ParentDashboardService.test.ts'
+      );
       console.warn('   - CommonDataService: worker/domain/__tests__/CommonDataService.test.ts');
       console.warn('   - WebhookService: worker/__tests__/webhook-service.test.ts');
       console.warn('   - Authentication: worker/middleware/__tests__/auth.test.ts (if exists)');

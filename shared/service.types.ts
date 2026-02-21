@@ -1,5 +1,12 @@
 import type { UserRole } from './common-types';
-import type { SchoolUser, SchoolClass, Course, Grade, Announcement, ScheduleItem } from './entities.types';
+import type {
+  SchoolUser,
+  SchoolClass,
+  Course,
+  Grade,
+  Announcement,
+  ScheduleItem,
+} from './entities.types';
 
 export interface StudentCardData {
   id: string;

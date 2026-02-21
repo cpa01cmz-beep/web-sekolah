@@ -39,8 +39,12 @@ export interface Migration {
 export class MigrationRunner {
   private static async loadState(env: Env): Promise<Set<string>> {
     try {
-      const stub = env.GlobalDurableObject.get(env.GlobalDurableObject.idFromName('sys-migration-state'));
-      const doc = await stub.getDoc(MIGRATION_STATE_KEY) as { data: MigrationState | null } | null;
+      const stub = env.GlobalDurableObject.get(
+        env.GlobalDurableObject.idFromName('sys-migration-state')
+      );
+      const doc = (await stub.getDoc(MIGRATION_STATE_KEY)) as {
+        data: MigrationState | null;
+      } | null;
       return new Set(doc?.data?.appliedMigrations ?? []);
     } catch (error) {
       logger.error('[Migration] Failed to load migration state', error);
@@ -50,10 +54,12 @@ export class MigrationRunner {
 
   private static async saveState(env: Env, appliedMigrations: Set<string>): Promise<void> {
     try {
-      const stub = env.GlobalDurableObject.get(env.GlobalDurableObject.idFromName('sys-migration-state'));
+      const stub = env.GlobalDurableObject.get(
+        env.GlobalDurableObject.idFromName('sys-migration-state')
+      );
       const state: MigrationState = {
         appliedMigrations: Array.from(appliedMigrations),
-        version: appliedMigrations.size
+        version: appliedMigrations.size,
       };
       await stub.casPut(MIGRATION_STATE_KEY, 0, state);
     } catch (error) {
@@ -69,8 +75,8 @@ export class MigrationRunner {
    */
   static async run(env: Env, migrations: Migration[]): Promise<void> {
     const appliedMigrations = await this.loadState(env);
-    const pending = migrations.filter(m => !appliedMigrations.has(m.id));
-    
+    const pending = migrations.filter((m) => !appliedMigrations.has(m.id));
+
     if (pending.length === 0) {
       logger.info('[Migration] No pending migrations to apply');
       return;
@@ -80,7 +86,10 @@ export class MigrationRunner {
 
     for (const migration of pending) {
       try {
-        logger.info('[Migration] Applying', { id: migration.id, description: migration.description });
+        logger.info('[Migration] Applying', {
+          id: migration.id,
+          description: migration.description,
+        });
         await migration.up(env);
         appliedMigrations.add(migration.id);
         await this.saveState(env, appliedMigrations);
@@ -102,8 +111,8 @@ export class MigrationRunner {
    */
   static async rollback(env: Env, migrations: Migration[], count = 1): Promise<void> {
     const appliedMigrations = await this.loadState(env);
-    const toRollback = migrations.filter(m => appliedMigrations.has(m.id)).slice(-count);
-    
+    const toRollback = migrations.filter((m) => appliedMigrations.has(m.id)).slice(-count);
+
     if (toRollback.length === 0) {
       logger.info('[Migration] No migrations to rollback');
       return;
@@ -111,7 +120,10 @@ export class MigrationRunner {
 
     for (const migration of toRollback) {
       try {
-        logger.info('[Migration] Rolling back', { id: migration.id, description: migration.description });
+        logger.info('[Migration] Rolling back', {
+          id: migration.id,
+          description: migration.description,
+        });
         await migration.down(env);
         appliedMigrations.delete(migration.id);
         await this.saveState(env, appliedMigrations);
@@ -147,7 +159,9 @@ export class MigrationRunner {
    */
   static async reset(env: Env): Promise<void> {
     try {
-      const stub = env.GlobalDurableObject.get(env.GlobalDurableObject.idFromName('sys-migration-state'));
+      const stub = env.GlobalDurableObject.get(
+        env.GlobalDurableObject.idFromName('sys-migration-state')
+      );
       await stub.del(MIGRATION_STATE_KEY);
       logger.warn('[Migration] Migration history has been reset');
     } catch (error) {
@@ -177,7 +191,7 @@ export const MigrationRegistry = {
 
   getAll(): Migration[] {
     return [...this.migrations];
-  }
+  },
 };
 
 /**
@@ -193,7 +207,9 @@ export const AddPasswordHashMigration: Migration = {
     MigrationHelpers.log('Starting AddPasswordHashMigration');
 
     if (env.ENVIRONMENT === 'production') {
-      throw new Error('Cannot set default passwords in production environment. Users must set passwords through a secure password reset flow.');
+      throw new Error(
+        'Cannot set default passwords in production environment. Users must set passwords through a secure password reset flow.'
+      );
     }
 
     const { items: users } = await UserEntity.list(env);
@@ -223,7 +239,7 @@ export const AddPasswordHashMigration: Migration = {
     }
 
     MigrationHelpers.log('AddPasswordHashMigration rollback completed');
-  }
+  },
 };
 
 MigrationRegistry.register(AddPasswordHashMigration);
@@ -246,7 +262,7 @@ export const MigrationHelpers = {
     checks: Array<{ name: string; check: () => Promise<boolean> }>
   ): Promise<void> {
     const results: Array<{ name: string; passed: boolean }> = [];
-    
+
     for (const { name, check } of checks) {
       try {
         const passed = await check();
@@ -260,9 +276,9 @@ export const MigrationHelpers = {
       }
     }
 
-    const failed = results.filter(r => !r.passed);
+    const failed = results.filter((r) => !r.passed);
     if (failed.length > 0) {
-      throw new Error(`Migration integrity checks failed: ${failed.map(f => f.name).join(', ')}`);
+      throw new Error(`Migration integrity checks failed: ${failed.map((f) => f.name).join(', ')}`);
     }
-  }
+  },
 };

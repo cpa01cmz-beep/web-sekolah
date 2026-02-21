@@ -184,10 +184,9 @@ describe('Fallback Handler', () => {
     });
 
     it('should handle timeout errors with fallback', async () => {
-      const primaryFn = vi.fn(() =>
-        new Promise((_, reject) =>
-          setTimeout(() => reject(new Error('Request timeout')), 100)
-        )
+      const primaryFn = vi.fn(
+        () =>
+          new Promise((_, reject) => setTimeout(() => reject(new Error('Request timeout')), 100))
       );
       const fallbackFn = vi.fn(() => Promise.resolve('cached data'));
 

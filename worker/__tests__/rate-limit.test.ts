@@ -1,6 +1,14 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { Hono } from 'hono';
-import { rateLimit, defaultRateLimiter, strictRateLimiter, looseRateLimiter, authRateLimiter, clearRateLimitStore, getRateLimitStore } from '../middleware/rate-limit';
+import {
+  rateLimit,
+  defaultRateLimiter,
+  strictRateLimiter,
+  looseRateLimiter,
+  authRateLimiter,
+  clearRateLimitStore,
+  getRateLimitStore,
+} from '../middleware/rate-limit';
 import { RateLimitWindow, RateLimitMaxRequests } from '../config/time';
 import type { Context } from 'hono';
 
@@ -33,7 +41,7 @@ describe('Rate Limiting Middleware', () => {
           headers: { 'x-forwarded-for': '192.168.1.1' },
         });
         expect(res.status).toBe(200);
-        const data = await res.json() as { count: number };
+        const data = (await res.json()) as { count: number };
         expect(data.count).toBe(i + 1);
       }
     });
@@ -55,7 +63,7 @@ describe('Rate Limiting Middleware', () => {
         headers: { 'x-forwarded-for': '192.168.1.2' },
       });
       expect(blockedRes.status).toBe(429);
-      const blockedData = await blockedRes.json() as { success: boolean; code: string };
+      const blockedData = (await blockedRes.json()) as { success: boolean; code: string };
       expect(blockedData.success).toBe(false);
       expect(blockedData.code).toBe('RATE_LIMIT_EXCEEDED');
     });
@@ -217,7 +225,10 @@ describe('Rate Limiting Middleware', () => {
         return `user:${userId}`;
       };
 
-      app.use('/api/test', rateLimit({ maxRequests: 2, windowMs: 60000, keyGenerator: customKeyGenerator }));
+      app.use(
+        '/api/test',
+        rateLimit({ maxRequests: 2, windowMs: 60000, keyGenerator: customKeyGenerator })
+      );
       app.get('/api/test', (c) => c.json({}));
 
       const user1Res1 = await app.request('/api/test', {
@@ -269,7 +280,7 @@ describe('Rate Limiting Middleware', () => {
       });
       expect(res2.status).toBe(429);
 
-      await new Promise(resolve => setTimeout(resolve, 150));
+      await new Promise((resolve) => setTimeout(resolve, 150));
 
       const res3 = await app.request('/api/test', {
         method: 'GET',
@@ -284,7 +295,10 @@ describe('Rate Limiting Middleware', () => {
       app.use('/api/test', defaultRateLimiter());
       app.get('/api/test', (c) => c.json({}));
 
-      const config = { maxRequests: RateLimitMaxRequests.STANDARD, windowMs: RateLimitWindow.STANDARD };
+      const config = {
+        maxRequests: RateLimitMaxRequests.STANDARD,
+        windowMs: RateLimitWindow.STANDARD,
+      };
 
       for (let i = 0; i < config.maxRequests; i++) {
         const res = await app.request('/api/test', {
@@ -363,7 +377,10 @@ describe('Rate Limiting Middleware', () => {
 
   describe('Skip options', () => {
     it('should skip successful requests when configured', async () => {
-      app.use('/api/test', rateLimit({ maxRequests: 2, windowMs: 60000, skipSuccessfulRequests: true }));
+      app.use(
+        '/api/test',
+        rateLimit({ maxRequests: 2, windowMs: 60000, skipSuccessfulRequests: true })
+      );
       app.get('/api/test', (c) => c.json({}));
 
       const res1 = await app.request('/api/test', {
@@ -386,7 +403,10 @@ describe('Rate Limiting Middleware', () => {
     });
 
     it('should skip failed requests when configured', async () => {
-      app.use('/api/test', rateLimit({ maxRequests: 2, windowMs: 60000, skipFailedRequests: true }));
+      app.use(
+        '/api/test',
+        rateLimit({ maxRequests: 2, windowMs: 60000, skipFailedRequests: true })
+      );
       app.get('/api/test', (c) => {
         const shouldFail = c.req.query('fail') === 'true';
         if (shouldFail) {
@@ -429,7 +449,7 @@ describe('Rate Limiting Middleware', () => {
       const store1 = getRateLimitStore();
       expect(store1.size).toBeGreaterThan(0);
 
-      await new Promise(resolve => setTimeout(resolve, 150));
+      await new Promise((resolve) => setTimeout(resolve, 150));
 
       const res2 = await app.request('/api/test', {
         method: 'GET',

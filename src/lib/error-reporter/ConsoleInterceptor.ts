@@ -16,10 +16,7 @@ export class ConsoleInterceptor {
 
     const currentWarn = console.warn as WrappedConsoleFn;
     const currentError = console.error as WrappedConsoleFn;
-    if (
-      currentWarn.__errorReporterWrapped &&
-      currentError.__errorReporterWrapped
-    ) {
+    if (currentWarn.__errorReporterWrapped && currentError.__errorReporterWrapped) {
       return;
     }
 
@@ -49,15 +46,13 @@ export class ConsoleInterceptor {
             typeof arg === 'string'
               ? arg
               : typeof arg === 'object' && arg
-              ? JSON.stringify(arg, null, 2)
-              : String(arg)
+                ? JSON.stringify(arg, null, 2)
+                : String(arg)
           )
           .join(' ');
         const stack = new Error().stack;
         const level =
-          method === 'warn' && message.includes(REACT_WARNING_PATTERN)
-            ? 'warning'
-            : 'error';
+          method === 'warn' && message.includes(REACT_WARNING_PATTERN) ? 'warning' : 'error';
 
         const context: ErrorContext = {
           message: `${prefix} ${message}`,

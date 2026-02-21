@@ -140,12 +140,12 @@ describe('WebhookService - Critical Business Logic', () => {
       const validEventTypes = ['user.created', 'user.updated', 'user.deleted', 'grade.created'];
       const invalidEventTypes = ['', ' ', null, undefined];
 
-      validEventTypes.forEach(eventType => {
+      validEventTypes.forEach((eventType) => {
         expect(eventType).toBeTruthy();
         expect(eventType.length).toBeGreaterThan(0);
       });
 
-      invalidEventTypes.forEach(eventType => {
+      invalidEventTypes.forEach((eventType) => {
         if (eventType !== null && eventType !== undefined) {
           expect(eventType.length).toBeLessThanOrEqual(1);
         }
@@ -156,12 +156,12 @@ describe('WebhookService - Critical Business Logic', () => {
       const validData = [{ userId: '123' }, {}, { nested: { value: 42 } }];
       const invalidData = [null, undefined, 'string', 123, true];
 
-      validData.forEach(data => {
+      validData.forEach((data) => {
         expect(typeof data).toBe('object');
         expect(data).not.toBeNull();
       });
 
-      invalidData.forEach(data => {
+      invalidData.forEach((data) => {
         const isObject = typeof data === 'object' && data !== null;
         expect(isObject).toBe(false);
       });
@@ -172,7 +172,7 @@ describe('WebhookService - Critical Business Logic', () => {
         user: { id: '123', name: 'John Doe', email: 'john@example.com' },
         metadata: { source: 'web', timestamp: Date.now() },
         nested: { deep: { value: 42 } },
-        arrays: [1, 2, 3, 4, 5]
+        arrays: [1, 2, 3, 4, 5],
       };
 
       expect(complexData.user).toHaveProperty('id');
@@ -189,18 +189,12 @@ describe('WebhookService - Critical Business Logic', () => {
       const validUrls = [
         'https://example.com/webhook',
         'https://api.example.com/webhooks/user',
-        'http://localhost:3000/webhook'
+        'http://localhost:3000/webhook',
       ];
 
-      const invalidUrls = [
-        'not-a-url',
-        'ftp://example.com/webhook',
-        '',
-        null,
-        undefined
-      ];
+      const invalidUrls = ['not-a-url', 'ftp://example.com/webhook', '', null, undefined];
 
-      validUrls.forEach(url => {
+      validUrls.forEach((url) => {
         expect(url).toMatch(/^https?:\/\/.+/);
       });
     });
@@ -209,21 +203,17 @@ describe('WebhookService - Critical Business Logic', () => {
       const validEvents = [
         ['user.created'],
         ['user.created', 'user.updated', 'user.deleted'],
-        ['grade.created', 'grade.updated']
+        ['grade.created', 'grade.updated'],
       ];
 
-      const invalidEvents = [
-        [],
-        null,
-        undefined
-      ];
+      const invalidEvents = [[], null, undefined];
 
-      validEvents.forEach(events => {
+      validEvents.forEach((events) => {
         expect(Array.isArray(events)).toBe(true);
         expect(events.length).toBeGreaterThan(0);
       });
 
-      invalidEvents.forEach(events => {
+      invalidEvents.forEach((events) => {
         if (Array.isArray(events)) {
           expect(events.length).toBe(0);
         }
@@ -231,25 +221,16 @@ describe('WebhookService - Critical Business Logic', () => {
     });
 
     it('should validate secret key', () => {
-      const validSecrets = [
-        'my-secret-key',
-        'webhook-secret-123',
-        'a'.repeat(100)
-      ];
+      const validSecrets = ['my-secret-key', 'webhook-secret-123', 'a'.repeat(100)];
 
-      const invalidSecrets = [
-        '',
-        null,
-        undefined,
-        ' '
-      ];
+      const invalidSecrets = ['', null, undefined, ' '];
 
-      validSecrets.forEach(secret => {
+      validSecrets.forEach((secret) => {
         expect(secret).toBeTruthy();
         expect(secret.length).toBeGreaterThan(0);
       });
 
-      invalidSecrets.forEach(secret => {
+      invalidSecrets.forEach((secret) => {
         if (secret !== null && secret !== undefined) {
           expect(secret.length).toBeLessThanOrEqual(1);
         }
@@ -301,7 +282,7 @@ describe('WebhookService - Critical Business Logic', () => {
         payload: { userId: 'user-123' },
         status: 500,
         attempts: 6,
-        errorMessage: 'Max retries exceeded'
+        errorMessage: 'Max retries exceeded',
       };
 
       expect(dlqEntry).toHaveProperty('id');
@@ -387,14 +368,14 @@ describe('WebhookService - Critical Business Logic', () => {
         id: 'event-001',
         eventType: 'user.created',
         data: { userId: 'user-123' },
-        createdAt: '2024-01-21T10:00:00Z'
+        createdAt: '2024-01-21T10:00:00Z',
       };
 
       const payload = {
         id: event.id,
         eventType: event.eventType,
         data: event.data,
-        timestamp: event.createdAt
+        timestamp: event.createdAt,
       };
 
       expect(payload).toHaveProperty('id');
@@ -411,7 +392,7 @@ describe('WebhookService - Critical Business Logic', () => {
       const eventData = {
         user: { id: '123', name: 'John Doe', email: 'john@example.com' },
         metadata: { source: 'web', timestamp: Date.now() },
-        nested: { deep: { value: 42 } }
+        nested: { deep: { value: 42 } },
       };
 
       expect(eventData.user.id).toBe('123');
@@ -443,7 +424,7 @@ describe('WebhookService - Critical Business Logic', () => {
         'X-Webhook-Signature': 'sha256=abc123',
         'X-Webhook-ID': 'event-001',
         'X-Webhook-Timestamp': '2024-01-21T10:00:00Z',
-        'User-Agent': 'Akademia-Pro-Webhook/1.0'
+        'User-Agent': 'Akademia-Pro-Webhook/1.0',
       };
 
       expect(headers['X-Webhook-Signature']).toBeDefined();
@@ -460,7 +441,7 @@ describe('WebhookService - Critical Business Logic', () => {
         url: 'https://example.com/webhook',
         events: ['user.created'],
         secret: 'secret-key',
-        active: true
+        active: true,
       };
 
       expect(config.url).toMatch(/^https?:\/\/.+/);
@@ -472,7 +453,7 @@ describe('WebhookService - Critical Business Logic', () => {
         url: 'https://example.com/webhook',
         events: ['user.created', 'user.updated'],
         secret: 'secret-key',
-        active: true
+        active: true,
       };
 
       expect(Array.isArray(config.events)).toBe(true);
@@ -486,7 +467,7 @@ describe('WebhookService - Critical Business Logic', () => {
         url: 'https://example.com/webhook',
         events: ['user.created'],
         secret: 'my-secret-key',
-        active: true
+        active: true,
       };
 
       expect(config.secret).toBeTruthy();
@@ -509,7 +490,7 @@ describe('WebhookService - Critical Business Logic', () => {
         eventType: 'user.created',
         processed: true,
         createdAt: '2024-01-21T10:00:00Z',
-        updatedAt: '2024-01-21T10:01:00Z'
+        updatedAt: '2024-01-21T10:01:00Z',
       };
 
       expect(event.processed).toBe(true);
@@ -520,12 +501,12 @@ describe('WebhookService - Critical Business Logic', () => {
       const delivery = {
         id: 'delivery-001',
         attempts: 1,
-        status: 'pending'
+        status: 'pending',
       };
 
       const newDelivery = {
         ...delivery,
-        attempts: delivery.attempts + 1
+        attempts: delivery.attempts + 1,
       };
 
       expect(newDelivery.attempts).toBe(2);
@@ -553,7 +534,7 @@ describe('WebhookService - Critical Business Logic', () => {
       }
 
       expect(batches.length).toBeGreaterThanOrEqual(1);
-      batches.forEach(batch => {
+      batches.forEach((batch) => {
         expect(batch.length).toBeLessThanOrEqual(concurrencyLimit);
       });
     });
@@ -563,7 +544,7 @@ describe('WebhookService - Critical Business Logic', () => {
       const processingOrder: number[] = [];
 
       for (const batch of batches) {
-        batch.forEach(item => processingOrder.push(item));
+        batch.forEach((item) => processingOrder.push(item));
       }
 
       expect(processingOrder).toEqual([1, 2, 3, 4, 5]);
@@ -587,11 +568,7 @@ describe('WebhookService - Critical Business Logic', () => {
     });
 
     it('should handle multiple active webhook configurations', () => {
-      const activeConfigs = [
-        { id: 'config-001' },
-        { id: 'config-002' },
-        { id: 'config-003' }
-      ];
+      const activeConfigs = [{ id: 'config-001' }, { id: 'config-002' }, { id: 'config-003' }];
       const hasActiveConfigs = activeConfigs.length > 0;
 
       expect(hasActiveConfigs).toBe(true);

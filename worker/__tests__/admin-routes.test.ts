@@ -18,8 +18,8 @@ describe('admin-routes - Critical Business Logic', () => {
           students: 50,
           teachers: 10,
           parents: 80,
-          admins: 2
-        }
+          admins: 2,
+        },
       };
 
       expect(dashboardData.userDistribution.students).toBe(50);
@@ -35,7 +35,7 @@ describe('admin-routes - Critical Business Logic', () => {
         { id: '3', title: 'Recent Announcement 2', date: '2024-01-11' },
         { id: '4', title: 'Recent Announcement 3', date: '2024-01-12' },
         { id: '5', title: 'Recent Announcement 4', date: '2024-01-13' },
-        { id: '6', title: 'Recent Announcement 5', date: '2024-01-14' }
+        { id: '6', title: 'Recent Announcement 5', date: '2024-01-14' },
       ];
 
       const recentAnnouncements = allAnnouncements.slice(-5).reverse();
@@ -51,12 +51,12 @@ describe('admin-routes - Critical Business Logic', () => {
         { id: '1', name: 'Student A', role: 'student', email: 'student1@test.com' },
         { id: '2', name: 'Teacher B', role: 'teacher', email: 'teacher1@test.com' },
         { id: '3', name: 'Student C', role: 'student', email: 'student2@test.com' },
-        { id: '4', name: 'Parent D', role: 'parent', email: 'parent1@test.com' }
+        { id: '4', name: 'Parent D', role: 'parent', email: 'parent1@test.com' },
       ];
 
-      const filteredByRole = allUsers.filter(u => u.role === 'student');
+      const filteredByRole = allUsers.filter((u) => u.role === 'student');
       expect(filteredByRole).toHaveLength(2);
-      expect(filteredByRole.every(u => u.role === 'student')).toBe(true);
+      expect(filteredByRole.every((u) => u.role === 'student')).toBe(true);
     });
 
     it('should filter users by classId', () => {
@@ -64,55 +64,63 @@ describe('admin-routes - Critical Business Logic', () => {
         { id: '1', name: 'Student A', role: 'student', classId: 'class-1' },
         { id: '2', name: 'Student B', role: 'student', classId: 'class-2' },
         { id: '3', name: 'Student C', role: 'student', classId: 'class-1' },
-        { id: '4', name: 'Teacher D', role: 'teacher' }
+        { id: '4', name: 'Teacher D', role: 'teacher' },
       ] as any[];
 
-      const filteredByClass = allUsers.filter(u =>
-        u.role === 'student' && 'classId' in u && u.classId === 'class-1'
+      const filteredByClass = allUsers.filter(
+        (u) => u.role === 'student' && 'classId' in u && u.classId === 'class-1'
       );
       expect(filteredByClass).toHaveLength(2);
-      expect(filteredByClass.every(u => u.classId === 'class-1')).toBe(true);
+      expect(filteredByClass.every((u) => u.classId === 'class-1')).toBe(true);
     });
 
     it('should search users by name', () => {
       const allUsers = [
         { id: '1', name: 'John Doe', role: 'student', email: 'john@test.com' },
         { id: '2', name: 'Jane Smith', role: 'teacher', email: 'jane@test.com' },
-        { id: '3', name: 'Johnson Lee', role: 'parent', email: 'johnson@test.com' }
+        { id: '3', name: 'Johnson Lee', role: 'parent', email: 'johnson@test.com' },
       ];
 
       const searchLower = 'john';
-      const filteredBySearch = allUsers.filter(u =>
-        u.name.toLowerCase().includes(searchLower)
-      );
+      const filteredBySearch = allUsers.filter((u) => u.name.toLowerCase().includes(searchLower));
       expect(filteredBySearch).toHaveLength(2);
-      expect(filteredBySearch.map(u => u.name)).toEqual(['John Doe', 'Johnson Lee']);
+      expect(filteredBySearch.map((u) => u.name)).toEqual(['John Doe', 'Johnson Lee']);
     });
 
     it('should search users by email', () => {
       const allUsers = [
         { id: '1', name: 'John Doe', role: 'student', email: 'john@test.com' },
         { id: '2', name: 'Jane Smith', role: 'teacher', email: 'jane@test.com' },
-        { id: '3', name: 'Johnson Lee', role: 'parent', email: 'johnson@test.com' }
+        { id: '3', name: 'Johnson Lee', role: 'parent', email: 'johnson@test.com' },
       ];
 
       const searchLower = 'test.com';
-      const filteredBySearch = allUsers.filter(u =>
-        u.email.toLowerCase().includes(searchLower)
-      );
+      const filteredBySearch = allUsers.filter((u) => u.email.toLowerCase().includes(searchLower));
       expect(filteredBySearch).toHaveLength(3);
     });
 
     it('should combine multiple filters', () => {
       const allUsers = [
-        { id: '1', name: 'John Student', role: 'student', classId: 'class-1', email: 'john1@test.com' },
+        {
+          id: '1',
+          name: 'John Student',
+          role: 'student',
+          classId: 'class-1',
+          email: 'john1@test.com',
+        },
         { id: '2', name: 'John Teacher', role: 'teacher', email: 'john2@test.com' },
-        { id: '3', name: 'Jane Student', role: 'student', classId: 'class-1', email: 'jane@test.com' }
+        {
+          id: '3',
+          name: 'Jane Student',
+          role: 'student',
+          classId: 'class-1',
+          email: 'jane@test.com',
+        },
       ] as any[];
 
-      let filtered = allUsers.filter(u => u.role === 'student');
-      filtered = filtered.filter(u => 'classId' in u && u.classId === 'class-1');
-      filtered = filtered.filter(u => u.name.toLowerCase().includes('john'));
+      let filtered = allUsers.filter((u) => u.role === 'student');
+      filtered = filtered.filter((u) => 'classId' in u && u.classId === 'class-1');
+      filtered = filtered.filter((u) => u.name.toLowerCase().includes('john'));
 
       expect(filtered).toHaveLength(1);
       expect(filtered[0].name).toBe('John Student');
@@ -150,19 +158,17 @@ describe('admin-routes - Critical Business Logic', () => {
   describe('Edge Cases', () => {
     it('should handle empty user list', () => {
       const allUsers: any[] = [];
-      const filteredByRole = allUsers.filter(u => u.role === 'student');
+      const filteredByRole = allUsers.filter((u) => u.role === 'student');
       expect(filteredByRole).toHaveLength(0);
     });
 
     it('should handle empty search results', () => {
-      const allUsers = [
-        { id: '1', name: 'John Doe', role: 'student', email: 'john@test.com' }
-      ];
+      const allUsers = [{ id: '1', name: 'John Doe', role: 'student', email: 'john@test.com' }];
 
       const searchLower = 'nonexistent';
-      const filteredBySearch = allUsers.filter(u =>
-        u.name.toLowerCase().includes(searchLower) ||
-        u.email.toLowerCase().includes(searchLower)
+      const filteredBySearch = allUsers.filter(
+        (u) =>
+          u.name.toLowerCase().includes(searchLower) || u.email.toLowerCase().includes(searchLower)
       );
 
       expect(filteredBySearch).toHaveLength(0);
@@ -171,14 +177,14 @@ describe('admin-routes - Critical Business Logic', () => {
     it('should handle case-insensitive search', () => {
       const allUsers = [
         { id: '1', name: 'John Doe', role: 'student', email: 'john@test.com' },
-        { id: '2', name: 'JANE SMITH', role: 'teacher', email: 'jane@test.com' }
+        { id: '2', name: 'JANE SMITH', role: 'teacher', email: 'jane@test.com' },
       ];
 
       const searchTerm = 'jOhN';
       const searchLower = searchTerm.toLowerCase();
-      const filteredBySearch = allUsers.filter(u =>
-        u.name.toLowerCase().includes(searchLower) ||
-        u.email.toLowerCase().includes(searchLower)
+      const filteredBySearch = allUsers.filter(
+        (u) =>
+          u.name.toLowerCase().includes(searchLower) || u.email.toLowerCase().includes(searchLower)
       );
 
       expect(filteredBySearch).toHaveLength(1);
@@ -186,15 +192,11 @@ describe('admin-routes - Critical Business Logic', () => {
     });
 
     it('should handle whitespace in search', () => {
-      const allUsers = [
-        { id: '1', name: 'John Doe', role: 'student', email: 'john@test.com' }
-      ];
+      const allUsers = [{ id: '1', name: 'John Doe', role: 'student', email: 'john@test.com' }];
 
       const searchLower = '  john  ';
       const trimmedSearch = searchLower.trim();
-      const filteredBySearch = allUsers.filter(u =>
-        u.name.toLowerCase().includes(trimmedSearch)
-      );
+      const filteredBySearch = allUsers.filter((u) => u.name.toLowerCase().includes(trimmedSearch));
 
       expect(filteredBySearch).toHaveLength(1);
     });
@@ -202,11 +204,11 @@ describe('admin-routes - Critical Business Logic', () => {
     it('should handle invalid classId filter', () => {
       const allUsers = [
         { id: '1', name: 'Student A', role: 'student', classId: 'class-1' },
-        { id: '2', name: 'Student B', role: 'student', classId: 'class-2' }
+        { id: '2', name: 'Student B', role: 'student', classId: 'class-2' },
       ] as any[];
 
-      const filteredByClass = allUsers.filter(u =>
-        u.role === 'student' && 'classId' in u && u.classId === 'nonexistent-class'
+      const filteredByClass = allUsers.filter(
+        (u) => u.role === 'student' && 'classId' in u && u.classId === 'nonexistent-class'
       );
 
       expect(filteredByClass).toHaveLength(0);
@@ -215,11 +217,11 @@ describe('admin-routes - Critical Business Logic', () => {
     it('should handle missing classId in user object', () => {
       const allUsers = [
         { id: '1', name: 'Student A', role: 'student', classId: 'class-1' },
-        { id: '2', name: 'Teacher B', role: 'teacher' }
+        { id: '2', name: 'Teacher B', role: 'teacher' },
       ] as any[];
 
-      const filteredByClass = allUsers.filter(u =>
-        u.role === 'student' && 'classId' in u && u.classId === 'class-1'
+      const filteredByClass = allUsers.filter(
+        (u) => u.role === 'student' && 'classId' in u && u.classId === 'class-1'
       );
 
       expect(filteredByClass).toHaveLength(1);
@@ -245,7 +247,7 @@ describe('admin-routes - Critical Business Logic', () => {
     it('should handle fewer than 5 announcements', () => {
       const allAnnouncements = [
         { id: '1', title: 'Announcement 1', date: '2024-01-01' },
-        { id: '2', title: 'Announcement 2', date: '2024-01-02' }
+        { id: '2', title: 'Announcement 2', date: '2024-01-02' },
       ];
 
       const recentAnnouncements = allAnnouncements.slice(-5).reverse();
@@ -266,8 +268,8 @@ describe('admin-routes - Critical Business Logic', () => {
           students: 50,
           teachers: 10,
           parents: 80,
-          admins: 2
-        }
+          admins: 2,
+        },
       };
 
       expect(dashboardData).toHaveProperty('totalUsers');
@@ -289,7 +291,7 @@ describe('admin-routes - Critical Business Logic', () => {
         academicYear: '2025-2026',
         semester: 1,
         allowRegistration: true,
-        maintenanceMode: false
+        maintenanceMode: false,
       };
 
       expect(settings).toHaveProperty('schoolName');
@@ -309,7 +311,7 @@ describe('admin-routes - Critical Business Logic', () => {
         content: 'This is a test announcement',
         targetRole: 'student' as const,
         authorId: 'admin-001',
-        date: new Date().toISOString()
+        date: new Date().toISOString(),
       };
 
       expect(announcement).toHaveProperty('id');
@@ -331,7 +333,7 @@ describe('admin-routes - Critical Business Logic', () => {
       const updatePayload = {
         title: 'Updated Title',
         content: 'Updated content',
-        targetRole: 'all' as const
+        targetRole: 'all' as const,
       };
 
       expect(updatePayload).toHaveProperty('title');
@@ -341,7 +343,7 @@ describe('admin-routes - Critical Business Logic', () => {
 
     it('should support partial updates for announcements', () => {
       const partialUpdate = {
-        title: 'New Title Only'
+        title: 'New Title Only',
       };
 
       expect(partialUpdate).toHaveProperty('title');
@@ -356,7 +358,7 @@ describe('admin-routes - Critical Business Logic', () => {
         targetRole: 'all' as const,
         authorId: 'admin-001',
         date: '2024-01-01T00:00:00Z',
-        updatedAt: '2024-01-15T10:30:00Z'
+        updatedAt: '2024-01-15T10:30:00Z',
       };
 
       expect(updatedAnnouncement).toHaveProperty('id');

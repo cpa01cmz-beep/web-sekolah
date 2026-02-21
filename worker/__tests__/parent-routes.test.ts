@@ -7,36 +7,34 @@ describe('parent-routes - Critical Business Logic', () => {
         id: 'parent-001',
         name: 'Parent Smith',
         email: 'parent@test.com',
-        role: 'parent' as const
+        role: 'parent' as const,
       };
 
       const child = {
         id: 'student-001',
         name: 'Child Smith',
         classId: 'class-001',
-        parentId: 'parent-001'
+        parentId: 'parent-001',
       };
 
       const childSchedule = [
         { day: 'Monday', startTime: '08:00', endTime: '14:30', courseName: 'Mathematics' },
-        { day: 'Monday', startTime: '14:45', endTime: '16:15', courseName: 'Physics' }
+        { day: 'Monday', startTime: '14:45', endTime: '16:15', courseName: 'Physics' },
       ];
 
       const recentGrades = [
         { id: 'grade-1', score: 95, courseName: 'Mathematics' },
-        { id: 'grade-2', score: 88, courseName: 'Physics' }
+        { id: 'grade-2', score: 88, courseName: 'Physics' },
       ];
 
-      const announcements = [
-        { id: 'ann-1', title: 'Parent Meeting', date: '2024-01-15' }
-      ];
+      const announcements = [{ id: 'ann-1', title: 'Parent Meeting', date: '2024-01-15' }];
 
       const dashboardData = {
         parent,
         child,
         childSchedule,
         recentGrades,
-        announcements
+        announcements,
       };
 
       expect(dashboardData.parent.id).toBe('parent-001');
@@ -53,7 +51,7 @@ describe('parent-routes - Critical Business Logic', () => {
         { day: 'Monday', startTime: '08:00', endTime: '14:30', courseName: 'Mathematics' },
         { day: 'Monday', startTime: '14:45', endTime: '16:15', courseName: 'Physics' },
         { day: 'Tuesday', startTime: '08:00', endTime: '14:30', courseName: 'Chemistry' },
-        { day: 'Tuesday', startTime: '14:45', endTime: '16:15', courseName: 'Biology' }
+        { day: 'Tuesday', startTime: '14:45', endTime: '16:15', courseName: 'Biology' },
       ];
 
       expect(childSchedule).toHaveLength(4);
@@ -67,12 +65,12 @@ describe('parent-routes - Critical Business Logic', () => {
       const recentGrades = [
         { id: 'grade-1', score: 95, courseName: 'Mathematics', feedback: 'Excellent' },
         { id: 'grade-2', score: 88, courseName: 'Physics', feedback: 'Good work' },
-        { id: 'grade-3', score: 92, courseName: 'Chemistry', feedback: 'Great' }
+        { id: 'grade-3', score: 92, courseName: 'Chemistry', feedback: 'Great' },
       ];
 
       expect(recentGrades).toHaveLength(3);
-      expect(recentGrades.every(g => g.courseName !== undefined)).toBe(true);
-      expect(recentGrades.every(g => g.score !== undefined)).toBe(true);
+      expect(recentGrades.every((g) => g.courseName !== undefined)).toBe(true);
+      expect(recentGrades.every((g) => g.score !== undefined)).toBe(true);
     });
   });
 
@@ -106,12 +104,12 @@ describe('parent-routes - Critical Business Logic', () => {
     it('should handle parent with multiple children', () => {
       const parent = {
         id: 'parent-001',
-        name: 'Parent Smith'
+        name: 'Parent Smith',
       };
 
       const children = [
         { id: 'student-001', name: 'Child 1' },
-        { id: 'student-002', name: 'Child 2' }
+        { id: 'student-002', name: 'Child 2' },
       ];
 
       expect(parent.id).toBe('parent-001');
@@ -125,7 +123,7 @@ describe('parent-routes - Critical Business Logic', () => {
         child: { id: 'student-001' },
         childSchedule,
         recentGrades: [],
-        announcements: []
+        announcements: [],
       };
 
       expect(dashboardData.childSchedule).toHaveLength(0);
@@ -138,7 +136,7 @@ describe('parent-routes - Critical Business Logic', () => {
         child: { id: 'student-001' },
         childSchedule: [],
         recentGrades,
-        announcements: []
+        announcements: [],
       };
 
       expect(dashboardData.recentGrades).toHaveLength(0);
@@ -151,7 +149,7 @@ describe('parent-routes - Critical Business Logic', () => {
         child: { id: 'student-001' },
         childSchedule: [],
         recentGrades: [],
-        announcements
+        announcements,
       };
 
       expect(dashboardData.announcements).toHaveLength(0);
@@ -161,7 +159,7 @@ describe('parent-routes - Critical Business Logic', () => {
       const child = {
         id: 'student-001',
         name: 'Orphan Child',
-        classId: 'class-001'
+        classId: 'class-001',
       } as any;
 
       expect(child.parentId).toBeUndefined();
@@ -170,7 +168,7 @@ describe('parent-routes - Critical Business Logic', () => {
     it('should handle missing feedback in grades', () => {
       const recentGrades = [
         { id: 'grade-1', score: 95, courseName: 'Mathematics', feedback: '' },
-        { id: 'grade-2', score: 88, courseName: 'Physics' } as any
+        { id: 'grade-2', score: 88, courseName: 'Physics' } as any,
       ];
 
       expect(recentGrades[0].feedback).toBe('');
@@ -180,7 +178,7 @@ describe('parent-routes - Critical Business Logic', () => {
     it('should handle schedule with overlapping times', () => {
       const childSchedule = [
         { day: 'Monday', startTime: '08:00', endTime: '14:30', courseName: 'Mathematics' },
-        { day: 'Monday', startTime: '14:00', endTime: '15:30', courseName: 'Physics' }
+        { day: 'Monday', startTime: '14:00', endTime: '15:30', courseName: 'Physics' },
       ];
 
       expect(childSchedule).toHaveLength(2);
@@ -196,17 +194,17 @@ describe('parent-routes - Critical Business Logic', () => {
           id: 'parent-001',
           name: 'Parent Smith',
           email: 'parent@test.com',
-          role: 'parent' as const
+          role: 'parent' as const,
         },
         child: {
           id: 'student-001',
           name: 'Child Smith',
           classId: 'class-001',
-          parentId: 'parent-001'
+          parentId: 'parent-001',
         },
         childSchedule: [],
         recentGrades: [],
-        announcements: []
+        announcements: [],
       };
 
       expect(dashboardData).toHaveProperty('parent');
@@ -221,7 +219,7 @@ describe('parent-routes - Critical Business Logic', () => {
         id: 'parent-001',
         name: 'Parent Smith',
         email: 'parent@test.com',
-        role: 'parent' as const
+        role: 'parent' as const,
       };
 
       expect(parent).toHaveProperty('id');
@@ -236,7 +234,7 @@ describe('parent-routes - Critical Business Logic', () => {
         id: 'student-001',
         name: 'Child Smith',
         classId: 'class-001',
-        parentId: 'parent-001'
+        parentId: 'parent-001',
       };
 
       expect(child).toHaveProperty('id');
@@ -250,7 +248,7 @@ describe('parent-routes - Critical Business Logic', () => {
         day: 'Monday',
         startTime: '08:00',
         endTime: '14:30',
-        courseName: 'Mathematics'
+        courseName: 'Mathematics',
       };
 
       expect(scheduleEntry).toHaveProperty('day');
@@ -264,7 +262,7 @@ describe('parent-routes - Critical Business Logic', () => {
         id: 'grade-001',
         score: 95,
         courseName: 'Mathematics',
-        feedback: 'Excellent!'
+        feedback: 'Excellent!',
       };
 
       expect(grade).toHaveProperty('id');
@@ -280,7 +278,7 @@ describe('parent-routes - Critical Business Logic', () => {
       const announcement = {
         id: 'ann-001',
         title: 'Parent Meeting',
-        date: '2024-01-15'
+        date: '2024-01-15',
       };
 
       expect(announcement).toHaveProperty('id');
@@ -323,7 +321,7 @@ describe('parent-routes - Critical Business Logic', () => {
     it('should accept valid grade scores', () => {
       const validScores = [0, 50, 95.5, 100];
 
-      validScores.forEach(score => {
+      validScores.forEach((score) => {
         expect(score).toBeGreaterThanOrEqual(0);
         expect(score).toBeLessThanOrEqual(100);
       });
@@ -332,7 +330,7 @@ describe('parent-routes - Critical Business Logic', () => {
     it('should reject invalid grade scores', () => {
       const invalidScores = [-1, 101, 150];
 
-      invalidScores.forEach(score => {
+      invalidScores.forEach((score) => {
         expect(score < 0 || score > 100).toBe(true);
       });
     });
@@ -340,7 +338,7 @@ describe('parent-routes - Critical Business Logic', () => {
     it('should handle decimal grade scores', () => {
       const decimalScores = [85.5, 92.75, 88.25];
 
-      decimalScores.forEach(score => {
+      decimalScores.forEach((score) => {
         expect(score).toBeGreaterThanOrEqual(0);
         expect(score).toBeLessThanOrEqual(100);
       });

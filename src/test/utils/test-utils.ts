@@ -14,7 +14,7 @@ export const createMockQueryClient = () => {
   });
 };
 
-export const waitForNextTick = () => new Promise(resolve => setTimeout(resolve, 0));
+export const waitForNextTick = () => new Promise((resolve) => setTimeout(resolve, 0));
 
 export const mockConsoleMethods = () => {
   const originalConsole = {

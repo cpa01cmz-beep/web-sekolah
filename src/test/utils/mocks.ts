@@ -27,7 +27,7 @@ export class MockRepository implements IRepository {
 
   private async execute<T>(path: string): Promise<T> {
     if (this.delay > 0) {
-      await new Promise(resolve => setTimeout(resolve, this.delay));
+      await new Promise((resolve) => setTimeout(resolve, this.delay));
     }
 
     if (this.mockErrors[path]) {
@@ -72,7 +72,7 @@ export const mockFetch = <T>(data: T, status = 200) => {
 
 export const mockLocalStorage = () => {
   const store: Record<string, string> = {};
-  
+
   return {
     getItem: vi.fn((key: string) => store[key] || null),
     setItem: vi.fn((key: string, value: string) => {
@@ -82,7 +82,7 @@ export const mockLocalStorage = () => {
       delete store[key];
     }),
     clear: vi.fn(() => {
-      Object.keys(store).forEach(key => delete store[key]);
+      Object.keys(store).forEach((key) => delete store[key]);
     }),
     get length() {
       return Object.keys(store).length;

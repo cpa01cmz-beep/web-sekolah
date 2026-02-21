@@ -21,7 +21,7 @@ describe('ApiRepository', () => {
       const result = await repository.get('/api/test');
 
       expect(apiClient).toHaveBeenCalledWith('/api/test', {
-        method: 'GET'
+        method: 'GET',
       });
       expect(result).toEqual(mockData);
     });
@@ -29,9 +29,9 @@ describe('ApiRepository', () => {
     it('should pass options to apiClient', async () => {
       const mockData = { id: '1' };
       const options: ApiRequestOptions = {
-        headers: { 'Authorization': 'Bearer token' },
+        headers: { Authorization: 'Bearer token' },
         timeout: 5000,
-        circuitBreaker: false
+        circuitBreaker: false,
       };
       vi.mocked(apiClient).mockResolvedValue(mockData);
 
@@ -39,7 +39,7 @@ describe('ApiRepository', () => {
 
       expect(apiClient).toHaveBeenCalledWith('/api/test', {
         method: 'GET',
-        ...options
+        ...options,
       });
     });
   });
@@ -54,7 +54,7 @@ describe('ApiRepository', () => {
 
       expect(apiClient).toHaveBeenCalledWith('/api/users', {
         method: 'POST',
-        body: JSON.stringify(body)
+        body: JSON.stringify(body),
       });
       expect(result).toEqual(mockData);
     });
@@ -67,7 +67,7 @@ describe('ApiRepository', () => {
 
       expect(apiClient).toHaveBeenCalledWith('/api/test', {
         method: 'POST',
-        body: undefined
+        body: undefined,
       });
     });
 
@@ -76,7 +76,7 @@ describe('ApiRepository', () => {
       const body = { name: 'Test' };
       const options: ApiRequestOptions = {
         headers: { 'Content-Type': 'application/json' },
-        timeout: 10000
+        timeout: 10000,
       };
       vi.mocked(apiClient).mockResolvedValue(mockData);
 
@@ -85,7 +85,7 @@ describe('ApiRepository', () => {
       expect(apiClient).toHaveBeenCalledWith('/api/test', {
         method: 'POST',
         body: JSON.stringify(body),
-        ...options
+        ...options,
       });
     });
   });
@@ -100,7 +100,7 @@ describe('ApiRepository', () => {
 
       expect(apiClient).toHaveBeenCalledWith('/api/users/1', {
         method: 'PUT',
-        body: JSON.stringify(body)
+        body: JSON.stringify(body),
       });
       expect(result).toEqual(mockData);
     });
@@ -113,7 +113,7 @@ describe('ApiRepository', () => {
 
       expect(apiClient).toHaveBeenCalledWith('/api/test', {
         method: 'PUT',
-        body: undefined
+        body: undefined,
       });
     });
 
@@ -128,7 +128,7 @@ describe('ApiRepository', () => {
       expect(apiClient).toHaveBeenCalledWith('/api/test', {
         method: 'PUT',
         body: JSON.stringify(body),
-        ...options
+        ...options,
       });
     });
   });
@@ -141,7 +141,7 @@ describe('ApiRepository', () => {
       const result = await repository.delete('/api/users/1');
 
       expect(apiClient).toHaveBeenCalledWith('/api/users/1', {
-        method: 'DELETE'
+        method: 'DELETE',
       });
       expect(result).toEqual(mockData);
     });
@@ -149,7 +149,7 @@ describe('ApiRepository', () => {
     it('should pass options to apiClient', async () => {
       const mockData = { deleted: true };
       const options: ApiRequestOptions = {
-        headers: { 'Authorization': 'Bearer token' }
+        headers: { Authorization: 'Bearer token' },
       };
       vi.mocked(apiClient).mockResolvedValue(mockData);
 
@@ -157,7 +157,7 @@ describe('ApiRepository', () => {
 
       expect(apiClient).toHaveBeenCalledWith('/api/users/1', {
         method: 'DELETE',
-        ...options
+        ...options,
       });
     });
   });
@@ -172,7 +172,7 @@ describe('ApiRepository', () => {
 
       expect(apiClient).toHaveBeenCalledWith('/api/users/1', {
         method: 'PATCH',
-        body: JSON.stringify(body)
+        body: JSON.stringify(body),
       });
       expect(result).toEqual(mockData);
     });
@@ -185,7 +185,7 @@ describe('ApiRepository', () => {
 
       expect(apiClient).toHaveBeenCalledWith('/api/test', {
         method: 'PATCH',
-        body: undefined
+        body: undefined,
       });
     });
 
@@ -200,7 +200,7 @@ describe('ApiRepository', () => {
       expect(apiClient).toHaveBeenCalledWith('/api/test', {
         method: 'PATCH',
         body: JSON.stringify(body),
-        ...options
+        ...options,
       });
     });
   });
@@ -252,7 +252,7 @@ describe('ApiRepository', () => {
       const mockData: UserData = {
         id: '1',
         name: 'John Doe',
-        email: 'john@example.com'
+        email: 'john@example.com',
       };
       vi.mocked(apiClient).mockResolvedValue(mockData);
 
@@ -268,7 +268,7 @@ describe('ApiRepository', () => {
       }
       const mockData: CreateResponse = {
         id: '123',
-        createdAt: '2026-01-07T00:00:00.000Z'
+        createdAt: '2026-01-07T00:00:00.000Z',
       };
       vi.mocked(apiClient).mockResolvedValue(mockData);
 
@@ -284,7 +284,7 @@ describe('ApiRepository', () => {
       }
       const mockData: UpdateResponse = {
         id: '1',
-        updatedAt: '2026-01-07T12:00:00.000Z'
+        updatedAt: '2026-01-07T12:00:00.000Z',
       };
       vi.mocked(apiClient).mockResolvedValue(mockData);
 
@@ -300,7 +300,7 @@ describe('ApiRepository', () => {
       }
       const mockData: DeleteResponse = {
         deleted: true,
-        message: 'User deleted successfully'
+        message: 'User deleted successfully',
       };
       vi.mocked(apiClient).mockResolvedValue(mockData);
 
@@ -316,11 +316,13 @@ describe('ApiRepository', () => {
       }
       const mockData: PatchResponse = {
         id: '1',
-        patched: true
+        patched: true,
       };
       vi.mocked(apiClient).mockResolvedValue(mockData);
 
-      const result = await repository.patch<PatchResponse>('/api/users/1', { email: 'new@example.com' });
+      const result = await repository.patch<PatchResponse>('/api/users/1', {
+        email: 'new@example.com',
+      });
 
       expect(result.patched).toBe(true);
     });

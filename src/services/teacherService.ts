@@ -8,7 +8,7 @@ import type {
   CreateAnnouncementData,
   ClassStudentWithGrade,
   ScheduleItem,
-  Message
+  Message,
 } from '@shared/types';
 import type { IRepository } from '@/repositories/IRepository';
 import { apiRepository } from '@/repositories/ApiRepository';
@@ -34,8 +34,12 @@ export function createTeacherService(repository: IRepository = apiRepository): T
       return repository.get<SchoolClass[]>(API_ENDPOINTS.TEACHERS.CLASSES(teacherId));
     },
 
-    async getSchedule(teacherId: string): Promise<(ScheduleItem & { className: string; courseName: string })[]> {
-      return repository.get<(ScheduleItem & { className: string; courseName: string })[]>(API_ENDPOINTS.TEACHERS.SCHEDULE(teacherId));
+    async getSchedule(
+      teacherId: string
+    ): Promise<(ScheduleItem & { className: string; courseName: string })[]> {
+      return repository.get<(ScheduleItem & { className: string; courseName: string })[]>(
+        API_ENDPOINTS.TEACHERS.SCHEDULE(teacherId)
+      );
     },
 
     async submitGrade(gradeData: SubmitGradeData): Promise<Grade> {
@@ -47,18 +51,25 @@ export function createTeacherService(repository: IRepository = apiRepository): T
     },
 
     async createAnnouncement(announcement: CreateAnnouncementData): Promise<Announcement> {
-      return repository.post<Announcement>(API_ENDPOINTS.TEACHERS.CREATE_ANNOUNCEMENT, announcement);
+      return repository.post<Announcement>(
+        API_ENDPOINTS.TEACHERS.CREATE_ANNOUNCEMENT,
+        announcement
+      );
     },
 
     async getClassStudentsWithGrades(classId: string): Promise<ClassStudentWithGrade[]> {
       return repository.get<ClassStudentWithGrade[]>(API_ENDPOINTS.CLASSES.STUDENTS(classId));
     },
 
-    getMessages: (teacherId: string, type?: 'inbox' | 'sent') => messageService.getMessages(teacherId, type),
+    getMessages: (teacherId: string, type?: 'inbox' | 'sent') =>
+      messageService.getMessages(teacherId, type),
     getUnreadCount: (teacherId: string) => messageService.getUnreadCount(teacherId),
-    getConversation: (teacherId: string, parentId: string) => messageService.getConversation(teacherId, parentId),
-    sendMessage: (teacherId: string, data: SendMessageData) => messageService.sendMessage(teacherId, data),
-    markAsRead: (teacherId: string, messageId: string) => messageService.markAsRead(teacherId, messageId),
+    getConversation: (teacherId: string, parentId: string) =>
+      messageService.getConversation(teacherId, parentId),
+    sendMessage: (teacherId: string, data: SendMessageData) =>
+      messageService.sendMessage(teacherId, data),
+    markAsRead: (teacherId: string, messageId: string) =>
+      messageService.markAsRead(teacherId, messageId),
   };
 }
 

@@ -14,52 +14,63 @@ import { AnnouncementForm } from '@/components/forms/AnnouncementForm';
 import { useAnnouncements, useCreateAnnouncement, useDeleteAnnouncement } from '@/hooks/useAdmin';
 import type { Announcement } from '@shared/types';
 
-const AnnouncementItem = memo(({ ann, index, total, onDelete, isDeleting }: { 
-  ann: Announcement; 
-  index: number; 
-  total: number; 
-  onDelete: (id: string) => void;
-  isDeleting: boolean;
-}) => {
-  const handleDelete = useCallback(() => {
-    onDelete(ann.id);
-  }, [onDelete, ann.id]);
+const AnnouncementItem = memo(
+  ({
+    ann,
+    index,
+    total,
+    onDelete,
+    isDeleting,
+  }: {
+    ann: Announcement;
+    index: number;
+    total: number;
+    onDelete: (id: string) => void;
+    isDeleting: boolean;
+  }) => {
+    const handleDelete = useCallback(() => {
+      onDelete(ann.id);
+    }, [onDelete, ann.id]);
 
-  return (
-    <div>
-      <div className="flex justify-between items-start">
-        <div className="flex-1">
-          <h3 className="font-semibold">{ann.title}</h3>
-          <p className="text-sm text-muted-foreground">
-            {formatDateLong(ann.date)}
-          </p>
+    return (
+      <div>
+        <div className="flex justify-between items-start">
+          <div className="flex-1">
+            <h3 className="font-semibold">{ann.title}</h3>
+            <p className="text-sm text-muted-foreground">{formatDateLong(ann.date)}</p>
+          </div>
+          <div className="flex space-x-2">
+            <Button
+              variant="outline"
+              size="icon"
+              className="h-8 w-8"
+              aria-label={`Edit announcement: ${ann.title}`}
+            >
+              <Edit className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="destructive"
+              size="icon"
+              className="h-8 w-8"
+              onClick={handleDelete}
+              aria-label={`Delete announcement: ${ann.title}`}
+              disabled={isDeleting}
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
-        <div className="flex space-x-2">
-          <Button variant="outline" size="icon" className="h-8 w-8" aria-label={`Edit announcement: ${ann.title}`}>
-            <Edit className="h-4 w-4" />
-          </Button>
-          <Button 
-            variant="destructive" 
-            size="icon" 
-            className="h-8 w-8" 
-            onClick={handleDelete} 
-            aria-label={`Delete announcement: ${ann.title}`}
-            disabled={isDeleting}
-          >
-            <Trash2 className="h-4 w-4" />
-          </Button>
-        </div>
+        <p className="mt-2 text-sm">{ann.content}</p>
+        {index < total - 1 && <Separator className="mt-6" />}
       </div>
-      <p className="mt-2 text-sm">{ann.content}</p>
-      {index < total - 1 && <Separator className="mt-6" />}
-    </div>
-  );
-});
+    );
+  }
+);
 AnnouncementItem.displayName = 'AnnouncementItem';
 
 export function AdminAnnouncementsPage() {
   const [isFormOpen, setIsFormOpen] = useState(false);
-  
+
   const { data: announcements, isLoading, error, refetch } = useAnnouncements();
   const createMutation = useCreateAnnouncement({
     onSuccess: () => {
@@ -79,17 +90,23 @@ export function AdminAnnouncementsPage() {
     },
   });
 
-  const handlePostAnnouncement = useCallback((data: { title: string; content: string }) => {
-    createMutation.mutate({
-      title: data.title,
-      content: data.content,
-      targetRole: 'all',
-    });
-  }, [createMutation]);
+  const handlePostAnnouncement = useCallback(
+    (data: { title: string; content: string }) => {
+      createMutation.mutate({
+        title: data.title,
+        content: data.content,
+        targetRole: 'all',
+      });
+    },
+    [createMutation]
+  );
 
-  const handleDelete = useCallback((id: string) => {
-    deleteMutation.mutate(id);
-  }, [deleteMutation]);
+  const handleDelete = useCallback(
+    (id: string) => {
+      deleteMutation.mutate(id);
+    },
+    [deleteMutation]
+  );
 
   const handleCloseForm = useCallback(() => {
     setIsFormOpen(false);
@@ -143,10 +160,7 @@ export function AdminAnnouncementsPage() {
               <CardDescription>Post a new school-wide announcement.</CardDescription>
             </CardHeader>
             <CardContent>
-              <Button
-                onClick={handleOpenForm}
-                className="w-full"
-              >
+              <Button onClick={handleOpenForm} className="w-full">
                 <Plus className="h-4 w-4 mr-2" />
                 Create New Announcement
               </Button>

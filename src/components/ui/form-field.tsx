@@ -50,7 +50,9 @@ export function FormField({
       </Label>
       {enhancedChild}
       {safeHelperText && !hasError && (
-        <p id={helperId} className="text-xs text-muted-foreground">{safeHelperText}</p>
+        <p id={helperId} className="text-xs text-muted-foreground">
+          {safeHelperText}
+        </p>
       )}
       {hasError && (
         <p

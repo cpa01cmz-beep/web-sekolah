@@ -39,9 +39,7 @@ describe('External Service Health Check', () => {
     });
 
     it('should return unhealthy when fetch throws error', async () => {
-      global.fetch = vi.fn(() =>
-        Promise.reject(new Error('Network error'))
-      ) as any;
+      global.fetch = vi.fn(() => Promise.reject(new Error('Network error'))) as any;
 
       const result = await ExternalServiceHealth.checkWebhookService('https://example.com/webhook');
 
@@ -52,9 +50,7 @@ describe('External Service Health Check', () => {
     });
 
     it('should return unhealthy when fetch throws error', async () => {
-      global.fetch = vi.fn(() =>
-        Promise.reject(new Error('Connection refused'))
-      ) as any;
+      global.fetch = vi.fn(() => Promise.reject(new Error('Connection refused'))) as any;
 
       const result = await ExternalServiceHealth.checkDocsService('https://example.com/docs');
 
@@ -86,9 +82,7 @@ describe('External Service Health Check', () => {
     });
 
     it('should track consecutive failures', async () => {
-      global.fetch = vi.fn(() =>
-        Promise.reject(new Error('Network error'))
-      ) as any;
+      global.fetch = vi.fn(() => Promise.reject(new Error('Network error'))) as any;
 
       await ExternalServiceHealth.checkWebhookService('https://example.com/webhook');
       await ExternalServiceHealth.checkWebhookService('https://example.com/webhook');
@@ -102,9 +96,7 @@ describe('External Service Health Check', () => {
     });
 
     it('should mark unhealthy after 5 consecutive failures', async () => {
-      global.fetch = vi.fn(() =>
-        Promise.reject(new Error('Network error'))
-      ) as any;
+      global.fetch = vi.fn(() => Promise.reject(new Error('Network error'))) as any;
 
       for (let i = 0; i < 5; i++) {
         await ExternalServiceHealth.checkWebhookService('https://example.com/webhook');
@@ -117,9 +109,7 @@ describe('External Service Health Check', () => {
     });
 
     it('should store last error message in health status', async () => {
-      global.fetch = vi.fn(() =>
-        Promise.reject(new Error('Connection timeout'))
-      ) as any;
+      global.fetch = vi.fn(() => Promise.reject(new Error('Connection timeout'))) as any;
 
       await ExternalServiceHealth.checkWebhookService('https://example.com/webhook');
 
@@ -128,9 +118,7 @@ describe('External Service Health Check', () => {
     });
 
     it('should reset consecutive failures on successful check', async () => {
-      global.fetch = vi.fn(() =>
-        Promise.reject(new Error('Network error'))
-      ) as any;
+      global.fetch = vi.fn(() => Promise.reject(new Error('Network error'))) as any;
 
       await ExternalServiceHealth.checkWebhookService('https://example.com/webhook');
       await ExternalServiceHealth.checkWebhookService('https://example.com/webhook');
@@ -204,13 +192,8 @@ describe('External Service Health Check', () => {
 
   describe('Latency Measurement', () => {
     it('should measure latency for successful request', async () => {
-      global.fetch = vi.fn(() =>
-        new Promise(resolve =>
-          setTimeout(() =>
-            resolve({ ok: true } as Response),
-            50
-          )
-        )
+      global.fetch = vi.fn(
+        () => new Promise((resolve) => setTimeout(() => resolve({ ok: true } as Response), 50))
       ) as any;
 
       const result = await ExternalServiceHealth.checkWebhookService('https://example.com/webhook');
@@ -219,13 +202,8 @@ describe('External Service Health Check', () => {
     });
 
     it('should measure latency for failed request', async () => {
-      global.fetch = vi.fn(() =>
-        new Promise((_, reject) =>
-          setTimeout(() =>
-            reject(new Error('Timeout')),
-            100
-          )
-        )
+      global.fetch = vi.fn(
+        () => new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 100))
       ) as any;
 
       const result = await ExternalServiceHealth.checkWebhookService('https://example.com/webhook');

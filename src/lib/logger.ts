@@ -17,7 +17,7 @@ function getLogLevel(): LogLevel {
 
 function createLogger(): PinoLogger {
   const level = getLogLevel();
-  
+
   if (typeof window !== 'undefined') {
     return pino({
       level,
@@ -25,7 +25,7 @@ function createLogger(): PinoLogger {
         write: (obj: { level: number; msg?: string; time?: number; [key: string]: unknown }) => {
           const { level: logLevel, time, ...rest } = obj;
           const prefix = `[${new Date(time || Date.now()).toISOString()}]`;
-          
+
           if (logLevel >= pino.levels.error) {
             console.error(prefix, rest);
           } else if (logLevel >= pino.levels.warn) {
@@ -33,23 +33,24 @@ function createLogger(): PinoLogger {
           } else {
             console.log(prefix, rest);
           }
-        }
-      }
+        },
+      },
     });
   }
-  
+
   return pino({
     level,
-    transport: import.meta.env.VITE_LOGGER_TYPE === 'json' 
-      ? undefined 
-      : {
-          target: 'pino-pretty',
-          options: {
-            colorize: true,
-            translateTime: 'SYS:standard',
-            ignore: 'pid,hostname'
-          }
-        }
+    transport:
+      import.meta.env.VITE_LOGGER_TYPE === 'json'
+        ? undefined
+        : {
+            target: 'pino-pretty',
+            options: {
+              colorize: true,
+              translateTime: 'SYS:standard',
+              ignore: 'pid,hostname',
+            },
+          },
   });
 }
 
@@ -79,7 +80,7 @@ function formatErrorContext(err: Error | unknown, context?: LogContext): LogCont
     errorContext.error = {
       message: err.message,
       stack: err.stack,
-      name: err.name
+      name: err.name,
     };
   } else if (err !== undefined) {
     errorContext.error = err;
@@ -99,7 +100,7 @@ export function createChildLogger(context: LogContext): {
   error: (message: string, error?: Error | unknown, additionalContext?: LogContext) => void;
 } {
   const child = getInstance().child(context);
-  
+
   return {
     debug: (message: string, additionalContext?: LogContext) => {
       child.debug(additionalContext || {}, message);
@@ -112,7 +113,7 @@ export function createChildLogger(context: LogContext): {
     },
     error: (message: string, err?: Error | unknown, additionalContext?: LogContext) => {
       child.error(formatErrorContext(err, additionalContext), message);
-    }
+    },
   };
 }
 
@@ -124,5 +125,5 @@ export const logger = {
   debug,
   info,
   warn,
-  error
+  error,
 };

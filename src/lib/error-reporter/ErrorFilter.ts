@@ -1,5 +1,9 @@
 import type { ErrorContext, ErrorFilterResult } from './types';
-import { isReactRouterFutureFlagMessage, isDeprecatedReactWarningMessage, hasRelevantSourceInStack } from './utils';
+import {
+  isReactRouterFutureFlagMessage,
+  isDeprecatedReactWarningMessage,
+  hasRelevantSourceInStack,
+} from './utils';
 import { REACT_WARNING_PATTERN, VENDOR_PATTERNS } from './constants';
 import { globalDeduplication } from './deduplication';
 
@@ -53,9 +57,7 @@ export class ErrorFilter {
     stack?: string
   ): boolean {
     return (
-      level === 'error' &&
-      message.includes('Uncaught Error') &&
-      !hasRelevantSourceInStack(stack)
+      level === 'error' && message.includes('Uncaught Error') && !hasRelevantSourceInStack(stack)
     );
   }
 

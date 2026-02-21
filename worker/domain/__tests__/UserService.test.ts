@@ -54,7 +54,7 @@ describe('UserService - Critical Path Testing', () => {
       const userData: CreateUserData = {
         name: 'Test User',
         email: 'test@example.com',
-        role: 'student' as UserRole
+        role: 'student' as UserRole,
       };
 
       expect(async () => {
@@ -74,7 +74,7 @@ describe('UserService - Critical Path Testing', () => {
         email: 'smith@example.com',
         role: 'teacher' as UserRole,
         classIds: ['11-A', '12-B'],
-        password: 'password123'
+        password: 'password123',
       };
 
       expect(async () => {
@@ -94,7 +94,7 @@ describe('UserService - Critical Path Testing', () => {
         email: 'parent@example.com',
         role: 'parent' as UserRole,
         childId: 'student-01',
-        password: 'password123'
+        password: 'password123',
       };
 
       expect(async () => {
@@ -113,7 +113,7 @@ describe('UserService - Critical Path Testing', () => {
         name: 'System Admin',
         email: 'admin@example.com',
         role: 'admin' as UserRole,
-        password: 'password123'
+        password: 'password123',
       };
 
       expect(async () => {
@@ -134,7 +134,7 @@ describe('UserService - Critical Path Testing', () => {
         name: 'Test User',
         email: 'test@example.com',
         role: 'student',
-        password: 'plaintext123'
+        password: 'plaintext123',
       };
 
       expect(typeof UserService.createUser).toBe('function');
@@ -150,7 +150,7 @@ describe('UserService - Critical Path Testing', () => {
       const userData: CreateUserData = {
         name: 'Test User',
         email: 'test@example.com',
-        role: 'admin' as UserRole
+        role: 'admin' as UserRole,
       };
 
       expect(async () => {
@@ -168,7 +168,7 @@ describe('UserService - Critical Path Testing', () => {
       const userData = {
         name: 'Test User',
         email: 'test@example.com',
-        role: 'student'
+        role: 'student',
       };
 
       expect(typeof UserService.createUser).toBe('function');
@@ -184,7 +184,7 @@ describe('UserService - Critical Path Testing', () => {
       const userData = {
         name: 'Test User',
         email: 'test@example.com',
-        role: 'student'
+        role: 'student',
       };
 
       expect(typeof UserService.createUser).toBe('function');
@@ -204,7 +204,7 @@ describe('UserService - Critical Path Testing', () => {
         email: 'student@example.com',
         role: 'student',
         classId: '11-A',
-        studentIdNumber: '12345'
+        studentIdNumber: '12345',
       };
 
       expect(typeof UserService.createUser).toBe('function');
@@ -220,7 +220,7 @@ describe('UserService - Critical Path Testing', () => {
       const userData: CreateUserData = {
         name: 'Student User',
         email: 'student@example.com',
-        role: 'student' as UserRole
+        role: 'student' as UserRole,
       };
 
       expect(async () => {
@@ -239,7 +239,7 @@ describe('UserService - Critical Path Testing', () => {
         name: 'Teacher User',
         email: 'teacher@example.com',
         role: 'teacher',
-        classIds: ['11-A', '12-B']
+        classIds: ['11-A', '12-B'],
       };
 
       expect(typeof UserService.createUser).toBe('function');
@@ -255,7 +255,7 @@ describe('UserService - Critical Path Testing', () => {
       const userData: CreateUserData = {
         name: 'Teacher User',
         email: 'teacher@example.com',
-        role: 'teacher' as UserRole
+        role: 'teacher' as UserRole,
       };
 
       expect(async () => {
@@ -274,7 +274,7 @@ describe('UserService - Critical Path Testing', () => {
         name: 'Parent User',
         email: 'parent@example.com',
         role: 'parent',
-        childId: 'student-01'
+        childId: 'student-01',
       };
 
       expect(typeof UserService.createUser).toBe('function');
@@ -290,7 +290,7 @@ describe('UserService - Critical Path Testing', () => {
       const userData: CreateUserData = {
         name: 'Parent User',
         email: 'parent@example.com',
-        role: 'parent' as UserRole
+        role: 'parent' as UserRole,
       };
 
       expect(async () => {
@@ -308,7 +308,7 @@ describe('UserService - Critical Path Testing', () => {
       const userData = {
         name: 'Admin User',
         email: 'admin@example.com',
-        role: 'admin'
+        role: 'admin',
       };
 
       expect(typeof UserService.createUser).toBe('function');
@@ -326,7 +326,7 @@ describe('UserService - Critical Path Testing', () => {
       const userData: CreateUserData = {
         name: '',
         email: 'test@example.com',
-        role: 'student' as UserRole
+        role: 'student' as UserRole,
       };
 
       expect(async () => {
@@ -344,7 +344,7 @@ describe('UserService - Critical Path Testing', () => {
       const userData: CreateUserData = {
         name: 'Test User',
         email: '',
-        role: 'student' as UserRole
+        role: 'student' as UserRole,
       };
 
       expect(async () => {
@@ -398,7 +398,7 @@ describe('UserService - Critical Path Testing', () => {
       const mockEnv = {} as unknown as Env;
       const userData = {
         name: 'Updated Name',
-        email: 'updated@example.com'
+        email: 'updated@example.com',
       };
 
       expect(async () => {
@@ -414,7 +414,7 @@ describe('UserService - Critical Path Testing', () => {
 
       const mockEnv = {} as unknown as Env;
       const userData = {
-        password: 'newpassword123'
+        password: 'newpassword123',
       };
 
       expect(async () => {
@@ -430,7 +430,7 @@ describe('UserService - Critical Path Testing', () => {
 
       const mockEnv = {} as unknown as Env;
       const userData = {
-        name: 'Updated Name'
+        name: 'Updated Name',
       };
 
       expect(typeof UserService.updateUser).toBe('function');
@@ -446,12 +446,12 @@ describe('UserService - Critical Path Testing', () => {
 
       const mockEnv = {} as unknown as Env;
       const userData = {
-        name: 'Updated Name'
+        name: 'Updated Name',
       };
 
-      await expect(
-        UserService.updateUser(mockEnv, 'non-existent-user', userData)
-      ).rejects.toThrow('User not found');
+      await expect(UserService.updateUser(mockEnv, 'non-existent-user', userData)).rejects.toThrow(
+        'User not found'
+      );
     });
 
     it('should handle empty user ID', async () => {
@@ -462,12 +462,10 @@ describe('UserService - Critical Path Testing', () => {
 
       const mockEnv = {} as unknown as Env;
       const userData = {
-        name: 'Updated Name'
+        name: 'Updated Name',
       };
 
-      await expect(
-        UserService.updateUser(mockEnv, '', userData)
-      ).rejects.toThrow('User not found');
+      await expect(UserService.updateUser(mockEnv, '', userData)).rejects.toThrow('User not found');
     });
 
     it('should handle null user ID', async () => {
@@ -478,7 +476,7 @@ describe('UserService - Critical Path Testing', () => {
 
       const mockEnv = {} as unknown as Env;
       const userData: UpdateUserData = {
-        name: 'Updated Name'
+        name: 'Updated Name',
       };
 
       await expect(
@@ -494,7 +492,7 @@ describe('UserService - Critical Path Testing', () => {
 
       const mockEnv = {} as unknown as Env;
       const userData: UpdateUserData = {
-        name: 'Updated Name'
+        name: 'Updated Name',
       };
 
       await expect(

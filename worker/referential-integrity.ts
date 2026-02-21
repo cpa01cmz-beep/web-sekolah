@@ -11,7 +11,10 @@ export class ReferentialIntegrity {
   /**
    * Validate that a grade references valid entities
    */
-  static async validateGrade(env: Env, grade: Partial<Grade>): Promise<{ valid: boolean; error?: string }> {
+  static async validateGrade(
+    env: Env,
+    grade: Partial<Grade>
+  ): Promise<{ valid: boolean; error?: string }> {
     if (!grade.studentId) {
       return { valid: false, error: 'Grade must reference a valid student' };
     }
@@ -45,8 +48,11 @@ export class ReferentialIntegrity {
         return { valid: false, error: `Student's class ${studentUser.classId} has been deleted` };
       }
       const classCourses = await CourseEntity.getByTeacherId(env, classEntity.teacherId);
-      if (!classCourses.some(c => c.id === grade.courseId)) {
-        return { valid: false, error: 'Student is not enrolled in a class that offers this course' };
+      if (!classCourses.some((c) => c.id === grade.courseId)) {
+        return {
+          valid: false,
+          error: 'Student is not enrolled in a class that offers this course',
+        };
       }
     }
 
@@ -56,7 +62,10 @@ export class ReferentialIntegrity {
   /**
    * Validate that a class references a valid teacher
    */
-  static async validateClass(env: Env, classData: Partial<SchoolClass>): Promise<{ valid: boolean; error?: string }> {
+  static async validateClass(
+    env: Env,
+    classData: Partial<SchoolClass>
+  ): Promise<{ valid: boolean; error?: string }> {
     if (!classData.teacherId) {
       return { valid: false, error: 'Class must reference a valid teacher' };
     }
@@ -78,7 +87,10 @@ export class ReferentialIntegrity {
   /**
    * Validate that a course references a valid teacher
    */
-  static async validateCourse(env: Env, courseData: { teacherId: string }): Promise<{ valid: boolean; error?: string }> {
+  static async validateCourse(
+    env: Env,
+    courseData: { teacherId: string }
+  ): Promise<{ valid: boolean; error?: string }> {
     if (!courseData.teacherId) {
       return { valid: false, error: 'Course must reference a valid teacher' };
     }
@@ -100,7 +112,10 @@ export class ReferentialIntegrity {
   /**
    * Validate that a student references a valid parent
    */
-  static async validateStudent(env: Env, studentData: { classId: string; parentId?: string }): Promise<{ valid: boolean; error?: string }> {
+  static async validateStudent(
+    env: Env,
+    studentData: { classId: string; parentId?: string }
+  ): Promise<{ valid: boolean; error?: string }> {
     if (!studentData.classId) {
       return { valid: false, error: 'Student must belong to a class' };
     }
@@ -132,7 +147,10 @@ export class ReferentialIntegrity {
   /**
    * Validate that an announcement references a valid author
    */
-  static async validateAnnouncement(env: Env, announcement: Partial<Announcement>): Promise<{ valid: boolean; error?: string }> {
+  static async validateAnnouncement(
+    env: Env,
+    announcement: Partial<Announcement>
+  ): Promise<{ valid: boolean; error?: string }> {
     if (!announcement.authorId) {
       return { valid: false, error: 'Announcement must reference a valid author' };
     }
@@ -157,7 +175,11 @@ export class ReferentialIntegrity {
    * Check for orphaned records before deleting an entity
    * Returns list of warnings about related records that will be affected
    */
-  static async checkDependents(env: Env, entity: 'user' | 'class' | 'course', id: string): Promise<string[]> {
+  static async checkDependents(
+    env: Env,
+    entity: 'user' | 'class' | 'course',
+    id: string
+  ): Promise<string[]> {
     const warnings: string[] = [];
 
     if (entity === 'user') {
@@ -190,7 +212,9 @@ export class ReferentialIntegrity {
 
       if (user.role === 'parent') {
         const students = await UserEntity.getByRole(env, 'student');
-        const children = students.filter((s): s is typeof s & { parentId: string } => 'parentId' in s && s.parentId === id);
+        const children = students.filter(
+          (s): s is typeof s & { parentId: string } => 'parentId' in s && s.parentId === id
+        );
         if (children.length > 0) {
           warnings.push(`This parent has ${children.length} child(ren) linked`);
         }

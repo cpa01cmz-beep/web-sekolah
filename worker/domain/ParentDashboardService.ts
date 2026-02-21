@@ -30,7 +30,9 @@ export class ParentDashboardService {
 
     const [child, childSchedule, childGrades, announcements] = await Promise.all([
       this.getChildWithClass(env, childState, childRoleFields.classId),
-      childRoleFields.classId ? CommonDataService.getScheduleWithDetails(env, childRoleFields.classId) : Promise.resolve([]),
+      childRoleFields.classId
+        ? CommonDataService.getScheduleWithDetails(env, childRoleFields.classId)
+        : Promise.resolve([]),
       CommonDataService.getRecentGradesWithCourseNames(env, roleFields.childId, 10),
       CommonDataService.getAnnouncementsWithAuthorNames(env, 5),
     ]);
@@ -38,7 +40,11 @@ export class ParentDashboardService {
     return { child, childSchedule, childGrades, announcements };
   }
 
-  private static async getChildWithClass(env: Env, childState: Student, classId?: string): Promise<Student & { className: string }> {
+  private static async getChildWithClass(
+    env: Env,
+    childState: Student,
+    classId?: string
+  ): Promise<Student & { className: string }> {
     let className = 'N/A';
     if (classId) {
       const classEntity = new ClassEntity(env, classId);
@@ -49,7 +55,7 @@ export class ParentDashboardService {
     const { passwordHash: _, ...childWithoutPassword } = childState;
     return {
       ...childWithoutPassword,
-      className
+      className,
     } as Student & { className: string };
   }
 }

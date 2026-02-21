@@ -47,7 +47,7 @@ export abstract class Entity<State> {
         return;
       }
     }
-    throw new Error("Concurrent modification detected");
+    throw new Error('Concurrent modification detected');
   }
 
   protected async ensureState(): Promise<State> {
@@ -76,7 +76,7 @@ export abstract class Entity<State> {
         return withTimestamps;
       }
     }
-    throw new Error("Concurrent modification detected");
+    throw new Error('Concurrent modification detected');
   }
 
   protected applyTimestamps(current: unknown, next: unknown): unknown {
@@ -88,7 +88,7 @@ export abstract class Entity<State> {
       return {
         ...state,
         updatedAt: now,
-        createdAt: state.createdAt || curr.createdAt || now
+        createdAt: state.createdAt || curr.createdAt || now,
       };
     }
     return state;
@@ -107,12 +107,12 @@ export abstract class Entity<State> {
   }
 
   async isSoftDeleted(): Promise<boolean> {
-    const state = await this.ensureState() as Record<string, unknown>;
+    const state = (await this.ensureState()) as Record<string, unknown>;
     return 'deletedAt' in state && state.deletedAt !== null && state.deletedAt !== undefined;
   }
 
   async softDelete(): Promise<boolean> {
-    const state = await this.ensureState() as Record<string, unknown>;
+    const state = (await this.ensureState()) as Record<string, unknown>;
     if ('deletedAt' in state && state.deletedAt !== null && state.deletedAt !== undefined) {
       return false;
     }
@@ -121,8 +121,8 @@ export abstract class Entity<State> {
   }
 
   async restore(): Promise<boolean> {
-    const state = await this.ensureState() as Record<string, unknown>;
-    if (!('deletedAt' in state) || (state.deletedAt === null || state.deletedAt === undefined)) {
+    const state = (await this.ensureState()) as Record<string, unknown>;
+    if (!('deletedAt' in state) || state.deletedAt === null || state.deletedAt === undefined) {
       return false;
     }
     await this.patch({ deletedAt: null } as unknown as Partial<State>);

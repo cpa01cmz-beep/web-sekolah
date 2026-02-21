@@ -40,11 +40,9 @@ describe('DateSortedSecondaryIndex', () => {
 
       await index.add(testDate, 'entity-1');
 
-      expect(mockStub.casPut).toHaveBeenCalledWith(
-        `sort:${paddedTimestamp}:entity-1`,
-        0,
-        { entityId: 'entity-1' }
-      );
+      expect(mockStub.casPut).toHaveBeenCalledWith(`sort:${paddedTimestamp}:entity-1`, 0, {
+        entityId: 'entity-1',
+      });
     });
 
     it('should add entry with current timestamp when date is ISO string', async () => {
@@ -244,7 +242,10 @@ describe('DateSortedSecondaryIndex', () => {
     });
 
     it('should delete all keys in parallel', async () => {
-      const keys = Array.from({ length: 100 }, (_, i) => `sort:${String(i).padStart(20, '0')}:entity-${i}`);
+      const keys = Array.from(
+        { length: 100 },
+        (_, i) => `sort:${String(i).padStart(20, '0')}:entity-${i}`
+      );
       mockStub.listPrefix.mockResolvedValue({ keys, next: null });
 
       await index.clear();
@@ -352,8 +353,8 @@ describe('DateSortedSecondaryIndex', () => {
         '2026-01-08T00:00:00.000Z',
       ];
 
-      const timestamps = dates.map(date => new Date(date).getTime());
-      const reversedTimestamps = dates.map(date =>
+      const timestamps = dates.map((date) => new Date(date).getTime());
+      const reversedTimestamps = dates.map((date) =>
         (Number.MAX_SAFE_INTEGER - new Date(date).getTime()).toString().padStart(20, '0')
       );
 
@@ -396,16 +397,12 @@ describe('DateSortedSecondaryIndex', () => {
       const reversedTimestamp = Number.MAX_SAFE_INTEGER - timestamp;
       const expectedKey = `sort:${reversedTimestamp.toString().padStart(20, '0')}`;
 
-      expect(mockStub.casPut).toHaveBeenCalledWith(
-        `${expectedKey}:entity-1`,
-        0,
-        { entityId: 'entity-1' }
-      );
-      expect(mockStub.casPut).toHaveBeenCalledWith(
-        `${expectedKey}:entity-2`,
-        0,
-        { entityId: 'entity-2' }
-      );
+      expect(mockStub.casPut).toHaveBeenCalledWith(`${expectedKey}:entity-1`, 0, {
+        entityId: 'entity-1',
+      });
+      expect(mockStub.casPut).toHaveBeenCalledWith(`${expectedKey}:entity-2`, 0, {
+        entityId: 'entity-2',
+      });
     });
   });
 
@@ -450,9 +447,7 @@ describe('DateSortedSecondaryIndex', () => {
     it('should remove entries with correct keys', async () => {
       mockStub.del.mockResolvedValue(true);
       const testDate = '2026-01-07T12:00:00.000Z';
-      const items = [
-        { date: testDate, entityId: 'entity-1' },
-      ];
+      const items = [{ date: testDate, entityId: 'entity-1' }];
 
       await index.removeBatch(items);
 

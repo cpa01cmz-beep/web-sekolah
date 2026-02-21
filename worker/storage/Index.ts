@@ -1,10 +1,10 @@
 import { Entity } from '../entities/Entity';
 
 export class Index<T extends string> extends Entity<unknown> {
-  static readonly entityName = "sys-index-root";
+  static readonly entityName = 'sys-index-root';
 
-  constructor(env: Env, name: string) { 
-    super(env, `index:${name}`); 
+  constructor(env: Env, name: string) {
+    super(env, `index:${name}`);
   }
 
   async addBatch(itemsToAdd: T[]): Promise<void> {
@@ -26,16 +26,18 @@ export class Index<T extends string> extends Entity<unknown> {
     return this.stub.indexRemoveBatch(itemsToRemove);
   }
 
-  async clear(): Promise<void> { await this.stub.indexDrop(this.key()); }
+  async clear(): Promise<void> {
+    await this.stub.indexDrop(this.key());
+  }
 
   async page(cursor?: string | null, limit?: number): Promise<{ items: T[]; next: string | null }> {
     const { keys, next } = await this.stub.listPrefix('i:', cursor ?? null, limit);
-    return { items: keys.map(k => k.slice(2) as T), next };
+    return { items: keys.map((k) => k.slice(2) as T), next };
   }
 
   async list(): Promise<T[]> {
     const { keys } = await this.stub.listPrefix('i:');
-    return keys.map(k => k.slice(2) as T);
+    return keys.map((k) => k.slice(2) as T);
   }
 
   async count(): Promise<number> {

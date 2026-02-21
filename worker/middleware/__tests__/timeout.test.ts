@@ -14,12 +14,15 @@ const mockContext = {
 } as unknown as Context;
 
 const gatewayTimeout = (c: Context, error = 'Gateway timeout') =>
-  c.json({
-    success: false,
-    error,
-    code: 'TIMEOUT' as ErrorCode,
-    requestId: crypto.randomUUID()
-  }, 504);
+  c.json(
+    {
+      success: false,
+      error,
+      code: 'TIMEOUT' as ErrorCode,
+      requestId: crypto.randomUUID(),
+    },
+    504
+  );
 
 function timeout(options: TimeoutOptions) {
   const { timeoutMs } = options;
@@ -73,7 +76,7 @@ describe('Timeout Middleware', () => {
     it('should allow request to complete within timeout', async () => {
       const middleware = timeout({ timeoutMs: 1000 });
       mockNext.mockImplementationOnce(async () => {
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await new Promise((resolve) => setTimeout(resolve, 100));
       });
 
       await middleware(mockContext, mockNext);
@@ -84,14 +87,14 @@ describe('Timeout Middleware', () => {
     it('should timeout request that exceeds timeout', async () => {
       const middleware = timeout({ timeoutMs: 50 });
       mockNext.mockImplementationOnce(async () => {
-        await new Promise(resolve => setTimeout(resolve, 200));
+        await new Promise((resolve) => setTimeout(resolve, 200));
       });
 
       const result = await middleware(mockContext, mockNext);
 
       expect(mockNext).toHaveBeenCalledTimes(1);
       expect(result?.status).toBe(504);
-      const json = await result?.json() as any;
+      const json = (await result?.json()) as any;
       expect(json.success).toBe(false);
       expect(json.code).toBe('TIMEOUT');
       expect(json.error).toBe('Request processing timeout');
@@ -122,7 +125,7 @@ describe('Timeout Middleware', () => {
       const middleware = timeout({ timeoutMs: 1000 });
       const clearTimeoutSpy = vi.spyOn(global, 'clearTimeout');
       mockNext.mockImplementationOnce(async () => {
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await new Promise((resolve) => setTimeout(resolve, 100));
       });
 
       await middleware(mockContext, mockNext);
@@ -135,7 +138,7 @@ describe('Timeout Middleware', () => {
       const middleware = timeout({ timeoutMs: 50 });
       const clearTimeoutSpy = vi.spyOn(global, 'clearTimeout');
       mockNext.mockImplementationOnce(async () => {
-        await new Promise(resolve => setTimeout(resolve, 200));
+        await new Promise((resolve) => setTimeout(resolve, 200));
       });
 
       await middleware(mockContext, mockNext);
@@ -147,7 +150,7 @@ describe('Timeout Middleware', () => {
     it('should handle very short timeout', async () => {
       const middleware = timeout({ timeoutMs: 1 });
       mockNext.mockImplementationOnce(async () => {
-        await new Promise(resolve => setTimeout(resolve, 50));
+        await new Promise((resolve) => setTimeout(resolve, 50));
       });
 
       const result = await middleware(mockContext, mockNext);
@@ -158,7 +161,7 @@ describe('Timeout Middleware', () => {
     it('should handle very long timeout', async () => {
       const middleware = timeout({ timeoutMs: 10000 });
       mockNext.mockImplementationOnce(async () => {
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await new Promise((resolve) => setTimeout(resolve, 100));
       });
 
       await middleware(mockContext, mockNext);
@@ -180,7 +183,7 @@ describe('Timeout Middleware', () => {
       const middleware = factory(2000);
 
       mockNext.mockImplementationOnce(async () => {
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await new Promise((resolve) => setTimeout(resolve, 100));
       });
 
       await middleware(mockContext, mockNext);
@@ -193,7 +196,7 @@ describe('Timeout Middleware', () => {
       const middleware = factory(50);
 
       mockNext.mockImplementationOnce(async () => {
-        await new Promise(resolve => setTimeout(resolve, 200));
+        await new Promise((resolve) => setTimeout(resolve, 200));
       });
 
       const result = await middleware(mockContext, mockNext);
@@ -206,7 +209,7 @@ describe('Timeout Middleware', () => {
       const middleware = factory();
 
       mockNext.mockImplementationOnce(async () => {
-        await new Promise(resolve => setTimeout(resolve, 200));
+        await new Promise((resolve) => setTimeout(resolve, 200));
       });
 
       const result = await middleware(mockContext, mockNext);
@@ -218,7 +221,7 @@ describe('Timeout Middleware', () => {
   describe('Predefined timeout middlewares', () => {
     it('defaultTimeoutMiddleware should use 30 second timeout', async () => {
       mockNext.mockImplementationOnce(async () => {
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await new Promise((resolve) => setTimeout(resolve, 100));
       });
 
       await defaultTimeoutMiddleware()(mockContext, mockNext);
@@ -228,7 +231,7 @@ describe('Timeout Middleware', () => {
 
     it('shortTimeoutMiddleware should use 10 second timeout', async () => {
       mockNext.mockImplementationOnce(async () => {
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await new Promise((resolve) => setTimeout(resolve, 100));
       });
 
       await shortTimeoutMiddleware()(mockContext, mockNext);
@@ -238,7 +241,7 @@ describe('Timeout Middleware', () => {
 
     it('longTimeoutMiddleware should use 60 second timeout', async () => {
       mockNext.mockImplementationOnce(async () => {
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await new Promise((resolve) => setTimeout(resolve, 100));
       });
 
       await longTimeoutMiddleware()(mockContext, mockNext);
@@ -248,7 +251,7 @@ describe('Timeout Middleware', () => {
 
     it('veryLongTimeoutMiddleware should use 2 minute timeout', async () => {
       mockNext.mockImplementationOnce(async () => {
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await new Promise((resolve) => setTimeout(resolve, 100));
       });
 
       await veryLongTimeoutMiddleware()(mockContext, mockNext);
@@ -267,7 +270,7 @@ describe('Timeout Middleware', () => {
       const res = await app.request('/fast');
 
       expect(res.status).toBe(200);
-      const json = await res.json() as any;
+      const json = (await res.json()) as any;
       expect(json.success).toBe(true);
     });
 
@@ -276,14 +279,14 @@ describe('Timeout Middleware', () => {
 
       app.use('/slow', timeout({ timeoutMs: 10 }));
       app.get('/slow', async (c) => {
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await new Promise((resolve) => setTimeout(resolve, 100));
         return c.json({ success: true });
       });
 
       const res = await app.request('/slow');
 
       expect(res.status).toBe(504);
-      const json = await res.json() as any;
+      const json = (await res.json()) as any;
       expect(json.success).toBe(false);
       expect(json.code).toBe('TIMEOUT');
     });
@@ -293,14 +296,14 @@ describe('Timeout Middleware', () => {
 
       app.use('/tight', timeout({ timeoutMs: 100 }));
       app.get('/tight', async (c) => {
-        await new Promise(resolve => setTimeout(resolve, 90));
+        await new Promise((resolve) => setTimeout(resolve, 90));
         return c.json({ success: true });
       });
 
       const res = await app.request('/tight');
 
       expect(res.status).toBe(200);
-      const json = await res.json() as any;
+      const json = (await res.json()) as any;
       expect(json.success).toBe(true);
     });
 
@@ -309,7 +312,7 @@ describe('Timeout Middleware', () => {
 
       app.use('/slow', timeout({ timeoutMs: 100 }));
       app.get('/slow', async (c) => {
-        await new Promise(resolve => setTimeout(resolve, 120));
+        await new Promise((resolve) => setTimeout(resolve, 120));
         return c.json({ success: true });
       });
 
@@ -323,7 +326,7 @@ describe('Timeout Middleware', () => {
     it('should handle timeout of 0ms', async () => {
       const middleware = timeout({ timeoutMs: 0 });
       mockNext.mockImplementationOnce(async () => {
-        await new Promise(resolve => setTimeout(resolve, 10));
+        await new Promise((resolve) => setTimeout(resolve, 10));
       });
 
       const result = await middleware(mockContext, mockNext);
@@ -368,7 +371,7 @@ describe('Timeout Middleware', () => {
       app.use('/', timeout({ timeoutMs: 500 }));
       app.get('/:id', async (c) => {
         const id = c.req.param('id');
-        await new Promise(resolve => setTimeout(resolve, parseInt(id) * 50));
+        await new Promise((resolve) => setTimeout(resolve, parseInt(id) * 50));
         return c.json({ success: true, id });
       });
 
@@ -382,9 +385,9 @@ describe('Timeout Middleware', () => {
       expect(res2.status).toBe(200);
       expect(res3.status).toBe(200);
 
-      const json1 = await res1.json() as { success: boolean; id: string };
-      const json2 = await res2.json() as { success: boolean; id: string };
-      const json3 = await res3.json() as { success: boolean; id: string };
+      const json1 = (await res1.json()) as { success: boolean; id: string };
+      const json2 = (await res2.json()) as { success: boolean; id: string };
+      const json3 = (await res3.json()) as { success: boolean; id: string };
 
       expect(json1.id).toBe('2');
       expect(json2.id).toBe('5');

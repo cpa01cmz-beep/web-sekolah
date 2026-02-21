@@ -1,8 +1,8 @@
 import { RETRY_CONFIG } from '@shared/constants';
 
-export const REACT_WARNING_PATTERN = "Warning:" as const;
-export const WARNING_PREFIX = "[WARNING]" as const;
-export const CONSOLE_ERROR_PREFIX = "[CONSOLE ERROR]" as const;
+export const REACT_WARNING_PATTERN = 'Warning:' as const;
+export const WARNING_PREFIX = '[WARNING]' as const;
+export const CONSOLE_ERROR_PREFIX = '[CONSOLE ERROR]' as const;
 
 export const ERROR_REPORTER_CONFIG = {
   MAX_QUEUE_SIZE: 10,
@@ -12,15 +12,6 @@ export const ERROR_REPORTER_CONFIG = {
   JITTER_DELAY_MS: 1000,
 } as const;
 
-export const SOURCE_FILE_PATTERNS: ReadonlyArray<RegExp> = [
-  /\.tsx?$/,
-  /\.jsx?$/,
-  /\/src\//,
-];
+export const SOURCE_FILE_PATTERNS: ReadonlyArray<RegExp> = [/\.tsx?$/, /\.jsx?$/, /\/src\//];
 
-export const VENDOR_PATTERNS: ReadonlyArray<RegExp> = [
-  /node_modules/,
-  /\.vite/,
-  /chunk-/,
-  /deps/,
-];
+export const VENDOR_PATTERNS: ReadonlyArray<RegExp> = [/node_modules/, /\.vite/, /chunk-/, /deps/];

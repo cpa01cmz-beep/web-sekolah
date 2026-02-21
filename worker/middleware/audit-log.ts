@@ -87,7 +87,11 @@ export function auditLog(action: string) {
         },
       };
 
-      logger.error(`[AUDIT] ${action} - ERROR`, error instanceof Error ? error : 'Unknown error', logEntry);
+      logger.error(
+        `[AUDIT] ${action} - ERROR`,
+        error instanceof Error ? error : 'Unknown error',
+        logEntry
+      );
       throw error;
     }
   };
@@ -95,7 +99,8 @@ export function auditLog(action: string) {
 
 export function requireAuditLog() {
   return (c: Context, next: Next) => {
-    const action = c.req.header('X-Action') || c.req.path.split('/').pop()?.toUpperCase() || 'UNKNOWN';
+    const action =
+      c.req.header('X-Action') || c.req.path.split('/').pop()?.toUpperCase() || 'UNKNOWN';
     return auditLog(action)(c, next);
   };
 }

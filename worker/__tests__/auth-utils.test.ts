@@ -2,22 +2,24 @@ import { describe, it, expect } from 'vitest';
 import { verifyToken, type JwtPayload } from '../middleware/auth';
 
 describe('auth-utils', () => {
-
   describe('Module Loading', () => {
     it('should document that generateToken() tests require proper Web Crypto API runtime', () => {
-      console.warn('⚠️  generateToken() tests skipped: SignJWT.sign() requires full Web Crypto API');
+      console.warn(
+        '⚠️  generateToken() tests skipped: SignJWT.sign() requires full Web Crypto API'
+      );
       console.warn('   jose library SignJWT class uses Web Crypto API HMAC signing');
       console.warn('   Test environment (jsdom) has limited Web Crypto API support');
       console.warn('   See docs/task.md for details on JWT testing requirements');
       console.warn('   Critical functionality: generateToken(), verifyToken()');
       console.warn('   verifyToken() tests: All passing (8 tests)');
-      console.warn('   generateToken() tests: Skipped (requires Cloudflare Workers / Node.js crypto)');
+      console.warn(
+        '   generateToken() tests: Skipped (requires Cloudflare Workers / Node.js crypto)'
+      );
       expect(true).toBe(true);
     });
   });
 
   describe('verifyToken', () => {
-
     it('should return null for invalid token', async () => {
       const secret = 'test-secret-key';
       const invalidToken = 'invalid.token.here';
@@ -28,7 +30,8 @@ describe('auth-utils', () => {
 
     it('should return null for token with wrong secret', async () => {
       const secret = 'secret-2';
-      const wrongSecretToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyLTEyMyIsImVtYWlsIjoidGVzdEBleGFtcGxlLmNvbSIsInJvbGUiOiJzdHVkZW50IiwiaWF0IjoxNjQ3NjI4ODAwLCJleHAiOjE2NDc2MzI0MDB9.invalid';
+      const wrongSecretToken =
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyLTEyMyIsImVtYWlsIjoidGVzdEBleGFtcGxlLmNvbSIsInJvbGUiOiJzdHVkZW50IiwiaWF0IjoxNjQ3NjI4ODAwLCJleHAiOjE2NDc2MzI0MDB9.invalid';
       const verified = await verifyToken(wrongSecretToken, secret);
 
       expect(verified).toBeNull();
@@ -56,14 +59,17 @@ describe('auth-utils', () => {
 
       expect(verified).toBeNull();
     });
-
   });
 
   describe('Token Verification Security', () => {
-
     it('should verify tokens for all user roles', async () => {
       const secret = 'test-secret-key';
-      const roles: Array<'student' | 'teacher' | 'parent' | 'admin'> = ['student', 'teacher', 'parent', 'admin'];
+      const roles: Array<'student' | 'teacher' | 'parent' | 'admin'> = [
+        'student',
+        'teacher',
+        'parent',
+        'admin',
+      ];
 
       for (const role of roles) {
         const verified = await verifyToken(`mock.${role}.token`, secret);
@@ -84,11 +90,9 @@ describe('auth-utils', () => {
 
       expect(verified).toBeNull();
     });
-
   });
 
   describe('Error Handling', () => {
-
     it('should handle null token gracefully', async () => {
       const secret = 'test-secret-key';
       const verified = await verifyToken(null as unknown as string, secret);
@@ -102,7 +106,5 @@ describe('auth-utils', () => {
 
       expect(verified).toBeNull();
     });
-
   });
-
 });

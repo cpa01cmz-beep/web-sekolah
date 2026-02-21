@@ -18,7 +18,7 @@ describe('Logger - Critical Path Testing', () => {
       debugSpy: vi.spyOn(console, 'debug').mockImplementation(() => {}),
       logSpy: vi.spyOn(console, 'log').mockImplementation(() => {}),
       warnSpy: vi.spyOn(console, 'warn').mockImplementation(() => {}),
-      errorSpy: vi.spyOn(console, 'error').mockImplementation(() => {})
+      errorSpy: vi.spyOn(console, 'error').mockImplementation(() => {}),
     };
   }
 
@@ -31,9 +31,7 @@ describe('Logger - Critical Path Testing', () => {
       debug('Test debug message');
 
       expect(debugSpy).toHaveBeenCalledTimes(1);
-      expect(debugSpy).toHaveBeenCalledWith(
-        expect.stringContaining('Test debug message')
-      );
+      expect(debugSpy).toHaveBeenCalledWith(expect.stringContaining('Test debug message'));
     });
 
     it('should suppress debug messages when LOG_LEVEL is info', async () => {
@@ -198,7 +196,7 @@ describe('Logger - Critical Path Testing', () => {
       expect(logged.context.error).toEqual({
         message: 'Test error',
         stack: expect.any(String),
-        name: 'Error'
+        name: 'Error',
       });
     });
 
@@ -268,7 +266,7 @@ describe('Logger - Critical Path Testing', () => {
       expect(logged.context.error).toEqual({
         message: 'Custom error message',
         stack: expect.any(String),
-        name: 'CustomError'
+        name: 'CustomError',
       });
     });
   });
@@ -286,7 +284,7 @@ describe('Logger - Critical Path Testing', () => {
       const logged = JSON.parse(logSpy.mock.calls[0][0] as string);
       expect(logged.context).toEqual({
         requestId: 'req-123',
-        userId: 'user-456'
+        userId: 'user-456',
       });
     });
 
@@ -302,7 +300,7 @@ describe('Logger - Critical Path Testing', () => {
       expect(logged.context).toEqual({
         requestId: 'req-123',
         userId: 'user-456',
-        action: 'update'
+        action: 'update',
       });
     });
 
@@ -317,7 +315,7 @@ describe('Logger - Critical Path Testing', () => {
       const logged = JSON.parse(logSpy.mock.calls[0][0] as string);
       expect(logged.context).toEqual({
         requestId: 'req-123',
-        userId: 'user-new'
+        userId: 'user-new',
       });
     });
 
@@ -351,8 +349,8 @@ describe('Logger - Critical Path Testing', () => {
         error: {
           message: 'Test error',
           stack: expect.any(String),
-          name: 'Error'
-        }
+          name: 'Error',
+        },
       });
     });
 
@@ -468,7 +466,7 @@ describe('Logger - Critical Path Testing', () => {
 
       const nestedContext = {
         user: { id: '123', profile: { name: 'John', age: 30 } },
-        metadata: { tags: ['tag1', 'tag2'], count: 42 }
+        metadata: { tags: ['tag1', 'tag2'], count: 42 },
       };
       info('Test message', nestedContext);
 
@@ -483,7 +481,7 @@ describe('Logger - Critical Path Testing', () => {
 
       const arrayContext = {
         userIds: ['user1', 'user2', 'user3'],
-        scores: [95, 87, 92]
+        scores: [95, 87, 92],
       };
       info('Test message', arrayContext);
 
@@ -498,7 +496,7 @@ describe('Logger - Critical Path Testing', () => {
 
       const numberKeyContext: any = {
         123: 'value1',
-        456: 'value2'
+        456: 'value2',
       };
       info('Test message', numberKeyContext);
 
@@ -543,13 +541,13 @@ describe('Logger - Critical Path Testing', () => {
 
       const authLogger = createChildLogger({
         requestId: 'req-abc123',
-        ip: '192.168.1.1'
+        ip: '192.168.1.1',
       });
 
       authLogger.info('Authentication request received', { email: 'user@example.com' });
       authLogger.warn('Failed authentication attempt', {
         email: 'user@example.com',
-        reason: 'invalid_credentials'
+        reason: 'invalid_credentials',
       });
 
       expect(logSpy).toHaveBeenCalledTimes(1);
@@ -559,7 +557,7 @@ describe('Logger - Critical Path Testing', () => {
       expect(infoLogged.context).toEqual({
         requestId: 'req-abc123',
         ip: '192.168.1.1',
-        email: 'user@example.com'
+        email: 'user@example.com',
       });
 
       const warnLogged = JSON.parse(warnSpy.mock.calls[0][0] as string);
@@ -567,7 +565,7 @@ describe('Logger - Critical Path Testing', () => {
         requestId: 'req-abc123',
         ip: '192.168.1.1',
         email: 'user@example.com',
-        reason: 'invalid_credentials'
+        reason: 'invalid_credentials',
       });
     });
 
@@ -576,12 +574,13 @@ describe('Logger - Critical Path Testing', () => {
       const { error } = await import('../logger');
 
       const dbError = new Error('Connection timeout');
-      dbError.stack = 'Error: Connection timeout\n    at DB.connect (db.js:10)\n    at main (app.js:50)';
+      dbError.stack =
+        'Error: Connection timeout\n    at DB.connect (db.js:10)\n    at main (app.js:50)';
 
       error('Database operation failed', dbError, {
         operation: 'SELECT',
         table: 'users',
-        queryId: 'query-123'
+        queryId: 'query-123',
       });
 
       expect(errorSpy).toHaveBeenCalledTimes(1);
@@ -593,8 +592,8 @@ describe('Logger - Critical Path Testing', () => {
         error: {
           message: 'Connection timeout',
           stack: 'Error: Connection timeout\n    at DB.connect (db.js:10)\n    at main (app.js:50)',
-          name: 'Error'
-        }
+          name: 'Error',
+        },
       });
     });
   });

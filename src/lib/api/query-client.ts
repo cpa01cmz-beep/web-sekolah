@@ -24,7 +24,8 @@ export const queryClient = new QueryClient({
         if (error.code === 'FORBIDDEN') return false;
         return failureCount < 3;
       },
-      retryDelay: (attemptIndex) => Math.min(RetryDelay.ONE_SECOND * Math.pow(2, attemptIndex), RetryDelay.THIRTY_SECONDS),
+      retryDelay: (attemptIndex) =>
+        Math.min(RetryDelay.ONE_SECOND * Math.pow(2, attemptIndex), RetryDelay.THIRTY_SECONDS),
     },
     mutations: {
       retry: (failureCount, error: ApiError) => {

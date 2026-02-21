@@ -1,5 +1,10 @@
 import { describe, it, expect } from 'vitest';
-import { getGradeLetter, getGradeColorClass, getGradeBadgeVariant, calculateAverageScore } from '../grades';
+import {
+  getGradeLetter,
+  getGradeColorClass,
+  getGradeBadgeVariant,
+  calculateAverageScore,
+} from '../grades';
 
 describe('Grade Utility Functions', () => {
   describe('getGradeLetter', () => {
@@ -105,20 +110,12 @@ describe('Grade Utility Functions', () => {
 
   describe('calculateAverageScore', () => {
     it('should calculate average score correctly', () => {
-      const grades = [
-        { score: 90 },
-        { score: 80 },
-        { score: 70 }
-      ];
+      const grades = [{ score: 90 }, { score: 80 }, { score: 70 }];
       expect(calculateAverageScore(grades)).toBe('80.00');
     });
 
     it('should handle decimal averages correctly', () => {
-      const grades = [
-        { score: 85 },
-        { score: 87 },
-        { score: 90 }
-      ];
+      const grades = [{ score: 85 }, { score: 87 }, { score: 90 }];
       expect(calculateAverageScore(grades)).toBe('87.33');
     });
 
@@ -138,10 +135,7 @@ describe('Grade Utility Functions', () => {
     });
 
     it('should format to 2 decimal places', () => {
-      const grades = [
-        { score: 85.333 },
-        { score: 84.666 }
-      ];
+      const grades = [{ score: 85.333 }, { score: 84.666 }];
       expect(calculateAverageScore(grades)).toBe('85.00');
     });
   });

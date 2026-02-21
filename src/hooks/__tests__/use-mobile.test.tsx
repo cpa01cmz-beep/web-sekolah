@@ -6,29 +6,30 @@ describe('useIsMobile', () => {
   const mockAddEventListener = vi.fn();
   const mockRemoveEventListener = vi.fn();
 
-  const createMockMediaQueryList = (matches: boolean): MediaQueryList => ({
-    matches,
-    media: '(max-width: 767px)',
-    onchange: null,
-    addEventListener: mockAddEventListener,
-    removeEventListener: mockRemoveEventListener,
-    dispatchEvent: vi.fn(),
-    addListener: vi.fn(),
-    removeListener: vi.fn(),
-  } as unknown as MediaQueryList);
+  const createMockMediaQueryList = (matches: boolean): MediaQueryList =>
+    ({
+      matches,
+      media: '(max-width: 767px)',
+      onchange: null,
+      addEventListener: mockAddEventListener,
+      removeEventListener: mockRemoveEventListener,
+      dispatchEvent: vi.fn(),
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
+    }) as unknown as MediaQueryList;
 
   beforeEach(() => {
     vi.clearAllMocks();
     mockAddEventListener.mockClear();
     mockRemoveEventListener.mockClear();
-    
+
     // Reset window.innerWidth to desktop size
     Object.defineProperty(window, 'innerWidth', {
       writable: true,
       configurable: true,
       value: 1024,
     });
-    
+
     window.matchMedia = vi.fn((query: string) => {
       if (query === '(max-width: 767px)') {
         return createMockMediaQueryList(false);

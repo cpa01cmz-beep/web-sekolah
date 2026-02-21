@@ -3,7 +3,9 @@ import { render, screen, waitFor } from '@testing-library/react';
 import { BarChart } from '../BarChart';
 
 vi.mock('recharts/es6/chart/BarChart', () => ({
-  BarChart: ({ children }: { children: React.ReactNode }) => <div data-testid="bar-chart">{children}</div>,
+  BarChart: ({ children }: { children: React.ReactNode }) => (
+    <div data-testid="bar-chart">{children}</div>
+  ),
 }));
 
 vi.mock('recharts/es6/cartesian/Bar', () => ({
@@ -54,7 +56,7 @@ describe('BarChart', () => {
 
   it('renders chart after loading', async () => {
     render(<BarChart data={mockData} ariaLabel="Test chart" />);
-    
+
     await waitFor(() => {
       expect(screen.getByRole('img', { name: 'Test chart' })).toBeInTheDocument();
     });
@@ -62,7 +64,7 @@ describe('BarChart', () => {
 
   it('renders empty state when data is empty', async () => {
     render(<BarChart data={[]} emptyMessage="No data to display" />);
-    
+
     await waitFor(() => {
       expect(screen.getByText('No data to display')).toBeInTheDocument();
     });
@@ -79,7 +81,7 @@ describe('BarChart', () => {
         className="custom-class"
       />
     );
-    
+
     await waitFor(() => {
       expect(screen.getByRole('img', { name: 'Test chart' })).toBeInTheDocument();
     });
@@ -91,7 +93,7 @@ describe('BarChart', () => {
       { name: 'B', value: 20, color: '#00ff00' },
     ];
     render(<BarChart data={dataWithColors} ariaLabel="Color test" />);
-    
+
     await waitFor(() => {
       expect(screen.getByRole('img', { name: 'Color test' })).toBeInTheDocument();
     });

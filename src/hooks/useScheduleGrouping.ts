@@ -7,7 +7,9 @@ interface ScheduleItemBase {
   day: ScheduleDay;
 }
 
-export function useScheduleGrouping<T extends ScheduleItemBase>(schedule: T[]): Record<string, T[]> {
+export function useScheduleGrouping<T extends ScheduleItemBase>(
+  schedule: T[]
+): Record<string, T[]> {
   return useMemo(() => {
     const grouped: Record<string, T[]> = {
       Senin: [],

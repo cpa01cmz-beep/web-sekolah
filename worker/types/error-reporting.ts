@@ -16,11 +16,11 @@ export interface ClientErrorReport {
 export interface CSPViolationReport {
   'csp-report': {
     'document-uri'?: string;
-    'referrer'?: string;
+    referrer?: string;
     'violated-directive'?: string;
     'effective-directive'?: string;
     'original-policy'?: string;
-    'disposition'?: string;
+    disposition?: string;
     'blocked-uri'?: string;
     'line-number'?: number;
     'column-number'?: number;

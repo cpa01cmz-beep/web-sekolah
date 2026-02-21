@@ -29,9 +29,7 @@ export const DashboardStatCard = memo(function DashboardStatCard({
         <div className={cn('font-bold', valueSize === '2xl' ? 'text-2xl' : 'text-3xl')}>
           {value}
         </div>
-        {subtitle && (
-          <p className="text-xs text-muted-foreground mt-1">{subtitle}</p>
-        )}
+        {subtitle && <p className="text-xs text-muted-foreground mt-1">{subtitle}</p>}
       </CardContent>
     </Card>
   );

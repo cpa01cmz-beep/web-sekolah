@@ -15,7 +15,7 @@ const DEFAULT_JITTER_MS = RETRY_CONFIG.DEFAULT_JITTER_MS;
 const MAX_DELAY_MS = 30000;
 
 async function sleep(ms: number): Promise<void> {
-  return new Promise(resolve => setTimeout(resolve, ms));
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 function calculateDelay(attempt: number, baseDelay: number, jitterMs: number): number {
@@ -25,16 +25,13 @@ function calculateDelay(attempt: number, baseDelay: number, jitterMs: number): n
   return cappedDelay + jitter;
 }
 
-export async function withRetry<T>(
-  fn: () => Promise<T>,
-  options: RetryOptions = {}
-): Promise<T> {
+export async function withRetry<T>(fn: () => Promise<T>, options: RetryOptions = {}): Promise<T> {
   const {
     maxRetries = DEFAULT_MAX_RETRIES,
     baseDelay = DEFAULT_BASE_DELAY_MS,
     jitterMs = DEFAULT_JITTER_MS,
     timeout,
-    shouldRetry
+    shouldRetry,
   } = options;
 
   let lastError: Error | unknown;
@@ -52,7 +49,7 @@ export async function withRetry<T>(
             controller.signal.addEventListener('abort', () => {
               reject(new Error('Request timeout'));
             });
-          })
+          }),
         ]);
 
         clearTimeout(timeoutId);

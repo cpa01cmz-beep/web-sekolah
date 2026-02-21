@@ -44,7 +44,7 @@ export class ScheduledTaskMonitor implements IMonitor {
 
   recordExecution(name: string, success: boolean, duration: number): void {
     const now = new Date().toISOString();
-    
+
     this.stats.totalExecutions++;
     this.stats.totalDuration += duration;
     this.stats.lastExecution = now;
@@ -87,7 +87,7 @@ export class ScheduledTaskMonitor implements IMonitor {
     this.stats.taskExecutions.forEach((value, key) => {
       taskExecutionsRecord[key] = value;
     });
-    
+
     return {
       totalExecutions: this.stats.totalExecutions,
       successfulExecutions: this.stats.successfulExecutions,

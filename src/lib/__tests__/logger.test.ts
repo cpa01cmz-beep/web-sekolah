@@ -18,7 +18,7 @@ describe('Logger (Frontend)', () => {
     vi.stubGlobal('console', {
       log: mockConsoleLog,
       warn: mockConsoleWarn,
-      error: mockConsoleError
+      error: mockConsoleError,
     });
 
     mockPinoLogger = {
@@ -30,8 +30,8 @@ describe('Logger (Frontend)', () => {
         debug: vi.fn(),
         info: vi.fn(),
         warn: vi.fn(),
-        error: vi.fn()
-      })
+        error: vi.fn(),
+      }),
     };
 
     vi.mocked(pino).mockReturnValue(mockPinoLogger);
@@ -41,9 +41,9 @@ describe('Logger (Frontend)', () => {
       meta: {
         env: {
           DEV: true,
-          VITE_LOG_LEVEL: 'debug'
-        }
-      }
+          VITE_LOG_LEVEL: 'debug',
+        },
+      },
     });
   });
 
@@ -117,8 +117,8 @@ describe('Logger (Frontend)', () => {
           error: {
             message: 'Test error',
             stack: testError.stack,
-            name: 'Error'
-          }
+            name: 'Error',
+          },
         },
         'API request failed'
       );
@@ -139,8 +139,8 @@ describe('Logger (Frontend)', () => {
           error: {
             message: 'Test error',
             stack: testError.stack,
-            name: 'Error'
-          }
+            name: 'Error',
+          },
         },
         'Failed to fetch'
       );
@@ -151,7 +151,7 @@ describe('Logger (Frontend)', () => {
 
       expect(mockPinoLogger.error).toHaveBeenCalledWith(
         {
-          error: { customError: 'Custom error message' }
+          error: { customError: 'Custom error message' },
         },
         'Error occurred'
       );
@@ -160,7 +160,10 @@ describe('Logger (Frontend)', () => {
     it('should handle null error value', () => {
       error('Error occurred', null, { userId: '123' });
 
-      expect(mockPinoLogger.error).toHaveBeenCalledWith({ userId: '123', error: null }, 'Error occurred');
+      expect(mockPinoLogger.error).toHaveBeenCalledWith(
+        { userId: '123', error: null },
+        'Error occurred'
+      );
     });
 
     it('should combine error object and context', () => {
@@ -173,8 +176,8 @@ describe('Logger (Frontend)', () => {
           error: {
             message: 'Database connection failed',
             stack: testError.stack,
-            name: 'Error'
-          }
+            name: 'Error',
+          },
         },
         'Database error'
       );
@@ -185,7 +188,10 @@ describe('Logger (Frontend)', () => {
     it('should create child logger with context', () => {
       const childLogger = createChildLogger({ requestId: 'req-123', userId: 'user-456' });
 
-      expect(mockPinoLogger.child).toHaveBeenCalledWith({ requestId: 'req-123', userId: 'user-456' });
+      expect(mockPinoLogger.child).toHaveBeenCalledWith({
+        requestId: 'req-123',
+        userId: 'user-456',
+      });
     });
 
     it('should use child logger for debug messages', () => {
@@ -223,8 +229,8 @@ describe('Logger (Frontend)', () => {
           error: {
             message: 'Processing failed',
             stack: testError.stack,
-            name: 'Error'
-          }
+            name: 'Error',
+          },
         },
         'Request failed'
       );
@@ -250,8 +256,8 @@ describe('Logger (Frontend)', () => {
           error: {
             message: 'Step failed',
             stack: testError.stack,
-            name: 'Error'
-          }
+            name: 'Error',
+          },
         },
         'Step error'
       );
@@ -306,7 +312,7 @@ describe('Logger (Frontend)', () => {
   describe('log level filtering', () => {
     it('should create new logger instance after reset in different environment context', () => {
       vi.stubGlobal('window', {});
-      
+
       vi.clearAllMocks();
       resetLogger();
 
@@ -328,13 +334,16 @@ describe('Logger (Frontend)', () => {
     it('should handle context with null values', () => {
       debug('Test message', { userId: null, action: undefined });
 
-      expect(mockPinoLogger.debug).toHaveBeenCalledWith({ userId: null, action: undefined }, 'Test message');
+      expect(mockPinoLogger.debug).toHaveBeenCalledWith(
+        { userId: null, action: undefined },
+        'Test message'
+      );
     });
 
     it('should handle context with nested objects', () => {
       const context = {
         user: { id: '123', name: 'John' },
-        meta: { timestamp: '2026-01-07', source: 'web' }
+        meta: { timestamp: '2026-01-07', source: 'web' },
       };
       info('Complex context', context);
 
@@ -352,8 +361,8 @@ describe('Logger (Frontend)', () => {
           error: {
             message: 'Test error',
             stack: undefined,
-            name: 'Error'
-          }
+            name: 'Error',
+          },
         },
         'Error without stack'
       );
@@ -375,8 +384,8 @@ describe('Logger (Frontend)', () => {
           error: {
             message: 'Custom error occurred',
             stack: customError.stack,
-            name: 'CustomError'
-          }
+            name: 'CustomError',
+          },
         },
         'Custom error'
       );
@@ -393,8 +402,8 @@ describe('Logger (Frontend)', () => {
           error: {
             message: 'Test error',
             stack: undefined,
-            name: 'Error'
-          }
+            name: 'Error',
+          },
         },
         'Error with undefined stack'
       );
@@ -408,16 +417,16 @@ describe('Logger (Frontend)', () => {
         meta: {
           env: {
             DEV: true,
-            VITE_LOG_LEVEL: 'debug'
-          }
-        }
+            VITE_LOG_LEVEL: 'debug',
+          },
+        },
       });
 
       resetLogger();
 
       expect(pino).toHaveBeenCalledWith(
         expect.objectContaining({
-          browser: expect.any(Object)
+          browser: expect.any(Object),
         })
       );
 

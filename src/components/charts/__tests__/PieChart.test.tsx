@@ -3,7 +3,9 @@ import { render, screen, waitFor } from '@testing-library/react';
 import { PieChart } from '../PieChart';
 
 vi.mock('recharts/es6/chart/PieChart', () => ({
-  PieChart: ({ children }: { children: React.ReactNode }) => <div data-testid="pie-chart">{children}</div>,
+  PieChart: ({ children }: { children: React.ReactNode }) => (
+    <div data-testid="pie-chart">{children}</div>
+  ),
 }));
 
 vi.mock('recharts/es6/polar/Pie', () => ({
@@ -42,7 +44,7 @@ describe('PieChart', () => {
 
   it('renders chart after loading', async () => {
     render(<PieChart data={mockData} ariaLabel="Distribution chart" />);
-    
+
     await waitFor(() => {
       expect(screen.getByRole('img', { name: 'Distribution chart' })).toBeInTheDocument();
     });
@@ -50,7 +52,7 @@ describe('PieChart', () => {
 
   it('renders empty state when data is empty', async () => {
     render(<PieChart data={[]} emptyMessage="No distribution data" />);
-    
+
     await waitFor(() => {
       expect(screen.getByText('No distribution data')).toBeInTheDocument();
     });
@@ -68,7 +70,7 @@ describe('PieChart', () => {
         ariaLabel="Distribution chart"
       />
     );
-    
+
     await waitFor(() => {
       expect(screen.getByRole('img', { name: 'Distribution chart' })).toBeInTheDocument();
     });
@@ -82,7 +84,7 @@ describe('PieChart', () => {
         ariaLabel="Custom colors"
       />
     );
-    
+
     await waitFor(() => {
       expect(screen.getByRole('img', { name: 'Custom colors' })).toBeInTheDocument();
     });
@@ -94,7 +96,7 @@ describe('PieChart', () => {
       { name: 'B', value: 20, color: '#00ff00' },
     ];
     render(<PieChart data={dataWithColors} ariaLabel="Data colors" />);
-    
+
     await waitFor(() => {
       expect(screen.getByRole('img', { name: 'Data colors' })).toBeInTheDocument();
     });

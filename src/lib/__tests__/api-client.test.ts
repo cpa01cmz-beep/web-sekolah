@@ -74,7 +74,7 @@ describe('apiClient', () => {
 
       const promise = apiClient('/api/test');
       await expect(promise).rejects.toThrow();
-      
+
       try {
         await promise;
       } catch (error: any) {
@@ -114,7 +114,7 @@ describe('apiClient', () => {
       global.fetch = vi.fn().mockResolvedValue(createMockResponse(mockResponse));
 
       await apiClient('/api/test', {
-        headers: { 'Authorization': 'Bearer token' },
+        headers: { Authorization: 'Bearer token' },
       });
 
       expect(fetch).toHaveBeenCalledWith('/api/test', expect.any(Object));

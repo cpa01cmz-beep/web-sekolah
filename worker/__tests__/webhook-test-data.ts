@@ -7,7 +7,7 @@ export const WEBHOOK_TEST_DATA = {
     active: true,
     createdAt: '',
     updatedAt: '',
-    deletedAt: null
+    deletedAt: null,
   },
   event: {
     id: 'event-test',
@@ -16,7 +16,7 @@ export const WEBHOOK_TEST_DATA = {
     processed: false,
     createdAt: '',
     updatedAt: '',
-    deletedAt: null
+    deletedAt: null,
   },
   delivery: {
     id: 'delivery-test',
@@ -27,8 +27,8 @@ export const WEBHOOK_TEST_DATA = {
     createdAt: '',
     updatedAt: '',
     deletedAt: null,
-    idempotencyKey: undefined
-  }
+    idempotencyKey: undefined,
+  },
 } as const;
 
 export const DEAD_LETTER_QUEUE_TEST_DATA = {
@@ -45,6 +45,6 @@ export const DEAD_LETTER_QUEUE_TEST_DATA = {
     failedAt: '',
     createdAt: '',
     updatedAt: '',
-    deletedAt: null
-  }
+    deletedAt: null,
+  },
 } as const;

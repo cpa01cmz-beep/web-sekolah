@@ -28,7 +28,11 @@ export function TeacherMessagesPage() {
 
   const teacherId = user?.id || '';
 
-  const { data: messages = [], isLoading: messagesLoading, error: messagesError } = useQuery({
+  const {
+    data: messages = [],
+    isLoading: messagesLoading,
+    error: messagesError,
+  } = useQuery({
     queryKey: ['teacher-messages', teacherId, activeTab],
     queryFn: () => teacherService.getMessages(teacherId, activeTab),
     enabled: !!teacherId,
@@ -47,7 +51,7 @@ export function TeacherMessagesPage() {
     enabled: !!teacherId,
   });
 
-  const classIds = useMemo(() => classes.map(c => c.id), [classes]);
+  const classIds = useMemo(() => classes.map((c) => c.id), [classes]);
 
   const { data: conversation = [], isLoading: conversationLoading } = useQuery({
     queryKey: ['teacher-conversation', teacherId, selectedParentId],
@@ -63,8 +67,8 @@ export function TeacherMessagesPage() {
         const students = await teacherService.getClassStudentsWithGrades(cls.id);
         for (const student of students) {
           if (student.parentId) {
-            const parent = await fetch(`/api/users/${student.parentId}`).then(r => r.json());
-            if (parent && !allParents.find(p => p.id === parent.id)) {
+            const parent = await fetch(`/api/users/${student.parentId}`).then((r) => r.json());
+            if (parent && !allParents.find((p) => p.id === parent.id)) {
               allParents.push(parent);
             }
           }
@@ -101,10 +105,11 @@ export function TeacherMessagesPage() {
     sendMessageMutation.mutate({ recipientId, subject, content });
   };
 
-  const uniqueParents = useMemo(() => 
-    parents.filter((parent, index, self) =>
-      index === self.findIndex((p) => p.id === parent.id)
-    ), [parents]);
+  const uniqueParents = useMemo(
+    () =>
+      parents.filter((parent, index, self) => index === self.findIndex((p) => p.id === parent.id)),
+    [parents]
+  );
 
   if (messagesError) {
     return (
@@ -119,10 +124,7 @@ export function TeacherMessagesPage() {
   return (
     <SlideUp delay={0} className="space-y-6" style={prefersReducedMotion ? { opacity: 1 } : {}}>
       <SlideUp delay={0.1} style={prefersReducedMotion ? { opacity: 1 } : {}}>
-        <PageHeader
-          title="Messages"
-          description="Communicate with parents"
-        />
+        <PageHeader title="Messages" description="Communicate with parents" />
       </SlideUp>
 
       <div className="flex justify-between items-center">
@@ -186,10 +188,13 @@ export function TeacherMessagesPage() {
                           <div className="flex items-center gap-2">
                             <User className="h-4 w-4 text-muted-foreground" />
                             <span className="font-medium">
-                              {uniqueParents.find(p => p.id === message.senderId)?.name || 'Parent'}
+                              {uniqueParents.find((p) => p.id === message.senderId)?.name ||
+                                'Parent'}
                             </span>
                             {!message.isRead && message.recipientId === teacherId && (
-                              <Badge variant="default" className="text-xs">New</Badge>
+                              <Badge variant="default" className="text-xs">
+                                New
+                              </Badge>
                             )}
                           </div>
                           <span className="text-xs text-muted-foreground">
@@ -236,7 +241,9 @@ export function TeacherMessagesPage() {
                           <div className="flex items-center gap-2">
                             <User className="h-4 w-4 text-muted-foreground" />
                             <span className="font-medium">
-                              To: {uniqueParents.find(p => p.id === message.recipientId)?.name || 'Parent'}
+                              To:{' '}
+                              {uniqueParents.find((p) => p.id === message.recipientId)?.name ||
+                                'Parent'}
                             </span>
                           </div>
                           <span className="text-xs text-muted-foreground">
@@ -260,7 +267,8 @@ export function TeacherMessagesPage() {
           <DialogContent className="sm:max-w-[600px] max-h-[80vh]">
             <DialogHeader>
               <DialogTitle>
-                Conversation with {uniqueParents.find(p => p.id === selectedParentId)?.name || 'Parent'}
+                Conversation with{' '}
+                {uniqueParents.find((p) => p.id === selectedParentId)?.name || 'Parent'}
               </DialogTitle>
             </DialogHeader>
             <ScrollArea className="h-[400px] pr-4">

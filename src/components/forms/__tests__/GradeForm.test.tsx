@@ -9,7 +9,7 @@ describe('GradeForm', () => {
     name: 'John Doe',
     score: 85,
     feedback: 'Great work!',
-    gradeId: 'grade123'
+    gradeId: 'grade123',
   };
 
   describe('Rendering', () => {
@@ -17,7 +17,13 @@ describe('GradeForm', () => {
       const onClose = vi.fn();
       const onSave = vi.fn();
       render(
-        <GradeForm open={true} onClose={onClose} editingStudent={defaultEditingStudent} onSave={onSave} isLoading={false} />
+        <GradeForm
+          open={true}
+          onClose={onClose}
+          editingStudent={defaultEditingStudent}
+          onSave={onSave}
+          isLoading={false}
+        />
       );
 
       expect(screen.getByText(/Edit Grade for John Doe/i)).toBeInTheDocument();
@@ -27,7 +33,13 @@ describe('GradeForm', () => {
       const onClose = vi.fn();
       const onSave = vi.fn();
       render(
-        <GradeForm open={true} onClose={onClose} editingStudent={defaultEditingStudent} onSave={onSave} isLoading={false} />
+        <GradeForm
+          open={true}
+          onClose={onClose}
+          editingStudent={defaultEditingStudent}
+          onSave={onSave}
+          isLoading={false}
+        />
       );
 
       expect(screen.getByText(/Update score and provide feedback\./i)).toBeInTheDocument();
@@ -37,7 +49,13 @@ describe('GradeForm', () => {
       const onClose = vi.fn();
       const onSave = vi.fn();
       render(
-        <GradeForm open={true} onClose={onClose} editingStudent={defaultEditingStudent} onSave={onSave} isLoading={false} />
+        <GradeForm
+          open={true}
+          onClose={onClose}
+          editingStudent={defaultEditingStudent}
+          onSave={onSave}
+          isLoading={false}
+        />
       );
 
       expect(screen.getByLabelText(/score/i)).toBeInTheDocument();
@@ -47,7 +65,13 @@ describe('GradeForm', () => {
       const onClose = vi.fn();
       const onSave = vi.fn();
       render(
-        <GradeForm open={true} onClose={onClose} editingStudent={defaultEditingStudent} onSave={onSave} isLoading={false} />
+        <GradeForm
+          open={true}
+          onClose={onClose}
+          editingStudent={defaultEditingStudent}
+          onSave={onSave}
+          isLoading={false}
+        />
       );
 
       expect(screen.getByLabelText(/feedback/i)).toBeInTheDocument();
@@ -57,7 +81,13 @@ describe('GradeForm', () => {
       const onClose = vi.fn();
       const onSave = vi.fn();
       render(
-        <GradeForm open={true} onClose={onClose} editingStudent={defaultEditingStudent} onSave={onSave} isLoading={false} />
+        <GradeForm
+          open={true}
+          onClose={onClose}
+          editingStudent={defaultEditingStudent}
+          onSave={onSave}
+          isLoading={false}
+        />
       );
 
       expect(screen.getByRole('button', { name: /cancel/i })).toBeInTheDocument();
@@ -68,7 +98,13 @@ describe('GradeForm', () => {
       const onClose = vi.fn();
       const onSave = vi.fn();
       render(
-        <GradeForm open={false} onClose={onClose} editingStudent={defaultEditingStudent} onSave={onSave} isLoading={false} />
+        <GradeForm
+          open={false}
+          onClose={onClose}
+          editingStudent={defaultEditingStudent}
+          onSave={onSave}
+          isLoading={false}
+        />
       );
 
       expect(screen.queryByText(/Edit Grade for/i)).not.toBeInTheDocument();
@@ -80,7 +116,13 @@ describe('GradeForm', () => {
       const onClose = vi.fn();
       const onSave = vi.fn();
       render(
-        <GradeForm open={true} onClose={onClose} editingStudent={defaultEditingStudent} onSave={onSave} isLoading={false} />
+        <GradeForm
+          open={true}
+          onClose={onClose}
+          editingStudent={defaultEditingStudent}
+          onSave={onSave}
+          isLoading={false}
+        />
       );
 
       expect(screen.getByLabelText(/score/i)).toHaveValue(85);
@@ -90,7 +132,13 @@ describe('GradeForm', () => {
       const onClose = vi.fn();
       const onSave = vi.fn();
       render(
-        <GradeForm open={true} onClose={onClose} editingStudent={defaultEditingStudent} onSave={onSave} isLoading={false} />
+        <GradeForm
+          open={true}
+          onClose={onClose}
+          editingStudent={defaultEditingStudent}
+          onSave={onSave}
+          isLoading={false}
+        />
       );
 
       expect(screen.getByLabelText(/feedback/i)).toHaveValue('Great work!');
@@ -101,7 +149,13 @@ describe('GradeForm', () => {
       const onSave = vi.fn();
       const studentWithNullScore = { ...defaultEditingStudent, score: null };
       render(
-        <GradeForm open={true} onClose={onClose} editingStudent={studentWithNullScore} onSave={onSave} isLoading={false} />
+        <GradeForm
+          open={true}
+          onClose={onClose}
+          editingStudent={studentWithNullScore}
+          onSave={onSave}
+          isLoading={false}
+        />
       );
 
       const scoreInput = screen.getByLabelText(/score/i) as HTMLInputElement;
@@ -113,7 +167,13 @@ describe('GradeForm', () => {
       const onSave = vi.fn();
       const studentWithEmptyFeedback = { ...defaultEditingStudent, feedback: '' };
       render(
-        <GradeForm open={true} onClose={onClose} editingStudent={studentWithEmptyFeedback} onSave={onSave} isLoading={false} />
+        <GradeForm
+          open={true}
+          onClose={onClose}
+          editingStudent={studentWithEmptyFeedback}
+          onSave={onSave}
+          isLoading={false}
+        />
       );
 
       expect(screen.getByLabelText(/feedback/i)).toHaveValue('');
@@ -124,7 +184,13 @@ describe('GradeForm', () => {
       const onClose = vi.fn();
       const onSave = vi.fn();
       render(
-        <GradeForm open={true} onClose={onClose} editingStudent={defaultEditingStudent} onSave={onSave} isLoading={false} />
+        <GradeForm
+          open={true}
+          onClose={onClose}
+          editingStudent={defaultEditingStudent}
+          onSave={onSave}
+          isLoading={false}
+        />
       );
 
       const scoreInput = screen.getByLabelText(/score/i);
@@ -139,7 +205,13 @@ describe('GradeForm', () => {
       const onClose = vi.fn();
       const onSave = vi.fn();
       render(
-        <GradeForm open={true} onClose={onClose} editingStudent={defaultEditingStudent} onSave={onSave} isLoading={false} />
+        <GradeForm
+          open={true}
+          onClose={onClose}
+          editingStudent={defaultEditingStudent}
+          onSave={onSave}
+          isLoading={false}
+        />
       );
 
       const feedbackTextarea = screen.getByLabelText(/feedback/i);
@@ -154,11 +226,19 @@ describe('GradeForm', () => {
       const onClose = vi.fn();
       const onSave = vi.fn();
 
-      render(<GradeForm open={true} onClose={onClose} editingStudent={defaultEditingStudent} onSave={onSave} isLoading={false} />);
+      render(
+        <GradeForm
+          open={true}
+          onClose={onClose}
+          editingStudent={defaultEditingStudent}
+          onSave={onSave}
+          isLoading={false}
+        />
+      );
 
       const scoreInput = screen.getByLabelText(/score/i);
       const feedbackTextarea = screen.getByLabelText(/feedback/i);
-      
+
       await user.clear(scoreInput);
       await user.type(scoreInput, '95');
       await user.clear(feedbackTextarea);
@@ -177,10 +257,24 @@ describe('GradeForm', () => {
       const onSave = vi.fn();
 
       const { rerender } = render(
-        <GradeForm open={false} onClose={onClose} editingStudent={defaultEditingStudent} onSave={onSave} isLoading={false} />
+        <GradeForm
+          open={false}
+          onClose={onClose}
+          editingStudent={defaultEditingStudent}
+          onSave={onSave}
+          isLoading={false}
+        />
       );
 
-      rerender(<GradeForm open={true} onClose={onClose} editingStudent={defaultEditingStudent} onSave={onSave} isLoading={false} />);
+      rerender(
+        <GradeForm
+          open={true}
+          onClose={onClose}
+          editingStudent={defaultEditingStudent}
+          onSave={onSave}
+          isLoading={false}
+        />
+      );
 
       expect(screen.getByLabelText(/score/i)).toHaveValue(85);
       expect(screen.getByLabelText(/feedback/i)).toHaveValue('Great work!');
@@ -192,7 +286,13 @@ describe('GradeForm', () => {
       const onClose = vi.fn();
       const onSave = vi.fn();
       render(
-        <GradeForm open={true} onClose={onClose} editingStudent={defaultEditingStudent} onSave={onSave} isLoading={false} />
+        <GradeForm
+          open={true}
+          onClose={onClose}
+          editingStudent={defaultEditingStudent}
+          onSave={onSave}
+          isLoading={false}
+        />
       );
 
       expect(screen.queryByText(/valid score/i)).not.toBeInTheDocument();
@@ -203,7 +303,13 @@ describe('GradeForm', () => {
       const onClose = vi.fn();
       const onSave = vi.fn();
       render(
-        <GradeForm open={true} onClose={onClose} editingStudent={defaultEditingStudent} onSave={onSave} isLoading={false} />
+        <GradeForm
+          open={true}
+          onClose={onClose}
+          editingStudent={defaultEditingStudent}
+          onSave={onSave}
+          isLoading={false}
+        />
       );
 
       const scoreInput = screen.getByLabelText(/score/i);
@@ -218,7 +324,13 @@ describe('GradeForm', () => {
       const onClose = vi.fn();
       const onSave = vi.fn();
       render(
-        <GradeForm open={true} onClose={onClose} editingStudent={defaultEditingStudent} onSave={onSave} isLoading={false} />
+        <GradeForm
+          open={true}
+          onClose={onClose}
+          editingStudent={defaultEditingStudent}
+          onSave={onSave}
+          isLoading={false}
+        />
       );
 
       const scoreInput = screen.getByLabelText(/score/i);
@@ -233,7 +345,13 @@ describe('GradeForm', () => {
       const onClose = vi.fn();
       const onSave = vi.fn();
       render(
-        <GradeForm open={true} onClose={onClose} editingStudent={defaultEditingStudent} onSave={onSave} isLoading={false} />
+        <GradeForm
+          open={true}
+          onClose={onClose}
+          editingStudent={defaultEditingStudent}
+          onSave={onSave}
+          isLoading={false}
+        />
       );
 
       const scoreInput = screen.getByLabelText(/score/i);
@@ -248,7 +366,13 @@ describe('GradeForm', () => {
       const onClose = vi.fn();
       const onSave = vi.fn();
       render(
-        <GradeForm open={true} onClose={onClose} editingStudent={defaultEditingStudent} onSave={onSave} isLoading={false} />
+        <GradeForm
+          open={true}
+          onClose={onClose}
+          editingStudent={defaultEditingStudent}
+          onSave={onSave}
+          isLoading={false}
+        />
       );
 
       const scoreInput = screen.getByLabelText(/score/i);
@@ -263,7 +387,13 @@ describe('GradeForm', () => {
       const onClose = vi.fn();
       const onSave = vi.fn();
       render(
-        <GradeForm open={true} onClose={onClose} editingStudent={defaultEditingStudent} onSave={onSave} isLoading={false} />
+        <GradeForm
+          open={true}
+          onClose={onClose}
+          editingStudent={defaultEditingStudent}
+          onSave={onSave}
+          isLoading={false}
+        />
       );
 
       const scoreInput = screen.getByLabelText(/score/i);
@@ -278,7 +408,13 @@ describe('GradeForm', () => {
       const onClose = vi.fn();
       const onSave = vi.fn();
       render(
-        <GradeForm open={true} onClose={onClose} editingStudent={defaultEditingStudent} onSave={onSave} isLoading={false} />
+        <GradeForm
+          open={true}
+          onClose={onClose}
+          editingStudent={defaultEditingStudent}
+          onSave={onSave}
+          isLoading={false}
+        />
       );
 
       const scoreInput = screen.getByLabelText(/score/i);
@@ -294,17 +430,23 @@ describe('GradeForm', () => {
       const onClose = vi.fn();
       const onSave = vi.fn();
       render(
-        <GradeForm open={true} onClose={onClose} editingStudent={defaultEditingStudent} onSave={onSave} isLoading={false} />
+        <GradeForm
+          open={true}
+          onClose={onClose}
+          editingStudent={defaultEditingStudent}
+          onSave={onSave}
+          isLoading={false}
+        />
       );
 
       // Score input with type="number" doesn't accept non-numeric characters
       // So we test the validation logic with boundary values instead
       const scoreInput = screen.getByLabelText(/score/i);
-      
+
       // Clear and type valid value first
       await user.clear(scoreInput);
       await user.type(scoreInput, '50');
-      
+
       expect(screen.queryByText(/valid score/)).not.toBeInTheDocument();
     });
   });
@@ -315,12 +457,18 @@ describe('GradeForm', () => {
       const onClose = vi.fn();
       const onSave = vi.fn();
       render(
-        <GradeForm open={true} onClose={onClose} editingStudent={defaultEditingStudent} onSave={onSave} isLoading={false} />
+        <GradeForm
+          open={true}
+          onClose={onClose}
+          editingStudent={defaultEditingStudent}
+          onSave={onSave}
+          isLoading={false}
+        />
       );
 
       const scoreInput = screen.getByLabelText(/score/i);
       const feedbackTextarea = screen.getByLabelText(/feedback/i);
-      
+
       await user.clear(scoreInput);
       await user.type(scoreInput, '90');
       await user.clear(feedbackTextarea);
@@ -330,7 +478,7 @@ describe('GradeForm', () => {
       expect(onSave).toHaveBeenCalledTimes(1);
       expect(onSave).toHaveBeenCalledWith({
         score: 90,
-        feedback: 'Great improvement!'
+        feedback: 'Great improvement!',
       });
     });
 
@@ -339,14 +487,20 @@ describe('GradeForm', () => {
       const onClose = vi.fn();
       const onSave = vi.fn();
       onSave.mockClear();
-      
+
       render(
-        <GradeForm open={true} onClose={onClose} editingStudent={defaultEditingStudent} onSave={onSave} isLoading={false} />
+        <GradeForm
+          open={true}
+          onClose={onClose}
+          editingStudent={defaultEditingStudent}
+          onSave={onSave}
+          isLoading={false}
+        />
       );
 
       const scoreInput = screen.getByLabelText(/score/i);
       const feedbackTextarea = screen.getByLabelText(/feedback/i);
-      
+
       await user.clear(scoreInput);
       await user.clear(feedbackTextarea);
       await user.type(feedbackTextarea, 'Feedback for no score');
@@ -354,7 +508,7 @@ describe('GradeForm', () => {
 
       expect(onSave).toHaveBeenCalledWith({
         score: null,
-        feedback: 'Feedback for no score'
+        feedback: 'Feedback for no score',
       });
     });
 
@@ -363,7 +517,13 @@ describe('GradeForm', () => {
       const onClose = vi.fn();
       const onSave = vi.fn();
       render(
-        <GradeForm open={true} onClose={onClose} editingStudent={defaultEditingStudent} onSave={onSave} isLoading={false} />
+        <GradeForm
+          open={true}
+          onClose={onClose}
+          editingStudent={defaultEditingStudent}
+          onSave={onSave}
+          isLoading={false}
+        />
       );
 
       const scoreInput = screen.getByLabelText(/score/i);
@@ -379,12 +539,18 @@ describe('GradeForm', () => {
       const onClose = vi.fn();
       const onSave = vi.fn();
       render(
-        <GradeForm open={true} onClose={onClose} editingStudent={defaultEditingStudent} onSave={onSave} isLoading={false} />
+        <GradeForm
+          open={true}
+          onClose={onClose}
+          editingStudent={defaultEditingStudent}
+          onSave={onSave}
+          isLoading={false}
+        />
       );
 
       const scoreInput = screen.getByLabelText(/score/i);
       const feedbackTextarea = screen.getByLabelText(/feedback/i);
-      
+
       await user.clear(scoreInput);
       await user.type(scoreInput, '85');
       await user.clear(feedbackTextarea);
@@ -392,7 +558,7 @@ describe('GradeForm', () => {
 
       expect(onSave).toHaveBeenCalledWith({
         score: 85,
-        feedback: ''
+        feedback: '',
       });
     });
 
@@ -405,7 +571,13 @@ describe('GradeForm', () => {
       for (const score of boundaryScores) {
         onSave.mockClear();
         const { unmount } = render(
-          <GradeForm open={true} onClose={onClose} editingStudent={defaultEditingStudent} onSave={onSave} isLoading={false} />
+          <GradeForm
+            open={true}
+            onClose={onClose}
+            editingStudent={defaultEditingStudent}
+            onSave={onSave}
+            isLoading={false}
+          />
         );
 
         const scoreInput = screen.getByLabelText(/score/i);
@@ -424,7 +596,13 @@ describe('GradeForm', () => {
       const onClose = vi.fn();
       const onSave = vi.fn();
       render(
-        <GradeForm open={true} onClose={onClose} editingStudent={defaultEditingStudent} onSave={onSave} isLoading={true} />
+        <GradeForm
+          open={true}
+          onClose={onClose}
+          editingStudent={defaultEditingStudent}
+          onSave={onSave}
+          isLoading={true}
+        />
       );
 
       const scoreInput = screen.getByLabelText(/score/i);
@@ -435,7 +613,13 @@ describe('GradeForm', () => {
       const onClose = vi.fn();
       const onSave = vi.fn();
       render(
-        <GradeForm open={true} onClose={onClose} editingStudent={defaultEditingStudent} onSave={onSave} isLoading={true} />
+        <GradeForm
+          open={true}
+          onClose={onClose}
+          editingStudent={defaultEditingStudent}
+          onSave={onSave}
+          isLoading={true}
+        />
       );
 
       const feedbackTextarea = screen.getByLabelText(/feedback/i);
@@ -446,7 +630,13 @@ describe('GradeForm', () => {
       const onClose = vi.fn();
       const onSave = vi.fn();
       render(
-        <GradeForm open={true} onClose={onClose} editingStudent={defaultEditingStudent} onSave={onSave} isLoading={true} />
+        <GradeForm
+          open={true}
+          onClose={onClose}
+          editingStudent={defaultEditingStudent}
+          onSave={onSave}
+          isLoading={true}
+        />
       );
 
       const scoreInput = screen.getByLabelText(/score/i);
@@ -457,7 +647,13 @@ describe('GradeForm', () => {
       const onClose = vi.fn();
       const onSave = vi.fn();
       render(
-        <GradeForm open={true} onClose={onClose} editingStudent={defaultEditingStudent} onSave={onSave} isLoading={true} />
+        <GradeForm
+          open={true}
+          onClose={onClose}
+          editingStudent={defaultEditingStudent}
+          onSave={onSave}
+          isLoading={true}
+        />
       );
 
       const feedbackTextarea = screen.getByLabelText(/feedback/i);
@@ -468,7 +664,13 @@ describe('GradeForm', () => {
       const onClose = vi.fn();
       const onSave = vi.fn();
       render(
-        <GradeForm open={true} onClose={onClose} editingStudent={defaultEditingStudent} onSave={onSave} isLoading={true} />
+        <GradeForm
+          open={true}
+          onClose={onClose}
+          editingStudent={defaultEditingStudent}
+          onSave={onSave}
+          isLoading={true}
+        />
       );
 
       const submitButton = screen.getByRole('button', { name: /saving/i });
@@ -479,7 +681,13 @@ describe('GradeForm', () => {
       const onClose = vi.fn();
       const onSave = vi.fn();
       render(
-        <GradeForm open={true} onClose={onClose} editingStudent={defaultEditingStudent} onSave={onSave} isLoading={true} />
+        <GradeForm
+          open={true}
+          onClose={onClose}
+          editingStudent={defaultEditingStudent}
+          onSave={onSave}
+          isLoading={true}
+        />
       );
 
       expect(screen.getByRole('button', { name: /saving\.\.\./i })).toBeInTheDocument();
@@ -489,7 +697,13 @@ describe('GradeForm', () => {
       const onClose = vi.fn();
       const onSave = vi.fn();
       render(
-        <GradeForm open={true} onClose={onClose} editingStudent={defaultEditingStudent} onSave={onSave} isLoading={true} />
+        <GradeForm
+          open={true}
+          onClose={onClose}
+          editingStudent={defaultEditingStudent}
+          onSave={onSave}
+          isLoading={true}
+        />
       );
 
       const submitButton = screen.getByRole('button', { name: /saving\.\.\./i });
@@ -500,7 +714,13 @@ describe('GradeForm', () => {
       const onClose = vi.fn();
       const onSave = vi.fn();
       render(
-        <GradeForm open={true} onClose={onClose} editingStudent={defaultEditingStudent} onSave={onSave} isLoading={true} />
+        <GradeForm
+          open={true}
+          onClose={onClose}
+          editingStudent={defaultEditingStudent}
+          onSave={onSave}
+          isLoading={true}
+        />
       );
 
       const cancelButton = screen.getByRole('button', { name: /cancel/i });
@@ -511,7 +731,13 @@ describe('GradeForm', () => {
       const onClose = vi.fn();
       const onSave = vi.fn();
       render(
-        <GradeForm open={true} onClose={onClose} editingStudent={defaultEditingStudent} onSave={onSave} isLoading={false} />
+        <GradeForm
+          open={true}
+          onClose={onClose}
+          editingStudent={defaultEditingStudent}
+          onSave={onSave}
+          isLoading={false}
+        />
       );
 
       expect(screen.getByRole('button', { name: /save changes/i })).toBeInTheDocument();
@@ -524,7 +750,13 @@ describe('GradeForm', () => {
       const onClose = vi.fn();
       const onSave = vi.fn();
       render(
-        <GradeForm open={true} onClose={onClose} editingStudent={defaultEditingStudent} onSave={onSave} isLoading={false} />
+        <GradeForm
+          open={true}
+          onClose={onClose}
+          editingStudent={defaultEditingStudent}
+          onSave={onSave}
+          isLoading={false}
+        />
       );
 
       await user.click(screen.getByRole('button', { name: /cancel/i }));
@@ -537,11 +769,19 @@ describe('GradeForm', () => {
       const onClose = vi.fn();
       const onSave = vi.fn();
 
-      render(<GradeForm open={true} onClose={onClose} editingStudent={defaultEditingStudent} onSave={onSave} isLoading={false} />);
+      render(
+        <GradeForm
+          open={true}
+          onClose={onClose}
+          editingStudent={defaultEditingStudent}
+          onSave={onSave}
+          isLoading={false}
+        />
+      );
 
       const scoreInput = screen.getByLabelText(/score/i);
       const feedbackTextarea = screen.getByLabelText(/feedback/i);
-      
+
       await user.clear(scoreInput);
       await user.type(scoreInput, '95');
       await user.clear(feedbackTextarea);
@@ -562,7 +802,13 @@ describe('GradeForm', () => {
       const onClose = vi.fn();
       const onSave = vi.fn();
       render(
-        <GradeForm open={true} onClose={onClose} editingStudent={defaultEditingStudent} onSave={onSave} isLoading={false} />
+        <GradeForm
+          open={true}
+          onClose={onClose}
+          editingStudent={defaultEditingStudent}
+          onSave={onSave}
+          isLoading={false}
+        />
       );
 
       const scoreInput = screen.getByLabelText(/score/i);
@@ -576,7 +822,13 @@ describe('GradeForm', () => {
       const onClose = vi.fn();
       const onSave = vi.fn();
       render(
-        <GradeForm open={true} onClose={onClose} editingStudent={defaultEditingStudent} onSave={onSave} isLoading={false} />
+        <GradeForm
+          open={true}
+          onClose={onClose}
+          editingStudent={defaultEditingStudent}
+          onSave={onSave}
+          isLoading={false}
+        />
       );
 
       const scoreInput = screen.getByLabelText(/score/i);
@@ -587,7 +839,13 @@ describe('GradeForm', () => {
       const onClose = vi.fn();
       const onSave = vi.fn();
       render(
-        <GradeForm open={true} onClose={onClose} editingStudent={defaultEditingStudent} onSave={onSave} isLoading={false} />
+        <GradeForm
+          open={true}
+          onClose={onClose}
+          editingStudent={defaultEditingStudent}
+          onSave={onSave}
+          isLoading={false}
+        />
       );
 
       const scoreInput = screen.getByLabelText(/score/i);
@@ -598,7 +856,13 @@ describe('GradeForm', () => {
       const onClose = vi.fn();
       const onSave = vi.fn();
       render(
-        <GradeForm open={true} onClose={onClose} editingStudent={defaultEditingStudent} onSave={onSave} isLoading={false} />
+        <GradeForm
+          open={true}
+          onClose={onClose}
+          editingStudent={defaultEditingStudent}
+          onSave={onSave}
+          isLoading={false}
+        />
       );
 
       const scoreInput = screen.getByLabelText(/score/i);
@@ -609,7 +873,13 @@ describe('GradeForm', () => {
       const onClose = vi.fn();
       const onSave = vi.fn();
       render(
-        <GradeForm open={true} onClose={onClose} editingStudent={defaultEditingStudent} onSave={onSave} isLoading={false} />
+        <GradeForm
+          open={true}
+          onClose={onClose}
+          editingStudent={defaultEditingStudent}
+          onSave={onSave}
+          isLoading={false}
+        />
       );
 
       const scoreInput = screen.getByLabelText(/score/i);
@@ -620,7 +890,13 @@ describe('GradeForm', () => {
       const onClose = vi.fn();
       const onSave = vi.fn();
       render(
-        <GradeForm open={true} onClose={onClose} editingStudent={defaultEditingStudent} onSave={onSave} isLoading={false} />
+        <GradeForm
+          open={true}
+          onClose={onClose}
+          editingStudent={defaultEditingStudent}
+          onSave={onSave}
+          isLoading={false}
+        />
       );
 
       const feedbackTextarea = screen.getByLabelText(/feedback/i);
@@ -631,27 +907,49 @@ describe('GradeForm', () => {
       const onClose = vi.fn();
       const onSave = vi.fn();
       render(
-        <GradeForm open={true} onClose={onClose} editingStudent={defaultEditingStudent} onSave={onSave} isLoading={false} />
+        <GradeForm
+          open={true}
+          onClose={onClose}
+          editingStudent={defaultEditingStudent}
+          onSave={onSave}
+          isLoading={false}
+        />
       );
 
-      expect(screen.getByText(/Enter a score between 0 and 100. Leave empty for no score\./i)).toBeInTheDocument();
+      expect(
+        screen.getByText(/Enter a score between 0 and 100. Leave empty for no score\./i)
+      ).toBeInTheDocument();
     });
 
     it('should have helper text for feedback field', () => {
       const onClose = vi.fn();
       const onSave = vi.fn();
       render(
-        <GradeForm open={true} onClose={onClose} editingStudent={defaultEditingStudent} onSave={onSave} isLoading={false} />
+        <GradeForm
+          open={true}
+          onClose={onClose}
+          editingStudent={defaultEditingStudent}
+          onSave={onSave}
+          isLoading={false}
+        />
       );
 
-      expect(screen.getByText(/Provide constructive feedback to help student improve/i)).toBeInTheDocument();
+      expect(
+        screen.getByText(/Provide constructive feedback to help student improve/i)
+      ).toBeInTheDocument();
     });
 
     it('should have aria-busy on all inputs during loading', () => {
       const onClose = vi.fn();
       const onSave = vi.fn();
       render(
-        <GradeForm open={true} onClose={onClose} editingStudent={defaultEditingStudent} onSave={onSave} isLoading={true} />
+        <GradeForm
+          open={true}
+          onClose={onClose}
+          editingStudent={defaultEditingStudent}
+          onSave={onSave}
+          isLoading={true}
+        />
       );
 
       const scoreInput = screen.getByLabelText(/score/i);
@@ -670,7 +968,13 @@ describe('GradeForm', () => {
       const onClose = vi.fn();
       const onSave = vi.fn();
       render(
-        <GradeForm open={true} onClose={onClose} editingStudent={defaultEditingStudent} onSave={onSave} isLoading={false} />
+        <GradeForm
+          open={true}
+          onClose={onClose}
+          editingStudent={defaultEditingStudent}
+          onSave={onSave}
+          isLoading={false}
+        />
       );
 
       const scoreInput = screen.getByLabelText(/score/i);
@@ -685,7 +989,13 @@ describe('GradeForm', () => {
       const onClose = vi.fn();
       const onSave = vi.fn();
       render(
-        <GradeForm open={true} onClose={onClose} editingStudent={defaultEditingStudent} onSave={onSave} isLoading={false} />
+        <GradeForm
+          open={true}
+          onClose={onClose}
+          editingStudent={defaultEditingStudent}
+          onSave={onSave}
+          isLoading={false}
+        />
       );
 
       const specialFeedback = 'Great work! Keep it up!';
@@ -701,7 +1011,13 @@ describe('GradeForm', () => {
       const onClose = vi.fn();
       const onSave = vi.fn();
       render(
-        <GradeForm open={true} onClose={onClose} editingStudent={defaultEditingStudent} onSave={onSave} isLoading={false} />
+        <GradeForm
+          open={true}
+          onClose={onClose}
+          editingStudent={defaultEditingStudent}
+          onSave={onSave}
+          isLoading={false}
+        />
       );
 
       const longFeedback = 'A'.repeat(500);
@@ -717,11 +1033,17 @@ describe('GradeForm', () => {
       const onClose = vi.fn();
       const onSave = vi.fn();
       render(
-        <GradeForm open={true} onClose={onClose} editingStudent={defaultEditingStudent} onSave={onSave} isLoading={false} />
+        <GradeForm
+          open={true}
+          onClose={onClose}
+          editingStudent={defaultEditingStudent}
+          onSave={onSave}
+          isLoading={false}
+        />
       );
 
       const scoreInput = screen.getByLabelText(/score/i);
-      
+
       // Test negative scores show validation errors
       await user.clear(scoreInput);
       await user.type(scoreInput, '-1');
@@ -733,11 +1055,17 @@ describe('GradeForm', () => {
       const onClose = vi.fn();
       const onSave = vi.fn();
       render(
-        <GradeForm open={true} onClose={onClose} editingStudent={defaultEditingStudent} onSave={onSave} isLoading={false} />
+        <GradeForm
+          open={true}
+          onClose={onClose}
+          editingStudent={defaultEditingStudent}
+          onSave={onSave}
+          isLoading={false}
+        />
       );
 
       const scoreInput = screen.getByLabelText(/score/i);
-      
+
       await user.clear(scoreInput);
       await user.type(scoreInput, '85');
       expect(screen.queryByText(/valid score/)).not.toBeInTheDocument();
@@ -756,7 +1084,13 @@ describe('GradeForm', () => {
       const onSave = vi.fn();
       const studentWithNullGradeId = { ...defaultEditingStudent, gradeId: null };
       render(
-        <GradeForm open={true} onClose={onClose} editingStudent={studentWithNullGradeId} onSave={onSave} isLoading={false} />
+        <GradeForm
+          open={true}
+          onClose={onClose}
+          editingStudent={studentWithNullGradeId}
+          onSave={onSave}
+          isLoading={false}
+        />
       );
 
       expect(screen.getByText(/Edit Grade for John Doe/i)).toBeInTheDocument();
@@ -767,7 +1101,13 @@ describe('GradeForm', () => {
       const onSave = vi.fn();
       const studentWithEmptyData = { ...defaultEditingStudent, score: null, feedback: '' };
       render(
-        <GradeForm open={true} onClose={onClose} editingStudent={studentWithEmptyData} onSave={onSave} isLoading={false} />
+        <GradeForm
+          open={true}
+          onClose={onClose}
+          editingStudent={studentWithEmptyData}
+          onSave={onSave}
+          isLoading={false}
+        />
       );
 
       const scoreInput = screen.getByLabelText(/score/i) as HTMLInputElement;
@@ -780,13 +1120,19 @@ describe('GradeForm', () => {
       const onClose = vi.fn();
       const onSave = vi.fn();
       render(
-        <GradeForm open={true} onClose={onClose} editingStudent={defaultEditingStudent} onSave={onSave} isLoading={false} />
+        <GradeForm
+          open={true}
+          onClose={onClose}
+          editingStudent={defaultEditingStudent}
+          onSave={onSave}
+          isLoading={false}
+        />
       );
 
       const scoreInput = screen.getByLabelText(/score/i);
       await user.clear(scoreInput);
       await user.type(scoreInput, '150');
-      
+
       await user.click(screen.getByRole('button', { name: /save changes/i }));
       await user.click(screen.getByRole('button', { name: /save changes/i }));
       await user.click(screen.getByRole('button', { name: /save changes/i }));
@@ -800,7 +1146,13 @@ describe('GradeForm', () => {
       const onClose = vi.fn();
       const onSave = vi.fn();
       render(
-        <GradeForm open={true} onClose={onClose} editingStudent={defaultEditingStudent} onSave={onSave} isLoading={false} />
+        <GradeForm
+          open={true}
+          onClose={onClose}
+          editingStudent={defaultEditingStudent}
+          onSave={onSave}
+          isLoading={false}
+        />
       );
 
       const scoreInput = screen.getByLabelText(/score/i);
@@ -811,7 +1163,13 @@ describe('GradeForm', () => {
       const onClose = vi.fn();
       const onSave = vi.fn();
       render(
-        <GradeForm open={true} onClose={onClose} editingStudent={defaultEditingStudent} onSave={onSave} isLoading={false} />
+        <GradeForm
+          open={true}
+          onClose={onClose}
+          editingStudent={defaultEditingStudent}
+          onSave={onSave}
+          isLoading={false}
+        />
       );
 
       const feedbackTextarea = screen.getByLabelText(/feedback/i);
@@ -822,20 +1180,36 @@ describe('GradeForm', () => {
       const onClose = vi.fn();
       const onSave = vi.fn();
       render(
-        <GradeForm open={true} onClose={onClose} editingStudent={defaultEditingStudent} onSave={onSave} isLoading={false} />
+        <GradeForm
+          open={true}
+          onClose={onClose}
+          editingStudent={defaultEditingStudent}
+          onSave={onSave}
+          isLoading={false}
+        />
       );
 
-      expect(screen.getByText(/Enter a score between 0 and 100. Leave empty for no score\./i)).toBeInTheDocument();
+      expect(
+        screen.getByText(/Enter a score between 0 and 100. Leave empty for no score\./i)
+      ).toBeInTheDocument();
     });
 
     it('should show feedback helper text', () => {
       const onClose = vi.fn();
       const onSave = vi.fn();
       render(
-        <GradeForm open={true} onClose={onClose} editingStudent={defaultEditingStudent} onSave={onSave} isLoading={false} />
+        <GradeForm
+          open={true}
+          onClose={onClose}
+          editingStudent={defaultEditingStudent}
+          onSave={onSave}
+          isLoading={false}
+        />
       );
 
-      expect(screen.getByText(/Provide constructive feedback to help student improve/i)).toBeInTheDocument();
+      expect(
+        screen.getByText(/Provide constructive feedback to help student improve/i)
+      ).toBeInTheDocument();
     });
   });
 });

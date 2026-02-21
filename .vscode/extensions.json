@@ -4,6 +4,8 @@
     "dbaeumer.vscode-eslint",
     "bradlc.vscode-tailwindcss",
     "ms-vscode.vscode-typescript-next",
-    "vitest.explorer"
+    "vitest.explorer",
+    "usernamehw.errorlens",
+    "streetsidesoftware.code-spell-checker"
   ]
 }

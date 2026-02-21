@@ -7,12 +7,12 @@ const StudentSchedulePage = lazy(() => import('@/pages/portal/student/StudentSch
 const StudentCardPage = lazy(() => import('@/pages/portal/student/StudentCardPage'));
 
 export const studentRoutes = {
-  path: "student",
+  path: 'student',
   children: [
     { index: true, element: withSuspense(StudentDashboardPage) },
-    { path: "dashboard", element: withSuspense(StudentDashboardPage) },
-    { path: "grades", element: withSuspense(StudentGradesPage) },
-    { path: "schedule", element: withSuspense(StudentSchedulePage) },
-    { path: "card", element: withSuspense(StudentCardPage) },
+    { path: 'dashboard', element: withSuspense(StudentDashboardPage) },
+    { path: 'grades', element: withSuspense(StudentGradesPage) },
+    { path: 'schedule', element: withSuspense(StudentSchedulePage) },
+    { path: 'card', element: withSuspense(StudentCardPage) },
   ],
 };

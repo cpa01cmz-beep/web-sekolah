@@ -18,7 +18,10 @@ interface EmptyStateProps {
   variant?: EmptyStateVariant;
 }
 
-const variantStyles: Record<EmptyStateVariant, { iconBg: string; iconColor: string; titleColor: string }> = {
+const variantStyles: Record<
+  EmptyStateVariant,
+  { iconBg: string; iconColor: string; titleColor: string }
+> = {
   default: {
     iconBg: 'bg-muted',
     iconColor: 'text-muted-foreground',
@@ -62,24 +65,22 @@ export const EmptyState = memo(function EmptyState({
 
   return (
     <div
-      className={cn(
-        'flex flex-col items-center justify-center p-12 text-center',
-        className
-      )}
+      className={cn('flex flex-col items-center justify-center p-12 text-center', className)}
       role="status"
       aria-live="polite"
     >
       {IconComponent && (
-        <div className={cn('mb-4 flex h-16 w-16 items-center justify-center rounded-full', styles.iconBg)}>
+        <div
+          className={cn(
+            'mb-4 flex h-16 w-16 items-center justify-center rounded-full',
+            styles.iconBg
+          )}
+        >
           <IconComponent className={cn('h-8 w-8', styles.iconColor)} aria-hidden="true" />
         </div>
       )}
       <h3 className={cn('text-lg font-semibold', styles.titleColor)}>{title}</h3>
-      {description && (
-        <p className="mt-2 text-sm text-muted-foreground max-w-md">
-          {description}
-        </p>
-      )}
+      {description && <p className="mt-2 text-sm text-muted-foreground max-w-md">{description}</p>}
       {action && (
         <Button
           onClick={action.onClick}

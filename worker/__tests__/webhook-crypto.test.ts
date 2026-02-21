@@ -2,9 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { generateSignature, verifySignature } from '../webhook-crypto';
 
 describe('webhook-crypto', () => {
-
   describe('generateSignature', () => {
-
     it('should generate consistent signature for same payload and secret', async () => {
       const payload = '{"event":"user.created","data":{"id":"user-123"}}';
       const secret = 'webhook-secret-key';
@@ -102,11 +100,9 @@ describe('webhook-crypto', () => {
 
       expect(hexPart).toBe(hexPart.toLowerCase());
     });
-
   });
 
   describe('verifySignature', () => {
-
     it('should return true for valid signature', async () => {
       const payload = '{"event":"user.created","data":{"id":"user-123"}}';
       const secret = 'webhook-secret-key';
@@ -120,7 +116,8 @@ describe('webhook-crypto', () => {
     it('should return false for invalid signature', async () => {
       const payload = '{"event":"user.created","data":{"id":"user-123"}}';
       const secret = 'webhook-secret-key';
-      const invalidSignature = 'sha256=invalidsignature00000000000000000000000000000000000000000000000000000000000000';
+      const invalidSignature =
+        'sha256=invalidsignature00000000000000000000000000000000000000000000000000000000000000';
 
       const isValid = await verifySignature(payload, invalidSignature, secret);
 
@@ -242,11 +239,9 @@ describe('webhook-crypto', () => {
 
       expect(isValid).toBe(false);
     });
-
   });
 
   describe('Integration Scenarios', () => {
-
     it('should verify signature generated immediately after', async () => {
       const payload = '{"event":"user.created","data":{"id":"user-123"}}';
       const secret = 'webhook-secret-key';
@@ -283,17 +278,15 @@ describe('webhook-crypto', () => {
       ]);
 
       const isValidations = await Promise.all(
-        signatures.map(sig => verifySignature(payload, sig, secret))
+        signatures.map((sig) => verifySignature(payload, sig, secret))
       );
 
-      expect(signatures.every(s => s === signatures[0])).toBe(true);
-      expect(isValidations.every(v => v === true)).toBe(true);
+      expect(signatures.every((s) => s === signatures[0])).toBe(true);
+      expect(isValidations.every((v) => v === true)).toBe(true);
     });
-
   });
 
   describe('Edge Cases and Boundary Conditions', () => {
-
     it('should handle whitespace-only payload', async () => {
       const payload = '   ';
       const secret = 'webhook-secret-key';
@@ -353,7 +346,5 @@ describe('webhook-crypto', () => {
 
       expect(isValid).toBe(true);
     });
-
   });
-
 });

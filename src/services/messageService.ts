@@ -41,6 +41,6 @@ export function createMessageService(
 
     async markAsRead(userId: string, messageId: string): Promise<Message> {
       return repository.post<Message>(endpoints.messageRead(userId, messageId), {});
-    }
+    },
   };
 }

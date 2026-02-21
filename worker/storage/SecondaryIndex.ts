@@ -1,7 +1,7 @@
 import { BaseSecondaryIndex } from './BaseSecondaryIndex';
 
 export class SecondaryIndex<T extends string> extends BaseSecondaryIndex {
-  static readonly entityName = "sys-secondary-index";
+  static readonly entityName = 'sys-secondary-index';
   protected readonly keyPrefix = 'field:';
 
   constructor(env: Env, entityName: string, fieldName: string) {

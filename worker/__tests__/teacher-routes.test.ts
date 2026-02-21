@@ -6,24 +6,22 @@ describe('teacher-routes - Critical Business Logic', () => {
       const teacher = {
         id: 'teacher-001',
         name: 'Teacher Smith',
-        email: 'teacher@test.com'
+        email: 'teacher@test.com',
       };
 
       const teacherClasses = [
         { id: 'class-1', name: '11-A', teacherId: 'teacher-001' },
-        { id: 'class-2', name: '11-B', teacherId: 'teacher-001' }
+        { id: 'class-2', name: '11-B', teacherId: 'teacher-001' },
       ];
 
       const totalStudents = 30 + 25;
 
       const recentGrades = [
         { id: 'grade-1', score: 95, studentId: 'student-1', courseId: 'course-1' },
-        { id: 'grade-2', score: 88, studentId: 'student-2', courseId: 'course-1' }
+        { id: 'grade-2', score: 88, studentId: 'student-2', courseId: 'course-1' },
       ];
 
-      const filteredAnnouncements = [
-        { id: 'ann-1', title: 'Exam Schedule', date: '2024-01-15' }
-      ];
+      const filteredAnnouncements = [{ id: 'ann-1', title: 'Exam Schedule', date: '2024-01-15' }];
 
       const dashboardData = {
         teacherId: teacher.id,
@@ -32,7 +30,7 @@ describe('teacher-routes - Critical Business Logic', () => {
         totalClasses: teacherClasses.length,
         totalStudents,
         recentGrades: recentGrades.slice(-5).reverse(),
-        recentAnnouncements: filteredAnnouncements
+        recentAnnouncements: filteredAnnouncements,
       };
 
       expect(dashboardData.teacherId).toBe('teacher-001');
@@ -46,7 +44,7 @@ describe('teacher-routes - Critical Business Logic', () => {
       const teacherClasses = [
         { id: 'class-1', name: '11-A' },
         { id: 'class-2', name: '11-B' },
-        { id: 'class-3', name: '11-C' }
+        { id: 'class-3', name: '11-C' },
       ];
 
       const classStudentCounts = [30, 25, 28];
@@ -61,7 +59,7 @@ describe('teacher-routes - Critical Business Logic', () => {
         { id: 'grade-2', score: 88, createdAt: '2024-01-11T10:00:00Z' },
         { id: 'grade-3', score: 92, createdAt: '2024-01-12T10:00:00Z' },
         { id: 'grade-4', score: 85, createdAt: '2024-01-13T10:00:00Z' },
-        { id: 'grade-5', score: 90, createdAt: '2024-01-14T10:00:00Z' }
+        { id: 'grade-5', score: 90, createdAt: '2024-01-14T10:00:00Z' },
       ];
 
       const reversedRecentGrades = recentGrades.slice(-5).reverse();
@@ -81,7 +79,7 @@ describe('teacher-routes - Critical Business Logic', () => {
         totalClasses: teacherClasses.length,
         totalStudents,
         recentGrades: [],
-        recentAnnouncements: []
+        recentAnnouncements: [],
       };
 
       expect(dashboardData.totalClasses).toBe(0);
@@ -101,13 +99,13 @@ describe('teacher-routes - Critical Business Logic', () => {
         studentId: 'student-001',
         courseId: 'course-001',
         score: 95,
-        feedback: 'Excellent work!'
+        feedback: 'Excellent work!',
       };
 
       const newGrade = {
         id: 'grade-001',
         ...gradeData,
-        createdAt: new Date().toISOString()
+        createdAt: new Date().toISOString(),
       };
 
       expect(newGrade.id).toBeDefined();
@@ -122,12 +120,12 @@ describe('teacher-routes - Critical Business Logic', () => {
       const validScores = [0, 50, 100, 95.5];
       const invalidScores = [-1, 101, 150];
 
-      validScores.forEach(score => {
+      validScores.forEach((score) => {
         expect(score).toBeGreaterThanOrEqual(0);
         expect(score).toBeLessThanOrEqual(100);
       });
 
-      invalidScores.forEach(score => {
+      invalidScores.forEach((score) => {
         expect(score < 0 || score > 100).toBe(true);
       });
     });
@@ -139,7 +137,7 @@ describe('teacher-routes - Critical Business Logic', () => {
         courseId: 'course-001',
         score: 95,
         feedback: 'Excellent!',
-        createdAt: new Date().toISOString()
+        createdAt: new Date().toISOString(),
       };
 
       const eventType = 'grade.created';
@@ -156,7 +154,7 @@ describe('teacher-routes - Critical Business Logic', () => {
       const announcementData = {
         title: 'Midterm Exam Schedule',
         content: 'Exams will be held next week.',
-        targetRole: 'student' as const
+        targetRole: 'student' as const,
       };
 
       const authorId = 'teacher-001';
@@ -164,7 +162,7 @@ describe('teacher-routes - Critical Business Logic', () => {
         id: 'ann-001',
         ...announcementData,
         authorId,
-        date: new Date().toISOString()
+        date: new Date().toISOString(),
       };
 
       expect(newAnnouncement.id).toBeDefined();
@@ -182,7 +180,7 @@ describe('teacher-routes - Critical Business Logic', () => {
         content: 'Exams next week',
         targetRole: 'student' as const,
         authorId: 'teacher-001',
-        date: new Date().toISOString()
+        date: new Date().toISOString(),
       };
 
       const eventType = 'announcement.created';
@@ -198,7 +196,7 @@ describe('teacher-routes - Critical Business Logic', () => {
     it('should handle missing teacher classes', () => {
       const teacher = {
         id: 'teacher-001',
-        name: 'Teacher Smith'
+        name: 'Teacher Smith',
       };
 
       const classes: any[] | undefined = undefined;
@@ -207,9 +205,7 @@ describe('teacher-routes - Critical Business Logic', () => {
     });
 
     it('should handle zero students in class', () => {
-      const teacherClasses = [
-        { id: 'class-1', name: '11-A' }
-      ];
+      const teacherClasses = [{ id: 'class-1', name: '11-A' }];
 
       const classStudentCounts = [0];
       const totalStudents = classStudentCounts.reduce((sum, count) => sum + count, 0);
@@ -227,7 +223,7 @@ describe('teacher-routes - Critical Business Logic', () => {
     it('should handle fewer than 5 recent grades', () => {
       const recentGrades = [
         { id: 'grade-1', score: 95, createdAt: '2024-01-10' },
-        { id: 'grade-2', score: 88, createdAt: '2024-01-11' }
+        { id: 'grade-2', score: 88, createdAt: '2024-01-11' },
       ];
 
       const reversedRecentGrades = recentGrades.slice(-5).reverse();
@@ -241,13 +237,13 @@ describe('teacher-routes - Critical Business Logic', () => {
         studentId: 'student-001',
         courseId: 'course-001',
         score: 95,
-        feedback: ''
+        feedback: '',
       };
 
       const newGrade = {
         id: 'grade-001',
         ...gradeData,
-        createdAt: new Date().toISOString()
+        createdAt: new Date().toISOString(),
       };
 
       expect(newGrade.feedback).toBe('');
@@ -258,13 +254,13 @@ describe('teacher-routes - Critical Business Logic', () => {
         studentId: 'student-001',
         courseId: 'course-001',
         score: 95,
-        feedback: null as any
+        feedback: null as any,
       };
 
       const newGrade = {
         id: 'grade-001',
         ...gradeData,
-        createdAt: new Date().toISOString()
+        createdAt: new Date().toISOString(),
       };
 
       expect(newGrade.feedback).toBeNull();
@@ -275,7 +271,7 @@ describe('teacher-routes - Critical Business Logic', () => {
         studentId: 'student-001',
         courseId: 'course-001',
         score: 87.5,
-        feedback: 'Good work'
+        feedback: 'Good work',
       };
 
       expect(gradeData.score).toBe(87.5);
@@ -285,7 +281,7 @@ describe('teacher-routes - Critical Business Logic', () => {
       const announcementData = {
         title: '',
         content: 'Test content',
-        targetRole: 'student' as const
+        targetRole: 'student' as const,
       };
 
       expect(announcementData.title).toBe('');
@@ -295,7 +291,7 @@ describe('teacher-routes - Critical Business Logic', () => {
       const announcementData = {
         title: 'Test Title',
         content: '',
-        targetRole: 'student' as const
+        targetRole: 'student' as const,
       };
 
       expect(announcementData.content).toBe('');
@@ -311,7 +307,7 @@ describe('teacher-routes - Critical Business Logic', () => {
         totalClasses: 2,
         totalStudents: 55,
         recentGrades: [],
-        recentAnnouncements: []
+        recentAnnouncements: [],
       };
 
       expect(dashboardData).toHaveProperty('teacherId');
@@ -332,7 +328,7 @@ describe('teacher-routes - Critical Business Logic', () => {
         courseId: 'course-001',
         score: 95,
         feedback: 'Excellent!',
-        createdAt: new Date().toISOString()
+        createdAt: new Date().toISOString(),
       };
 
       expect(grade).toHaveProperty('id');
@@ -351,7 +347,7 @@ describe('teacher-routes - Critical Business Logic', () => {
         content: 'Test content',
         targetRole: 'student' as const,
         authorId: 'teacher-001',
-        date: new Date().toISOString()
+        date: new Date().toISOString(),
       };
 
       expect(announcement).toHaveProperty('id');
@@ -366,7 +362,7 @@ describe('teacher-routes - Critical Business Logic', () => {
       const teacherClass = {
         id: 'class-001',
         name: '11-A',
-        teacherId: 'teacher-001'
+        teacherId: 'teacher-001',
       };
 
       expect(teacherClass).toHaveProperty('id');
@@ -380,13 +376,13 @@ describe('teacher-routes - Critical Business Logic', () => {
       const teacherClasses = [
         { id: 'class-1', name: '11-A' },
         { id: 'class-2', name: '11-B' },
-        { id: 'class-3', name: '11-C' }
+        { id: 'class-3', name: '11-C' },
       ];
 
       const studentCounts = [30, 25, 28];
-      const totalStudents = await Promise.all(
-        studentCounts.map(async (count) => count)
-      ).then(counts => counts.reduce((sum, count) => sum + count, 0));
+      const totalStudents = await Promise.all(studentCounts.map(async (count) => count)).then(
+        (counts) => counts.reduce((sum, count) => sum + count, 0)
+      );
 
       expect(totalStudents).toBe(83);
     });
@@ -394,21 +390,19 @@ describe('teacher-routes - Critical Business Logic', () => {
     it('should handle empty classes with Promise.all', async () => {
       const teacherClasses: any[] = [];
 
-      const totalStudents = await Promise.all(
-        teacherClasses.map(async () => 0)
-      ).then(counts => counts.reduce((sum, count) => sum + count, 0));
+      const totalStudents = await Promise.all(teacherClasses.map(async () => 0)).then((counts) =>
+        counts.reduce((sum, count) => sum + count, 0)
+      );
 
       expect(totalStudents).toBe(0);
     });
 
     it('should handle single class with Promise.all', async () => {
-      const teacherClasses = [
-        { id: 'class-1', name: '11-A' }
-      ];
+      const teacherClasses = [{ id: 'class-1', name: '11-A' }];
 
-      const totalStudents = await Promise.all(
-        [30].map(async (count) => count)
-      ).then(counts => counts.reduce((sum, count) => sum + count, 0));
+      const totalStudents = await Promise.all([30].map(async (count) => count)).then((counts) =>
+        counts.reduce((sum, count) => sum + count, 0)
+      );
 
       expect(totalStudents).toBe(30);
     });
@@ -439,7 +433,7 @@ describe('teacher-routes - Critical Business Logic', () => {
 
     it('should accept decimal scores', () => {
       const scores = [95.5, 87.3, 90.75, 85.1];
-      scores.forEach(score => {
+      scores.forEach((score) => {
         expect(score).toBeGreaterThanOrEqual(0);
         expect(score).toBeLessThanOrEqual(100);
       });

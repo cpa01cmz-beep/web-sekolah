@@ -52,29 +52,31 @@ function getKeyFromContext(c: Context, customKeyGenerator?: (c: Context) => stri
   if (customKeyGenerator) {
     return customKeyGenerator(c);
   }
-  
+
   const forwarded = c.req.header('x-forwarded-for');
-  const ip = forwarded ? forwarded.split(',')[0] : c.req.header('cf-connecting-ip') || c.req.header('x-real-ip') || 'unknown';
-  
+  const ip = forwarded
+    ? forwarded.split(',')[0]
+    : c.req.header('cf-connecting-ip') || c.req.header('x-real-ip') || 'unknown';
+
   const path = c.req.path;
   return `${ip}:${path}`;
 }
 
 function getOrCreateEntry(key: string, config: RateLimitConfig): RateLimitStore {
   cleanupExpiredEntries();
-  
+
   const now = Date.now();
   const existing = store.get(key);
-  
+
   if (existing && existing.resetTime > now) {
     return existing;
   }
-  
+
   const entry: RateLimitStore = {
     count: 0,
     resetTime: now + config.windowMs,
   };
-  
+
   store.set(key, entry);
   integrationMonitor.updateRateLimitEntries(store.size);
   return entry;
@@ -94,42 +96,46 @@ export function rateLimit(options: RateLimitMiddlewareOptions = {}) {
     const key = getKeyFromContext(c, options.keyGenerator);
     const entry = getOrCreateEntry(key, config);
     const now = Date.now();
-    
+
     entry.count++;
     const blocked = entry.count > config.maxRequests;
     integrationMonitor.recordRateLimitRequest(blocked);
-    
+
     const info: RateLimitInfo = {
       limit: config.maxRequests,
       remaining: Math.max(0, config.maxRequests - entry.count),
       reset: Math.ceil(entry.resetTime / TimeConstants.SECOND_MS),
     };
-    
+
     if (standardHeaders) {
       c.header('X-RateLimit-Limit', info.limit.toString());
       c.header('X-RateLimit-Remaining', info.remaining.toString());
       c.header('X-RateLimit-Reset', info.reset.toString());
     }
-    
+
     if (entry.count > config.maxRequests) {
       if (options.onLimitReached) {
         options.onLimitReached(c, info);
       }
-      
+
       if (options.handler) {
         return options.handler(c, info);
       }
-      
-      c.header('Retry-After', Math.ceil((entry.resetTime - now) / TimeConstants.SECOND_MS).toString());
+
+      c.header(
+        'Retry-After',
+        Math.ceil((entry.resetTime - now) / TimeConstants.SECOND_MS).toString()
+      );
       return rateLimitExceeded(c, Math.ceil((entry.resetTime - now) / TimeConstants.SECOND_MS));
     }
-    
+
     await next();
-    
+
     const status = c.res.status;
-    const skip = (config.skipSuccessfulRequests && status >= 200 && status < 300) ||
-                 (config.skipFailedRequests && status >= 400);
-    
+    const skip =
+      (config.skipSuccessfulRequests && status >= 200 && status < 300) ||
+      (config.skipFailedRequests && status >= 400);
+
     if (skip) {
       entry.count--;
     }

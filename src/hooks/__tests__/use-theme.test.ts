@@ -247,7 +247,9 @@ describe('useTheme', () => {
         result.current.toggleTheme();
       });
 
-      const darkClassCount = document.documentElement.className.split(' ').filter(c => c === 'dark').length;
+      const darkClassCount = document.documentElement.className
+        .split(' ')
+        .filter((c) => c === 'dark').length;
       expect(darkClassCount).toBe(1);
     });
   });

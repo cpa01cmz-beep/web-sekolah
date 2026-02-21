@@ -10,8 +10,7 @@ export class GlobalErrorHandler {
   setupGlobalErrorHandler(): void {
     const originalHandler = window.onerror;
     window.onerror = (message, source, lineno, colno, error) => {
-      const errorMessage =
-        typeof message === 'string' ? message : 'Unknown error';
+      const errorMessage = typeof message === 'string' ? message : 'Unknown error';
 
       const context: ErrorContext = {
         message: errorMessage,
@@ -46,6 +45,5 @@ export class GlobalErrorHandler {
     });
   }
 
-  dispose(): void {
-  }
+  dispose(): void {}
 }

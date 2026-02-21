@@ -17,7 +17,9 @@ describe('TeacherService - Critical Path Testing', () => {
   describe('Module Loading', () => {
     it('should document that full tests require Cloudflare Workers environment', () => {
       if (!canLoadModule) {
-        console.warn('⚠️  TeacherService tests skipped: Cloudflare Workers environment not available');
+        console.warn(
+          '⚠️  TeacherService tests skipped: Cloudflare Workers environment not available'
+        );
         console.warn('   This module requires advanced mocking setup for full testing');
         console.warn('   See docs/task.md for details on domain service testing');
       }
@@ -210,9 +212,9 @@ describe('TeacherService - Critical Path Testing', () => {
 
       const mockEnv = {} as any;
 
-      await expect(
-        TeacherService.getClassStudentsWithGrades(mockEnv, '11-A', '')
-      ).rejects.toThrow('Class not found');
+      await expect(TeacherService.getClassStudentsWithGrades(mockEnv, '11-A', '')).rejects.toThrow(
+        'Class not found'
+      );
     });
 
     it('should handle non-existent teacher ID', async () => {
@@ -395,8 +397,10 @@ describe('TeacherService - Critical Path Testing', () => {
 
       console.log('\n📊 N+1 Query Elimination Analysis:');
       scenarios.forEach(({ students, courses, queriesBefore, queriesAfter }) => {
-        const improvement = ((queriesBefore - queriesAfter) / queriesBefore * 100).toFixed(1);
-        console.log(`  - ${students} students, ${courses} courses: ${queriesBefore} → ${queriesAfter} queries (${improvement}% reduction)`);
+        const improvement = (((queriesBefore - queriesAfter) / queriesBefore) * 100).toFixed(1);
+        console.log(
+          `  - ${students} students, ${courses} courses: ${queriesBefore} → ${queriesAfter} queries (${improvement}% reduction)`
+        );
       });
 
       expect(scenarios).toHaveLength(3);
@@ -442,7 +446,7 @@ describe('TeacherService - Critical Path Testing', () => {
       console.log('\n📊 Grade Matching Strategy:');
       console.log('  - Composite key: ${studentId}:${courseId}');
       console.log('  - O(1) lookup per student in gradesMap');
-      console.log('  - Finds first matching grade from teacher\'s courses');
+      console.log("  - Finds first matching grade from teacher's courses");
       console.log('  - Handles multiple grades per student across courses');
 
       expect(true).toBe(true);
@@ -459,7 +463,7 @@ describe('TeacherService - Critical Path Testing', () => {
       expect(typeof TeacherService.getClassStudentsWithGrades).toBe('function');
     });
 
-    it('should handle students with no grades from teacher\'s courses', async () => {
+    it("should handle students with no grades from teacher's courses", async () => {
       if (!canLoadModule) {
         console.warn('⏭️  Test skipped: Module not available without Cloudflare Workers');
         return;

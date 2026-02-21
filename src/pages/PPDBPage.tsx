@@ -12,9 +12,7 @@ export function PPDBPage() {
         <div className="bg-primary/5">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24 text-center">
             <SlideUp>
-              <h1 className="text-4xl md:text-5xl font-bold text-primary">
-                Pendaftaran PPDB
-              </h1>
+              <h1 className="text-4xl md:text-5xl font-bold text-primary">Pendaftaran PPDB</h1>
             </SlideUp>
             <SlideUp delay={0.2}>
               <p className="mt-4 max-w-3xl mx-auto text-lg text-muted-foreground">

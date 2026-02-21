@@ -39,9 +39,7 @@ export class ApiErrorMonitor implements IMonitor {
     const errorsLastMinute = this.stats.recentErrors.filter(
       (e) => e.timestamp >= oneMinuteAgo
     ).length;
-    const errorsLastHour = this.stats.recentErrors.filter(
-      (e) => e.timestamp >= oneHourAgo
-    ).length;
+    const errorsLastHour = this.stats.recentErrors.filter((e) => e.timestamp >= oneHourAgo).length;
 
     return {
       perMinute: errorsLastMinute,

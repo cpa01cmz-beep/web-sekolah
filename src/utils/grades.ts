@@ -4,7 +4,7 @@ import {
   GRADE_A_THRESHOLD,
   GRADE_B_THRESHOLD,
   GRADE_C_THRESHOLD,
-  PASSING_SCORE_THRESHOLD
+  PASSING_SCORE_THRESHOLD,
 } from '@/constants/grades';
 
 type BadgeVariant = VariantProps<typeof badgeVariants>['variant'];

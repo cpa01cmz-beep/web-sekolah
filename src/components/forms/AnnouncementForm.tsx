@@ -1,5 +1,12 @@
 import { useState, useCallback, memo } from 'react';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
@@ -14,12 +21,21 @@ interface AnnouncementFormProps {
   isLoading: boolean;
 }
 
-export const AnnouncementForm = memo(function AnnouncementForm({ open, onClose, onSave, isLoading }: AnnouncementFormProps) {
+export const AnnouncementForm = memo(function AnnouncementForm({
+  open,
+  onClose,
+  onSave,
+  isLoading,
+}: AnnouncementFormProps) {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
 
   const formData = { title, content };
-  const { errors, validateAll, reset: resetValidation } = useFormValidation(formData, {
+  const {
+    errors,
+    validateAll,
+    reset: resetValidation,
+  } = useFormValidation(formData, {
     validators: {
       title: (value, show) => validateTitle(value, show, 5),
       content: (value, show) => validateContent(value, show, 10),
@@ -33,23 +49,29 @@ export const AnnouncementForm = memo(function AnnouncementForm({ open, onClose, 
     onClose();
   }, [onClose, resetValidation]);
 
-  const handleOpenChange = useCallback((newOpen: boolean) => {
-    if (!newOpen) {
-      setTitle('');
-      setContent('');
-      resetValidation();
-      onClose();
-    }
-  }, [onClose, resetValidation]);
+  const handleOpenChange = useCallback(
+    (newOpen: boolean) => {
+      if (!newOpen) {
+        setTitle('');
+        setContent('');
+        resetValidation();
+        onClose();
+      }
+    },
+    [onClose, resetValidation]
+  );
 
-  const handleSubmit = useCallback((e: React.FormEvent) => {
-    e.preventDefault();
-    if (!validateAll()) {
-      return;
-    }
+  const handleSubmit = useCallback(
+    (e: React.FormEvent) => {
+      e.preventDefault();
+      if (!validateAll()) {
+        return;
+      }
 
-    onSave({ title: title.trim(), content: content.trim() });
-  }, [validateAll, title, content, onSave]);
+      onSave({ title: title.trim(), content: content.trim() });
+    },
+    [validateAll, title, content, onSave]
+  );
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>

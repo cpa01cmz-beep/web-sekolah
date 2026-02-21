@@ -1,5 +1,12 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { PageHeader } from '@/components/PageHeader';
@@ -31,10 +38,7 @@ export function ParentStudentSchedulePage() {
   if (error) {
     return (
       <SlideUp className="space-y-6">
-        <PageHeader
-          title="Jadwal Pelajaran Anak Anda"
-          description="Gagal memuat jadwal"
-        />
+        <PageHeader title="Jadwal Pelajaran Anak Anda" description="Gagal memuat jadwal" />
         <Alert variant="destructive">
           <AlertTriangle className="h-4 w-4" aria-hidden="true" />
           <AlertTitle>Error</AlertTitle>

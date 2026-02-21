@@ -22,10 +22,7 @@ export const FormSuccess = memo(function FormSuccess({
 }: FormSuccessProps) {
   return (
     <div
-      className={cn(
-        'flex flex-col items-center justify-center p-12 text-center',
-        className
-      )}
+      className={cn('flex flex-col items-center justify-center p-12 text-center', className)}
       role="status"
       aria-live="polite"
     >
@@ -33,11 +30,7 @@ export const FormSuccess = memo(function FormSuccess({
         <Icon className="h-8 w-8 text-green-600 dark:text-green-400" aria-hidden="true" />
       </div>
       <h3 className="text-lg font-semibold text-foreground">{title}</h3>
-      {description && (
-        <p className="mt-2 text-sm text-muted-foreground max-w-md">
-          {description}
-        </p>
-      )}
+      {description && <p className="mt-2 text-sm text-muted-foreground max-w-md">{description}</p>}
       {action && (
         <button
           onClick={action.onClick}

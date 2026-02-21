@@ -36,7 +36,7 @@ export function useFormValidation<T extends Record<string, any>>(
 
   const validateAll = useCallback(() => {
     setShowValidationErrors(true);
-    return Object.values(errors).every(error => !error);
+    return Object.values(errors).every((error) => !error);
   }, [errors]);
 
   const reset = useCallback(() => {
@@ -44,7 +44,7 @@ export function useFormValidation<T extends Record<string, any>>(
   }, []);
 
   const hasErrors = useMemo(() => {
-    return Object.values(errors).some(error => Boolean(error));
+    return Object.values(errors).some((error) => Boolean(error));
   }, [errors]);
 
   return {

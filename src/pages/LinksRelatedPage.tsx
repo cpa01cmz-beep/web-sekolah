@@ -10,9 +10,7 @@ export function LinksRelatedPage() {
         <div className="bg-primary/5">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24 text-center">
             <SlideUp>
-              <h1 className="text-4xl md:text-5xl font-bold text-primary">
-                Tautan Terkait
-              </h1>
+              <h1 className="text-4xl md:text-5xl font-bold text-primary">Tautan Terkait</h1>
             </SlideUp>
             <SlideUp delay={0.2}>
               <p className="mt-4 max-w-3xl mx-auto text-lg text-muted-foreground">
@@ -26,19 +24,34 @@ export function LinksRelatedPage() {
             <SlideLeft>
               <h2 className="text-3xl font-bold text-foreground mb-6">Pemerintahan</h2>
               <div className="space-y-4">
-                <a href="#" className="block p-4 bg-card rounded-lg shadow-sm hover:shadow-md transition-shadow">
+                <a
+                  href="#"
+                  className="block p-4 bg-card rounded-lg shadow-sm hover:shadow-md transition-shadow"
+                >
                   <h3 className="font-bold text-lg">Kementerian Pendidikan dan Kebudayaan</h3>
-                  <p className="text-sm text-muted-foreground mt-1">Website resmi Kementerian Pendidikan dan Kebudayaan Republik Indonesia</p>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Website resmi Kementerian Pendidikan dan Kebudayaan Republik Indonesia
+                  </p>
                 </a>
 
-                <a href="#" className="block p-4 bg-card rounded-lg shadow-sm hover:shadow-md transition-shadow">
+                <a
+                  href="#"
+                  className="block p-4 bg-card rounded-lg shadow-sm hover:shadow-md transition-shadow"
+                >
                   <h3 className="font-bold text-lg">Dinas Pendidikan Provinsi</h3>
-                  <p className="text-sm text-muted-foreground mt-1">Website Dinas Pendidikan tingkat provinsi</p>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Website Dinas Pendidikan tingkat provinsi
+                  </p>
                 </a>
 
-                <a href="#" className="block p-4 bg-card rounded-lg shadow-sm hover:shadow-md transition-shadow">
+                <a
+                  href="#"
+                  className="block p-4 bg-card rounded-lg shadow-sm hover:shadow-md transition-shadow"
+                >
                   <h3 className="font-bold text-lg">Badan Standar Nasional Pendidikan</h3>
-                  <p className="text-sm text-muted-foreground mt-1">Badan yang menetapkan standar nasional pendidikan</p>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Badan yang menetapkan standar nasional pendidikan
+                  </p>
                 </a>
               </div>
             </SlideLeft>
@@ -46,19 +59,34 @@ export function LinksRelatedPage() {
             <SlideRight delay={0.1}>
               <h2 className="text-3xl font-bold text-foreground mb-6">Pendidikan & Referensi</h2>
               <div className="space-y-4">
-                <a href="#" className="block p-4 bg-card rounded-lg shadow-sm hover:shadow-md transition-shadow">
+                <a
+                  href="#"
+                  className="block p-4 bg-card rounded-lg shadow-sm hover:shadow-md transition-shadow"
+                >
                   <h3 className="font-bold text-lg">Perpustakaan Nasional</h3>
-                  <p className="text-sm text-muted-foreground mt-1">Digital library dengan koleksi buku dan jurnal nasional</p>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Digital library dengan koleksi buku dan jurnal nasional
+                  </p>
                 </a>
 
-                <a href="#" className="block p-4 bg-card rounded-lg shadow-sm hover:shadow-md transition-shadow">
+                <a
+                  href="#"
+                  className="block p-4 bg-card rounded-lg shadow-sm hover:shadow-md transition-shadow"
+                >
                   <h3 className="font-bold text-lg">Pusat Sumber Belajar</h3>
-                  <p className="text-sm text-muted-foreground mt-1">Platform pembelajaran online untuk siswa dan guru</p>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Platform pembelajaran online untuk siswa dan guru
+                  </p>
                 </a>
 
-                <a href="#" className="block p-4 bg-card rounded-lg shadow-sm hover:shadow-md transition-shadow">
+                <a
+                  href="#"
+                  className="block p-4 bg-card rounded-lg shadow-sm hover:shadow-md transition-shadow"
+                >
                   <h3 className="font-bold text-lg">Komunitas Guru Indonesia</h3>
-                  <p className="text-sm text-muted-foreground mt-1">Forum komunitas untuk guru se-Indonesia</p>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Forum komunitas untuk guru se-Indonesia
+                  </p>
                 </a>
               </div>
             </SlideRight>
@@ -66,30 +94,47 @@ export function LinksRelatedPage() {
 
           <SlideUp>
             <div className="mt-16">
-              <h2 className="text-3xl font-bold text-foreground mb-6">Organisasi Pendidikan Internasional</h2>
+              <h2 className="text-3xl font-bold text-foreground mb-6">
+                Organisasi Pendidikan Internasional
+              </h2>
               <div className="grid md:grid-cols-3 gap-6">
-                <a href="#" className="block p-6 bg-card rounded-lg shadow-sm hover:shadow-md transition-shadow text-center">
+                <a
+                  href="#"
+                  className="block p-6 bg-card rounded-lg shadow-sm hover:shadow-md transition-shadow text-center"
+                >
                   <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
                     <span className="text-blue-600 font-bold">UNESCO</span>
                   </div>
                   <h3 className="font-bold">UNESCO</h3>
-                  <p className="text-sm text-muted-foreground mt-2">Organisasi PBB untuk pendidikan, sains dan budaya</p>
+                  <p className="text-sm text-muted-foreground mt-2">
+                    Organisasi PBB untuk pendidikan, sains dan budaya
+                  </p>
                 </a>
 
-                <a href="#" className="block p-6 bg-card rounded-lg shadow-sm hover:shadow-md transition-shadow text-center">
+                <a
+                  href="#"
+                  className="block p-6 bg-card rounded-lg shadow-sm hover:shadow-md transition-shadow text-center"
+                >
                   <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
                     <span className="text-green-600 font-bold">OECD</span>
                   </div>
                   <h3 className="font-bold">OECD Education</h3>
-                  <p className="text-sm text-muted-foreground mt-2">Organisasi untuk kerjasama ekonomi dan pengembangan</p>
+                  <p className="text-sm text-muted-foreground mt-2">
+                    Organisasi untuk kerjasama ekonomi dan pengembangan
+                  </p>
                 </a>
 
-                <a href="#" className="block p-6 bg-card rounded-lg shadow-sm hover:shadow-md transition-shadow text-center">
+                <a
+                  href="#"
+                  className="block p-6 bg-card rounded-lg shadow-sm hover:shadow-md transition-shadow text-center"
+                >
                   <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
                     <span className="text-purple-600 font-bold">WB</span>
                   </div>
                   <h3 className="font-bold">World Bank Education</h3>
-                  <p className="text-sm text-muted-foreground mt-2">Program pendidikan dari Bank Dunia</p>
+                  <p className="text-sm text-muted-foreground mt-2">
+                    Program pendidikan dari Bank Dunia
+                  </p>
                 </a>
               </div>
             </div>

@@ -1,4 +1,9 @@
-import { useQuery as useTanstackQuery, useMutation as useTanstackMutation, UseQueryOptions, UseMutationOptions } from '@tanstack/react-query';
+import {
+  useQuery as useTanstackQuery,
+  useMutation as useTanstackMutation,
+  UseQueryOptions,
+  UseMutationOptions,
+} from '@tanstack/react-query';
 import { adminService } from '@/services/adminService';
 import type {
   AdminDashboardData,
@@ -8,7 +13,7 @@ import type {
   UpdateUserData,
   Announcement,
   CreateAnnouncementData,
-  Settings
+  Settings,
 } from '@shared/types';
 import { CachingTime } from '@/config/time';
 import { createQueryOptions } from '@/config/query-config';
@@ -40,7 +45,10 @@ export function useCreateUser(options?: UseMutationOptions<SchoolUser, Error, Cr
   });
 }
 
-export function useUpdateUser(userId: string, options?: UseMutationOptions<SchoolUser, Error, UpdateUserData>) {
+export function useUpdateUser(
+  userId: string,
+  options?: UseMutationOptions<SchoolUser, Error, UpdateUserData>
+) {
   return useTanstackMutation({
     mutationFn: (userData: UpdateUserData) => adminService.updateUser(userId, userData),
     ...options,
@@ -63,9 +71,12 @@ export function useAnnouncements(options?: UseQueryOptions<Announcement[]>) {
   });
 }
 
-export function useCreateAnnouncement(options?: UseMutationOptions<Announcement, Error, CreateAnnouncementData>) {
+export function useCreateAnnouncement(
+  options?: UseMutationOptions<Announcement, Error, CreateAnnouncementData>
+) {
   return useTanstackMutation({
-    mutationFn: (announcement: CreateAnnouncementData) => adminService.createAnnouncement(announcement),
+    mutationFn: (announcement: CreateAnnouncementData) =>
+      adminService.createAnnouncement(announcement),
     ...options,
   });
 }
@@ -86,7 +97,9 @@ export function useSettings(options?: UseQueryOptions<Settings>) {
   });
 }
 
-export function useUpdateSettings(options?: UseMutationOptions<Settings, Error, Partial<Settings>>) {
+export function useUpdateSettings(
+  options?: UseMutationOptions<Settings, Error, Partial<Settings>>
+) {
   return useTanstackMutation({
     mutationFn: (settings: Partial<Settings>) => adminService.updateSettings(settings),
     ...options,

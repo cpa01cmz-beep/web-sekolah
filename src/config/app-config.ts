@@ -12,7 +12,8 @@ export const APP_CONFIG = {
   EXTERNAL_URLS: {
     PATTERN_CUBES: 'https://www.transparenttextures.com/patterns/cubes.png',
   },
-  HERO_IMAGE: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?q=80&w=2070&auto=format&fit=crop',
+  HERO_IMAGE:
+    'https://images.unsplash.com/photo-1523240795612-9a054b0db644?q=80&w=2070&auto=format&fit=crop',
   FEATURES: [
     {
       title: 'Unified Portal',
@@ -28,8 +29,17 @@ export const APP_CONFIG = {
     },
   ],
   VALUES: [
-    { title: 'Excellence', description: 'Striving for the highest standards in education and technology.' },
-    { title: 'Collaboration', description: 'Fostering a connected community between all school stakeholders.' },
-    { title: 'Innovation', description: 'Continuously improving the educational experience with modern tools.' },
+    {
+      title: 'Excellence',
+      description: 'Striving for the highest standards in education and technology.',
+    },
+    {
+      title: 'Collaboration',
+      description: 'Fostering a connected community between all school stakeholders.',
+    },
+    {
+      title: 'Innovation',
+      description: 'Continuously improving the educational experience with modern tools.',
+    },
   ],
 } as const;

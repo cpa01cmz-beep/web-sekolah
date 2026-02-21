@@ -1,5 +1,12 @@
 import { describe, it, expect } from 'vitest';
-import { isValidScore, MIN_SCORE, MAX_SCORE, validateSubject, validateRecipient, validationRules } from '@/utils/validation';
+import {
+  isValidScore,
+  MIN_SCORE,
+  MAX_SCORE,
+  validateSubject,
+  validateRecipient,
+  validationRules,
+} from '@/utils/validation';
 
 describe('Validation Utilities', () => {
   describe('isValidScore', () => {

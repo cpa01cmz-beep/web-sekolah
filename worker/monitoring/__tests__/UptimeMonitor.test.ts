@@ -70,19 +70,19 @@ describe('UptimeMonitor', () => {
 
     it('should handle multiple resets correctly', () => {
       vi.useFakeTimers();
-      
+
       monitor.reset();
       vi.advanceTimersByTime(10);
       const uptime1 = monitor.getUptime();
-      
+
       monitor.reset();
       vi.advanceTimersByTime(20);
       const uptime2 = monitor.getUptime();
-      
+
       monitor.reset();
       vi.advanceTimersByTime(30);
       const uptime3 = monitor.getUptime();
-      
+
       vi.useRealTimers();
 
       expect(uptime1).toBe(10);

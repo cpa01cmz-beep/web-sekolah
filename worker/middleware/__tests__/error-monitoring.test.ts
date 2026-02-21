@@ -20,7 +20,10 @@ function errorMonitoring() {
       await next();
     } catch (error) {
       const status = c.res.status || 500;
-      const code = error instanceof Error && 'code' in error && (error as any).code ? (error as any).code : 'INTERNAL_SERVER_ERROR';
+      const code =
+        error instanceof Error && 'code' in error && (error as any).code
+          ? (error as any).code
+          : 'INTERNAL_SERVER_ERROR';
       const endpoint = c.req.path;
 
       recordApiError(code, status, endpoint);
@@ -86,8 +89,7 @@ describe('Error Monitoring Middleware', () => {
         res: { status: 200 },
         req: { path: '/api/test' },
       } as unknown as Context;
-      mockNext.mockImplementationOnce(async () => {
-      });
+      mockNext.mockImplementationOnce(async () => {});
 
       await middleware(mockContext, mockNext);
 
@@ -249,8 +251,7 @@ describe('Error Monitoring Middleware', () => {
         res: { status: 200 },
         req: { path: '/api/test' },
       } as unknown as Context;
-      mockNext.mockImplementationOnce(async () => {
-      });
+      mockNext.mockImplementationOnce(async () => {});
 
       await middleware(mockContext, mockNext);
 
@@ -266,8 +267,7 @@ describe('Error Monitoring Middleware', () => {
         res: { status: 400 },
         req: { path: '/api/test' },
       } as unknown as Context;
-      mockNext.mockImplementationOnce(async () => {
-      });
+      mockNext.mockImplementationOnce(async () => {});
 
       await middleware(mockContext, mockNext);
 
@@ -292,8 +292,7 @@ describe('Error Monitoring Middleware', () => {
         res: { status: 401 },
         req: { path: '/api/test' },
       } as unknown as Context;
-      mockNext.mockImplementationOnce(async () => {
-      });
+      mockNext.mockImplementationOnce(async () => {});
 
       await middleware(mockContext, mockNext);
 
@@ -312,8 +311,7 @@ describe('Error Monitoring Middleware', () => {
         res: { status: 403 },
         req: { path: '/api/test' },
       } as unknown as Context;
-      mockNext.mockImplementationOnce(async () => {
-      });
+      mockNext.mockImplementationOnce(async () => {});
 
       await middleware(mockContext, mockNext);
 
@@ -332,8 +330,7 @@ describe('Error Monitoring Middleware', () => {
         res: { status: 404 },
         req: { path: '/api/test' },
       } as unknown as Context;
-      mockNext.mockImplementationOnce(async () => {
-      });
+      mockNext.mockImplementationOnce(async () => {});
 
       await middleware(mockContext, mockNext);
 
@@ -352,8 +349,7 @@ describe('Error Monitoring Middleware', () => {
         res: { status: 408 },
         req: { path: '/api/test' },
       } as unknown as Context;
-      mockNext.mockImplementationOnce(async () => {
-      });
+      mockNext.mockImplementationOnce(async () => {});
 
       await middleware(mockContext, mockNext);
 
@@ -372,8 +368,7 @@ describe('Error Monitoring Middleware', () => {
         res: { status: 429 },
         req: { path: '/api/test' },
       } as unknown as Context;
-      mockNext.mockImplementationOnce(async () => {
-      });
+      mockNext.mockImplementationOnce(async () => {});
 
       await middleware(mockContext, mockNext);
 
@@ -392,8 +387,7 @@ describe('Error Monitoring Middleware', () => {
         res: { status: 500 },
         req: { path: '/api/test' },
       } as unknown as Context;
-      mockNext.mockImplementationOnce(async () => {
-      });
+      mockNext.mockImplementationOnce(async () => {});
 
       await middleware(mockContext, mockNext);
 
@@ -412,8 +406,7 @@ describe('Error Monitoring Middleware', () => {
         res: { status: 503 },
         req: { path: '/api/test' },
       } as unknown as Context;
-      mockNext.mockImplementationOnce(async () => {
-      });
+      mockNext.mockImplementationOnce(async () => {});
 
       await middleware(mockContext, mockNext);
 
@@ -432,8 +425,7 @@ describe('Error Monitoring Middleware', () => {
         res: { status: 504 },
         req: { path: '/api/test' },
       } as unknown as Context;
-      mockNext.mockImplementationOnce(async () => {
-      });
+      mockNext.mockImplementationOnce(async () => {});
 
       await middleware(mockContext, mockNext);
 
@@ -452,8 +444,7 @@ describe('Error Monitoring Middleware', () => {
         res: { status: 418 },
         req: { path: '/api/test' },
       } as unknown as Context;
-      mockNext.mockImplementationOnce(async () => {
-      });
+      mockNext.mockImplementationOnce(async () => {});
 
       await middleware(mockContext, mockNext);
 
@@ -472,8 +463,7 @@ describe('Error Monitoring Middleware', () => {
         res: { status: 100 },
         req: { path: '/api/test' },
       } as unknown as Context;
-      mockNext.mockImplementationOnce(async () => {
-      });
+      mockNext.mockImplementationOnce(async () => {});
 
       await middleware(mockContext, mockNext);
 
@@ -487,8 +477,7 @@ describe('Error Monitoring Middleware', () => {
         res: { status: 301 },
         req: { path: '/api/test' },
       } as unknown as Context;
-      mockNext.mockImplementationOnce(async () => {
-      });
+      mockNext.mockImplementationOnce(async () => {});
 
       await middleware(mockContext, mockNext);
 
@@ -505,8 +494,7 @@ describe('Error Monitoring Middleware', () => {
           res: { status },
           req: { path: '/api/test' },
         } as unknown as Context;
-        mockNext.mockImplementationOnce(async () => {
-        });
+        mockNext.mockImplementationOnce(async () => {});
 
         await middleware(mockContext, mockNext);
 
@@ -522,8 +510,7 @@ describe('Error Monitoring Middleware', () => {
         res: { status: 404 },
         req: { path: '/api/grades' },
       } as unknown as Context;
-      mockNext.mockImplementationOnce(async () => {
-      });
+      mockNext.mockImplementationOnce(async () => {});
 
       await middleware(mockContext, mockNext);
 
@@ -548,8 +535,7 @@ describe('Error Monitoring Middleware', () => {
         res: { status: 400 },
         req: { path: '/api/test' },
       } as unknown as Context;
-      mockNext.mockImplementationOnce(async () => {
-      });
+      mockNext.mockImplementationOnce(async () => {});
 
       await expect(middleware(mockContext, mockNext)).resolves.not.toThrow();
 
@@ -666,8 +652,7 @@ describe('Error Monitoring Middleware', () => {
         res: { status: 404 },
         req: { path: '' },
       } as unknown as Context;
-      mockNext.mockImplementationOnce(async () => {
-      });
+      mockNext.mockImplementationOnce(async () => {});
 
       await middleware(mockContext, mockNext);
 
@@ -688,8 +673,7 @@ describe('Error Monitoring Middleware', () => {
           res: { status: 500 },
           req: { path: '/api/test' },
         } as unknown as Context;
-        mockNext.mockImplementationOnce(async () => {
-        });
+        mockNext.mockImplementationOnce(async () => {});
 
         await middleware(mockContext, mockNext);
       }
@@ -704,8 +688,7 @@ describe('Error Monitoring Middleware', () => {
         res: { status: 200 },
         req: { path: '/api/test' },
       } as unknown as Context;
-      mockNext.mockImplementationOnce(async () => {
-      });
+      mockNext.mockImplementationOnce(async () => {});
 
       await middleware(mockContext, mockNext);
 

@@ -9,7 +9,13 @@ interface PageHeaderProps {
   'aria-label'?: string;
 }
 
-export const PageHeader = memo(function PageHeader({ title, description, className, children, 'aria-label': ariaLabel }: PageHeaderProps) {
+export const PageHeader = memo(function PageHeader({
+  title,
+  description,
+  className,
+  children,
+  'aria-label': ariaLabel,
+}: PageHeaderProps) {
   const label = ariaLabel || `${title} page`;
   return (
     <header className={cn('mb-6', className)} aria-label={label}>

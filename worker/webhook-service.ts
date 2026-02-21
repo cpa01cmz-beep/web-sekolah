@@ -1,5 +1,10 @@
 import type { Env } from './core-utils';
-import { WebhookConfigEntity, WebhookEventEntity, WebhookDeliveryEntity, DeadLetterQueueWebhookEntity } from './entities';
+import {
+  WebhookConfigEntity,
+  WebhookEventEntity,
+  WebhookDeliveryEntity,
+  DeadLetterQueueWebhookEntity,
+} from './entities';
 import type { WebhookConfig, WebhookEvent, WebhookDelivery } from '@shared/types';
 import { logger } from './logger';
 import { integrationMonitor } from './integration-monitor';
@@ -23,7 +28,11 @@ export class WebhookService {
     return breaker;
   }
 
-  static async triggerEvent(env: Env, eventType: string, data: Record<string, unknown>): Promise<void> {
+  static async triggerEvent(
+    env: Env,
+    eventType: string,
+    data: Record<string, unknown>
+  ): Promise<void> {
     logger.info('Triggering webhook event', { eventType });
 
     const activeConfigs = await WebhookConfigEntity.getByEventType(env, eventType);
@@ -42,7 +51,7 @@ export class WebhookService {
       data,
       processed: false,
       createdAt: now,
-      updatedAt: now
+      updatedAt: now,
     };
 
     await new WebhookEventEntity(env, eventId).save(event);
@@ -50,7 +59,7 @@ export class WebhookService {
 
     for (const config of activeConfigs) {
       const idempotencyKey = `${eventId}:${config.id}`;
-      
+
       const existingDelivery = await WebhookDeliveryEntity.getByIdempotencyKey(env, idempotencyKey);
       if (existingDelivery) {
         logger.debug('Webhook delivery already exists with idempotency key', { idempotencyKey });
@@ -67,12 +76,18 @@ export class WebhookService {
         nextAttemptAt: now,
         createdAt: now,
         updatedAt: now,
-        idempotencyKey
+        idempotencyKey,
       };
 
       await WebhookDeliveryEntity.createWithDateIndex(env, delivery);
 
-      logger.info('Webhook delivery created', { deliveryId, eventId, webhookConfigId: config.id, eventType, idempotencyKey });
+      logger.info('Webhook delivery created', {
+        deliveryId,
+        eventId,
+        webhookConfigId: config.id,
+        eventType,
+        idempotencyKey,
+      });
     }
   }
 
@@ -85,10 +100,10 @@ export class WebhookService {
     logger.info(`Found ${pendingDeliveries.length} pending webhook deliveries`);
 
     const concurrencyLimit = WEBHOOK_CONFIG.CONCURRENCY_LIMIT;
-    
+
     for (let i = 0; i < pendingDeliveries.length; i += concurrencyLimit) {
       const batch = pendingDeliveries.slice(i, i + concurrencyLimit);
-      await Promise.all(batch.map(delivery => this.attemptDelivery(env, delivery)));
+      await Promise.all(batch.map((delivery) => this.attemptDelivery(env, delivery)));
     }
   }
 
@@ -101,7 +116,7 @@ export class WebhookService {
       logger.error('Webhook config or event not found', {
         deliveryId: delivery.id,
         webhookConfigId: delivery.webhookConfigId,
-        eventId: delivery.eventId
+        eventId: delivery.eventId,
       });
       await this.markDeliveryFailed(env, delivery, 'Configuration or event not found');
       return;
@@ -119,7 +134,7 @@ export class WebhookService {
       id: event.id,
       eventType: event.eventType,
       data: event.data,
-      timestamp: event.createdAt
+      timestamp: event.createdAt,
     };
 
     const signature = await generateSignature(JSON.stringify(payload), config.secret);
@@ -134,10 +149,10 @@ export class WebhookService {
             'X-Webhook-Signature': signature,
             'X-Webhook-ID': event.id,
             'X-Webhook-Timestamp': event.createdAt,
-            'User-Agent': 'Akademia-Pro-Webhook/1.0'
+            'User-Agent': 'Akademia-Pro-Webhook/1.0',
           },
           body: JSON.stringify(payload),
-          signal: AbortSignal.timeout(WEBHOOK_CONFIG.REQUEST_TIMEOUT_MS)
+          signal: AbortSignal.timeout(WEBHOOK_CONFIG.REQUEST_TIMEOUT_MS),
         });
       });
 
@@ -148,7 +163,7 @@ export class WebhookService {
         logger.info('Webhook delivered successfully', {
           deliveryId: delivery.id,
           webhookConfigId: config.id,
-          statusCode: response.status
+          statusCode: response.status,
         });
       } else {
         const errorText = await response.text();
@@ -157,23 +172,27 @@ export class WebhookService {
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      
+
       if (errorMessage.includes('Circuit breaker is open')) {
         await this.markDeliveryFailed(env, delivery, `Circuit breaker open: ${errorMessage}`);
         logger.warn('Webhook delivery skipped due to open circuit breaker', {
           deliveryId: delivery.id,
           webhookConfigId: config.id,
-          errorMessage
+          errorMessage,
         });
       } else {
         await this.handleDeliveryError(env, delivery, config, 0, errorMessage);
       }
-      
+
       integrationMonitor.recordWebhookDelivery(false);
     }
   }
 
-  private static async markDeliveryDelivered(env: Env, delivery: WebhookDelivery, statusCode: number): Promise<void> {
+  private static async markDeliveryDelivered(
+    env: Env,
+    delivery: WebhookDelivery,
+    statusCode: number
+  ): Promise<void> {
     const deliveryEntity = new WebhookDeliveryEntity(env, delivery.id);
     await deliveryEntity.save({
       ...delivery,
@@ -181,7 +200,7 @@ export class WebhookService {
       statusCode,
       attempts: delivery.attempts + 1,
       nextAttemptAt: undefined,
-      updatedAt: new Date().toISOString()
+      updatedAt: new Date().toISOString(),
     });
 
     const eventEntity = new WebhookEventEntity(env, delivery.eventId);
@@ -190,13 +209,19 @@ export class WebhookService {
       await eventEntity.save({
         ...event,
         processed: true,
-        updatedAt: new Date().toISOString()
+        updatedAt: new Date().toISOString(),
       });
       integrationMonitor.recordWebhookEventProcessed();
     }
   }
 
-  private static async handleDeliveryError(env: Env, delivery: WebhookDelivery, config: WebhookConfig, statusCode: number, errorMessage: string): Promise<void> {
+  private static async handleDeliveryError(
+    env: Env,
+    delivery: WebhookDelivery,
+    config: WebhookConfig,
+    statusCode: number,
+    errorMessage: string
+  ): Promise<void> {
     const newAttempt = delivery.attempts + 1;
 
     if (newAttempt >= WEBHOOK_CONFIG.MAX_RETRIES) {
@@ -206,12 +231,15 @@ export class WebhookService {
         deliveryId: delivery.id,
         webhookConfigId: config.id,
         statusCode,
-        errorMessage
+        errorMessage,
       });
       return;
     }
 
-    const retryDelay = WEBHOOK_CONFIG.RETRY_DELAYS_MS[Math.min(newAttempt, WEBHOOK_CONFIG.RETRY_DELAYS_MS.length - 1)];
+    const retryDelay =
+      WEBHOOK_CONFIG.RETRY_DELAYS_MS[
+        Math.min(newAttempt, WEBHOOK_CONFIG.RETRY_DELAYS_MS.length - 1)
+      ];
     const nextAttemptAt = new Date(Date.now() + retryDelay).toISOString();
 
     const deliveryEntity = new WebhookDeliveryEntity(env, delivery.id);
@@ -222,7 +250,7 @@ export class WebhookService {
       attempts: newAttempt,
       nextAttemptAt,
       errorMessage,
-      updatedAt: new Date().toISOString()
+      updatedAt: new Date().toISOString(),
     });
 
     logger.warn('Webhook delivery failed, scheduling retry', {
@@ -231,21 +259,31 @@ export class WebhookService {
       statusCode,
       errorMessage,
       attempt: newAttempt,
-      nextAttemptAt
+      nextAttemptAt,
     });
   }
 
-  private static async markDeliveryFailed(env: Env, delivery: WebhookDelivery, errorMessage: string): Promise<void> {
+  private static async markDeliveryFailed(
+    env: Env,
+    delivery: WebhookDelivery,
+    errorMessage: string
+  ): Promise<void> {
     const deliveryEntity = new WebhookDeliveryEntity(env, delivery.id);
     await deliveryEntity.save({
       ...delivery,
       status: 'failed',
       errorMessage,
-      updatedAt: new Date().toISOString()
+      updatedAt: new Date().toISOString(),
     });
   }
 
-  private static async archiveToDeadLetterQueue(env: Env, delivery: WebhookDelivery, config: WebhookConfig, statusCode: number, errorMessage: string): Promise<void> {
+  private static async archiveToDeadLetterQueue(
+    env: Env,
+    delivery: WebhookDelivery,
+    config: WebhookConfig,
+    statusCode: number,
+    errorMessage: string
+  ): Promise<void> {
     const event = await new WebhookEventEntity(env, delivery.eventId).getState();
     if (!event) return;
 
@@ -264,7 +302,7 @@ export class WebhookService {
       errorMessage,
       failedAt: now,
       createdAt: now,
-      updatedAt: now
+      updatedAt: now,
     };
 
     await new DeadLetterQueueWebhookEntity(env, dlqId).save(dlqEntry);

@@ -17,7 +17,9 @@ describe('StudentDashboardService - Critical Path Testing', () => {
   describe('Module Loading', () => {
     it('should document that full tests require Cloudflare Workers environment', () => {
       if (!canLoadModule) {
-        console.warn('⚠️  StudentDashboardService tests skipped: Cloudflare Workers environment not available');
+        console.warn(
+          '⚠️  StudentDashboardService tests skipped: Cloudflare Workers environment not available'
+        );
         console.warn('   This module requires advanced mocking setup for full testing');
         console.warn('   See docs/task.md for details on domain service testing');
       }
@@ -58,9 +60,9 @@ describe('StudentDashboardService - Critical Path Testing', () => {
 
       const mockEnv = {} as any;
 
-      await expect(
-        StudentDashboardService.getDashboardData(mockEnv, '')
-      ).rejects.toThrow('Student not found');
+      await expect(StudentDashboardService.getDashboardData(mockEnv, '')).rejects.toThrow(
+        'Student not found'
+      );
     });
 
     it('should handle non-existent student ID', async () => {
@@ -84,9 +86,9 @@ describe('StudentDashboardService - Critical Path Testing', () => {
 
       const mockEnv = {} as any;
 
-      await expect(
-        StudentDashboardService.getDashboardData(mockEnv, 'teacher-01')
-      ).rejects.toThrow('Student not found');
+      await expect(StudentDashboardService.getDashboardData(mockEnv, 'teacher-01')).rejects.toThrow(
+        'Student not found'
+      );
     });
 
     it('should handle null student ID', async () => {
@@ -97,9 +99,9 @@ describe('StudentDashboardService - Critical Path Testing', () => {
 
       const mockEnv = {} as any;
 
-      await expect(
-        StudentDashboardService.getDashboardData(mockEnv, null as any)
-      ).rejects.toThrow('Student not found');
+      await expect(StudentDashboardService.getDashboardData(mockEnv, null as any)).rejects.toThrow(
+        'Student not found'
+      );
     });
 
     it('should handle undefined student ID', async () => {
@@ -364,7 +366,7 @@ describe('StudentDashboardService - Critical Path Testing', () => {
       const nonStudentRoles = ['teacher', 'admin', 'parent'];
 
       console.log('\n🔒 Role-Based Access Control:');
-      nonStudentRoles.forEach(role => {
+      nonStudentRoles.forEach((role) => {
         console.log(`  - ${role} role: Blocked from student dashboard`);
       });
 

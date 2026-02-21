@@ -1,5 +1,13 @@
 import { useState, useMemo, useCallback, memo } from 'react';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter, DialogClose } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogClose,
+} from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
@@ -22,29 +30,45 @@ interface GradeFormProps {
   isLoading: boolean;
 }
 
-export const GradeForm = memo(function GradeForm({ open, onClose, editingStudent, onSave, isLoading }: GradeFormProps) {
-  const [currentScore, setCurrentScore] = useState<string>(() => editingStudent?.score?.toString() || '');
-  const [currentFeedback, setCurrentFeedback] = useState<string>(() => editingStudent?.feedback || '');
+export const GradeForm = memo(function GradeForm({
+  open,
+  onClose,
+  editingStudent,
+  onSave,
+  isLoading,
+}: GradeFormProps) {
+  const [currentScore, setCurrentScore] = useState<string>(
+    () => editingStudent?.score?.toString() || ''
+  );
+  const [currentFeedback, setCurrentFeedback] = useState<string>(
+    () => editingStudent?.feedback || ''
+  );
 
-  const handleOpenChange = useCallback((newOpen: boolean) => {
-    if (!newOpen) {
-      setCurrentScore('');
-      setCurrentFeedback('');
-      onClose();
-    } else if (editingStudent) {
-      setCurrentScore(editingStudent.score?.toString() || '');
-      setCurrentFeedback(editingStudent.feedback || '');
-    }
-  }, [editingStudent, onClose]);
+  const handleOpenChange = useCallback(
+    (newOpen: boolean) => {
+      if (!newOpen) {
+        setCurrentScore('');
+        setCurrentFeedback('');
+        onClose();
+      } else if (editingStudent) {
+        setCurrentScore(editingStudent.score?.toString() || '');
+        setCurrentFeedback(editingStudent.feedback || '');
+      }
+    },
+    [editingStudent, onClose]
+  );
 
-  const handleSubmit = useCallback((e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const scoreValue = currentScore === '' ? null : parseInt(currentScore, 10);
-    if (currentScore !== '' && !isValidScore(scoreValue)) {
-      return;
-    }
-    onSave({ score: scoreValue, feedback: currentFeedback });
-  }, [currentScore, currentFeedback, onSave]);
+  const handleSubmit = useCallback(
+    (e: React.FormEvent<HTMLFormElement>) => {
+      e.preventDefault();
+      const scoreValue = currentScore === '' ? null : parseInt(currentScore, 10);
+      if (currentScore !== '' && !isValidScore(scoreValue)) {
+        return;
+      }
+      onSave({ score: scoreValue, feedback: currentFeedback });
+    },
+    [currentScore, currentFeedback, onSave]
+  );
 
   const scoreError = useMemo(() => {
     if (currentScore === '') return '';
@@ -103,7 +127,11 @@ export const GradeForm = memo(function GradeForm({ open, onClose, editingStudent
             </div>
           </div>
           <DialogFooter>
-            <DialogClose asChild><Button type="button" variant="secondary">Cancel</Button></DialogClose>
+            <DialogClose asChild>
+              <Button type="button" variant="secondary">
+                Cancel
+              </Button>
+            </DialogClose>
             <Button type="submit" disabled={isLoading} aria-busy={isLoading}>
               {isLoading ? 'Saving...' : 'Save changes'}
             </Button>

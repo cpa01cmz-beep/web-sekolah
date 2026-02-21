@@ -17,7 +17,7 @@ describe('Migration System - Data Integrity', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    
+
     mockStub = {
       casPut: vi.fn().mockResolvedValue({ ok: true, v: 1 }),
       del: vi.fn().mockResolvedValue(true),
@@ -98,9 +98,7 @@ describe('Migration System - Data Integrity', () => {
     it('should log migration steps', () => {
       MigrationHelpers.log('Starting migration process');
 
-      expect(logger.info).toHaveBeenCalledWith(
-        '[Migration] Starting migration process'
-      );
+      expect(logger.info).toHaveBeenCalledWith('[Migration] Starting migration process');
     });
 
     it('should validate integrity with all passing checks', async () => {
@@ -191,9 +189,7 @@ describe('Migration System - Data Integrity', () => {
           id: '20260107_add_password_hash',
         })
       );
-      expect(logger.info).toHaveBeenCalledWith(
-        '[Migration] All migrations applied successfully'
-      );
+      expect(logger.info).toHaveBeenCalledWith('[Migration] All migrations applied successfully');
     });
 
     it('should handle migration errors', async () => {
@@ -206,9 +202,9 @@ describe('Migration System - Data Integrity', () => {
 
       MigrationRegistry.register(mockMigration);
 
-      await expect(
-        MigrationRunner.run(mockEnv, [mockMigration])
-      ).rejects.toThrow('Migration 20260107_add_password_hash failed: Error: Database connection failed');
+      await expect(MigrationRunner.run(mockEnv, [mockMigration])).rejects.toThrow(
+        'Migration 20260107_add_password_hash failed: Error: Database connection failed'
+      );
 
       expect(logger.error).toHaveBeenCalledWith(
         expect.stringContaining('Failed to apply 20260107_add_password_hash'),
@@ -226,10 +222,10 @@ describe('Migration System - Data Integrity', () => {
 
       MigrationRegistry.register(mockMigration);
       logger.info = vi.fn();
-      
-      mockStub.getDoc = vi.fn().mockResolvedValue({ 
-        v: 1, 
-        data: { appliedMigrations: ['20260107_add_password_hash'], version: 1 } 
+
+      mockStub.getDoc = vi.fn().mockResolvedValue({
+        v: 1,
+        data: { appliedMigrations: ['20260107_add_password_hash'], version: 1 },
       });
 
       await MigrationRunner.rollback(mockEnv, [mockMigration]);
@@ -258,15 +254,15 @@ describe('Migration System - Data Integrity', () => {
       };
 
       MigrationRegistry.register(mockMigration);
-      
-      mockStub.getDoc = vi.fn().mockResolvedValue({ 
-        v: 1, 
-        data: { appliedMigrations: ['20260107_add_password_hash'], version: 1 } 
+
+      mockStub.getDoc = vi.fn().mockResolvedValue({
+        v: 1,
+        data: { appliedMigrations: ['20260107_add_password_hash'], version: 1 },
       });
 
-      await expect(
-        MigrationRunner.rollback(mockEnv, [mockMigration])
-      ).rejects.toThrow('Rollback of 20260107_add_password_hash failed: Error: Rollback failed');
+      await expect(MigrationRunner.rollback(mockEnv, [mockMigration])).rejects.toThrow(
+        'Rollback of 20260107_add_password_hash failed: Error: Rollback failed'
+      );
 
       expect(logger.error).toHaveBeenCalledWith(
         expect.stringContaining('Failed to rollback'),
@@ -297,7 +293,9 @@ describe('Migration System - Data Integrity', () => {
 
       expect(mockMigration1.up).toHaveBeenCalled();
       expect(mockMigration2.up).toHaveBeenCalled();
-      expect(logger.info).toHaveBeenCalledWith('[Migration] Found pending migrations', { count: 2 });
+      expect(logger.info).toHaveBeenCalledWith('[Migration] Found pending migrations', {
+        count: 2,
+      });
       expect(logger.info).toHaveBeenCalledWith(
         '[Migration] Successfully applied',
         expect.objectContaining({
@@ -310,9 +308,7 @@ describe('Migration System - Data Integrity', () => {
           id: '20260108_add_timestamps',
         })
       );
-      expect(logger.info).toHaveBeenCalledWith(
-        '[Migration] All migrations applied successfully'
-      );
+      expect(logger.info).toHaveBeenCalledWith('[Migration] All migrations applied successfully');
     });
   });
 
@@ -326,10 +322,10 @@ describe('Migration System - Data Integrity', () => {
       };
 
       MigrationRegistry.register(mockMigration);
-      
-      mockStub.getDoc = vi.fn().mockResolvedValue({ 
-        v: 1, 
-        data: { appliedMigrations: ['20260107_add_password_hash'], version: 1 } 
+
+      mockStub.getDoc = vi.fn().mockResolvedValue({
+        v: 1,
+        data: { appliedMigrations: ['20260107_add_password_hash'], version: 1 },
       });
 
       await MigrationRunner.run({ ...mockEnv, ENVIRONMENT: 'development' }, [mockMigration]);

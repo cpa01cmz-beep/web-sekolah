@@ -4,11 +4,17 @@ import type { StudentDashboardData, Grade, ScheduleItem, StudentCardData } from 
 import { CachingTime } from '@/config/time';
 import { createQueryOptions } from '@/config/query-config';
 
-export function useStudentDashboard(studentId: string, options?: UseQueryOptions<StudentDashboardData>) {
+export function useStudentDashboard(
+  studentId: string,
+  options?: UseQueryOptions<StudentDashboardData>
+) {
   return useTanstackQuery({
     queryKey: ['students', studentId, 'dashboard'],
     queryFn: () => studentService.getDashboard(studentId),
-    ...createQueryOptions<StudentDashboardData>({ enabled: !!studentId, staleTime: CachingTime.FIVE_MINUTES }),
+    ...createQueryOptions<StudentDashboardData>({
+      enabled: !!studentId,
+      staleTime: CachingTime.FIVE_MINUTES,
+    }),
     ...options,
   });
 }
@@ -26,7 +32,10 @@ export function useStudentSchedule(studentId: string, options?: UseQueryOptions<
   return useTanstackQuery({
     queryKey: ['students', studentId, 'schedule'],
     queryFn: () => studentService.getSchedule(studentId),
-    ...createQueryOptions<ScheduleItem[]>({ enabled: !!studentId, staleTime: CachingTime.ONE_HOUR }),
+    ...createQueryOptions<ScheduleItem[]>({
+      enabled: !!studentId,
+      staleTime: CachingTime.ONE_HOUR,
+    }),
     ...options,
   });
 }
@@ -35,7 +44,7 @@ export function useStudentCard(studentId: string, options?: UseQueryOptions<Stud
   return useTanstackQuery({
     queryKey: ['students', studentId, 'card'],
     queryFn: () => studentService.getCard(studentId),
-    ...createQueryOptions<StudentCardData>({ 
+    ...createQueryOptions<StudentCardData>({
       enabled: !!studentId,
       staleTime: CachingTime.TWENTY_FOUR_HOURS,
       gcTime: CachingTime.SEVEN_DAYS,

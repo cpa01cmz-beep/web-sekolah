@@ -13,7 +13,7 @@ describe('Index', () => {
       indexDrop: vi.fn().mockResolvedValue(undefined),
       listPrefix: vi.fn().mockResolvedValue({
         keys: ['i:value1', 'i:value2', 'i:value3'],
-        next: null
+        next: null,
       }),
     };
 
@@ -232,7 +232,7 @@ describe('Index', () => {
     beforeEach(() => {
       mockStub.listPrefix.mockResolvedValue({
         keys: ['i:value1', 'i:value2', 'i:value3'],
-        next: 'next-cursor-1'
+        next: 'next-cursor-1',
       });
     });
 
@@ -246,7 +246,7 @@ describe('Index', () => {
     it('should strip prefix from keys', async () => {
       mockStub.listPrefix.mockResolvedValue({
         keys: ['i:apple', 'i:banana', 'i:cherry'],
-        next: null
+        next: null,
       });
 
       const result = await index.page();
@@ -281,7 +281,7 @@ describe('Index', () => {
     it('should handle empty result set', async () => {
       mockStub.listPrefix.mockResolvedValue({
         keys: [],
-        next: null
+        next: null,
       });
 
       const result = await index.page();
@@ -293,7 +293,7 @@ describe('Index', () => {
     it('should handle single item result', async () => {
       mockStub.listPrefix.mockResolvedValue({
         keys: ['i:single-item'],
-        next: null
+        next: null,
       });
 
       const result = await index.page();
@@ -305,7 +305,7 @@ describe('Index', () => {
     it('should handle next cursor being null (last page)', async () => {
       mockStub.listPrefix.mockResolvedValue({
         keys: ['i:value1', 'i:value2'],
-        next: null
+        next: null,
       });
 
       const result = await index.page();
@@ -316,7 +316,7 @@ describe('Index', () => {
     it('should preserve original type', async () => {
       mockStub.listPrefix.mockResolvedValue({
         keys: ['i:123', 'i:456'],
-        next: null
+        next: null,
       });
 
       const result = await index.page();
@@ -329,7 +329,7 @@ describe('Index', () => {
     beforeEach(() => {
       mockStub.listPrefix.mockResolvedValue({
         keys: ['i:value1', 'i:value2', 'i:value3'],
-        next: null
+        next: null,
       });
     });
 
@@ -342,7 +342,7 @@ describe('Index', () => {
     it('should strip prefix from all keys', async () => {
       mockStub.listPrefix.mockResolvedValue({
         keys: ['i:a', 'i:b', 'i:c', 'i:d', 'i:e'],
-        next: null
+        next: null,
       });
 
       const result = await index.list();
@@ -353,7 +353,7 @@ describe('Index', () => {
     it('should handle empty result set', async () => {
       mockStub.listPrefix.mockResolvedValue({
         keys: [],
-        next: null
+        next: null,
       });
 
       const result = await index.list();
@@ -364,7 +364,7 @@ describe('Index', () => {
     it('should handle single item result', async () => {
       mockStub.listPrefix.mockResolvedValue({
         keys: ['i:only-one'],
-        next: null
+        next: null,
       });
 
       const result = await index.list();
@@ -377,7 +377,7 @@ describe('Index', () => {
       const keys = Array.from({ length: 1000 }, (_, i) => `i:value${i}`);
       mockStub.listPrefix.mockResolvedValue({
         keys,
-        next: null
+        next: null,
       });
 
       const result = await index.list();
@@ -388,7 +388,7 @@ describe('Index', () => {
     it('should ignore next cursor from stub', async () => {
       mockStub.listPrefix.mockResolvedValue({
         keys: ['i:value1', 'i:value2'],
-        next: 'ignored-cursor'
+        next: 'ignored-cursor',
       });
 
       const result = await index.list();
@@ -400,7 +400,7 @@ describe('Index', () => {
     it('should preserve original type', async () => {
       mockStub.listPrefix.mockResolvedValue({
         keys: ['i:numeric', 'i:values'],
-        next: null
+        next: null,
       });
 
       const result = await index.list();
@@ -419,7 +419,7 @@ describe('Index', () => {
     it('should return count of items in index', async () => {
       mockStub.listPrefix.mockResolvedValue({
         keys: ['i:value1', 'i:value2', 'i:value3'],
-        next: null
+        next: null,
       });
 
       const result = await index.count();
@@ -430,7 +430,7 @@ describe('Index', () => {
     it('should return 0 for empty index', async () => {
       mockStub.listPrefix.mockResolvedValue({
         keys: [],
-        next: null
+        next: null,
       });
 
       const result = await index.count();
@@ -441,7 +441,7 @@ describe('Index', () => {
     it('should return 1 for single item', async () => {
       mockStub.listPrefix.mockResolvedValue({
         keys: ['i:single'],
-        next: null
+        next: null,
       });
 
       const result = await index.count();
@@ -453,7 +453,7 @@ describe('Index', () => {
       const keys = Array.from({ length: 10000 }, (_, i) => `i:value${i}`);
       mockStub.listPrefix.mockResolvedValue({
         keys,
-        next: null
+        next: null,
       });
 
       const result = await index.count();
@@ -498,15 +498,15 @@ describe('Index', () => {
       mockStub.listPrefix
         .mockResolvedValueOnce({
           keys: ['i:page1-1', 'i:page1-2', 'i:page1-3'],
-          next: 'cursor-page-2'
+          next: 'cursor-page-2',
         })
         .mockResolvedValueOnce({
           keys: ['i:page2-1', 'i:page2-2'],
-          next: 'cursor-page-3'
+          next: 'cursor-page-3',
         })
         .mockResolvedValueOnce({
           keys: ['i:page3-1'],
-          next: null
+          next: null,
         });
 
       const page1 = await index.page(null, 3);

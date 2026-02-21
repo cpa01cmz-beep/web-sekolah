@@ -3,7 +3,9 @@ import { render, screen, waitFor } from '@testing-library/react';
 import { LineChart } from '../LineChart';
 
 vi.mock('recharts/es6/chart/LineChart', () => ({
-  LineChart: ({ children }: { children: React.ReactNode }) => <div data-testid="line-chart">{children}</div>,
+  LineChart: ({ children }: { children: React.ReactNode }) => (
+    <div data-testid="line-chart">{children}</div>
+  ),
 }));
 
 vi.mock('recharts/es6/cartesian/Line', () => ({
@@ -55,7 +57,7 @@ describe('LineChart', () => {
 
   it('renders chart after loading', async () => {
     render(<LineChart data={mockData} series={mockSeries} ariaLabel="Trend chart" />);
-    
+
     await waitFor(() => {
       expect(screen.getByRole('img', { name: 'Trend chart' })).toBeInTheDocument();
     });
@@ -63,7 +65,7 @@ describe('LineChart', () => {
 
   it('renders empty state when data is empty', async () => {
     render(<LineChart data={[]} series={mockSeries} emptyMessage="No trend data" />);
-    
+
     await waitFor(() => {
       expect(screen.getByText('No trend data')).toBeInTheDocument();
     });
@@ -81,18 +83,16 @@ describe('LineChart', () => {
         ariaLabel="Trend chart"
       />
     );
-    
+
     await waitFor(() => {
       expect(screen.getByRole('img', { name: 'Trend chart' })).toBeInTheDocument();
     });
   });
 
   it('handles custom series colors', async () => {
-    const seriesWithColors = [
-      { dataKey: 'value1', color: '#ff0000', strokeWidth: 3 },
-    ];
+    const seriesWithColors = [{ dataKey: 'value1', color: '#ff0000', strokeWidth: 3 }];
     render(<LineChart data={mockData} series={seriesWithColors} ariaLabel="Custom colors" />);
-    
+
     await waitFor(() => {
       expect(screen.getByRole('img', { name: 'Custom colors' })).toBeInTheDocument();
     });

@@ -7,22 +7,28 @@ describe('user-management-routes - Critical Business Logic', () => {
         { id: 'u1', name: 'Student A', email: 'student@test.com', role: 'student' },
         { id: 'u2', name: 'Teacher B', email: 'teacher@test.com', role: 'teacher' },
         { id: 'u3', name: 'Parent C', email: 'parent@test.com', role: 'parent' },
-        { id: 'u4', name: 'Admin D', email: 'admin@test.com', role: 'admin' }
+        { id: 'u4', name: 'Admin D', email: 'admin@test.com', role: 'admin' },
       ];
 
       expect(allUsers).toHaveLength(4);
-      expect(allUsers.every(u => u.id)).toBe(true);
-      expect(allUsers.every(u => u.name)).toBe(true);
-      expect(allUsers.every(u => u.email)).toBe(true);
-      expect(allUsers.every(u => u.role)).toBe(true);
+      expect(allUsers.every((u) => u.id)).toBe(true);
+      expect(allUsers.every((u) => u.name)).toBe(true);
+      expect(allUsers.every((u) => u.email)).toBe(true);
+      expect(allUsers.every((u) => u.role)).toBe(true);
     });
 
     it('should exclude passwordHash from user data', () => {
       const users = [
-        { id: 'u1', name: 'Student A', email: 'student@test.com', role: 'student', passwordHash: 'hashed123' }
+        {
+          id: 'u1',
+          name: 'Student A',
+          email: 'student@test.com',
+          role: 'student',
+          passwordHash: 'hashed123',
+        },
       ] as any[];
 
-      const usersWithoutPassword = users.map(u => {
+      const usersWithoutPassword = users.map((u) => {
         const { passwordHash: _, ...userWithoutPassword } = u;
         return userWithoutPassword;
       });
@@ -44,13 +50,13 @@ describe('user-management-routes - Critical Business Logic', () => {
         name: 'New Student',
         email: 'newstudent@test.com',
         role: 'student',
-        classId: 'class-1'
+        classId: 'class-1',
       } as any;
 
       const newUser = {
         id: `user-${Date.now()}`,
         ...userData,
-        createdAt: new Date().toISOString()
+        createdAt: new Date().toISOString(),
       };
 
       expect(newUser).toHaveProperty('id');
@@ -65,13 +71,13 @@ describe('user-management-routes - Critical Business Logic', () => {
         name: 'New Teacher',
         email: 'newteacher@test.com',
         role: 'teacher',
-        classIds: ['class-1', 'class-2']
+        classIds: ['class-1', 'class-2'],
       } as any;
 
       const newUser = {
         id: `user-${Date.now()}`,
         ...userData,
-        createdAt: new Date().toISOString()
+        createdAt: new Date().toISOString(),
       };
 
       expect(newUser.role).toBe('teacher');
@@ -83,13 +89,13 @@ describe('user-management-routes - Critical Business Logic', () => {
         name: 'New Parent',
         email: 'newparent@test.com',
         role: 'parent',
-        childId: 'student-1'
+        childId: 'student-1',
       } as any;
 
       const newUser = {
         id: `user-${Date.now()}`,
         ...userData,
-        createdAt: new Date().toISOString()
+        createdAt: new Date().toISOString(),
       };
 
       expect(newUser.role).toBe('parent');
@@ -100,13 +106,13 @@ describe('user-management-routes - Critical Business Logic', () => {
       const userData = {
         name: 'New Admin',
         email: 'newadmin@test.com',
-        role: 'admin'
+        role: 'admin',
       };
 
       const newUser = {
         id: `user-${Date.now()}`,
         ...userData,
-        createdAt: new Date().toISOString()
+        createdAt: new Date().toISOString(),
       };
 
       expect(newUser.role).toBe('admin');
@@ -124,7 +130,7 @@ describe('user-management-routes - Critical Business Logic', () => {
     it('should handle missing required fields', () => {
       const userData = {
         name: 'Incomplete User',
-        email: 'incomplete@test.com'
+        email: 'incomplete@test.com',
       } as any;
 
       const isValid = userData.name && userData.email && userData.role;
@@ -157,7 +163,13 @@ describe('user-management-routes - Critical Business Logic', () => {
     });
 
     it('should update role-specific fields', () => {
-      const existingStudent = { id: 's1', name: 'Student A', email: 'student@test.com', role: 'student', classId: 'class-1' } as any;
+      const existingStudent = {
+        id: 's1',
+        name: 'Student A',
+        email: 'student@test.com',
+        role: 'student',
+        classId: 'class-1',
+      } as any;
       const updateData = { classId: 'class-2' };
 
       const updatedUser = { ...existingStudent, ...updateData };
@@ -166,7 +178,12 @@ describe('user-management-routes - Critical Business Logic', () => {
     });
 
     it('should trigger webhook event for user.updated', () => {
-      const updatedUser = { id: 'u1', name: 'Updated User', email: 'updated@test.com', role: 'student' };
+      const updatedUser = {
+        id: 'u1',
+        name: 'Updated User',
+        email: 'updated@test.com',
+        role: 'student',
+      };
       const eventType = 'user.updated';
       const context = { userId: updatedUser.id };
 
@@ -175,7 +192,13 @@ describe('user-management-routes - Critical Business Logic', () => {
     });
 
     it('should exclude passwordHash from response', () => {
-      const updatedUser = { id: 'u1', name: 'User', email: 'user@test.com', role: 'student', passwordHash: 'hashed123' };
+      const updatedUser = {
+        id: 'u1',
+        name: 'User',
+        email: 'user@test.com',
+        role: 'student',
+        passwordHash: 'hashed123',
+      };
       const { passwordHash: _, ...userWithoutPassword } = updatedUser as any;
 
       expect(userWithoutPassword).not.toHaveProperty('passwordHash');
@@ -195,7 +218,13 @@ describe('user-management-routes - Critical Business Logic', () => {
 
   describe('DELETE /api/users/:id - User Deletion', () => {
     it('should soft delete user (set deletedAt)', () => {
-      const user = { id: 'u1', name: 'User', email: 'user@test.com', role: 'student', deletedAt: null as any };
+      const user = {
+        id: 'u1',
+        name: 'User',
+        email: 'user@test.com',
+        role: 'student',
+        deletedAt: null as any,
+      };
       const deleteResult = { deleted: true, warnings: [] };
 
       const deletedUser = { ...user, deletedAt: new Date().toISOString() };
@@ -221,12 +250,13 @@ describe('user-management-routes - Critical Business Logic', () => {
       const relatedRecords = {
         classes: ['class-1', 'class-2'],
         grades: [],
-        announcements: []
+        announcements: [],
       };
 
-      const canDelete = relatedRecords.classes.length === 0 &&
-                      relatedRecords.grades.length === 0 &&
-                      relatedRecords.announcements.length === 0;
+      const canDelete =
+        relatedRecords.classes.length === 0 &&
+        relatedRecords.grades.length === 0 &&
+        relatedRecords.announcements.length === 0;
 
       expect(canDelete).toBe(false);
     });
@@ -242,10 +272,7 @@ describe('user-management-routes - Critical Business Logic', () => {
     });
 
     it('should return warnings if deletion blocked', () => {
-      const warnings = [
-        'User has 5 grades',
-        'User has 2 classes'
-      ];
+      const warnings = ['User has 5 grades', 'User has 2 classes'];
 
       const deleteResult = { deleted: false, warnings };
 
@@ -276,13 +303,13 @@ describe('user-management-routes - Critical Business Logic', () => {
         studentId: 's1',
         courseId: 'c1',
         score: 85,
-        feedback: 'Good work'
+        feedback: 'Good work',
       };
 
       const newGrade = {
         id: `grade-${Date.now()}`,
         ...gradeData,
-        createdAt: new Date().toISOString()
+        createdAt: new Date().toISOString(),
       };
 
       expect(newGrade.studentId).toBe('s1');
@@ -303,10 +330,11 @@ describe('user-management-routes - Critical Business Logic', () => {
     it('should handle missing required fields', () => {
       const gradeData = {
         studentId: 's1',
-        courseId: 'c1'
+        courseId: 'c1',
       } as any;
 
-      const isValid = gradeData.studentId && gradeData.courseId && typeof gradeData.score === 'number';
+      const isValid =
+        gradeData.studentId && gradeData.courseId && typeof gradeData.score === 'number';
       expect(isValid).toBe(false);
     });
 
@@ -325,7 +353,7 @@ describe('user-management-routes - Critical Business Logic', () => {
         studentId: 's1',
         courseId: 'c1',
         score: 85,
-        feedback: ''
+        feedback: '',
       };
 
       const newGrade = { id: 'g1', ...gradeData, createdAt: '' };
@@ -336,7 +364,13 @@ describe('user-management-routes - Critical Business Logic', () => {
 
   describe('PUT /api/grades/:id - Grade Update', () => {
     it('should update grade score', () => {
-      const existingGrade = { id: 'g1', studentId: 's1', courseId: 'c1', score: 85, feedback: 'Good' };
+      const existingGrade = {
+        id: 'g1',
+        studentId: 's1',
+        courseId: 'c1',
+        score: 85,
+        feedback: 'Good',
+      };
       const updateData = { score: 90 };
 
       const updatedGrade = { ...existingGrade, ...updateData };
@@ -347,7 +381,13 @@ describe('user-management-routes - Critical Business Logic', () => {
     });
 
     it('should update grade feedback', () => {
-      const existingGrade = { id: 'g1', studentId: 's1', courseId: 'c1', score: 85, feedback: 'Good' };
+      const existingGrade = {
+        id: 'g1',
+        studentId: 's1',
+        courseId: 'c1',
+        score: 85,
+        feedback: 'Good',
+      };
       const updateData = { feedback: 'Excellent work!' };
 
       const updatedGrade = { ...existingGrade, ...updateData };
@@ -357,7 +397,13 @@ describe('user-management-routes - Critical Business Logic', () => {
     });
 
     it('should update both score and feedback', () => {
-      const existingGrade = { id: 'g1', studentId: 's1', courseId: 'c1', score: 85, feedback: 'Good' };
+      const existingGrade = {
+        id: 'g1',
+        studentId: 's1',
+        courseId: 'c1',
+        score: 85,
+        feedback: 'Good',
+      };
       const updateData = { score: 95, feedback: 'Perfect!' };
 
       const updatedGrade = { ...existingGrade, ...updateData };
@@ -367,7 +413,13 @@ describe('user-management-routes - Critical Business Logic', () => {
     });
 
     it('should trigger webhook event for grade.updated', () => {
-      const updatedGrade = { id: 'g1', studentId: 's1', courseId: 'c1', score: 90, feedback: 'Updated' };
+      const updatedGrade = {
+        id: 'g1',
+        studentId: 's1',
+        courseId: 'c1',
+        score: 90,
+        feedback: 'Updated',
+      };
       const eventType = 'grade.updated';
       const context = { gradeId: updatedGrade.id };
 
@@ -376,7 +428,14 @@ describe('user-management-routes - Critical Business Logic', () => {
     });
 
     it('should return updated grade with all fields', () => {
-      const existingGrade = { id: 'g1', studentId: 's1', courseId: 'c1', score: 85, feedback: '', createdAt: '2024-01-01' };
+      const existingGrade = {
+        id: 'g1',
+        studentId: 's1',
+        courseId: 'c1',
+        score: 85,
+        feedback: '',
+        createdAt: '2024-01-01',
+      };
       const updateData = { score: 90, feedback: 'Updated' };
 
       const updatedGrade = { ...existingGrade, ...updateData };
@@ -492,21 +551,39 @@ describe('user-management-routes - Critical Business Logic', () => {
 
   describe('Data Validation - User Types', () => {
     it('should validate student has classId', () => {
-      const student = { id: 's1', name: 'Student', email: 'student@test.com', role: 'student', classId: 'class-1' } as any;
+      const student = {
+        id: 's1',
+        name: 'Student',
+        email: 'student@test.com',
+        role: 'student',
+        classId: 'class-1',
+      } as any;
 
       expect(student.role).toBe('student');
       expect(student.classId).toBe('class-1');
     });
 
     it('should validate teacher has classIds', () => {
-      const teacher = { id: 't1', name: 'Teacher', email: 'teacher@test.com', role: 'teacher', classIds: ['class-1', 'class-2'] } as any;
+      const teacher = {
+        id: 't1',
+        name: 'Teacher',
+        email: 'teacher@test.com',
+        role: 'teacher',
+        classIds: ['class-1', 'class-2'],
+      } as any;
 
       expect(teacher.role).toBe('teacher');
       expect(teacher.classIds).toHaveLength(2);
     });
 
     it('should validate parent has childId', () => {
-      const parent = { id: 'p1', name: 'Parent', email: 'parent@test.com', role: 'parent', childId: 's1' } as any;
+      const parent = {
+        id: 'p1',
+        name: 'Parent',
+        email: 'parent@test.com',
+        role: 'parent',
+        childId: 's1',
+      } as any;
 
       expect(parent.role).toBe('parent');
       expect(parent.childId).toBe('s1');
@@ -524,7 +601,14 @@ describe('user-management-routes - Critical Business Logic', () => {
 
   describe('Data Validation - Grade Fields', () => {
     it('should validate grade has required fields', () => {
-      const grade = { id: 'g1', studentId: 's1', courseId: 'c1', score: 85, feedback: '', createdAt: '' };
+      const grade = {
+        id: 'g1',
+        studentId: 's1',
+        courseId: 'c1',
+        score: 85,
+        feedback: '',
+        createdAt: '',
+      };
 
       expect(grade).toHaveProperty('id');
       expect(grade).toHaveProperty('studentId');
@@ -538,12 +622,12 @@ describe('user-management-routes - Critical Business Logic', () => {
       const validScores = [0, 50, 85, 100];
       const invalidScores = [-1, 101, 150];
 
-      validScores.forEach(score => {
+      validScores.forEach((score) => {
         expect(score).toBeGreaterThanOrEqual(0);
         expect(score).toBeLessThanOrEqual(100);
       });
 
-      invalidScores.forEach(score => {
+      invalidScores.forEach((score) => {
         const isValid = score >= 0 && score <= 100;
         expect(isValid).toBe(false);
       });

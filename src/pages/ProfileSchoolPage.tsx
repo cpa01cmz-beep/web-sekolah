@@ -10,9 +10,7 @@ export function ProfileSchoolPage() {
         <div className="bg-primary/5">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24 text-center">
             <SlideUp>
-              <h1 className="text-4xl md:text-5xl font-bold text-primary">
-                Profil Sekolah
-              </h1>
+              <h1 className="text-4xl md:text-5xl font-bold text-primary">Profil Sekolah</h1>
             </SlideUp>
             <SlideUp delay={0.2}>
               <p className="mt-4 max-w-3xl mx-auto text-lg text-muted-foreground">
@@ -26,10 +24,14 @@ export function ProfileSchoolPage() {
             <SlideLeft>
               <h2 className="text-3xl font-bold text-foreground">Sejarah Sekolah</h2>
               <p className="mt-4 text-muted-foreground">
-                Berdiri sejak tahun 2005, sekolah kami telah berkomitmen untuk memberikan pendidikan berkualitas tinggi dengan mengedepankan nilai-nilai karakter dan inovasi teknologi dalam proses belajar mengajar.
+                Berdiri sejak tahun 2005, sekolah kami telah berkomitmen untuk memberikan pendidikan
+                berkualitas tinggi dengan mengedepankan nilai-nilai karakter dan inovasi teknologi
+                dalam proses belajar mengajar.
               </p>
               <p className="mt-4 text-muted-foreground">
-                Dengan visi menjadi pusat unggulan pendidikan berbasis teknologi, kami terus mengembangkan kurikulum yang relevan dengan perkembangan zaman dan kebutuhan industri.
+                Dengan visi menjadi pusat unggulan pendidikan berbasis teknologi, kami terus
+                mengembangkan kurikulum yang relevan dengan perkembangan zaman dan kebutuhan
+                industri.
               </p>
             </SlideLeft>
             <FadeIn>
@@ -66,7 +68,9 @@ export function ProfileSchoolPage() {
                   <span className="text-2xl font-bold text-purple-600">20+</span>
                 </div>
                 <h3 className="text-xl font-bold mb-2">Program Unggulan</h3>
-                <p className="text-muted-foreground">Berbagai program khusus untuk pengembangan siswa</p>
+                <p className="text-muted-foreground">
+                  Berbagai program khusus untuk pengembangan siswa
+                </p>
               </div>
             </SlideUp>
           </div>

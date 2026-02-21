@@ -78,9 +78,9 @@ describe('AuthService', () => {
       global.fetch = vi.fn().mockResolvedValue(createMockResponse(mockResponse));
 
       const promise = AuthService.login(credentials);
-      
+
       vi.advanceTimersByTime(500);
-      
+
       const result = await promise;
 
       expect(result.user).toBeDefined();
@@ -261,9 +261,9 @@ describe('AuthService', () => {
       const promise1 = AuthService.login(credentials);
       vi.advanceTimersByTime(500);
       const result1 = await promise1;
-      
+
       vi.advanceTimersByTime(100);
-      
+
       const promise2 = AuthService.login(credentials);
       vi.advanceTimersByTime(500);
       const result2 = await promise2;
@@ -288,16 +288,18 @@ describe('AuthService', () => {
 
     it('should simulate API delay', async () => {
       const promise = AuthService.logout();
-      
+
       vi.advanceTimersByTime(499);
       let resolved = false;
-      promise.then(() => { resolved = true; });
-      
+      promise.then(() => {
+        resolved = true;
+      });
+
       expect(resolved).toBe(false);
-      
+
       vi.advanceTimersByTime(1);
       await promise;
-      
+
       expect(resolved).toBe(true);
     });
   });
@@ -310,21 +312,21 @@ describe('AuthService', () => {
 
     it('should return null for invalid token format', async () => {
       const invalidToken = 'invalid-token';
-      
+
       const mockResponse: ApiResponse = {
         success: false,
         error: 'Invalid token',
       };
 
       global.fetch = vi.fn().mockResolvedValue(createMockResponse(mockResponse, 401));
-      
+
       const result = await AuthService.getCurrentUser(invalidToken);
       expect(result).toBeNull();
     });
 
     it('should return student user for student token', async () => {
       const studentToken = 'mock-jwt-token-student01-1234567890';
-      
+
       const mockResponse: ApiResponse<BaseUser> = {
         success: true,
         data: {
@@ -334,11 +336,11 @@ describe('AuthService', () => {
       };
 
       global.fetch = vi.fn().mockResolvedValue(createMockResponse(mockResponse));
-      
+
       const promise = AuthService.getCurrentUser(studentToken);
       vi.advanceTimersByTime(500);
       const result = await promise;
-      
+
       expect(result).toBeDefined();
       expect(result!.id).toBe('student-01');
       expect(result!.role).toBe('student');
@@ -347,7 +349,7 @@ describe('AuthService', () => {
 
     it('should return teacher user for teacher token', async () => {
       const teacherToken = 'mock-jwt-token-teacher01-1234567890';
-      
+
       const mockResponse: ApiResponse<BaseUser> = {
         success: true,
         data: {
@@ -357,11 +359,11 @@ describe('AuthService', () => {
       };
 
       global.fetch = vi.fn().mockResolvedValue(createMockResponse(mockResponse));
-      
+
       const promise = AuthService.getCurrentUser(teacherToken);
       vi.advanceTimersByTime(500);
       const result = await promise;
-      
+
       expect(result).toBeDefined();
       expect(result!.id).toBe('teacher-01');
       expect(result!.role).toBe('teacher');
@@ -370,7 +372,7 @@ describe('AuthService', () => {
 
     it('should return parent user for parent token', async () => {
       const parentToken = 'mock-jwt-token-parent01-1234567890';
-      
+
       const mockResponse: ApiResponse<BaseUser> = {
         success: true,
         data: {
@@ -380,11 +382,11 @@ describe('AuthService', () => {
       };
 
       global.fetch = vi.fn().mockResolvedValue(createMockResponse(mockResponse));
-      
+
       const promise = AuthService.getCurrentUser(parentToken);
       vi.advanceTimersByTime(500);
       const result = await promise;
-      
+
       expect(result).toBeDefined();
       expect(result!.id).toBe('parent-01');
       expect(result!.role).toBe('parent');
@@ -393,18 +395,18 @@ describe('AuthService', () => {
 
     it('should return admin user for admin token', async () => {
       const adminToken = 'mock-jwt-token-admin01-1234567890';
-      
+
       const mockResponse: ApiResponse<BaseUser> = {
         success: true,
         data: mockUsers['admin@example.com'],
       };
 
       global.fetch = vi.fn().mockResolvedValue(createMockResponse(mockResponse));
-      
+
       const promise = AuthService.getCurrentUser(adminToken);
       vi.advanceTimersByTime(500);
       const result = await promise;
-      
+
       expect(result).toBeDefined();
       expect(result!.id).toBe('admin-01');
       expect(result!.role).toBe('admin');
@@ -413,7 +415,7 @@ describe('AuthService', () => {
 
     it('should include avatar URL for all user types', async () => {
       const studentToken = 'mock-jwt-token-student-01-1234567890';
-      
+
       const mockResponse: ApiResponse<BaseUser> = {
         success: true,
         data: {
@@ -423,11 +425,11 @@ describe('AuthService', () => {
       };
 
       global.fetch = vi.fn().mockResolvedValue(createMockResponse(mockResponse));
-      
+
       const promise = AuthService.getCurrentUser(studentToken);
       vi.advanceTimersByTime(500);
       const result = await promise;
-      
+
       expect(result).toBeDefined();
       expect(result!.id).toBe('student-01');
       expect(result!.role).toBe('student');

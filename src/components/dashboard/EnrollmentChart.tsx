@@ -24,16 +24,17 @@ export const EnrollmentChart = memo(function EnrollmentChart({ data }: Enrollmen
   useEffect(() => {
     const loadChartComponents = async () => {
       try {
-        const [BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer] = await Promise.all([
-          import('recharts/es6/chart/BarChart'),
-          import('recharts/es6/cartesian/Bar'),
-          import('recharts/es6/cartesian/XAxis'),
-          import('recharts/es6/cartesian/YAxis'),
-          import('recharts/es6/cartesian/CartesianGrid'),
-          import('recharts/es6/component/Tooltip'),
-          import('recharts/es6/component/Legend'),
-          import('recharts/es6/component/ResponsiveContainer'),
-        ]);
+        const [BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer] =
+          await Promise.all([
+            import('recharts/es6/chart/BarChart'),
+            import('recharts/es6/cartesian/Bar'),
+            import('recharts/es6/cartesian/XAxis'),
+            import('recharts/es6/cartesian/YAxis'),
+            import('recharts/es6/cartesian/CartesianGrid'),
+            import('recharts/es6/component/Tooltip'),
+            import('recharts/es6/component/Legend'),
+            import('recharts/es6/component/ResponsiveContainer'),
+          ]);
         setChart({
           BarChart: BarChart.BarChart,
           Bar: Bar.Bar,
@@ -66,7 +67,12 @@ export const EnrollmentChart = memo(function EnrollmentChart({ data }: Enrollmen
   }
 
   return (
-    <Chart.ResponsiveContainer width="100%" height={300} role="img" aria-label="User distribution bar chart">
+    <Chart.ResponsiveContainer
+      width="100%"
+      height={300}
+      role="img"
+      aria-label="User distribution bar chart"
+    >
       <Chart.BarChart data={data}>
         <Chart.CartesianGrid strokeDasharray="3 3" />
         <Chart.XAxis dataKey="name" />

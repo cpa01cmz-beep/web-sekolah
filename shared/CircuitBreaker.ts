@@ -31,7 +31,11 @@ export class CircuitBreaker {
     error: (msg: string, meta?: Record<string, unknown>) => void;
   };
 
-  constructor(key: string, config?: Partial<CircuitBreakerConfig>, logger?: CircuitBreaker['logger']) {
+  constructor(
+    key: string,
+    config?: Partial<CircuitBreakerConfig>,
+    logger?: CircuitBreaker['logger']
+  ) {
     this.key = key;
     this.config = { ...DEFAULT_CONFIG, ...config };
     this.state = {
@@ -54,7 +58,10 @@ export class CircuitBreaker {
           nextAttemptIn: this.state.nextAttemptTime - now,
         });
 
-        const error = new Error(`Circuit breaker is open for ${this.key}`) as Error & { code?: string; status?: number };
+        const error = new Error(`Circuit breaker is open for ${this.key}`) as Error & {
+          code?: string;
+          status?: number;
+        };
         error.code = ErrorCode.CIRCUIT_BREAKER_OPEN;
         error.status = 503;
         throw error;
@@ -155,7 +162,10 @@ export class CircuitBreaker {
     this.halfOpenCalls = 0;
   }
 
-  static createWebhookBreaker(webhookUrl: string, logger?: CircuitBreaker['logger']): CircuitBreaker {
+  static createWebhookBreaker(
+    webhookUrl: string,
+    logger?: CircuitBreaker['logger']
+  ): CircuitBreaker {
     return new CircuitBreaker(`webhook:${webhookUrl}`, undefined, logger);
   }
 }

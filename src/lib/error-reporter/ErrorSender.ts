@@ -29,45 +29,41 @@ export class ErrorSender {
   }
 
   async sendError(error: ErrorReport): Promise<void> {
-    await errorSenderCircuitBreaker.execute(
-      async () => {
-        await withRetry(
-          async () => {
-            const response = await fetch(this.reportingEndpoint, {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify(error),
-            });
+    await errorSenderCircuitBreaker.execute(async () => {
+      await withRetry(
+        async () => {
+          const response = await fetch(this.reportingEndpoint, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(error),
+          });
 
-            if (!response.ok) {
-              throw new Error(
-                `Failed to report error: ${response.status} ${response.statusText}`
-              );
-            }
-
-            const result = (await response.json()) as {
-              success: boolean;
-              error?: string;
-            };
-
-            if (!result.success) {
-              throw new Error(result.error || 'Unknown error occurred');
-            }
-
-            logger.debug('[ErrorSender] Error reported successfully', {
-              message: error.message,
-            });
-          },
-          {
-            maxRetries: this.maxRetries,
-            baseDelay: this.baseRetryDelay,
-            jitterMs: ERROR_REPORTER_CONFIG.JITTER_DELAY_MS,
-            timeout: this.requestTimeout,
+          if (!response.ok) {
+            throw new Error(`Failed to report error: ${response.status} ${response.statusText}`);
           }
-        );
-      }
-    );
+
+          const result = (await response.json()) as {
+            success: boolean;
+            error?: string;
+          };
+
+          if (!result.success) {
+            throw new Error(result.error || 'Unknown error occurred');
+          }
+
+          logger.debug('[ErrorSender] Error reported successfully', {
+            message: error.message,
+          });
+        },
+        {
+          maxRetries: this.maxRetries,
+          baseDelay: this.baseRetryDelay,
+          jitterMs: ERROR_REPORTER_CONFIG.JITTER_DELAY_MS,
+          timeout: this.requestTimeout,
+        }
+      );
+    });
   }
 }

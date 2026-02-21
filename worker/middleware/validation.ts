@@ -11,12 +11,12 @@ export function validateBody<T>(schema: ZodSchema<T>) {
 
       if (!result.success) {
         const error = result.error;
-        
+
         logger.warn('[VALIDATION] Request body validation failed', {
           path: c.req.path,
           method: c.req.method,
           errors: error.issues.map((e) => ({
-            path: e.path.map(p => String(p)).join('.'),
+            path: e.path.map((p) => String(p)).join('.'),
             message: e.message,
           })),
         });
@@ -46,17 +46,17 @@ export function validateQuery<T>(schema: ZodSchema<T>) {
     url.searchParams.forEach((value, key) => {
       queryParams[key] = value;
     });
-    
+
     const result = schema.safeParse(queryParams);
-    
+
     if (!result.success) {
       const error = result.error;
-      
+
       logger.warn('[VALIDATION] Query parameter validation failed', {
         path: c.req.path,
         method: c.req.method,
         errors: error.issues.map((e) => ({
-          path: e.path.map(p => String(p)).join('.'),
+          path: e.path.map((p) => String(p)).join('.'),
           message: e.message,
         })),
       });
@@ -76,12 +76,12 @@ export function validateParams<T>(schema: ZodSchema<T>) {
 
     if (!result.success) {
       const error = result.error;
-      
+
       logger.warn('[VALIDATION] Path parameter validation failed', {
         path: c.req.path,
         method: c.req.method,
         errors: error.issues.map((e) => ({
-          path: e.path.map(p => String(p)).join('.'),
+          path: e.path.map((p) => String(p)).join('.'),
           message: e.message,
         })),
       });
@@ -96,12 +96,12 @@ export function validateParams<T>(schema: ZodSchema<T>) {
 
 function formatZodError(error: ZodError): string {
   const firstError = error.issues[0];
-  
+
   if (firstError.path.length > 0) {
-    const path = firstError.path.map(p => String(p)).join('.');
+    const path = firstError.path.map((p) => String(p)).join('.');
     return `${path}: ${firstError.message}`;
   }
-  
+
   return firstError.message;
 }
 

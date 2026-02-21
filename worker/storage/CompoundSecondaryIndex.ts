@@ -2,7 +2,7 @@ import type { Env } from '../types';
 import { BaseSecondaryIndex } from './BaseSecondaryIndex';
 
 export class CompoundSecondaryIndex extends BaseSecondaryIndex {
-  static readonly entityName = "sys-compound-secondary-index";
+  static readonly entityName = 'sys-compound-secondary-index';
   protected readonly keyPrefix = 'compound:';
 
   constructor(env: Env, entityName: string, fieldNames: string[]) {

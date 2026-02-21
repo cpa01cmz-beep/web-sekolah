@@ -1,36 +1,59 @@
 import type { Env } from '../core-utils';
-import { UserEntity, ClassEntity, AnnouncementEntity, ScheduleEntity, ClassScheduleState, CourseEntity, GradeEntity } from '../entities';
-import type { SchoolUser, SchoolClass, Announcement, Student, ScheduleItem, Grade, Course, UserRole } from '@shared/types';
+import {
+  UserEntity,
+  ClassEntity,
+  AnnouncementEntity,
+  ScheduleEntity,
+  ClassScheduleState,
+  CourseEntity,
+  GradeEntity,
+} from '../entities';
+import type {
+  SchoolUser,
+  SchoolClass,
+  Announcement,
+  Student,
+  ScheduleItem,
+  Grade,
+  Course,
+  UserRole,
+} from '@shared/types';
 import { getUniqueIds, buildEntityMap, fetchAndMap } from './EntityMapUtils';
 
 export class CommonDataService {
-  static async getStudentWithClassAndSchedule(env: Env, studentId: string): Promise<{
+  static async getStudentWithClassAndSchedule(
+    env: Env,
+    studentId: string
+  ): Promise<{
     student: SchoolUser | null;
     classData: SchoolClass | null;
     schedule: ClassScheduleState | null;
   }> {
     const studentEntity = new UserEntity(env, studentId);
-    const student = await studentEntity.getState() as SchoolUser | null;
+    const student = (await studentEntity.getState()) as SchoolUser | null;
 
     if (!student || student.role !== 'student') {
       return { student: null, classData: null, schedule: null };
     }
 
     const classEntity = new ClassEntity(env, (student as Student).classId);
-    const classData = await classEntity.getState() as SchoolClass | null;
+    const classData = (await classEntity.getState()) as SchoolClass | null;
 
     const scheduleEntity = new ScheduleEntity(env, (student as Student).classId);
-    const schedule = await scheduleEntity.getState() as ClassScheduleState | null;
+    const schedule = (await scheduleEntity.getState()) as ClassScheduleState | null;
 
     return { student, classData, schedule };
   }
 
-  static async getStudentForGrades(env: Env, studentId: string): Promise<{
+  static async getStudentForGrades(
+    env: Env,
+    studentId: string
+  ): Promise<{
     student: SchoolUser | null;
     classData: SchoolClass | null;
   }> {
     const studentEntity = new UserEntity(env, studentId);
-    const student = await studentEntity.getState() as SchoolUser | null;
+    const student = (await studentEntity.getState()) as SchoolUser | null;
 
     if (!student || student.role !== 'student') {
       return { student: null, classData: null };
@@ -38,17 +61,20 @@ export class CommonDataService {
 
     const classId = (student as Student).classId;
     const classEntity = classId ? new ClassEntity(env, classId) : null;
-    const classData = classEntity ? await classEntity.getState() as SchoolClass | null : null;
+    const classData = classEntity ? ((await classEntity.getState()) as SchoolClass | null) : null;
 
     return { student, classData };
   }
 
-  static async getTeacherWithClasses(env: Env, teacherId: string): Promise<{
+  static async getTeacherWithClasses(
+    env: Env,
+    teacherId: string
+  ): Promise<{
     teacher: SchoolUser | null;
     classes: SchoolClass[];
   }> {
     const teacherEntity = new UserEntity(env, teacherId);
-    const teacher = await teacherEntity.getState() as SchoolUser | null;
+    const teacher = (await teacherEntity.getState()) as SchoolUser | null;
 
     if (!teacher) {
       return { teacher: null, classes: [] };
@@ -68,9 +94,15 @@ export class CommonDataService {
     return await AnnouncementEntity.getByTargetRole(env, targetRole);
   }
 
-  static async getRecentAnnouncementsByRole(env: Env, targetRole: string, limit: number): Promise<Announcement[]> {
+  static async getRecentAnnouncementsByRole(
+    env: Env,
+    targetRole: string,
+    limit: number
+  ): Promise<Announcement[]> {
     const recentAnnouncements = await AnnouncementEntity.getRecent(env, limit * 2);
-    const roleAnnouncements = recentAnnouncements.filter(ann => ann.targetRole === targetRole || ann.targetRole === 'all');
+    const roleAnnouncements = recentAnnouncements.filter(
+      (ann) => ann.targetRole === targetRole || ann.targetRole === 'all'
+    );
     return roleAnnouncements.slice(0, limit);
   }
 
@@ -95,7 +127,10 @@ export class CommonDataService {
     return allUsers.map(({ passwordHash: _, ...rest }) => rest);
   }
 
-  static async getUsersWithFilters(env: Env, filters: { role?: UserRole; classId?: string; search?: string }): Promise<SchoolUser[]> {
+  static async getUsersWithFilters(
+    env: Env,
+    filters: { role?: UserRole; classId?: string; search?: string }
+  ): Promise<SchoolUser[]> {
     const { role, classId, search } = filters;
 
     let users: SchoolUser[];
@@ -117,18 +152,20 @@ export class CommonDataService {
     let filteredUsers = users;
 
     if (role && search) {
-      filteredUsers = filteredUsers.filter(u => u.role === role);
+      filteredUsers = filteredUsers.filter((u) => u.role === role);
     }
 
     if (classId && !search) {
-      filteredUsers = filteredUsers.filter(u => u.role === 'student' && 'classId' in u && u.classId === classId);
+      filteredUsers = filteredUsers.filter(
+        (u) => u.role === 'student' && 'classId' in u && u.classId === classId
+      );
     }
 
     if (search) {
       const searchLower = search.toLowerCase();
-      filteredUsers = filteredUsers.filter(u =>
-        u.name.toLowerCase().includes(searchLower) ||
-        u.email.toLowerCase().includes(searchLower)
+      filteredUsers = filteredUsers.filter(
+        (u) =>
+          u.name.toLowerCase().includes(searchLower) || u.email.toLowerCase().includes(searchLower)
       );
     }
 
@@ -142,7 +179,7 @@ export class CommonDataService {
 
   static async getUserById(env: Env, userId: string): Promise<SchoolUser | null> {
     const userEntity = new UserEntity(env, userId);
-    const user = await userEntity.getState() as SchoolUser | null;
+    const user = (await userEntity.getState()) as SchoolUser | null;
     if (!user) {
       return null;
     }
@@ -150,7 +187,10 @@ export class CommonDataService {
     return userWithoutPassword;
   }
 
-  static async getScheduleWithDetails(env: Env, classId: string): Promise<(ScheduleItem & { courseName: string; teacherName: string })[]> {
+  static async getScheduleWithDetails(
+    env: Env,
+    classId: string
+  ): Promise<(ScheduleItem & { courseName: string; teacherName: string })[]> {
     const scheduleEntity = new ScheduleEntity(env, classId);
     const scheduleState = await scheduleEntity.getState();
 
@@ -158,18 +198,20 @@ export class CommonDataService {
       return [];
     }
 
-    const courseIds = getUniqueIds(scheduleState.items.map(item => item.courseId));
+    const courseIds = getUniqueIds(scheduleState.items.map((item) => item.courseId));
     const teacherIds: string[] = [];
 
-    const coursesMap = await fetchAndMap(courseIds, id => new CourseEntity(env, id).getState());
-    coursesMap.forEach(course => {
+    const coursesMap = await fetchAndMap(courseIds, (id) => new CourseEntity(env, id).getState());
+    coursesMap.forEach((course) => {
       if (course.teacherId) teacherIds.push(course.teacherId);
     });
 
     const uniqueTeacherIds = getUniqueIds(teacherIds);
-    const teachersMap = await fetchAndMap(uniqueTeacherIds, id => new UserEntity(env, id).getState());
+    const teachersMap = await fetchAndMap(uniqueTeacherIds, (id) =>
+      new UserEntity(env, id).getState()
+    );
 
-    return scheduleState.items.map(item => {
+    return scheduleState.items.map((item) => {
       const course = coursesMap.get(item.courseId);
       const teacher = course ? teachersMap.get(course.teacherId) : undefined;
       return {
@@ -180,52 +222,67 @@ export class CommonDataService {
     });
   }
 
-  static async getAnnouncementsWithAuthorNames(env: Env, limit: number): Promise<(Announcement & { authorName: string })[]> {
+  static async getAnnouncementsWithAuthorNames(
+    env: Env,
+    limit: number
+  ): Promise<(Announcement & { authorName: string })[]> {
     const recentAnnouncements = await AnnouncementEntity.getRecent(env, limit);
 
     if (recentAnnouncements.length === 0) {
       return [];
     }
 
-    const uniqueAuthorIds = getUniqueIds(recentAnnouncements.map(a => a.authorId));
-    const authorsMap = await fetchAndMap(uniqueAuthorIds, id => new UserEntity(env, id).getState());
+    const uniqueAuthorIds = getUniqueIds(recentAnnouncements.map((a) => a.authorId));
+    const authorsMap = await fetchAndMap(uniqueAuthorIds, (id) =>
+      new UserEntity(env, id).getState()
+    );
 
-    return recentAnnouncements.map(ann => ({
+    return recentAnnouncements.map((ann) => ({
       ...ann,
       authorName: authorsMap.get(ann.authorId)?.name || 'Unknown Author',
     }));
   }
 
-  static async getRecentGradesWithCourseNames(env: Env, studentId: string, limit: number = 10): Promise<(Grade & { courseName: string })[]> {
+  static async getRecentGradesWithCourseNames(
+    env: Env,
+    studentId: string,
+    limit: number = 10
+  ): Promise<(Grade & { courseName: string })[]> {
     const studentGrades = await GradeEntity.getRecentForStudent(env, studentId, limit);
 
     if (studentGrades.length === 0) {
       return [];
     }
 
-    const uniqueCourseIds = getUniqueIds(studentGrades.map(g => g.courseId));
-    const gradeCoursesMap = await fetchAndMap(uniqueCourseIds, id => new CourseEntity(env, id).getState());
+    const uniqueCourseIds = getUniqueIds(studentGrades.map((g) => g.courseId));
+    const gradeCoursesMap = await fetchAndMap(uniqueCourseIds, (id) =>
+      new CourseEntity(env, id).getState()
+    );
 
-    return studentGrades.map(grade => ({
+    return studentGrades.map((grade) => ({
       ...grade,
       courseName: gradeCoursesMap.get(grade.courseId)?.name || 'Unknown Course',
     }));
   }
 
-  static async getTeacherRecentGradesWithDetails(env: Env, teacherId: string, limit: number = 5): Promise<(Grade & { courseName: string; studentName: string })[]> {
+  static async getTeacherRecentGradesWithDetails(
+    env: Env,
+    teacherId: string,
+    limit: number = 5
+  ): Promise<(Grade & { courseName: string; studentName: string })[]> {
     const teacherCourses = await CourseEntity.getByTeacherId(env, teacherId);
-    
+
     if (teacherCourses.length === 0) {
       return [];
     }
 
     const courseGradeResults = await Promise.all(
-      teacherCourses.map(course => GradeEntity.getByCourseId(env, course.id))
+      teacherCourses.map((course) => GradeEntity.getByCourseId(env, course.id))
     );
     const allGrades: Grade[] = courseGradeResults.flat();
 
-    const sortedGrades = allGrades.sort((a, b) => 
-      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    const sortedGrades = allGrades.sort(
+      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
     );
     const recentGrades = sortedGrades.slice(0, limit);
 
@@ -233,15 +290,15 @@ export class CommonDataService {
       return [];
     }
 
-    const uniqueCourseIds = getUniqueIds(recentGrades.map(g => g.courseId));
-    const uniqueStudentIds = getUniqueIds(recentGrades.map(g => g.studentId));
+    const uniqueCourseIds = getUniqueIds(recentGrades.map((g) => g.courseId));
+    const uniqueStudentIds = getUniqueIds(recentGrades.map((g) => g.studentId));
 
     const [coursesMap, studentsMap] = await Promise.all([
-      fetchAndMap(uniqueCourseIds, id => new CourseEntity(env, id).getState()),
-      fetchAndMap(uniqueStudentIds, id => new UserEntity(env, id).getState())
+      fetchAndMap(uniqueCourseIds, (id) => new CourseEntity(env, id).getState()),
+      fetchAndMap(uniqueStudentIds, (id) => new UserEntity(env, id).getState()),
     ]);
 
-    return recentGrades.map(grade => ({
+    return recentGrades.map((grade) => ({
       ...grade,
       courseName: coursesMap.get(grade.courseId)?.name || 'Unknown Course',
       studentName: studentsMap.get(grade.studentId)?.name || 'Unknown Student',

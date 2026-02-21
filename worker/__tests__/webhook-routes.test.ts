@@ -70,7 +70,7 @@ describe('Webhook Routes - Critical Business Logic', () => {
         url: 'https://example.com/webhook',
         events: ['user.created'],
         secret: 'secret-key',
-        active: true
+        active: true,
       };
 
       expect(operation).toBe('create webhook');
@@ -100,7 +100,7 @@ describe('Webhook Routes - Critical Business Logic', () => {
       const param = { id: 'webhook-001' };
       const body = {
         url: 'https://example.com/webhook-updated',
-        active: false
+        active: false,
       };
 
       expect(operation).toBe('update webhook');
@@ -133,7 +133,7 @@ describe('Webhook Routes - Critical Business Logic', () => {
     it('should handle deleted webhook config check', () => {
       const config = {
         id: 'webhook-001',
-        deletedAt: '2024-01-21T10:00:00Z'
+        deletedAt: '2024-01-21T10:00:00Z',
       };
 
       expect(config.deletedAt).toBeTruthy();
@@ -147,15 +147,9 @@ describe('Webhook Routes - Critical Business Logic', () => {
     });
 
     it('should handle invalid webhook URL format', () => {
-      const invalidUrls = [
-        'not-a-url',
-        'ftp://example.com/webhook',
-        '',
-        null,
-        undefined
-      ];
+      const invalidUrls = ['not-a-url', 'ftp://example.com/webhook', '', null, undefined];
 
-      invalidUrls.forEach(url => {
+      invalidUrls.forEach((url) => {
         if (url && typeof url === 'string') {
           const isValid = url.match(/^https?:\/\/.+/);
           expect(isValid).toBeNull();
@@ -167,7 +161,7 @@ describe('Webhook Routes - Critical Business Logic', () => {
       const body = {
         url: 'https://example.com/webhook',
         secret: 'secret-key',
-        active: true
+        active: true,
       };
 
       expect(body).not.toHaveProperty('events');
@@ -177,7 +171,7 @@ describe('Webhook Routes - Critical Business Logic', () => {
       const body = {
         url: 'https://example.com/webhook',
         events: ['user.created'],
-        active: true
+        active: true,
       };
 
       expect(body).not.toHaveProperty('secret');
@@ -187,7 +181,7 @@ describe('Webhook Routes - Critical Business Logic', () => {
       const body = {
         url: 'https://example.com/webhook',
         events: ['user.created'],
-        secret: 'secret-key'
+        secret: 'secret-key',
       };
       const defaultActive = true;
 
@@ -255,7 +249,7 @@ describe('Webhook Routes - Critical Business Logic', () => {
     it('should handle deleted webhook event check', () => {
       const event = {
         id: 'event-001',
-        deletedAt: '2024-01-21T10:00:00Z'
+        deletedAt: '2024-01-21T10:00:00Z',
       };
 
       expect(event.deletedAt).toBeTruthy();
@@ -277,7 +271,7 @@ describe('Webhook Routes - Critical Business Logic', () => {
 
     it('should handle empty events array', () => {
       const events = {
-        items: []
+        items: [],
       };
 
       expect(Array.isArray(events.items)).toBe(true);
@@ -362,7 +356,7 @@ describe('Webhook Routes - Critical Business Logic', () => {
     it('should handle deleted DLQ entry check', () => {
       const dlqEntry = {
         id: 'dlq-001',
-        deletedAt: '2024-01-21T10:00:00Z'
+        deletedAt: '2024-01-21T10:00:00Z',
       };
 
       expect(dlqEntry.deletedAt).toBeTruthy();
@@ -424,7 +418,7 @@ describe('Webhook Routes - Critical Business Logic', () => {
     it('should handle createdAt and updatedAt timestamps', () => {
       const entity = {
         createdAt: '2024-01-21T10:00:00.000Z',
-        updatedAt: '2024-01-21T10:30:00.000Z'
+        updatedAt: '2024-01-21T10:30:00.000Z',
       };
 
       expect(entity.createdAt).toMatch(/^\d{4}-\d{2}-\d{2}T/);
@@ -444,7 +438,7 @@ describe('Webhook Routes - Critical Business Logic', () => {
     it('should validate webhook delivery statuses', () => {
       const validStatuses = ['pending', 'delivered', 'failed'];
 
-      validStatuses.forEach(status => {
+      validStatuses.forEach((status) => {
         expect(['pending', 'delivered', 'failed']).toContain(status);
       });
     });
@@ -475,7 +469,7 @@ describe('Webhook Routes - Critical Business Logic', () => {
         secret: 'secret-key',
         active: true,
         createdAt: '2024-01-21T10:00:00.000Z',
-        updatedAt: '2024-01-21T10:00:00.000Z'
+        updatedAt: '2024-01-21T10:00:00.000Z',
       };
 
       expect(config).toHaveProperty('id');
@@ -494,7 +488,7 @@ describe('Webhook Routes - Critical Business Logic', () => {
         data: { userId: 'user-123' },
         processed: false,
         createdAt: '2024-01-21T10:00:00.000Z',
-        updatedAt: '2024-01-21T10:00:00.000Z'
+        updatedAt: '2024-01-21T10:00:00.000Z',
       };
 
       expect(event).toHaveProperty('id');
@@ -515,7 +509,7 @@ describe('Webhook Routes - Critical Business Logic', () => {
         nextAttemptAt: '2024-01-21T10:01:00.000Z',
         idempotencyKey: 'event-001:webhook-001',
         createdAt: '2024-01-21T10:00:00.000Z',
-        updatedAt: '2024-01-21T10:00:00.000Z'
+        updatedAt: '2024-01-21T10:00:00.000Z',
       };
 
       expect(delivery).toHaveProperty('id');
@@ -542,7 +536,7 @@ describe('Webhook Routes - Critical Business Logic', () => {
         errorMessage: 'Max retries exceeded',
         failedAt: '2024-01-21T10:30:00.000Z',
         createdAt: '2024-01-21T10:00:00.000Z',
-        updatedAt: '2024-01-21T10:30:00.000Z'
+        updatedAt: '2024-01-21T10:30:00.000Z',
       };
 
       expect(dlqEntry).toHaveProperty('id');
@@ -574,7 +568,7 @@ describe('Webhook Routes - Critical Business Logic', () => {
         url: 'https://example.com/webhook',
         events: [],
         secret: 'secret-key',
-        active: true
+        active: true,
       };
 
       expect(config.events).toHaveLength(0);
@@ -584,7 +578,7 @@ describe('Webhook Routes - Critical Business Logic', () => {
       const delivery = {
         id: 'delivery-001',
         attempts: 5,
-        status: 'pending'
+        status: 'pending',
       };
 
       expect(delivery.attempts).toBe(5);
@@ -594,7 +588,7 @@ describe('Webhook Routes - Critical Business Logic', () => {
     it('should handle DLQ entry with various error statuses', () => {
       const errorStatuses = [400, 401, 403, 404, 500, 502, 503, 504];
 
-      errorStatuses.forEach(status => {
+      errorStatuses.forEach((status) => {
         expect(status).toBeGreaterThanOrEqual(400);
         expect(status).toBeLessThan(600);
       });
@@ -605,8 +599,8 @@ describe('Webhook Routes - Critical Business Logic', () => {
         userId: 'user-123',
         message: 'Hello, world! 🌍 Testing special chars: á, é, ñ, 中文, 日本語',
         nested: {
-          value: 'Value with "quotes" and \'apostrophes\''
-        }
+          value: 'Value with "quotes" and \'apostrophes\'',
+        },
       };
 
       expect(payload.message).toContain('🌍');

@@ -19,9 +19,7 @@ const AnnouncementItem = memo(({ ann, isLast }: { ann: Announcement; isLast: boo
   <div>
     <div>
       <h3 className="font-semibold">{ann.title}</h3>
-      <p className="text-sm text-muted-foreground">
-        {formatDateLong(ann.date)}
-      </p>
+      <p className="text-sm text-muted-foreground">{formatDateLong(ann.date)}</p>
       <p className="mt-2 text-sm">{ann.content}</p>
     </div>
     {!isLast && <Separator className="mt-6" />}
@@ -43,18 +41,21 @@ export function TeacherAnnouncementsPage() {
     },
   });
 
-  const handlePostAnnouncement = useCallback((data: { title: string; content: string }) => {
-    if (!user) {
-      toast.error('You must be logged in to post announcements.');
-      return;
-    }
+  const handlePostAnnouncement = useCallback(
+    (data: { title: string; content: string }) => {
+      if (!user) {
+        toast.error('You must be logged in to post announcements.');
+        return;
+      }
 
-    createMutation.mutate({
-      title: data.title,
-      content: data.content,
-      targetRole: 'all',
-    });
-  }, [user, createMutation]);
+      createMutation.mutate({
+        title: data.title,
+        content: data.content,
+        targetRole: 'all',
+      });
+    },
+    [user, createMutation]
+  );
 
   if (isLoading) {
     return (
@@ -100,7 +101,10 @@ export function TeacherAnnouncementsPage() {
               <CardDescription>Post a new announcement for students and parents.</CardDescription>
             </CardHeader>
             <CardContent>
-              <InlineAnnouncementForm onSave={handlePostAnnouncement} isLoading={createMutation.isPending} />
+              <InlineAnnouncementForm
+                onSave={handlePostAnnouncement}
+                isLoading={createMutation.isPending}
+              />
             </CardContent>
           </Card>
         </div>

@@ -10,12 +10,7 @@ interface DashboardLayoutProps<T> {
   children: React.ReactNode | ((data: T) => React.ReactNode);
 }
 
-export function DashboardLayout<T>({
-  isLoading,
-  error,
-  data,
-  children,
-}: DashboardLayoutProps<T>) {
+export function DashboardLayout<T>({ isLoading, error, data, children }: DashboardLayoutProps<T>) {
   if (isLoading) return <DashboardSkeleton />;
 
   if (error) {
@@ -23,9 +18,7 @@ export function DashboardLayout<T>({
       <Alert variant="destructive" role="alert">
         <AlertTriangle className="h-4 w-4" aria-hidden="true" />
         <AlertTitle>Error</AlertTitle>
-        <AlertDescription>
-          Failed to load dashboard data. Please try again later.
-        </AlertDescription>
+        <AlertDescription>Failed to load dashboard data. Please try again later.</AlertDescription>
       </Alert>
     );
   }

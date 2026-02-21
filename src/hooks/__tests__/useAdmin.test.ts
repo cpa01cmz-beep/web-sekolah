@@ -11,7 +11,7 @@ import {
   useAnnouncements,
   useCreateAnnouncement,
   useSettings,
-  useUpdateSettings
+  useUpdateSettings,
 } from '../useAdmin';
 import { resetCircuitBreaker } from '../../lib/api-client';
 
@@ -54,11 +54,11 @@ describe('useAdmin Hooks', () => {
         ok: true,
         status: 200,
         headers: { get: vi.fn() },
-        json: vi.fn().mockResolvedValueOnce({ success: true, data: mockData })
+        json: vi.fn().mockResolvedValueOnce({ success: true, data: mockData }),
       });
 
       const { result } = renderHook(() => useAdminDashboard(), {
-        wrapper: createWrapper()
+        wrapper: createWrapper(),
       });
 
       await waitFor(() => {
@@ -70,12 +70,15 @@ describe('useAdmin Hooks', () => {
 
     it('should handle loading state', async () => {
       let resolveFetch: any;
-      (global.fetch as any).mockImplementationOnce(() => new Promise(resolve => {
-        resolveFetch = resolve;
-      }));
+      (global.fetch as any).mockImplementationOnce(
+        () =>
+          new Promise((resolve) => {
+            resolveFetch = resolve;
+          })
+      );
 
       const { result } = renderHook(() => useAdminDashboard(), {
-        wrapper: createWrapper()
+        wrapper: createWrapper(),
       });
 
       expect(result.current.isLoading).toBe(true);
@@ -84,7 +87,7 @@ describe('useAdmin Hooks', () => {
         ok: true,
         status: 200,
         headers: { get: vi.fn() },
-        json: vi.fn().mockResolvedValue({ success: true, data: {} })
+        json: vi.fn().mockResolvedValue({ success: true, data: {} }),
       });
 
       await waitFor(() => {
@@ -96,7 +99,7 @@ describe('useAdmin Hooks', () => {
       (global.fetch as any).mockRejectedValueOnce(new Error('Network error'));
 
       const { result } = renderHook(() => useAdminDashboard(), {
-        wrapper: createWrapper()
+        wrapper: createWrapper(),
       });
 
       await waitFor(() => {
@@ -115,11 +118,11 @@ describe('useAdmin Hooks', () => {
         ok: true,
         status: 200,
         headers: { get: vi.fn() },
-        json: vi.fn().mockResolvedValueOnce({ success: true, data: mockUsers })
+        json: vi.fn().mockResolvedValueOnce({ success: true, data: mockUsers }),
       });
 
       const { result } = renderHook(() => useUsers(), {
-        wrapper: createWrapper()
+        wrapper: createWrapper(),
       });
 
       await waitFor(() => {
@@ -133,7 +136,7 @@ describe('useAdmin Hooks', () => {
       const filters = { role: 'student' as any };
 
       const { result } = renderHook(() => useUsers(filters), {
-        wrapper: createWrapper()
+        wrapper: createWrapper(),
       });
 
       expect(result.current).toBeDefined();
@@ -143,7 +146,7 @@ describe('useAdmin Hooks', () => {
   describe('useCreateUser', () => {
     it('should return mutation object', () => {
       const { result } = renderHook(() => useCreateUser(), {
-        wrapper: createWrapper()
+        wrapper: createWrapper(),
       });
 
       expect(result.current.mutate).toBeDefined();
@@ -151,18 +154,23 @@ describe('useAdmin Hooks', () => {
     });
 
     it('should call API on mutate', async () => {
-      const userData = { name: 'Test', email: 'test@example.com', password: 'pass', role: 'student' as any };
+      const userData = {
+        name: 'Test',
+        email: 'test@example.com',
+        password: 'pass',
+        role: 'student' as any,
+      };
       const mockUser = { id: '123', ...userData };
 
       (global.fetch as any).mockResolvedValueOnce({
         ok: true,
         status: 201,
         headers: { get: vi.fn() },
-        json: vi.fn().mockResolvedValueOnce({ success: true, data: mockUser })
+        json: vi.fn().mockResolvedValueOnce({ success: true, data: mockUser }),
       });
 
       const { result } = renderHook(() => useCreateUser(), {
-        wrapper: createWrapper()
+        wrapper: createWrapper(),
       });
 
       await result.current.mutateAsync(userData);
@@ -170,24 +178,29 @@ describe('useAdmin Hooks', () => {
       expect(global.fetch).toHaveBeenCalledWith(
         expect.any(String),
         expect.objectContaining({
-          method: 'POST'
+          method: 'POST',
         })
       );
     });
 
     it('should handle successful mutation', async () => {
-      const userData = { name: 'Test', email: 'test@example.com', password: 'pass', role: 'student' as any };
+      const userData = {
+        name: 'Test',
+        email: 'test@example.com',
+        password: 'pass',
+        role: 'student' as any,
+      };
       const mockUser = { id: '123', ...userData };
 
       (global.fetch as any).mockResolvedValueOnce({
         ok: true,
         status: 201,
         headers: { get: vi.fn() },
-        json: vi.fn().mockResolvedValueOnce({ success: true, data: mockUser })
+        json: vi.fn().mockResolvedValueOnce({ success: true, data: mockUser }),
       });
 
       const { result } = renderHook(() => useCreateUser(), {
-        wrapper: createWrapper()
+        wrapper: createWrapper(),
       });
 
       await result.current.mutateAsync(userData);
@@ -203,7 +216,7 @@ describe('useAdmin Hooks', () => {
   describe('useUpdateUser', () => {
     it('should return mutation object', () => {
       const { result } = renderHook(() => useUpdateUser('user-123'), {
-        wrapper: createWrapper()
+        wrapper: createWrapper(),
       });
 
       expect(result.current.mutate).toBeDefined();
@@ -218,11 +231,11 @@ describe('useAdmin Hooks', () => {
         ok: true,
         status: 200,
         headers: { get: vi.fn() },
-        json: vi.fn().mockResolvedValueOnce({ success: true, data: mockUser })
+        json: vi.fn().mockResolvedValueOnce({ success: true, data: mockUser }),
       });
 
       const { result } = renderHook(() => useUpdateUser('user-123'), {
-        wrapper: createWrapper()
+        wrapper: createWrapper(),
       });
 
       await result.current.mutateAsync(userData);
@@ -230,7 +243,7 @@ describe('useAdmin Hooks', () => {
       expect(global.fetch).toHaveBeenCalledWith(
         expect.any(String),
         expect.objectContaining({
-          method: 'PUT'
+          method: 'PUT',
         })
       );
     });
@@ -239,7 +252,7 @@ describe('useAdmin Hooks', () => {
   describe('useDeleteUser', () => {
     it('should return mutation object', () => {
       const { result } = renderHook(() => useDeleteUser('user-123'), {
-        wrapper: createWrapper()
+        wrapper: createWrapper(),
       });
 
       expect(result.current.mutate).toBeDefined();
@@ -251,11 +264,11 @@ describe('useAdmin Hooks', () => {
         ok: true,
         status: 200,
         headers: { get: vi.fn() },
-        json: vi.fn().mockResolvedValueOnce({ success: true, data: null })
+        json: vi.fn().mockResolvedValueOnce({ success: true, data: null }),
       });
 
       const { result } = renderHook(() => useDeleteUser('user-123'), {
-        wrapper: createWrapper()
+        wrapper: createWrapper(),
       });
 
       await result.current.mutateAsync();
@@ -263,7 +276,7 @@ describe('useAdmin Hooks', () => {
       expect(global.fetch).toHaveBeenCalledWith(
         expect.any(String),
         expect.objectContaining({
-          method: 'DELETE'
+          method: 'DELETE',
         })
       );
     });
@@ -277,11 +290,11 @@ describe('useAdmin Hooks', () => {
         ok: true,
         status: 200,
         headers: { get: vi.fn() },
-        json: vi.fn().mockResolvedValueOnce({ success: true, data: mockAnnouncements })
+        json: vi.fn().mockResolvedValueOnce({ success: true, data: mockAnnouncements }),
       });
 
       const { result } = renderHook(() => useAnnouncements(), {
-        wrapper: createWrapper()
+        wrapper: createWrapper(),
       });
 
       await waitFor(() => {
@@ -295,7 +308,7 @@ describe('useAdmin Hooks', () => {
   describe('useCreateAnnouncement', () => {
     it('should return mutation object', () => {
       const { result } = renderHook(() => useCreateAnnouncement(), {
-        wrapper: createWrapper()
+        wrapper: createWrapper(),
       });
 
       expect(result.current.mutate).toBeDefined();
@@ -310,11 +323,11 @@ describe('useAdmin Hooks', () => {
         ok: true,
         status: 201,
         headers: { get: vi.fn() },
-        json: vi.fn().mockResolvedValueOnce({ success: true, data: mockAnnouncement })
+        json: vi.fn().mockResolvedValueOnce({ success: true, data: mockAnnouncement }),
       });
 
       const { result } = renderHook(() => useCreateAnnouncement(), {
-        wrapper: createWrapper()
+        wrapper: createWrapper(),
       });
 
       await result.current.mutateAsync(announcementData);
@@ -322,7 +335,7 @@ describe('useAdmin Hooks', () => {
       expect(global.fetch).toHaveBeenCalledWith(
         expect.any(String),
         expect.objectContaining({
-          method: 'POST'
+          method: 'POST',
         })
       );
     });
@@ -335,11 +348,11 @@ describe('useAdmin Hooks', () => {
         ok: true,
         status: 201,
         headers: { get: vi.fn() },
-        json: vi.fn().mockResolvedValueOnce({ success: true, data: mockAnnouncement })
+        json: vi.fn().mockResolvedValueOnce({ success: true, data: mockAnnouncement }),
       });
 
       const { result } = renderHook(() => useCreateAnnouncement(), {
-        wrapper: createWrapper()
+        wrapper: createWrapper(),
       });
 
       await result.current.mutateAsync(announcementData);
@@ -360,11 +373,11 @@ describe('useAdmin Hooks', () => {
         ok: true,
         status: 200,
         headers: { get: vi.fn() },
-        json: vi.fn().mockResolvedValueOnce({ success: true, data: mockSettings })
+        json: vi.fn().mockResolvedValueOnce({ success: true, data: mockSettings }),
       });
 
       const { result } = renderHook(() => useSettings(), {
-        wrapper: createWrapper()
+        wrapper: createWrapper(),
       });
 
       await waitFor(() => {
@@ -378,7 +391,7 @@ describe('useAdmin Hooks', () => {
   describe('useUpdateSettings', () => {
     it('should return mutation object', () => {
       const { result } = renderHook(() => useUpdateSettings(), {
-        wrapper: createWrapper()
+        wrapper: createWrapper(),
       });
 
       expect(result.current.mutate).toBeDefined();
@@ -394,11 +407,11 @@ describe('useAdmin Hooks', () => {
         ok: true,
         status: 200,
         headers: { get: vi.fn() },
-        json: vi.fn().mockResolvedValueOnce({ success: true, data: updatedSettings })
+        json: vi.fn().mockResolvedValueOnce({ success: true, data: updatedSettings }),
       });
 
       const { result } = renderHook(() => useUpdateSettings(), {
-        wrapper: createWrapper()
+        wrapper: createWrapper(),
       });
 
       await result.current.mutateAsync(settingsData);
@@ -406,7 +419,7 @@ describe('useAdmin Hooks', () => {
       expect(global.fetch).toHaveBeenCalledWith(
         expect.any(String),
         expect.objectContaining({
-          method: 'PUT'
+          method: 'PUT',
         })
       );
     });
@@ -420,11 +433,11 @@ describe('useAdmin Hooks', () => {
         ok: true,
         status: 200,
         headers: { get: vi.fn() },
-        json: vi.fn().mockResolvedValueOnce({ success: true, data: updatedSettings })
+        json: vi.fn().mockResolvedValueOnce({ success: true, data: updatedSettings }),
       });
 
       const { result } = renderHook(() => useUpdateSettings(), {
-        wrapper: createWrapper()
+        wrapper: createWrapper(),
       });
 
       await result.current.mutateAsync(partialData);
@@ -442,7 +455,7 @@ describe('useAdmin Hooks', () => {
       (global.fetch as any).mockRejectedValueOnce(new Error('Network error'));
 
       const { result } = renderHook(() => useAdminDashboard(), {
-        wrapper: createWrapper()
+        wrapper: createWrapper(),
       });
 
       await waitFor(() => {
@@ -456,11 +469,16 @@ describe('useAdmin Hooks', () => {
       (global.fetch as any).mockRejectedValueOnce(new Error('Network error'));
 
       const { result } = renderHook(() => useCreateUser(), {
-        wrapper: createWrapper()
+        wrapper: createWrapper(),
       });
 
       try {
-        await result.current.mutateAsync({ name: 'Test', email: 'test@example.com', password: 'pass', role: 'student' as any });
+        await result.current.mutateAsync({
+          name: 'Test',
+          email: 'test@example.com',
+          password: 'pass',
+          role: 'student' as any,
+        });
       } catch (error) {
         expect(error).toBeInstanceOf(Error);
       }
@@ -474,12 +492,15 @@ describe('useAdmin Hooks', () => {
   describe('loading states', () => {
     it('should show loading state during query fetch', async () => {
       let resolveFetch: any;
-      (global.fetch as any).mockImplementationOnce(() => new Promise(resolve => {
-        resolveFetch = resolve;
-      }));
+      (global.fetch as any).mockImplementationOnce(
+        () =>
+          new Promise((resolve) => {
+            resolveFetch = resolve;
+          })
+      );
 
       const { result } = renderHook(() => useAdminDashboard(), {
-        wrapper: createWrapper()
+        wrapper: createWrapper(),
       });
 
       expect(result.current.isLoading).toBe(true);
@@ -488,7 +509,7 @@ describe('useAdmin Hooks', () => {
         ok: true,
         status: 200,
         headers: { get: vi.fn() },
-        json: vi.fn().mockResolvedValue({ success: true, data: {} })
+        json: vi.fn().mockResolvedValue({ success: true, data: {} }),
       });
 
       await waitFor(() => {
@@ -498,15 +519,23 @@ describe('useAdmin Hooks', () => {
 
     it('should show loading state during mutation', async () => {
       let resolveFetch: any;
-      (global.fetch as any).mockImplementationOnce(() => new Promise(resolve => {
-        resolveFetch = resolve;
-      }));
+      (global.fetch as any).mockImplementationOnce(
+        () =>
+          new Promise((resolve) => {
+            resolveFetch = resolve;
+          })
+      );
 
       const { result } = renderHook(() => useCreateUser(), {
-        wrapper: createWrapper()
+        wrapper: createWrapper(),
       });
 
-      const userData = { name: 'Test', email: 'test@example.com', password: 'pass', role: 'student' as any };
+      const userData = {
+        name: 'Test',
+        email: 'test@example.com',
+        password: 'pass',
+        role: 'student' as any,
+      };
       const mockUser = { id: '123', ...userData };
 
       const mutationPromise = result.current.mutateAsync(userData);
@@ -519,7 +548,7 @@ describe('useAdmin Hooks', () => {
         ok: true,
         status: 201,
         headers: { get: vi.fn() },
-        json: vi.fn().mockResolvedValueOnce({ success: true, data: mockUser })
+        json: vi.fn().mockResolvedValueOnce({ success: true, data: mockUser }),
       });
 
       await mutationPromise;
@@ -535,17 +564,22 @@ describe('useAdmin Hooks', () => {
       const onSuccess = vi.fn();
 
       const { result } = renderHook(() => useCreateUser({ onSuccess }), {
-        wrapper: createWrapper()
+        wrapper: createWrapper(),
       });
 
-      const userData = { name: 'Test', email: 'test@example.com', password: 'pass', role: 'student' as any };
+      const userData = {
+        name: 'Test',
+        email: 'test@example.com',
+        password: 'pass',
+        role: 'student' as any,
+      };
       const mockUser = { id: '123', ...userData };
 
       (global.fetch as any).mockResolvedValueOnce({
         ok: true,
         status: 201,
         headers: { get: vi.fn() },
-        json: vi.fn().mockResolvedValueOnce({ success: true, data: mockUser })
+        json: vi.fn().mockResolvedValueOnce({ success: true, data: mockUser }),
       });
 
       await result.current.mutateAsync(userData);
@@ -561,13 +595,18 @@ describe('useAdmin Hooks', () => {
       const onError = vi.fn();
 
       const { result } = renderHook(() => useCreateUser({ onError }), {
-        wrapper: createWrapper()
+        wrapper: createWrapper(),
       });
 
       (global.fetch as any).mockRejectedValueOnce(new Error('Failed'));
 
       try {
-        await result.current.mutateAsync({ name: 'Test', email: 'test@example.com', password: 'pass', role: 'student' as any });
+        await result.current.mutateAsync({
+          name: 'Test',
+          email: 'test@example.com',
+          password: 'pass',
+          role: 'student' as any,
+        });
       } catch {
         // Expected to throw
       }

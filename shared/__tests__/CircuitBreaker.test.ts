@@ -131,8 +131,9 @@ describe('CircuitBreaker', () => {
         }
       }
 
-      await expect(breaker.execute(() => Promise.resolve('success')))
-        .rejects.toThrow('Circuit breaker is open');
+      await expect(breaker.execute(() => Promise.resolve('success'))).rejects.toThrow(
+        'Circuit breaker is open'
+      );
 
       vi.useRealTimers();
     });

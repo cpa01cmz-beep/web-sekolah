@@ -89,7 +89,9 @@ describe('Audit Log Middleware - Critical Security/Compliance Testing', () => {
       expect(logger.info).toHaveBeenCalledWith(
         expect.anything(),
         expect.objectContaining({
-          requestId: expect.stringMatching(/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i),
+          requestId: expect.stringMatching(
+            /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+          ),
         })
       );
     });
@@ -440,9 +442,7 @@ describe('Audit Log Middleware - Critical Security/Compliance Testing', () => {
       const app = new Hono();
       app.use('*', auditLog('CREATE_USER'));
       app.post('/users', async (c) => {
-        await new Promise((resolve) =>
-          setTimeout(() => resolve(undefined), 100)
-        );
+        await new Promise((resolve) => setTimeout(() => resolve(undefined), 100));
         return c.json({ success: true });
       });
 
@@ -581,11 +581,13 @@ describe('Audit Log Middleware - Critical Security/Compliance Testing', () => {
     it('should handle complete user creation flow', async () => {
       const app = new Hono();
       app.use('*', auditLog('CREATE_USER'));
-      app.post('/users', (c) => c.json({
-        id: 'user-123',
-        name: 'John Doe',
-        email: 'john@example.com',
-      }));
+      app.post('/users', (c) =>
+        c.json({
+          id: 'user-123',
+          name: 'John Doe',
+          email: 'john@example.com',
+        })
+      );
 
       const res = await app.request('/users', {
         method: 'POST',
@@ -667,9 +669,7 @@ describe('Audit Log Middleware - Critical Security/Compliance Testing', () => {
       app.post('/users', (c) => c.json({ success: true }));
 
       const start = Date.now();
-      const promises = Array.from({ length: 100 }, () =>
-        app.request('/users', { method: 'POST' })
-      );
+      const promises = Array.from({ length: 100 }, () => app.request('/users', { method: 'POST' }));
       await Promise.all(promises);
       const duration = Date.now() - start;
 

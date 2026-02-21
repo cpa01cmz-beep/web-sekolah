@@ -40,23 +40,26 @@ export function StudentCardPage() {
 
   if (!user) return null;
 
-  if (isLoading) return (
-    <SlideUp className="space-y-6 flex flex-col items-center px-4 sm:px-0 w-full">
-      <div className="text-center w-full max-w-2xl">
-        <Skeleton className="h-8 sm:h-9 w-1/3 mx-auto mb-2" />
-        <Skeleton className="h-4 w-2/3 mx-auto" />
-      </div>
-      <CardSkeleton />
-      <Skeleton className="h-12 w-48" />
-    </SlideUp>
-  );
+  if (isLoading)
+    return (
+      <SlideUp className="space-y-6 flex flex-col items-center px-4 sm:px-0 w-full">
+        <div className="text-center w-full max-w-2xl">
+          <Skeleton className="h-8 sm:h-9 w-1/3 mx-auto mb-2" />
+          <Skeleton className="h-4 w-2/3 mx-auto" />
+        </div>
+        <CardSkeleton />
+        <Skeleton className="h-12 w-48" />
+      </SlideUp>
+    );
 
   if (error) {
     return (
       <Alert variant="destructive">
         <AlertTriangle className="h-4 w-4" />
         <AlertTitle>Error</AlertTitle>
-        <AlertDescription>Failed to load student card data. Please try again later.</AlertDescription>
+        <AlertDescription>
+          Failed to load student card data. Please try again later.
+        </AlertDescription>
       </Alert>
     );
   }
@@ -65,7 +68,7 @@ export function StudentCardPage() {
     studentIdNumber: user.id,
     className: 'N/A',
     validUntil: new Date().toISOString().split('T')[0],
-    photoUrl: user.avatarUrl || ''
+    photoUrl: user.avatarUrl || '',
   };
 
   return (
@@ -77,7 +80,10 @@ export function StudentCardPage() {
         />
       </div>
       <div
-        className="w-full max-w-[550px] min-h-[330px] rounded-2xl p-4 sm:p-6 text-white shadow-2xl flex flex-col justify-between relative overflow-hidden" style={{ background: `linear-gradient(to bottom right, ${THEME_COLORS.PRIMARY}, ${THEME_COLORS.SECONDARY})` }}
+        className="w-full max-w-[550px] min-h-[330px] rounded-2xl p-4 sm:p-6 text-white shadow-2xl flex flex-col justify-between relative overflow-hidden"
+        style={{
+          background: `linear-gradient(to bottom right, ${THEME_COLORS.PRIMARY}, ${THEME_COLORS.SECONDARY})`,
+        }}
       >
         <div className="absolute -top-10 -right-10 w-32 h-32 sm:w-40 sm:h-40 bg-white/10 rounded-full"></div>
         <div className="absolute -bottom-12 -left-12 w-32 h-32 sm:w-40 sm:h-40 bg-white/10 rounded-full"></div>
@@ -94,7 +100,9 @@ export function StudentCardPage() {
         <main className="flex items-center gap-4 sm:gap-6 z-10">
           <Avatar className="h-24 w-24 sm:h-32 sm:w-32 border-4 border-white/50 flex-shrink-0">
             <AvatarImage src={studentData.photoUrl || user.avatarUrl} alt={user.name} />
-            <AvatarFallback className="text-3xl sm:text-4xl bg-white/20">{user.name.charAt(0)}</AvatarFallback>
+            <AvatarFallback className="text-3xl sm:text-4xl bg-white/20">
+              {user.name.charAt(0)}
+            </AvatarFallback>
           </Avatar>
           <div className="space-y-1.5 sm:space-y-2 min-w-0 flex-1">
             <div>
@@ -103,19 +111,21 @@ export function StudentCardPage() {
             </div>
             <div>
               <p className="text-xs sm:text-sm opacity-80">Nomor Induk Siswa</p>
-              <p className="font-semibold text-base sm:text-lg truncate">{studentData.studentIdNumber}</p>
+              <p className="font-semibold text-base sm:text-lg truncate">
+                {studentData.studentIdNumber}
+              </p>
             </div>
-             <div>
+            <div>
               <p className="text-xs sm:text-sm opacity-80">Kelas</p>
               <p className="font-semibold text-base sm:text-lg truncate">{studentData.className}</p>
             </div>
           </div>
         </main>
         <footer className="flex justify-between items-end z-10 gap-2">
-            <p className="text-xs opacity-70 truncate">Jl. Pendidikan No. 123, Jakarta</p>
-            <div className="bg-white p-1.5 sm:p-2 rounded-lg flex-shrink-0">
-                <QrCode className="h-12 w-12 sm:h-16 sm:w-16 text-black" />
-            </div>
+          <p className="text-xs opacity-70 truncate">Jl. Pendidikan No. 123, Jakarta</p>
+          <div className="bg-white p-1.5 sm:p-2 rounded-lg flex-shrink-0">
+            <QrCode className="h-12 w-12 sm:h-16 sm:w-16 text-black" />
+          </div>
         </footer>
       </div>
       <Button onClick={handlePrint} size="lg" className="mt-6 sm:mt-8 w-full sm:w-auto">

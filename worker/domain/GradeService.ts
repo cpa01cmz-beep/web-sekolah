@@ -32,14 +32,18 @@ export class GradeService {
     return newGrade;
   }
 
-  static async updateGrade(env: Env, gradeId: string, updates: { score: number; feedback: string }): Promise<Grade> {
+  static async updateGrade(
+    env: Env,
+    gradeId: string,
+    updates: { score: number; feedback: string }
+  ): Promise<Grade> {
     if (gradeId === 'null' || !gradeId) {
       throw new Error('Grade ID is required');
     }
 
     const gradeEntity = new GradeEntity(env, gradeId);
 
-    if (!await gradeEntity.exists()) {
+    if (!(await gradeEntity.exists())) {
       throw new Error('Grade not found');
     }
 
@@ -48,7 +52,11 @@ export class GradeService {
     return updatedGrade!;
   }
 
-  static async getGradeByStudentAndCourse(env: Env, studentId: string, courseId: string): Promise<Grade | null> {
+  static async getGradeByStudentAndCourse(
+    env: Env,
+    studentId: string,
+    courseId: string
+  ): Promise<Grade | null> {
     return await GradeEntity.getByStudentIdAndCourseId(env, studentId, courseId);
   }
 

@@ -7,7 +7,7 @@ import type {
   UpdateUserData,
   Announcement,
   CreateAnnouncementData,
-  Settings
+  Settings,
 } from '@shared/types';
 import type { IRepository } from '@/repositories/IRepository';
 import { apiRepository } from '@/repositories/ApiRepository';
@@ -26,7 +26,9 @@ export function createAdminService(repository: IRepository = apiRepository): Adm
       if (filters?.search) queryParams.append('search', filters.search);
 
       const queryString = queryParams.toString();
-      const endpoint = queryString ? `${API_ENDPOINTS.ADMIN.USERS}?${queryString}` : API_ENDPOINTS.ADMIN.USERS;
+      const endpoint = queryString
+        ? `${API_ENDPOINTS.ADMIN.USERS}?${queryString}`
+        : API_ENDPOINTS.ADMIN.USERS;
       return repository.get<SchoolUser[]>(endpoint);
     },
 
@@ -60,7 +62,7 @@ export function createAdminService(repository: IRepository = apiRepository): Adm
 
     async updateSettings(settings: Partial<Settings>): Promise<Settings> {
       return repository.put<Settings>(API_ENDPOINTS.ADMIN.SETTINGS, settings);
-    }
+    },
   };
 }
 

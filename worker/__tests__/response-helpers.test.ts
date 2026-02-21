@@ -1,20 +1,30 @@
 import { describe, it, expect, vi } from 'vitest';
-import { ok, bad, unauthorized, forbidden, notFound, conflict, rateLimitExceeded, serverError, serviceUnavailable, gatewayTimeout, isStr } from '../api/response-helpers';
+import {
+  ok,
+  bad,
+  unauthorized,
+  forbidden,
+  notFound,
+  conflict,
+  rateLimitExceeded,
+  serverError,
+  serviceUnavailable,
+  gatewayTimeout,
+  isStr,
+} from '../api/response-helpers';
 import { Hono } from 'hono';
 import type { Context } from 'hono';
 import { ErrorCode } from '@shared/types';
 
 describe('response-helpers', () => {
-
   describe('ok', () => {
-
     it('should return 200 status with success response', async () => {
       const app = new Hono();
       app.get('/', (c) => ok(c, { message: 'success' }));
 
       const req = new Request('http://localhost', { method: 'GET' });
       const res = await app.request(req);
-      const body = await res.json() as { success: boolean; data: unknown };
+      const body = (await res.json()) as { success: boolean; data: unknown };
 
       expect(res.status).toBe(200);
       expect(body.success).toBe(true);
@@ -28,10 +38,10 @@ describe('response-helpers', () => {
 
       const req = new Request('http://localhost', {
         method: 'GET',
-        headers: { 'X-Request-ID': 'test-request-id-123' }
+        headers: { 'X-Request-ID': 'test-request-id-123' },
       });
       const res = await app.request(req);
-      const body = await res.json() as { requestId: string };
+      const body = (await res.json()) as { requestId: string };
 
       expect(body.requestId).toBe('test-request-id-123');
     });
@@ -42,9 +52,11 @@ describe('response-helpers', () => {
 
       const req = new Request('http://localhost', { method: 'GET' });
       const res = await app.request(req);
-      const body = await res.json() as { requestId: string };
+      const body = (await res.json()) as { requestId: string };
 
-      expect(body.requestId).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i);
+      expect(body.requestId).toMatch(
+        /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+      );
     });
 
     it('should handle complex data structures', async () => {
@@ -52,29 +64,27 @@ describe('response-helpers', () => {
       const complexData = {
         user: { id: '123', name: 'Test User' },
         items: [{ id: 1 }, { id: 2 }],
-        nested: { a: { b: { c: 'deep' } } }
+        nested: { a: { b: { c: 'deep' } } },
       };
       app.get('/', (c) => ok(c, complexData));
 
       const req = new Request('http://localhost', { method: 'GET' });
       const res = await app.request(req);
-      const body = await res.json() as { success: boolean; data: typeof complexData };
+      const body = (await res.json()) as { success: boolean; data: typeof complexData };
 
       expect(body.success).toBe(true);
       expect(body.data).toEqual(complexData);
     });
-
   });
 
   describe('bad', () => {
-
     it('should return 400 status with error response', async () => {
       const app = new Hono();
       app.get('/', (c) => bad(c, 'Invalid input'));
 
       const req = new Request('http://localhost', { method: 'GET' });
       const res = await app.request(req);
-      const body = await res.json() as { success: boolean; error: string; code: string };
+      const body = (await res.json()) as { success: boolean; error: string; code: string };
 
       expect(res.status).toBe(400);
       expect(body.success).toBe(false);
@@ -89,7 +99,7 @@ describe('response-helpers', () => {
 
       const req = new Request('http://localhost', { method: 'GET' });
       const res = await app.request(req);
-      const body = await res.json() as { code: string };
+      const body = (await res.json()) as { code: string };
 
       expect(res.status).toBe(400);
       expect(body.code).toBe(ErrorCode.NOT_FOUND);
@@ -97,27 +107,30 @@ describe('response-helpers', () => {
 
     it('should include details if provided', async () => {
       const app = new Hono();
-      app.get('/', (c) => bad(c, 'Validation failed', ErrorCode.VALIDATION_ERROR, { field: 'email', reason: 'invalid format' }));
+      app.get('/', (c) =>
+        bad(c, 'Validation failed', ErrorCode.VALIDATION_ERROR, {
+          field: 'email',
+          reason: 'invalid format',
+        })
+      );
 
       const req = new Request('http://localhost', { method: 'GET' });
       const res = await app.request(req);
-      const body = await res.json() as { details: Record<string, unknown> };
+      const body = (await res.json()) as { details: Record<string, unknown> };
 
       expect(res.status).toBe(400);
       expect(body.details).toEqual({ field: 'email', reason: 'invalid format' });
     });
-
   });
 
   describe('unauthorized', () => {
-
     it('should return 401 status with UNAUTHORIZED code', async () => {
       const app = new Hono();
       app.get('/', (c) => unauthorized(c, 'Not authenticated'));
 
       const req = new Request('http://localhost', { method: 'GET' });
       const res = await app.request(req);
-      const body = await res.json() as { success: boolean; error: string; code: string };
+      const body = (await res.json()) as { success: boolean; error: string; code: string };
 
       expect(res.status).toBe(401);
       expect(body.success).toBe(false);
@@ -132,23 +145,21 @@ describe('response-helpers', () => {
 
       const req = new Request('http://localhost', { method: 'GET' });
       const res = await app.request(req);
-      const body = await res.json() as { error: string };
+      const body = (await res.json()) as { error: string };
 
       expect(res.status).toBe(401);
       expect(body.error).toBe('Unauthorized');
     });
-
   });
 
   describe('forbidden', () => {
-
     it('should return 403 status with FORBIDDEN code', async () => {
       const app = new Hono();
       app.get('/', (c) => forbidden(c, 'Access denied'));
 
       const req = new Request('http://localhost', { method: 'GET' });
       const res = await app.request(req);
-      const body = await res.json() as { success: boolean; error: string; code: string };
+      const body = (await res.json()) as { success: boolean; error: string; code: string };
 
       expect(res.status).toBe(403);
       expect(body.success).toBe(false);
@@ -162,23 +173,21 @@ describe('response-helpers', () => {
 
       const req = new Request('http://localhost', { method: 'GET' });
       const res = await app.request(req);
-      const body = await res.json() as { error: string };
+      const body = (await res.json()) as { error: string };
 
       expect(res.status).toBe(403);
       expect(body.error).toBe('Forbidden');
     });
-
   });
 
   describe('notFound', () => {
-
     it('should return 404 status with NOT_FOUND code', async () => {
       const app = new Hono();
       app.get('/', (c) => notFound(c, 'Resource not found'));
 
       const req = new Request('http://localhost', { method: 'GET' });
       const res = await app.request(req);
-      const body = await res.json() as { success: boolean; error: string; code: string };
+      const body = (await res.json()) as { success: boolean; error: string; code: string };
 
       expect(res.status).toBe(404);
       expect(body.success).toBe(false);
@@ -192,23 +201,21 @@ describe('response-helpers', () => {
 
       const req = new Request('http://localhost', { method: 'GET' });
       const res = await app.request(req);
-      const body = await res.json() as { error: string };
+      const body = (await res.json()) as { error: string };
 
       expect(res.status).toBe(404);
       expect(body.error).toBe('not found');
     });
-
   });
 
   describe('conflict', () => {
-
     it('should return 409 status with CONFLICT code', async () => {
       const app = new Hono();
       app.get('/', (c) => conflict(c, 'Resource already exists'));
 
       const req = new Request('http://localhost', { method: 'GET' });
       const res = await app.request(req);
-      const body = await res.json() as { success: boolean; error: string; code: string };
+      const body = (await res.json()) as { success: boolean; error: string; code: string };
 
       expect(res.status).toBe(409);
       expect(body.success).toBe(false);
@@ -222,23 +229,21 @@ describe('response-helpers', () => {
 
       const req = new Request('http://localhost', { method: 'GET' });
       const res = await app.request(req);
-      const body = await res.json() as { error: string };
+      const body = (await res.json()) as { error: string };
 
       expect(res.status).toBe(409);
       expect(body.error).toBe('Conflict');
     });
-
   });
 
   describe('rateLimitExceeded', () => {
-
     it('should return 429 status with RATE_LIMIT_EXCEEDED code', async () => {
       const app = new Hono();
       app.get('/', (c) => rateLimitExceeded(c, 60));
 
       const req = new Request('http://localhost', { method: 'GET' });
       const res = await app.request(req);
-      const body = await res.json() as { success: boolean; error: string; code: string };
+      const body = (await res.json()) as { success: boolean; error: string; code: string };
 
       expect(res.status).toBe(429);
       expect(body.success).toBe(false);
@@ -267,18 +272,16 @@ describe('response-helpers', () => {
       expect(res.status).toBe(429);
       expect(res.headers.get('Retry-After')).toBeNull();
     });
-
   });
 
   describe('serverError', () => {
-
     it('should return 500 status with INTERNAL_SERVER_ERROR code', async () => {
       const app = new Hono();
       app.get('/', (c) => serverError(c, 'Database error'));
 
       const req = new Request('http://localhost', { method: 'GET' });
       const res = await app.request(req);
-      const body = await res.json() as { success: boolean; error: string; code: string };
+      const body = (await res.json()) as { success: boolean; error: string; code: string };
 
       expect(res.status).toBe(500);
       expect(body.success).toBe(false);
@@ -292,23 +295,21 @@ describe('response-helpers', () => {
 
       const req = new Request('http://localhost', { method: 'GET' });
       const res = await app.request(req);
-      const body = await res.json() as { error: string };
+      const body = (await res.json()) as { error: string };
 
       expect(res.status).toBe(500);
       expect(body.error).toBe('Internal server error');
     });
-
   });
 
   describe('serviceUnavailable', () => {
-
     it('should return 503 status with SERVICE_UNAVAILABLE code', async () => {
       const app = new Hono();
       app.get('/', (c) => serviceUnavailable(c, 'Maintenance mode'));
 
       const req = new Request('http://localhost', { method: 'GET' });
       const res = await app.request(req);
-      const body = await res.json() as { success: boolean; error: string; code: string };
+      const body = (await res.json()) as { success: boolean; error: string; code: string };
 
       expect(res.status).toBe(503);
       expect(body.success).toBe(false);
@@ -322,23 +323,21 @@ describe('response-helpers', () => {
 
       const req = new Request('http://localhost', { method: 'GET' });
       const res = await app.request(req);
-      const body = await res.json() as { error: string };
+      const body = (await res.json()) as { error: string };
 
       expect(res.status).toBe(503);
       expect(body.error).toBe('Service unavailable');
     });
-
   });
 
   describe('gatewayTimeout', () => {
-
     it('should return 504 status with TIMEOUT code', async () => {
       const app = new Hono();
       app.get('/', (c) => gatewayTimeout(c, 'External service timeout'));
 
       const req = new Request('http://localhost', { method: 'GET' });
       const res = await app.request(req);
-      const body = await res.json() as { success: boolean; error: string; code: string };
+      const body = (await res.json()) as { success: boolean; error: string; code: string };
 
       expect(res.status).toBe(504);
       expect(body.success).toBe(false);
@@ -352,16 +351,14 @@ describe('response-helpers', () => {
 
       const req = new Request('http://localhost', { method: 'GET' });
       const res = await app.request(req);
-      const body = await res.json() as { error: string };
+      const body = (await res.json()) as { error: string };
 
       expect(res.status).toBe(504);
       expect(body.error).toBe('Gateway timeout');
     });
-
   });
 
   describe('isStr', () => {
-
     it('should return true for non-empty string', () => {
       expect(isStr('hello')).toBe(true);
     });
@@ -398,11 +395,9 @@ describe('response-helpers', () => {
     it('should return true for whitespace-only string', () => {
       expect(isStr('   ')).toBe(true);
     });
-
   });
 
   describe('Error Code Consistency', () => {
-
     it('should use consistent error codes across all responses', async () => {
       const app = new Hono();
       app.get('/bad', (c) => bad(c, 'test'));
@@ -416,20 +411,25 @@ describe('response-helpers', () => {
       app.get('/gatewayTimeout', (c) => gatewayTimeout(c, 'test'));
 
       const endpoints = [
-        '/bad', '/unauthorized', '/forbidden', '/notFound', '/conflict',
-        '/rateLimitExceeded', '/serverError', '/serviceUnavailable', '/gatewayTimeout'
+        '/bad',
+        '/unauthorized',
+        '/forbidden',
+        '/notFound',
+        '/conflict',
+        '/rateLimitExceeded',
+        '/serverError',
+        '/serviceUnavailable',
+        '/gatewayTimeout',
       ];
 
       for (const endpoint of endpoints) {
         const req = new Request(`http://localhost${endpoint}`, { method: 'GET' });
         const res = await app.request(req);
-        const body = await res.json() as { code: string };
+        const body = (await res.json()) as { code: string };
 
         expect(body).toHaveProperty('code');
         expect(body.code).toBeTruthy();
       }
     });
-
   });
-
 });

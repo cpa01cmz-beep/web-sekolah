@@ -1,73 +1,80 @@
 import { describe, it, expect } from 'vitest';
 import { Hono } from 'hono';
 import { z } from 'zod';
-import { validateBody, validateQuery, validateParams, type ValidatedBody, type ValidatedQuery, type ValidatedParams } from '../validation';
+import {
+  validateBody,
+  validateQuery,
+  validateParams,
+  type ValidatedBody,
+  type ValidatedQuery,
+  type ValidatedParams,
+} from '../validation';
 
 describe('Validation Middleware', () => {
   describe('validateBody', () => {
     it('should pass valid body and set validatedBody in context', async () => {
       const app = new Hono();
       const schema = z.object({ name: z.string(), age: z.number() });
-      
+
       app.use('*', validateBody(schema));
       app.post('/test', (c) => c.json(c.get('validatedBody') as z.infer<typeof schema>));
-      
+
       const res = await app.request('/test', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: 'John', age: 30 }),
       });
-      
+
       expect(res.status).toBe(200);
-      const data = await res.json() as z.infer<typeof schema>;
+      const data = (await res.json()) as z.infer<typeof schema>;
       expect(data).toEqual({ name: 'John', age: 30 });
     });
 
     it('should reject invalid body with 400 status', async () => {
       const app = new Hono();
       const schema = z.object({ name: z.string(), age: z.number() });
-      
+
       app.use('*', validateBody(schema));
       app.post('/test', (c) => c.json({ success: true }));
-      
+
       const res = await app.request('/test', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: 'John' }),
       });
-      
+
       expect(res.status).toBe(400);
     });
 
     it('should reject body with wrong type', async () => {
       const app = new Hono();
       const schema = z.object({ name: z.string(), age: z.number() });
-      
+
       app.use('*', validateBody(schema));
       app.post('/test', (c) => c.json({ success: true }));
-      
+
       const res = await app.request('/test', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: 'John', age: 'thirty' }),
       });
-      
+
       expect(res.status).toBe(400);
     });
 
     it('should handle invalid JSON', async () => {
       const app = new Hono();
       const schema = z.object({ name: z.string() });
-      
+
       app.use('*', validateBody(schema));
       app.post('/test', (c) => c.json({ success: true }));
-      
+
       const res = await app.request('/test', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: 'invalid json{',
       });
-      
+
       expect(res.status).toBe(400);
     });
 
@@ -79,18 +86,18 @@ describe('Validation Middleware', () => {
           email: z.string().email(),
         }),
       });
-      
+
       app.use('*', validateBody(schema));
       app.post('/test', (c) => c.json(c.get('validatedBody') as z.infer<typeof schema>));
-      
+
       const res = await app.request('/test', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ user: { name: 'John', email: 'john@example.com' } }),
       });
-      
+
       expect(res.status).toBe(200);
-      const data = await res.json() as z.infer<typeof schema>;
+      const data = (await res.json()) as z.infer<typeof schema>;
       expect(data.user.name).toBe('John');
       expect(data.user.email).toBe('john@example.com');
     });
@@ -98,23 +105,23 @@ describe('Validation Middleware', () => {
     it('should validate arrays', async () => {
       const app = new Hono();
       const schema = z.array(z.object({ id: z.string(), name: z.string() }));
-      
+
       app.use('*', validateBody(schema));
       app.post('/test', (c) => c.json(c.get('validatedBody') as z.infer<typeof schema>));
-      
+
       const items = [
         { id: '1', name: 'Item 1' },
         { id: '2', name: 'Item 2' },
       ];
-      
+
       const res = await app.request('/test', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(items),
       });
-      
+
       expect(res.status).toBe(200);
-      const data = await res.json() as z.infer<typeof schema>;
+      const data = (await res.json()) as z.infer<typeof schema>;
       expect(data).toHaveLength(2);
       expect(data[0].name).toBe('Item 1');
     });
@@ -122,48 +129,48 @@ describe('Validation Middleware', () => {
     it('should reject when required field is missing', async () => {
       const app = new Hono();
       const schema = z.object({ name: z.string().min(2), email: z.string().email() });
-      
+
       app.use('*', validateBody(schema));
       app.post('/test', (c) => c.json({ success: true }));
-      
+
       const res = await app.request('/test', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: 'John' }),
       });
-      
+
       expect(res.status).toBe(400);
     });
 
     it('should validate with min constraint', async () => {
       const app = new Hono();
       const schema = z.object({ name: z.string().min(2) });
-      
+
       app.use('*', validateBody(schema));
       app.post('/test', (c) => c.json(c.get('validatedBody') as z.infer<typeof schema>));
-      
+
       const res = await app.request('/test', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: 'Jo' }),
       });
-      
+
       expect(res.status).toBe(200);
     });
 
     it('should reject when min constraint not met', async () => {
       const app = new Hono();
       const schema = z.object({ name: z.string().min(2) });
-      
+
       app.use('*', validateBody(schema));
       app.post('/test', (c) => c.json({ success: true }));
-      
+
       const res = await app.request('/test', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: 'J' }),
       });
-      
+
       expect(res.status).toBe(400);
     });
   });
@@ -172,26 +179,26 @@ describe('Validation Middleware', () => {
     it('should pass valid query params and set validatedQuery in context', async () => {
       const app = new Hono();
       const schema = z.object({ page: z.string(), limit: z.string() });
-      
+
       app.use('*', validateQuery(schema));
       app.get('/test', (c) => c.json(c.get('validatedQuery') as z.infer<typeof schema>));
-      
+
       const res = await app.request('/test?page=1&limit=10');
-      
+
       expect(res.status).toBe(200);
-      const data = await res.json() as z.infer<typeof schema>;
+      const data = (await res.json()) as z.infer<typeof schema>;
       expect(data).toEqual({ page: '1', limit: '10' });
     });
 
     it('should reject invalid query params', async () => {
       const app = new Hono();
       const schema = z.object({ page: z.string(), limit: z.string() });
-      
+
       app.use('*', validateQuery(schema));
       app.get('/test', (c) => c.json({ success: true }));
-      
+
       const res = await app.request('/test?page=1');
-      
+
       expect(res.status).toBe(400);
     });
 
@@ -202,14 +209,14 @@ describe('Validation Middleware', () => {
         limit: z.string().optional(),
         sort: z.string().optional(),
       });
-      
+
       app.use('*', validateQuery(schema));
       app.get('/test', (c) => c.json(c.get('validatedQuery') as z.infer<typeof schema>));
-      
+
       const res = await app.request('/test?page=1');
-      
+
       expect(res.status).toBe(200);
-      const data = await res.json() as z.infer<typeof schema>;
+      const data = (await res.json()) as z.infer<typeof schema>;
       expect(data.page).toBe('1');
       expect(data.limit).toBeUndefined();
       expect(data.sort).toBeUndefined();
@@ -221,14 +228,14 @@ describe('Validation Middleware', () => {
         page: z.string().transform((val) => parseInt(val, 10)),
         limit: z.string().transform((val) => parseInt(val, 10)),
       });
-      
+
       app.use('*', validateQuery(schema));
       app.get('/test', (c) => c.json(c.get('validatedQuery') as z.infer<typeof schema>));
-      
+
       const res = await app.request('/test?page=1&limit=10');
-      
+
       expect(res.status).toBe(200);
-      const data = await res.json() as z.infer<typeof schema>;
+      const data = (await res.json()) as z.infer<typeof schema>;
       expect(data.page).toBe(1);
       expect(data.limit).toBe(10);
     });
@@ -238,14 +245,14 @@ describe('Validation Middleware', () => {
       const schema = z.object({
         sort: z.enum(['asc', 'desc']),
       });
-      
+
       app.use('*', validateQuery(schema));
       app.get('/test', (c) => c.json(c.get('validatedQuery') as z.infer<typeof schema>));
-      
+
       const res = await app.request('/test?sort=asc');
-      
+
       expect(res.status).toBe(200);
-      const data = await res.json() as z.infer<typeof schema>;
+      const data = (await res.json()) as z.infer<typeof schema>;
       expect(data.sort).toBe('asc');
     });
 
@@ -254,12 +261,12 @@ describe('Validation Middleware', () => {
       const schema = z.object({
         sort: z.enum(['asc', 'desc']),
       });
-      
+
       app.use('*', validateQuery(schema));
       app.get('/test', (c) => c.json({ success: true }));
-      
+
       const res = await app.request('/test?sort=invalid');
-      
+
       expect(res.status).toBe(400);
     });
   });
@@ -268,7 +275,7 @@ describe('Validation Middleware', () => {
     it('should validate path param schema', () => {
       const schema = z.object({ id: z.string() });
       const middleware = validateParams(schema);
-      
+
       expect(typeof middleware).toBe('function');
     });
 
@@ -278,7 +285,7 @@ describe('Validation Middleware', () => {
         postId: z.string().uuid(),
       });
       const middleware = validateParams(schema);
-      
+
       expect(typeof middleware).toBe('function');
     });
 
@@ -288,7 +295,7 @@ describe('Validation Middleware', () => {
         slug: z.string().regex(/^[a-z0-9-]+$/),
       });
       const middleware = validateParams(schema);
-      
+
       expect(typeof middleware).toBe('function');
     });
   });
@@ -318,25 +325,25 @@ describe('Validation Middleware', () => {
       const app = new Hono();
       const bodySchema = z.object({ name: z.string() });
       const querySchema = z.object({ page: z.string() });
-      
+
       app.use('*', validateBody(bodySchema));
       app.use('*', validateQuery(querySchema));
-      
+
       app.post('/test', (c) => {
         return c.json({
           body: c.get('validatedBody'),
           query: c.get('validatedQuery'),
         });
       });
-      
+
       const res = await app.request('/test?page=1', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: 'John' }),
       });
-      
+
       expect(res.status).toBe(200);
-      const data = await res.json() as {
+      const data = (await res.json()) as {
         body: z.infer<typeof bodySchema>;
         query: z.infer<typeof querySchema>;
       };
@@ -352,18 +359,18 @@ describe('Validation Middleware', () => {
         z.object({ type: z.literal('a'), value: z.string() }),
         z.object({ type: z.literal('b'), count: z.number() }),
       ]);
-      
+
       app.use('*', validateBody(schema));
       app.post('/test', (c) => c.json(c.get('validatedBody') as z.infer<typeof schema>));
-      
+
       const res = await app.request('/test', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ type: 'a', value: 'test' }),
       });
-      
+
       expect(res.status).toBe(200);
-      const data = await res.json() as z.infer<typeof schema>;
+      const data = (await res.json()) as z.infer<typeof schema>;
       expect(data.type).toBe('a');
       if (data.type === 'a') {
         expect(data.value).toBe('test');
@@ -376,16 +383,16 @@ describe('Validation Middleware', () => {
         z.object({ type: z.literal('a'), value: z.string() }),
         z.object({ type: z.literal('b'), count: z.number() }),
       ]);
-      
+
       app.use('*', validateBody(schema));
       app.post('/test', (c) => c.json({ success: true }));
-      
+
       const res = await app.request('/test', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ type: 'c', value: 'test' }),
       });
-      
+
       expect(res.status).toBe(400);
     });
 
@@ -396,16 +403,16 @@ describe('Validation Middleware', () => {
           message: 'Password must be at least 8 characters',
         }),
       });
-      
+
       app.use('*', validateBody(schema));
       app.post('/test', (c) => c.json(c.get('validatedBody') as z.infer<typeof schema>));
-      
+
       const res = await app.request('/test', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ password: 'password123' }),
       });
-      
+
       expect(res.status).toBe(200);
     });
 
@@ -416,16 +423,16 @@ describe('Validation Middleware', () => {
           message: 'Password must be at least 8 characters',
         }),
       });
-      
+
       app.use('*', validateBody(schema));
       app.post('/test', (c) => c.json({ success: true }));
-      
+
       const res = await app.request('/test', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ password: 'short' }),
       });
-      
+
       expect(res.status).toBe(400);
     });
   });

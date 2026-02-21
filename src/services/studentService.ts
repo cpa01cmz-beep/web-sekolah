@@ -1,10 +1,5 @@
 import type { StudentService } from './serviceContracts';
-import type {
-  StudentDashboardData,
-  Grade,
-  ScheduleItem,
-  StudentCardData
-} from '@shared/types';
+import type { StudentDashboardData, Grade, ScheduleItem, StudentCardData } from '@shared/types';
 import type { IRepository } from '@/repositories/IRepository';
 import { apiRepository } from '@/repositories/ApiRepository';
 import { API_ENDPOINTS } from '@/config/api-endpoints';
@@ -25,7 +20,7 @@ export function createStudentService(repository: IRepository = apiRepository): S
 
     async getCard(studentId: string): Promise<StudentCardData> {
       return repository.get<StudentCardData>(API_ENDPOINTS.STUDENTS.CARD(studentId));
-    }
+    },
   };
 }
 

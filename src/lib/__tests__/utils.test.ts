@@ -44,7 +44,10 @@ describe('cn() - Class Name Utility', () => {
 
     it('should merge arrays of class names', () => {
       // Arrange
-      const input = [['text-primary', 'font-bold'], ['bg-blue-500', 'p-4']];
+      const input = [
+        ['text-primary', 'font-bold'],
+        ['bg-blue-500', 'p-4'],
+      ];
       // Act
       const result = cn(...input);
       // Assert
@@ -56,7 +59,7 @@ describe('cn() - Class Name Utility', () => {
       const input = {
         'text-primary': true,
         'font-bold': true,
-        'italic': false
+        italic: false,
       };
       // Act
       const result = cn(input);
@@ -68,8 +71,8 @@ describe('cn() - Class Name Utility', () => {
       // Arrange
       const input = [
         'text-primary',
-        ['font-bold', { 'bg-blue-500': true, 'italic': false }],
-        { 'p-4': true }
+        ['font-bold', { 'bg-blue-500': true, italic: false }],
+        { 'p-4': true },
       ];
       // Act
       const result = cn(...input);
@@ -227,7 +230,7 @@ describe('cn() - Class Name Utility', () => {
       // Arrange
       const input = {
         'text-primary': false,
-        'font-bold': false
+        'font-bold': false,
       };
       // Act
       const result = cn(input);
@@ -323,7 +326,10 @@ describe('cn() - Class Name Utility', () => {
 
     it('should handle deeply nested arrays', () => {
       // Arrange
-      const input = [[['text-primary'], ['font-bold']], [['bg-blue-500'], ['p-4']]];
+      const input = [
+        [['text-primary'], ['font-bold']],
+        [['bg-blue-500'], ['p-4']],
+      ];
       // Act
       const result = cn(...input);
       // Assert
@@ -332,11 +338,7 @@ describe('cn() - Class Name Utility', () => {
 
     it('should handle mixed nesting levels', () => {
       // Arrange
-      const input = [
-        'text-primary',
-        [['font-bold', 'bg-blue-500']],
-        { 'p-4': true, 'm-2': true }
-      ];
+      const input = ['text-primary', [['font-bold', 'bg-blue-500']], { 'p-4': true, 'm-2': true }];
       // Act
       const result = cn(...input);
       // Assert
@@ -349,11 +351,7 @@ describe('cn() - Class Name Utility', () => {
       // Arrange
       const isActive = true;
       const isLoading = false;
-      const input = [
-        'base-class',
-        isActive && 'active-class',
-        isLoading && 'loading-class'
-      ];
+      const input = ['base-class', isActive && 'active-class', isLoading && 'loading-class'];
       // Act
       const result = cn(...input);
       // Assert
@@ -362,12 +360,7 @@ describe('cn() - Class Name Utility', () => {
 
     it('should handle responsive design pattern', () => {
       // Arrange
-      const input = [
-        'text-sm',
-        'md:text-base',
-        'lg:text-lg',
-        'xl:text-xl'
-      ];
+      const input = ['text-sm', 'md:text-base', 'lg:text-lg', 'xl:text-xl'];
       // Act
       const result = cn(...input);
       // Assert
@@ -382,7 +375,7 @@ describe('cn() - Class Name Utility', () => {
         'text-primary': !isError && !isSuccess,
         'text-red-500': isError,
         'text-green-500': isSuccess,
-        'font-bold': true
+        'font-bold': true,
       };
       // Act
       const result = cn(input);
@@ -399,7 +392,7 @@ describe('cn() - Class Name Utility', () => {
         variant === 'primary' && 'bg-blue-500',
         variant === 'secondary' && 'bg-gray-500',
         size === 'sm' && 'text-sm',
-        size === 'lg' && 'text-lg'
+        size === 'lg' && 'text-lg',
       ];
       // Act
       const result = cn(...input);
@@ -414,12 +407,14 @@ describe('cn() - Class Name Utility', () => {
         'hover:bg-blue-600',
         'focus:ring-2',
         'focus:ring-blue-300',
-        'active:bg-blue-700'
+        'active:bg-blue-700',
       ];
       // Act
       const result = cn(...input);
       // Assert
-      expect(result).toBe('bg-blue-500 hover:bg-blue-600 focus:ring-2 focus:ring-blue-300 active:bg-blue-700');
+      expect(result).toBe(
+        'bg-blue-500 hover:bg-blue-600 focus:ring-2 focus:ring-blue-300 active:bg-blue-700'
+      );
     });
   });
 
@@ -432,12 +427,16 @@ describe('cn() - Class Name Utility', () => {
 
       it('should have hover with transform interaction', () => {
         // Act & Assert
-        expect(cardInteractions.hoverWithTransform).toBe('hover:shadow-lg hover:-translate-y-1 transition-all duration-200');
+        expect(cardInteractions.hoverWithTransform).toBe(
+          'hover:shadow-lg hover:-translate-y-1 transition-all duration-200'
+        );
       });
 
       it('should have hover with scale interaction', () => {
         // Act & Assert
-        expect(cardInteractions.hoverWithScale).toBe('hover:shadow-lg hover:scale-105 transition-all duration-200');
+        expect(cardInteractions.hoverWithScale).toBe(
+          'hover:shadow-lg hover:scale-105 transition-all duration-200'
+        );
       });
     });
 
@@ -449,7 +448,9 @@ describe('cn() - Class Name Utility', () => {
 
       it('should have hover underline interaction', () => {
         // Act & Assert
-        expect(textInteractions.hoverUnderline).toBe('text-primary hover:underline transition-colors');
+        expect(textInteractions.hoverUnderline).toBe(
+          'text-primary hover:underline transition-colors'
+        );
       });
 
       it('should have link interaction', () => {
@@ -466,7 +467,9 @@ describe('cn() - Class Name Utility', () => {
 
       it('should have destructive hover interaction', () => {
         // Act & Assert
-        expect(buttonInteractions.destructiveHover).toBe('hover:bg-destructive/90 transition-colors');
+        expect(buttonInteractions.destructiveHover).toBe(
+          'hover:bg-destructive/90 transition-colors'
+        );
       });
 
       it('should have secondary hover interaction', () => {
@@ -476,7 +479,9 @@ describe('cn() - Class Name Utility', () => {
 
       it('should have outline hover interaction', () => {
         // Act & Assert
-        expect(buttonInteractions.outlineHover).toBe('hover:bg-accent hover:text-accent-foreground transition-colors');
+        expect(buttonInteractions.outlineHover).toBe(
+          'hover:bg-accent hover:text-accent-foreground transition-colors'
+        );
       });
 
       it('should have transform interaction', () => {
@@ -523,14 +528,14 @@ describe('cn() - Class Name Utility', () => {
       // Arrange
       const input = ['text-primary', 'font-bold', 'bg-blue-500'];
       const iterations = 100;
-      
+
       // Act
       const startTime = performance.now();
       for (let i = 0; i < iterations; i++) {
         cn(...input);
       }
       const endTime = performance.now();
-      
+
       // Assert
       const executionTime = endTime - startTime;
       expect(executionTime).toBeLessThan(100); // Should complete in < 100ms
@@ -539,12 +544,12 @@ describe('cn() - Class Name Utility', () => {
     it('should produce consistent output for same inputs', () => {
       // Arrange
       const input = ['text-primary', 'font-bold', 'bg-blue-500'];
-      
+
       // Act
       const result1 = cn(...input);
       const result2 = cn(...input);
       const result3 = cn(...input);
-      
+
       // Assert
       expect(result1).toBe(result2);
       expect(result2).toBe(result3);
@@ -553,12 +558,12 @@ describe('cn() - Class Name Utility', () => {
     it('should handle large class name sets efficiently', () => {
       // Arrange
       const input = Array.from({ length: 100 }, (_, i) => `class-${i}`);
-      
+
       // Act
       const startTime = performance.now();
       const result = cn(...input);
       const endTime = performance.now();
-      
+
       // Assert
       const executionTime = endTime - startTime;
       expect(executionTime).toBeLessThan(50); // Should complete in < 50ms
@@ -609,11 +614,7 @@ describe('cn() - Class Name Utility', () => {
       // Arrange
       const isActive = true;
       const isDisabled = false;
-      const input = [
-        'base-class',
-        isActive && 'active',
-        isDisabled && 'disabled'
-      ];
+      const input = ['base-class', isActive && 'active', isDisabled && 'disabled'];
       // Act
       const result = cn(...input);
       // Assert

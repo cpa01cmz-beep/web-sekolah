@@ -1,5 +1,11 @@
 import { describe, it, expect } from 'vitest';
-import { GRADE_A_THRESHOLD, GRADE_B_THRESHOLD, GRADE_C_THRESHOLD, PASSING_SCORE_THRESHOLD, GRADE_PRECISION_FACTOR } from '../constants';
+import {
+  GRADE_A_THRESHOLD,
+  GRADE_B_THRESHOLD,
+  GRADE_C_THRESHOLD,
+  PASSING_SCORE_THRESHOLD,
+  GRADE_PRECISION_FACTOR,
+} from '../constants';
 
 describe('student-routes - Critical Business Logic', () => {
   describe('GET /api/students/:id/card - Grade Calculations', () => {
@@ -7,11 +13,12 @@ describe('student-routes - Critical Business Logic', () => {
       const grades = [
         { id: 'g1', score: 85, studentId: 's1', courseId: 'c1', feedback: '', createdAt: '' },
         { id: 'g2', score: 90, studentId: 's1', courseId: 'c2', feedback: '', createdAt: '' },
-        { id: 'g3', score: 80, studentId: 's1', courseId: 'c3', feedback: '', createdAt: '' }
+        { id: 'g3', score: 80, studentId: 's1', courseId: 'c3', feedback: '', createdAt: '' },
       ];
 
       const averageScore = grades.reduce((sum, g) => sum + g.score, 0) / grades.length;
-      const roundedScore = Math.round(averageScore * GRADE_PRECISION_FACTOR) / GRADE_PRECISION_FACTOR;
+      const roundedScore =
+        Math.round(averageScore * GRADE_PRECISION_FACTOR) / GRADE_PRECISION_FACTOR;
 
       expect(averageScore).toBe(85);
       expect(roundedScore).toBe(85);
@@ -19,9 +26,8 @@ describe('student-routes - Critical Business Logic', () => {
 
     it('should return 0 average score for student with no grades', () => {
       const grades: any[] = [];
-      const averageScore = grades.length > 0
-        ? grades.reduce((sum, g) => sum + g.score, 0) / grades.length
-        : 0;
+      const averageScore =
+        grades.length > 0 ? grades.reduce((sum, g) => sum + g.score, 0) / grades.length : 0;
 
       expect(averageScore).toBe(0);
     });
@@ -29,11 +35,12 @@ describe('student-routes - Critical Business Logic', () => {
     it('should round average score to 1 decimal place', () => {
       const grades = [
         { id: 'g1', score: 85.67, studentId: 's1', courseId: 'c1', feedback: '', createdAt: '' },
-        { id: 'g2', score: 90.33, studentId: 's1', courseId: 'c2', feedback: '', createdAt: '' }
+        { id: 'g2', score: 90.33, studentId: 's1', courseId: 'c2', feedback: '', createdAt: '' },
       ];
 
       const averageScore = grades.reduce((sum, g) => sum + g.score, 0) / grades.length;
-      const roundedScore = Math.round(averageScore * GRADE_PRECISION_FACTOR) / GRADE_PRECISION_FACTOR;
+      const roundedScore =
+        Math.round(averageScore * GRADE_PRECISION_FACTOR) / GRADE_PRECISION_FACTOR;
 
       expect(roundedScore).toBe(88);
     });
@@ -43,10 +50,10 @@ describe('student-routes - Critical Business Logic', () => {
         { id: 'g1', score: 95, studentId: 's1', courseId: 'c1', feedback: '', createdAt: '' },
         { id: 'g2', score: 90, studentId: 's1', courseId: 'c2', feedback: '', createdAt: '' },
         { id: 'g3', score: 89, studentId: 's1', courseId: 'c3', feedback: '', createdAt: '' },
-        { id: 'g4', score: 85, studentId: 's1', courseId: 'c4', feedback: '', createdAt: '' }
+        { id: 'g4', score: 85, studentId: 's1', courseId: 'c4', feedback: '', createdAt: '' },
       ];
 
-      const gradeA = grades.filter(g => g.score >= GRADE_A_THRESHOLD).length;
+      const gradeA = grades.filter((g) => g.score >= GRADE_A_THRESHOLD).length;
       expect(gradeA).toBe(2);
     });
 
@@ -55,10 +62,12 @@ describe('student-routes - Critical Business Logic', () => {
         { id: 'g1', score: 89, studentId: 's1', courseId: 'c1', feedback: '', createdAt: '' },
         { id: 'g2', score: 85, studentId: 's1', courseId: 'c2', feedback: '', createdAt: '' },
         { id: 'g3', score: 80, studentId: 's1', courseId: 'c3', feedback: '', createdAt: '' },
-        { id: 'g4', score: 79, studentId: 's1', courseId: 'c4', feedback: '', createdAt: '' }
+        { id: 'g4', score: 79, studentId: 's1', courseId: 'c4', feedback: '', createdAt: '' },
       ];
 
-      const gradeB = grades.filter(g => g.score >= GRADE_B_THRESHOLD && g.score < GRADE_A_THRESHOLD).length;
+      const gradeB = grades.filter(
+        (g) => g.score >= GRADE_B_THRESHOLD && g.score < GRADE_A_THRESHOLD
+      ).length;
       expect(gradeB).toBe(3);
     });
 
@@ -67,10 +76,12 @@ describe('student-routes - Critical Business Logic', () => {
         { id: 'g1', score: 79, studentId: 's1', courseId: 'c1', feedback: '', createdAt: '' },
         { id: 'g2', score: 75, studentId: 's1', courseId: 'c2', feedback: '', createdAt: '' },
         { id: 'g3', score: 70, studentId: 's1', courseId: 'c3', feedback: '', createdAt: '' },
-        { id: 'g4', score: 69, studentId: 's1', courseId: 'c4', feedback: '', createdAt: '' }
+        { id: 'g4', score: 69, studentId: 's1', courseId: 'c4', feedback: '', createdAt: '' },
       ];
 
-      const gradeC = grades.filter(g => g.score >= GRADE_C_THRESHOLD && g.score < GRADE_B_THRESHOLD).length;
+      const gradeC = grades.filter(
+        (g) => g.score >= GRADE_C_THRESHOLD && g.score < GRADE_B_THRESHOLD
+      ).length;
       expect(gradeC).toBe(3);
     });
 
@@ -79,10 +90,12 @@ describe('student-routes - Critical Business Logic', () => {
         { id: 'g1', score: 69, studentId: 's1', courseId: 'c1', feedback: '', createdAt: '' },
         { id: 'g2', score: 65, studentId: 's1', courseId: 'c2', feedback: '', createdAt: '' },
         { id: 'g3', score: 60, studentId: 's1', courseId: 'c3', feedback: '', createdAt: '' },
-        { id: 'g4', score: 59, studentId: 's1', courseId: 'c4', feedback: '', createdAt: '' }
+        { id: 'g4', score: 59, studentId: 's1', courseId: 'c4', feedback: '', createdAt: '' },
       ] as any[];
 
-      const gradeD = grades.filter(g => g.score >= PASSING_SCORE_THRESHOLD && g.score < GRADE_C_THRESHOLD).length;
+      const gradeD = grades.filter(
+        (g) => g.score >= PASSING_SCORE_THRESHOLD && g.score < GRADE_C_THRESHOLD
+      ).length;
       expect(gradeD).toBe(3);
     });
 
@@ -91,10 +104,10 @@ describe('student-routes - Critical Business Logic', () => {
         { id: 'g1', score: 59, studentId: 's1', courseId: 'c1', feedback: '', createdAt: '' },
         { id: 'g2', score: 55, studentId: 's1', courseId: 'c2', feedback: '', createdAt: '' },
         { id: 'g3', score: 45, studentId: 's1', courseId: 'c3', feedback: '', createdAt: '' },
-        { id: 'g4', score: 60, studentId: 's1', courseId: 'c4', feedback: '', createdAt: '' }
+        { id: 'g4', score: 60, studentId: 's1', courseId: 'c4', feedback: '', createdAt: '' },
       ] as any[];
 
-      const gradeF = grades.filter(g => g.score < PASSING_SCORE_THRESHOLD).length;
+      const gradeF = grades.filter((g) => g.score < PASSING_SCORE_THRESHOLD).length;
       expect(gradeF).toBe(3);
     });
 
@@ -102,7 +115,7 @@ describe('student-routes - Critical Business Logic', () => {
       const grades = [
         { id: 'g1', score: 85, studentId: 's1', courseId: 'c1', feedback: '', createdAt: '' },
         { id: 'g2', score: 90, studentId: 's1', courseId: 'c2', feedback: '', createdAt: '' },
-        { id: 'g3', score: 75, studentId: 's1', courseId: 'c3', feedback: '', createdAt: '' }
+        { id: 'g3', score: 75, studentId: 's1', courseId: 'c3', feedback: '', createdAt: '' },
       ];
 
       const totalGrades = grades.length;
@@ -117,7 +130,7 @@ describe('student-routes - Critical Business Logic', () => {
         { id: 'g4', score: 80, createdAt: '2024-01-04T00:00:00Z' },
         { id: 'g5', score: 95, createdAt: '2024-01-05T00:00:00Z' },
         { id: 'g6', score: 88, createdAt: '2024-01-06T00:00:00Z' },
-        { id: 'g7', score: 82, createdAt: '2024-01-07T00:00:00Z' }
+        { id: 'g7', score: 82, createdAt: '2024-01-07T00:00:00Z' },
       ];
 
       const recentGrades = grades.slice(-5).reverse();
@@ -130,7 +143,7 @@ describe('student-routes - Critical Business Logic', () => {
       const grades = [
         { id: 'g1', score: 85, createdAt: '2024-01-01T00:00:00Z' },
         { id: 'g2', score: 90, createdAt: '2024-01-02T00:00:00Z' },
-        { id: 'g3', score: 75, createdAt: '2024-01-03T00:00:00Z' }
+        { id: 'g3', score: 75, createdAt: '2024-01-03T00:00:00Z' },
       ];
 
       const recentGrades = grades.slice(-5).reverse();
@@ -172,8 +185,8 @@ describe('student-routes - Critical Business Logic', () => {
       const schedule = {
         items: [
           { id: 's1', courseId: 'c1', day: 'Monday', startTime: '08:00', endTime: '09:00' },
-          { id: 's2', courseId: 'c2', day: 'Monday', startTime: '10:00', endTime: '11:00' }
-        ]
+          { id: 's2', courseId: 'c2', day: 'Monday', startTime: '10:00', endTime: '11:00' },
+        ],
       } as any;
 
       const scheduleItems = (schedule as any)?.items || [];
@@ -230,19 +243,19 @@ describe('student-routes - Critical Business Logic', () => {
       const allGrades = [
         { id: 'g1', score: 85, studentId: 's1', courseId: 'c1', feedback: '', createdAt: '' },
         { id: 'g2', score: 90, studentId: 's2', courseId: 'c2', feedback: '', createdAt: '' },
-        { id: 'g3', score: 75, studentId: 's1', courseId: 'c3', feedback: '', createdAt: '' }
+        { id: 'g3', score: 75, studentId: 's1', courseId: 'c3', feedback: '', createdAt: '' },
       ];
 
       const studentId = 's1';
-      const studentGrades = allGrades.filter(g => g.studentId === studentId);
+      const studentGrades = allGrades.filter((g) => g.studentId === studentId);
 
       expect(studentGrades).toHaveLength(2);
-      expect(studentGrades.every(g => g.studentId === studentId)).toBe(true);
+      expect(studentGrades.every((g) => g.studentId === studentId)).toBe(true);
     });
 
     it('should return empty array for student with no grades', () => {
       const allGrades: any[] = [];
-      const studentGrades = allGrades.filter(g => g.studentId === 's1');
+      const studentGrades = allGrades.filter((g) => g.studentId === 's1');
 
       expect(studentGrades).toHaveLength(0);
       expect(studentGrades).toEqual([]);
@@ -259,7 +272,7 @@ describe('student-routes - Critical Business Logic', () => {
         averageScore: 85,
         totalGrades: 5,
         gradeDistribution: { A: 2, B: 2, C: 1, D: 0, F: 0 },
-        recentGrades: []
+        recentGrades: [],
       } as any;
 
       expect(cardData).toHaveProperty('name');
@@ -298,7 +311,9 @@ describe('student-routes - Critical Business Logic', () => {
 
   describe('Edge Cases - Boundary Conditions', () => {
     it('should handle student with single grade', () => {
-      const grades = [{ id: 'g1', score: 85, studentId: 's1', courseId: 'c1', feedback: '', createdAt: '' }];
+      const grades = [
+        { id: 'g1', score: 85, studentId: 's1', courseId: 'c1', feedback: '', createdAt: '' },
+      ];
 
       const averageScore = grades.reduce((sum, g) => sum + g.score, 0) / grades.length;
       const totalGrades = grades.length;
@@ -308,27 +323,37 @@ describe('student-routes - Critical Business Logic', () => {
     });
 
     it('should handle perfect score (100)', () => {
-      const grades = [{ id: 'g1', score: 100, studentId: 's1', courseId: 'c1', feedback: '', createdAt: '' }];
+      const grades = [
+        { id: 'g1', score: 100, studentId: 's1', courseId: 'c1', feedback: '', createdAt: '' },
+      ];
 
-      const gradeA = grades.filter(g => g.score >= GRADE_A_THRESHOLD).length;
+      const gradeA = grades.filter((g) => g.score >= GRADE_A_THRESHOLD).length;
       expect(gradeA).toBe(1);
     });
 
     it('should handle minimum passing score (60)', () => {
-      const grades = [{ id: 'g1', score: 60, studentId: 's1', courseId: 'c1', feedback: '', createdAt: '' }];
+      const grades = [
+        { id: 'g1', score: 60, studentId: 's1', courseId: 'c1', feedback: '', createdAt: '' },
+      ];
 
-      const gradeD = grades.filter(g => g.score >= PASSING_SCORE_THRESHOLD && g.score < GRADE_C_THRESHOLD).length;
-      const gradeF = grades.filter(g => g.score < PASSING_SCORE_THRESHOLD).length;
+      const gradeD = grades.filter(
+        (g) => g.score >= PASSING_SCORE_THRESHOLD && g.score < GRADE_C_THRESHOLD
+      ).length;
+      const gradeF = grades.filter((g) => g.score < PASSING_SCORE_THRESHOLD).length;
 
       expect(gradeD).toBe(1);
       expect(gradeF).toBe(0);
     });
 
     it('should handle failing score (59)', () => {
-      const grades = [{ id: 'g1', score: 59, studentId: 's1', courseId: 'c1', feedback: '', createdAt: '' }] as any[];
+      const grades = [
+        { id: 'g1', score: 59, studentId: 's1', courseId: 'c1', feedback: '', createdAt: '' },
+      ] as any[];
 
-      const gradeD = grades.filter(g => g.score >= PASSING_SCORE_THRESHOLD && g.score < GRADE_C_THRESHOLD).length;
-      const gradeF = grades.filter(g => g.score < PASSING_SCORE_THRESHOLD).length;
+      const gradeD = grades.filter(
+        (g) => g.score >= PASSING_SCORE_THRESHOLD && g.score < GRADE_C_THRESHOLD
+      ).length;
+      const gradeF = grades.filter((g) => g.score < PASSING_SCORE_THRESHOLD).length;
 
       expect(gradeD).toBe(0);
       expect(gradeF).toBe(1);
@@ -337,11 +362,12 @@ describe('student-routes - Critical Business Logic', () => {
     it('should handle decimal scores', () => {
       const grades = [
         { id: 'g1', score: 85.5, studentId: 's1', courseId: 'c1', feedback: '', createdAt: '' },
-        { id: 'g2', score: 90.7, studentId: 's1', courseId: 'c2', feedback: '', createdAt: '' }
+        { id: 'g2', score: 90.7, studentId: 's1', courseId: 'c2', feedback: '', createdAt: '' },
       ];
 
       const averageScore = grades.reduce((sum, g) => sum + g.score, 0) / grades.length;
-      const roundedScore = Math.round(averageScore * GRADE_PRECISION_FACTOR) / GRADE_PRECISION_FACTOR;
+      const roundedScore =
+        Math.round(averageScore * GRADE_PRECISION_FACTOR) / GRADE_PRECISION_FACTOR;
 
       expect(roundedScore).toBe(88.1);
     });

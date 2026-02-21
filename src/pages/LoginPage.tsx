@@ -1,6 +1,13 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { FormField } from '@/components/ui/form-field';
 import { useAuthStore } from '@/lib/authStore';
@@ -50,9 +57,17 @@ export function LoginPage() {
   const passwordError = validatePassword(password, showValidationErrors);
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-4" style={{ backgroundColor: THEME_COLORS.BACKGROUND }}>
+    <div
+      className="min-h-screen flex flex-col items-center justify-center p-4"
+      style={{ backgroundColor: THEME_COLORS.BACKGROUND }}
+    >
       <Toaster richColors />
-      <div className="absolute inset-0" style={{ background: `linear-gradient(to bottom right, ${THEME_COLORS.PRIMARY}10, ${THEME_COLORS.SECONDARY}10)` }}></div>
+      <div
+        className="absolute inset-0"
+        style={{
+          background: `linear-gradient(to bottom right, ${THEME_COLORS.PRIMARY}10, ${THEME_COLORS.SECONDARY}10)`,
+        }}
+      ></div>
       <SlideUp>
         <div className="w-full max-w-md z-10">
           <Card>
@@ -64,59 +79,63 @@ export function LoginPage() {
               <CardTitle className="text-2xl">Unified Login</CardTitle>
               <CardDescription>Enter your credentials to access your portal.</CardDescription>
             </CardHeader>
-            <form onSubmit={(e) => {
-              e.preventDefault();
-              setShowValidationErrors(true);
-              if (!isLoading && email && password) {
-                toast.error('Please select your role to login.');
-              }
-            }}>
-            <CardContent className="space-y-6">
-              <FormField
-                id="email"
-                label="Email"
-                helperText="Enter your registered email address"
-                required
-                error={emailError}
-              >
-                <Input
-                  type="email"
-                  placeholder="user@example.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                setShowValidationErrors(true);
+                if (!isLoading && email && password) {
+                  toast.error('Please select your role to login.');
+                }
+              }}
+            >
+              <CardContent className="space-y-6">
+                <FormField
+                  id="email"
+                  label="Email"
+                  helperText="Enter your registered email address"
                   required
-                  disabled={!!isLoading}
-                />
-              </FormField>
-              <FormField
-                id="password"
-                label="Password"
-                helperText="Enter your password"
-                required
-                error={passwordError}
-              >
-                <Input
-                  type="password"
-                  placeholder="•••••"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  error={emailError}
+                >
+                  <Input
+                    type="email"
+                    placeholder="user@example.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    disabled={!!isLoading}
+                  />
+                </FormField>
+                <FormField
+                  id="password"
+                  label="Password"
+                  helperText="Enter your password"
                   required
-                  disabled={!!isLoading}
+                  error={passwordError}
+                >
+                  <Input
+                    type="password"
+                    placeholder="•••••"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    disabled={!!isLoading}
+                  />
+                </FormField>
+              </CardContent>
+              <CardFooter className="flex flex-col gap-4">
+                <p className="text-sm text-muted-foreground">Select your role to login:</p>
+                <RoleButtonGrid
+                  loadingRole={isLoading}
+                  onRoleSelect={handleLogin}
+                  buttonClassName="w-full"
                 />
-              </FormField>
-
-            </CardContent>
-            <CardFooter className="flex flex-col gap-4">
-              <p className="text-sm text-muted-foreground">Select your role to login:</p>
-              <RoleButtonGrid
-                loadingRole={isLoading}
-                onRoleSelect={handleLogin}
-                buttonClassName="w-full"
-              />
-              <Link to="/" className="text-sm text-primary hover:underline mt-4 flex items-center gap-1">
-                Back to Home <ArrowRight className="h-4 w-4" />
-              </Link>
-            </CardFooter>
+                <Link
+                  to="/"
+                  className="text-sm text-primary hover:underline mt-4 flex items-center gap-1"
+                >
+                  Back to Home <ArrowRight className="h-4 w-4" />
+                </Link>
+              </CardFooter>
             </form>
           </Card>
         </div>

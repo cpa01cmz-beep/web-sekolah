@@ -2,7 +2,7 @@ export type DateFormat = 'short' | 'long' | 'time' | 'month-year' | 'full-date';
 
 export function formatDate(date: string | Date, format: DateFormat = 'short'): string {
   const dateObj = typeof date === 'string' ? new Date(date) : date;
-  
+
   if (isNaN(dateObj.getTime())) {
     return 'Invalid Date';
   }
@@ -53,14 +53,14 @@ export function formatDateLong(date: string | Date): string {
 
 export function formatTime(date: string | Date): string {
   const dateObj = typeof date === 'string' ? new Date(date) : date;
-  
+
   if (isNaN(dateObj.getTime())) {
     return 'Invalid Time';
   }
 
   return dateObj.toLocaleTimeString('en-US', {
     hour: 'numeric',
-    minute: 'numeric'
+    minute: 'numeric',
   });
 }
 

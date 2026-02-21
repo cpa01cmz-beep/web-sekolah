@@ -50,7 +50,7 @@ export async function handleErrorResponse(
   return createApiError(
     (errorJson.error as string) || `Request failed with status ${response.status}`,
     response.status,
-    (errorJson.code as string),
+    errorJson.code as string,
     requestIdHeader || requestId
   );
 }
@@ -69,7 +69,11 @@ export function handleApiSuccessError(
   );
 }
 
-export function handleMissingDataError(status: number, requestId: string, requestIdHeader: string | null): ApiError {
+export function handleMissingDataError(
+  status: number,
+  requestId: string,
+  requestIdHeader: string | null
+): ApiError {
   return createApiError(
     'API response missing data field',
     status,

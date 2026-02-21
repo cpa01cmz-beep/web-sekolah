@@ -23,7 +23,7 @@ const logLevels: Record<LogLevel, number> = {
   debug: 0,
   info: 1,
   warn: 2,
-  error: 3
+  error: 3,
 };
 
 const currentLevel = getLogLevel();
@@ -41,7 +41,7 @@ function formatLogEntry(level: string, message: string, context?: LogContext): L
   const entry: LogEntry = {
     level,
     timestamp: formatTimestamp(),
-    message
+    message,
   };
 
   if (context && Object.keys(context).length > 0) {
@@ -94,7 +94,7 @@ function formatErrorContext(err: Error | unknown, context?: LogContext): LogCont
     errorContext.error = {
       message: err.message,
       stack: err.stack,
-      name: err.name
+      name: err.name,
     };
   } else if (err !== undefined) {
     errorContext.error = err;
@@ -131,7 +131,7 @@ export function createChildLogger(context: LogContext): {
     error: (message: string, err?: Error | unknown, additionalContext?: LogContext) => {
       const mergedContext = { ...baseContext, ...additionalContext };
       error(message, err, mergedContext);
-    }
+    },
   };
 }
 
@@ -139,7 +139,7 @@ export const logger = {
   debug,
   info,
   warn,
-  error
+  error,
 };
 
 let testResetCount = 0;

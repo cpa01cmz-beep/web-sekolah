@@ -137,7 +137,7 @@ describe('Analytics Utilities', () => {
     it('calculates grade distribution', () => {
       const scores = [95, 85, 75, 65, 55, 45];
       const distribution = calculateGradeDistribution(scores);
-      
+
       expect(distribution.A).toBe(1);
       expect(distribution.B).toBe(1);
       expect(distribution.C).toBe(1);
@@ -156,7 +156,7 @@ describe('Analytics Utilities', () => {
     it('converts distribution to chart data', () => {
       const distribution = { A: 2, B: 3, C: 1, D: 0, E: 0, F: 0 };
       const chartData = gradeDistributionToChartData(distribution);
-      
+
       expect(chartData).toHaveLength(3);
       expect(chartData[0]).toEqual({ name: 'A (90-100)', value: 2 });
       expect(chartData[1]).toEqual({ name: 'B (80-89)', value: 3 });
@@ -208,9 +208,9 @@ describe('Analytics Utilities', () => {
         { category: 'B', value: 2 },
         { category: 'A', value: 3 },
       ];
-      
+
       const grouped = groupByField(data, 'category');
-      
+
       expect(grouped['A']).toHaveLength(2);
       expect(grouped['B']).toHaveLength(1);
     });
@@ -223,11 +223,11 @@ describe('Analytics Utilities', () => {
         { category: 'B', value: 20 },
         { category: 'A', value: 30 },
       ];
-      
+
       const result = aggregateByField(data, 'category', 'value', 'sum');
-      
-      expect(result.find(r => r.name === 'A')?.value).toBe(40);
-      expect(result.find(r => r.name === 'B')?.value).toBe(20);
+
+      expect(result.find((r) => r.name === 'A')?.value).toBe(40);
+      expect(result.find((r) => r.name === 'B')?.value).toBe(20);
     });
 
     it('aggregates by avg', () => {
@@ -235,10 +235,10 @@ describe('Analytics Utilities', () => {
         { category: 'A', value: 10 },
         { category: 'A', value: 20 },
       ];
-      
+
       const result = aggregateByField(data, 'category', 'value', 'avg');
-      
-      expect(result.find(r => r.name === 'A')?.value).toBe(15);
+
+      expect(result.find((r) => r.name === 'A')?.value).toBe(15);
     });
 
     it('aggregates by count', () => {
@@ -247,11 +247,11 @@ describe('Analytics Utilities', () => {
         { category: 'A', value: 20 },
         { category: 'B', value: 30 },
       ];
-      
+
       const result = aggregateByField(data, 'category', 'value', 'count');
-      
-      expect(result.find(r => r.name === 'A')?.value).toBe(2);
-      expect(result.find(r => r.name === 'B')?.value).toBe(1);
+
+      expect(result.find((r) => r.name === 'A')?.value).toBe(2);
+      expect(result.find((r) => r.name === 'B')?.value).toBe(1);
     });
   });
 
@@ -261,9 +261,9 @@ describe('Analytics Utilities', () => {
         { name: 'A', value: 50 },
         { name: 'B', value: 100 },
       ];
-      
+
       const normalized = normalizeData(data, 100);
-      
+
       expect(normalized[0].value).toBe(50);
       expect(normalized[1].value).toBe(100);
     });
@@ -273,9 +273,9 @@ describe('Analytics Utilities', () => {
         { name: 'A', value: 0 },
         { name: 'B', value: 0 },
       ];
-      
+
       const normalized = normalizeData(data, 100);
-      
+
       expect(normalized).toEqual(data);
     });
   });
@@ -287,9 +287,9 @@ describe('Analytics Utilities', () => {
         { name: 'B', value: 30 },
         { name: 'C', value: 20 },
       ];
-      
+
       const sorted = sortByValue(data);
-      
+
       expect(sorted[0].value).toBe(30);
       expect(sorted[1].value).toBe(20);
       expect(sorted[2].value).toBe(10);
@@ -301,9 +301,9 @@ describe('Analytics Utilities', () => {
         { name: 'B', value: 30 },
         { name: 'C', value: 20 },
       ];
-      
+
       const sorted = sortByValue(data, 'asc');
-      
+
       expect(sorted[0].value).toBe(10);
       expect(sorted[1].value).toBe(20);
       expect(sorted[2].value).toBe(30);
@@ -318,9 +318,9 @@ describe('Analytics Utilities', () => {
         { name: 'C', value: 20 },
         { name: 'D', value: 40 },
       ];
-      
+
       const top2 = topN(data, 2);
-      
+
       expect(top2).toHaveLength(2);
       expect(top2[0].value).toBe(40);
       expect(top2[1].value).toBe(30);
@@ -485,7 +485,7 @@ describe('Analytics Utilities', () => {
   describe('calculatePerformanceSummary', () => {
     it('returns complete summary for valid scores', () => {
       const summary = calculatePerformanceSummary([85, 90, 75, 80, 95]);
-      
+
       expect(summary.average).toBe(85);
       expect(summary.median).toBe(85);
       expect(summary.min).toBe(75);
@@ -497,7 +497,7 @@ describe('Analytics Utilities', () => {
 
     it('returns zeros for empty array', () => {
       const summary = calculatePerformanceSummary([]);
-      
+
       expect(summary.average).toBe(0);
       expect(summary.median).toBe(0);
       expect(summary.min).toBe(0);
@@ -509,7 +509,7 @@ describe('Analytics Utilities', () => {
 
     it('calculates grade distribution correctly', () => {
       const summary = calculatePerformanceSummary([95, 85, 75, 65, 55]);
-      
+
       expect(summary.gradeDistribution.A).toBe(1);
       expect(summary.gradeDistribution.B).toBe(1);
       expect(summary.gradeDistribution.C).toBe(1);

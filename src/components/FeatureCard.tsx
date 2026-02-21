@@ -11,11 +11,24 @@ interface FeatureCardProps {
   className?: string;
 }
 
-export const FeatureCard = memo(function FeatureCard({ icon: Icon, title, description, className }: FeatureCardProps) {
+export const FeatureCard = memo(function FeatureCard({
+  icon: Icon,
+  title,
+  description,
+  className,
+}: FeatureCardProps) {
   return (
-    <Card className={cn('text-center h-full hover:shadow-lg hover:-translate-y-1 transition-all duration-200', className)}>
+    <Card
+      className={cn(
+        'text-center h-full hover:shadow-lg hover:-translate-y-1 transition-all duration-200',
+        className
+      )}
+    >
       <CardHeader>
-        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full" style={{ backgroundColor: THEME_COLORS.SECONDARY }}>
+        <div
+          className="mx-auto flex h-16 w-16 items-center justify-center rounded-full"
+          style={{ backgroundColor: THEME_COLORS.SECONDARY }}
+        >
           <Icon className="h-8 w-8 text-white" aria-hidden="true" />
         </div>
         <CardTitle className="mt-4">{title}</CardTitle>

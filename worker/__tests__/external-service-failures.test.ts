@@ -8,9 +8,7 @@ describe('External Service Failures - Integration Testing', () => {
 
   describe('Network Failure Scenarios', () => {
     it('should handle connection timeout errors', async () => {
-      const primaryFn = vi.fn(() =>
-        Promise.reject(new Error('ETIMEDOUT: Connection timed out'))
-      );
+      const primaryFn = vi.fn(() => Promise.reject(new Error('ETIMEDOUT: Connection timed out')));
       const fallbackFn = vi.fn(() => Promise.resolve({ cached: true }));
 
       const result = await withFallback(primaryFn, { fallback: fallbackFn });
@@ -20,9 +18,7 @@ describe('External Service Failures - Integration Testing', () => {
     });
 
     it('should handle connection refused errors', async () => {
-      const primaryFn = vi.fn(() =>
-        Promise.reject(new Error('ECONNREFUSED: Connection refused'))
-      );
+      const primaryFn = vi.fn(() => Promise.reject(new Error('ECONNREFUSED: Connection refused')));
       const fallbackFn = vi.fn(() => Promise.resolve({ status: 'offline' }));
 
       const result = await withFallback(primaryFn, { fallback: fallbackFn });
@@ -32,9 +28,7 @@ describe('External Service Failures - Integration Testing', () => {
     });
 
     it('should handle DNS resolution failures', async () => {
-      const primaryFn = vi.fn(() =>
-        Promise.reject(new Error('ENOTFOUND: DNS lookup failed'))
-      );
+      const primaryFn = vi.fn(() => Promise.reject(new Error('ENOTFOUND: DNS lookup failed')));
       const fallbackFn = vi.fn(() => Promise.resolve({ source: 'fallback' }));
 
       const result = await withFallback(primaryFn, { fallback: fallbackFn });
@@ -44,9 +38,7 @@ describe('External Service Failures - Integration Testing', () => {
     });
 
     it('should handle network unreachable errors', async () => {
-      const primaryFn = vi.fn(() =>
-        Promise.reject(new Error('ENETUNREACH: Network unreachable'))
-      );
+      const primaryFn = vi.fn(() => Promise.reject(new Error('ENETUNREACH: Network unreachable')));
       const fallbackFn = vi.fn(() => Promise.resolve({ mode: 'offline' }));
 
       const result = await withFallback(primaryFn, { fallback: fallbackFn });
@@ -70,9 +62,7 @@ describe('External Service Failures - Integration Testing', () => {
 
   describe('HTTP Error Scenarios', () => {
     it('should handle 500 Internal Server Error', async () => {
-      const primaryFn = vi.fn(() =>
-        Promise.reject(new Error('HTTP 500: Internal Server Error'))
-      );
+      const primaryFn = vi.fn(() => Promise.reject(new Error('HTTP 500: Internal Server Error')));
       const fallbackFn = vi.fn(() => Promise.resolve({ fallback: true }));
 
       const result = await withFallback(primaryFn, { fallback: fallbackFn });
@@ -82,9 +72,7 @@ describe('External Service Failures - Integration Testing', () => {
     });
 
     it('should handle 502 Bad Gateway', async () => {
-      const primaryFn = vi.fn(() =>
-        Promise.reject(new Error('HTTP 502: Bad Gateway'))
-      );
+      const primaryFn = vi.fn(() => Promise.reject(new Error('HTTP 502: Bad Gateway')));
       const fallbackFn = vi.fn(() => Promise.resolve({ gateway: 'down' }));
 
       const result = await withFallback(primaryFn, { fallback: fallbackFn });
@@ -94,9 +82,7 @@ describe('External Service Failures - Integration Testing', () => {
     });
 
     it('should handle 503 Service Unavailable', async () => {
-      const primaryFn = vi.fn(() =>
-        Promise.reject(new Error('HTTP 503: Service Unavailable'))
-      );
+      const primaryFn = vi.fn(() => Promise.reject(new Error('HTTP 503: Service Unavailable')));
       const fallbackFn = vi.fn(() => Promise.resolve({ service: 'unavailable' }));
 
       const result = await withFallback(primaryFn, { fallback: fallbackFn });
@@ -106,9 +92,7 @@ describe('External Service Failures - Integration Testing', () => {
     });
 
     it('should handle 504 Gateway Timeout', async () => {
-      const primaryFn = vi.fn(() =>
-        Promise.reject(new Error('HTTP 504: Gateway Timeout'))
-      );
+      const primaryFn = vi.fn(() => Promise.reject(new Error('HTTP 504: Gateway Timeout')));
       const fallbackFn = vi.fn(() => Promise.resolve({ timeout: 'gateway' }));
 
       const result = await withFallback(primaryFn, { fallback: fallbackFn });
@@ -118,9 +102,7 @@ describe('External Service Failures - Integration Testing', () => {
     });
 
     it('should handle 429 Too Many Requests', async () => {
-      const primaryFn = vi.fn(() =>
-        Promise.reject(new Error('HTTP 429: Too Many Requests'))
-      );
+      const primaryFn = vi.fn(() => Promise.reject(new Error('HTTP 429: Too Many Requests')));
       const fallbackFn = vi.fn(() => Promise.resolve({ rateLimited: true }));
 
       const result = await withFallback(primaryFn, { fallback: fallbackFn });
@@ -130,9 +112,7 @@ describe('External Service Failures - Integration Testing', () => {
     });
 
     it('should handle 408 Request Timeout', async () => {
-      const primaryFn = vi.fn(() =>
-        Promise.reject(new Error('HTTP 408: Request Timeout'))
-      );
+      const primaryFn = vi.fn(() => Promise.reject(new Error('HTTP 408: Request Timeout')));
       const fallbackFn = vi.fn(() => Promise.resolve({ timeout: 'request' }));
 
       const result = await withFallback(primaryFn, { fallback: fallbackFn });
@@ -183,8 +163,9 @@ describe('External Service Failures - Integration Testing', () => {
       const primaryFn = vi.fn(() => Promise.reject(new Error('Primary failed')));
       const fallbackFn = vi.fn(() => Promise.reject(new Error('Fallback also failed')));
 
-      await expect(withFallback(primaryFn, { fallback: fallbackFn }))
-        .rejects.toThrow('Fallback also failed');
+      await expect(withFallback(primaryFn, { fallback: fallbackFn })).rejects.toThrow(
+        'Fallback also failed'
+      );
 
       expect(fallbackFn).toHaveBeenCalledTimes(1);
     });
@@ -232,27 +213,25 @@ describe('External Service Failures - Integration Testing', () => {
 
   describe('Conditional Fallback', () => {
     it('should skip fallback when shouldFallback returns false', async () => {
-      const primaryFn = vi.fn(() =>
-        Promise.reject(new Error('Error not requiring fallback'))
-      );
+      const primaryFn = vi.fn(() => Promise.reject(new Error('Error not requiring fallback')));
       const fallbackFn = vi.fn(() => Promise.resolve('fallback result'));
       const shouldFallback = vi.fn((error: Error) => {
         return error.message.includes('critical');
       });
 
-      await expect(withFallback(primaryFn, {
-        fallback: fallbackFn,
-        shouldFallback,
-      })).rejects.toThrow('Error not requiring fallback');
+      await expect(
+        withFallback(primaryFn, {
+          fallback: fallbackFn,
+          shouldFallback,
+        })
+      ).rejects.toThrow('Error not requiring fallback');
 
       expect(shouldFallback).toHaveBeenCalledWith(expect.any(Error));
       expect(fallbackFn).not.toHaveBeenCalled();
     });
 
     it('should use fallback when shouldFallback returns true', async () => {
-      const primaryFn = vi.fn(() =>
-        Promise.reject(new Error('Critical error'))
-      );
+      const primaryFn = vi.fn(() => Promise.reject(new Error('Critical error')));
       const fallbackFn = vi.fn(() => Promise.resolve('fallback result'));
       const shouldFallback = vi.fn(() => true);
 
@@ -267,9 +246,7 @@ describe('External Service Failures - Integration Testing', () => {
     });
 
     it('should handle timeout errors with fallback', async () => {
-      const primaryFn = vi.fn(() =>
-        Promise.reject(new Error('Timeout error'))
-      );
+      const primaryFn = vi.fn(() => Promise.reject(new Error('Timeout error')));
       const fallbackFn = vi.fn(() => Promise.resolve({ cached: true, timeout: true }));
       const shouldFallback = vi.fn(() => true);
 
@@ -284,9 +261,7 @@ describe('External Service Failures - Integration Testing', () => {
     });
 
     it('should handle network errors with fallback', async () => {
-      const primaryFn = vi.fn(() =>
-        Promise.reject(new Error('Network error'))
-      );
+      const primaryFn = vi.fn(() => Promise.reject(new Error('Network error')));
       const fallbackFn = vi.fn(() => Promise.resolve({ offline: true }));
       const shouldFallback = vi.fn(() => true);
 
@@ -326,9 +301,7 @@ describe('External Service Failures - Integration Testing', () => {
     });
 
     it('should pass original error to onFallback callback', async () => {
-      const primaryFn = vi.fn(() =>
-        Promise.reject(new Error('Specific error message'))
-      );
+      const primaryFn = vi.fn(() => Promise.reject(new Error('Specific error message')));
       const fallbackFn = vi.fn(() => Promise.resolve('fallback'));
       const onFallback = vi.fn();
 
@@ -417,18 +390,18 @@ describe('External Service Failures - Integration Testing', () => {
         throw new Error('Fallback throws synchronously');
       });
 
-      await expect(withFallback(primaryFn, { fallback: fallbackFn }))
-        .rejects.toThrow('Fallback throws synchronously');
+      await expect(withFallback(primaryFn, { fallback: fallbackFn })).rejects.toThrow(
+        'Fallback throws synchronously'
+      );
     });
 
     it('should handle fallback that rejects asynchronously', async () => {
       const primaryFn = vi.fn(() => Promise.reject(new Error('Primary failed')));
-      const fallbackFn = vi.fn(() =>
-        Promise.reject(new Error('Fallback rejects asynchronously'))
-      );
+      const fallbackFn = vi.fn(() => Promise.reject(new Error('Fallback rejects asynchronously')));
 
-      await expect(withFallback(primaryFn, { fallback: fallbackFn }))
-        .rejects.toThrow('Fallback rejects asynchronously');
+      await expect(withFallback(primaryFn, { fallback: fallbackFn })).rejects.toThrow(
+        'Fallback rejects asynchronously'
+      );
     });
 
     it('should handle rapid consecutive failures', async () => {
@@ -445,7 +418,7 @@ describe('External Service Failures - Integration Testing', () => {
 
       const results = await Promise.all(promises);
 
-      expect(results.every(r => r === 'fallback')).toBe(true);
+      expect(results.every((r) => r === 'fallback')).toBe(true);
       expect(fallbackFn).toHaveBeenCalledTimes(5);
     });
   });

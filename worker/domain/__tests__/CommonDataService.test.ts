@@ -17,7 +17,9 @@ describe('CommonDataService - Critical Path Testing', () => {
   describe('Module Loading', () => {
     it('should document that full tests require Cloudflare Workers environment', () => {
       if (!canLoadModule) {
-        console.warn('⚠️  CommonDataService tests skipped: Cloudflare Workers environment not available');
+        console.warn(
+          '⚠️  CommonDataService tests skipped: Cloudflare Workers environment not available'
+        );
         console.warn('   This module requires advanced mocking setup for full testing');
         console.warn('   See docs/task.md for details on domain service testing');
       }
@@ -302,7 +304,7 @@ describe('CommonDataService - Critical Path Testing', () => {
       }
 
       const mockEnv = {} as any;
-      const filters = { search: 'O\'Brien' };
+      const filters = { search: "O'Brien" };
 
       const result = await CommonDataService.getUsersWithFilters(mockEnv, filters);
 

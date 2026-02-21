@@ -1,7 +1,7 @@
 export const WEBHOOK_CONFIG = {
   MAX_RETRIES: 6,
   RETRY_DELAYS_MINUTES: [1, 5, 15, 30, 60, 120] as const,
-  RETRY_DELAYS_MS: [1, 5, 15, 30, 60, 120].map(minutes => minutes * 60 * 1000) as const,
+  RETRY_DELAYS_MS: [1, 5, 15, 30, 60, 120].map((minutes) => minutes * 60 * 1000) as const,
   REQUEST_TIMEOUT_MS: 30000,
   CONCURRENCY_LIMIT: 5,
 } as const;

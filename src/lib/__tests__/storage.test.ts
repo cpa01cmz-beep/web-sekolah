@@ -95,7 +95,9 @@ describe('storage utility', () => {
 
       try {
         // Act & Assert
-        expect(() => storage.setItem(key, value)).toThrow('Storage is not available in server environment');
+        expect(() => storage.setItem(key, value)).toThrow(
+          'Storage is not available in server environment'
+        );
       } finally {
         // Restore window
         global.window = originalWindow;
@@ -111,9 +113,11 @@ describe('storage utility', () => {
       const originalLocalStorage = global.localStorage;
       Object.defineProperty(global, 'localStorage', {
         value: {
-          setItem: () => { throw new Error('Storage unavailable'); }
+          setItem: () => {
+            throw new Error('Storage unavailable');
+          },
         },
-        writable: true
+        writable: true,
       });
 
       try {
@@ -198,7 +202,9 @@ describe('storage utility', () => {
 
       try {
         // Act & Assert
-        expect(() => storage.getItem(key)).toThrow('Storage is not available in server environment');
+        expect(() => storage.getItem(key)).toThrow(
+          'Storage is not available in server environment'
+        );
       } finally {
         // Restore window
         global.window = originalWindow;
@@ -257,7 +263,9 @@ describe('storage utility', () => {
 
       try {
         // Act & Assert
-        expect(() => storage.removeItem(key)).toThrow('Storage is not available in server environment');
+        expect(() => storage.removeItem(key)).toThrow(
+          'Storage is not available in server environment'
+        );
       } finally {
         // Restore window
         global.window = originalWindow;
@@ -343,9 +351,9 @@ describe('storage utility', () => {
           name: 'John',
           address: {
             city: 'New York',
-            country: 'USA'
-          }
-        }
+            country: 'USA',
+          },
+        },
       };
 
       // Act
@@ -390,7 +398,7 @@ describe('storage utility', () => {
       const value = {
         name: 'John Doe',
         email: 'john@example.com',
-        message: 'Hello! 你好 🌍'
+        message: 'Hello! 你好 🌍',
       };
 
       // Act
@@ -412,7 +420,9 @@ describe('storage utility', () => {
 
       try {
         // Act & Assert
-        expect(() => storage.setObject(key, value)).toThrow('Storage is not available in server environment');
+        expect(() => storage.setObject(key, value)).toThrow(
+          'Storage is not available in server environment'
+        );
       } finally {
         // Restore window
         global.window = originalWindow;
@@ -455,9 +465,9 @@ describe('storage utility', () => {
           name: 'John',
           address: {
             city: 'New York',
-            country: 'USA'
-          }
-        }
+            country: 'USA',
+          },
+        },
       };
       localStorage.setItem(key, JSON.stringify(value));
 
@@ -533,7 +543,7 @@ describe('storage utility', () => {
       const key = 'test-key';
       const value = {
         message: 'Hello 世界 🌍',
-        emoji: '😀'
+        emoji: '😀',
       };
       localStorage.setItem(key, JSON.stringify(value));
 
@@ -554,7 +564,9 @@ describe('storage utility', () => {
 
       try {
         // Act & Assert
-        expect(() => storage.getObject(key)).toThrow('Storage is not available in server environment');
+        expect(() => storage.getObject(key)).toThrow(
+          'Storage is not available in server environment'
+        );
       } finally {
         // Restore window
         global.window = originalWindow;
@@ -583,7 +595,7 @@ describe('storage utility', () => {
         id: '123',
         name: 'John Doe',
         email: 'john@example.com',
-        role: 'student'
+        role: 'student',
       };
 
       // Act
@@ -613,7 +625,7 @@ describe('storage utility', () => {
       const session = {
         userId: '123',
         loginTime: new Date().toISOString(),
-        expiresAt: new Date(Date.now() + 3600000).toISOString()
+        expiresAt: new Date(Date.now() + 3600000).toISOString(),
       };
 
       // Act
@@ -743,7 +755,9 @@ describe('storage utility', () => {
       cyclicObject.self = cyclicObject;
 
       // Act & Assert - Should throw error for cyclic objects
-      expect(() => storage.setObject(key, cyclicObject)).toThrow('Converting circular structure to JSON');
+      expect(() => storage.setObject(key, cyclicObject)).toThrow(
+        'Converting circular structure to JSON'
+      );
     });
   });
 });

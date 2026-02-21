@@ -17,7 +17,9 @@ describe('GradeService - Critical Path Testing', () => {
   describe('Module Loading', () => {
     it('should document that full tests require Cloudflare Workers environment', () => {
       if (!canLoadModule) {
-        console.warn('⚠️  GradeService tests skipped: Cloudflare Workers environment not available');
+        console.warn(
+          '⚠️  GradeService tests skipped: Cloudflare Workers environment not available'
+        );
         console.warn('   This module requires advanced mocking setup for full testing');
         console.warn('   See docs/task.md for details on domain service testing');
       }

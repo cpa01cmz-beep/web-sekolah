@@ -1,4 +1,4 @@
-import { DurableObject } from "cloudflare:workers";
+import { DurableObject } from 'cloudflare:workers';
 
 export interface Env {
   GlobalDurableObject: DurableObjectNamespace<GlobalDurableObject>;
@@ -9,7 +9,10 @@ export interface Env {
 }
 
 export class GlobalDurableObject extends DurableObject<Env, unknown> {
-  constructor(public ctx: DurableObjectState, public env: Env) {
+  constructor(
+    public ctx: DurableObjectState,
+    public env: Env
+  ) {
     super(ctx, env);
   }
 }

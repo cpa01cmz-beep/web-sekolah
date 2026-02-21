@@ -2,7 +2,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Separator } from '@/components/ui/separator';
 import { PageHeader } from '@/components/PageHeader';
@@ -29,10 +35,7 @@ export function AdminSettingsPage() {
     onError: (err) => toast.error(`Failed to save settings: ${err.message}`),
   });
 
-  const mergedSettings = useMemo(
-    () => ({ ...defaultSettings, ...settings }),
-    [settings]
-  );
+  const mergedSettings = useMemo(() => ({ ...defaultSettings, ...settings }), [settings]);
 
   const [localEdits, setLocalEdits] = useState<Partial<Settings>>({});
 
@@ -137,7 +140,12 @@ export function AdminSettingsPage() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="primary-color">Primary Color</Label>
-                <Input id="primary-color" type="color" defaultValue={THEME_COLORS.PRIMARY} className="w-24" />
+                <Input
+                  id="primary-color"
+                  type="color"
+                  defaultValue={THEME_COLORS.PRIMARY}
+                  className="w-24"
+                />
               </div>
             </CardContent>
           </Card>

@@ -7,7 +7,9 @@ interface ThemeToggleProps {
   className?: string;
 }
 
-export const ThemeToggle = memo(function ThemeToggle({ className = "absolute top-4 right-4" }: ThemeToggleProps) {
+export const ThemeToggle = memo(function ThemeToggle({
+  className = 'absolute top-4 right-4',
+}: ThemeToggleProps) {
   const { isDark, toggleTheme } = useTheme();
 
   const handleClick = useCallback(() => {
@@ -15,8 +17,8 @@ export const ThemeToggle = memo(function ThemeToggle({ className = "absolute top
   }, [toggleTheme]);
 
   return (
-    <Button 
-      onClick={handleClick} 
+    <Button
+      onClick={handleClick}
       variant="ghost"
       size="icon"
       className={`${className} hover:scale-110 transition-all duration-200 active:scale-90 z-50`}

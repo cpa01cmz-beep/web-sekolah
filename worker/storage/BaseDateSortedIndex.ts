@@ -81,7 +81,7 @@ export abstract class BaseDateSortedIndex extends Entity<unknown> {
     const sortedKeys = keys.sort();
 
     return sortedKeys
-      .map(key => extractEntityIdFromKey(key))
+      .map((key) => extractEntityIdFromKey(key))
       .filter((id): id is string => id !== null);
   }
 

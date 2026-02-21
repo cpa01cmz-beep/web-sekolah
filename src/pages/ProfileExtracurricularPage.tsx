@@ -2,7 +2,10 @@ import { SiteHeader } from '@/components/SiteHeader';
 import { SiteFooter } from '@/components/SiteFooter';
 import { SlideUp } from '@/components/animations';
 import { ContentCard } from '@/components/ContentCard';
-import { EXTRACURRICULAR_ACTIVITIES, EXTRACURRICULAR_PAGE_CONTENT } from '@/constants/extracurricular';
+import {
+  EXTRACURRICULAR_ACTIVITIES,
+  EXTRACURRICULAR_PAGE_CONTENT,
+} from '@/constants/extracurricular';
 
 export function ProfileExtracurricularPage() {
   return (
@@ -40,7 +43,9 @@ export function ProfileExtracurricularPage() {
 
           <SlideUp>
             <div className="mt-24 text-center">
-              <h2 className="text-3xl font-bold text-foreground mb-6">{EXTRACURRICULAR_PAGE_CONTENT.joiningSection.title}</h2>
+              <h2 className="text-3xl font-bold text-foreground mb-6">
+                {EXTRACURRICULAR_PAGE_CONTENT.joiningSection.title}
+              </h2>
               <p className="max-w-2xl mx-auto text-muted-foreground mb-8">
                 {EXTRACURRICULAR_PAGE_CONTENT.joiningSection.description}
               </p>

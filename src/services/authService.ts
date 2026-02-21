@@ -16,10 +16,13 @@ interface AuthResponse {
 export class AuthService {
   static async login(credentials: LoginCredentials): Promise<AuthResponse> {
     try {
-      const response = await apiClient<{ token: string; user: BaseUser }>(API_ENDPOINTS.AUTH.LOGIN, {
-        method: 'POST',
-        body: JSON.stringify(credentials),
-      });
+      const response = await apiClient<{ token: string; user: BaseUser }>(
+        API_ENDPOINTS.AUTH.LOGIN,
+        {
+          method: 'POST',
+          body: JSON.stringify(credentials),
+        }
+      );
 
       return {
         token: response.token,

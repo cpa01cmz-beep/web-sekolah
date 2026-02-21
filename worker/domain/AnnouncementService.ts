@@ -22,7 +22,7 @@ export class AnnouncementService {
       targetRole: announcementData.targetRole || 'all',
       authorId,
       createdAt: now,
-      updatedAt: now
+      updatedAt: now,
     };
 
     const validation = await ReferentialIntegrity.validateAnnouncement(env, newAnnouncement);
@@ -34,20 +34,24 @@ export class AnnouncementService {
     return newAnnouncement;
   }
 
-  static async updateAnnouncement(env: Env, announcementId: string, updates: Partial<CreateAnnouncementData>): Promise<Announcement> {
+  static async updateAnnouncement(
+    env: Env,
+    announcementId: string,
+    updates: Partial<CreateAnnouncementData>
+  ): Promise<Announcement> {
     if (announcementId === 'null' || !announcementId) {
       throw new Error('Announcement ID is required');
     }
 
     const announcementEntity = new AnnouncementEntity(env, announcementId);
 
-    if (!await announcementEntity.exists()) {
+    if (!(await announcementEntity.exists())) {
       throw new Error('Announcement not found');
     }
 
     const updateData: Partial<Announcement> = {
       ...updates,
-      updatedAt: new Date().toISOString()
+      updatedAt: new Date().toISOString(),
     };
 
     await announcementEntity.patch(updateData);

@@ -10,6 +10,6 @@ export type {
   TeacherService,
   ParentService,
   AdminService,
-  PublicService
+  PublicService,
 } from './serviceContracts';
 export type { MessageService, MessageEndpoints } from './messageService';

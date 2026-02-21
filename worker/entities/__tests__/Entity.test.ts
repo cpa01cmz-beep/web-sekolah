@@ -91,11 +91,7 @@ describe('Entity', () => {
 
       await entity.save(newState);
 
-      expect(mockStub.casPut).toHaveBeenCalledWith(
-        'test:test-id',
-        0,
-        newState
-      );
+      expect(mockStub.casPut).toHaveBeenCalledWith('test:test-id', 0, newState);
       expect(entity.state).toEqual(newState);
       expect(entity['_version']).toBe(1);
     });
@@ -116,11 +112,7 @@ describe('Entity', () => {
       await entity.ensureState();
       await entity.save(newState);
 
-      expect(mockStub.casPut).toHaveBeenCalledWith(
-        'test:test-id',
-        5,
-        newState
-      );
+      expect(mockStub.casPut).toHaveBeenCalledWith('test:test-id', 5, newState);
       expect(entity.state).toEqual(newState);
       expect(entity['_version']).toBe(6);
     });
@@ -317,9 +309,9 @@ describe('Entity', () => {
       mockStub.getDoc.mockResolvedValue({ v: 1, data: currentState });
       mockStub.casPut.mockResolvedValue({ ok: false });
 
-      await expect(
-        entity.mutate((current) => ({ ...current, name: 'After' }))
-      ).rejects.toThrow('Concurrent modification detected');
+      await expect(entity.mutate((current) => ({ ...current, name: 'After' }))).rejects.toThrow(
+        'Concurrent modification detected'
+      );
     });
   });
 
@@ -694,11 +686,7 @@ describe('Entity', () => {
 
       await noTimestampsEntity.save(newState);
 
-      expect(mockStub.casPut).toHaveBeenCalledWith(
-        'notimestamps:test-id',
-        0,
-        newState
-      );
+      expect(mockStub.casPut).toHaveBeenCalledWith('notimestamps:test-id', 0, newState);
     });
   });
 });

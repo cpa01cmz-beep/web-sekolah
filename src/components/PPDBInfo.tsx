@@ -44,8 +44,12 @@ export const PPDBInfo = memo(function PPDBInfo() {
           Jika Anda memiliki pertanyaan tentang proses PPDB, silakan hubungi kami:
         </p>
         <div className="mt-4 space-y-2">
-          <p><span className="font-medium">Telepon:</span> (021) 123-4567</p>
-          <p><span className="font-medium">Email:</span> ppdb@akademia.pro</p>
+          <p>
+            <span className="font-medium">Telepon:</span> (021) 123-4567
+          </p>
+          <p>
+            <span className="font-medium">Email:</span> ppdb@akademia.pro
+          </p>
         </div>
       </div>
     </div>
@@ -58,7 +62,8 @@ export const PPDBGuide = memo(function PPDBGuide() {
     <div className="mt-8 bg-blue-50 rounded-lg p-6 border border-blue-200">
       <h3 className="text-lg font-bold text-blue-800 mb-2">Panduan Pendaftaran</h3>
       <p className="text-blue-700">
-        Pastikan semua data yang Anda masukkan sudah benar dan lengkap. Setelah mendaftar, Anda akan menerima email konfirmasi dengan instruksi selanjutnya.
+        Pastikan semua data yang Anda masukkan sudah benar dan lengkap. Setelah mendaftar, Anda akan
+        menerima email konfirmasi dengan instruksi selanjutnya.
       </p>
     </div>
   );

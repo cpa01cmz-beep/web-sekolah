@@ -13,13 +13,13 @@ export interface ErrorFallbackProps {
 }
 
 export function ErrorFallback({
-  title = "Oops! Something went wrong",
+  title = 'Oops! Something went wrong',
   message = "We're aware of the issue and actively working to fix it. Your experience matters to us.",
   error,
   onRetry,
   onGoHome,
   showErrorDetails = true,
-  statusMessage = "Our team has been notified"
+  statusMessage = 'Our team has been notified',
 }: ErrorFallbackProps) {
   const handleRetry = () => {
     if (onRetry) {
@@ -42,7 +42,7 @@ export function ErrorFallback({
       <div className="w-full max-w-md">
         {/* Animated background gradient */}
         <div className="absolute inset-0 bg-gradient-rainbow opacity-5 dark:opacity-10" />
-        
+
         {/* Error card */}
         <Card className="relative backdrop-blur-sm shadow-2xl">
           <CardContent className="p-8 space-y-6">
@@ -83,7 +83,12 @@ export function ErrorFallback({
                 </summary>
                 <pre className="mt-3 text-xs overflow-auto max-h-40 text-muted-foreground">
                   {error instanceof Error ? error.message : String(error)}
-                  {error instanceof Error && error.stack && '\n\n' + error.stack + '\n\n' + (error as Error & { componentStack?: string }).componentStack}
+                  {error instanceof Error &&
+                    error.stack &&
+                    '\n\n' +
+                      error.stack +
+                      '\n\n' +
+                      (error as Error & { componentStack?: string }).componentStack}
                 </pre>
               </details>
             )}

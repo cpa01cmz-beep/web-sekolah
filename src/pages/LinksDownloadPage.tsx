@@ -11,9 +11,7 @@ export function LinksDownloadPage() {
         <div className="bg-primary/5">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24 text-center">
             <SlideUp>
-              <h1 className="text-4xl md:text-5xl font-bold text-primary">
-                Download
-              </h1>
+              <h1 className="text-4xl md:text-5xl font-bold text-primary">Download</h1>
             </SlideUp>
             <SlideUp delay={0.2}>
               <p className="mt-4 max-w-3xl mx-auto text-lg text-muted-foreground">
@@ -37,11 +35,7 @@ export function LinksDownloadPage() {
                   fileFormat="PDF"
                   fileSize="1.8 MB"
                 />
-                <DownloadCard
-                  title="Kurikulum Sekolah"
-                  fileFormat="PDF"
-                  fileSize="3.2 MB"
-                />
+                <DownloadCard title="Kurikulum Sekolah" fileFormat="PDF" fileSize="3.2 MB" />
               </div>
             </SlideLeft>
 
@@ -53,16 +47,8 @@ export function LinksDownloadPage() {
                   fileFormat="DOCX"
                   fileSize="512 KB"
                 />
-                <DownloadCard
-                  title="Panduan PPDB"
-                  fileFormat="PDF"
-                  fileSize="1.2 MB"
-                />
-                <DownloadCard
-                  title="Surat Izin Orang Tua"
-                  fileFormat="DOCX"
-                  fileSize="256 KB"
-                />
+                <DownloadCard title="Panduan PPDB" fileFormat="PDF" fileSize="1.2 MB" />
+                <DownloadCard title="Surat Izin Orang Tua" fileFormat="DOCX" fileSize="256 KB" />
               </div>
             </SlideRight>
           </div>

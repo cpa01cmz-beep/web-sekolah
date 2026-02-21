@@ -12,12 +12,7 @@ export const TableSkeleton = memo(function TableSkeleton({
   showHeader?: boolean;
 }) {
   return (
-    <div 
-      className="space-y-3" 
-      role="status" 
-      aria-label="Loading table data" 
-      aria-live="polite"
-    >
+    <div className="space-y-3" role="status" aria-label="Loading table data" aria-live="polite">
       {showHeader && (
         <div className="flex gap-4 pb-2 border-b">
           {Array.from({ length: columns }).map((_, i) => (
@@ -50,12 +45,7 @@ export const DashboardSkeleton = memo(function DashboardSkeleton({
   showSubtitle?: boolean;
 }) {
   return (
-    <div 
-      className="space-y-6" 
-      role="status" 
-      aria-label="Loading dashboard data" 
-      aria-live="polite"
-    >
+    <div className="space-y-6" role="status" aria-label="Loading dashboard data" aria-live="polite">
       {showTitle && (
         <div className="space-y-2">
           <Skeleton className="h-8 w-1/2" aria-hidden="true" />

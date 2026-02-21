@@ -11,7 +11,7 @@ export function extractEntityIdFromKey(key: string): string | null {
 
 export abstract class BaseSecondaryIndex extends Entity<unknown> {
   protected abstract readonly keyPrefix: string;
-  
+
   constructor(env: Env, indexKey: string) {
     super(env, indexKey);
   }
@@ -53,9 +53,7 @@ export abstract class BaseSecondaryIndex extends Entity<unknown> {
   async getByValues(fieldValues: string[]): Promise<string[]> {
     const prefix = this.buildFieldKey(fieldValues);
     const { keys } = await this.stub.listPrefix(prefix);
-    return keys
-      .map(key => extractEntityIdFromKey(key))
-      .filter((id): id is string => id !== null);
+    return keys.map((key) => extractEntityIdFromKey(key)).filter((id): id is string => id !== null);
   }
 
   async countByValues(fieldValues: string[]): Promise<number> {

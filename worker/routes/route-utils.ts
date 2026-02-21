@@ -15,7 +15,10 @@ export function validateUserAccess(
   resourceType: string = 'data'
 ): boolean {
   if (userId !== requestedId) {
-    logger.warn(`[AUTH] ${role} accessing another ${role} ${resourceType}`, { userId, requestedId });
+    logger.warn(`[AUTH] ${role} accessing another ${role} ${resourceType}`, {
+      userId,
+      requestedId,
+    });
     forbidden(c, `Access denied: Cannot access another ${role} ${resourceType}`);
     return false;
   }
@@ -26,7 +29,10 @@ export function withAuth(role: 'student' | 'teacher' | 'parent' | 'admin') {
   return [authenticate(), authorize(role)] as const;
 }
 
-export function withUserValidation(role: 'student' | 'teacher' | 'parent', resourceName: string = 'data') {
+export function withUserValidation(
+  role: 'student' | 'teacher' | 'parent',
+  resourceName: string = 'data'
+) {
   return [
     authenticate(),
     authorize(role),
@@ -39,7 +45,7 @@ export function withUserValidation(role: 'student' | 'teacher' | 'parent', resou
       }
 
       await next();
-    }
+    },
   ] as const;
 }
 
@@ -56,8 +62,13 @@ export function withErrorHandler(operationName: string) {
   };
 }
 
-export function triggerWebhookSafely(env: Env, eventType: string, payload: unknown, context?: Record<string, unknown>): void {
-  WebhookService.triggerEvent(env, eventType, toWebhookPayload(payload)).catch(err => {
+export function triggerWebhookSafely(
+  env: Env,
+  eventType: string,
+  payload: unknown,
+  context?: Record<string, unknown>
+): void {
+  WebhookService.triggerEvent(env, eventType, toWebhookPayload(payload)).catch((err) => {
     logger.error(`Failed to trigger ${eventType} webhook`, { err, ...context });
   });
 }

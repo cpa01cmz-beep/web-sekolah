@@ -2,10 +2,22 @@ import { Button } from '@/components/ui/button';
 import { FormField } from '@/components/ui/form-field';
 import { FormFieldInput } from '@/components/ui/form-field-input';
 import { FormSuccess } from '@/components/ui/form-success';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { useState, useCallback, useMemo } from 'react';
 import { toast } from 'sonner';
-import { validateName, validateEmail, validatePhone, validateNisn, validateRequired } from '@/utils/validation';
+import {
+  validateName,
+  validateEmail,
+  validatePhone,
+  validateNisn,
+  validateRequired,
+} from '@/utils/validation';
 import { useFormValidation } from '@/hooks/useFormValidation';
 
 interface PPDBFormData {
@@ -37,7 +49,11 @@ export function PPDBForm({ onSubmit }: PPDBFormProps) {
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [isSuccess, setIsSuccess] = useState<boolean>(false);
 
-  const { errors, validateAll, reset: resetValidation } = useFormValidation(formData, {
+  const {
+    errors,
+    validateAll,
+    reset: resetValidation,
+  } = useFormValidation(formData, {
     validators: {
       name: (value, show) => validateName(value, show, 3),
       placeOfBirth: (value, show) => validateRequired(value, show, 'Tempat lahir'),
@@ -51,7 +67,7 @@ export function PPDBForm({ onSubmit }: PPDBFormProps) {
   });
 
   const handleInputChange = useCallback((field: keyof PPDBFormData, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: String(value) }));
+    setFormData((prev) => ({ ...prev, [field]: String(value) }));
   }, []);
 
   const handleReset = useCallback(() => {
@@ -59,40 +75,48 @@ export function PPDBForm({ onSubmit }: PPDBFormProps) {
     resetValidation();
   }, [resetValidation]);
 
-  const successAction = useMemo(() => ({
-    label: "Daftar Siswa Lain",
-    onClick: handleReset,
-  }), [handleReset]);
+  const successAction = useMemo(
+    () => ({
+      label: 'Daftar Siswa Lain',
+      onClick: handleReset,
+    }),
+    [handleReset]
+  );
 
-  const handleSubmit = useCallback(async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (!validateAll()) {
-      toast.error('Mohon lengkapi formulir dengan benar.');
-      return;
-    }
+  const handleSubmit = useCallback(
+    async (e: React.FormEvent<HTMLFormElement>) => {
+      e.preventDefault();
+      if (!validateAll()) {
+        toast.error('Mohon lengkapi formulir dengan benar.');
+        return;
+      }
 
-    setIsSubmitting(true);
-    try {
-      await onSubmit?.(formData);
-      setIsSuccess(true);
-      toast.success('Pendaftaran berhasil dikirim! Silakan cek email untuk instruksi selanjutnya.');
-      setFormData({
-        name: '',
-        placeOfBirth: '',
-        dateOfBirth: '',
-        nisn: '',
-        school: '',
-        level: '',
-        email: '',
-        phone: '',
-      });
-      resetValidation();
-    } catch (error) {
-      toast.error('Pendaftaran gagal. Silakan coba lagi.');
-    } finally {
-      setIsSubmitting(false);
-    }
-  }, [validateAll, onSubmit, formData, resetValidation]);
+      setIsSubmitting(true);
+      try {
+        await onSubmit?.(formData);
+        setIsSuccess(true);
+        toast.success(
+          'Pendaftaran berhasil dikirim! Silakan cek email untuk instruksi selanjutnya.'
+        );
+        setFormData({
+          name: '',
+          placeOfBirth: '',
+          dateOfBirth: '',
+          nisn: '',
+          school: '',
+          level: '',
+          email: '',
+          phone: '',
+        });
+        resetValidation();
+      } catch (error) {
+        toast.error('Pendaftaran gagal. Silakan coba lagi.');
+      } finally {
+        setIsSubmitting(false);
+      }
+    },
+    [validateAll, onSubmit, formData, resetValidation]
+  );
 
   if (isSuccess) {
     return (
@@ -177,7 +201,10 @@ export function PPDBForm({ onSubmit }: PPDBFormProps) {
           helperText="Pilih jenjang pendidikan yang dituju"
           required
         >
-          <Select onValueChange={(value) => handleInputChange('level', value)} disabled={isSubmitting}>
+          <Select
+            onValueChange={(value) => handleInputChange('level', value)}
+            disabled={isSubmitting}
+          >
             <SelectTrigger id="level" aria-labelledby="level-label" aria-busy={isSubmitting}>
               <SelectValue placeholder="Pilih jenjang" />
             </SelectTrigger>

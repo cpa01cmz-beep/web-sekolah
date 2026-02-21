@@ -31,7 +31,8 @@ const app = new Hono<{ Bindings: Env }>();
 app.use('*', logger());
 
 app.use('/api/*', async (c, next) => {
-  const allowedOrigins = (c.env.ALLOWED_ORIGINS?.split(',') || DefaultOrigins.LOCAL_DEV) as string[];
+  const allowedOrigins = (c.env.ALLOWED_ORIGINS?.split(',') ||
+    DefaultOrigins.LOCAL_DEV) as string[];
   const origin = c.req.header('Origin');
 
   if (origin && allowedOrigins.includes(origin)) {
@@ -40,26 +41,30 @@ app.use('/api/*', async (c, next) => {
     c.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Request-ID');
     c.header('Access-Control-Allow-Credentials', 'true');
     c.header('Access-Control-Max-Age', (TimeConstants.ONE_DAY_MS / 1000).toString());
-    c.header('Access-Control-Expose-Headers', 'X-Request-ID, X-CF-Ray, X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset');
+    c.header(
+      'Access-Control-Expose-Headers',
+      'X-Request-ID, X-CF-Ray, X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset'
+    );
     c.header('Vary', 'Origin');
   }
-  
+
   if (c.req.method === 'OPTIONS') {
     return new Response(null, { status: HttpStatusCode.NO_CONTENT });
   }
-  
+
   await next();
 });
 
 app.use('/api/*', async (c, next) => {
-  const requestId = c.req.header('cf-request-id') || c.req.header('X-Request-ID') || crypto.randomUUID();
+  const requestId =
+    c.req.header('cf-request-id') || c.req.header('X-Request-ID') || crypto.randomUUID();
   c.header('X-Request-ID', requestId);
-  
+
   const cfRay = c.req.header('CF-Ray');
   if (cfRay) {
     c.header('X-CF-Ray', cfRay);
   }
-  
+
   await next();
 });
 
@@ -100,8 +105,10 @@ app.get('/api/health', async (c) => {
     uptime: `${(metrics.uptime / 1000).toFixed(2)}s`,
     systemHealth: {
       circuitBreaker: metrics.circuitBreaker?.isOpen ? 'OPEN (degraded)' : 'CLOSED (healthy)',
-      webhook: webhookSuccessRate >= 95 ? 'healthy' : webhookSuccessRate >= 80 ? 'degraded' : 'unhealthy',
-      rateLimiting: rateLimitBlockRate < 1 ? 'healthy' : rateLimitBlockRate < 5 ? 'elevated' : 'high',
+      webhook:
+        webhookSuccessRate >= 95 ? 'healthy' : webhookSuccessRate >= 80 ? 'degraded' : 'unhealthy',
+      rateLimiting:
+        rateLimitBlockRate < 1 ? 'healthy' : rateLimitBlockRate < 5 ? 'elevated' : 'high',
     },
     webhook: {
       successRate: `${webhookSuccessRate.toFixed(2)}%`,
@@ -151,7 +158,10 @@ app.post('/api/csp-report', async (c) => {
 });
 
 app.notFound((c) => notFound(c));
-app.onError((err, c) => { pinoLogger.error(`[ERROR] ${err}`); return serverError(c, err instanceof Error ? err.message : 'Internal Server Error'); });
+app.onError((err, c) => {
+  pinoLogger.error(`[ERROR] ${err}`);
+  return serverError(c, err instanceof Error ? err.message : 'Internal Server Error');
+});
 
 pinoLogger.info('Server is running');
 

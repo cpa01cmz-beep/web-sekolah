@@ -25,30 +25,36 @@ export function StudentGradesPage() {
 
   const grades = useMemo(() => dashboardData?.recentGrades ?? [], [dashboardData]);
 
-  const averageScore = useMemo(() => 
-    grades.length > 0 ? calculateAverageScore(grades) : '-',
+  const averageScore = useMemo(
+    () => (grades.length > 0 ? calculateAverageScore(grades) : '-'),
     [grades]
   );
 
-  const tableRows = useMemo(() => grades.map((grade, index) => ({
-    id: grade.id,
-    cells: [
-      { key: 'no', content: index + 1, className: 'font-medium' },
-      { key: 'subject', content: grade.courseName },
-      { key: 'score', content: grade.score, className: 'text-center font-semibold' },
-      {
-        key: 'grade',
-        content: (
-          <Badge className={`text-white ${getGradeColorClass(grade.score)}`}>
-            <span className="sr-only">{grade.score >= 70 ? 'Passing grade: ' : 'Failing grade: '}</span>
-            {getGradeLetter(grade.score)}
-          </Badge>
-        ),
-        className: 'text-center',
-      },
-      { key: 'feedback', content: grade.feedback },
-    ],
-  })), [grades]);
+  const tableRows = useMemo(
+    () =>
+      grades.map((grade, index) => ({
+        id: grade.id,
+        cells: [
+          { key: 'no', content: index + 1, className: 'font-medium' },
+          { key: 'subject', content: grade.courseName },
+          { key: 'score', content: grade.score, className: 'text-center font-semibold' },
+          {
+            key: 'grade',
+            content: (
+              <Badge className={`text-white ${getGradeColorClass(grade.score)}`}>
+                <span className="sr-only">
+                  {grade.score >= 70 ? 'Passing grade: ' : 'Failing grade: '}
+                </span>
+                {getGradeLetter(grade.score)}
+              </Badge>
+            ),
+            className: 'text-center',
+          },
+          { key: 'feedback', content: grade.feedback },
+        ],
+      })),
+    [grades]
+  );
 
   if (isLoading) return <CardSkeleton lines={5} showHeader />;
 
@@ -84,8 +90,12 @@ export function StudentGradesPage() {
                 <table className="w-full caption-bottom text-sm">
                   <tfoot>
                     <tr className="border-t">
-                      <td colSpan={2} className="p-2 align-middle font-bold text-lg">Rata-rata</td>
-                      <td className="p-2 align-middle text-center font-bold text-lg">{averageScore}</td>
+                      <td colSpan={2} className="p-2 align-middle font-bold text-lg">
+                        Rata-rata
+                      </td>
+                      <td className="p-2 align-middle text-center font-bold text-lg">
+                        {averageScore}
+                      </td>
                       <td colSpan={2}></td>
                     </tr>
                   </tfoot>

@@ -31,7 +31,11 @@ describe('CompoundSecondaryIndex', () => {
     });
 
     it('should create compound key with multiple field names', () => {
-      const multiFieldIndex = new CompoundSecondaryIndex(mockEnv, 'test-entity', ['field1', 'field2', 'field3']);
+      const multiFieldIndex = new CompoundSecondaryIndex(mockEnv, 'test-entity', [
+        'field1',
+        'field2',
+        'field3',
+      ]);
       expect(multiFieldIndex['key']()).toContain('compound-index:test-entity:field1:field2:field3');
     });
 
@@ -45,41 +49,33 @@ describe('CompoundSecondaryIndex', () => {
     it('should add entry with compound key', async () => {
       await index.add(['value1', 'value2'], 'entity-1');
 
-      expect(mockStub.casPut).toHaveBeenCalledWith(
-        'compound:value1:value2:entity:entity-1',
-        0,
-        { entityId: 'entity-1' }
-      );
+      expect(mockStub.casPut).toHaveBeenCalledWith('compound:value1:value2:entity:entity-1', 0, {
+        entityId: 'entity-1',
+      });
     });
 
     it('should add entry with single field value', async () => {
       await index.add(['value1'], 'entity-1');
 
-      expect(mockStub.casPut).toHaveBeenCalledWith(
-        'compound:value1:entity:entity-1',
-        0,
-        { entityId: 'entity-1' }
-      );
+      expect(mockStub.casPut).toHaveBeenCalledWith('compound:value1:entity:entity-1', 0, {
+        entityId: 'entity-1',
+      });
     });
 
     it('should add entry with empty field values', async () => {
       await index.add(['', ''], 'entity-1');
 
-      expect(mockStub.casPut).toHaveBeenCalledWith(
-        'compound:::entity:entity-1',
-        0,
-        { entityId: 'entity-1' }
-      );
+      expect(mockStub.casPut).toHaveBeenCalledWith('compound:::entity:entity-1', 0, {
+        entityId: 'entity-1',
+      });
     });
 
     it('should add entry with special characters in field values', async () => {
       await index.add(['value:1', 'value/2'], 'entity-1');
 
-      expect(mockStub.casPut).toHaveBeenCalledWith(
-        'compound:value:1:value/2:entity:entity-1',
-        0,
-        { entityId: 'entity-1' }
-      );
+      expect(mockStub.casPut).toHaveBeenCalledWith('compound:value:1:value/2:entity:entity-1', 0, {
+        entityId: 'entity-1',
+      });
     });
   });
 
@@ -184,7 +180,10 @@ describe('CompoundSecondaryIndex', () => {
     });
 
     it('should return correct count for large result sets', async () => {
-      const keys = Array.from({ length: 100 }, (_, i) => `compound:value1:value2:entity:entity-${i}`);
+      const keys = Array.from(
+        { length: 100 },
+        (_, i) => `compound:value1:value2:entity:entity-${i}`
+      );
       mockStub.listPrefix.mockResolvedValue({ keys, next: null });
 
       const result = await index.countByValues(['value1', 'value2']);
@@ -216,10 +215,7 @@ describe('CompoundSecondaryIndex', () => {
 
     it('should return true for multiple matching entries', async () => {
       mockStub.listPrefix.mockResolvedValue({
-        keys: [
-          'compound:value1:value2:entity:entity-1',
-          'compound:value1:value2:entity:entity-2',
-        ],
+        keys: ['compound:value1:value2:entity:entity-1', 'compound:value1:value2:entity:entity-2'],
         next: null,
       });
 
@@ -262,7 +258,10 @@ describe('CompoundSecondaryIndex', () => {
     });
 
     it('should delete all keys in parallel', async () => {
-      const keys = Array.from({ length: 10 }, (_, i) => `compound:value1:value2:entity:entity-${i}`);
+      const keys = Array.from(
+        { length: 10 },
+        (_, i) => `compound:value1:value2:entity:entity-${i}`
+      );
       mockStub.listPrefix.mockResolvedValue({ keys, next: null });
 
       await index.clearValues(['value1', 'value2']);
@@ -316,8 +315,12 @@ describe('CompoundSecondaryIndex', () => {
       await index.addBatch(items);
 
       expect(mockStub.casPut).toHaveBeenCalledTimes(2);
-      expect(mockStub.casPut).toHaveBeenCalledWith('compound:value1:value2:entity:entity-1', 0, { entityId: 'entity-1' });
-      expect(mockStub.casPut).toHaveBeenCalledWith('compound:value3:value4:entity:entity-2', 0, { entityId: 'entity-2' });
+      expect(mockStub.casPut).toHaveBeenCalledWith('compound:value1:value2:entity:entity-1', 0, {
+        entityId: 'entity-1',
+      });
+      expect(mockStub.casPut).toHaveBeenCalledWith('compound:value3:value4:entity:entity-2', 0, {
+        entityId: 'entity-2',
+      });
     });
 
     it('should return immediately for empty array', async () => {
@@ -385,22 +388,18 @@ describe('CompoundSecondaryIndex', () => {
       const largeValue = 'a'.repeat(1000);
       await index.add([largeValue], 'entity-1');
 
-      expect(mockStub.casPut).toHaveBeenCalledWith(
-        `compound:${largeValue}:entity:entity-1`,
-        0,
-        { entityId: 'entity-1' }
-      );
+      expect(mockStub.casPut).toHaveBeenCalledWith(`compound:${largeValue}:entity:entity-1`, 0, {
+        entityId: 'entity-1',
+      });
     });
 
     it('should handle unicode characters in field values', async () => {
       const unicodeValue = '日本語-한글-中文-العربية';
       await index.add([unicodeValue], 'entity-1');
 
-      expect(mockStub.casPut).toHaveBeenCalledWith(
-        `compound:${unicodeValue}:entity:entity-1`,
-        0,
-        { entityId: 'entity-1' }
-      );
+      expect(mockStub.casPut).toHaveBeenCalledWith(`compound:${unicodeValue}:entity:entity-1`, 0, {
+        entityId: 'entity-1',
+      });
     });
 
     it('should handle entityId with special characters', async () => {
@@ -428,11 +427,9 @@ describe('CompoundSecondaryIndex', () => {
     it('should handle empty field array', async () => {
       await index.add([], 'entity-1');
 
-      expect(mockStub.casPut).toHaveBeenCalledWith(
-        'compound::entity:entity-1',
-        0,
-        { entityId: 'entity-1' }
-      );
+      expect(mockStub.casPut).toHaveBeenCalledWith('compound::entity:entity-1', 0, {
+        entityId: 'entity-1',
+      });
     });
   });
 });

@@ -20,7 +20,11 @@ export const ContactForm = memo(function ContactForm({ onSubmit }: ContactFormPr
   const [isSuccess, setIsSuccess] = useState(false);
 
   const formData = { name, email, message };
-  const { errors, validateAll, reset: resetValidation } = useFormValidation(formData, {
+  const {
+    errors,
+    validateAll,
+    reset: resetValidation,
+  } = useFormValidation(formData, {
     validators: {
       name: validateName,
       email: validateEmail,
@@ -28,35 +32,41 @@ export const ContactForm = memo(function ContactForm({ onSubmit }: ContactFormPr
     },
   });
 
-  const handleSubmit = useCallback(async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!validateAll()) {
-      return;
-    }
-    setIsSubmitting(true);
-    try {
-      await onSubmit?.({ name, email, message });
-      setIsSuccess(true);
-      setName('');
-      setEmail('');
-      setMessage('');
-      resetValidation();
-    } catch (error) {
-      logger.error('Contact form submission failed', error);
-    } finally {
-      setIsSubmitting(false);
-    }
-  }, [validateAll, onSubmit, name, email, message, resetValidation]);
+  const handleSubmit = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault();
+      if (!validateAll()) {
+        return;
+      }
+      setIsSubmitting(true);
+      try {
+        await onSubmit?.({ name, email, message });
+        setIsSuccess(true);
+        setName('');
+        setEmail('');
+        setMessage('');
+        resetValidation();
+      } catch (error) {
+        logger.error('Contact form submission failed', error);
+      } finally {
+        setIsSubmitting(false);
+      }
+    },
+    [validateAll, onSubmit, name, email, message, resetValidation]
+  );
 
   const handleReset = useCallback(() => {
     setIsSuccess(false);
     resetValidation();
   }, [resetValidation]);
 
-  const successAction = useMemo(() => ({
-    label: "Send Another Message",
-    onClick: handleReset,
-  }), [handleReset]);
+  const successAction = useMemo(
+    () => ({
+      label: 'Send Another Message',
+      onClick: handleReset,
+    }),
+    [handleReset]
+  );
 
   if (isSuccess) {
     return (
@@ -73,7 +83,7 @@ export const ContactForm = memo(function ContactForm({ onSubmit }: ContactFormPr
       <FormField
         id="contact-name"
         label="Full Name"
-          error={errors.name}
+        error={errors.name}
         helperText="Enter your full name"
         required
       >
@@ -90,7 +100,7 @@ export const ContactForm = memo(function ContactForm({ onSubmit }: ContactFormPr
       <FormField
         id="contact-email"
         label="Email"
-          error={errors.email}
+        error={errors.email}
         helperText="We'll never share your email with anyone else"
         required
       >

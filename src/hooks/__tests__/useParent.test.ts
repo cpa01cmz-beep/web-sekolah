@@ -48,7 +48,7 @@ describe('useParent Hooks', () => {
           avatarUrl: 'https://example.com/avatar.jpg',
           className: '11-A',
           createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
+          updatedAt: new Date().toISOString(),
         },
         childSchedule: [
           {
@@ -56,8 +56,8 @@ describe('useParent Hooks', () => {
             time: '08:00 - 09:30',
             courseId: 'math-11',
             courseName: 'Mathematics',
-            teacherName: 'Ibu Siti'
-          }
+            teacherName: 'Ibu Siti',
+          },
         ],
         childGrades: [
           {
@@ -68,8 +68,8 @@ describe('useParent Hooks', () => {
             feedback: 'Good work',
             courseName: 'Mathematics',
             createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString()
-          }
+            updatedAt: new Date().toISOString(),
+          },
         ],
         announcements: [
           {
@@ -81,20 +81,20 @@ describe('useParent Hooks', () => {
             date: new Date().toISOString(),
             authorName: 'John Teacher',
             createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString()
-          }
-        ]
+            updatedAt: new Date().toISOString(),
+          },
+        ],
       };
 
       (global.fetch as any).mockResolvedValueOnce({
         ok: true,
         status: 200,
         headers: { get: vi.fn() },
-        json: vi.fn().mockResolvedValueOnce({ success: true, data: mockDashboardData })
+        json: vi.fn().mockResolvedValueOnce({ success: true, data: mockDashboardData }),
       });
 
       const { result } = renderHook(() => useParentDashboard('parent-1'), {
-        wrapper: createWrapper()
+        wrapper: createWrapper(),
       });
 
       await waitFor(() => {
@@ -106,26 +106,29 @@ describe('useParent Hooks', () => {
 
     it('should not execute query when parentId is empty', () => {
       const { result } = renderHook(() => useParentDashboard(''), {
-        wrapper: createWrapper()
+        wrapper: createWrapper(),
       });
       expect(result.current.fetchStatus).toBe('idle');
     });
 
     it('should not execute query when parentId is null', () => {
       const { result } = renderHook(() => useParentDashboard(null as any), {
-        wrapper: createWrapper()
+        wrapper: createWrapper(),
       });
       expect(result.current.fetchStatus).toBe('idle');
     });
 
     it('should handle loading state', async () => {
       let resolveFetch: any;
-      (global.fetch as any).mockImplementationOnce(() => new Promise(resolve => {
-        resolveFetch = resolve;
-      }));
+      (global.fetch as any).mockImplementationOnce(
+        () =>
+          new Promise((resolve) => {
+            resolveFetch = resolve;
+          })
+      );
 
       const { result } = renderHook(() => useParentDashboard('parent-1'), {
-        wrapper: createWrapper()
+        wrapper: createWrapper(),
       });
 
       expect(result.current.isLoading).toBe(true);
@@ -134,7 +137,7 @@ describe('useParent Hooks', () => {
         ok: true,
         status: 200,
         headers: { get: vi.fn() },
-        json: vi.fn().mockResolvedValue({ success: true, data: {} })
+        json: vi.fn().mockResolvedValue({ success: true, data: {} }),
       });
 
       await waitFor(() => {
@@ -146,7 +149,7 @@ describe('useParent Hooks', () => {
       (global.fetch as any).mockRejectedValueOnce(new Error('Network error'));
 
       const { result } = renderHook(() => useParentDashboard('parent-1'), {
-        wrapper: createWrapper()
+        wrapper: createWrapper(),
       });
 
       await waitFor(() => {
@@ -168,22 +171,22 @@ describe('useParent Hooks', () => {
           avatarUrl: 'https://example.com/avatar.jpg',
           className: '11-A',
           createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
+          updatedAt: new Date().toISOString(),
         },
         childSchedule: [],
         childGrades: [],
-        announcements: []
+        announcements: [],
       };
 
       (global.fetch as any).mockResolvedValueOnce({
         ok: true,
         status: 200,
         headers: { get: vi.fn() },
-        json: vi.fn().mockResolvedValueOnce({ success: true, data: mockDashboardData })
+        json: vi.fn().mockResolvedValueOnce({ success: true, data: mockDashboardData }),
       });
 
       const { result } = renderHook(() => useParentDashboard('parent-1'), {
-        wrapper: createWrapper()
+        wrapper: createWrapper(),
       });
 
       await waitFor(() => {
@@ -207,7 +210,7 @@ describe('useParent Hooks', () => {
           avatarUrl: 'https://example.com/avatar.jpg',
           className: '11-A',
           createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
+          updatedAt: new Date().toISOString(),
         },
         childSchedule: [],
         childGrades: [],
@@ -221,7 +224,7 @@ describe('useParent Hooks', () => {
             date: new Date().toISOString(),
             authorName: 'John Teacher',
             createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString()
+            updatedAt: new Date().toISOString(),
           },
           {
             id: 'ann-2',
@@ -232,20 +235,20 @@ describe('useParent Hooks', () => {
             date: new Date().toISOString(),
             authorName: 'Jane Teacher',
             createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString()
-          }
-        ]
+            updatedAt: new Date().toISOString(),
+          },
+        ],
       };
 
       (global.fetch as any).mockResolvedValueOnce({
         ok: true,
         status: 200,
         headers: { get: vi.fn() },
-        json: vi.fn().mockResolvedValueOnce({ success: true, data: mockDashboardData })
+        json: vi.fn().mockResolvedValueOnce({ success: true, data: mockDashboardData }),
       });
 
       const { result } = renderHook(() => useParentDashboard('parent-1'), {
-        wrapper: createWrapper()
+        wrapper: createWrapper(),
       });
 
       await waitFor(() => {
@@ -267,7 +270,7 @@ describe('useParent Hooks', () => {
           avatarUrl: 'https://example.com/avatar.jpg',
           className: '11-A',
           createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
+          updatedAt: new Date().toISOString(),
         },
         childSchedule: [
           {
@@ -275,36 +278,36 @@ describe('useParent Hooks', () => {
             time: '08:00 - 09:30',
             courseId: 'math-11',
             courseName: 'Mathematics',
-            teacherName: 'Ibu Siti'
+            teacherName: 'Ibu Siti',
           },
           {
             day: 'Senin',
             time: '09:45 - 11:15',
             courseId: 'physics-11',
             courseName: 'Physics',
-            teacherName: 'Pak Budi'
+            teacherName: 'Pak Budi',
           },
           {
             day: 'Selasa',
             time: '08:00 - 09:30',
             courseId: 'english-11',
             courseName: 'English',
-            teacherName: 'Ms. Smith'
-          }
+            teacherName: 'Ms. Smith',
+          },
         ],
         childGrades: [],
-        announcements: []
+        announcements: [],
       };
 
       (global.fetch as any).mockResolvedValueOnce({
         ok: true,
         status: 200,
         headers: { get: vi.fn() },
-        json: vi.fn().mockResolvedValueOnce({ success: true, data: mockDashboardData })
+        json: vi.fn().mockResolvedValueOnce({ success: true, data: mockDashboardData }),
       });
 
       const { result } = renderHook(() => useParentDashboard('parent-1'), {
-        wrapper: createWrapper()
+        wrapper: createWrapper(),
       });
 
       await waitFor(() => {
@@ -328,7 +331,7 @@ describe('useParent Hooks', () => {
           avatarUrl: 'https://example.com/avatar.jpg',
           className: '11-A',
           createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
+          updatedAt: new Date().toISOString(),
         },
         childSchedule: [],
         childGrades: [
@@ -340,7 +343,7 @@ describe('useParent Hooks', () => {
             feedback: 'Good work',
             courseName: 'Mathematics',
             createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString()
+            updatedAt: new Date().toISOString(),
           },
           {
             id: 'grade-2',
@@ -350,7 +353,7 @@ describe('useParent Hooks', () => {
             feedback: 'Excellent',
             courseName: 'Physics',
             createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString()
+            updatedAt: new Date().toISOString(),
           },
           {
             id: 'grade-3',
@@ -360,21 +363,21 @@ describe('useParent Hooks', () => {
             feedback: 'Needs improvement',
             courseName: 'English',
             createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString()
-          }
+            updatedAt: new Date().toISOString(),
+          },
         ],
-        announcements: []
+        announcements: [],
       };
 
       (global.fetch as any).mockResolvedValueOnce({
         ok: true,
         status: 200,
         headers: { get: vi.fn() },
-        json: vi.fn().mockResolvedValueOnce({ success: true, data: mockDashboardData })
+        json: vi.fn().mockResolvedValueOnce({ success: true, data: mockDashboardData }),
       });
 
       const { result } = renderHook(() => useParentDashboard('parent-1'), {
-        wrapper: createWrapper()
+        wrapper: createWrapper(),
       });
 
       await waitFor(() => {
@@ -394,29 +397,29 @@ describe('useParent Hooks', () => {
         {
           day: 'Senin',
           time: '08:00 - 09:30',
-          courseId: 'math-11'
+          courseId: 'math-11',
         },
         {
           day: 'Senin',
           time: '09:45 - 11:15',
-          courseId: 'physics-11'
+          courseId: 'physics-11',
         },
         {
           day: 'Selasa',
           time: '08:00 - 09:30',
-          courseId: 'english-11'
-        }
+          courseId: 'english-11',
+        },
       ];
 
       (global.fetch as any).mockResolvedValueOnce({
         ok: true,
         status: 200,
         headers: { get: vi.fn() },
-        json: vi.fn().mockResolvedValueOnce({ success: true, data: mockSchedule })
+        json: vi.fn().mockResolvedValueOnce({ success: true, data: mockSchedule }),
       });
 
       const { result } = renderHook(() => useChildSchedule('student-1'), {
-        wrapper: createWrapper()
+        wrapper: createWrapper(),
       });
 
       await waitFor(() => {
@@ -428,14 +431,14 @@ describe('useParent Hooks', () => {
 
     it('should not execute query when childId is empty', () => {
       const { result } = renderHook(() => useChildSchedule(''), {
-        wrapper: createWrapper()
+        wrapper: createWrapper(),
       });
       expect(result.current.fetchStatus).toBe('idle');
     });
 
     it('should not execute query when childId is null', () => {
       const { result } = renderHook(() => useChildSchedule(null as any), {
-        wrapper: createWrapper()
+        wrapper: createWrapper(),
       });
       expect(result.current.fetchStatus).toBe('idle');
     });
@@ -445,11 +448,11 @@ describe('useParent Hooks', () => {
         ok: true,
         status: 200,
         headers: { get: vi.fn() },
-        json: vi.fn().mockResolvedValueOnce({ success: true, data: [] })
+        json: vi.fn().mockResolvedValueOnce({ success: true, data: [] }),
       });
 
       const { result } = renderHook(() => useChildSchedule('student-1'), {
-        wrapper: createWrapper()
+        wrapper: createWrapper(),
       });
 
       await waitFor(() => {
@@ -461,12 +464,15 @@ describe('useParent Hooks', () => {
 
     it('should handle loading state', async () => {
       let resolveFetch: any;
-      (global.fetch as any).mockImplementationOnce(() => new Promise(resolve => {
-        resolveFetch = resolve;
-      }));
+      (global.fetch as any).mockImplementationOnce(
+        () =>
+          new Promise((resolve) => {
+            resolveFetch = resolve;
+          })
+      );
 
       const { result } = renderHook(() => useChildSchedule('student-1'), {
-        wrapper: createWrapper()
+        wrapper: createWrapper(),
       });
 
       expect(result.current.isLoading).toBe(true);
@@ -475,7 +481,7 @@ describe('useParent Hooks', () => {
         ok: true,
         status: 200,
         headers: { get: vi.fn() },
-        json: vi.fn().mockResolvedValue({ success: true, data: [] })
+        json: vi.fn().mockResolvedValue({ success: true, data: [] }),
       });
 
       await waitFor(() => {
@@ -487,7 +493,7 @@ describe('useParent Hooks', () => {
       (global.fetch as any).mockRejectedValueOnce(new Error('Network error'));
 
       const { result } = renderHook(() => useChildSchedule('student-1'), {
-        wrapper: createWrapper()
+        wrapper: createWrapper(),
       });
 
       await waitFor(() => {
@@ -503,18 +509,18 @@ describe('useParent Hooks', () => {
         { day: 'Selasa', time: '08:00 - 09:30', courseId: 'english-11' },
         { day: 'Rabu', time: '08:00 - 09:30', courseId: 'physics-11' },
         { day: 'Kamis', time: '08:00 - 09:30', courseId: 'biology-11' },
-        { day: 'Jumat', time: '08:00 - 09:30', courseId: 'chemistry-11' }
+        { day: 'Jumat', time: '08:00 - 09:30', courseId: 'chemistry-11' },
       ];
 
       (global.fetch as any).mockResolvedValueOnce({
         ok: true,
         status: 200,
         headers: { get: vi.fn() },
-        json: vi.fn().mockResolvedValueOnce({ success: true, data: mockSchedule })
+        json: vi.fn().mockResolvedValueOnce({ success: true, data: mockSchedule }),
       });
 
       const { result } = renderHook(() => useChildSchedule('student-1'), {
-        wrapper: createWrapper()
+        wrapper: createWrapper(),
       });
 
       await waitFor(() => {
@@ -531,25 +537,25 @@ describe('useParent Hooks', () => {
         { day: 'Senin', time: '08:00 - 09:30', courseId: 'math-11' },
         { day: 'Senin', time: '09:45 - 11:15', courseId: 'physics-11' },
         { day: 'Senin', time: '11:30 - 13:00', courseId: 'english-11' },
-        { day: 'Selasa', time: '08:00 - 09:30', courseId: 'chemistry-11' }
+        { day: 'Selasa', time: '08:00 - 09:30', courseId: 'chemistry-11' },
       ];
 
       (global.fetch as any).mockResolvedValueOnce({
         ok: true,
         status: 200,
         headers: { get: vi.fn() },
-        json: vi.fn().mockResolvedValueOnce({ success: true, data: mockSchedule })
+        json: vi.fn().mockResolvedValueOnce({ success: true, data: mockSchedule }),
       });
 
       const { result } = renderHook(() => useChildSchedule('student-1'), {
-        wrapper: createWrapper()
+        wrapper: createWrapper(),
       });
 
       await waitFor(() => {
         expect(result.current.isSuccess).toBe(true);
       });
 
-      const mondayItems = result.current.data?.filter(item => item.day === 'Senin');
+      const mondayItems = result.current.data?.filter((item) => item.day === 'Senin');
       expect(mondayItems?.length).toBe(3);
     });
   });

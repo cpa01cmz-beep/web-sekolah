@@ -1,4 +1,14 @@
-import { LayoutDashboard, Calendar, Award, User, BookCopy, Megaphone, Users, Settings, Mail } from 'lucide-react';
+import {
+  LayoutDashboard,
+  Calendar,
+  Award,
+  User,
+  BookCopy,
+  Megaphone,
+  Users,
+  Settings,
+  Mail,
+} from 'lucide-react';
 import type { ComponentType } from 'react';
 
 export interface NavLink {

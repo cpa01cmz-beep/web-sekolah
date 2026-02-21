@@ -8,9 +8,16 @@ import {
   useSubmitGrade,
   useTeacherAnnouncements,
   useCreateAnnouncement,
-  useTeacherClassStudents
+  useTeacherClassStudents,
 } from '../useTeacher';
-import type { TeacherDashboardData, SchoolClass, Grade, Announcement, CreateAnnouncementData, SubmitGradeData } from '@shared/types';
+import type {
+  TeacherDashboardData,
+  SchoolClass,
+  Grade,
+  Announcement,
+  CreateAnnouncementData,
+  SubmitGradeData,
+} from '@shared/types';
 
 describe('useTeacher Hooks', () => {
   let testQueryClient: QueryClient;
@@ -51,18 +58,18 @@ describe('useTeacher Hooks', () => {
         totalClasses: 5,
         totalStudents: 25,
         recentGrades: [],
-        recentAnnouncements: []
+        recentAnnouncements: [],
       };
 
       (global.fetch as any).mockResolvedValueOnce({
         ok: true,
         status: 200,
         headers: { get: vi.fn() },
-        json: vi.fn().mockResolvedValueOnce({ success: true, data: mockDashboardData })
+        json: vi.fn().mockResolvedValueOnce({ success: true, data: mockDashboardData }),
       });
 
       const { result } = renderHook(() => useTeacherDashboard('teacher-1'), {
-        wrapper: createWrapper()
+        wrapper: createWrapper(),
       });
 
       await waitFor(() => {
@@ -74,26 +81,29 @@ describe('useTeacher Hooks', () => {
 
     it('should not execute query when teacherId is empty', () => {
       const { result } = renderHook(() => useTeacherDashboard(''), {
-        wrapper: createWrapper()
+        wrapper: createWrapper(),
       });
       expect(result.current.fetchStatus).toBe('idle');
     });
 
     it('should not execute query when teacherId is null', () => {
       const { result } = renderHook(() => useTeacherDashboard(null as any), {
-        wrapper: createWrapper()
+        wrapper: createWrapper(),
       });
       expect(result.current.fetchStatus).toBe('idle');
     });
 
     it('should handle loading state', async () => {
       let resolveFetch: any;
-      (global.fetch as any).mockImplementationOnce(() => new Promise(resolve => {
-        resolveFetch = resolve;
-      }));
+      (global.fetch as any).mockImplementationOnce(
+        () =>
+          new Promise((resolve) => {
+            resolveFetch = resolve;
+          })
+      );
 
       const { result } = renderHook(() => useTeacherDashboard('teacher-1'), {
-        wrapper: createWrapper()
+        wrapper: createWrapper(),
       });
 
       expect(result.current.isLoading).toBe(true);
@@ -102,7 +112,7 @@ describe('useTeacher Hooks', () => {
         ok: true,
         status: 200,
         headers: { get: vi.fn() },
-        json: vi.fn().mockResolvedValue({ success: true, data: {} })
+        json: vi.fn().mockResolvedValue({ success: true, data: {} }),
       });
 
       await waitFor(() => {
@@ -114,7 +124,7 @@ describe('useTeacher Hooks', () => {
       (global.fetch as any).mockRejectedValueOnce(new Error('Network error'));
 
       const { result } = renderHook(() => useTeacherDashboard('teacher-1'), {
-        wrapper: createWrapper()
+        wrapper: createWrapper(),
       });
 
       await waitFor(() => {
@@ -128,19 +138,31 @@ describe('useTeacher Hooks', () => {
   describe('useTeacherClasses', () => {
     it('should return teacher classes', async () => {
       const mockClasses: SchoolClass[] = [
-        { id: 'class-1', name: 'Mathematics 101', teacherId: 'teacher-1', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-        { id: 'class-2', name: 'Physics 101', teacherId: 'teacher-1', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() }
+        {
+          id: 'class-1',
+          name: 'Mathematics 101',
+          teacherId: 'teacher-1',
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        },
+        {
+          id: 'class-2',
+          name: 'Physics 101',
+          teacherId: 'teacher-1',
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        },
       ];
 
       (global.fetch as any).mockResolvedValueOnce({
         ok: true,
         status: 200,
         headers: { get: vi.fn() },
-        json: vi.fn().mockResolvedValueOnce({ success: true, data: mockClasses })
+        json: vi.fn().mockResolvedValueOnce({ success: true, data: mockClasses }),
       });
 
       const { result } = renderHook(() => useTeacherClasses('teacher-1'), {
-        wrapper: createWrapper()
+        wrapper: createWrapper(),
       });
 
       await waitFor(() => {
@@ -152,7 +174,7 @@ describe('useTeacher Hooks', () => {
 
     it('should not execute query when teacherId is empty', () => {
       const { result } = renderHook(() => useTeacherClasses(''), {
-        wrapper: createWrapper()
+        wrapper: createWrapper(),
       });
       expect(result.current.fetchStatus).toBe('idle');
     });
@@ -162,11 +184,11 @@ describe('useTeacher Hooks', () => {
         ok: true,
         status: 200,
         headers: { get: vi.fn() },
-        json: vi.fn().mockResolvedValueOnce({ success: true, data: [] })
+        json: vi.fn().mockResolvedValueOnce({ success: true, data: [] }),
       });
 
       const { result } = renderHook(() => useTeacherClasses('teacher-1'), {
-        wrapper: createWrapper()
+        wrapper: createWrapper(),
       });
 
       await waitFor(() => {
@@ -186,25 +208,25 @@ describe('useTeacher Hooks', () => {
         score: 85,
         feedback: 'Good work',
         createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        updatedAt: new Date().toISOString(),
       };
 
       const gradeData: SubmitGradeData = {
         studentId: 'student-1',
         courseId: 'course-1',
         score: 85,
-        feedback: 'Good work'
+        feedback: 'Good work',
       };
 
       (global.fetch as any).mockResolvedValueOnce({
         ok: true,
         status: 200,
         headers: { get: vi.fn() },
-        json: vi.fn().mockResolvedValueOnce({ success: true, data: mockGrade })
+        json: vi.fn().mockResolvedValueOnce({ success: true, data: mockGrade }),
       });
 
       const { result } = renderHook(() => useSubmitGrade(), {
-        wrapper: createWrapper()
+        wrapper: createWrapper(),
       });
 
       await act(async () => {
@@ -222,17 +244,19 @@ describe('useTeacher Hooks', () => {
         studentId: 'student-1',
         courseId: 'course-1',
         score: 85,
-        feedback: 'Good work'
+        feedback: 'Good work',
       };
 
       (global.fetch as any).mockRejectedValueOnce(new Error('Failed to submit grade'));
 
       const { result } = renderHook(() => useSubmitGrade(), {
-        wrapper: createWrapper()
+        wrapper: createWrapper(),
       });
 
       await act(async () => {
-        await expect(result.current.mutateAsync(gradeData)).rejects.toThrow('Failed to submit grade');
+        await expect(result.current.mutateAsync(gradeData)).rejects.toThrow(
+          'Failed to submit grade'
+        );
       });
 
       await waitFor(() => {
@@ -248,25 +272,25 @@ describe('useTeacher Hooks', () => {
         score: 100,
         feedback: 'Perfect score',
         createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        updatedAt: new Date().toISOString(),
       };
 
       const gradeData: SubmitGradeData = {
         studentId: 'student-1',
         courseId: 'course-1',
         score: 100,
-        feedback: 'Perfect score'
+        feedback: 'Perfect score',
       };
 
       (global.fetch as any).mockResolvedValueOnce({
         ok: true,
         status: 200,
         headers: { get: vi.fn() },
-        json: vi.fn().mockResolvedValueOnce({ success: true, data: mockGrade })
+        json: vi.fn().mockResolvedValueOnce({ success: true, data: mockGrade }),
       });
 
       const { result } = renderHook(() => useSubmitGrade(), {
-        wrapper: createWrapper()
+        wrapper: createWrapper(),
       });
 
       await act(async () => {
@@ -283,25 +307,25 @@ describe('useTeacher Hooks', () => {
         score: 0,
         feedback: 'No score',
         createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        updatedAt: new Date().toISOString(),
       };
 
       const gradeData: SubmitGradeData = {
         studentId: 'student-1',
         courseId: 'course-1',
         score: 0,
-        feedback: 'No score'
+        feedback: 'No score',
       };
 
       (global.fetch as any).mockResolvedValueOnce({
         ok: true,
         status: 200,
         headers: { get: vi.fn() },
-        json: vi.fn().mockResolvedValueOnce({ success: true, data: mockGrade })
+        json: vi.fn().mockResolvedValueOnce({ success: true, data: mockGrade }),
       });
 
       const { result } = renderHook(() => useSubmitGrade(), {
-        wrapper: createWrapper()
+        wrapper: createWrapper(),
       });
 
       await act(async () => {
@@ -322,19 +346,19 @@ describe('useTeacher Hooks', () => {
           targetRole: 'student',
           date: new Date().toISOString(),
           createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
-        }
+          updatedAt: new Date().toISOString(),
+        },
       ];
 
       (global.fetch as any).mockResolvedValueOnce({
         ok: true,
         status: 200,
         headers: { get: vi.fn() },
-        json: vi.fn().mockResolvedValueOnce({ success: true, data: mockAnnouncements })
+        json: vi.fn().mockResolvedValueOnce({ success: true, data: mockAnnouncements }),
       });
 
       const { result } = renderHook(() => useTeacherAnnouncements('teacher-1'), {
-        wrapper: createWrapper()
+        wrapper: createWrapper(),
       });
 
       await waitFor(() => {
@@ -346,7 +370,7 @@ describe('useTeacher Hooks', () => {
 
     it('should not execute query when teacherId is empty', () => {
       const { result } = renderHook(() => useTeacherAnnouncements(''), {
-        wrapper: createWrapper()
+        wrapper: createWrapper(),
       });
       expect(result.current.fetchStatus).toBe('idle');
     });
@@ -356,11 +380,11 @@ describe('useTeacher Hooks', () => {
         ok: true,
         status: 200,
         headers: { get: vi.fn() },
-        json: vi.fn().mockResolvedValueOnce({ success: true, data: [] })
+        json: vi.fn().mockResolvedValueOnce({ success: true, data: [] }),
       });
 
       const { result } = renderHook(() => useTeacherAnnouncements('teacher-1'), {
-        wrapper: createWrapper()
+        wrapper: createWrapper(),
       });
 
       await waitFor(() => {
@@ -381,24 +405,24 @@ describe('useTeacher Hooks', () => {
         targetRole: 'student',
         date: new Date().toISOString(),
         createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        updatedAt: new Date().toISOString(),
       };
 
       const announcementData: CreateAnnouncementData = {
         title: 'Midterm Exam',
         content: 'Midterm exam will be held next week',
-        targetRole: 'student'
+        targetRole: 'student',
       };
 
       (global.fetch as any).mockResolvedValueOnce({
         ok: true,
         status: 200,
         headers: { get: vi.fn() },
-        json: vi.fn().mockResolvedValueOnce({ success: true, data: mockAnnouncement })
+        json: vi.fn().mockResolvedValueOnce({ success: true, data: mockAnnouncement }),
       });
 
       const { result } = renderHook(() => useCreateAnnouncement(), {
-        wrapper: createWrapper()
+        wrapper: createWrapper(),
       });
 
       await act(async () => {
@@ -415,17 +439,19 @@ describe('useTeacher Hooks', () => {
       const announcementData: CreateAnnouncementData = {
         title: 'Midterm Exam',
         content: 'Midterm exam will be held next week',
-        targetRole: 'student'
+        targetRole: 'student',
       };
 
       (global.fetch as any).mockRejectedValueOnce(new Error('Failed to create announcement'));
 
       const { result } = renderHook(() => useCreateAnnouncement(), {
-        wrapper: createWrapper()
+        wrapper: createWrapper(),
       });
 
       await act(async () => {
-        await expect(result.current.mutateAsync(announcementData)).rejects.toThrow('Failed to create announcement');
+        await expect(result.current.mutateAsync(announcementData)).rejects.toThrow(
+          'Failed to create announcement'
+        );
       });
 
       await waitFor(() => {
@@ -442,24 +468,24 @@ describe('useTeacher Hooks', () => {
         targetRole: 'all',
         date: new Date().toISOString(),
         createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        updatedAt: new Date().toISOString(),
       };
 
       const announcementData: CreateAnnouncementData = {
         title: 'School Closed',
         content: 'School will be closed tomorrow',
-        targetRole: 'all'
+        targetRole: 'all',
       };
 
       (global.fetch as any).mockResolvedValueOnce({
         ok: true,
         status: 200,
         headers: { get: vi.fn() },
-        json: vi.fn().mockResolvedValueOnce({ success: true, data: mockAnnouncement })
+        json: vi.fn().mockResolvedValueOnce({ success: true, data: mockAnnouncement }),
       });
 
       const { result } = renderHook(() => useCreateAnnouncement(), {
-        wrapper: createWrapper()
+        wrapper: createWrapper(),
       });
 
       await act(async () => {
@@ -477,23 +503,23 @@ describe('useTeacher Hooks', () => {
         targetRole: 'all',
         date: new Date().toISOString(),
         createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        updatedAt: new Date().toISOString(),
       };
 
       const announcementData: CreateAnnouncementData = {
         title: 'Important Notice',
-        content: 'Check your email'
+        content: 'Check your email',
       };
 
       (global.fetch as any).mockResolvedValueOnce({
         ok: true,
         status: 200,
         headers: { get: vi.fn() },
-        json: vi.fn().mockResolvedValueOnce({ success: true, data: mockAnnouncement })
+        json: vi.fn().mockResolvedValueOnce({ success: true, data: mockAnnouncement }),
       });
 
       const { result } = renderHook(() => useCreateAnnouncement(), {
-        wrapper: createWrapper()
+        wrapper: createWrapper(),
       });
 
       await act(async () => {
@@ -511,26 +537,26 @@ describe('useTeacher Hooks', () => {
           name: 'John Doe',
           score: 85,
           feedback: 'Good work',
-          gradeId: 'grade-1'
+          gradeId: 'grade-1',
         },
         {
           id: 'student-2',
           name: 'Jane Smith',
           score: 90,
           feedback: 'Excellent',
-          gradeId: 'grade-2'
-        }
+          gradeId: 'grade-2',
+        },
       ];
 
       (global.fetch as any).mockResolvedValueOnce({
         ok: true,
         status: 200,
         headers: { get: vi.fn() },
-        json: vi.fn().mockResolvedValueOnce({ success: true, data: mockStudents })
+        json: vi.fn().mockResolvedValueOnce({ success: true, data: mockStudents }),
       });
 
       const { result } = renderHook(() => useTeacherClassStudents('class-1'), {
-        wrapper: createWrapper()
+        wrapper: createWrapper(),
       });
 
       await waitFor(() => {
@@ -542,7 +568,7 @@ describe('useTeacher Hooks', () => {
 
     it('should not execute query when classId is empty', () => {
       const { result } = renderHook(() => useTeacherClassStudents(''), {
-        wrapper: createWrapper()
+        wrapper: createWrapper(),
       });
       expect(result.current.fetchStatus).toBe('idle');
     });
@@ -554,19 +580,19 @@ describe('useTeacher Hooks', () => {
           name: 'John Doe',
           score: null,
           feedback: '',
-          gradeId: null
-        }
+          gradeId: null,
+        },
       ];
 
       (global.fetch as any).mockResolvedValueOnce({
         ok: true,
         status: 200,
         headers: { get: vi.fn() },
-        json: vi.fn().mockResolvedValueOnce({ success: true, data: mockStudents })
+        json: vi.fn().mockResolvedValueOnce({ success: true, data: mockStudents }),
       });
 
       const { result } = renderHook(() => useTeacherClassStudents('class-1'), {
-        wrapper: createWrapper()
+        wrapper: createWrapper(),
       });
 
       await waitFor(() => {
@@ -582,11 +608,11 @@ describe('useTeacher Hooks', () => {
         ok: true,
         status: 200,
         headers: { get: vi.fn() },
-        json: vi.fn().mockResolvedValueOnce({ success: true, data: [] })
+        json: vi.fn().mockResolvedValueOnce({ success: true, data: [] }),
       });
 
       const { result } = renderHook(() => useTeacherClassStudents('class-1'), {
-        wrapper: createWrapper()
+        wrapper: createWrapper(),
       });
 
       await waitFor(() => {

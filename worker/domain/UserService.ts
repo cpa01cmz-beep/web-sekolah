@@ -16,28 +16,33 @@ import { UserCreationStrategyFactory, type BaseUserFields } from './UserCreation
 
 export class UserService {
   /**
-    * Creates a new user with role-specific fields and password hashing
-    *
-    * @param env - Cloudflare Workers environment with Durable Object bindings
-    * @param userData - User data including role (student/teacher/parent/admin)
-    * @returns Created user object (without passwordHash)
-    *
-    * Role-specific fields:
-    * - student: classId, studentIdNumber
-    * - teacher: classIds (array)
-    * - parent: childId
-    * - admin: no additional fields
-    *
-    * Password handling:
-    * - If password provided, hashes using PBKDF2 with 100,000 iterations
-    * - If no password provided, sets passwordHash to null (for OAuth/future auth methods)
-    *
-    * Architecture note: Uses Strategy Pattern for role-specific creation logic.
-    * Adding new roles only requires creating a new strategy class (Open/Closed Principle).
-    */
+   * Creates a new user with role-specific fields and password hashing
+   *
+   * @param env - Cloudflare Workers environment with Durable Object bindings
+   * @param userData - User data including role (student/teacher/parent/admin)
+   * @returns Created user object (without passwordHash)
+   *
+   * Role-specific fields:
+   * - student: classId, studentIdNumber
+   * - teacher: classIds (array)
+   * - parent: childId
+   * - admin: no additional fields
+   *
+   * Password handling:
+   * - If password provided, hashes using PBKDF2 with 100,000 iterations
+   * - If no password provided, sets passwordHash to null (for OAuth/future auth methods)
+   *
+   * Architecture note: Uses Strategy Pattern for role-specific creation logic.
+   * Adding new roles only requires creating a new strategy class (Open/Closed Principle).
+   */
   static async createUser(env: Env, userData: CreateUserData): Promise<SchoolUser> {
     const now = new Date().toISOString();
-    const base: BaseUserFields = { id: crypto.randomUUID(), createdAt: now, updatedAt: now, avatarUrl: '' };
+    const base: BaseUserFields = {
+      id: crypto.randomUUID(),
+      createdAt: now,
+      updatedAt: now,
+      avatarUrl: '',
+    };
 
     let passwordHash = null;
     if (userData.password) {
@@ -68,7 +73,7 @@ export class UserService {
   static async updateUser(env: Env, userId: string, userData: UpdateUserData): Promise<SchoolUser> {
     const userEntity = new UserEntity(env, userId);
 
-    if (!await userEntity.exists()) {
+    if (!(await userEntity.exists())) {
       throw new Error('User not found');
     }
 
@@ -104,7 +109,10 @@ export class UserService {
    * - Parent: Has dependent students (cannot delete if child exists)
    * - Admin: Has dependents (careful deletion required)
    */
-  static async deleteUser(env: Env, userId: string): Promise<{ id: string; deleted: boolean; warnings: string[] }> {
+  static async deleteUser(
+    env: Env,
+    userId: string
+  ): Promise<{ id: string; deleted: boolean; warnings: string[] }> {
     const warnings = await this.checkDependents(env, userId);
 
     if (warnings.length > 0) {

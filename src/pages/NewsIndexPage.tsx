@@ -10,9 +10,7 @@ export function NewsIndexPage() {
         <div className="bg-primary/5">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24 text-center">
             <SlideUp>
-              <h1 className="text-4xl md:text-5xl font-bold text-primary">
-                Indeks Berita
-              </h1>
+              <h1 className="text-4xl md:text-5xl font-bold text-primary">Indeks Berita</h1>
             </SlideUp>
             <SlideUp delay={0.2}>
               <p className="mt-4 max-w-3xl mx-auto text-lg text-muted-foreground">
@@ -28,10 +26,26 @@ export function NewsIndexPage() {
                 <div className="bg-card rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
                   <h3 className="text-xl font-bold mb-4">2025</h3>
                   <ul className="space-y-2">
-                    <li><a href="#" className="text-primary hover:underline">November (15)</a></li>
-                    <li><a href="#" className="text-primary hover:underline">Oktober (12)</a></li>
-                    <li><a href="#" className="text-primary hover:underline">September (18)</a></li>
-                    <li><a href="#" className="text-primary hover:underline">Agustus (9)</a></li>
+                    <li>
+                      <a href="#" className="text-primary hover:underline">
+                        November (15)
+                      </a>
+                    </li>
+                    <li>
+                      <a href="#" className="text-primary hover:underline">
+                        Oktober (12)
+                      </a>
+                    </li>
+                    <li>
+                      <a href="#" className="text-primary hover:underline">
+                        September (18)
+                      </a>
+                    </li>
+                    <li>
+                      <a href="#" className="text-primary hover:underline">
+                        Agustus (9)
+                      </a>
+                    </li>
                   </ul>
                 </div>
               </SlideUp>
@@ -40,10 +54,26 @@ export function NewsIndexPage() {
                 <div className="bg-card rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
                   <h3 className="text-xl font-bold mb-4">2024</h3>
                   <ul className="space-y-2">
-                    <li><a href="#" className="text-primary hover:underline">Desember (11)</a></li>
-                    <li><a href="#" className="text-primary hover:underline">November (14)</a></li>
-                    <li><a href="#" className="text-primary hover:underline">Oktober (16)</a></li>
-                    <li><a href="#" className="text-primary hover:underline">September (13)</a></li>
+                    <li>
+                      <a href="#" className="text-primary hover:underline">
+                        Desember (11)
+                      </a>
+                    </li>
+                    <li>
+                      <a href="#" className="text-primary hover:underline">
+                        November (14)
+                      </a>
+                    </li>
+                    <li>
+                      <a href="#" className="text-primary hover:underline">
+                        Oktober (16)
+                      </a>
+                    </li>
+                    <li>
+                      <a href="#" className="text-primary hover:underline">
+                        September (13)
+                      </a>
+                    </li>
                   </ul>
                 </div>
               </SlideUp>
@@ -52,7 +82,11 @@ export function NewsIndexPage() {
                 <div className="bg-card rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
                   <h3 className="text-xl font-bold mb-4">2023</h3>
                   <ul className="space-y-2">
-                    <li><a href="#" className="text-primary hover:underline">Arsip Penuh</a></li>
+                    <li>
+                      <a href="#" className="text-primary hover:underline">
+                        Arsip Penuh
+                      </a>
+                    </li>
                   </ul>
                 </div>
               </SlideUp>
@@ -72,7 +106,10 @@ export function NewsIndexPage() {
                     ></div>
                     <div>
                       <h3 className="font-bold">Prestasi Siswa di Olimpiade Sains Nasional</h3>
-                      <p className="text-sm text-muted-foreground mt-1">Tim sains kami berhasil meraih medali emas di ajang bergengsi tingkat nasional.</p>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        Tim sains kami berhasil meraih medali emas di ajang bergengsi tingkat
+                        nasional.
+                      </p>
                       <span className="text-xs text-primary mt-2">15 Oktober 2025</span>
                     </div>
                   </div>
@@ -87,7 +124,10 @@ export function NewsIndexPage() {
                     ></div>
                     <div>
                       <h3 className="font-bold">Pembangunan Gedung Baru Dimulai</h3>
-                      <p className="text-sm text-muted-foreground mt-1">Proyek pembangunan gedung serba guna baru telah dimulai dengan target selesai akhir tahun.</p>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        Proyek pembangunan gedung serba guna baru telah dimulai dengan target
+                        selesai akhir tahun.
+                      </p>
                       <span className="text-xs text-primary mt-2">3 September 2025</span>
                     </div>
                   </div>

@@ -10,13 +10,12 @@ export function ProfileServicesPage() {
         <div className="bg-primary/5">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24 text-center">
             <SlideUp>
-              <h1 className="text-4xl md:text-5xl font-bold text-primary">
-                Layanan & Produk
-              </h1>
+              <h1 className="text-4xl md:text-5xl font-bold text-primary">Layanan & Produk</h1>
             </SlideUp>
             <SlideUp delay={0.2}>
               <p className="mt-4 max-w-3xl mx-auto text-lg text-muted-foreground">
-                Berbagai layanan dan produk unggulan yang kami tawarkan untuk mendukung proses pendidikan.
+                Berbagai layanan dan produk unggulan yang kami tawarkan untuk mendukung proses
+                pendidikan.
               </p>
             </SlideUp>
           </div>
@@ -33,7 +32,8 @@ export function ProfileServicesPage() {
                   <div>
                     <h3 className="text-xl font-bold">Sistem Pembelajaran Digital</h3>
                     <p className="mt-2 text-muted-foreground">
-                      Platform e-learning terintegrasi yang memungkinkan siswa belajar kapan saja dan di mana saja dengan materi interaktif.
+                      Platform e-learning terintegrasi yang memungkinkan siswa belajar kapan saja
+                      dan di mana saja dengan materi interaktif.
                     </p>
                   </div>
                 </div>
@@ -45,7 +45,8 @@ export function ProfileServicesPage() {
                   <div>
                     <h3 className="text-xl font-bold">Konseling Karier</h3>
                     <p className="mt-2 text-muted-foreground">
-                      Program konseling untuk membantu siswa mengenal potensi diri dan merencanakan karier masa depan.
+                      Program konseling untuk membantu siswa mengenal potensi diri dan merencanakan
+                      karier masa depan.
                     </p>
                   </div>
                 </div>
@@ -57,7 +58,8 @@ export function ProfileServicesPage() {
                   <div>
                     <h3 className="text-xl font-bold">Pelatihan Keterampilan</h3>
                     <p className="mt-2 text-muted-foreground">
-                      Berbagai pelatihan keterampilan teknis dan soft skills untuk meningkatkan daya saing siswa di dunia kerja.
+                      Berbagai pelatihan keterampilan teknis dan soft skills untuk meningkatkan daya
+                      saing siswa di dunia kerja.
                     </p>
                   </div>
                 </div>
@@ -74,7 +76,8 @@ export function ProfileServicesPage() {
                   <div>
                     <h3 className="text-xl font-bold">Aplikasi Akademia Pro</h3>
                     <p className="mt-2 text-muted-foreground">
-                      Aplikasi manajemen sekolah terintegrasi yang menghubungkan siswa, guru, orang tua, dan administrator.
+                      Aplikasi manajemen sekolah terintegrasi yang menghubungkan siswa, guru, orang
+                      tua, dan administrator.
                     </p>
                   </div>
                 </div>
@@ -86,7 +89,8 @@ export function ProfileServicesPage() {
                   <div>
                     <h3 className="text-xl font-bold">Buku Digital Interaktif</h3>
                     <p className="mt-2 text-muted-foreground">
-                      Koleksi buku pelajaran digital dengan konten multimedia untuk meningkatkan pemahaman siswa.
+                      Koleksi buku pelajaran digital dengan konten multimedia untuk meningkatkan
+                      pemahaman siswa.
                     </p>
                   </div>
                 </div>
@@ -98,7 +102,8 @@ export function ProfileServicesPage() {
                   <div>
                     <h3 className="text-xl font-bold">Sertifikasi Kompetensi</h3>
                     <p className="mt-2 text-muted-foreground">
-                      Program sertifikasi yang diakui industri untuk membuktikan kompetensi siswa di bidang tertentu.
+                      Program sertifikasi yang diakui industri untuk membuktikan kompetensi siswa di
+                      bidang tertentu.
                     </p>
                   </div>
                 </div>

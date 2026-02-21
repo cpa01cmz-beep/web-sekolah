@@ -16,7 +16,9 @@ describe('RoleButtonGrid', () => {
 
     it('should render buttons in a 2x2 grid layout', () => {
       const onRoleSelect = vi.fn();
-      const { container } = render(<RoleButtonGrid loadingRole={null} onRoleSelect={onRoleSelect} />);
+      const { container } = render(
+        <RoleButtonGrid loadingRole={null} onRoleSelect={onRoleSelect} />
+      );
 
       const grid = container.querySelector('.grid');
       expect(grid).toBeInTheDocument();
@@ -26,10 +28,16 @@ describe('RoleButtonGrid', () => {
     it('should apply custom button className when provided', () => {
       const onRoleSelect = vi.fn();
       const customClass = 'custom-button-class';
-      render(<RoleButtonGrid loadingRole={null} onRoleSelect={onRoleSelect} buttonClassName={customClass} />);
+      render(
+        <RoleButtonGrid
+          loadingRole={null}
+          onRoleSelect={onRoleSelect}
+          buttonClassName={customClass}
+        />
+      );
 
       const buttons = screen.getAllByRole('button');
-      buttons.forEach(button => {
+      buttons.forEach((button) => {
         expect(button).toHaveClass(customClass);
       });
     });
@@ -137,7 +145,7 @@ describe('RoleButtonGrid', () => {
       render(<RoleButtonGrid loadingRole={null} onRoleSelect={onRoleSelect} />);
 
       const buttons = screen.getAllByRole('button');
-      buttons.forEach(button => {
+      buttons.forEach((button) => {
         expect(button).toHaveClass('min-h-[44px]');
       });
     });
@@ -184,7 +192,9 @@ describe('RoleButtonGrid', () => {
 
     it('should be memoized to prevent unnecessary re-renders', () => {
       const onRoleSelect = vi.fn();
-      const { rerender } = render(<RoleButtonGrid loadingRole={null} onRoleSelect={onRoleSelect} />);
+      const { rerender } = render(
+        <RoleButtonGrid loadingRole={null} onRoleSelect={onRoleSelect} />
+      );
 
       const studentButton = screen.getByRole('button', { name: /login as student/i });
       const initialButton = studentButton;

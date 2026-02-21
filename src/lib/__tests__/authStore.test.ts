@@ -37,11 +37,9 @@ describe('AuthStore', () => {
         token: 'test-token',
       });
 
-      await useAuthStore.getState().login(
-        credentials.email,
-        credentials.password,
-        credentials.role
-      );
+      await useAuthStore
+        .getState()
+        .login(credentials.email, credentials.password, credentials.role);
 
       const state = useAuthStore.getState();
       expect(state.user).toEqual({
@@ -75,11 +73,9 @@ describe('AuthStore', () => {
 
       const setItemSpy = vi.spyOn(localStorage, 'setItem');
 
-      await useAuthStore.getState().login(
-        credentials.email,
-        credentials.password,
-        credentials.role
-      );
+      await useAuthStore
+        .getState()
+        .login(credentials.email, credentials.password, credentials.role);
 
       expect(setItemSpy).toHaveBeenCalledWith('authToken', 'teacher-token');
     });
@@ -91,16 +87,10 @@ describe('AuthStore', () => {
         role: 'student' as UserRole,
       };
 
-      vi.spyOn(AuthService, 'login').mockRejectedValue(
-        new Error('Invalid credentials')
-      );
+      vi.spyOn(AuthService, 'login').mockRejectedValue(new Error('Invalid credentials'));
 
       await expect(
-        useAuthStore.getState().login(
-          credentials.email,
-          credentials.password,
-          credentials.role
-        )
+        useAuthStore.getState().login(credentials.email, credentials.password, credentials.role)
       ).rejects.toThrow('Invalid credentials');
 
       const state = useAuthStore.getState();
@@ -115,18 +105,14 @@ describe('AuthStore', () => {
         role: 'student' as UserRole,
       };
 
-      vi.spyOn(AuthService, 'login').mockRejectedValue(
-        new Error('Invalid credentials')
-      );
+      vi.spyOn(AuthService, 'login').mockRejectedValue(new Error('Invalid credentials'));
 
       const setItemSpy = vi.spyOn(localStorage, 'setItem');
 
       try {
-        await useAuthStore.getState().login(
-          credentials.email,
-          credentials.password,
-          credentials.role
-        );
+        await useAuthStore
+          .getState()
+          .login(credentials.email, credentials.password, credentials.role);
       } catch (error) {
         // Expected error
       }
@@ -148,9 +134,7 @@ describe('AuthStore', () => {
         token: 'test-token',
       });
 
-      const logoutSpy = vi
-        .spyOn(AuthService, 'logout')
-        .mockResolvedValue(undefined);
+      const logoutSpy = vi.spyOn(AuthService, 'logout').mockResolvedValue(undefined);
 
       await useAuthStore.getState().logout();
 
@@ -172,9 +156,7 @@ describe('AuthStore', () => {
         token: 'test-token',
       });
 
-      vi.spyOn(AuthService, 'logout').mockRejectedValue(
-        new Error('Logout failed')
-      );
+      vi.spyOn(AuthService, 'logout').mockRejectedValue(new Error('Logout failed'));
 
       await useAuthStore.getState().logout();
 
@@ -187,9 +169,9 @@ describe('AuthStore', () => {
   describe('initializeAuth', () => {
     it('should restore user state from valid stored token', async () => {
       const storedToken = 'mock-jwt-token-student-01-1234567890';
-      
+
       vi.spyOn(localStorage, 'getItem').mockReturnValue(storedToken);
-      
+
       vi.spyOn(AuthService, 'getCurrentUser').mockResolvedValue({
         id: 'student-01',
         name: 'Test Student',
@@ -213,11 +195,11 @@ describe('AuthStore', () => {
 
     it('should clear invalid token from localStorage', async () => {
       const invalidToken = 'invalid-token';
-      
+
       vi.spyOn(localStorage, 'getItem').mockReturnValue(invalidToken);
-      
+
       vi.spyOn(AuthService, 'getCurrentUser').mockResolvedValue(null);
-      
+
       const removeItemSpy = vi.spyOn(localStorage, 'removeItem');
 
       await useAuthStore.getState().initializeAuth();
@@ -230,7 +212,7 @@ describe('AuthStore', () => {
 
     it('should do nothing when no token is stored', async () => {
       vi.spyOn(localStorage, 'getItem').mockReturnValue(null);
-      
+
       const getCurrentUserSpy = vi.spyOn(AuthService, 'getCurrentUser');
 
       await useAuthStore.getState().initializeAuth();
@@ -243,13 +225,11 @@ describe('AuthStore', () => {
 
     it('should handle API errors during initialization', async () => {
       const storedToken = 'mock-jwt-token-student-01-1234567890';
-      
+
       vi.spyOn(localStorage, 'getItem').mockReturnValue(storedToken);
-      
-      vi.spyOn(AuthService, 'getCurrentUser').mockRejectedValue(
-        new Error('Network error')
-      );
-      
+
+      vi.spyOn(AuthService, 'getCurrentUser').mockRejectedValue(new Error('Network error'));
+
       const removeItemSpy = vi.spyOn(localStorage, 'removeItem');
 
       await useAuthStore.getState().initializeAuth();

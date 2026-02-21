@@ -5,7 +5,9 @@ import { storage } from '@/lib/storage';
 export function useTheme() {
   const [isDark, setIsDark] = useState(() => {
     const savedTheme = storage.getItem(STORAGE_KEYS.THEME);
-    return savedTheme ? savedTheme === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
+    return savedTheme
+      ? savedTheme === 'dark'
+      : window.matchMedia('(prefers-color-scheme: dark)').matches;
   });
 
   useEffect(() => {
@@ -19,7 +21,7 @@ export function useTheme() {
   }, [isDark]);
 
   const toggleTheme = useCallback(() => {
-    setIsDark(prev => !prev);
+    setIsDark((prev) => !prev);
   }, []);
 
   return { isDark, toggleTheme };

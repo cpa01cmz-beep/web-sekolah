@@ -13,8 +13,8 @@ class GlobalErrorDeduplication {
 
   private calculateErrorPrecedence(context: ErrorContext): ErrorPrecedence {
     const hasSourceCode = this.hasRelevantSourceCode(context.stack);
-    const isWarning = context.level === "warning";
-    const stackDepth = context.stack ? context.stack.split("\n").length : 0;
+    const isWarning = context.level === 'warning';
+    const stackDepth = context.stack ? context.stack.split('\n').length : 0;
 
     return {
       hasSourceCode,
@@ -27,11 +27,8 @@ class GlobalErrorDeduplication {
   private hasRelevantSourceCode(stack?: string): boolean {
     if (!stack) return false;
     return stack
-      .split("\n")
-      .some(
-        (line) =>
-          /\.tsx?$/.test(line) || /\.jsx?$/.test(line) || /\/src\//.test(line)
-      );
+      .split('\n')
+      .some((line) => /\.tsx?$/.test(line) || /\.jsx?$/.test(line) || /\/src\//.test(line));
   }
 
   private isHigherPrecedence(
@@ -55,23 +52,19 @@ class GlobalErrorDeduplication {
 
   private generateErrorSignature(context: ErrorContext): string {
     let messageCore = context.message
-      .replace(/\[CONSOLE ERROR\]|\[WARNING\]/g, "")
-      .replace(/^Uncaught Error:\s*/i, "")
-      .replace(/^Error:\s*/i, "")
-      .replace(/%s.*?\n/g, "")
-      .replace(/\s+/g, " ")
+      .replace(/\[CONSOLE ERROR\]|\[WARNING\]/g, '')
+      .replace(/^Uncaught Error:\s*/i, '')
+      .replace(/^Error:\s*/i, '')
+      .replace(/%s.*?\n/g, '')
+      .replace(/\s+/g, ' ')
       .trim();
 
-    if (messageCore.includes("Maximum update depth exceeded")) {
-      messageCore = "Maximum update depth exceeded";
-    }
-    else if (
-      messageCore.includes("The result of getSnapshot should be cached")
-    ) {
-      messageCore = "The result of getSnapshot should be cached";
-    }
-    else if (messageCore.includes("React Router caught the following error")) {
-      messageCore = "React Router caught error";
+    if (messageCore.includes('Maximum update depth exceeded')) {
+      messageCore = 'Maximum update depth exceeded';
+    } else if (messageCore.includes('The result of getSnapshot should be cached')) {
+      messageCore = 'The result of getSnapshot should be cached';
+    } else if (messageCore.includes('React Router caught the following error')) {
+      messageCore = 'React Router caught error';
     }
 
     return messageCore;
@@ -90,7 +83,7 @@ class GlobalErrorDeduplication {
 
     if (!existing) {
       if (immediate && !precedence.hasSourceCode) {
-        return { shouldReport: false, reason: "no_source_code" };
+        return { shouldReport: false, reason: 'no_source_code' };
       }
       this.reportedErrors.set(signature, {
         timestamp: now,
@@ -110,11 +103,11 @@ class GlobalErrorDeduplication {
     }
 
     if (now - existing.timestamp < this.ERROR_DEDUPLICATION_WINDOW_MS) {
-      return { shouldReport: false, reason: "duplicate_in_window" };
+      return { shouldReport: false, reason: 'duplicate_in_window' };
     }
 
     if (immediate && !precedence.hasSourceCode) {
-      return { shouldReport: false, reason: "no_source_code" };
+      return { shouldReport: false, reason: 'no_source_code' };
     }
 
     existing.timestamp = now;

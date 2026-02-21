@@ -43,36 +43,48 @@ export function AdminUserManagementPage() {
   const deleteUserMutation = useDeleteUser(userIdToDelete || '', {
     onSuccess: () => {
       toast.success('User deleted successfully.');
-      queryClient.setQueryData(['users'], (oldData: SchoolUser[] | undefined) => oldData?.filter(u => u.id !== userIdToDelete) || []);
+      queryClient.setQueryData(
+        ['users'],
+        (oldData: SchoolUser[] | undefined) => oldData?.filter((u) => u.id !== userIdToDelete) || []
+      );
       setUserIdToDelete(null);
     },
     onError: (err) => toast.error(`Failed to delete user: ${err.message}`),
   });
-  const handleSaveUser = useCallback((data: { name: string; email: string; role: UserRole }) => {
-    const userData = {
-      ...data,
-      avatarUrl: getAvatarUrl(data.email),
-    };
-    if (editingUser) {
-      updateUserMutation.mutate(userData);
-    } else {
-      createUserMutation.mutate(userData);
-    }
-  }, [editingUser, updateUserMutation, createUserMutation]);
-  
-  const handleDeleteUser = useCallback((userId: string) => {
-    setUserIdToDelete(userId);
-    deleteUserMutation.mutate();
-  }, [deleteUserMutation]);
-  
-  const handleEditUser = useCallback((userId: string, userName: string) => {
-    const user = users?.find(u => u.id === userId && u.name === userName);
-    if (user) {
-      setEditingUser(user);
-      setIsModalOpen(true);
-    }
-  }, [users]);
-  
+  const handleSaveUser = useCallback(
+    (data: { name: string; email: string; role: UserRole }) => {
+      const userData = {
+        ...data,
+        avatarUrl: getAvatarUrl(data.email),
+      };
+      if (editingUser) {
+        updateUserMutation.mutate(userData);
+      } else {
+        createUserMutation.mutate(userData);
+      }
+    },
+    [editingUser, updateUserMutation, createUserMutation]
+  );
+
+  const handleDeleteUser = useCallback(
+    (userId: string) => {
+      setUserIdToDelete(userId);
+      deleteUserMutation.mutate();
+    },
+    [deleteUserMutation]
+  );
+
+  const handleEditUser = useCallback(
+    (userId: string, userName: string) => {
+      const user = users?.find((u) => u.id === userId && u.name === userName);
+      if (user) {
+        setEditingUser(user);
+        setIsModalOpen(true);
+      }
+    },
+    [users]
+  );
+
   const handleCloseModal = useCallback(() => {
     setIsModalOpen(false);
     setEditingUser(null);
@@ -83,37 +95,48 @@ export function AdminUserManagementPage() {
     setIsModalOpen(true);
   }, []);
 
-  const tableHeaders = useMemo(() => [
-    { key: 'name', label: 'Name' },
-    { key: 'email', label: 'Email' },
-    { key: 'role', label: 'Role', className: 'text-center' },
-    { key: 'actions', label: 'Actions', className: 'text-right' },
-  ], []);
-
-  const tableRows = useMemo(() => (users || []).map(user => ({
-    id: user.id,
-    cells: [
-      { key: 'name', content: user.name, className: 'font-medium' },
-      { key: 'email', content: user.email },
-      {
-        key: 'role',
-        content: <UserRoleBadge role={user.role} />,
-        className: 'text-center',
-      },
-      {
-        key: 'actions',
-        content: <UserActions userId={user.id} userName={user.name} onEdit={handleEditUser} onDelete={handleDeleteUser} />,
-        className: 'text-right',
-      },
+  const tableHeaders = useMemo(
+    () => [
+      { key: 'name', label: 'Name' },
+      { key: 'email', label: 'Email' },
+      { key: 'role', label: 'Role', className: 'text-center' },
+      { key: 'actions', label: 'Actions', className: 'text-right' },
     ],
-  })), [users, handleEditUser, handleDeleteUser]);
+    []
+  );
+
+  const tableRows = useMemo(
+    () =>
+      (users || []).map((user) => ({
+        id: user.id,
+        cells: [
+          { key: 'name', content: user.name, className: 'font-medium' },
+          { key: 'email', content: user.email },
+          {
+            key: 'role',
+            content: <UserRoleBadge role={user.role} />,
+            className: 'text-center',
+          },
+          {
+            key: 'actions',
+            content: (
+              <UserActions
+                userId={user.id}
+                userName={user.name}
+                onEdit={handleEditUser}
+                onDelete={handleDeleteUser}
+              />
+            ),
+            className: 'text-right',
+          },
+        ],
+      })),
+    [users, handleEditUser, handleDeleteUser]
+  );
 
   return (
     <SlideUp className="space-y-6">
-      <PageHeader
-        title="User Management"
-        description="Manage all user accounts in the system."
-      >
+      <PageHeader title="User Management" description="Manage all user accounts in the system.">
         <DialogTrigger asChild>
           <Button onClick={handleAddUser}>
             <PlusCircle className="mr-2 h-4 w-4" /> Add User

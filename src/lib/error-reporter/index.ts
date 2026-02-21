@@ -10,14 +10,14 @@ export type {
   ConsoleMethod,
   ConsoleArgs,
   ConsoleNative,
-  WrappedConsoleFn
+  WrappedConsoleFn,
 } from './types';
 export {
   REACT_WARNING_PATTERN,
   WARNING_PREFIX,
   CONSOLE_ERROR_PREFIX,
   SOURCE_FILE_PATTERNS,
-  VENDOR_PATTERNS
+  VENDOR_PATTERNS,
 } from './constants';
 export {
   categorizeError,
@@ -25,7 +25,7 @@ export {
   isDeprecatedReactWarningMessage,
   hasRelevantSourceInStack,
   parseStackTrace,
-  formatConsoleArgs
+  formatConsoleArgs,
 } from './utils';
 export { setupImmediateInterceptors } from './immediate-interceptors';
 
@@ -36,8 +36,8 @@ export const errorReporter = new ErrorReporter();
 
 setupImmediateInterceptors();
 
-if (typeof window !== "undefined") {
-  window.addEventListener("beforeunload", () => {
+if (typeof window !== 'undefined') {
+  window.addEventListener('beforeunload', () => {
     errorReporter.dispose();
   });
 }

@@ -6,7 +6,7 @@ import type { Env } from '../core-utils';
 describe('CSP Report Endpoint', () => {
   it('should receive CSP violation reports and log them', async () => {
     const app = new Hono<{ Bindings: Env }>();
-    
+
     app.post('/api/csp-report', async (c) => {
       try {
         const report = await c.req.json<{ 'csp-report': Record<string, unknown> }>();
@@ -21,11 +21,11 @@ describe('CSP Report Endpoint', () => {
     const cspReport = {
       'csp-report': {
         'document-uri': 'https://example.com/page',
-        'referrer': 'https://example.com/referrer',
+        referrer: 'https://example.com/referrer',
         'violated-directive': 'script-src',
         'effective-directive': 'script-src',
         'original-policy': "default-src 'self'; script-src 'self' 'sha256-...'",
-        'disposition': 'report',
+        disposition: 'report',
         'blocked-uri': 'https://evil.com/script.js',
         'line-number': 10,
         'column-number': 5,
@@ -46,7 +46,7 @@ describe('CSP Report Endpoint', () => {
 
   it('should handle malformed CSP reports gracefully', async () => {
     const app = new Hono<{ Bindings: Env }>();
-    
+
     app.post('/api/csp-report', async (c) => {
       try {
         await c.req.json<{ 'csp-report': Record<string, unknown> }>();
@@ -67,7 +67,7 @@ describe('CSP Report Endpoint', () => {
 
   it('should handle empty CSP reports', async () => {
     const app = new Hono<{ Bindings: Env }>();
-    
+
     app.post('/api/csp-report', async (c) => {
       try {
         await c.req.json<{ 'csp-report': Record<string, unknown> }>();
@@ -88,7 +88,7 @@ describe('CSP Report Endpoint', () => {
 
   it('should return 204 for all CSP report requests', async () => {
     const app = new Hono<{ Bindings: Env }>();
-    
+
     app.post('/api/csp-report', async (c) => {
       try {
         await c.req.json<{ 'csp-report': Record<string, unknown> }>();

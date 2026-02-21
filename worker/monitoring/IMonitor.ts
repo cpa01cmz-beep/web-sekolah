@@ -4,7 +4,13 @@ import type { WebhookStats } from './WebhookMonitor';
 import type { ApiErrorStats } from './ApiErrorMonitor';
 import type { ScheduledTaskStats } from './ScheduledTaskMonitor';
 
-export type MonitorStats = CircuitBreakerStats | RateLimitStats | WebhookStats | ApiErrorStats | ScheduledTaskStats | { uptime: number };
+export type MonitorStats =
+  | CircuitBreakerStats
+  | RateLimitStats
+  | WebhookStats
+  | ApiErrorStats
+  | ScheduledTaskStats
+  | { uptime: number };
 
 export interface IMonitor {
   reset(): void;

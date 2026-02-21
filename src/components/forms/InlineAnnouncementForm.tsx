@@ -11,7 +11,10 @@ interface InlineAnnouncementFormProps {
   isLoading: boolean;
 }
 
-export const InlineAnnouncementForm = memo(function InlineAnnouncementForm({ onSave, isLoading }: InlineAnnouncementFormProps) {
+export const InlineAnnouncementForm = memo(function InlineAnnouncementForm({
+  onSave,
+  isLoading,
+}: InlineAnnouncementFormProps) {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
 
@@ -23,13 +26,16 @@ export const InlineAnnouncementForm = memo(function InlineAnnouncementForm({ onS
     },
   });
 
-  const handleSubmit = useCallback((e: React.FormEvent) => {
-    e.preventDefault();
-    if (!validateAll()) {
-      return;
-    }
-    onSave({ title: title.trim(), content: content.trim() });
-  }, [title, content, validateAll, onSave]);
+  const handleSubmit = useCallback(
+    (e: React.FormEvent) => {
+      e.preventDefault();
+      if (!validateAll()) {
+        return;
+      }
+      onSave({ title: title.trim(), content: content.trim() });
+    },
+    [title, content, validateAll, onSave]
+  );
 
   const handleTitleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setTitle(e.target.value);

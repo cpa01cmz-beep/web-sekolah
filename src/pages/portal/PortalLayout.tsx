@@ -37,13 +37,26 @@ export const PortalLayout = memo(function PortalLayout() {
                   <Menu className="h-6 w-6" aria-hidden="true" />
                 </Button>
               </SheetTrigger>
-              <SheetContent side="left" className="p-0 w-64" role="dialog" aria-label="Mobile navigation menu">
+              <SheetContent
+                side="left"
+                className="p-0 w-64"
+                role="dialog"
+                aria-label="Mobile navigation menu"
+              >
                 <div className="flex flex-col h-full">
                   <div className="flex items-center h-16 border-b px-4">
-                    <GraduationCap className="h-7 w-7" style={{ color: THEME_COLORS.PRIMARY }} aria-hidden="true" />
+                    <GraduationCap
+                      className="h-7 w-7"
+                      style={{ color: THEME_COLORS.PRIMARY }}
+                      aria-hidden="true"
+                    />
                     <span className="ml-2 text-lg font-bold">Akademia Pro</span>
                   </div>
-                  <nav className="flex-grow p-4 space-y-2" role="navigation" aria-label={`${user.role} portal navigation`}>
+                  <nav
+                    className="flex-grow p-4 space-y-2"
+                    role="navigation"
+                    aria-label={`${user.role} portal navigation`}
+                  >
                     <h3 className="sr-only">Navigation Menu</h3>
                     {navLinks.map((link: NavLinkType) => (
                       <NavLink
@@ -59,7 +72,9 @@ export const PortalLayout = memo(function PortalLayout() {
                           )
                         }
                       >
-                        <span aria-hidden="true"><link.icon className="h-5 w-5" /></span>
+                        <span aria-hidden="true">
+                          <link.icon className="h-5 w-5" />
+                        </span>
                         <span>{link.label}</span>
                       </NavLink>
                     ))}
@@ -75,7 +90,12 @@ export const PortalLayout = memo(function PortalLayout() {
             <TooltipProvider delayDuration={200}>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button variant="ghost" size="icon" className="rounded-full" aria-label="View notifications">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="rounded-full"
+                    aria-label="View notifications"
+                  >
                     <Bell className="h-5 w-5" aria-hidden="true" />
                   </Button>
                 </TooltipTrigger>

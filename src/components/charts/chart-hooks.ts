@@ -14,14 +14,37 @@ export function useChartData<T extends Record<string, unknown>>(
   }, [data, isLoading, error]);
 }
 
-type ChartComponentType = 
-  | 'LineChart' | 'BarChart' | 'PieChart' | 'AreaChart' | 'RadarChart' | 'ScatterChart'
-  | 'Line' | 'Bar' | 'Pie' | 'Area' | 'Radar' | 'Scatter'
-  | 'XAxis' | 'YAxis' | 'ZAxis' | 'CartesianGrid' | 'PolarGrid' | 'PolarAngleAxis' | 'PolarRadiusAxis'
-  | 'Tooltip' | 'Legend' | 'ResponsiveContainer' | 'Cell'
-  | 'ReferenceLine' | 'Brush' | 'ErrorBar';
+type ChartComponentType =
+  | 'LineChart'
+  | 'BarChart'
+  | 'PieChart'
+  | 'AreaChart'
+  | 'RadarChart'
+  | 'ScatterChart'
+  | 'Line'
+  | 'Bar'
+  | 'Pie'
+  | 'Area'
+  | 'Radar'
+  | 'Scatter'
+  | 'XAxis'
+  | 'YAxis'
+  | 'ZAxis'
+  | 'CartesianGrid'
+  | 'PolarGrid'
+  | 'PolarAngleAxis'
+  | 'PolarRadiusAxis'
+  | 'Tooltip'
+  | 'Legend'
+  | 'ResponsiveContainer'
+  | 'Cell'
+  | 'ReferenceLine'
+  | 'Brush'
+  | 'ErrorBar';
 
-type ChartComponentsMap = Partial<Record<ChartComponentType, React.ComponentType<Record<string, unknown>>>>;
+type ChartComponentsMap = Partial<
+  Record<ChartComponentType, React.ComponentType<Record<string, unknown>>>
+>;
 
 export function useChartComponents<T extends ChartComponentType>(
   componentNames: readonly T[]
@@ -58,8 +81,13 @@ export function useChartComponents<T extends ChartComponentType>(
   return { components, isLoading };
 }
 
-async function importComponent(name: ChartComponentType): Promise<React.ComponentType<Record<string, unknown>>> {
-  const imports: Record<ChartComponentType, () => Promise<{ [key: string]: React.ComponentType<Record<string, unknown>> }>> = {
+async function importComponent(
+  name: ChartComponentType
+): Promise<React.ComponentType<Record<string, unknown>>> {
+  const imports: Record<
+    ChartComponentType,
+    () => Promise<{ [key: string]: React.ComponentType<Record<string, unknown>> }>
+  > = {
     LineChart: () => import('recharts/es6/chart/LineChart'),
     BarChart: () => import('recharts/es6/chart/BarChart'),
     PieChart: () => import('recharts/es6/chart/PieChart'),

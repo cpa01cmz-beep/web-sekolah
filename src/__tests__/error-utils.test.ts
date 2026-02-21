@@ -144,18 +144,22 @@ describe('Error Utils - mapStatusToErrorCode', () => {
 
   describe('Consistency - Return Type', () => {
     it('should return string for all inputs', () => {
-      const testCodes = [0, 100, 200, 300, 400, 401, 403, 404, 408, 409, 422, 429, 500, 503, 504, 999, -1];
-      
-      testCodes.forEach(code => {
+      const testCodes = [
+        0, 100, 200, 300, 400, 401, 403, 404, 408, 409, 422, 429, 500, 503, 504, 999, -1,
+      ];
+
+      testCodes.forEach((code) => {
         const result = mapStatusToErrorCode(code);
         expect(typeof result).toBe('string');
       });
     });
 
     it('should not return undefined or null', () => {
-      const testCodes = [0, 100, 200, 300, 400, 401, 403, 404, 408, 409, 422, 429, 500, 503, 504, 999, -1];
-      
-      testCodes.forEach(code => {
+      const testCodes = [
+        0, 100, 200, 300, 400, 401, 403, 404, 408, 409, 422, 429, 500, 503, 504, 999, -1,
+      ];
+
+      testCodes.forEach((code) => {
         const result = mapStatusToErrorCode(code);
         expect(result).not.toBeUndefined();
         expect(result).not.toBeNull();
@@ -191,7 +195,7 @@ describe('Error Utils - mapStatusToErrorCode', () => {
     it('should handle both timeout status codes consistently', () => {
       const timeout408 = mapStatusToErrorCode(408);
       const timeout504 = mapStatusToErrorCode(504);
-      
+
       expect(timeout408).toBe('TIMEOUT');
       expect(timeout504).toBe('TIMEOUT');
       expect(timeout408).toBe(timeout504);
@@ -211,13 +215,13 @@ describe('Error Utils - mapStatusToErrorCode', () => {
 
     it('should handle multiple different inputs without side effects', () => {
       const results: string[] = [];
-      
+
       const testCodes = [400, 401, 403, 404, 408, 409, 422, 429, 500, 503, 504];
-      testCodes.forEach(code => {
+      testCodes.forEach((code) => {
         results.push(mapStatusToErrorCode(code));
       });
 
-      const reversedResults = [...testCodes].reverse().map(code => mapStatusToErrorCode(code));
+      const reversedResults = [...testCodes].reverse().map((code) => mapStatusToErrorCode(code));
 
       results.forEach((result, index) => {
         expect(result).toBe(results[index]);
@@ -233,8 +237,8 @@ describe('Error Utils - mapStatusToErrorCode', () => {
   describe('Sad Path - Special Characters and Unicode', () => {
     it('should handle special numeric values', () => {
       const specialCodes = [Number.NaN, Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY];
-      
-      specialCodes.forEach(code => {
+
+      specialCodes.forEach((code) => {
         const result = mapStatusToErrorCode(code);
         expect(typeof result).toBe('string');
         expect(result).not.toBeUndefined();

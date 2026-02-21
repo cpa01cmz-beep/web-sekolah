@@ -488,7 +488,11 @@ describe('ReferentialIntegrity', () => {
       const { ReferentialIntegrity } = await import('../referential-integrity');
       const mockEnv = {} as any;
 
-      const warnings = await ReferentialIntegrity.checkDependents(mockEnv, 'user', 'non-existent-id');
+      const warnings = await ReferentialIntegrity.checkDependents(
+        mockEnv,
+        'user',
+        'non-existent-id'
+      );
 
       expect(Array.isArray(warnings)).toBe(true);
       expect(warnings).toHaveLength(0);

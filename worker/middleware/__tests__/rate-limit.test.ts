@@ -1,15 +1,15 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { Hono } from 'hono';
-import { 
-  rateLimit, 
-  createRateLimiter, 
+import {
+  rateLimit,
+  createRateLimiter,
   defaultRateLimiter,
   strictRateLimiter,
   looseRateLimiter,
   authRateLimiter,
   clearRateLimitStore,
   getRateLimitStore,
-  type RateLimitMiddlewareOptions
+  type RateLimitMiddlewareOptions,
 } from '../rate-limit';
 
 describe('Rate Limiting Middleware', () => {
@@ -31,7 +31,7 @@ describe('Rate Limiting Middleware', () => {
       for (let i = 0; i < 5; i++) {
         const res = await app.request('/test');
         expect(res.status).toBe(200);
-        const data = await res.json() as { success: boolean };
+        const data = (await res.json()) as { success: boolean };
         expect(data.success).toBe(true);
       }
     });
@@ -50,7 +50,7 @@ describe('Rate Limiting Middleware', () => {
       // 4th request should be blocked
       const blockedRes = await app.request('/test');
       expect(blockedRes.status).toBe(429);
-      const data = await blockedRes.json() as { success: boolean; code: string };
+      const data = (await blockedRes.json()) as { success: boolean; code: string };
       expect(data.success).toBe(false);
       expect(data.code).toBe('RATE_LIMIT_EXCEEDED');
     });
@@ -97,7 +97,7 @@ describe('Rate Limiting Middleware', () => {
 
     it('should allow disabling standard headers', async () => {
       const limitMiddleware = createRateLimiter({ maxRequests: 10, windowMs: 60000 })({
-        standardHeaders: false
+        standardHeaders: false,
       });
       app.use('*', limitMiddleware);
       app.get('/test', (c) => c.json({ success: true }));
@@ -125,7 +125,7 @@ describe('Rate Limiting Middleware', () => {
     it('should use custom key generator when provided', async () => {
       const customKeyGenerator = (c: any) => `custom:${c.req.header('X-Custom-Id')}`;
       const limitMiddleware = createRateLimiter({ maxRequests: 2, windowMs: 60000 })({
-        keyGenerator: customKeyGenerator
+        keyGenerator: customKeyGenerator,
       });
       app.use('*', limitMiddleware);
       app.get('/test', (c) => c.json({ success: true }));
@@ -149,7 +149,7 @@ describe('Rate Limiting Middleware', () => {
       const limitMiddleware = createRateLimiter({
         maxRequests: 2,
         windowMs: 60000,
-        skipSuccessfulRequests: true
+        skipSuccessfulRequests: true,
       })();
       app.use('*', limitMiddleware);
       app.get('/test', (c) => c.json({ success: true }));
@@ -165,7 +165,7 @@ describe('Rate Limiting Middleware', () => {
       const limitMiddleware = createRateLimiter({
         maxRequests: 2,
         windowMs: 60000,
-        skipFailedRequests: true
+        skipFailedRequests: true,
       })();
       app.use('*', limitMiddleware);
       app.get('/test', (c) => {
@@ -183,15 +183,18 @@ describe('Rate Limiting Middleware', () => {
   describe('Custom handler', () => {
     it('should use custom handler when provided', async () => {
       const customHandler = vi.fn((c: any, info: any) => {
-        return c.json({
-          error: 'Custom rate limit message',
-          limit: info.limit,
-          remaining: info.remaining
-        }, 429);
+        return c.json(
+          {
+            error: 'Custom rate limit message',
+            limit: info.limit,
+            remaining: info.remaining,
+          },
+          429
+        );
       });
 
       const limitMiddleware = createRateLimiter({ maxRequests: 1, windowMs: 60000 })({
-        handler: customHandler
+        handler: customHandler,
       });
       app.use('*', limitMiddleware);
       app.get('/test', (c) => c.json({ success: true }));
@@ -201,7 +204,7 @@ describe('Rate Limiting Middleware', () => {
 
       expect(customHandler).toHaveBeenCalled();
       expect(blockedRes.status).toBe(429);
-      const data = await blockedRes.json() as { error: string; limit: number; remaining: number };
+      const data = (await blockedRes.json()) as { error: string; limit: number; remaining: number };
       expect(data.error).toBe('Custom rate limit message');
       expect(data.limit).toBe(1);
       expect(data.remaining).toBe(0);
@@ -214,7 +217,7 @@ describe('Rate Limiting Middleware', () => {
 
       const limitMiddleware = createRateLimiter({
         maxRequests: 1,
-        windowMs: 60000
+        windowMs: 60000,
       })({ onLimitReached });
       app.use('*', limitMiddleware);
       app.get('/test', (c) => c.json({ success: true }));
@@ -358,9 +361,13 @@ describe('Rate Limiting Middleware', () => {
       app.use('*', limitMiddleware);
       app.get('/test', (c) => c.json({ success: true }));
 
-      const res1 = await app.request('/test', { headers: { 'X-Forwarded-For': '1.1.1.1, 2.2.2.2' } });
+      const res1 = await app.request('/test', {
+        headers: { 'X-Forwarded-For': '1.1.1.1, 2.2.2.2' },
+      });
       expect(res1.status).toBe(200);
-      const res2 = await app.request('/test', { headers: { 'X-Forwarded-For': '1.1.1.1, 2.2.2.2' } });
+      const res2 = await app.request('/test', {
+        headers: { 'X-Forwarded-For': '1.1.1.1, 2.2.2.2' },
+      });
       expect(res2.status).toBe(429);
     });
   });
@@ -387,7 +394,7 @@ describe('Rate Limiting Middleware', () => {
       const requests = Array.from({ length: 3 }, () => app.request('/test'));
       const results = await Promise.all(requests);
 
-      results.forEach(res => expect(res.status).toBe(200));
+      results.forEach((res) => expect(res.status).toBe(200));
     });
   });
 });

@@ -11,7 +11,9 @@ describe('Security Headers Middleware', () => {
     const res = await app.request('/test');
 
     expect(res.status).toBe(200);
-    expect(res.headers.get('Strict-Transport-Security')).toBe('max-age=31536000; includeSubDomains; preload');
+    expect(res.headers.get('Strict-Transport-Security')).toBe(
+      'max-age=31536000; includeSubDomains; preload'
+    );
     expect(res.headers.get('Content-Security-Policy')).toBeDefined();
     expect(res.headers.get('X-Frame-Options')).toBe('DENY');
     expect(res.headers.get('X-Content-Type-Options')).toBe('nosniff');
@@ -32,7 +34,9 @@ describe('Security Headers Middleware', () => {
     const csp = res.headers.get('Content-Security-Policy');
 
     expect(csp).toBeDefined();
-    expect(csp).toContain("script-src 'self' 'sha256-1LjDIY7ayXpv8ODYzP8xZXqNvuMhUBdo39lNMQ1oGHI=' 'unsafe-eval'");
+    expect(csp).toContain(
+      "script-src 'self' 'sha256-1LjDIY7ayXpv8ODYzP8xZXqNvuMhUBdo39lNMQ1oGHI=' 'unsafe-eval'"
+    );
     expect(csp).not.toContain("script-src 'self' 'unsafe-inline'");
     expect(csp).toContain("style-src 'self' 'unsafe-inline'");
   });
@@ -46,7 +50,7 @@ describe('Security Headers Middleware', () => {
     const csp = res.headers.get('Content-Security-Policy');
 
     expect(csp).toBeDefined();
-    expect(csp).toContain("report-uri /api/csp-report");
+    expect(csp).toContain('report-uri /api/csp-report');
   });
 
   it('should allow HSTS configuration to be disabled', async () => {
@@ -91,7 +95,9 @@ describe('Security Headers Middleware', () => {
     const res = await app.request('/test');
 
     expect(res.status).toBe(200);
-    expect(res.headers.get('Strict-Transport-Security')).toBe('max-age=86400; includeSubDomains; preload');
+    expect(res.headers.get('Strict-Transport-Security')).toBe(
+      'max-age=86400; includeSubDomains; preload'
+    );
   });
 
   it('should allow X-Frame-Options to be disabled', async () => {
@@ -141,11 +147,14 @@ describe('Security Headers Middleware', () => {
   it('should combine multiple custom configurations', async () => {
     const app = new Hono();
     const customCSP = "default-src 'self';";
-    app.use('*', securityHeaders({
-      enableHSTS: false,
-      cspDirectives: customCSP,
-      hstsMaxAge: 86400,
-    }));
+    app.use(
+      '*',
+      securityHeaders({
+        enableHSTS: false,
+        cspDirectives: customCSP,
+        hstsMaxAge: 86400,
+      })
+    );
     app.get('/test', (c) => c.json({ success: true }));
 
     const res = await app.request('/test');

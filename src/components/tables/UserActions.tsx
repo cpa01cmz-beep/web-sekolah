@@ -15,10 +15,20 @@ export const UserActions = memo(({ userId, userName, onEdit, onDelete }: UserAct
 
   return (
     <div className="flex gap-2 justify-end">
-      <Button variant="outline" size="icon" onClick={handleEdit} aria-label={`Edit user ${userName}`}>
+      <Button
+        variant="outline"
+        size="icon"
+        onClick={handleEdit}
+        aria-label={`Edit user ${userName}`}
+      >
         <Edit className="h-4 w-4" aria-hidden="true" />
       </Button>
-      <Button variant="destructive" size="icon" onClick={handleDelete} aria-label={`Delete user ${userName}`}>
+      <Button
+        variant="destructive"
+        size="icon"
+        onClick={handleDelete}
+        aria-label={`Delete user ${userName}`}
+      >
         <Trash2 className="h-4 w-4" aria-hidden="true" />
       </Button>
     </div>

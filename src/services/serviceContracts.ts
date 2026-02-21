@@ -26,7 +26,7 @@ import type {
   LinkItem,
   DownloadItem,
   ClassStudentWithGrade,
-  Message
+  Message,
 } from '@shared/types';
 
 export interface SendMessageData {
@@ -46,7 +46,9 @@ export interface StudentService {
 export interface TeacherService {
   getDashboard(teacherId: string): Promise<TeacherDashboardData>;
   getClasses(teacherId: string): Promise<SchoolClass[]>;
-  getSchedule(teacherId: string): Promise<(ScheduleItem & { className: string; courseName: string })[]>;
+  getSchedule(
+    teacherId: string
+  ): Promise<(ScheduleItem & { className: string; courseName: string })[]>;
   submitGrade(gradeData: SubmitGradeData): Promise<Grade>;
   getAnnouncements(teacherId: string): Promise<Announcement[]>;
   createAnnouncement(announcement: CreateAnnouncementData): Promise<Announcement>;

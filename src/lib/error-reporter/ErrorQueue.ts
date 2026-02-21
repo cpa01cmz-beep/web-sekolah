@@ -6,10 +6,7 @@ export class ErrorQueue {
   private readonly maxQueueSize: number;
   private readonly processCallback: (errors: ErrorReport[]) => Promise<void>;
 
-  constructor(
-    maxQueueSize: number,
-    processCallback: (errors: ErrorReport[]) => Promise<void>
-  ) {
+  constructor(maxQueueSize: number, processCallback: (errors: ErrorReport[]) => Promise<void>) {
     this.maxQueueSize = maxQueueSize;
     this.processCallback = processCallback;
   }

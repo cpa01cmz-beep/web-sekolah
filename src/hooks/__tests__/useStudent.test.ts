@@ -2,7 +2,12 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React from 'react';
-import { useStudentDashboard, useStudentGrades, useStudentSchedule, useStudentCard } from '../useStudent';
+import {
+  useStudentDashboard,
+  useStudentGrades,
+  useStudentSchedule,
+  useStudentCard,
+} from '../useStudent';
 import type { StudentDashboardData, Grade, ScheduleItem, StudentCardData } from '@shared/types';
 
 describe('useStudent Hooks', () => {
@@ -44,24 +49,24 @@ describe('useStudent Hooks', () => {
             time: '08:00 - 09:30',
             courseId: 'math-11',
             courseName: 'Mathematics',
-            teacherName: 'Ibu Siti'
-          }
+            teacherName: 'Ibu Siti',
+          },
         ],
         recentGrades: [],
-        announcements: []
+        announcements: [],
       };
 
       (global.fetch as any).mockResolvedValueOnce({
         ok: true,
         status: 200,
         headers: {
-          get: vi.fn((name: string) => name === 'X-Request-ID' ? 'test-request-id' : null)
+          get: vi.fn((name: string) => (name === 'X-Request-ID' ? 'test-request-id' : null)),
         },
         json: vi.fn().mockResolvedValueOnce({
           success: true,
           data: mockDashboardData,
-          requestId: 'test-request-id'
-        })
+          requestId: 'test-request-id',
+        }),
       });
 
       const wrapper = createWrapper();
@@ -100,20 +105,19 @@ describe('useStudent Hooks', () => {
         ok: true,
         status: 200,
         headers: {
-          get: vi.fn((name: string) => name === 'X-Request-ID' ? 'test-request-id' : null)
+          get: vi.fn((name: string) => (name === 'X-Request-ID' ? 'test-request-id' : null)),
         },
         json: vi.fn().mockResolvedValueOnce({
           success: true,
           data: { schedule: [], recentGrades: [], announcements: [] },
-          requestId: 'test-request-id'
-        })
+          requestId: 'test-request-id',
+        }),
       });
 
       const wrapper = createWrapper();
-      const { result } = renderHook(
-        () => useStudentDashboard('student-01', customOptions),
-        { wrapper }
-      );
+      const { result } = renderHook(() => useStudentDashboard('student-01', customOptions), {
+        wrapper,
+      });
 
       await waitFor(() => expect(result.current.isSuccess).toBe(true));
     });
@@ -121,7 +125,9 @@ describe('useStudent Hooks', () => {
     it('should construct correct query key', () => {
       const wrapper = createWrapper();
       const { result } = renderHook(() => useStudentDashboard('student-123'), { wrapper });
-      expect(testQueryClient.getQueryCache().find({ queryKey: ['students', 'student-123', 'dashboard'] })).toBeDefined();
+      expect(
+        testQueryClient.getQueryCache().find({ queryKey: ['students', 'student-123', 'dashboard'] })
+      ).toBeDefined();
     });
   });
 
@@ -135,21 +141,21 @@ describe('useStudent Hooks', () => {
           score: 95,
           feedback: 'Excellent work!',
           createdAt: '2026-01-07T10:00:00.000Z',
-          updatedAt: '2026-01-07T10:00:00.000Z'
-        }
+          updatedAt: '2026-01-07T10:00:00.000Z',
+        },
       ];
 
       (global.fetch as any).mockResolvedValueOnce({
         ok: true,
         status: 200,
         headers: {
-          get: vi.fn((name: string) => name === 'X-Request-ID' ? 'test-request-id' : null)
+          get: vi.fn((name: string) => (name === 'X-Request-ID' ? 'test-request-id' : null)),
         },
         json: vi.fn().mockResolvedValueOnce({
           success: true,
           data: mockGrades,
-          requestId: 'test-request-id'
-        })
+          requestId: 'test-request-id',
+        }),
       });
 
       const wrapper = createWrapper();
@@ -170,13 +176,13 @@ describe('useStudent Hooks', () => {
         ok: true,
         status: 200,
         headers: {
-          get: vi.fn((name: string) => name === 'X-Request-ID' ? 'test-request-id' : null)
+          get: vi.fn((name: string) => (name === 'X-Request-ID' ? 'test-request-id' : null)),
         },
         json: vi.fn().mockResolvedValueOnce({
           success: true,
           data: [],
-          requestId: 'test-request-id'
-        })
+          requestId: 'test-request-id',
+        }),
       });
 
       const wrapper = createWrapper();
@@ -189,7 +195,9 @@ describe('useStudent Hooks', () => {
     it('should construct correct query key', () => {
       const wrapper = createWrapper();
       const { result } = renderHook(() => useStudentGrades('student-456'), { wrapper });
-      expect(testQueryClient.getQueryCache().find({ queryKey: ['students', 'student-456', 'grades'] })).toBeDefined();
+      expect(
+        testQueryClient.getQueryCache().find({ queryKey: ['students', 'student-456', 'grades'] })
+      ).toBeDefined();
     });
   });
 
@@ -199,26 +207,26 @@ describe('useStudent Hooks', () => {
         {
           day: 'Senin',
           time: '08:00 - 09:30',
-          courseId: 'math-11'
+          courseId: 'math-11',
         },
         {
           day: 'Senin',
           time: '09:45 - 11:15',
-          courseId: 'eng-11'
-        }
+          courseId: 'eng-11',
+        },
       ];
 
       (global.fetch as any).mockResolvedValueOnce({
         ok: true,
         status: 200,
         headers: {
-          get: vi.fn((name: string) => name === 'X-Request-ID' ? 'test-request-id' : null)
+          get: vi.fn((name: string) => (name === 'X-Request-ID' ? 'test-request-id' : null)),
         },
         json: vi.fn().mockResolvedValueOnce({
           success: true,
           data: mockSchedule,
-          requestId: 'test-request-id'
-        })
+          requestId: 'test-request-id',
+        }),
       });
 
       const wrapper = createWrapper();
@@ -239,13 +247,13 @@ describe('useStudent Hooks', () => {
         ok: true,
         status: 200,
         headers: {
-          get: vi.fn((name: string) => name === 'X-Request-ID' ? 'test-request-id' : null)
+          get: vi.fn((name: string) => (name === 'X-Request-ID' ? 'test-request-id' : null)),
         },
         json: vi.fn().mockResolvedValueOnce({
           success: true,
           data: [],
-          requestId: 'test-request-id'
-        })
+          requestId: 'test-request-id',
+        }),
       });
 
       const wrapper = createWrapper();
@@ -258,7 +266,9 @@ describe('useStudent Hooks', () => {
     it('should construct correct query key', () => {
       const wrapper = createWrapper();
       const { result } = renderHook(() => useStudentSchedule('student-789'), { wrapper });
-      expect(testQueryClient.getQueryCache().find({ queryKey: ['students', 'student-789', 'schedule'] })).toBeDefined();
+      expect(
+        testQueryClient.getQueryCache().find({ queryKey: ['students', 'student-789', 'schedule'] })
+      ).toBeDefined();
     });
   });
 
@@ -271,20 +281,20 @@ describe('useStudent Hooks', () => {
         classId: '11-A',
         className: 'Class 11-A',
         photoUrl: 'https://example.com/photo.jpg',
-        validUntil: '2026-12-31T23:59:59.000Z'
+        validUntil: '2026-12-31T23:59:59.000Z',
       };
 
       (global.fetch as any).mockResolvedValueOnce({
         ok: true,
         status: 200,
         headers: {
-          get: vi.fn((name: string) => name === 'X-Request-ID' ? 'test-request-id' : null)
+          get: vi.fn((name: string) => (name === 'X-Request-ID' ? 'test-request-id' : null)),
         },
         json: vi.fn().mockResolvedValueOnce({
           success: true,
           data: mockCardData,
-          requestId: 'test-request-id'
-        })
+          requestId: 'test-request-id',
+        }),
       });
 
       const wrapper = createWrapper();
@@ -313,7 +323,9 @@ describe('useStudent Hooks', () => {
     it('should construct correct query key', () => {
       const wrapper = createWrapper();
       const { result } = renderHook(() => useStudentCard('student-999'), { wrapper });
-      expect(testQueryClient.getQueryCache().find({ queryKey: ['students', 'student-999', 'card'] })).toBeDefined();
+      expect(
+        testQueryClient.getQueryCache().find({ queryKey: ['students', 'student-999', 'card'] })
+      ).toBeDefined();
     });
   });
 
@@ -339,25 +351,27 @@ describe('useStudent Hooks', () => {
 
     it('should handle special characters in studentId', async () => {
       const specialId = 'student-01@test!#$';
-      
+
       (global.fetch as any).mockResolvedValueOnce({
         ok: true,
         status: 200,
         headers: {
-          get: vi.fn((name: string) => name === 'X-Request-ID' ? 'test-request-id' : null)
+          get: vi.fn((name: string) => (name === 'X-Request-ID' ? 'test-request-id' : null)),
         },
         json: vi.fn().mockResolvedValueOnce({
           success: true,
           data: { schedule: [], recentGrades: [], announcements: [] },
-          requestId: 'test-request-id'
-        })
+          requestId: 'test-request-id',
+        }),
       });
 
       const wrapper = createWrapper();
       const { result } = renderHook(() => useStudentDashboard(specialId), { wrapper });
-      
+
       await waitFor(() => expect(result.current.isSuccess).toBe(true));
-      expect(testQueryClient.getQueryCache().find({ queryKey: ['students', specialId, 'dashboard'] })).toBeDefined();
+      expect(
+        testQueryClient.getQueryCache().find({ queryKey: ['students', specialId, 'dashboard'] })
+      ).toBeDefined();
     });
   });
 });

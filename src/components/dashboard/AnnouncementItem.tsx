@@ -21,7 +21,9 @@ function AnnouncementItemInner<T extends BaseAnnouncement>({
   showIcon = true,
   icon,
 }: AnnouncementItemProps<T>) {
-  const displayIcon = icon ?? <Activity className="h-4 w-4 text-muted-foreground flex-shrink-0" aria-hidden="true" />;
+  const displayIcon = icon ?? (
+    <Activity className="h-4 w-4 text-muted-foreground flex-shrink-0" aria-hidden="true" />
+  );
 
   if (variant === 'simple') {
     return (

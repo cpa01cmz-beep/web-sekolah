@@ -1,5 +1,12 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { AlertTriangle, CalendarDays } from 'lucide-react';
@@ -16,12 +23,13 @@ export function TeacherSchedulePage() {
 
   const scheduleByDay = useScheduleGrouping(schedule);
 
-  if (isLoading) return (
-    <SlideUp className="space-y-6">
-      <Skeleton className="h-9 w-1/3" />
-      <ScheduleSkeleton />
-    </SlideUp>
-  );
+  if (isLoading)
+    return (
+      <SlideUp className="space-y-6">
+        <Skeleton className="h-9 w-1/3" />
+        <ScheduleSkeleton />
+      </SlideUp>
+    );
 
   if (error) {
     return (
@@ -35,8 +43,8 @@ export function TeacherSchedulePage() {
 
   return (
     <SlideUp className="space-y-6">
-      <PageHeader 
-        title="Teaching Schedule" 
+      <PageHeader
+        title="Teaching Schedule"
         description="View your weekly teaching schedule across all assigned classes."
       />
       <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">

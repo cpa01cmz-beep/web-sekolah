@@ -60,12 +60,42 @@ describe('IndexedEntity', () => {
 
     it('should delete multiple entities and return count of successful deletions', async () => {
       const ids = ['id-1', 'id-2', 'id-3'];
-      
+
       mockStub.getDoc
-        .mockResolvedValueOnce({ v: 1, data: { id: 'id-1', name: 'Test 1', category: 'cat-a', createdAt: '', updatedAt: '', deletedAt: null } })
-        .mockResolvedValueOnce({ v: 1, data: { id: 'id-2', name: 'Test 2', category: 'cat-b', createdAt: '', updatedAt: '', deletedAt: null } })
-        .mockResolvedValueOnce({ v: 1, data: { id: 'id-3', name: 'Test 3', category: 'cat-a', createdAt: '', updatedAt: '', deletedAt: null } });
-      
+        .mockResolvedValueOnce({
+          v: 1,
+          data: {
+            id: 'id-1',
+            name: 'Test 1',
+            category: 'cat-a',
+            createdAt: '',
+            updatedAt: '',
+            deletedAt: null,
+          },
+        })
+        .mockResolvedValueOnce({
+          v: 1,
+          data: {
+            id: 'id-2',
+            name: 'Test 2',
+            category: 'cat-b',
+            createdAt: '',
+            updatedAt: '',
+            deletedAt: null,
+          },
+        })
+        .mockResolvedValueOnce({
+          v: 1,
+          data: {
+            id: 'id-3',
+            name: 'Test 3',
+            category: 'cat-a',
+            createdAt: '',
+            updatedAt: '',
+            deletedAt: null,
+          },
+        });
+
       mockStub.del.mockResolvedValue(true);
       mockStub.listPrefix.mockResolvedValue({ keys: [] });
 
@@ -77,11 +107,31 @@ describe('IndexedEntity', () => {
 
     it('should clean up secondary indexes when deleting multiple entities', async () => {
       const ids = ['id-1', 'id-2'];
-      
+
       mockStub.getDoc
-        .mockResolvedValueOnce({ v: 1, data: { id: 'id-1', name: 'Test 1', category: 'cat-a', createdAt: '', updatedAt: '', deletedAt: null } })
-        .mockResolvedValueOnce({ v: 1, data: { id: 'id-2', name: 'Test 2', category: 'cat-b', createdAt: '', updatedAt: '', deletedAt: null } });
-      
+        .mockResolvedValueOnce({
+          v: 1,
+          data: {
+            id: 'id-1',
+            name: 'Test 1',
+            category: 'cat-a',
+            createdAt: '',
+            updatedAt: '',
+            deletedAt: null,
+          },
+        })
+        .mockResolvedValueOnce({
+          v: 1,
+          data: {
+            id: 'id-2',
+            name: 'Test 2',
+            category: 'cat-b',
+            createdAt: '',
+            updatedAt: '',
+            deletedAt: null,
+          },
+        });
+
       mockStub.del.mockResolvedValue(true);
       mockStub.listPrefix.mockResolvedValue({ keys: [] });
 
@@ -93,12 +143,42 @@ describe('IndexedEntity', () => {
 
     it('should handle partial failures gracefully', async () => {
       const ids = ['id-1', 'id-2', 'id-3'];
-      
+
       mockStub.getDoc
-        .mockResolvedValueOnce({ v: 1, data: { id: 'id-1', name: 'Test 1', category: 'cat-a', createdAt: '', updatedAt: '', deletedAt: null } })
-        .mockResolvedValueOnce({ v: 1, data: { id: 'id-2', name: 'Test 2', category: 'cat-b', createdAt: '', updatedAt: '', deletedAt: null } })
-        .mockResolvedValueOnce({ v: 1, data: { id: 'id-3', name: 'Test 3', category: 'cat-a', createdAt: '', updatedAt: '', deletedAt: null } });
-      
+        .mockResolvedValueOnce({
+          v: 1,
+          data: {
+            id: 'id-1',
+            name: 'Test 1',
+            category: 'cat-a',
+            createdAt: '',
+            updatedAt: '',
+            deletedAt: null,
+          },
+        })
+        .mockResolvedValueOnce({
+          v: 1,
+          data: {
+            id: 'id-2',
+            name: 'Test 2',
+            category: 'cat-b',
+            createdAt: '',
+            updatedAt: '',
+            deletedAt: null,
+          },
+        })
+        .mockResolvedValueOnce({
+          v: 1,
+          data: {
+            id: 'id-3',
+            name: 'Test 3',
+            category: 'cat-a',
+            createdAt: '',
+            updatedAt: '',
+            deletedAt: null,
+          },
+        });
+
       mockStub.del
         .mockResolvedValueOnce(true)
         .mockResolvedValueOnce(false)
@@ -112,11 +192,23 @@ describe('IndexedEntity', () => {
 
     it('should handle exceptions when getting state', async () => {
       const ids = ['id-1', 'id-2'];
-      
+
       mockStub.getDoc
-        .mockResolvedValueOnce({ v: 1, data: { id: 'id-1', name: 'Test 1', category: 'cat-a', createdAt: '', updatedAt: '', deletedAt: null } })
-        .mockImplementationOnce(() => { throw new Error('Storage error'); });
-      
+        .mockResolvedValueOnce({
+          v: 1,
+          data: {
+            id: 'id-1',
+            name: 'Test 1',
+            category: 'cat-a',
+            createdAt: '',
+            updatedAt: '',
+            deletedAt: null,
+          },
+        })
+        .mockImplementationOnce(() => {
+          throw new Error('Storage error');
+        });
+
       mockStub.del.mockResolvedValue(true);
       mockStub.listPrefix.mockResolvedValue({ keys: [] });
 
@@ -128,9 +220,16 @@ describe('IndexedEntity', () => {
 
   describe('delete', () => {
     it('should delete entity and clean up both primary and secondary indexes', async () => {
-      mockStub.getDoc.mockResolvedValue({ 
-        v: 1, 
-        data: { id: 'id-1', name: 'Test 1', category: 'cat-a', createdAt: '', updatedAt: '', deletedAt: null } 
+      mockStub.getDoc.mockResolvedValue({
+        v: 1,
+        data: {
+          id: 'id-1',
+          name: 'Test 1',
+          category: 'cat-a',
+          createdAt: '',
+          updatedAt: '',
+          deletedAt: null,
+        },
       });
       mockStub.del.mockResolvedValue(true);
       mockStub.listPrefix.mockResolvedValue({ keys: [] });
@@ -145,7 +244,7 @@ describe('IndexedEntity', () => {
   describe('create', () => {
     it('should create entity and add to both primary and secondary indexes', async () => {
       vi.useFakeTimers().setSystemTime(new Date('2024-01-01T00:00:00.000Z'));
-      
+
       mockStub.getDoc.mockResolvedValue(null);
       mockStub.casPut.mockResolvedValue({ ok: true, v: 1 });
       mockStub.listPrefix.mockResolvedValue({ keys: [] });
@@ -165,7 +264,7 @@ describe('IndexedEntity', () => {
       expect(result.name).toBe('New Entity');
       expect(result.category).toBe('cat-a');
       expect(mockStub.casPut).toHaveBeenCalled();
-      
+
       vi.useRealTimers();
     });
   });

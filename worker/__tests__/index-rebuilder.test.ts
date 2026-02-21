@@ -1,13 +1,18 @@
 import { describe, it, expect } from 'vitest';
 
 describe('Index Rebuilder', () => {
-
   describe('Module Loading', () => {
     it('should note that index rebuild tests require Cloudflare Workers environment', () => {
-      console.warn('⚠️  Index rebuilder tests skipped: Cloudflare Workers environment not available');
-      console.warn('   This module requires Durable Objects, entity mocking, and index class mocking');
+      console.warn(
+        '⚠️  Index rebuilder tests skipped: Cloudflare Workers environment not available'
+      );
+      console.warn(
+        '   This module requires Durable Objects, entity mocking, and index class mocking'
+      );
       console.warn('   See docs/task.md for details on pending index rebuilder testing');
-      console.warn('   Critical functionality: rebuildAllIndexes() and 8 entity-specific rebuild functions');
+      console.warn(
+        '   Critical functionality: rebuildAllIndexes() and 8 entity-specific rebuild functions'
+      );
     });
     expect(true).toBe(true);
   });
@@ -21,7 +26,9 @@ describe('Index Rebuilder', () => {
     it('should rebuild AnnouncementEntity indexes (authorId, targetRole, date)');
     it('should rebuild WebhookConfigEntity indexes (active)');
     it('should rebuild WebhookEventEntity indexes (processed, eventType)');
-    it('should rebuild WebhookDeliveryEntity indexes (status, eventId, webhookConfigId, idempotencyKey)');
+    it(
+      'should rebuild WebhookDeliveryEntity indexes (status, eventId, webhookConfigId, idempotencyKey)'
+    );
     it('should rebuild DeadLetterQueueWebhookEntity indexes (webhookConfigId, eventType)');
     it('should handle errors from individual rebuild functions without stopping entire process');
     it('should complete rebuild process for all 8 entities even if one entity has no data');
@@ -47,7 +54,9 @@ describe('Index Rebuilder', () => {
     it('should add class ID to teacherId index for all classes');
     it('should handle empty class list (no classes to rebuild)');
     it('should maintain index consistency after rebuild');
-    it('should support multiple classes with same teacher (teacherId index maps teacherId to multiple classIds)');
+    it(
+      'should support multiple classes with same teacher (teacherId index maps teacherId to multiple classIds)'
+    );
   });
 
   describe('rebuildCourseIndexes - Course Entity', () => {
@@ -57,11 +66,15 @@ describe('Index Rebuilder', () => {
     it('should add course ID to teacherId index for all courses');
     it('should handle empty course list (no courses to rebuild)');
     it('should maintain index consistency after rebuild');
-    it('should support multiple courses with same teacher (teacherId index maps teacherId to multiple courseIds)');
+    it(
+      'should support multiple courses with same teacher (teacherId index maps teacherId to multiple courseIds)'
+    );
   });
 
   describe('rebuildGradeIndexes - Grade Entity (Complex)', () => {
-    it('should clear existing studentId, courseId, compound, and student-date-sorted indexes before rebuilding');
+    it(
+      'should clear existing studentId, courseId, compound, and student-date-sorted indexes before rebuilding'
+    );
     it('should load all grades from GradeEntity.list()');
     it('should skip soft-deleted grades (deletedAt !== null)');
     it('should add grade ID to studentId index for all grades');
@@ -118,7 +131,9 @@ describe('Index Rebuilder', () => {
   });
 
   describe('rebuildWebhookDeliveryIndexes - WebhookDelivery Entity (Complex)', () => {
-    it('should clear existing status, eventId, webhookConfigId, idempotencyKey, and date indexes before rebuilding');
+    it(
+      'should clear existing status, eventId, webhookConfigId, idempotencyKey, and date indexes before rebuilding'
+    );
     it('should load all webhook deliveries from WebhookDeliveryEntity.list()');
     it('should skip soft-deleted webhook deliveries (deletedAt !== null)');
     it('should add webhook delivery ID to status index for all webhook deliveries');
@@ -173,7 +188,9 @@ describe('Index Rebuilder', () => {
     it('should ensure per-student date-sorted indexes are isolated by studentId');
     it('should ensure idempotencyKey index maintains uniqueness');
     it('should ensure no duplicate entity IDs in secondary indexes');
-    it('should ensure all index types (Secondary, Compound, DateSorted, StudentDateSorted) work correctly');
+    it(
+      'should ensure all index types (Secondary, Compound, DateSorted, StudentDateSorted) work correctly'
+    );
   });
 
   describe('Performance Considerations', () => {
@@ -209,10 +226,13 @@ describe('Index Rebuilder', () => {
     it('should verify compound index uses correct composite key format');
     it('should verify date-sorted index uses correct timestamp format for sorting');
     it('should verify per-student date-sorted index is rebuilt per-student independently');
-    it('should verify idempotencyKey index conditionally adds entries (only if idempotencyKey exists)');
+    it(
+      'should verify idempotencyKey index conditionally adds entries (only if idempotencyKey exists)'
+    );
     it('should verify boolean fields are converted to strings for index storage');
-    it('should verify all index types are supported: SecondaryIndex, CompoundSecondaryIndex, DateSortedSecondaryIndex, StudentDateSortedIndex');
+    it(
+      'should verify all index types are supported: SecondaryIndex, CompoundSecondaryIndex, DateSortedSecondaryIndex, StudentDateSortedIndex'
+    );
     it('should verify index rebuild maintains data integrity and query performance');
   });
-
 });

@@ -31,33 +31,39 @@ async function fetchWithRetry(url: string): Promise<Response> {
       maxRetries: RETRY_CONFIG.DEFAULT_MAX_RETRIES,
       baseDelay: RETRY_CONFIG.DEFAULT_BASE_DELAY_MS,
       jitterMs: TimeConstants.SECOND_MS,
-      timeout: RetryDelay.THIRTY_SECONDS_MS
+      timeout: RetryDelay.THIRTY_SECONDS_MS,
     }
   );
 }
 
 export function docsRoutes(app: Hono<{ Bindings: Env }>) {
-  app.get('/api-docs', withErrorHandler('load API documentation')(async (c: Context) => {
-    const specUrl = new URL(c.req.url);
-    specUrl.pathname = '/openapi.yaml';
+  app.get(
+    '/api-docs',
+    withErrorHandler('load API documentation')(async (c: Context) => {
+      const specUrl = new URL(c.req.url);
+      specUrl.pathname = '/openapi.yaml';
 
-    const response = await fetchWithRetry(specUrl.toString());
-    const spec = await response.text();
-    return c.text(spec, 200, {
-      'Content-Type': 'application/x-yaml',
-    });
-  }));
+      const response = await fetchWithRetry(specUrl.toString());
+      const spec = await response.text();
+      return c.text(spec, 200, {
+        'Content-Type': 'application/x-yaml',
+      });
+    })
+  );
 
-  app.get('/api-docs.yaml', withErrorHandler('load OpenAPI specification')(async (c: Context) => {
-    const specUrl = new URL(c.req.url);
-    specUrl.pathname = '/openapi.yaml';
+  app.get(
+    '/api-docs.yaml',
+    withErrorHandler('load OpenAPI specification')(async (c: Context) => {
+      const specUrl = new URL(c.req.url);
+      specUrl.pathname = '/openapi.yaml';
 
-    const response = await fetchWithRetry(specUrl.toString());
-    const spec = await response.text();
-    return c.text(spec, 200, {
-      'Content-Type': 'application/x-yaml',
-    });
-  }));
+      const response = await fetchWithRetry(specUrl.toString());
+      const spec = await response.text();
+      return c.text(spec, 200, {
+        'Content-Type': 'application/x-yaml',
+      });
+    })
+  );
 
   app.get('/api-docs.html', async (c) => {
     const html = `

@@ -5,7 +5,7 @@ export function getUniqueIds(ids: string[]): string[] {
 }
 
 export function buildEntityMap<T extends EntityWithId>(entities: (T | null)[]): Map<string, T> {
-  return new Map(entities.filter((e): e is T => e !== null).map(e => [e.id, e]));
+  return new Map(entities.filter((e): e is T => e !== null).map((e) => [e.id, e]));
 }
 
 export async function fetchAndMap<T extends EntityWithId>(

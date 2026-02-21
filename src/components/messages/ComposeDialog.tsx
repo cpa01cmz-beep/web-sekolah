@@ -2,8 +2,20 @@ import { useState, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { FormField } from '@/components/ui/form-field';
 import { Send } from 'lucide-react';
 import { useFormValidation } from '@/hooks/useFormValidation';
@@ -23,7 +35,7 @@ export function ComposeDialog({
   recipientLabel,
   recipientPlaceholder,
   onSend,
-  isLoading
+  isLoading,
 }: ComposeDialogProps) {
   const [open, setOpen] = useState(false);
   const [recipientId, setRecipientId] = useState('');
@@ -31,7 +43,11 @@ export function ComposeDialog({
   const [content, setContent] = useState('');
 
   const formData = { recipientId, subject, content };
-  const { errors, validateAll, reset: resetValidation } = useFormValidation(formData, {
+  const {
+    errors,
+    validateAll,
+    reset: resetValidation,
+  } = useFormValidation(formData, {
     validators: {
       recipientId: validateRecipient,
       subject: (value, show) => validateSubject(value, show, 3, 100),
@@ -47,13 +63,16 @@ export function ComposeDialog({
     setOpen(false);
   }, [resetValidation]);
 
-  const handleOpenChange = useCallback((newOpen: boolean) => {
-    if (!newOpen) {
-      handleClose();
-    } else {
-      setOpen(true);
-    }
-  }, [handleClose]);
+  const handleOpenChange = useCallback(
+    (newOpen: boolean) => {
+      if (!newOpen) {
+        handleClose();
+      } else {
+        setOpen(true);
+      }
+    },
+    [handleClose]
+  );
 
   const handleSend = () => {
     if (!validateAll()) return;
@@ -74,12 +93,7 @@ export function ComposeDialog({
           <DialogTitle>Compose Message</DialogTitle>
         </DialogHeader>
         <div className="space-y-4 py-4">
-          <FormField
-            id="recipient"
-            label={recipientLabel}
-            error={errors.recipientId}
-            required
-          >
+          <FormField id="recipient" label={recipientLabel} error={errors.recipientId} required>
             <Select value={recipientId} onValueChange={setRecipientId}>
               <SelectTrigger>
                 <SelectValue placeholder={recipientPlaceholder} />

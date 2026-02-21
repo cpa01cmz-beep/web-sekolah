@@ -1,5 +1,5 @@
-import type { SchoolData } from "@shared/types";
-import { AVATAR_BASE_URL } from "@shared/constants";
+import type { SchoolData } from '@shared/types';
+import { AVATAR_BASE_URL } from '@shared/constants';
 
 const now = new Date().toISOString();
 
@@ -14,7 +14,7 @@ export const seedData: SchoolData = {
       classId: '11-A',
       studentIdNumber: '12345',
       createdAt: now,
-      updatedAt: now
+      updatedAt: now,
     },
     {
       id: 'student-02',
@@ -25,7 +25,7 @@ export const seedData: SchoolData = {
       classId: '11-A',
       studentIdNumber: '12346',
       createdAt: now,
-      updatedAt: now
+      updatedAt: now,
     },
     {
       id: 'teacher-01',
@@ -35,7 +35,7 @@ export const seedData: SchoolData = {
       avatarUrl: `${AVATAR_BASE_URL}?u=teacher01`,
       classIds: ['11-A'],
       createdAt: now,
-      updatedAt: now
+      updatedAt: now,
     },
     {
       id: 'teacher-02',
@@ -45,7 +45,7 @@ export const seedData: SchoolData = {
       avatarUrl: `${AVATAR_BASE_URL}?u=teacher02`,
       classIds: ['12-B'],
       createdAt: now,
-      updatedAt: now
+      updatedAt: now,
     },
     {
       id: 'parent-01',
@@ -55,7 +55,7 @@ export const seedData: SchoolData = {
       avatarUrl: `${AVATAR_BASE_URL}?u=parent01`,
       childId: 'student-01',
       createdAt: now,
-      updatedAt: now
+      updatedAt: now,
     },
     {
       id: 'admin-01',
@@ -64,8 +64,8 @@ export const seedData: SchoolData = {
       role: 'admin',
       avatarUrl: `${AVATAR_BASE_URL}?u=admin01`,
       createdAt: now,
-      updatedAt: now
-    }
+      updatedAt: now,
+    },
   ],
 
   classes: [
@@ -74,15 +74,15 @@ export const seedData: SchoolData = {
       name: 'Class 11-A',
       teacherId: 'teacher-01',
       createdAt: now,
-      updatedAt: now
+      updatedAt: now,
     },
     {
       id: '12-B',
       name: 'Class 12-B',
       teacherId: 'teacher-02',
       createdAt: now,
-      updatedAt: now
-    }
+      updatedAt: now,
+    },
   ],
 
   courses: [
@@ -91,22 +91,22 @@ export const seedData: SchoolData = {
       name: 'Mathematics',
       teacherId: 'teacher-01',
       createdAt: now,
-      updatedAt: now
+      updatedAt: now,
     },
     {
       id: 'phys-12',
       name: 'Physics',
       teacherId: 'teacher-02',
       createdAt: now,
-      updatedAt: now
+      updatedAt: now,
     },
     {
       id: 'hist-11',
       name: 'History',
       teacherId: 'teacher-01',
       createdAt: now,
-      updatedAt: now
-    }
+      updatedAt: now,
+    },
   ],
 
   grades: [
@@ -117,7 +117,7 @@ export const seedData: SchoolData = {
       score: 95,
       feedback: 'Excellent work!',
       createdAt: now,
-      updatedAt: now
+      updatedAt: now,
     },
     {
       id: 'g-02',
@@ -126,7 +126,7 @@ export const seedData: SchoolData = {
       score: 88,
       feedback: 'Good understanding of material.',
       createdAt: now,
-      updatedAt: now
+      updatedAt: now,
     },
     {
       id: 'g-03',
@@ -135,8 +135,8 @@ export const seedData: SchoolData = {
       score: 82,
       feedback: 'Consistent effort.',
       createdAt: now,
-      updatedAt: now
-    }
+      updatedAt: now,
+    },
   ],
 
   announcements: [
@@ -148,7 +148,7 @@ export const seedData: SchoolData = {
       authorId: 'admin-01',
       targetRole: 'all',
       createdAt: now,
-      updatedAt: now
+      updatedAt: now,
     },
     {
       id: 'ann-02',
@@ -158,8 +158,8 @@ export const seedData: SchoolData = {
       authorId: 'teacher-01',
       targetRole: 'student',
       createdAt: now,
-      updatedAt: now
-    }
+      updatedAt: now,
+    },
   ],
 
   schedules: [
@@ -167,20 +167,19 @@ export const seedData: SchoolData = {
       classId: '11-A',
       day: 'Senin',
       time: '08:00 - 09:30',
-      courseId: 'math-11'
+      courseId: 'math-11',
     },
     {
       classId: '11-A',
       day: 'Selasa',
       time: '10:00 - 11:30',
-      courseId: 'hist-11'
+      courseId: 'hist-11',
     },
     {
       classId: '12-B',
       day: 'Senin',
       time: '08:00 - 09:30',
-      courseId: 'phys-12'
-    }
-  ]
-
+      courseId: 'phys-12',
+    },
+  ],
 };

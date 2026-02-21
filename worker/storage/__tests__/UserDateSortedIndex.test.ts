@@ -27,7 +27,9 @@ describe('UserDateSortedIndex', () => {
 
       new UserDateSortedIndex(mockEnv, 'message', 'user-123', 'sent');
 
-      expect(mockEnv.GlobalDurableObject.idFromName).toHaveBeenCalledWith('sys-user-date-sorted-index:user-date-sorted-index:message:user-123:sent');
+      expect(mockEnv.GlobalDurableObject.idFromName).toHaveBeenCalledWith(
+        'sys-user-date-sorted-index:user-date-sorted-index:message:user-123:sent'
+      );
       expect(mockEnv.GlobalDurableObject.get).toHaveBeenCalledWith({ name: 'test-doid' });
     });
 
@@ -36,7 +38,9 @@ describe('UserDateSortedIndex', () => {
 
       new UserDateSortedIndex(mockEnv, 'message', 'user-456', 'received');
 
-      expect(mockEnv.GlobalDurableObject.idFromName).toHaveBeenCalledWith('sys-user-date-sorted-index:user-date-sorted-index:message:user-456:received');
+      expect(mockEnv.GlobalDurableObject.idFromName).toHaveBeenCalledWith(
+        'sys-user-date-sorted-index:user-date-sorted-index:message:user-456:received'
+      );
       expect(mockEnv.GlobalDurableObject.get).toHaveBeenCalledWith({ name: 'test-doid' });
     });
   });
@@ -67,7 +71,7 @@ describe('UserDateSortedIndex', () => {
 
       expect(mockStub.casPut).toHaveBeenCalledTimes(3);
       const calls = mockStub.casPut.mock.calls as Array<[string, number, { entityId: string }]>;
-      const keys = calls.map(call => call[0]);
+      const keys = calls.map((call) => call[0]);
 
       const ts3 = new Date('2026-01-07T15:00:00.000Z').getTime();
       const ts1 = new Date('2026-01-08T10:00:00.000Z').getTime();

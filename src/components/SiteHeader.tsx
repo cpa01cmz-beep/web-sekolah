@@ -2,7 +2,12 @@ import { Link, NavLink } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { GraduationCap, Menu } from 'lucide-react';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { useState, useCallback, memo } from 'react';
 import { THEME_COLORS } from '@/theme/colors';
 import { navLinks } from '@/constants/navigation';
@@ -23,16 +28,22 @@ export const SiteHeader = memo(function SiteHeader() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
           <Link to="/" className="flex items-center gap-2">
-            <GraduationCap className="h-8 w-8" style={{ color: THEME_COLORS.PRIMARY }} aria-hidden="true" />
+            <GraduationCap
+              className="h-8 w-8"
+              style={{ color: THEME_COLORS.PRIMARY }}
+              aria-hidden="true"
+            />
             <span className="text-xl font-bold text-foreground">Akademia Pro</span>
           </Link>
-          <nav className="hidden md:flex items-center space-x-6" aria-label="Main navigation" role="navigation">
-              {navLinks.map((link) => (
-                link.submenu ? (
+          <nav
+            className="hidden md:flex items-center space-x-6"
+            aria-label="Main navigation"
+            role="navigation"
+          >
+            {navLinks.map((link) =>
+              link.submenu ? (
                 <DropdownMenu key={link.name}>
-                  <DropdownMenuTrigger
-                    className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
-                  >
+                  <DropdownMenuTrigger className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2">
                     {link.name}
                   </DropdownMenuTrigger>
                   <DropdownMenuContent>
@@ -58,10 +69,14 @@ export const SiteHeader = memo(function SiteHeader() {
                   {link.name}
                 </NavLink>
               )
-            ))}
+            )}
           </nav>
           <div className="flex items-center gap-4">
-            <Button asChild className="hidden md:inline-flex transition-all duration-200" style={{ backgroundColor: THEME_COLORS.PRIMARY }}>
+            <Button
+              asChild
+              className="hidden md:inline-flex transition-all duration-200"
+              style={{ backgroundColor: THEME_COLORS.PRIMARY }}
+            >
               <Link to="/login">Login</Link>
             </Button>
             <Sheet open={isMobileMenuOpen} onOpenChange={setMobileMenuOpen}>
@@ -70,8 +85,13 @@ export const SiteHeader = memo(function SiteHeader() {
                   <Menu className="h-6 w-6" aria-hidden="true" />
                 </Button>
               </SheetTrigger>
-                  <SheetContent side="left" role="dialog" aria-modal="true" aria-label="Mobile navigation menu">
-                  <nav aria-label="Mobile navigation">
+              <SheetContent
+                side="left"
+                role="dialog"
+                aria-modal="true"
+                aria-label="Mobile navigation menu"
+              >
+                <nav aria-label="Mobile navigation">
                   <div className="flex flex-col space-y-6 p-4">
                     <Link
                       to="/"
@@ -79,13 +99,28 @@ export const SiteHeader = memo(function SiteHeader() {
                       onClick={handleMobileNavClose}
                       aria-label="Akademia Pro Home"
                     >
-                      <GraduationCap className="h-8 w-8" style={{ color: THEME_COLORS.PRIMARY }} aria-hidden="true" />
+                      <GraduationCap
+                        className="h-8 w-8"
+                        style={{ color: THEME_COLORS.PRIMARY }}
+                        aria-hidden="true"
+                      />
                       <span className="text-xl font-bold text-foreground">Akademia Pro</span>
                     </Link>
-                    {navLinks.map((link) => (
+                    {navLinks.map((link) =>
                       link.submenu ? (
-                        <div key={link.name} className="flex flex-col space-y-2" role="group" aria-label={`${link.name} submenu`}>
-                          <span className="text-lg font-medium text-foreground" role="heading" aria-level={3}>{link.name}</span>
+                        <div
+                          key={link.name}
+                          className="flex flex-col space-y-2"
+                          role="group"
+                          aria-label={`${link.name} submenu`}
+                        >
+                          <span
+                            className="text-lg font-medium text-foreground"
+                            role="heading"
+                            aria-level={3}
+                          >
+                            {link.name}
+                          </span>
                           {link.submenu.map((sublink) => (
                             <NavLink
                               key={sublink.name}
@@ -93,8 +128,8 @@ export const SiteHeader = memo(function SiteHeader() {
                               onClick={handleMobileNavClose}
                               className={({ isActive }) =>
                                 `ml-4 text-base font-medium transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-md px-2 py-1 -mx-2 ${
-                                    isActive ? 'text-primary' : 'text-muted-foreground'
-                                  }`
+                                  isActive ? 'text-primary' : 'text-muted-foreground'
+                                }`
                               }
                             >
                               {sublink.name}
@@ -115,9 +150,16 @@ export const SiteHeader = memo(function SiteHeader() {
                           {link.name}
                         </NavLink>
                       )
-                    ))}
-                    <Button asChild className="w-full transition-all duration-200" style={{ backgroundColor: THEME_COLORS.PRIMARY }} onClick={handleMobileLoginClick}>
-                      <Link to="/login" className="focus-visible:ring-offset-2">Login</Link>
+                    )}
+                    <Button
+                      asChild
+                      className="w-full transition-all duration-200"
+                      style={{ backgroundColor: THEME_COLORS.PRIMARY }}
+                      onClick={handleMobileLoginClick}
+                    >
+                      <Link to="/login" className="focus-visible:ring-offset-2">
+                        Login
+                      </Link>
                     </Button>
                   </div>
                 </nav>

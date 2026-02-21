@@ -1,5 +1,12 @@
 import { describe, it, expect } from 'vitest';
-import { EndpointTimeout, ConnectionTimeout, TimeoutCategory, getTimeoutForEndpoint, isFastQuery, isComplexOperation } from '../endpoint-timeout';
+import {
+  EndpointTimeout,
+  ConnectionTimeout,
+  TimeoutCategory,
+  getTimeoutForEndpoint,
+  isFastQuery,
+  isComplexOperation,
+} from '../endpoint-timeout';
 
 describe('Endpoint Timeout Configuration', () => {
   describe('EndpointTimeout constants', () => {

@@ -2,14 +2,14 @@ import type { SchoolUser, Student, Teacher, Parent, Admin, CreateUserData } from
 
 /**
  * UserCreationStrategy - Strategy Interface for Role-Specific User Creation
- * 
+ *
  * Defines the contract for creating users with different roles.
  * Each strategy knows how to construct its specific user type.
  */
 export interface UserCreationStrategy {
   /**
    * Creates a user object with role-specific fields
-   * 
+   *
    * @param base - Base user fields (id, createdAt, updatedAt, avatarUrl)
    * @param userData - User creation data from API request
    * @param passwordHash - Hashed password (or null if not provided)
@@ -39,7 +39,7 @@ export class StudentCreationStrategy implements UserCreationStrategy {
       role: 'student',
       classId: userData.classId ?? '',
       studentIdNumber: userData.studentIdNumber ?? '',
-      passwordHash
+      passwordHash,
     } as Student;
   }
 }
@@ -54,7 +54,7 @@ export class TeacherCreationStrategy implements UserCreationStrategy {
       ...userData,
       role: 'teacher',
       classIds: userData.classIds ?? [],
-      passwordHash
+      passwordHash,
     } as Teacher;
   }
 }
@@ -69,7 +69,7 @@ export class ParentCreationStrategy implements UserCreationStrategy {
       ...userData,
       role: 'parent',
       childId: userData.childId ?? '',
-      passwordHash
+      passwordHash,
     } as Parent;
   }
 }
@@ -83,7 +83,7 @@ export class AdminCreationStrategy implements UserCreationStrategy {
       ...base,
       ...userData,
       role: 'admin',
-      passwordHash
+      passwordHash,
     } as Admin;
   }
 }
@@ -96,7 +96,7 @@ export class UserCreationStrategyFactory {
     student: new StudentCreationStrategy(),
     teacher: new TeacherCreationStrategy(),
     parent: new ParentCreationStrategy(),
-    admin: new AdminCreationStrategy()
+    admin: new AdminCreationStrategy(),
   };
 
   static getStrategy(role: string): UserCreationStrategy {

@@ -213,7 +213,8 @@ describe('DashboardStatCard', () => {
     });
 
     it('should render with very long subtitle', () => {
-      const longSubtitle = 'This is a very long subtitle that might wrap to multiple lines in the card';
+      const longSubtitle =
+        'This is a very long subtitle that might wrap to multiple lines in the card';
       render(<DashboardStatCard title="Status" value={42} subtitle={longSubtitle} />);
 
       expect(screen.getByText(longSubtitle)).toBeInTheDocument();

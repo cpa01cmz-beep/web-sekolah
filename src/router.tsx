@@ -1,4 +1,4 @@
-import { createBrowserRouter } from "react-router-dom";
+import { createBrowserRouter } from 'react-router-dom';
 import { lazy } from 'react';
 import { RouteErrorBoundary } from '@/components/RouteErrorBoundary';
 import { withSuspense } from './router-utils';
@@ -13,7 +13,7 @@ const PortalLayout = lazy(() => import('@/pages/portal/PortalLayout'));
 export const router = createBrowserRouter([
   ...publicRoutes,
   {
-    path: "/portal",
+    path: '/portal',
     element: withSuspense(PortalLayout),
     errorElement: <RouteErrorBoundary />,
     children: [

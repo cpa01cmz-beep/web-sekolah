@@ -1,9 +1,5 @@
 import { logger } from '../logger';
-import type {
-  ErrorReport,
-  ErrorContext,
-  BaseErrorData,
-} from './types';
+import type { ErrorReport, ErrorContext, BaseErrorData } from './types';
 import { ERROR_REPORTER_CONFIG } from './constants';
 import { categorizeError, parseStackTrace } from './utils';
 import { ErrorFilter } from './ErrorFilter';
@@ -38,13 +34,9 @@ class ErrorReporter {
       this.processQueueCallback.bind(this)
     );
 
-    this.consoleInterceptor = new ConsoleInterceptor(
-      this.handleError.bind(this)
-    );
+    this.consoleInterceptor = new ConsoleInterceptor(this.handleError.bind(this));
 
-    this.globalErrorHandler = new GlobalErrorHandler(
-      this.handleError.bind(this)
-    );
+    this.globalErrorHandler = new GlobalErrorHandler(this.handleError.bind(this));
 
     try {
       this.setup();
@@ -70,9 +62,7 @@ class ErrorReporter {
     this.errorQueue.report(payload);
   }
 
-  private createErrorPayload(
-    context: ErrorContext
-  ): ErrorReport {
+  private createErrorPayload(context: ErrorContext): ErrorReport {
     const baseData = this.createBaseErrorData();
     return {
       ...baseData,

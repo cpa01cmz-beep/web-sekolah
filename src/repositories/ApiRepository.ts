@@ -10,7 +10,7 @@ export class ApiRepository implements IRepository {
     return apiClient<T>(path, {
       method: 'POST',
       body: body ? JSON.stringify(body) : undefined,
-      ...options
+      ...options,
     });
   }
 
@@ -18,7 +18,7 @@ export class ApiRepository implements IRepository {
     return apiClient<T>(path, {
       method: 'PUT',
       body: body ? JSON.stringify(body) : undefined,
-      ...options
+      ...options,
     });
   }
 
@@ -30,7 +30,7 @@ export class ApiRepository implements IRepository {
     return apiClient<T>(path, {
       method: 'PATCH',
       body: body ? JSON.stringify(body) : undefined,
-      ...options
+      ...options,
     });
   }
 }

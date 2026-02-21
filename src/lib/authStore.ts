@@ -32,7 +32,7 @@ interface AuthState {
 export const useAuthStore = create<AuthState>((set) => ({
   user: null,
   token: null,
-  
+
   /**
    * Authenticate user with email, password, and role
    * @param email - User's email address
@@ -50,7 +50,7 @@ export const useAuthStore = create<AuthState>((set) => ({
       throw error;
     }
   },
-  
+
   /**
    * Log out the current user and clear authentication state
    * Clears both in-memory state and any stored tokens
@@ -64,7 +64,7 @@ export const useAuthStore = create<AuthState>((set) => ({
       set({ user: null, token: null });
     }
   },
-  
+
   /**
    * Initialize authentication state from stored token
    * Checks for a stored token and validates it to restore session
@@ -87,4 +87,4 @@ export const useAuthStore = create<AuthState>((set) => ({
       }
     }
   },
-}));
+}));

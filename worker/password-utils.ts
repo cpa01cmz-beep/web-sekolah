@@ -1,13 +1,7 @@
 import { logger } from './logger';
 import { PasswordConfig } from './config/security';
 
-const {
-  PBKDF2_ITERATIONS,
-  SALT_LENGTH,
-  HASH_LENGTH,
-  ALGORITHM,
-  HASH_ALGORITHM,
-} = PasswordConfig;
+const { PBKDF2_ITERATIONS, SALT_LENGTH, HASH_LENGTH, ALGORITHM, HASH_ALGORITHM } = PasswordConfig;
 
 export interface PasswordHash {
   salt: string;
@@ -53,7 +47,7 @@ async function deriveKey(password: string, salt: string): Promise<string> {
 
 function bufferToHex(buffer: Uint8Array): string {
   return Array.from(buffer)
-    .map(b => b.toString(16).padStart(2, '0'))
+    .map((b) => b.toString(16).padStart(2, '0'))
     .join('');
 }
 
@@ -68,10 +62,10 @@ function hexToBuffer(hex: string): Uint8Array {
 function constantTimeCompare(a: string, b: string): boolean {
   const aBuffer = new TextEncoder().encode(a);
   const bBuffer = new TextEncoder().encode(b);
-  
+
   const maxLen = Math.max(aBuffer.length, bBuffer.length);
   let result = aBuffer.length ^ bBuffer.length;
-  
+
   for (let i = 0; i < maxLen; i++) {
     const aByte = i < aBuffer.length ? aBuffer[i] : 0;
     const bByte = i < bBuffer.length ? bBuffer[i] : 0;
@@ -84,17 +78,17 @@ export async function hashPassword(password: string): Promise<HashedPassword> {
   const salt = await generateSalt();
   const hash = await deriveKey(password, salt);
   const storedHash = `${salt}:${hash}`;
-  
-  logger.debug('[Password] Password hashed', { 
-    saltLength: salt.length, 
-    hashLength: hash.length 
+
+  logger.debug('[Password] Password hashed', {
+    saltLength: salt.length,
+    hashLength: hash.length,
   });
-  
+
   return { hash: storedHash };
 }
 
 export async function verifyPassword(
-  password: string, 
+  password: string,
   storedHash: string | null | undefined
 ): Promise<boolean> {
   if (!storedHash) {
@@ -138,7 +132,7 @@ export function getDefaultPasswordHash(): string {
 export function isValidPasswordHashFormat(hash: string): boolean {
   if (!hash) return false;
   const parts = hash.split(':');
-  return parts.length === 2 && 
-         parts[0].length === SALT_LENGTH * 2 && 
-         parts[1].length === HASH_LENGTH * 2;
+  return (
+    parts.length === 2 && parts[0].length === SALT_LENGTH * 2 && parts[1].length === HASH_LENGTH * 2
+  );
 }

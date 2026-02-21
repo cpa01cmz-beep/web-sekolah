@@ -56,7 +56,8 @@ describe('Retry Utility', () => {
 
   describe('Retry Behavior', () => {
     it('should retry on failure with exponential backoff', async () => {
-      const fn = vi.fn()
+      const fn = vi
+        .fn()
         .mockRejectedValueOnce(new Error('Error 1'))
         .mockRejectedValueOnce(new Error('Error 2'))
         .mockResolvedValue('success');
@@ -108,9 +109,7 @@ describe('Retry Utility', () => {
 
   describe('Exponential Backoff', () => {
     it('should delay 1000ms on first retry (attempt 0)', async () => {
-      const fn = vi.fn()
-        .mockRejectedValueOnce(new Error('Error 1'))
-        .mockResolvedValue('success');
+      const fn = vi.fn().mockRejectedValueOnce(new Error('Error 1')).mockResolvedValue('success');
 
       const promise = withRetry(fn, { maxRetries: 2, baseDelay: 1000 });
 
@@ -124,7 +123,8 @@ describe('Retry Utility', () => {
     });
 
     it('should delay 2000ms on second retry (attempt 1)', async () => {
-      const fn = vi.fn()
+      const fn = vi
+        .fn()
         .mockRejectedValueOnce(new Error('Error 1'))
         .mockRejectedValueOnce(new Error('Error 2'))
         .mockResolvedValue('success');
@@ -142,7 +142,8 @@ describe('Retry Utility', () => {
     });
 
     it('should delay 4000ms on third retry (attempt 2)', async () => {
-      const fn = vi.fn()
+      const fn = vi
+        .fn()
         .mockRejectedValueOnce(new Error('Error 1'))
         .mockRejectedValueOnce(new Error('Error 2'))
         .mockRejectedValueOnce(new Error('Error 3'))
@@ -160,9 +161,7 @@ describe('Retry Utility', () => {
     });
 
     it('should use custom baseDelay when specified', async () => {
-      const fn = vi.fn()
-        .mockRejectedValueOnce(new Error('Error'))
-        .mockResolvedValue('success');
+      const fn = vi.fn().mockRejectedValueOnce(new Error('Error')).mockResolvedValue('success');
 
       const promise = withRetry(fn, { maxRetries: 2, baseDelay: 500 });
 
@@ -181,14 +180,16 @@ describe('Retry Utility', () => {
       // real setTimeout interacts with fake timer system. The timeout logic
       // is simple and implicitly tested through integration tests.
 
-      const fn = vi.fn().mockImplementation(
-        () => new Promise(resolve => setTimeout(resolve, 10000))
-      );
+      const fn = vi
+        .fn()
+        .mockImplementation(() => new Promise((resolve) => setTimeout(resolve, 10000)));
 
       const promise = withRetry(fn, { timeout: 100 });
 
       let caughtError: unknown = null;
-      promise.catch(err => { caughtError = err; });
+      promise.catch((err) => {
+        caughtError = err;
+      });
 
       await vi.advanceTimersByTimeAsync(100);
 
@@ -198,9 +199,9 @@ describe('Retry Utility', () => {
     });
 
     it('should not timeout when function completes within timeout', async () => {
-      const fn = vi.fn().mockImplementation(
-        () => new Promise(resolve => setTimeout(resolve, 50))
-      );
+      const fn = vi
+        .fn()
+        .mockImplementation(() => new Promise((resolve) => setTimeout(resolve, 50)));
 
       const promise = withRetry(fn, { timeout: 100 });
 
@@ -214,14 +215,18 @@ describe('Retry Utility', () => {
     it.skip('should abort request and not retry on timeout', async () => {
       // NOTE: See first skip for details on timeout testing limitations
 
-      const fn = vi.fn().mockImplementation(
-        () => new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 10000))
-      );
+      const fn = vi
+        .fn()
+        .mockImplementation(
+          () => new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 10000))
+        );
 
       const promise = withRetry(fn, { timeout: 100, maxRetries: 3 });
 
       let caughtError: unknown = null;
-      promise.catch(err => { caughtError = err; });
+      promise.catch((err) => {
+        caughtError = err;
+      });
 
       await vi.advanceTimersByTimeAsync(100);
 
@@ -233,14 +238,16 @@ describe('Retry Utility', () => {
     it.skip('should handle zero timeout (immediate timeout)', async () => {
       // NOTE: See first skip for details on timeout testing limitations
 
-      const fn = vi.fn().mockImplementation(
-        () => new Promise(resolve => setTimeout(resolve, 10))
-      );
+      const fn = vi
+        .fn()
+        .mockImplementation(() => new Promise((resolve) => setTimeout(resolve, 10)));
 
       const promise = withRetry(fn, { timeout: 0 });
 
       let caughtError: unknown = null;
-      promise.catch(err => { caughtError = err; });
+      promise.catch((err) => {
+        caughtError = err;
+      });
 
       await vi.advanceTimersByTimeAsync(0);
 
@@ -252,7 +259,8 @@ describe('Retry Utility', () => {
 
   describe('shouldRetry Callback', () => {
     it('should retry based on shouldRetry callback returning true', async () => {
-      const fn = vi.fn()
+      const fn = vi
+        .fn()
         .mockRejectedValueOnce(new Error('Retryable error'))
         .mockResolvedValue('success');
 
@@ -293,13 +301,15 @@ describe('Retry Utility', () => {
     });
 
     it('should call shouldRetry with error and attempt number', async () => {
-      const fn = vi.fn()
+      const fn = vi
+        .fn()
         .mockRejectedValueOnce(new Error('Error 1'))
         .mockRejectedValueOnce(new Error('Error 2'))
         .mockRejectedValueOnce(new Error('Error 3'))
         .mockResolvedValue('success');
 
-      const shouldRetry = vi.fn()
+      const shouldRetry = vi
+        .fn()
         .mockReturnValueOnce(true)
         .mockReturnValueOnce(true)
         .mockReturnValueOnce(true);
@@ -320,14 +330,13 @@ describe('Retry Utility', () => {
     });
 
     it('should stop retrying when shouldRetry returns false mid-sequence', async () => {
-      const fn = vi.fn()
+      const fn = vi
+        .fn()
         .mockRejectedValueOnce(new Error('Error 1'))
         .mockRejectedValueOnce(new Error('Error 2'))
         .mockResolvedValue('success');
 
-      const shouldRetry = vi.fn()
-        .mockReturnValueOnce(true)
-        .mockReturnValueOnce(false);
+      const shouldRetry = vi.fn().mockReturnValueOnce(true).mockReturnValueOnce(false);
 
       const promise = withRetry(fn, { maxRetries: 4, shouldRetry });
       await vi.advanceTimersByTimeAsync(1000);
@@ -340,9 +349,7 @@ describe('Retry Utility', () => {
 
   describe('Jitter Functionality', () => {
     it('should add random jitter to delay', async () => {
-      const fn = vi.fn()
-        .mockRejectedValueOnce(new Error('Error'))
-        .mockResolvedValue('success');
+      const fn = vi.fn().mockRejectedValueOnce(new Error('Error')).mockResolvedValue('success');
 
       const promise = withRetry(fn, { maxRetries: 2, baseDelay: 1000, jitterMs: 100 });
 
@@ -353,9 +360,7 @@ describe('Retry Utility', () => {
     });
 
     it('should work with zero jitter', async () => {
-      const fn = vi.fn()
-        .mockRejectedValueOnce(new Error('Error'))
-        .mockResolvedValue('success');
+      const fn = vi.fn().mockRejectedValueOnce(new Error('Error')).mockResolvedValue('success');
 
       const promise = withRetry(fn, { maxRetries: 2, baseDelay: 1000, jitterMs: 0 });
 
@@ -366,9 +371,7 @@ describe('Retry Utility', () => {
     });
 
     it('should not add jitter when not specified', async () => {
-      const fn = vi.fn()
-        .mockRejectedValueOnce(new Error('Error'))
-        .mockResolvedValue('success');
+      const fn = vi.fn().mockRejectedValueOnce(new Error('Error')).mockResolvedValue('success');
 
       const promise = withRetry(fn, { maxRetries: 2, baseDelay: 1000 });
 
@@ -381,7 +384,8 @@ describe('Retry Utility', () => {
 
   describe('Error Handling', () => {
     it('should throw the last error when all retries exhausted', async () => {
-      const fn = vi.fn()
+      const fn = vi
+        .fn()
         .mockRejectedValueOnce(new Error('Error 1'))
         .mockRejectedValueOnce(new Error('Error 2'))
         .mockRejectedValueOnce(new Error('Error 3'))
@@ -399,7 +403,10 @@ describe('Retry Utility', () => {
 
     it('should preserve error type and message', async () => {
       class CustomError extends Error {
-        constructor(message: string, public code: string) {
+        constructor(
+          message: string,
+          public code: string
+        ) {
           super(message);
           this.name = 'CustomError';
         }
@@ -450,9 +457,7 @@ describe('Retry Utility', () => {
     });
 
     it('should handle negative baseDelay', async () => {
-      const fn = vi.fn()
-        .mockRejectedValueOnce(new Error('Error'))
-        .mockResolvedValue('success');
+      const fn = vi.fn().mockRejectedValueOnce(new Error('Error')).mockResolvedValue('success');
 
       const promise = withRetry(fn, { maxRetries: 2, baseDelay: -100 });
 
@@ -505,11 +510,13 @@ describe('Retry Utility', () => {
 
   describe('Integration Scenarios', () => {
     it('should handle rapid successive calls independently', async () => {
-      const fn1 = vi.fn()
+      const fn1 = vi
+        .fn()
         .mockRejectedValueOnce(new Error('Error 1'))
         .mockResolvedValue('success 1');
 
-      const fn2 = vi.fn()
+      const fn2 = vi
+        .fn()
         .mockRejectedValueOnce(new Error('Error 2'))
         .mockResolvedValue('success 2');
 
@@ -527,7 +534,8 @@ describe('Retry Utility', () => {
     });
 
     it('should combine retry, timeout, and jitter', async () => {
-      const fn = vi.fn()
+      const fn = vi
+        .fn()
         .mockRejectedValueOnce(new Error('Error'))
         .mockRejectedValueOnce(new Error('Error'))
         .mockResolvedValue('success');
@@ -536,7 +544,7 @@ describe('Retry Utility', () => {
         maxRetries: 3,
         baseDelay: 500,
         jitterMs: 50,
-        timeout: 1000
+        timeout: 1000,
       });
 
       await vi.advanceTimersByTimeAsync(550);
@@ -548,7 +556,8 @@ describe('Retry Utility', () => {
     });
 
     it('should handle complex shouldRetry logic', async () => {
-      const fn = vi.fn()
+      const fn = vi
+        .fn()
         .mockRejectedValueOnce(new Error('Network error'))
         .mockRejectedValueOnce(new Error('Timeout'))
         .mockRejectedValueOnce(new Error('Rate limit'))
@@ -577,7 +586,8 @@ describe('Retry Utility', () => {
 
   describe('Max Delay Cap', () => {
     it('should cap delay at 30 seconds (MAX_DELAY_MS)', async () => {
-      const fn = vi.fn()
+      const fn = vi
+        .fn()
         .mockRejectedValueOnce(new Error('Error 1'))
         .mockRejectedValueOnce(new Error('Error 2'))
         .mockRejectedValueOnce(new Error('Error 3'))
@@ -599,9 +609,7 @@ describe('Retry Utility', () => {
     });
 
     it('should not exceed max delay even with high attempt count', async () => {
-      const fn = vi.fn()
-        .mockRejectedValueOnce(new Error('Error'))
-        .mockResolvedValue('success');
+      const fn = vi.fn().mockRejectedValueOnce(new Error('Error')).mockResolvedValue('success');
 
       const promise = withRetry(fn, { maxRetries: 20, baseDelay: 1000 });
 
@@ -613,7 +621,8 @@ describe('Retry Utility', () => {
     });
 
     it('should cap exponential backoff to prevent extreme delays', async () => {
-      const fn = vi.fn()
+      const fn = vi
+        .fn()
         .mockRejectedValueOnce(new Error('Error 1'))
         .mockRejectedValueOnce(new Error('Error 2'))
         .mockRejectedValueOnce(new Error('Error 3'))

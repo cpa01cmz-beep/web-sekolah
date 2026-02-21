@@ -4,7 +4,9 @@ import type { Env } from '../core-utils';
 describe('Admin Monitoring Routes - Integration Testing', () => {
   describe('Module Loading', () => {
     it('should document that admin monitoring route tests require Cloudflare Workers environment', () => {
-      console.warn('⚠️  Admin monitoring route tests skipped: Cloudflare Workers environment not available');
+      console.warn(
+        '⚠️  Admin monitoring route tests skipped: Cloudflare Workers environment not available'
+      );
       console.warn('   These routes require live Hono app with Durable Object storage');
       console.warn('   See docs/task.md for details on route testing approach');
       expect(true).toBe(true);

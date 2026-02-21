@@ -23,76 +23,76 @@ const PPDBPage = lazy(() => import('@/pages/PPDBPage'));
 
 export const publicRoutes = [
   {
-    path: "/",
+    path: '/',
     element: withSuspense(HomePage),
     errorElement: <RouteErrorBoundary />,
   },
   {
-    path: "/login",
+    path: '/login',
     element: withSuspense(LoginPage),
   },
   {
-    path: "/about",
+    path: '/about',
     element: withSuspense(AboutPage),
   },
   {
-    path: "/contact",
+    path: '/contact',
     element: withSuspense(ContactPage),
   },
   {
-    path: "/privacy",
+    path: '/privacy',
     element: withSuspense(PrivacyPolicyPage),
   },
   {
-    path: "/news/update",
+    path: '/news/update',
     element: withSuspense(NewsUpdatePage),
   },
   {
-    path: "/news/announcements",
+    path: '/news/announcements',
     element: withSuspense(NewsAnnouncementsPage),
   },
   {
-    path: "/news/index",
+    path: '/news/index',
     element: withSuspense(NewsIndexPage),
   },
   {
-    path: "/profile/school",
+    path: '/profile/school',
     element: withSuspense(ProfileSchoolPage),
   },
   {
-    path: "/profile/services",
+    path: '/profile/services',
     element: withSuspense(ProfileServicesPage),
   },
   {
-    path: "/profile/achievements",
+    path: '/profile/achievements',
     element: withSuspense(ProfileAchievementsPage),
   },
   {
-    path: "/profile/extracurricular",
+    path: '/profile/extracurricular',
     element: withSuspense(ProfileExtracurricularPage),
   },
   {
-    path: "/profile/facilities",
+    path: '/profile/facilities',
     element: withSuspense(ProfileFacilitiesPage),
   },
   {
-    path: "/works",
+    path: '/works',
     element: withSuspense(WorksPage),
   },
   {
-    path: "/gallery",
+    path: '/gallery',
     element: withSuspense(GalleryPage),
   },
   {
-    path: "/links/related",
+    path: '/links/related',
     element: withSuspense(LinksRelatedPage),
   },
   {
-    path: "/links/download",
+    path: '/links/download',
     element: withSuspense(LinksDownloadPage),
   },
   {
-    path: "/ppdb",
+    path: '/ppdb',
     element: withSuspense(PPDBPage),
   },
 ];

@@ -1,22 +1,25 @@
-import { IndexedEntity, SecondaryIndex, type Env } from "../core-utils";
-import type { WebhookConfig } from "@shared/types";
+import { IndexedEntity, SecondaryIndex, type Env } from '../core-utils';
+import type { WebhookConfig } from '@shared/types';
 
 export class WebhookConfigEntity extends IndexedEntity<WebhookConfig> {
-  static readonly entityName = "webhookConfig";
-  static readonly indexName = "webhookConfigs";
+  static readonly entityName = 'webhookConfig';
+  static readonly indexName = 'webhookConfigs';
   static readonly initialState: WebhookConfig = {
-    id: "",
-    url: "",
+    id: '',
+    url: '',
     events: [],
-    secret: "",
+    secret: '',
     active: false,
-    createdAt: "",
-    updatedAt: "",
-    deletedAt: null
+    createdAt: '',
+    updatedAt: '',
+    deletedAt: null,
   };
 
   static readonly secondaryIndexes = [
-    { fieldName: 'active', getValue: (state: { id: string; }) => String((state as WebhookConfig).active) }
+    {
+      fieldName: 'active',
+      getValue: (state: { id: string }) => String((state as WebhookConfig).active),
+    },
   ];
 
   static async getActive(env: Env): Promise<WebhookConfig[]> {
@@ -25,6 +28,6 @@ export class WebhookConfigEntity extends IndexedEntity<WebhookConfig> {
 
   static async getByEventType(env: Env, eventType: string): Promise<WebhookConfig[]> {
     const activeConfigs = await this.getActive(env);
-    return activeConfigs.filter(c => c.events.includes(eventType));
+    return activeConfigs.filter((c) => c.events.includes(eventType));
   }
 }

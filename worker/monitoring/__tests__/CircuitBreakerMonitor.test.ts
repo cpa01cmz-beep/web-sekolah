@@ -152,7 +152,7 @@ describe('CircuitBreakerMonitor', () => {
 
       monitor.setState(state);
       const state1 = monitor.getState();
-      
+
       if (state1) {
         state1.isOpen = false;
         state1.failureCount = 999;

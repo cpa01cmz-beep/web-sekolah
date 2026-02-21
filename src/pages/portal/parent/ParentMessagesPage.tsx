@@ -27,7 +27,11 @@ export function ParentMessagesPage() {
 
   const parentId = user?.id || '';
 
-  const { data: messages = [], isLoading: messagesLoading, error: messagesError } = useQuery({
+  const {
+    data: messages = [],
+    isLoading: messagesLoading,
+    error: messagesError,
+  } = useQuery({
     queryKey: ['parent-messages', parentId, activeTab],
     queryFn: () => parentService.getMessages(parentId, activeTab),
     enabled: !!parentId,
@@ -91,10 +95,7 @@ export function ParentMessagesPage() {
   return (
     <SlideUp delay={0} className="space-y-6" style={prefersReducedMotion ? { opacity: 1 } : {}}>
       <SlideUp delay={0.1} style={prefersReducedMotion ? { opacity: 1 } : {}}>
-        <PageHeader
-          title="Messages"
-          description="Communicate with your child's teachers"
-        />
+        <PageHeader title="Messages" description="Communicate with your child's teachers" />
       </SlideUp>
 
       <div className="flex justify-between items-center">
@@ -158,10 +159,12 @@ export function ParentMessagesPage() {
                           <div className="flex items-center gap-2">
                             <User className="h-4 w-4 text-muted-foreground" />
                             <span className="font-medium">
-                              {teachers.find(t => t.id === message.senderId)?.name || 'Teacher'}
+                              {teachers.find((t) => t.id === message.senderId)?.name || 'Teacher'}
                             </span>
                             {!message.isRead && message.recipientId === parentId && (
-                              <Badge variant="default" className="text-xs">New</Badge>
+                              <Badge variant="default" className="text-xs">
+                                New
+                              </Badge>
                             )}
                           </div>
                           <span className="text-xs text-muted-foreground">
@@ -208,7 +211,9 @@ export function ParentMessagesPage() {
                           <div className="flex items-center gap-2">
                             <User className="h-4 w-4 text-muted-foreground" />
                             <span className="font-medium">
-                              To: {teachers.find(t => t.id === message.recipientId)?.name || 'Teacher'}
+                              To:{' '}
+                              {teachers.find((t) => t.id === message.recipientId)?.name ||
+                                'Teacher'}
                             </span>
                           </div>
                           <span className="text-xs text-muted-foreground">
@@ -232,7 +237,8 @@ export function ParentMessagesPage() {
           <DialogContent className="sm:max-w-[600px] max-h-[80vh]">
             <DialogHeader>
               <DialogTitle>
-                Conversation with {teachers.find(t => t.id === selectedTeacherId)?.name || 'Teacher'}
+                Conversation with{' '}
+                {teachers.find((t) => t.id === selectedTeacherId)?.name || 'Teacher'}
               </DialogTitle>
             </DialogHeader>
             <ScrollArea className="h-[400px] pr-4">

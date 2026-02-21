@@ -8,7 +8,7 @@ import type {
   GalleryItem,
   WorkItem,
   LinkItem,
-  DownloadItem
+  DownloadItem,
 } from '@shared/types';
 import type { IRepository } from '@/repositories/IRepository';
 import { apiRepository } from '@/repositories/ApiRepository';
@@ -33,7 +33,9 @@ export function createPublicService(repository: IRepository = apiRepository): Pu
     },
 
     async getNews(limit?: number): Promise<NewsItem[]> {
-      const endpoint = limit ? `${API_ENDPOINTS.PUBLIC.NEWS}?limit=${limit}` : API_ENDPOINTS.PUBLIC.NEWS;
+      const endpoint = limit
+        ? `${API_ENDPOINTS.PUBLIC.NEWS}?limit=${limit}`
+        : API_ENDPOINTS.PUBLIC.NEWS;
       return repository.get<NewsItem[]>(endpoint);
     },
 
@@ -55,7 +57,7 @@ export function createPublicService(repository: IRepository = apiRepository): Pu
 
     async getDownloads(): Promise<DownloadItem[]> {
       return repository.get<DownloadItem[]>(API_ENDPOINTS.PUBLIC.DOWNLOADS);
-    }
+    },
   };
 }
 

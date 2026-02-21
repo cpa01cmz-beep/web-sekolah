@@ -546,7 +546,7 @@ describe('Validation Schemas', () => {
 
     it('should accept all valid targetRole values', () => {
       const validRoles = ['all', 'students', 'teachers', 'parents'] as const;
-      
+
       for (const role of validRoles) {
         const data = {
           title: 'Important Announcement',

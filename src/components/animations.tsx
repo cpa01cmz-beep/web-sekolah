@@ -13,12 +13,14 @@ type AnimationType = 'fadeIn' | 'slideUp' | 'slideLeft' | 'slideRight';
 function createAnimationComponent(animationType: AnimationType) {
   return memo(function Animation({ children, delay = 0, className, style }: AnimationProps) {
     const prefersReducedMotion = useReducedMotion();
-    
+
     return (
       <div
         className={className}
         style={{
-          animation: prefersReducedMotion ? 'none' : `${animationType} 0.5s ease-out ${delay}s forwards`,
+          animation: prefersReducedMotion
+            ? 'none'
+            : `${animationType} 0.5s ease-out ${delay}s forwards`,
           opacity: prefersReducedMotion ? 1 : 0,
           ...style,
         }}

@@ -2,12 +2,12 @@ import { describe, it, expect } from 'vitest';
 import { verifyToken } from '../auth';
 
 describe('Authentication Middleware', () => {
-
   describe('verifyToken - positive cases', () => {
     it('should verify valid token for student role', async () => {
       const secret = 'test-secret-key';
-      const validStudentToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyLTEyMyIsImVtYWlsIjoidGVzdEBleGFtcGxlLmNvbSIsInJvbGUiOiJzdHVkZW50IiwiaWF0IjoxNzM2NzE4ODAwLCJleHAiOjE3MzY3MjI0MDB9.test-sig-replace-with-real-signature';
-      
+      const validStudentToken =
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyLTEyMyIsImVtYWlsIjoidGVzdEBleGFtcGxlLmNvbSIsInJvbGUiOiJzdHVkZW50IiwiaWF0IjoxNzM2NzE4ODAwLCJleHAiOjE3MzY3MjI0MDB9.test-sig-replace-with-real-signature';
+
       const result = await verifyToken(validStudentToken, secret);
 
       if (result) {
@@ -21,8 +21,9 @@ describe('Authentication Middleware', () => {
 
     it('should verify valid token for teacher role', async () => {
       const secret = 'test-secret-key';
-      const validTeacherToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZWFjaGVyLTQ1NiIsImVtYWlsIjoidGVhY2hlckBleGFtcGxlLmNvbSIsInJvbGUiOiJ0ZWFjaGVyIiwiaWF0IjoxNzM2NzE4ODAwLCJleHAiOjE3MzY3MjI0MDB9.test-sig-replace-with-real-signature';
-      
+      const validTeacherToken =
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZWFjaGVyLTQ1NiIsImVtYWlsIjoidGVhY2hlckBleGFtcGxlLmNvbSIsInJvbGUiOiJ0ZWFjaGVyIiwiaWF0IjoxNzM2NzE4ODAwLCJleHAiOjE3MzY3MjI0MDB9.test-sig-replace-with-real-signature';
+
       const result = await verifyToken(validTeacherToken, secret);
 
       if (result) {
@@ -36,8 +37,9 @@ describe('Authentication Middleware', () => {
 
     it('should verify valid token for parent role', async () => {
       const secret = 'test-secret-key';
-      const validParentToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJwYXJlbnQtNzg5IiwiZW1haWwiOiJwYXJlbnRAZXhhbXBsZS5jb20iLCJyb2xlIjoicGFyZW50IiwiaWF0IjoxNzM2NzE4ODAwLCJleHAiOjE3MzY3MjI0MDB9.test-sig-replace-with-real-signature';
-      
+      const validParentToken =
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJwYXJlbnQtNzg5IiwiZW1haWwiOiJwYXJlbnRAZXhhbXBsZS5jb20iLCJyb2xlIjoicGFyZW50IiwiaWF0IjoxNzM2NzE4ODAwLCJleHAiOjE3MzY3MjI0MDB9.test-sig-replace-with-real-signature';
+
       const result = await verifyToken(validParentToken, secret);
 
       if (result) {
@@ -51,8 +53,9 @@ describe('Authentication Middleware', () => {
 
     it('should verify valid token for admin role', async () => {
       const secret = 'test-secret-key';
-      const validAdminToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhZG1pbi0wMDAiLCJlbWFpbCI6ImFkbWluQGV4YW1wbGUuY29tIiwicm9sZSI6ImFkbWluIiwiaWF0IjoxNzM2NzE4ODAwLCJleHAiOjE3MzY3MjI0MDB9.test-sig-replace-with-real-signature';
-      
+      const validAdminToken =
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhZG1pbi0wMDAiLCJlbWFpbCI6ImFkbWluQGV4YW1wbGUuY29tIiwicm9sZSI6ImFkbWluIiwiaWF0IjoxNzM2NzE4ODAwLCJleHAiOjE3MzY3MjI0MDB9.test-sig-replace-with-real-signature';
+
       const result = await verifyToken(validAdminToken, secret);
 
       if (result) {
@@ -85,7 +88,8 @@ describe('Authentication Middleware', () => {
     });
 
     it('should handle tokens with wrong secret', async () => {
-      const wrongSecretToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyLTEyMyIsImVtYWlsIjoidGVzdEBleGFtcGxlLmNvbSIsInJvbGUiOiJzdHVkZW50IiwiaWF0IjoxNjQ3NjI4ODAwLCJleHAiOjE2NDc2MzI0MDB9.invalid';
+      const wrongSecretToken =
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyLTEyMyIsImVtYWlsIjoidGVzdEBleGFtcGxlLmNvbSIsInJvbGUiOiJzdHVkZW50IiwiaWF0IjoxNjQ3NjI4ODAwLCJleHAiOjE2NDc2MzI0MDB9.invalid';
       const result = await verifyToken(wrongSecretToken, 'wrong-secret');
 
       expect(result).toBeNull();

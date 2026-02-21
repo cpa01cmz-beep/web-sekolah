@@ -38,10 +38,7 @@ export async function generateToken(
   return token;
 }
 
-export async function verifyToken(
-  token: string,
-  secret: string
-): Promise<JwtPayload | null> {
+export async function verifyToken(token: string, secret: string): Promise<JwtPayload | null> {
   try {
     const key = await getSecretKey(secret);
     const { payload } = await jwtVerify(token, key);
@@ -55,7 +52,7 @@ export async function verifyToken(
 export function authenticate(secretEnvVar: string = 'JWT_SECRET') {
   return async (c: Context<{ Bindings: { [key: string]: string } }>, next: Next) => {
     const authHeader = c.req.header('Authorization');
-    
+
     if (!authHeader) {
       return unauthorized(c, 'Missing authorization header');
     }

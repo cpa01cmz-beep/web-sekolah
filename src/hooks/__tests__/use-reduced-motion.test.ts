@@ -72,8 +72,11 @@ describe('useReducedMotion() - Accessibility Hook', () => {
       // Act - Simulate media query change
       mediaQueryMatches = true;
       act(() => {
-        listeners.forEach(listener => {
-          listener({ matches: true, media: '(prefers-reduced-motion: reduce)' } as MediaQueryListEvent);
+        listeners.forEach((listener) => {
+          listener({
+            matches: true,
+            media: '(prefers-reduced-motion: reduce)',
+          } as MediaQueryListEvent);
         });
       });
 
@@ -112,8 +115,11 @@ describe('useReducedMotion() - Accessibility Hook', () => {
       // Act - Simulate media query change
       mediaQueryMatches = false;
       act(() => {
-        listeners.forEach(listener => {
-          listener({ matches: false, media: '(prefers-reduced-motion: reduce)' } as MediaQueryListEvent);
+        listeners.forEach((listener) => {
+          listener({
+            matches: false,
+            media: '(prefers-reduced-motion: reduce)',
+          } as MediaQueryListEvent);
         });
       });
 
@@ -220,7 +226,7 @@ describe('useReducedMotion() - Accessibility Hook', () => {
 
       // Act
       act(() => {
-        listeners.forEach(listener => {
+        listeners.forEach((listener) => {
           const event = {
             matches: true,
             media: '(prefers-reduced-motion: reduce)',
@@ -355,8 +361,11 @@ describe('useReducedMotion() - Accessibility Hook', () => {
       // Act
       mediaQueryMatches = true;
       act(() => {
-        listeners.forEach(listener => {
-          listener({ matches: true, media: '(prefers-reduced-motion: reduce)' } as MediaQueryListEvent);
+        listeners.forEach((listener) => {
+          listener({
+            matches: true,
+            media: '(prefers-reduced-motion: reduce)',
+          } as MediaQueryListEvent);
         });
       });
 
@@ -455,18 +464,27 @@ describe('useReducedMotion() - Accessibility Hook', () => {
       // Act - Rapid changes
       act(() => {
         mediaQueryMatches = true;
-        listeners.forEach(listener => {
-          listener({ matches: true, media: '(prefers-reduced-motion: reduce)' } as MediaQueryListEvent);
+        listeners.forEach((listener) => {
+          listener({
+            matches: true,
+            media: '(prefers-reduced-motion: reduce)',
+          } as MediaQueryListEvent);
         });
 
         mediaQueryMatches = false;
-        listeners.forEach(listener => {
-          listener({ matches: false, media: '(prefers-reduced-motion: reduce)' } as MediaQueryListEvent);
+        listeners.forEach((listener) => {
+          listener({
+            matches: false,
+            media: '(prefers-reduced-motion: reduce)',
+          } as MediaQueryListEvent);
         });
 
         mediaQueryMatches = true;
-        listeners.forEach(listener => {
-          listener({ matches: true, media: '(prefers-reduced-motion: reduce)' } as MediaQueryListEvent);
+        listeners.forEach((listener) => {
+          listener({
+            matches: true,
+            media: '(prefers-reduced-motion: reduce)',
+          } as MediaQueryListEvent);
         });
       });
 
@@ -591,8 +609,11 @@ describe('useReducedMotion() - Accessibility Hook', () => {
       // Act - User enables reduced motion
       mediaQueryMatches = true;
       act(() => {
-        listeners.forEach(listener => {
-          listener({ matches: true, media: '(prefers-reduced-motion: reduce)' } as MediaQueryListEvent);
+        listeners.forEach((listener) => {
+          listener({
+            matches: true,
+            media: '(prefers-reduced-motion: reduce)',
+          } as MediaQueryListEvent);
         });
       });
 

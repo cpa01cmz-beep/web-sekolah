@@ -17,7 +17,9 @@ describe('ParentDashboardService - Critical Path Testing', () => {
   describe('Module Loading', () => {
     it('should document that full tests require Cloudflare Workers environment', () => {
       if (!canLoadModule) {
-        console.warn('⚠️  ParentDashboardService tests skipped: Cloudflare Workers environment not available');
+        console.warn(
+          '⚠️  ParentDashboardService tests skipped: Cloudflare Workers environment not available'
+        );
         console.warn('   This module requires advanced mocking setup for full testing');
         console.warn('   See docs/task.md for details on domain service testing');
       }
@@ -113,9 +115,9 @@ describe('ParentDashboardService - Critical Path Testing', () => {
 
       const mockEnv = {} as any;
 
-      await expect(
-        ParentDashboardService.getDashboardData(mockEnv, '')
-      ).rejects.toThrow('Parent not found');
+      await expect(ParentDashboardService.getDashboardData(mockEnv, '')).rejects.toThrow(
+        'Parent not found'
+      );
     });
 
     it('should handle non-existent parent ID', async () => {
@@ -139,9 +141,9 @@ describe('ParentDashboardService - Critical Path Testing', () => {
 
       const mockEnv = {} as any;
 
-      await expect(
-        ParentDashboardService.getDashboardData(mockEnv, 'student-01')
-      ).rejects.toThrow('Parent not found');
+      await expect(ParentDashboardService.getDashboardData(mockEnv, 'student-01')).rejects.toThrow(
+        'Parent not found'
+      );
     });
 
     it('should handle null parent ID', async () => {
@@ -152,9 +154,9 @@ describe('ParentDashboardService - Critical Path Testing', () => {
 
       const mockEnv = {} as any;
 
-      await expect(
-        ParentDashboardService.getDashboardData(mockEnv, null as any)
-      ).rejects.toThrow('Parent not found');
+      await expect(ParentDashboardService.getDashboardData(mockEnv, null as any)).rejects.toThrow(
+        'Parent not found'
+      );
     });
 
     it('should handle undefined parent ID', async () => {
