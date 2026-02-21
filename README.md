@@ -4,8 +4,8 @@
 
 [![🤖 iFlow CLI Automation](https://img.shields.io/badge/iFlow--CLI-Automation-blue)](https://github.com/iflow-ai/iflow-cli-action)
 
-[![Tests: 2936 passing](https://img.shields.io/badge/Tests-2936%20passing-brightgreen)](https://github.com/cpa01cmz-beep/web-sekolah/actions)
-[![Security: 98/100](https://img.shields.io/badge/Security-98%2F100-success)](./docs/SECURITY_ASSESSMENT_2026-01-22.md)
+[![Tests: 3096 passing](https://img.shields.io/badge/Tests-3096%20passing-brightgreen)](https://github.com/cpa01cmz-beep/web-sekolah/actions)
+[![Security: 97/100](https://img.shields.io/badge/Security-97%2F100-success)](./docs/SECURITY.md)
 [![TypeScript: Strict](https://img.shields.io/badge/TypeScript-Strict-blue)](https://www.typescriptlang.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
@@ -64,7 +64,7 @@ The system is built on Cloudflare's high-performance serverless infrastructure, 
 - **Bundle Size**: 491 KB (136 KB gzipped) - 53% reduction from optimizations
 - **Load Time**: < 2 seconds on 3G connection
 - **API Response**: < 100ms average (Cloudflare Workers)
-- **Security**: 98/100 score (Production Ready ✅)
+- **Security**: 97/100 score (Production Ready ✅)
 - **Test Coverage**: 3096 tests total (2936 passing, 5 skipped, 155 todo)
 
 ## Technology Stack
@@ -201,7 +201,7 @@ Run the test suite to verify everything is working:
 npm test
 ```
 
-All tests should pass (currently 2936 tests passing, 5 skipped, 155 todo).
+All tests should pass (currently 3096 tests passing, 5 skipped, 155 todo).
 
 ### Type Checking
 
