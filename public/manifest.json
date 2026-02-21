@@ -1,5 +1,5 @@
 {
-  "name": "Akademia Pro",
+  "name": "Akademia Pro - School Management Portal",
   "short_name": "Akademia",
   "description": "Modern School Management Portal for Students, Teachers, Parents, and Administrators",
   "start_url": "/",
@@ -7,6 +7,7 @@
   "background_color": "#ffffff",
   "theme_color": "#2563eb",
   "orientation": "portrait-primary",
+  "scope": "/",
   "icons": [
     {
       "src": "/vite.svg",
@@ -16,5 +17,23 @@
     }
   ],
   "categories": ["education", "productivity"],
-  "lang": "en"
+  "lang": "en",
+  "dir": "ltr",
+  "prefer_related_applications": false,
+  "shortcuts": [
+    {
+      "name": "Dashboard",
+      "short_name": "Dashboard",
+      "description": "Go to your dashboard",
+      "url": "/portal/dashboard",
+      "icons": [{ "src": "/vite.svg", "sizes": "any" }]
+    },
+    {
+      "name": "Schedule",
+      "short_name": "Schedule",
+      "description": "View your schedule",
+      "url": "/portal/schedule",
+      "icons": [{ "src": "/vite.svg", "sizes": "any" }]
+    }
+  ]
 }
