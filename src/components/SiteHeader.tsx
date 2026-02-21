@@ -31,7 +31,7 @@ export const SiteHeader = memo(function SiteHeader() {
                 link.submenu ? (
                 <DropdownMenu key={link.name}>
                   <DropdownMenuTrigger
-                    className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+                    className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-md px-2 py-1"
                   >
                     {link.name}
                   </DropdownMenuTrigger>
@@ -50,7 +50,7 @@ export const SiteHeader = memo(function SiteHeader() {
                   key={link.name}
                   to={link.href}
                   className={({ isActive }) =>
-                    `text-sm font-medium transition-colors hover:text-primary ${
+                    `text-sm font-medium transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-md px-2 py-1 ${
                       isActive ? 'text-primary' : 'text-muted-foreground'
                     }`
                   }
