@@ -293,6 +293,98 @@ describe('Validation Middleware', () => {
     });
   });
 
+  describe('Request body size limit', () => {
+    it('should reject body exceeding default size limit (1MB)', async () => {
+      const app = new Hono();
+      const schema = z.object({ data: z.string() });
+      
+      app.use('*', validateBody(schema));
+      app.post('/test', (c) => c.json({ success: true }));
+      
+      const largeData = 'x'.repeat(1024 * 1024 + 100);
+      const res = await app.request('/test', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ data: largeData }),
+      });
+      
+      expect(res.status).toBe(413);
+      const data = await res.json() as { success: boolean; code: string };
+      expect(data.success).toBe(false);
+      expect(data.code).toBe('PAYLOAD_TOO_LARGE');
+    });
+
+    it('should accept body within default size limit', async () => {
+      const app = new Hono();
+      const schema = z.object({ data: z.string() });
+      
+      app.use('*', validateBody(schema));
+      app.post('/test', (c) => c.json({ success: true }));
+      
+      const normalData = 'x'.repeat(1024);
+      const res = await app.request('/test', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ data: normalData }),
+      });
+      
+      expect(res.status).toBe(200);
+    });
+
+    it('should reject body exceeding custom size limit', async () => {
+      const app = new Hono();
+      const schema = z.object({ data: z.string() });
+      
+      app.use('*', validateBody(schema, { maxSize: 100 }));
+      app.post('/test', (c) => c.json({ success: true }));
+      
+      const res = await app.request('/test', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ data: 'x'.repeat(200) }),
+      });
+      
+      expect(res.status).toBe(413);
+      const data = await res.json() as { success: boolean; code: string };
+      expect(data.code).toBe('PAYLOAD_TOO_LARGE');
+    });
+
+    it('should reject based on Content-Length header when present', async () => {
+      const app = new Hono();
+      const schema = z.object({ data: z.string() });
+      
+      app.use('*', validateBody(schema, { maxSize: 100 }));
+      app.post('/test', (c) => c.json({ success: true }));
+      
+      const res = await app.request('/test', {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Content-Length': '200',
+        },
+        body: JSON.stringify({ data: 'test' }),
+      });
+      
+      expect(res.status).toBe(413);
+    });
+
+    it('should accept body within custom size limit', async () => {
+      const app = new Hono();
+      const schema = z.object({ data: z.string() });
+      
+      app.use('*', validateBody(schema, { maxSize: 1000 }));
+      app.post('/test', (c) => c.json({ success: true }));
+      
+      const res = await app.request('/test', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ data: 'test' }),
+      });
+      
+      expect(res.status).toBe(200);
+    });
+  });
+
   describe('Type exports', () => {
     it('should export ValidatedBody type', () => {
       type Test = ValidatedBody<{ name: string }>;

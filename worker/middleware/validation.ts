@@ -3,10 +3,50 @@ import type { ZodSchema, ZodError } from 'zod';
 import { bad } from '../api/response-helpers';
 import { logger } from '../logger';
 
-export function validateBody<T>(schema: ZodSchema<T>) {
+const DEFAULT_MAX_BODY_SIZE = 1024 * 1024;
+
+interface ValidateBodyOptions {
+  maxSize?: number;
+}
+
+export function validateBody<T>(schema: ZodSchema<T>, options?: ValidateBodyOptions) {
+  const maxSize = options?.maxSize ?? DEFAULT_MAX_BODY_SIZE;
+  
   return async (c: Context, next: Next) => {
     try {
+      const contentLength = c.req.header('Content-Length');
+      if (contentLength) {
+        const length = parseInt(contentLength, 10);
+        if (length > maxSize) {
+          logger.warn('[VALIDATION] Request body too large', {
+            path: c.req.path,
+            method: c.req.method,
+            contentLength: length,
+            maxSize,
+          });
+          return c.json(
+            { success: false, code: 'PAYLOAD_TOO_LARGE', message: 'Request body too large' },
+            413
+          );
+        }
+      }
+      
       const body = await c.req.json();
+      const bodySize = JSON.stringify(body).length;
+      
+      if (bodySize > maxSize) {
+        logger.warn('[VALIDATION] Request body size exceeded limit', {
+          path: c.req.path,
+          method: c.req.method,
+          bodySize,
+          maxSize,
+        });
+        return c.json(
+          { success: false, code: 'PAYLOAD_TOO_LARGE', message: 'Request body too large' },
+          413
+        );
+      }
+      
       const result = schema.safeParse(body);
 
       if (!result.success) {
