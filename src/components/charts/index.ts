@@ -1,6 +1,7 @@
 export { BarChart, type BarChartProps } from './BarChart';
 export { LineChart, type LineChartProps, type LineSeries } from './LineChart';
 export { PieChart, type PieChartProps } from './PieChart';
+export { RadarChart, type RadarChartProps } from './RadarChart';
 export { BaseChart } from './BaseChart';
 export { ChartSkeleton } from './ChartSkeleton';
 export { useChartData, useChartComponents } from './chart-hooks';
