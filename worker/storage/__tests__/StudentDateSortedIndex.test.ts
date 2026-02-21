@@ -203,4 +203,70 @@ describe('StudentDateSortedIndex', () => {
       expect(mockStub.del).not.toHaveBeenCalled();
     });
   });
+
+  describe('addBatch', () => {
+    it('should add multiple grade IDs in parallel', async () => {
+      mockStub.casPut.mockResolvedValue({ ok: true, v: 1 });
+      const index = new StudentDateSortedIndex(mockEnv, 'grade', 'student-123');
+      const items = [
+        { date: '2026-01-07T12:00:00.000Z', entityId: 'grade-1' },
+        { date: '2026-01-07T13:00:00.000Z', entityId: 'grade-2' },
+        { date: '2026-01-07T14:00:00.000Z', entityId: 'grade-3' },
+      ];
+
+      await index.addBatch(items);
+
+      expect(mockStub.casPut).toHaveBeenCalledTimes(3);
+    });
+
+    it('should handle empty array', async () => {
+      const index = new StudentDateSortedIndex(mockEnv, 'grade', 'student-123');
+
+      await index.addBatch([]);
+
+      expect(mockStub.casPut).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('removeBatch', () => {
+    it('should remove multiple grade IDs in parallel', async () => {
+      mockStub.del.mockResolvedValue(true);
+      const index = new StudentDateSortedIndex(mockEnv, 'grade', 'student-123');
+      const items = [
+        { date: '2026-01-07T12:00:00.000Z', entityId: 'grade-1' },
+        { date: '2026-01-07T13:00:00.000Z', entityId: 'grade-2' },
+      ];
+
+      const result = await index.removeBatch(items);
+
+      expect(result).toBe(2);
+      expect(mockStub.del).toHaveBeenCalledTimes(2);
+    });
+
+    it('should handle empty array', async () => {
+      const index = new StudentDateSortedIndex(mockEnv, 'grade', 'student-123');
+
+      const result = await index.removeBatch([]);
+
+      expect(result).toBe(0);
+      expect(mockStub.del).not.toHaveBeenCalled();
+    });
+
+    it('should return count of successfully removed entries', async () => {
+      mockStub.del
+        .mockResolvedValueOnce(true)
+        .mockResolvedValueOnce(false)
+        .mockResolvedValueOnce(true);
+      const index = new StudentDateSortedIndex(mockEnv, 'grade', 'student-123');
+      const items = [
+        { date: '2026-01-07T12:00:00.000Z', entityId: 'grade-1' },
+        { date: '2026-01-07T13:00:00.000Z', entityId: 'grade-2' },
+        { date: '2026-01-07T14:00:00.000Z', entityId: 'grade-3' },
+      ];
+
+      const result = await index.removeBatch(items);
+
+      expect(result).toBe(2);
+    });
+  });
 });

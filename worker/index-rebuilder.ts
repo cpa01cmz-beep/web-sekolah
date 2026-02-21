@@ -28,13 +28,16 @@ async function rebuildUserIndexes(env: Env): Promise<void> {
   await emailIndex.clear();
   
   const { items: users } = await UserEntity.list(env);
-  for (const user of users) {
-    if (user.deletedAt) continue;
-    await roleIndex.add(user.role, user.id);
-    if (isStudent(user)) {
-      await classIdIndex.add(user.classId, user.id);
-    }
-    await emailIndex.add(user.email, user.id);
+  const validUsers = users.filter(u => !u.deletedAt);
+  
+  await roleIndex.addBatch(validUsers.map(u => ({ fieldValue: u.role, entityId: u.id })));
+  await emailIndex.addBatch(validUsers.map(u => ({ fieldValue: u.email, entityId: u.id })));
+  
+  const classIdItems = validUsers
+    .filter(u => isStudent(u))
+    .map(u => ({ fieldValue: u.classId, entityId: u.id }));
+  if (classIdItems.length > 0) {
+    await classIdIndex.addBatch(classIdItems);
   }
 }
 
@@ -44,10 +47,8 @@ async function rebuildClassIndexes(env: Env): Promise<void> {
   await teacherIdIndex.clear();
   
   const { items: classes } = await ClassEntity.list(env);
-  for (const cls of classes) {
-    if (cls.deletedAt) continue;
-    await teacherIdIndex.add(cls.teacherId, cls.id);
-  }
+  const validClasses = classes.filter(c => !c.deletedAt);
+  await teacherIdIndex.addBatch(validClasses.map(c => ({ fieldValue: c.teacherId, entityId: c.id })));
 }
 
 async function rebuildCourseIndexes(env: Env): Promise<void> {
@@ -56,10 +57,8 @@ async function rebuildCourseIndexes(env: Env): Promise<void> {
   await teacherIdIndex.clear();
   
   const { items: courses } = await CourseEntity.list(env);
-  for (const course of courses) {
-    if (course.deletedAt) continue;
-    await teacherIdIndex.add(course.teacherId, course.id);
-  }
+  const validCourses = courses.filter(c => !c.deletedAt);
+  await teacherIdIndex.addBatch(validCourses.map(c => ({ fieldValue: c.teacherId, entityId: c.id })));
 }
 
 async function rebuildGradeIndexes(env: Env): Promise<void> {
@@ -72,28 +71,26 @@ async function rebuildGradeIndexes(env: Env): Promise<void> {
   await compoundIndex.clear();
 
   const { items: grades } = await GradeEntity.list(env);
-  for (const grade of grades) {
-    if (grade.deletedAt) continue;
-    await studentIdIndex.add(grade.studentId, grade.id);
-    await courseIdIndex.add(grade.courseId, grade.id);
-    await compoundIndex.add([grade.studentId, grade.courseId], grade.id);
-  }
+  const validGrades = grades.filter(g => !g.deletedAt);
+  
+  await studentIdIndex.addBatch(validGrades.map(g => ({ fieldValue: g.studentId, entityId: g.id })));
+  await courseIdIndex.addBatch(validGrades.map(g => ({ fieldValue: g.courseId, entityId: g.id })));
+  await compoundIndex.addBatch(validGrades.map(g => ({ fieldValues: [g.studentId, g.courseId], entityId: g.id })));
 
   const gradesByStudent = new Map<string, typeof grades>();
-  for (const grade of grades) {
-    if (grade.deletedAt) continue;
+  for (const grade of validGrades) {
     const studentGrades = gradesByStudent.get(grade.studentId) || [];
     studentGrades.push(grade);
     gradesByStudent.set(grade.studentId, studentGrades);
   }
 
-  for (const [studentId, studentGrades] of gradesByStudent) {
-    const studentDateIndex = new StudentDateSortedIndex(env, GradeEntity.entityName, studentId);
-    await studentDateIndex.clear();
-    for (const grade of studentGrades) {
-      await studentDateIndex.add(grade.createdAt, grade.id);
-    }
-  }
+  await Promise.all(
+    Array.from(gradesByStudent.entries()).map(async ([studentId, studentGrades]) => {
+      const studentDateIndex = new StudentDateSortedIndex(env, GradeEntity.entityName, studentId);
+      await studentDateIndex.clear();
+      await studentDateIndex.addBatch(studentGrades.map(g => ({ date: g.createdAt, entityId: g.id })));
+    })
+  );
 }
 
 async function rebuildAnnouncementIndexes(env: Env): Promise<void> {
@@ -106,12 +103,11 @@ async function rebuildAnnouncementIndexes(env: Env): Promise<void> {
   await dateIndex.clear();
 
   const { items: announcements } = await AnnouncementEntity.list(env);
-  for (const announcement of announcements) {
-    if (announcement.deletedAt) continue;
-    await authorIdIndex.add(announcement.authorId, announcement.id);
-    await targetRoleIndex.add(announcement.targetRole, announcement.id);
-    await dateIndex.add(announcement.date, announcement.id);
-  }
+  const validAnnouncements = announcements.filter(a => !a.deletedAt);
+  
+  await authorIdIndex.addBatch(validAnnouncements.map(a => ({ fieldValue: a.authorId, entityId: a.id })));
+  await targetRoleIndex.addBatch(validAnnouncements.map(a => ({ fieldValue: a.targetRole, entityId: a.id })));
+  await dateIndex.addBatch(validAnnouncements.map(a => ({ date: a.date, entityId: a.id })));
 }
 
 async function rebuildWebhookConfigIndexes(env: Env): Promise<void> {
@@ -120,10 +116,8 @@ async function rebuildWebhookConfigIndexes(env: Env): Promise<void> {
   await activeIndex.clear();
 
   const { items: configs } = await WebhookConfigEntity.list(env);
-  for (const config of configs) {
-    if (config.deletedAt) continue;
-    await activeIndex.add(config.active.toString(), config.id);
-  }
+  const validConfigs = configs.filter(c => !c.deletedAt);
+  await activeIndex.addBatch(validConfigs.map(c => ({ fieldValue: c.active.toString(), entityId: c.id })));
 }
 
 async function rebuildWebhookEventIndexes(env: Env): Promise<void> {
@@ -134,11 +128,10 @@ async function rebuildWebhookEventIndexes(env: Env): Promise<void> {
   await eventTypeIndex.clear();
 
   const { items: events } = await WebhookEventEntity.list(env);
-  for (const event of events) {
-    if (event.deletedAt) continue;
-    await processedIndex.add(event.processed.toString(), event.id);
-    await eventTypeIndex.add(event.eventType, event.id);
-  }
+  const validEvents = events.filter(e => !e.deletedAt);
+  
+  await processedIndex.addBatch(validEvents.map(e => ({ fieldValue: e.processed.toString(), entityId: e.id })));
+  await eventTypeIndex.addBatch(validEvents.map(e => ({ fieldValue: e.eventType, entityId: e.id })));
 }
 
 async function rebuildWebhookDeliveryIndexes(env: Env): Promise<void> {
@@ -155,16 +148,20 @@ async function rebuildWebhookDeliveryIndexes(env: Env): Promise<void> {
   await dateIndex.clear();
 
   const { items: deliveries } = await WebhookDeliveryEntity.list(env);
-  for (const delivery of deliveries) {
-    if (delivery.deletedAt) continue;
-    await statusIndex.add(delivery.status, delivery.id);
-    await eventIdIndex.add(delivery.eventId, delivery.id);
-    await webhookConfigIdIndex.add(delivery.webhookConfigId, delivery.id);
-    if (delivery.idempotencyKey) {
-      await idempotencyKeyIndex.add(delivery.idempotencyKey, delivery.id);
-    }
-    await dateIndex.add(delivery.createdAt, delivery.id);
+  const validDeliveries = deliveries.filter(d => !d.deletedAt);
+  
+  await statusIndex.addBatch(validDeliveries.map(d => ({ fieldValue: d.status, entityId: d.id })));
+  await eventIdIndex.addBatch(validDeliveries.map(d => ({ fieldValue: d.eventId, entityId: d.id })));
+  await webhookConfigIdIndex.addBatch(validDeliveries.map(d => ({ fieldValue: d.webhookConfigId, entityId: d.id })));
+  
+  const idempotencyItems = validDeliveries
+    .filter(d => d.idempotencyKey)
+    .map(d => ({ fieldValue: d.idempotencyKey!, entityId: d.id }));
+  if (idempotencyItems.length > 0) {
+    await idempotencyKeyIndex.addBatch(idempotencyItems);
   }
+  
+  await dateIndex.addBatch(validDeliveries.map(d => ({ date: d.createdAt, entityId: d.id })));
 }
 
 async function rebuildDeadLetterQueueIndexes(env: Env): Promise<void> {
@@ -175,11 +172,10 @@ async function rebuildDeadLetterQueueIndexes(env: Env): Promise<void> {
   await eventTypeIndex.clear();
 
   const { items: dlqItems } = await DeadLetterQueueWebhookEntity.list(env);
-  for (const item of dlqItems) {
-    if (item.deletedAt) continue;
-    await webhookConfigIdIndex.add(item.webhookConfigId, item.id);
-    await eventTypeIndex.add(item.eventType, item.id);
-  }
+  const validItems = dlqItems.filter(i => !i.deletedAt);
+  
+  await webhookConfigIdIndex.addBatch(validItems.map(i => ({ fieldValue: i.webhookConfigId, entityId: i.id })));
+  await eventTypeIndex.addBatch(validItems.map(i => ({ fieldValue: i.eventType, entityId: i.id })));
 }
 
 async function rebuildMessageIndexes(env: Env): Promise<void> {
@@ -194,19 +190,24 @@ async function rebuildMessageIndexes(env: Env): Promise<void> {
   await recipientIsReadCompoundIndex.clear();
 
   const { items: messages } = await MessageEntity.list(env, undefined, undefined, true);
+  const validMessages = messages.filter(m => !m.deletedAt);
   
-  const messagesBySender = new Map<string, typeof messages>();
-  const messagesByRecipient = new Map<string, typeof messages>();
+  await senderIdIndex.addBatch(validMessages.map(m => ({ fieldValue: m.senderId, entityId: m.id })));
+  await recipientIdIndex.addBatch(validMessages.map(m => ({ fieldValue: m.recipientId, entityId: m.id })));
   
-  for (const message of messages) {
-    if (message.deletedAt) continue;
-    await senderIdIndex.add(message.senderId, message.id);
-    await recipientIdIndex.add(message.recipientId, message.id);
-    if (message.parentMessageId) {
-      await parentMessageIdIndex.add(message.parentMessageId, message.id);
-    }
-    await recipientIsReadCompoundIndex.add([message.recipientId, message.isRead.toString()], message.id);
-    
+  const parentMessageItems = validMessages
+    .filter(m => m.parentMessageId)
+    .map(m => ({ fieldValue: m.parentMessageId!, entityId: m.id }));
+  if (parentMessageItems.length > 0) {
+    await parentMessageIdIndex.addBatch(parentMessageItems);
+  }
+  
+  await recipientIsReadCompoundIndex.addBatch(validMessages.map(m => ({ fieldValues: [m.recipientId, m.isRead.toString()], entityId: m.id })));
+  
+  const messagesBySender = new Map<string, typeof validMessages>();
+  const messagesByRecipient = new Map<string, typeof validMessages>();
+  
+  for (const message of validMessages) {
     const senderMessages = messagesBySender.get(message.senderId) || [];
     senderMessages.push(message);
     messagesBySender.set(message.senderId, senderMessages);
@@ -216,19 +217,16 @@ async function rebuildMessageIndexes(env: Env): Promise<void> {
     messagesByRecipient.set(message.recipientId, recipientMessages);
   }
 
-  for (const [senderId, senderMessages] of messagesBySender) {
-    const sentDateIndex = new UserDateSortedIndex(env, MessageEntity.entityName, senderId, 'sent');
-    await sentDateIndex.clear();
-    for (const message of senderMessages) {
-      await sentDateIndex.add(message.createdAt, message.id);
-    }
-  }
-
-  for (const [recipientId, recipientMessages] of messagesByRecipient) {
-    const receivedDateIndex = new UserDateSortedIndex(env, MessageEntity.entityName, recipientId, 'received');
-    await receivedDateIndex.clear();
-    for (const message of recipientMessages) {
-      await receivedDateIndex.add(message.createdAt, message.id);
-    }
-  }
+  await Promise.all([
+    ...Array.from(messagesBySender.entries()).map(async ([senderId, senderMessages]) => {
+      const sentDateIndex = new UserDateSortedIndex(env, MessageEntity.entityName, senderId, 'sent');
+      await sentDateIndex.clear();
+      await sentDateIndex.addBatch(senderMessages.map(m => ({ date: m.createdAt, entityId: m.id })));
+    }),
+    ...Array.from(messagesByRecipient.entries()).map(async ([recipientId, recipientMessages]) => {
+      const receivedDateIndex = new UserDateSortedIndex(env, MessageEntity.entityName, recipientId, 'received');
+      await receivedDateIndex.clear();
+      await receivedDateIndex.addBatch(recipientMessages.map(m => ({ date: m.createdAt, entityId: m.id })));
+    })
+  ]);
 }
