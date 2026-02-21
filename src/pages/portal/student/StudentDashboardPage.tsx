@@ -1,15 +1,14 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { PageHeader } from '@/components/PageHeader';
 import { SlideUp } from '@/components/animations';
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
 import { AnnouncementItem } from '@/components/dashboard/AnnouncementItem';
+import { GradeListItem } from '@/components/dashboard/GradeListItem';
 import { useReducedMotion } from '@/hooks/use-reduced-motion';
 import { Clock, BookOpen, Megaphone } from 'lucide-react';
 import { useStudentDashboard } from '@/hooks/useStudent';
 import { useAuthStore } from '@/lib/authStore';
 import type { StudentDashboardData } from '@shared/types';
-import { getGradeColorClass, getGradeLetter } from '@/utils/grades';
 import { memo } from 'react';
 
 const ScheduleItem = memo(({ item }: { item: StudentDashboardData['schedule'][0] }) => (
@@ -22,20 +21,6 @@ const ScheduleItem = memo(({ item }: { item: StudentDashboardData['schedule'][0]
   </li>
 ));
 ScheduleItem.displayName = 'ScheduleItem';
-
-const GradeItem = memo(({ grade }: { grade: StudentDashboardData['recentGrades'][0] }) => {
-  const isPassing = grade.score >= 70;
-  return (
-    <li className="flex items-center justify-between">
-      <p className="text-sm font-medium">{grade.courseName}</p>
-      <Badge className={`text-white ${getGradeColorClass(grade.score)}`}>
-        <span className="sr-only">{isPassing ? 'Passing grade: ' : 'Failing grade: '}</span>
-        {getGradeLetter(grade.score)} ({grade.score})
-      </Badge>
-    </li>
-  );
-});
-GradeItem.displayName = 'GradeItem';
 
 export function StudentDashboardPage() {
   const prefersReducedMotion = useReducedMotion();
@@ -85,7 +70,7 @@ export function StudentDashboardPage() {
                     ) : (
                       <ul className="space-y-3" aria-labelledby="grades-heading" aria-label={`${data.recentGrades.length} recent grades`}>
                         {data.recentGrades.map((grade) => (
-                          <GradeItem key={grade.id} grade={grade} />
+                          <GradeListItem key={grade.id} courseName={grade.courseName} score={grade.score} />
                         ))}
                       </ul>
                     )}

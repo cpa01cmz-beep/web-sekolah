@@ -1,30 +1,15 @@
 import { memo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { PageHeader } from '@/components/PageHeader';
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
 import { AnnouncementItem } from '@/components/dashboard/AnnouncementItem';
+import { GradeListItem } from '@/components/dashboard/GradeListItem';
 import { Award, CalendarCheck, Megaphone } from 'lucide-react';
 import { SlideUp } from '@/components/animations';
 import { useReducedMotion } from '@/hooks/use-reduced-motion';
 import { useParentDashboard } from '@/hooks/useParent';
 import { useAuthStore } from '@/lib/authStore';
-import { getGradeColorClass, getGradeLetter } from '@/utils/grades';
 import type { ParentDashboardData } from '@shared/types';
-
-const GradeItem = memo(({ grade }: { grade: ParentDashboardData['childGrades'][0] }) => {
-  const isPassing = grade.score >= 70;
-  return (
-    <li className="flex items-center justify-between">
-      <p className="text-sm font-medium">{grade.courseName}</p>
-      <Badge className={`text-white ${getGradeColorClass(grade.score)}`}>
-        <span className="sr-only">{isPassing ? 'Passing grade: ' : 'Failing grade: '}</span>
-        {getGradeLetter(grade.score)} ({grade.score})
-      </Badge>
-    </li>
-  );
-});
-GradeItem.displayName = 'GradeItem';
 
 const ScheduleItem = memo(({ item }: { item: ParentDashboardData['childSchedule'][0] }) => (
   <li className="text-sm">
@@ -66,7 +51,7 @@ export function ParentDashboardPage() {
                     ) : (
                       <ul className="space-y-3" aria-labelledby="grades-heading" aria-label={`${data.childGrades.length} recent grades`}>
                         {data.childGrades.map((grade) => (
-                          <GradeItem key={grade.id} grade={grade} />
+                          <GradeListItem key={grade.id} courseName={grade.courseName} score={grade.score} />
                         ))}
                       </ul>
                     )}
