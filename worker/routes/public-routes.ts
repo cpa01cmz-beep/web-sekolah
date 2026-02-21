@@ -49,7 +49,7 @@ export function publicRoutes(app: Hono<{ Bindings: Env }>) {
   app.get('/api/public/news', validateQuery(newsLimitQuerySchema), withErrorHandler('get news')(async (c: Context) => {
     const validatedQuery = c.get('validatedQuery') as { limit?: number } | undefined;
     const limit = validatedQuery?.limit ?? PaginationDefaults.DEFAULT_NEWS_LIMIT;
-    const { items } = await NewsEntity.list(c.env, undefined, limit);
+    const items = await NewsEntity.getRecent(c.env, limit);
     return ok(c, items);
   }));
 
