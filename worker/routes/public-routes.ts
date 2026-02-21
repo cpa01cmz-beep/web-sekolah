@@ -17,6 +17,8 @@ import {
   ensurePublicContentSeeds 
 } from '../entities/PublicContentEntity';
 
+import { PaginationDefaults } from '../config';
+
 export function publicRoutes(app: Hono<{ Bindings: Env }>) {
   app.get('/api/public/profile', withErrorHandler('get school profile')(async (c: Context) => {
     const profile = await SchoolProfileEntity.getProfile(c.env);
@@ -44,7 +46,7 @@ export function publicRoutes(app: Hono<{ Bindings: Env }>) {
 
   app.get('/api/public/news', withErrorHandler('get news')(async (c: Context) => {
     const limitParam = c.req.query('limit');
-    const limit = limitParam ? parseInt(limitParam, 10) : 10;
+    const limit = limitParam ? parseInt(limitParam, 10) : PaginationDefaults.DEFAULT_NEWS_LIMIT;
     const { items } = await NewsEntity.list(c.env, undefined, limit);
     return ok(c, items);
   }));
