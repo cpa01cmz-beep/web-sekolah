@@ -27323,7 +27323,7 @@ Added to .env.example:
 SCHOOL_NAME=SMA Negeri 1 Jakarta
 
 # Academic Year
-ACADEMIC_YEAR=2025-2026
+ACADEMIC_YEAR=2026-2027
 
 # Semester
 SEMESTER=1
@@ -27360,7 +27360,7 @@ MAINTENANCE_MODE=false
 
 **Environment Variables Added**:
 - SCHOOL_NAME: School name displayed throughout application (default: SMA Negeri 1 Jakarta)
-- ACADEMIC_YEAR: Current academic year format YYYY-YYYY (default: 2025-2026)
+- ACADEMIC_YEAR: Current academic year format YYYY-YYYY (default: 2026-2027)
 - SEMESTER: Current semester 1 or 2 (default: 1)
 - ALLOW_REGISTRATION: Allow new user registration (default: true)
 - MAINTENANCE_MODE: Enable maintenance mode (default: false)
