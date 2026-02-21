@@ -1,4 +1,5 @@
 import { memo } from 'react';
+import { Button } from '@/components/ui/button';
 
 interface DownloadCardProps {
   title: string;
@@ -29,14 +30,14 @@ export const DownloadCard = memo(function DownloadCard({
   if (variant === 'vertical') {
     return (
       <div className={`bg-card rounded-lg shadow-sm p-6 ${className}`}>
-        <div className={`w-12 h-12 rounded-lg flex items-center justify-center mb-4 ${iconColorClasses[iconColor]}`}>
+        <div className={`w-12 h-12 rounded-lg flex items-center justify-center mb-4 ${iconColorClasses[iconColor]}`} aria-hidden="true">
           <span className="font-bold">{fileFormat}</span>
         </div>
         <h3 className="font-bold mb-2">{title}</h3>
         {description && <p className="text-sm text-muted-foreground mb-4">{description}</p>}
-        <button className="w-full px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm hover:bg-primary/90 transition-colors">
+        <Button className="w-full" aria-label={`Download ${title} (${fileFormat}, ${fileSize})`}>
           Download
-        </button>
+        </Button>
       </div>
     );
   }
@@ -47,9 +48,9 @@ export const DownloadCard = memo(function DownloadCard({
         <h3 className="font-bold">{title}</h3>
         <p className="text-sm text-muted-foreground mt-1">{fileFormat}, {fileSize}</p>
       </div>
-      <button className="px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm hover:bg-primary/90 transition-colors">
+      <Button aria-label={`Download ${title} (${fileFormat}, ${fileSize})`}>
         Download
-      </button>
+      </Button>
     </div>
   );
 });

@@ -55,9 +55,11 @@ export const ContentCard = memo(function ContentCard({
         {author && (
           <div className="mt-4 flex items-center">
             {authorAvatar ? (
-              <img src={authorAvatar} alt={author} className="w-8 h-8 rounded-full" />
+              <img src={authorAvatar} alt={`${author}'s avatar`} className="w-8 h-8 rounded-full" />
             ) : (
-              <div className="w-8 h-8 rounded-full bg-gray-300"></div>
+              <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center" aria-hidden="true">
+                <span className="text-xs font-medium text-muted-foreground">{author.charAt(0).toUpperCase()}</span>
+              </div>
             )}
             <span className="ml-2 text-sm">{author}</span>
           </div>
