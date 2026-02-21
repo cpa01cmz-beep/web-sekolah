@@ -11,7 +11,8 @@ import { createWebhookConfigSchema, updateWebhookConfigSchema, paramsSchema } fr
 export function webhookConfigRoutes(app: Hono<{ Bindings: Env }>) {
   app.get('/api/webhooks', withErrorHandler('list webhooks')(async (c: Context) => {
     const configs = await WebhookConfigEntity.list(c.env);
-    return ok(c, configs.items);
+    const itemsWithoutSecrets = configs.items.map(({ secret: _, ...rest }) => rest);
+    return ok(c, itemsWithoutSecrets);
   }));
 
   app.get('/api/webhooks/:id', withErrorHandler('get webhook')(async (c: Context) => {
@@ -22,7 +23,8 @@ export function webhookConfigRoutes(app: Hono<{ Bindings: Env }>) {
       return notFound(c, 'Webhook configuration not found');
     }
 
-    return ok(c, config);
+    const { secret: _, ...configWithoutSecret } = config;
+    return ok(c, configWithoutSecret);
   }));
 
   app.post('/api/webhooks', validateBody(createWebhookConfigSchema), withErrorHandler('create webhook')(async (c: Context) => {
@@ -45,7 +47,8 @@ export function webhookConfigRoutes(app: Hono<{ Bindings: Env }>) {
 
     logger.info('Webhook configuration created', { id, url: body.url, events: body.events });
 
-    return ok(c, config);
+    const { secret: _, ...configWithoutSecret } = config;
+    return ok(c, configWithoutSecret);
   }));
 
    app.put('/api/webhooks/:id', validateBody(updateWebhookConfigSchema), withErrorHandler('update webhook')(async (c: Context) => {
@@ -67,12 +70,13 @@ export function webhookConfigRoutes(app: Hono<{ Bindings: Env }>) {
        updatedAt: new Date().toISOString()
      };
 
-     const entity = new WebhookConfigEntity(c.env, id);
-     await entity.patch(updated);
+      const entity = new WebhookConfigEntity(c.env, id);
+      await entity.patch(updated);
 
-     logger.info('Webhook configuration updated', { id });
+      logger.info('Webhook configuration updated', { id });
 
-     return ok(c, updated);
+      const { secret: _, ...updatedWithoutSecret } = updated;
+      return ok(c, updatedWithoutSecret);
    }));
 
    app.delete('/api/webhooks/:id', validateParams(paramsSchema), withErrorHandler('delete webhook')(async (c: Context) => {
