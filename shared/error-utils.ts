@@ -1,17 +1,5 @@
 import { ErrorCode } from './types';
 
-/**
- * Maps HTTP status codes to standardized error codes.
- * Ensures consistent error code usage across frontend and backend.
- *
- * @param status - HTTP status code
- * @returns Standardized error code from ErrorCode enum
- *
- * @example
- * mapStatusToErrorCode(401) // Returns 'UNAUTHORIZED'
- * mapStatusToErrorCode(503) // Returns 'SERVICE_UNAVAILABLE'
- * mapStatusToErrorCode(999) // Returns 'NETWORK_ERROR' (unknown status)
- */
 export function mapStatusToErrorCode(status: number): string {
   switch (status) {
     case 400:

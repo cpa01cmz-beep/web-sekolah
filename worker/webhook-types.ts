@@ -33,15 +33,6 @@ export type WebhookEventPayload =
   | MessageCreatedPayload
   | MessageReadPayload;
 
-/**
- * Converts a typed webhook payload to Record<string, unknown> for storage.
- * 
- * This conversion is necessary because WebhookEvent.data is typed as Record<string, unknown>
- * for JSON serialization compatibility, but strongly-typed payloads don't have index signatures.
- * 
- * @param payload - The strongly-typed webhook payload
- * @returns The payload as Record<string, unknown> for storage
- */
 export function toWebhookPayload<T extends WebhookEventPayload>(payload: T): Record<string, unknown> {
   return payload as unknown as Record<string, unknown>;
 }
