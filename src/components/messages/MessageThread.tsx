@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { memo, useEffect } from 'react';
 import { EmptyState } from '@/components/ui/empty-state';
 import { MessageSquare } from 'lucide-react';
 import { formatDistanceToNow } from '@/utils/date';
@@ -10,7 +10,7 @@ interface MessageThreadProps {
   onMarkAsRead: (messageId: string) => void;
 }
 
-export function MessageThread({ messages, currentUserId, onMarkAsRead }: MessageThreadProps) {
+function MessageThreadInner({ messages, currentUserId, onMarkAsRead }: MessageThreadProps) {
   useEffect(() => {
     messages.forEach(msg => {
       if (!msg.isRead && msg.recipientId === currentUserId) {
@@ -57,3 +57,6 @@ export function MessageThread({ messages, currentUserId, onMarkAsRead }: Message
     </div>
   );
 }
+
+export const MessageThread = memo(MessageThreadInner);
+MessageThread.displayName = 'MessageThread';
