@@ -1,7 +1,7 @@
 "$schema" = "./node_modules/wrangler/config-schema.json"
 name = "website-sekolah"
 main = "worker/index.ts"
-compatibility_date = "2026-02-18"
+compatibility_date = "2026-02-20"
 compatibility_flags = ["nodejs_compat"]
 
 [assets]
@@ -17,7 +17,8 @@ head_sampling_rate = 0.1
 crons = ["* * * * *"]
 
 [limits]
-cpu_ms = 50
+cpu_ms = 30000
+subrequests = 50
 
 [placement]
 mode = "smart"
@@ -39,7 +40,8 @@ vars = { ENVIRONMENT = "staging" }
 crons = ["* * * * *"]
 
 [env.staging.limits]
-cpu_ms = 50
+cpu_ms = 30000
+subrequests = 50
 
 [env.staging.placement]
 mode = "smart"
@@ -68,7 +70,8 @@ logpush = true
 crons = ["* * * * *"]
 
 [env.production.limits]
-cpu_ms = 50
+cpu_ms = 30000
+subrequests = 50
 
 [env.production.placement]
 mode = "smart"
