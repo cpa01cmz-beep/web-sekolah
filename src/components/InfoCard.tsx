@@ -22,7 +22,7 @@ export const InfoCard = memo(function InfoCard({ icon: Icon, iconElement, title,
           </div>
         )}
         {iconElement && (
-          <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+          <div className={cn('w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4', iconClassName)}>
             {iconElement}
           </div>
         )}

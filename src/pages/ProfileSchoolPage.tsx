@@ -1,12 +1,14 @@
 import { SiteHeader } from '@/components/SiteHeader';
 import { SiteFooter } from '@/components/SiteFooter';
+import { SkipLink } from '@/components/SkipLink';
 import { SlideUp, SlideLeft, FadeIn } from '@/components/animations';
 
 export function ProfileSchoolPage() {
   return (
     <div className="flex flex-col min-h-screen bg-background">
+      <SkipLink targetId="main-content" />
       <SiteHeader />
-      <main className="flex-grow">
+      <main id="main-content" className="flex-grow">
         <div className="bg-primary/5">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24 text-center">
             <SlideUp>
@@ -41,7 +43,7 @@ export function ProfileSchoolPage() {
 
           <div className="mt-24 grid md:grid-cols-3 gap-8">
             <SlideUp>
-              <div className="bg-card rounded-lg shadow-md p-6 text-center">
+              <div className="bg-card rounded-lg shadow-md p-6 text-center hover:shadow-lg transition-shadow">
                 <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
                   <span className="text-2xl font-bold text-blue-600">1000+</span>
                 </div>
@@ -51,7 +53,7 @@ export function ProfileSchoolPage() {
             </SlideUp>
 
             <SlideUp delay={0.1}>
-              <div className="bg-card rounded-lg shadow-md p-6 text-center">
+              <div className="bg-card rounded-lg shadow-md p-6 text-center hover:shadow-lg transition-shadow">
                 <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
                   <span className="text-2xl font-bold text-green-600">50+</span>
                 </div>
@@ -61,7 +63,7 @@ export function ProfileSchoolPage() {
             </SlideUp>
 
             <SlideUp delay={0.2}>
-              <div className="bg-card rounded-lg shadow-md p-6 text-center">
+              <div className="bg-card rounded-lg shadow-md p-6 text-center hover:shadow-lg transition-shadow">
                 <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
                   <span className="text-2xl font-bold text-purple-600">20+</span>
                 </div>
