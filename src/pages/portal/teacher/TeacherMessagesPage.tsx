@@ -109,7 +109,7 @@ export function TeacherMessagesPage() {
   if (messagesError) {
     return (
       <Alert variant="destructive">
-        <AlertTriangle className="h-4 w-4" />
+        <AlertTriangle className="h-4 w-4" aria-hidden="true" />
         <AlertTitle>Error</AlertTitle>
         <AlertDescription>Failed to load messages. Please try again later.</AlertDescription>
       </Alert>

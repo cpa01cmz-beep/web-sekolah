@@ -4,6 +4,7 @@ import { PageHeader } from '@/components/PageHeader';
 import { DashboardStatCard } from '@/components/dashboard/DashboardStatCard';
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
 import { AnnouncementItem } from '@/components/dashboard/AnnouncementItem';
+import { DashboardCardEmptyState } from '@/components/dashboard/DashboardCardEmptyState';
 import { BookCopy, Megaphone, Award } from 'lucide-react';
 import { SlideUp } from '@/components/animations';
 import { useReducedMotion } from '@/hooks/use-reduced-motion';
@@ -54,7 +55,7 @@ export function TeacherDashboardPage() {
                 </CardHeader>
                 <CardContent>
                   {data.recentGrades.length === 0 ? (
-                    <p className="text-sm text-muted-foreground text-center py-4" role="status">No recent grades recorded.</p>
+                    <DashboardCardEmptyState message="No recent grades recorded." />
                   ) : (
                     <ul className="space-y-2" aria-labelledby="grades-heading" aria-label={`${data.recentGrades.length} recent grades`}>
                       {data.recentGrades.map((grade) => (
@@ -73,7 +74,7 @@ export function TeacherDashboardPage() {
                 </CardHeader>
                 <CardContent>
                   {data.recentAnnouncements.length === 0 ? (
-                    <p className="text-sm text-muted-foreground text-center py-4" role="status">No announcements available.</p>
+                    <DashboardCardEmptyState message="No announcements available." />
                   ) : (
                     <ul className="space-y-2" aria-labelledby="announcements-heading" aria-label={`${data.recentAnnouncements.length} announcements`}>
                       {data.recentAnnouncements.map((ann) => (
