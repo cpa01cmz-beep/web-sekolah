@@ -36,6 +36,10 @@ export const RetryDelay = {
   ONE_MINUTE_MS: 1000 * 60,
 } as const;
 
+export const ScheduledTaskConfig = {
+  DEFAULT_TIMEOUT_MS: TimeConstants.FIVE_MINUTES_MS,
+} as const;
+
 export const HttpStatusCode = {
   CONTINUE: 100,
   SWITCHING_PROTOCOLS: 101,
