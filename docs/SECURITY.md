@@ -235,7 +235,7 @@ cspDirectives: `default-src 'self'; script-src 'self' 'nonce-${nonce}'; style-sr
 |------|-------|--------|-------|
 | 2026-02-20 | 97/100 (A+) | Secure | Dev dependency vulnerabilities documented (ESLint transitive deps), all controls verified |
 | 2026-01-22 | 98/100 (A+) | Secure | Zero vulnerabilities, CSP improvements, all controls verified |
-| 2026-01-08 | 95/100 (A+) | Secure | Zero vulnerabilities, comprehensive controls |
+| 2026-01-08 | 98/100 (A+) | Secure | Zero vulnerabilities, comprehensive controls |
 | 2026-01-07 | 94/100 (A+) | Secure | Security headers implemented |
 
 ---
