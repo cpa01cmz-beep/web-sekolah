@@ -5,7 +5,7 @@
 [![🤖 iFlow CLI Automation](https://img.shields.io/badge/iFlow--CLI-Automation-blue)](https://github.com/iflow-ai/iflow-cli-action)
 
 [![Tests: 2873 passing](https://img.shields.io/badge/Tests-2873%20passing-brightgreen)](https://github.com/cpa01cmz-beep/web-sekolah/actions)
-[![Security: 98/100](https://img.shields.io/badge/Security-98%2F100-success)](./docs/SECURITY_ASSESSMENT_2026-01-22.md)
+[![Security: 97/100](https://img.shields.io/badge/Security-97%2F100-success)](./docs/SECURITY.md)
 [![TypeScript: Strict](https://img.shields.io/badge/TypeScript-Strict-blue)](https://www.typescriptlang.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
@@ -64,7 +64,7 @@ The system is built on Cloudflare's high-performance serverless infrastructure, 
 - **Bundle Size**: 491 KB (136 KB gzipped) - 53% reduction from optimizations
 - **Load Time**: < 2 seconds on 3G connection
 - **API Response**: < 100ms average (Cloudflare Workers)
-- **Security**: 98/100 score (Production Ready ✅)
+- **Security**: 97/100 score (Production Ready ✅)
 - **Test Coverage**: 2873 tests passing (5 skipped, 155 todo)
 
 ## Technology Stack
