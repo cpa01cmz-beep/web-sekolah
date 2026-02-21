@@ -20,9 +20,9 @@ export const SiteFooter = memo(function SiteFooter() {
           <nav aria-label="Footer quick links">
             <h3 className="font-semibold text-foreground mb-4">Quick Links</h3>
             <ul className="space-y-2 text-sm">
-              <li><Link to="/about" className="hover:text-primary">About Us</Link></li>
-              <li><Link to="/contact" className="hover:text-primary">Contact</Link></li>
-              <li><Link to="/privacy" className="hover:text-primary">Privacy Policy</Link></li>
+              <li><Link to="/about" className="hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-md px-1 -mx-1">About Us</Link></li>
+              <li><Link to="/contact" className="hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-md px-1 -mx-1">Contact</Link></li>
+              <li><Link to="/privacy" className="hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-md px-1 -mx-1">Privacy Policy</Link></li>
             </ul>
           </nav>
           <div>
@@ -36,13 +36,13 @@ export const SiteFooter = memo(function SiteFooter() {
           <div>
             <h3 className="font-semibold text-foreground mb-4">Follow Us</h3>
             <nav aria-label="Social media links" className="flex space-x-4">
-              <a href="#" className="hover:text-primary" aria-label="Twitter">
+              <a href="#" className="hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-md p-1 -m-1" aria-label="Twitter">
                 <Twitter className="h-5 w-5" />
               </a>
-              <a href="#" className="hover:text-primary" aria-label="Facebook">
+              <a href="#" className="hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-md p-1 -m-1" aria-label="Facebook">
                 <Facebook className="h-5 w-5" />
               </a>
-              <a href="#" className="hover:text-primary" aria-label="Instagram">
+              <a href="#" className="hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-md p-1 -m-1" aria-label="Instagram">
                 <Instagram className="h-5 w-5" />
               </a>
             </nav>
