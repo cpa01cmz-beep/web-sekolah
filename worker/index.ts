@@ -94,8 +94,18 @@ app.get('/api/health', async (c) => {
   const webhookSuccessRate = integrationMonitor.getWebhookSuccessRate();
   const rateLimitBlockRate = integrationMonitor.getRateLimitBlockRate();
 
+  const circuitBreakerHealthy = !metrics.circuitBreaker?.isOpen;
+  const webhookHealthy = webhookSuccessRate >= 95;
+  const rateLimitHealthy = rateLimitBlockRate < 5;
+
+  let status: 'healthy' | 'degraded' | 'unhealthy' = 'healthy';
+  if (!circuitBreakerHealthy || !webhookHealthy || !rateLimitHealthy) {
+    const criticalIssues = [!circuitBreakerHealthy, webhookSuccessRate < 80, rateLimitBlockRate >= 10].filter(Boolean).length;
+    status = criticalIssues >= 2 ? 'unhealthy' : 'degraded';
+  }
+
   return ok(c, {
-    status: 'healthy',
+    status,
     timestamp: new Date().toISOString(),
     uptime: `${(metrics.uptime / 1000).toFixed(2)}s`,
     systemHealth: {
