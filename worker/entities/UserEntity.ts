@@ -37,4 +37,16 @@ export class UserEntity extends IndexedEntity<SchoolUser> {
     const users = await this.getBySecondaryIndex(env, 'email', email);
     return users.length > 0 ? users[0] : null;
   }
+
+  static async existsByEmail(env: Env, email: string): Promise<boolean> {
+    return this.existsBySecondaryIndex(env, 'email', email);
+  }
+
+  static async existsByRole(env: Env, role: UserRole): Promise<boolean> {
+    return this.existsBySecondaryIndex(env, 'role', role);
+  }
+
+  static async existsByClassId(env: Env, classId: string): Promise<boolean> {
+    return this.existsBySecondaryIndex(env, 'classId', classId);
+  }
 }
