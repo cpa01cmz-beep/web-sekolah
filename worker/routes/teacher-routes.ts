@@ -148,4 +148,26 @@ export function teacherRoutes(app: Hono<{ Bindings: Env }>) {
     triggerWebhookSafely(c.env, 'message.read', { id: message.id, readAt: message.updatedAt, readBy: teacherId }, { messageId: message.id });
     return ok(c, message);
   }));
+
+  app.delete('/api/teachers/:id/messages/:messageId', ...withAuth('teacher'), withErrorHandler('delete teacher message')(async (c: Context) => {
+    const messageId = c.req.param('messageId');
+    const teacherId = getCurrentUserId(c);
+    
+    const message = await MessageEntity.get(c.env, messageId);
+    if (!message) {
+      return notFound(c, 'Message not found');
+    }
+    
+    if (message.senderId !== teacherId && message.recipientId !== teacherId) {
+      return notFound(c, 'Message not found');
+    }
+    
+    const deleted = await MessageEntity.softDelete(c.env, messageId);
+    if (!deleted) {
+      return notFound(c, 'Message not found');
+    }
+    
+    triggerWebhookSafely(c.env, 'message.deleted', { id: messageId, deletedBy: teacherId }, { messageId });
+    return ok(c, { deleted: true, id: messageId });
+  }));
 }

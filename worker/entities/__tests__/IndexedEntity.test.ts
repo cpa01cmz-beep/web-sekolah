@@ -177,7 +177,7 @@ describe('IndexedEntity', () => {
       const result = await TestIndexedEntity.existsBySecondaryIndex(mockEnv, 'category', 'cat-a');
 
       expect(result).toBe(true);
-      expect(mockStub.listPrefix).toHaveBeenCalledWith('field:cat-a:entity:');
+      expect(mockStub.listPrefix).toHaveBeenCalledWith('field:cat-a:entity:', null, 1);
     });
 
     it('should return false when no entities exist with the given field value', async () => {
