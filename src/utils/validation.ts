@@ -4,6 +4,9 @@ export const MIN_SCORE = ValidationLimits.GRADE_MIN_SCORE;
 
 export const MAX_SCORE = ValidationLimits.GRADE_MAX_SCORE;
 
+const EMAIL_REGEX = /^\S+@\S+\.\S+$/;
+const DIGITS_ONLY_REGEX = /^\d+$/;
+
 export function isValidScore(score: number | null | undefined): score is number {
   if (score === null || score === undefined) return false;
   return !isNaN(score) && Number.isInteger(score) && score >= MIN_SCORE && score <= MAX_SCORE;
@@ -59,7 +62,7 @@ export const validationRules = {
       message: 'Email is required',
     },
     format: {
-      validate: (value: string) => /^\S+@\S+\.\S+$/.test(value),
+      validate: (value: string) => EMAIL_REGEX.test(value),
       message: 'Please enter a valid email address',
     },
   },
@@ -69,7 +72,7 @@ export const validationRules = {
       message: 'Phone number is required',
     },
     numeric: {
-      validate: (value: string) => /^\d+$/.test(value),
+      validate: (value: string) => DIGITS_ONLY_REGEX.test(value),
       message: 'Phone number must be digits only',
     },
     length: (min: number, max: number) => ({
@@ -83,7 +86,7 @@ export const validationRules = {
       message: 'NISN is required',
     },
     numeric: {
-      validate: (value: string) => /^\d+$/.test(value),
+      validate: (value: string) => DIGITS_ONLY_REGEX.test(value),
       message: 'NISN must be digits only',
     },
     exactLength: (length: number) => ({
