@@ -1,3 +1,5 @@
+export { useAuth } from './useAuth';
+export type { UseAuthReturn } from './useAuth';
 export { useIsMobile } from './use-mobile';
 export { useReducedMotion } from './use-reduced-motion';
 export { useTheme } from './use-theme';
