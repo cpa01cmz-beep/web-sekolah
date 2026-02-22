@@ -42,15 +42,15 @@
       "headers": [
         {
           "key": "Cache-Control",
-          "value": "public, max-age=31536000, immutable, stale-while-revalidate=86400"
+          "value": "public, max-age=31536000, immutable, stale-while-revalidate=86400, stale-if-error=86400"
         },
         {
           "key": "CDN-Cache-Control",
-          "value": "public, max-age=31536000, immutable, stale-while-revalidate=86400"
+          "value": "public, max-age=31536000, immutable, stale-while-revalidate=86400, stale-if-error=86400"
         },
         {
           "key": "Vercel-CDN-Cache-Control",
-          "value": "public, max-age=31536000, immutable, stale-while-revalidate=86400"
+          "value": "public, max-age=31536000, immutable, stale-while-revalidate=86400, stale-if-error=86400"
         },
         {
           "key": "Expires",
@@ -63,19 +63,15 @@
       "headers": [
         {
           "key": "Cache-Control",
-          "value": "public, max-age=31536000, immutable"
+          "value": "public, max-age=31536000, immutable, stale-while-revalidate=86400, stale-if-error=86400"
         },
         {
           "key": "CDN-Cache-Control",
-          "value": "public, max-age=31536000, immutable"
+          "value": "public, max-age=31536000, immutable, stale-while-revalidate=86400, stale-if-error=86400"
         },
         {
           "key": "Vercel-CDN-Cache-Control",
-          "value": "public, max-age=31536000, immutable"
-        },
-        {
-          "key": "Expires",
-          "value": "Thu, 31 Dec 2037 23:59:59 GMT"
+          "value": "public, max-age=31536000, immutable, stale-while-revalidate=86400, stale-if-error=86400"
         }
       ]
     },
@@ -84,19 +80,15 @@
       "headers": [
         {
           "key": "Cache-Control",
-          "value": "public, max-age=31536000, immutable"
+          "value": "public, max-age=31536000, immutable, stale-while-revalidate=86400, stale-if-error=86400"
         },
         {
           "key": "CDN-Cache-Control",
-          "value": "public, max-age=31536000, immutable"
+          "value": "public, max-age=31536000, immutable, stale-while-revalidate=86400, stale-if-error=86400"
         },
         {
           "key": "Vercel-CDN-Cache-Control",
-          "value": "public, max-age=31536000, immutable"
-        },
-        {
-          "key": "Expires",
-          "value": "Thu, 31 Dec 2037 23:59:59 GMT"
+          "value": "public, max-age=31536000, immutable, stale-while-revalidate=86400, stale-if-error=86400"
         }
       ]
     },
@@ -105,15 +97,15 @@
       "headers": [
         {
           "key": "Cache-Control",
-          "value": "public, max-age=31536000, immutable"
+          "value": "public, max-age=31536000, immutable, stale-while-revalidate=86400, stale-if-error=86400"
         },
         {
           "key": "CDN-Cache-Control",
-          "value": "public, max-age=31536000, immutable"
+          "value": "public, max-age=31536000, immutable, stale-while-revalidate=86400, stale-if-error=86400"
         },
         {
           "key": "Vercel-CDN-Cache-Control",
-          "value": "public, max-age=31536000, immutable"
+          "value": "public, max-age=31536000, immutable, stale-while-revalidate=86400, stale-if-error=86400"
         },
         {
           "key": "Access-Control-Allow-Origin",
@@ -126,15 +118,15 @@
       "headers": [
         {
           "key": "Cache-Control",
-          "value": "public, max-age=31536000, immutable"
+          "value": "public, max-age=31536000, immutable, stale-while-revalidate=86400, stale-if-error=86400"
         },
         {
           "key": "CDN-Cache-Control",
-          "value": "public, max-age=31536000, immutable"
+          "value": "public, max-age=31536000, immutable, stale-while-revalidate=86400, stale-if-error=86400"
         },
         {
           "key": "Vercel-CDN-Cache-Control",
-          "value": "public, max-age=31536000, immutable"
+          "value": "public, max-age=31536000, immutable, stale-while-revalidate=86400, stale-if-error=86400"
         },
         {
           "key": "Access-Control-Allow-Origin",
@@ -147,15 +139,15 @@
       "headers": [
         {
           "key": "Cache-Control",
-          "value": "public, max-age=31536000, immutable"
+          "value": "public, max-age=31536000, immutable, stale-while-revalidate=86400, stale-if-error=86400"
         },
         {
           "key": "CDN-Cache-Control",
-          "value": "public, max-age=31536000, immutable"
+          "value": "public, max-age=31536000, immutable, stale-while-revalidate=86400, stale-if-error=86400"
         },
         {
           "key": "Vercel-CDN-Cache-Control",
-          "value": "public, max-age=31536000, immutable"
+          "value": "public, max-age=31536000, immutable, stale-while-revalidate=86400, stale-if-error=86400"
         }
       ]
     },
@@ -164,15 +156,15 @@
       "headers": [
         {
           "key": "Cache-Control",
-          "value": "public, max-age=86400, stale-while-revalidate=604800"
+          "value": "public, max-age=86400, stale-while-revalidate=604800, stale-if-error=604800"
         },
         {
           "key": "CDN-Cache-Control",
-          "value": "public, max-age=86400, stale-while-revalidate=604800"
+          "value": "public, max-age=86400, stale-while-revalidate=604800, stale-if-error=604800"
         },
         {
           "key": "Vercel-CDN-Cache-Control",
-          "value": "public, max-age=86400, stale-while-revalidate=604800"
+          "value": "public, max-age=86400, stale-while-revalidate=604800, stale-if-error=604800"
         }
       ]
     },
@@ -181,15 +173,15 @@
       "headers": [
         {
           "key": "Cache-Control",
-          "value": "public, max-age=86400, stale-while-revalidate=604800"
+          "value": "public, max-age=86400, stale-while-revalidate=604800, stale-if-error=604800"
         },
         {
           "key": "CDN-Cache-Control",
-          "value": "public, max-age=86400, stale-while-revalidate=604800"
+          "value": "public, max-age=86400, stale-while-revalidate=604800, stale-if-error=604800"
         },
         {
           "key": "Vercel-CDN-Cache-Control",
-          "value": "public, max-age=86400, stale-while-revalidate=604800"
+          "value": "public, max-age=86400, stale-while-revalidate=604800, stale-if-error=604800"
         }
       ]
     },
@@ -198,15 +190,15 @@
       "headers": [
         {
           "key": "Cache-Control",
-          "value": "public, max-age=86400, stale-while-revalidate=604800"
+          "value": "public, max-age=86400, stale-while-revalidate=604800, stale-if-error=604800"
         },
         {
           "key": "CDN-Cache-Control",
-          "value": "public, max-age=86400, stale-while-revalidate=604800"
+          "value": "public, max-age=86400, stale-while-revalidate=604800, stale-if-error=604800"
         },
         {
           "key": "Vercel-CDN-Cache-Control",
-          "value": "public, max-age=86400, stale-while-revalidate=604800"
+          "value": "public, max-age=86400, stale-while-revalidate=604800, stale-if-error=604800"
         },
         {
           "key": "Content-Type",
