@@ -43,6 +43,10 @@
     "validate:env:staging": "./scripts/validate-env.sh staging",
     "validate:env:production": "./scripts/validate-env.sh production",
     "validate:env:json": "./scripts/validate-env.sh staging --json",
+    "metrics": "./scripts/deployment-metrics.sh staging",
+    "metrics:staging": "./scripts/deployment-metrics.sh staging",
+    "metrics:production": "./scripts/deployment-metrics.sh production",
+    "metrics:json": "./scripts/deployment-metrics.sh staging --json",
     "vercel:build": "vite build",
     "vercel:preview": "vite preview --host 0.0.0.0 --port ${PORT:-4173}"
   },
