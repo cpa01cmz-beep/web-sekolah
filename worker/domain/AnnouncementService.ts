@@ -72,6 +72,10 @@ export class AnnouncementService {
     return await AnnouncementEntity.getRecent(env, limit);
   }
 
+  static async getRecentAnnouncementsByRole(env: Env, targetRole: string, limit: number): Promise<Announcement[]> {
+    return await AnnouncementEntity.getRecentByTargetRole(env, targetRole, limit);
+  }
+
   static async deleteAnnouncement(env: Env, announcementId: string): Promise<boolean> {
     return await AnnouncementEntity.deleteWithDateIndex(env, announcementId);
   }
