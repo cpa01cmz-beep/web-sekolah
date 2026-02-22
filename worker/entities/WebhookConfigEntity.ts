@@ -27,4 +27,13 @@ export class WebhookConfigEntity extends IndexedEntity<WebhookConfig> {
     const activeConfigs = await this.getActive(env);
     return activeConfigs.filter(c => c.events.includes(eventType));
   }
+
+  static async countActive(env: Env): Promise<number> {
+    const index = new SecondaryIndex<string>(env, this.entityName, 'active');
+    return await index.countByValue('true');
+  }
+
+  static async existsActive(env: Env): Promise<boolean> {
+    return this.existsBySecondaryIndex(env, 'active', 'true');
+  }
 }

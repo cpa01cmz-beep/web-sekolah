@@ -1,4 +1,4 @@
-import { IndexedEntity, type Env } from "../core-utils";
+import { IndexedEntity, SecondaryIndex, type Env } from "../core-utils";
 import type { Announcement } from "@shared/types";
 import { seedData } from "../seed-data";
 import { DateSortedSecondaryIndex } from "../storage/DateSortedSecondaryIndex";
@@ -32,6 +32,24 @@ export class AnnouncementEntity extends IndexedEntity<Announcement> {
     }
     const announcements = await Promise.all(recentIds.map(id => new this(env, id).getState()));
     return announcements.filter(a => a && !a.deletedAt) as Announcement[];
+  }
+
+  static async countByAuthorId(env: Env, authorId: string): Promise<number> {
+    const index = new SecondaryIndex<string>(env, this.entityName, 'authorId');
+    return await index.countByValue(authorId);
+  }
+
+  static async existsByAuthorId(env: Env, authorId: string): Promise<boolean> {
+    return this.existsBySecondaryIndex(env, 'authorId', authorId);
+  }
+
+  static async countByTargetRole(env: Env, targetRole: string): Promise<number> {
+    const index = new SecondaryIndex<string>(env, this.entityName, 'targetRole');
+    return await index.countByValue(targetRole);
+  }
+
+  static async existsByTargetRole(env: Env, targetRole: string): Promise<boolean> {
+    return this.existsBySecondaryIndex(env, 'targetRole', targetRole);
   }
 
   static async createWithDateIndex(env: Env, state: Announcement): Promise<Announcement> {
