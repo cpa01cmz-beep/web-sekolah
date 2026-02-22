@@ -1,16 +1,14 @@
 import type { Context, Next } from 'hono';
 import { integrationMonitor } from '../integration-monitor';
 import { rateLimitExceeded } from '../core-utils';
-import { RateLimitMaxRequests, RateLimitWindow, TimeConstants } from '../config/time';
+import { RateLimitMaxRequests, RateLimitWindow, TimeConstants, RateLimitStore as RateLimitStoreConfig } from '../config/time';
 
-const MAX_STORE_SIZE = 10000;
-
-interface RateLimitStore {
+interface RateLimitStoreEntry {
   count: number;
   resetTime: number;
 }
 
-const store = new Map<string, RateLimitStore>();
+const store = new Map<string, RateLimitStoreEntry>();
 
 interface RateLimitConfig {
   windowMs: number;
@@ -65,10 +63,10 @@ function getKeyFromContext(c: Context, customKeyGenerator?: (c: Context) => stri
   return `${ip}:${path}`;
 }
 
-function getOrCreateEntry(key: string, config: RateLimitConfig): RateLimitStore {
+function getOrCreateEntry(key: string, config: RateLimitConfig): RateLimitStoreEntry {
   cleanupExpiredEntries();
   
-  const maxStoreSize = config.maxStoreSize ?? MAX_STORE_SIZE;
+  const maxStoreSize = config.maxStoreSize ?? RateLimitStoreConfig.MAX_ENTRIES;
   if (store.size >= maxStoreSize) {
     const oldestKey = store.keys().next().value;
     if (oldestKey) {
@@ -83,7 +81,7 @@ function getOrCreateEntry(key: string, config: RateLimitConfig): RateLimitStore 
     return existing;
   }
   
-  const entry: RateLimitStore = {
+  const entry: RateLimitStoreEntry = {
     count: 0,
     resetTime: now + config.windowMs,
   };
@@ -193,7 +191,7 @@ export function clearRateLimitStore(): void {
   store.clear();
 }
 
-export function getRateLimitStore(): Map<string, RateLimitStore> {
+export function getRateLimitStore(): Map<string, RateLimitStoreEntry> {
   cleanupExpiredEntries();
   integrationMonitor.updateRateLimitEntries(store.size);
   return new Map(store);
