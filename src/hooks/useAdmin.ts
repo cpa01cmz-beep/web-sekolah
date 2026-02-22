@@ -12,10 +12,14 @@ import type {
 } from '@shared/types';
 import { CachingTime } from '@/config/time';
 import { createQueryOptions } from '@/config/query-config';
+import { createSimpleQueryKey } from '@/config/query-factory';
+
+const adminKey = createSimpleQueryKey('admin');
+const usersKey = createSimpleQueryKey('users');
 
 export function useAdminDashboard(options?: UseQueryOptions<AdminDashboardData>) {
   return useTanstackQuery({
-    queryKey: ['admin', 'dashboard'],
+    queryKey: adminKey(),
     queryFn: () => adminService.getDashboard(),
     ...createQueryOptions<AdminDashboardData>({ staleTime: CachingTime.FIVE_MINUTES }),
     ...options,
@@ -23,7 +27,7 @@ export function useAdminDashboard(options?: UseQueryOptions<AdminDashboardData>)
 }
 
 export function useUsers(filters?: UserFilters, options?: UseQueryOptions<SchoolUser[]>) {
-  const queryKey = filters ? ['users', filters] : ['users'];
+  const queryKey = filters ? [usersKey()[0], filters] : usersKey();
 
   return useTanstackQuery({
     queryKey,
@@ -56,7 +60,7 @@ export function useDeleteUser(userId: string, options?: UseMutationOptions<void,
 
 export function useAnnouncements(options?: UseQueryOptions<Announcement[]>) {
   return useTanstackQuery({
-    queryKey: ['admin', 'announcements'],
+    queryKey: [...adminKey(), 'announcements'],
     queryFn: () => adminService.getAnnouncements(),
     ...createQueryOptions<Announcement[]>({ staleTime: CachingTime.FIVE_MINUTES }),
     ...options,
@@ -79,7 +83,7 @@ export function useDeleteAnnouncement(options?: UseMutationOptions<void, Error, 
 
 export function useSettings(options?: UseQueryOptions<Settings>) {
   return useTanstackQuery({
-    queryKey: ['admin', 'settings'],
+    queryKey: [...adminKey(), 'settings'],
     queryFn: () => adminService.getSettings(),
     ...createQueryOptions<Settings>({ staleTime: CachingTime.THIRTY_MINUTES }),
     ...options,

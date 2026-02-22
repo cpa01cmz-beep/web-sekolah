@@ -3,10 +3,13 @@ import { parentService } from '@/services/parentService';
 import type { ParentDashboardData, ScheduleItem } from '@shared/types';
 import { CachingTime } from '@/config/time';
 import { createQueryOptions } from '@/config/query-config';
+import { createEntityQueryKey } from '@/config/query-factory';
+
+const parentKey = createEntityQueryKey('parents');
 
 export function useParentDashboard(parentId: string, options?: UseQueryOptions<ParentDashboardData>) {
   return useTanstackQuery({
-    queryKey: ['parents', parentId, 'dashboard'],
+    queryKey: parentKey(parentId, 'dashboard'),
     queryFn: () => parentService.getDashboard(parentId),
     ...createQueryOptions<ParentDashboardData>({ enabled: !!parentId, staleTime: CachingTime.FIVE_MINUTES }),
     ...options,
@@ -15,7 +18,7 @@ export function useParentDashboard(parentId: string, options?: UseQueryOptions<P
 
 export function useChildSchedule(parentId: string, options?: UseQueryOptions<ScheduleItem[]>) {
   return useTanstackQuery({
-    queryKey: ['parents', parentId, 'schedule'],
+    queryKey: parentKey(parentId, 'schedule'),
     queryFn: () => parentService.getChildSchedule(parentId),
     ...createQueryOptions<ScheduleItem[]>({ enabled: !!parentId, staleTime: CachingTime.ONE_HOUR }),
     ...options,

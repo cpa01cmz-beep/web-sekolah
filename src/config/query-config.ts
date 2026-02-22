@@ -1,11 +1,13 @@
 import type { UseQueryOptions } from '@tanstack/react-query';
 import { CachingTime } from './time';
 
-type QueryConfig<T> = Partial<Omit<UseQueryOptions<T>, 'queryKey' | 'queryFn'>> & {
+export type { QueryConfig } from './query-factory';
+
+type InternalQueryConfig<T> = Partial<Omit<UseQueryOptions<T>, 'queryKey' | 'queryFn'>> & {
   enabled?: boolean;
 };
 
-export function createQueryOptions<T>(config: QueryConfig<T> = {}): Partial<UseQueryOptions<T>> {
+export function createQueryOptions<T>(config: InternalQueryConfig<T> = {}): Partial<UseQueryOptions<T>> {
   const {
     enabled = true,
     staleTime = CachingTime.FIVE_MINUTES,
