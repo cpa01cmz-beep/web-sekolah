@@ -56,11 +56,48 @@ describe('Cloudflare Cache Middleware', () => {
       expect(cacheControl).toContain('stale-while-revalidate=300');
     });
 
+    it('should set stale-if-error', async () => {
+      app.use('*', cloudflareCache({
+        browserTTL: 60,
+        cdnTTL: 300,
+        staleIfError: 120,
+      }));
+      app.get('/test', (c) => c.json({ success: true }));
+
+      const res = await app.request('/test');
+
+      expect(res.status).toBe(200);
+      const cacheControl = res.headers.get('Cache-Control');
+      expect(cacheControl).toContain('max-age=60');
+      expect(cacheControl).toContain('stale-if-error=120');
+      const cdnCacheControl = res.headers.get('CDN-Cache-Control');
+      expect(cdnCacheControl).toContain('max-age=300');
+      expect(cdnCacheControl).toContain('stale-if-error=120');
+    });
+
+    it('should not add stale-if-error to CDN cache when cdnTTL is 0', async () => {
+      app.use('*', cloudflareCache({
+        browserTTL: 60,
+        staleIfError: 120,
+      }));
+      app.get('/test', (c) => c.json({ success: true }));
+
+      const res = await app.request('/test');
+
+      expect(res.status).toBe(200);
+      const cacheControl = res.headers.get('Cache-Control');
+      expect(cacheControl).toContain('max-age=60');
+      expect(cacheControl).toContain('stale-if-error=120');
+      const cdnCacheControl = res.headers.get('CDN-Cache-Control');
+      expect(cdnCacheControl).toBe('no-store');
+    });
+
     it('should set all cache options together', async () => {
       app.use('*', cloudflareCache({
         browserTTL: 300,
         cdnTTL: 3600,
         staleWhileRevalidate: 86400,
+        staleIfError: 300,
       }));
       app.get('/test', (c) => c.json({ success: true }));
 
@@ -70,7 +107,10 @@ describe('Cloudflare Cache Middleware', () => {
       const cacheControl = res.headers.get('Cache-Control');
       expect(cacheControl).toContain('max-age=300');
       expect(cacheControl).toContain('stale-while-revalidate=86400');
-      expect(res.headers.get('CDN-Cache-Control')).toBe('max-age=3600');
+      expect(cacheControl).toContain('stale-if-error=300');
+      const cdnCacheControl = res.headers.get('CDN-Cache-Control');
+      expect(cdnCacheControl).toContain('max-age=3600');
+      expect(cdnCacheControl).toContain('stale-if-error=300');
     });
 
     it('should add Vary header', async () => {
@@ -95,7 +135,10 @@ describe('Cloudflare Cache Middleware', () => {
       const cacheControl = res.headers.get('Cache-Control');
       expect(cacheControl).toContain('max-age=300');
       expect(cacheControl).toContain('stale-while-revalidate=86400');
-      expect(res.headers.get('CDN-Cache-Control')).toBe('max-age=3600');
+      expect(cacheControl).toContain('stale-if-error=300');
+      const cdnCacheControl = res.headers.get('CDN-Cache-Control');
+      expect(cdnCacheControl).toContain('max-age=3600');
+      expect(cdnCacheControl).toContain('stale-if-error=300');
     });
   });
 
