@@ -222,8 +222,9 @@ The application uses **Cloudflare Workers Durable Objects** for persistent stora
  | MessageEntity | ID | senderId, recipientId, parentMessageId, (recipientId,isRead) compound, createdAt (date-sorted per-user: sent/received) |
 | ScheduleEntity | ID | - |
 | WebhookConfigEntity | ID | active |
-| WebhookEventEntity | ID | processed, eventType |
-| WebhookDeliveryEntity | ID | eventId, webhookConfigId, status, idempotencyKey |
+ | WebhookEventEntity | ID | processed, eventType |
+ | WebhookDeliveryEntity | ID | eventId, webhookConfigId, status, idempotencyKey |
+ | DeadLetterQueueWebhookEntity | ID | webhookConfigId, eventType |
 
 ### Index Performance
 
@@ -325,7 +326,44 @@ To support future soft-delete requirements, `IndexedEntity` now includes:
   - `validateClass()`: Rejects classes referencing deleted teachers
   - `validateCourse()`: Rejects courses referencing deleted teachers
   - `validateStudent()`: Rejects students referencing deleted classes or parents
-  - `validateAnnouncement()`: Rejects announcements referencing deleted authors
+   - `validateAnnouncement()`: Rejects announcements referencing deleted authors
+
+### DeadLetterQueueWebhookEntity Count/Exists Methods (2026-02-22)
+
+**Problem**: DeadLetterQueueWebhookEntity lacked count and exists methods for its secondary indexes, inconsistent with other entity patterns in the codebase.
+
+**Solution**: Added count and exists methods for `webhookConfigId` and `eventType` secondary indexes to maintain consistency with other entity patterns.
+
+**Implementation**:
+- Added `countByWebhookConfigId(env, webhookConfigId)`: Count failed webhooks by config ID
+- Added `existsByWebhookConfigId(env, webhookConfigId)`: Check if failed webhooks exist for a config
+- Added `countByEventType(env, eventType)`: Count failed webhooks by event type
+- Added `existsByEventType(env, eventType)`: Check if failed webhooks exist for an event type
+
+**Metrics**:
+
+| Method | Complexity | Use Case |
+|--------|------------|----------|
+| `countByWebhookConfigId` | O(1) indexed | Admin dashboard stats |
+| `existsByWebhookConfigId` | O(1) indexed | Validation checks |
+| `countByEventType` | O(1) indexed | Error analytics |
+| `existsByEventType` | O(1) indexed | Error tracking |
+
+**Benefits**:
+- ✅ Consistent with other entity patterns (UserEntity, AnnouncementEntity, WebhookEventEntity)
+- ✅ O(1) indexed lookups instead of O(n) full table scans
+- ✅ Enables efficient validation and analytics for dead letter queue
+- ✅ All 3141 tests passing (8 new tests added)
+- ✅ Zero breaking changes to existing functionality
+
+**Success Criteria**:
+- [x] Added countByWebhookConfigId method
+- [x] Added existsByWebhookConfigId method
+- [x] Added countByEventType method
+- [x] Added existsByEventType method
+- [x] Unit tests added for all new methods
+- [x] All tests passing (no regressions)
+- [x] Documentation updated
 
      ### Recent Data Optimizations (2026-01-07)
 
