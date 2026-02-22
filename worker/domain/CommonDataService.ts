@@ -90,6 +90,14 @@ export class CommonDataService {
     return await CourseEntity.countByTeacherId(env, teacherId);
   }
 
+  static async getGradeCountByStudent(env: Env, studentId: string): Promise<number> {
+    return await GradeEntity.countByStudentId(env, studentId);
+  }
+
+  static async getGradeCountByCourse(env: Env, courseId: string): Promise<number> {
+    return await GradeEntity.countByCourseId(env, courseId);
+  }
+
   static async getUserCountByRole(env: Env, role: UserRole): Promise<number> {
     return await UserEntity.countByRole(env, role);
   }

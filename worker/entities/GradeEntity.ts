@@ -1,4 +1,4 @@
-import { IndexedEntity, type Env } from "../core-utils";
+import { IndexedEntity, SecondaryIndex, type Env } from "../core-utils";
 import type { Grade } from "@shared/types";
 import { seedData } from "../seed-data";
 import { CompoundSecondaryIndex } from "../storage/CompoundSecondaryIndex";
@@ -21,6 +21,16 @@ export class GradeEntity extends IndexedEntity<Grade> {
 
   static async getByCourseId(env: Env, courseId: string): Promise<Grade[]> {
     return this.getBySecondaryIndex(env, 'courseId', courseId);
+  }
+
+  static async countByStudentId(env: Env, studentId: string): Promise<number> {
+    const index = new SecondaryIndex<string>(env, this.entityName, 'studentId');
+    return await index.countByValue(studentId);
+  }
+
+  static async countByCourseId(env: Env, courseId: string): Promise<number> {
+    const index = new SecondaryIndex<string>(env, this.entityName, 'courseId');
+    return await index.countByValue(courseId);
   }
 
   static async getByStudentIdAndCourseId(env: Env, studentId: string, courseId: string): Promise<Grade | null> {
