@@ -39,3 +39,10 @@ export {
   useParentDashboard,
   useChildSchedule,
 } from './useParent';
+export {
+  usePerformanceAnalytics,
+} from './usePerformanceAnalytics';
+export type {
+  GradeData,
+  PerformanceAnalyticsResult,
+} from './usePerformanceAnalytics';
