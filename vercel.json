@@ -9,6 +9,7 @@
   "trailingSlash": false,
   "fluid": true,
   "regions": ["sin1", "hnd1", "iad1"],
+  "functionFailoverRegions": ["sfo1", "fra1"],
   "functions": {
     "api/**": {
       "maxDuration": 10
