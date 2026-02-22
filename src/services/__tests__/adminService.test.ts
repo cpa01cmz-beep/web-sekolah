@@ -217,7 +217,7 @@ describe('AdminService', () => {
     it('should fetch system settings', async () => {
       const mockData = {
         schoolName: 'SMA Harapan Bangsa',
-        academicYear: '2025/2026',
+        academicYear: '2025-2026',
         semester: 1,
         allowRegistration: true,
         maintenanceMode: false,
@@ -252,7 +252,7 @@ describe('AdminService', () => {
       };
       const mockResult = {
         schoolName: 'SMA Harapan Bangsa',
-        academicYear: '2025/2026',
+        academicYear: '2025-2026',
         semester: 1,
         allowRegistration: false,
         maintenanceMode: false,
@@ -273,7 +273,7 @@ describe('AdminService', () => {
       };
       const mockResult = {
         schoolName: 'SMA Harapan Bangsa',
-        academicYear: '2025/2026',
+        academicYear: '2025-2026',
         semester: 1,
         allowRegistration: true,
         maintenanceMode: true,
