@@ -1,4 +1,5 @@
 import { ApiResponse } from "../../shared/types";
+import { HttpHeader, ContentType, AuthPrefix } from '@shared/http-constants';
 import { ApiTimeout, RetryDelay, RetryCount, CircuitBreakerConfig } from '../config/time';
 import { STORAGE_KEYS } from '../constants/storage-keys';
 import { storage } from '../lib/storage';
@@ -30,13 +31,13 @@ export async function apiClient<T>(path: string, init?: RequestInit & { timeout?
     const executeRequest = async (): Promise<T> => {
     const token = getAuthToken();
     const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
-      'X-Request-ID': requestId,
+      [HttpHeader.CONTENT_TYPE]: ContentType.JSON,
+      [HttpHeader.X_REQUEST_ID]: requestId,
       ...initHeaders as Record<string, string>,
     };
 
     if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
+      headers[HttpHeader.AUTHORIZATION] = `${AuthPrefix.BEARER} ${token}`;
     }
 
     const res = await fetchWithTimeout(path, {
@@ -45,7 +46,7 @@ export async function apiClient<T>(path: string, init?: RequestInit & { timeout?
       ...restInit,
     });
 
-    const requestIdHeader = res.headers.get('X-Request-ID');
+    const requestIdHeader = res.headers.get(HttpHeader.X_REQUEST_ID);
 
     if (!res.ok) {
       throw await handleErrorResponse(res, requestId, requestIdHeader);

@@ -1,4 +1,5 @@
 import type { Context, Next } from 'hono';
+import { HttpHeader } from '@shared/http-constants';
 import { logger } from '../logger';
 
 export interface AuditLogEntry {
@@ -34,7 +35,7 @@ const sensitiveOperations = new Set([
 export function auditLog(action: string) {
   return async (c: Context, next: Next) => {
     const startTime = Date.now();
-    const requestId = c.req.header('X-Request-ID') || crypto.randomUUID();
+    const requestId = c.req.header(HttpHeader.X_REQUEST_ID) || crypto.randomUUID();
     const cfRay = c.req.header('CF-Ray');
     const ip = c.req.header('cf-connecting-ip') || c.req.header('x-real-ip') || 'unknown';
     const userAgent = c.req.header('user-agent') || 'unknown';

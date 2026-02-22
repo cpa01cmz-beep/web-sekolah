@@ -24,6 +24,7 @@ import { DefaultOrigins } from './config/defaults';
 import { handleScheduled } from './scheduled';
 import { validateBody } from './middleware/validation';
 import { clientErrorSchema, cspReportSchema } from './middleware/schemas';
+import { HttpHeader } from '@shared/http-constants';
 
 // Need to export GlobalDurableObject to make it available in wrangler
 export { GlobalDurableObject };
@@ -39,10 +40,10 @@ app.use('/api/*', async (c, next) => {
   if (origin && allowedOrigins.includes(origin)) {
     c.header('Access-Control-Allow-Origin', origin);
     c.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-    c.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Request-ID');
+    c.header('Access-Control-Allow-Headers', `${HttpHeader.CONTENT_TYPE}, ${HttpHeader.AUTHORIZATION}, ${HttpHeader.X_REQUEST_ID}`);
     c.header('Access-Control-Allow-Credentials', 'true');
     c.header('Access-Control-Max-Age', (TimeConstants.ONE_DAY_MS / 1000).toString());
-    c.header('Access-Control-Expose-Headers', 'X-Request-ID, X-CF-Ray, X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset');
+    c.header('Access-Control-Expose-Headers', `${HttpHeader.X_REQUEST_ID}, ${HttpHeader.X_CF_RAY}, ${HttpHeader.X_RATELIMIT_LIMIT}, ${HttpHeader.X_RATELIMIT_REMAINING}, ${HttpHeader.X_RATELIMIT_RESET}`);
     c.header('Vary', 'Origin');
   }
   
@@ -54,8 +55,8 @@ app.use('/api/*', async (c, next) => {
 });
 
 app.use('/api/*', async (c, next) => {
-  const requestId = c.req.header('cf-request-id') || c.req.header('X-Request-ID') || crypto.randomUUID();
-  c.header('X-Request-ID', requestId);
+  const requestId = c.req.header(HttpHeader.CF_REQUEST_ID) || c.req.header(HttpHeader.X_REQUEST_ID) || crypto.randomUUID();
+  c.header(HttpHeader.X_REQUEST_ID, requestId);
   await next();
 });
 
@@ -92,7 +93,7 @@ app.get('/api/health', healthCheckCache(), async (c) => {
   const metrics = integrationMonitor.getHealthMetrics();
   const webhookSuccessRate = integrationMonitor.getWebhookSuccessRate();
   const rateLimitBlockRate = integrationMonitor.getRateLimitBlockRate();
-  const requestId = c.req.header('X-Request-ID') || crypto.randomUUID();
+  const requestId = c.req.header(HttpHeader.X_REQUEST_ID) || crypto.randomUUID();
 
   return ok(c, {
     status: 'healthy',

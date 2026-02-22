@@ -1,4 +1,5 @@
 import { ErrorCode } from "@shared/types";
+import { HttpHeader } from "@shared/http-constants";
 import type { Context } from "hono";
 
 interface ApiErrorResponse {
@@ -18,7 +19,7 @@ interface ApiSuccessResponse<T> {
 type ApiStandardResponse<T = unknown> = ApiSuccessResponse<T> | ApiErrorResponse;
 
 export const ok = <T>(c: Context, data: T, requestId?: string) => 
-  c.json({ success: true, data, requestId: requestId || c.req.header('X-Request-ID') || crypto.randomUUID() } as ApiSuccessResponse<T>);
+  c.json({ success: true, data, requestId: requestId || c.req.header(HttpHeader.X_REQUEST_ID) || crypto.randomUUID() } as ApiSuccessResponse<T>);
 
 const createErrorResponse = (
   c: Context, 
@@ -31,7 +32,7 @@ const createErrorResponse = (
     success: false, 
     error, 
     code,
-    requestId: c.req.header('X-Request-ID') || crypto.randomUUID(),
+    requestId: c.req.header(HttpHeader.X_REQUEST_ID) || crypto.randomUUID(),
     details 
   } as ApiErrorResponse, status);
 
