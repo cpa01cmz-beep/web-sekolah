@@ -39,8 +39,21 @@ export function studentRoutes(app: Hono<{ Bindings: Env }>) {
     }
 
     const grades = await GradeService.getStudentGrades(c.env, requestedStudentId);
+    
+    let sum = 0;
+    const distribution = { A: 0, B: 0, C: 0, D: 0, F: 0 };
+    
+    for (const g of grades) {
+      sum += g.score;
+      if (g.score >= GRADE_A_THRESHOLD) distribution.A++;
+      else if (g.score >= GRADE_B_THRESHOLD) distribution.B++;
+      else if (g.score >= GRADE_C_THRESHOLD) distribution.C++;
+      else if (g.score >= PASSING_SCORE_THRESHOLD) distribution.D++;
+      else distribution.F++;
+    }
+    
     const averageScore = grades.length > 0
-      ? grades.reduce((sum, g) => sum + g.score, 0) / grades.length
+      ? sum / grades.length
       : 0;
 
     const cardData: StudentCardData = {
@@ -51,13 +64,7 @@ export function studentRoutes(app: Hono<{ Bindings: Env }>) {
       className: classData?.name || 'N/A',
       averageScore: Math.round(averageScore * GRADE_PRECISION_FACTOR) / GRADE_PRECISION_FACTOR,
       totalGrades: grades.length,
-      gradeDistribution: {
-        A: grades.filter(g => g.score >= GRADE_A_THRESHOLD).length,
-        B: grades.filter(g => g.score >= GRADE_B_THRESHOLD && g.score < GRADE_A_THRESHOLD).length,
-        C: grades.filter(g => g.score >= GRADE_C_THRESHOLD && g.score < GRADE_B_THRESHOLD).length,
-        D: grades.filter(g => g.score >= PASSING_SCORE_THRESHOLD && g.score < GRADE_C_THRESHOLD).length,
-        F: grades.filter(g => g.score < PASSING_SCORE_THRESHOLD).length,
-      },
+      gradeDistribution: distribution,
       recentGrades: grades.slice(-5).reverse()
     };
 
