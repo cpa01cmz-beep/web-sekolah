@@ -83,7 +83,7 @@ export function StudentCardPage() {
         <div className="absolute -bottom-12 -left-12 w-32 h-32 sm:w-40 sm:h-40 bg-white/10 rounded-full" aria-hidden="true"></div>
         <header className="flex items-center justify-between z-10 gap-2">
           <div className="flex items-center gap-2 sm:gap-3">
-            <GraduationCap className="h-8 w-8 sm:h-10 sm:w-10 flex-shrink-0" />
+            <GraduationCap className="h-8 w-8 sm:h-10 sm:w-10 flex-shrink-0" aria-hidden="true" />
             <div>
               <h2 className="font-bold text-lg sm:text-xl">AKADEMIA PRO</h2>
               <p className="text-xs opacity-80">KARTU TANDA PELAJAR</p>
@@ -114,12 +114,12 @@ export function StudentCardPage() {
         <footer className="flex justify-between items-end z-10 gap-2">
             <p className="text-xs opacity-70 truncate">Jl. Pendidikan No. 123, Jakarta</p>
             <div className="bg-white p-1.5 sm:p-2 rounded-lg flex-shrink-0">
-                <QrCode className="h-12 w-12 sm:h-16 sm:w-16 text-black" />
+                <QrCode className="h-12 w-12 sm:h-16 sm:w-16 text-black" aria-hidden="true" />
             </div>
         </footer>
       </div>
       <Button onClick={handlePrint} size="lg" className="mt-6 sm:mt-8 w-full sm:w-auto">
-        <Printer className="mr-2 h-5 w-5" />
+        <Printer className="mr-2 h-5 w-5" aria-hidden="true" />
         Print / Save as PDF
       </Button>
     </SlideUp>

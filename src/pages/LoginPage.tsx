@@ -58,7 +58,7 @@ export function LoginPage() {
           <Card>
             <CardHeader className="text-center">
               <Link to="/" className="flex items-center justify-center gap-2 mb-4">
-                <GraduationCap className="h-10 w-10" style={{ color: THEME_COLORS.PRIMARY }} />
+                <GraduationCap className="h-10 w-10" style={{ color: THEME_COLORS.PRIMARY }} aria-hidden="true" />
                 <span className="text-2xl font-bold text-foreground">Akademia Pro</span>
               </Link>
               <CardTitle className="text-2xl">Unified Login</CardTitle>
@@ -114,7 +114,7 @@ export function LoginPage() {
                 buttonClassName="w-full"
               />
               <Link to="/" className="text-sm text-primary hover:underline mt-4 flex items-center gap-1">
-                Back to Home <ArrowRight className="h-4 w-4" />
+                Back to Home <ArrowRight className="h-4 w-4" aria-hidden="true" />
               </Link>
             </CardFooter>
             </form>

@@ -128,7 +128,7 @@ export function TeacherMessagesPage() {
       <div className="flex justify-between items-center">
         <div className="flex items-center gap-2">
           <Badge variant="secondary">
-            <Mail className="h-3 w-3 mr-1" />
+            <Mail className="h-3 w-3 mr-1" aria-hidden="true" />
             {unreadCount} unread
           </Badge>
         </div>
@@ -144,11 +144,11 @@ export function TeacherMessagesPage() {
       <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'inbox' | 'sent')}>
         <TabsList>
           <TabsTrigger value="inbox">
-            <Inbox className="h-4 w-4 mr-2" />
+            <Inbox className="h-4 w-4 mr-2" aria-hidden="true" />
             Inbox
           </TabsTrigger>
           <TabsTrigger value="sent">
-            <Send className="h-4 w-4 mr-2" />
+            <Send className="h-4 w-4 mr-2" aria-hidden="true" />
             Sent
           </TabsTrigger>
         </TabsList>
@@ -161,7 +161,7 @@ export function TeacherMessagesPage() {
             <CardContent>
               {messagesLoading ? (
                 <div className="flex justify-center py-8">
-                  <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                  <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" aria-hidden="true" />
                 </div>
               ) : messages.length === 0 ? (
                 <EmptyState
@@ -184,7 +184,7 @@ export function TeacherMessagesPage() {
                       >
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2">
-                            <User className="h-4 w-4 text-muted-foreground" />
+                            <User className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
                             <span className="font-medium">
                               {uniqueParents.find(p => p.id === message.senderId)?.name || 'Parent'}
                             </span>
@@ -215,7 +215,7 @@ export function TeacherMessagesPage() {
             <CardContent>
               {messagesLoading ? (
                 <div className="flex justify-center py-8">
-                  <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                  <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" aria-hidden="true" />
                 </div>
               ) : messages.length === 0 ? (
                 <EmptyState
@@ -234,7 +234,7 @@ export function TeacherMessagesPage() {
                       >
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2">
-                            <User className="h-4 w-4 text-muted-foreground" />
+                            <User className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
                             <span className="font-medium">
                               To: {uniqueParents.find(p => p.id === message.recipientId)?.name || 'Parent'}
                             </span>
@@ -266,7 +266,7 @@ export function TeacherMessagesPage() {
             <ScrollArea className="h-[400px] pr-4">
               {conversationLoading ? (
                 <div className="flex justify-center py-8">
-                  <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                  <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" aria-hidden="true" />
                 </div>
               ) : (
                 <MessageThread
