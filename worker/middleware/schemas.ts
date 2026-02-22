@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { StatusCodeRanges, ValidationLimits, USER_ROLES } from '../config/validation';
+import { StatusCodeRanges, ValidationLimits, USER_ROLES, HealthThresholds } from '../config/validation';
 import type { Context } from 'hono';
 import { WEBHOOK_EVENT_TYPES } from '@shared/webhook.types';
 
@@ -13,7 +13,7 @@ export const createUserSchema = z.object({
   role: z.enum(USER_ROLES, {
     message: `Invalid role. Must be one of: ${USER_ROLES.join(', ')}`,
   }),
-  password: z.string().min(8, 'Password must be at least 8 characters')
+  password: z.string().min(ValidationLimits.PASSWORD_MIN_LENGTH, `Password must be at least ${ValidationLimits.PASSWORD_MIN_LENGTH} characters`)
     .regex(/[A-Z]/, 'Password must contain at least one uppercase letter')
     .regex(/[a-z]/, 'Password must contain at least one lowercase letter')
     .regex(/[0-9]/, 'Password must contain at least one number')
@@ -21,7 +21,7 @@ export const createUserSchema = z.object({
   classId: z.string().uuid('Invalid class ID').optional(),
   classIds: z.array(z.string().uuid()).optional(),
   childId: z.string().uuid('Invalid child ID').optional(),
-  studentIdNumber: z.string().min(3).max(20).optional(),
+  studentIdNumber: z.string().min(ValidationLimits.STUDENT_ID_MIN_LENGTH).max(ValidationLimits.STUDENT_ID_MAX_LENGTH).optional(),
   avatarUrl: z.string().url().optional(),
 });
 
@@ -43,7 +43,7 @@ export const updateGradeSchema = createGradeSchema.partial().extend({
 
 export const createClassSchema = z.object({
   name: z.string().min(ValidationLimits.USER_NAME_MIN_LENGTH).max(ValidationLimits.USER_NAME_MAX_LENGTH),
-  gradeLevel: z.number().int().min(1).max(12),
+  gradeLevel: z.number().int().min(ValidationLimits.GRADE_LEVEL_MIN).max(ValidationLimits.GRADE_LEVEL_MAX),
   teacherId: z.string().uuid('Invalid teacher ID'),
   academicYear: z.string().regex(/^\d{4}-\d{4}$/, 'Academic year must be in format YYYY-YYYY'),
 });

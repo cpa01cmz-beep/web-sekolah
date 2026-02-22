@@ -19,6 +19,7 @@ import { responseErrorMonitoring } from './middleware/error-monitoring';
 import { integrationMonitor } from './integration-monitor';
 import { HttpStatusCode, TimeConstants } from './config/time';
 import { DefaultOrigins } from './config/defaults';
+import { HealthThresholds } from './config/validation';
 import { handleScheduled } from './scheduled';
 import { validateBody } from './middleware/validation';
 import { clientErrorSchema } from './middleware/schemas';
@@ -100,8 +101,8 @@ app.get('/api/health', async (c) => {
     uptime: `${(metrics.uptime / 1000).toFixed(2)}s`,
     systemHealth: {
       circuitBreaker: metrics.circuitBreaker?.isOpen ? 'OPEN (degraded)' : 'CLOSED (healthy)',
-      webhook: webhookSuccessRate >= 95 ? 'healthy' : webhookSuccessRate >= 80 ? 'degraded' : 'unhealthy',
-      rateLimiting: rateLimitBlockRate < 1 ? 'healthy' : rateLimitBlockRate < 5 ? 'elevated' : 'high',
+      webhook: webhookSuccessRate >= HealthThresholds.WEBHOOK_SUCCESS_HEALTHY ? 'healthy' : webhookSuccessRate >= HealthThresholds.WEBHOOK_SUCCESS_DEGRADED ? 'degraded' : 'unhealthy',
+      rateLimiting: rateLimitBlockRate < HealthThresholds.RATE_LIMIT_BLOCK_HEALTHY ? 'healthy' : rateLimitBlockRate < HealthThresholds.RATE_LIMIT_BLOCK_ELEVATED ? 'elevated' : 'high',
     },
     webhook: {
       successRate: `${webhookSuccessRate.toFixed(2)}%`,

@@ -12,7 +12,7 @@ export const ValidationLimits = {
   ERROR_MESSAGE_MAX_LENGTH: 1000,
   USER_AGENT_MAX_LENGTH: 500,
   ERROR_SOURCE_MAX_LENGTH: 100,
-  PASSWORD_MIN_LENGTH: 6,
+  PASSWORD_MIN_LENGTH: 8,
   PHONE_MIN_LENGTH: 10,
   PHONE_MAX_LENGTH: 13,
   NISN_LENGTH: 10,
@@ -24,6 +24,10 @@ export const ValidationLimits = {
   WEBHOOK_SECRET_MAX_LENGTH: 500,
   SEMESTER_MIN: 1,
   SEMESTER_MAX: 2,
+  STUDENT_ID_MIN_LENGTH: 3,
+  STUDENT_ID_MAX_LENGTH: 20,
+  GRADE_LEVEL_MIN: 1,
+  GRADE_LEVEL_MAX: 12,
 } as const;
 
 export const StatusCodeRanges = {
@@ -70,6 +74,13 @@ export const ErrorMessages = {
 } as const;
 
 export const USER_ROLES = ['student', 'teacher', 'parent', 'admin'] as const;
+
+export const HealthThresholds = {
+  WEBHOOK_SUCCESS_HEALTHY: 95,
+  WEBHOOK_SUCCESS_DEGRADED: 80,
+  RATE_LIMIT_BLOCK_HEALTHY: 1,
+  RATE_LIMIT_BLOCK_ELEVATED: 5,
+} as const;
 
 export const getAvatarUrl = (userId: string): string => {
   return `${AVATAR_BASE_URL}?u=${encodeURIComponent(userId)}`;
