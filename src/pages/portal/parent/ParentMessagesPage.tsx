@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -74,6 +74,15 @@ export function ParentMessagesPage() {
     },
   });
 
+  const handleSendMessage = (recipientId: string, subject: string, content: string) => {
+    sendMessageMutation.mutate({ recipientId, subject, content });
+  };
+
+  const teachersMap = useMemo(() => 
+    new Map(teachers.map(t => [t.id, t])),
+    [teachers]
+  );
+
   if (messagesError) {
     return (
       <Alert variant="destructive">
@@ -83,10 +92,6 @@ export function ParentMessagesPage() {
       </Alert>
     );
   }
-
-  const handleSendMessage = (recipientId: string, subject: string, content: string) => {
-    sendMessageMutation.mutate({ recipientId, subject, content });
-  };
 
   return (
     <SlideUp delay={0} className="space-y-6" style={prefersReducedMotion ? { opacity: 1 } : {}}>
@@ -158,7 +163,7 @@ export function ParentMessagesPage() {
                           <div className="flex items-center gap-2">
                             <User className="h-4 w-4 text-muted-foreground" />
                             <span className="font-medium">
-                              {teachers.find(t => t.id === message.senderId)?.name || 'Teacher'}
+                              {teachersMap.get(message.senderId)?.name || 'Teacher'}
                             </span>
                             {!message.isRead && message.recipientId === parentId && (
                               <Badge variant="default" className="text-xs">New</Badge>
@@ -208,7 +213,7 @@ export function ParentMessagesPage() {
                           <div className="flex items-center gap-2">
                             <User className="h-4 w-4 text-muted-foreground" />
                             <span className="font-medium">
-                              To: {teachers.find(t => t.id === message.recipientId)?.name || 'Teacher'}
+                              To: {teachersMap.get(message.recipientId)?.name || 'Teacher'}
                             </span>
                           </div>
                           <span className="text-xs text-muted-foreground">
@@ -232,7 +237,7 @@ export function ParentMessagesPage() {
           <DialogContent className="sm:max-w-[600px] max-h-[80vh]">
             <DialogHeader>
               <DialogTitle>
-                Conversation with {teachers.find(t => t.id === selectedTeacherId)?.name || 'Teacher'}
+                Conversation with {teachersMap.get(selectedTeacherId)?.name || 'Teacher'}
               </DialogTitle>
             </DialogHeader>
             <ScrollArea className="h-[400px] pr-4">
