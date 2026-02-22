@@ -1,4 +1,5 @@
 import { ApiTimeout } from '../../config/time';
+import { ErrorMessages } from '@shared/constants';
 
 export interface RequestOptions extends RequestInit {
   timeout?: number;
@@ -19,7 +20,7 @@ export async function fetchWithTimeout(url: string, options: RequestOptions = {}
   } catch (error) {
     clearTimeout(timeoutId);
     if (error instanceof Error && error.name === 'AbortError') {
-      const timeoutError = new Error('Request timeout') as Error & { code?: string; status?: number; retryable?: boolean };
+      const timeoutError = new Error(ErrorMessages.REQUEST_TIMEOUT) as Error & { code?: string; status?: number; retryable?: boolean };
       timeoutError.code = 'TIMEOUT';
       timeoutError.status = 408;
       timeoutError.retryable = true;

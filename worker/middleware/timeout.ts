@@ -1,6 +1,7 @@
 import type { Context, Next } from 'hono';
 import { gatewayTimeout } from '../core-utils';
 import { EndpointTimeout } from '../config/endpoint-timeout';
+import { ErrorMessages } from '@shared/constants';
 
 interface TimeoutOptions {
   timeoutMs: number;
@@ -18,7 +19,7 @@ export function timeout(options: TimeoutOptions) {
     const timeoutPromise = new Promise((_, reject) => {
       timer = setTimeout(() => {
         if (!isComplete) {
-          reject(new Error('Request timeout'));
+          reject(new Error(ErrorMessages.REQUEST_TIMEOUT));
         }
       }, timeoutMs);
     });
@@ -27,7 +28,7 @@ export function timeout(options: TimeoutOptions) {
       await Promise.race([next(), timeoutPromise]);
       isComplete = true;
     } catch (error) {
-      if (error instanceof Error && error.message === 'Request timeout') {
+      if (error instanceof Error && error.message === ErrorMessages.REQUEST_TIMEOUT) {
         return gatewayTimeout(c, 'Request processing timeout');
       }
       throw error;

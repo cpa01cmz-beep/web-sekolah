@@ -63,6 +63,12 @@ export const DEFAULT_LOCALE = 'en-US' as const;
 
 export const AVATAR_BASE_URL = 'https://i.pravatar.cc/150';
 
+export const ErrorMessages = {
+  REQUEST_TIMEOUT: 'Request timeout',
+  CONCURRENT_MODIFICATION: 'Concurrent modification detected',
+  USER_NOT_AUTHENTICATED: 'User not authenticated',
+} as const;
+
 export const USER_ROLES = ['student', 'teacher', 'parent', 'admin'] as const;
 
 export const getAvatarUrl = (userId: string): string => {

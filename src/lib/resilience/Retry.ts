@@ -1,4 +1,4 @@
-import { RETRY_CONFIG } from '@shared/constants';
+import { RETRY_CONFIG, ErrorMessages } from '@shared/constants';
 import { logger } from '../logger';
 
 export interface RetryOptions {
@@ -50,7 +50,7 @@ export async function withRetry<T>(
           fn(),
           new Promise<T>((_, reject) => {
             controller.signal.addEventListener('abort', () => {
-              reject(new Error('Request timeout'));
+              reject(new Error(ErrorMessages.REQUEST_TIMEOUT));
             });
           })
         ]);
