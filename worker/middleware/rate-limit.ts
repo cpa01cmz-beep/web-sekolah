@@ -3,6 +3,8 @@ import { integrationMonitor } from '../integration-monitor';
 import { rateLimitExceeded } from '../core-utils';
 import { RateLimitMaxRequests, RateLimitWindow, TimeConstants } from '../config/time';
 
+const MAX_STORE_SIZE = 10000;
+
 interface RateLimitStore {
   count: number;
   resetTime: number;
@@ -15,6 +17,7 @@ interface RateLimitConfig {
   maxRequests: number;
   skipSuccessfulRequests?: boolean;
   skipFailedRequests?: boolean;
+  maxStoreSize?: number;
 }
 
 interface RateLimitInfo {
@@ -53,8 +56,10 @@ function getKeyFromContext(c: Context, customKeyGenerator?: (c: Context) => stri
     return customKeyGenerator(c);
   }
   
-  const forwarded = c.req.header('x-forwarded-for');
-  const ip = forwarded ? forwarded.split(',')[0] : c.req.header('cf-connecting-ip') || c.req.header('x-real-ip') || 'unknown';
+  const ip = c.req.header('cf-connecting-ip') || 
+             c.req.header('x-real-ip') || 
+             c.req.header('x-forwarded-for')?.split(',')[0].trim() || 
+             'unknown';
   
   const path = c.req.path;
   return `${ip}:${path}`;
@@ -62,6 +67,14 @@ function getKeyFromContext(c: Context, customKeyGenerator?: (c: Context) => stri
 
 function getOrCreateEntry(key: string, config: RateLimitConfig): RateLimitStore {
   cleanupExpiredEntries();
+  
+  const maxStoreSize = config.maxStoreSize ?? MAX_STORE_SIZE;
+  if (store.size >= maxStoreSize) {
+    const oldestKey = store.keys().next().value;
+    if (oldestKey) {
+      store.delete(oldestKey);
+    }
+  }
   
   const now = Date.now();
   const existing = store.get(key);
