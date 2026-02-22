@@ -4,6 +4,7 @@ interface CloudflareCacheConfig {
   browserTTL?: number;
   cdnTTL?: number;
   staleWhileRevalidate?: number;
+  staleIfError?: number;
 }
 
 export function cloudflareCache(config: CloudflareCacheConfig = {}) {
@@ -11,6 +12,7 @@ export function cloudflareCache(config: CloudflareCacheConfig = {}) {
     browserTTL = 0,
     cdnTTL = 0,
     staleWhileRevalidate = 0,
+    staleIfError = 0,
   } = config;
 
   return async (c: Context, next: Next) => {
@@ -30,15 +32,27 @@ export function cloudflareCache(config: CloudflareCacheConfig = {}) {
       cacheControlParts.push(`stale-while-revalidate=${staleWhileRevalidate}`);
     }
     
+    if (staleIfError > 0) {
+      cacheControlParts.push(`stale-if-error=${staleIfError}`);
+    }
+    
     if (cacheControlParts.length > 0) {
       response.headers.set('Cache-Control', cacheControlParts.join(', '));
     }
     
+    const cdnCacheControlParts: string[] = [];
+    
     if (cdnTTL > 0) {
-      response.headers.set('CDN-Cache-Control', `max-age=${cdnTTL}`);
+      cdnCacheControlParts.push(`max-age=${cdnTTL}`);
     } else {
-      response.headers.set('CDN-Cache-Control', 'no-store');
+      cdnCacheControlParts.push('no-store');
     }
+    
+    if (staleIfError > 0 && cdnTTL > 0) {
+      cdnCacheControlParts.push(`stale-if-error=${staleIfError}`);
+    }
+    
+    response.headers.set('CDN-Cache-Control', cdnCacheControlParts.join(', '));
     
     response.headers.set('Vary', 'Accept-Encoding, Origin');
   };
@@ -49,6 +63,7 @@ export function publicCache() {
     browserTTL: 300,
     cdnTTL: 3600,
     staleWhileRevalidate: 86400,
+    staleIfError: 300,
   });
 }
 
