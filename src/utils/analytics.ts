@@ -451,3 +451,147 @@ export function generatePerformanceInsights(
 
   return insights;
 }
+
+export interface TrendDataPoint {
+  date: string;
+  value: number;
+  label?: string;
+}
+
+export function generateTrendDataPoints(
+  values: number[],
+  labels?: string[]
+): TrendDataPoint[] {
+  if (values.length === 0) return [];
+
+  return values.map((value, index) => ({
+    date: labels?.[index] ?? `Period ${index + 1}`,
+    value,
+    label: labels?.[index],
+  }));
+}
+
+export interface SubjectComparison {
+  subject: string;
+  score: number;
+  maxScore: number;
+  percentage: number;
+}
+
+export function calculateSubjectComparison(
+  performances: SubjectPerformance[],
+  maxScore: number = 100
+): SubjectComparison[] {
+  if (performances.length === 0) return [];
+
+  return performances.map((perf) => ({
+    subject: perf.subject,
+    score: perf.score,
+    maxScore,
+    percentage: Math.round((perf.score / maxScore) * 100),
+  }));
+}
+
+export interface AtRiskStudent {
+  identifier: string;
+  averageScore: number;
+  failingSubjects: number;
+  trend: 'declining' | 'stable' | 'improving';
+  riskLevel: 'high' | 'medium' | 'low';
+}
+
+export function identifyAtRiskStudents(
+  studentData: Array<{
+    identifier: string;
+    scores: number[];
+    failingCount: number;
+  }>,
+  failingThreshold: number = 60
+): AtRiskStudent[] {
+  if (studentData.length === 0) return [];
+
+  return studentData
+    .map((student) => {
+      const avgScore = calculateAverage(student.scores);
+      const trend = calculateTrendDirection(student.scores);
+      const riskLevel: 'high' | 'medium' | 'low' = 
+        avgScore < failingThreshold || student.failingCount >= 3
+          ? 'high'
+          : avgScore < failingThreshold + 10 || student.failingCount >= 2
+            ? 'medium'
+            : 'low';
+
+      return {
+        identifier: student.identifier,
+        averageScore: avgScore,
+        failingSubjects: student.failingCount,
+        trend: trend === 'down' ? 'declining' : trend === 'up' ? 'improving' : 'stable',
+        riskLevel,
+      };
+    })
+    .filter((student) => student.riskLevel !== 'low')
+    .sort((a, b) => {
+      const riskOrder = { high: 0, medium: 1, low: 2 };
+      return riskOrder[a.riskLevel] - riskOrder[b.riskLevel];
+    });
+}
+
+export interface PassingRateResult {
+  passing: number;
+  failing: number;
+  total: number;
+  rate: number;
+}
+
+export function calculatePassingRate(
+  scores: number[],
+  passingThreshold: number = 60
+): PassingRateResult {
+  if (scores.length === 0) {
+    return { passing: 0, failing: 0, total: 0, rate: 0 };
+  }
+
+  const passing = scores.filter((score) => score >= passingThreshold).length;
+  const failing = scores.length - passing;
+  const rate = Math.round((passing / scores.length) * 100);
+
+  return { passing, failing, total: scores.length, rate };
+}
+
+export interface ClassPerformanceMetrics {
+  average: number;
+  median: number;
+  passingRate: number;
+  gradeDistribution: GradeDistribution;
+  topPerformers: number[];
+  needsImprovement: number[];
+}
+
+export function calculateClassPerformanceMetrics(
+  scores: number[],
+  passingThreshold: number = 60,
+  topCount: number = 5
+): ClassPerformanceMetrics {
+  if (scores.length === 0) {
+    return {
+      average: 0,
+      median: 0,
+      passingRate: 0,
+      gradeDistribution: { A: 0, B: 0, C: 0, D: 0, E: 0, F: 0 },
+      topPerformers: [],
+      needsImprovement: [],
+    };
+  }
+
+  const sortedScores = [...scores].sort((a, b) => b - a);
+  const passingRateResult = calculatePassingRate(scores, passingThreshold);
+
+  return {
+    average: calculateAverage(scores),
+    median: calculateMedian(scores),
+    passingRate: passingRateResult.rate,
+    gradeDistribution: calculateGradeDistribution(scores),
+    topPerformers: sortedScores.slice(0, topCount),
+    needsImprovement: sortedScores.filter((s) => s < passingThreshold).reverse(),
+  };
+}
