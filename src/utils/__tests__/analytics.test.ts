@@ -25,6 +25,7 @@ import {
   detectAnomalies,
   analyzeTrend,
   generatePerformanceInsights,
+  identifyAtRiskStudents,
 } from '../analytics';
 
 describe('Analytics Utilities', () => {
@@ -695,6 +696,99 @@ describe('Analytics Utilities', () => {
 
       const strengths = insights.filter((i) => i.type === 'strength');
       expect(strengths.length).toBe(3);
+    });
+  });
+
+  describe('identifyAtRiskStudents', () => {
+    it('returns empty array for empty input', () => {
+      expect(identifyAtRiskStudents([])).toEqual([]);
+    });
+
+    it('identifies critical risk students with failing grades', () => {
+      const students = [
+        { studentId: '1', studentName: 'John', scores: [45, 50, 55], averageScore: 50 },
+        { studentId: '2', studentName: 'Jane', scores: [75, 80, 85], averageScore: 80 },
+      ];
+
+      const atRisk = identifyAtRiskStudents(students);
+
+      expect(atRisk).toHaveLength(1);
+      expect(atRisk[0].studentId).toBe('1');
+      expect(atRisk[0].riskLevel).toBe('critical');
+      expect(atRisk[0].reason).toContain('below passing threshold');
+    });
+
+    it('identifies high risk students near failing threshold', () => {
+      const students = [
+        { studentId: '1', studentName: 'Bob', scores: [62, 65, 68], averageScore: 65 },
+      ];
+
+      const atRisk = identifyAtRiskStudents(students);
+
+      expect(atRisk).toHaveLength(1);
+      expect(atRisk[0].riskLevel).toBe('high');
+      expect(atRisk[0].reason).toContain('at risk of falling below');
+    });
+
+    it('identifies moderate risk students with declining trend', () => {
+      const students = [
+        { studentId: '1', studentName: 'Alice', scores: [90, 85, 80, 75, 70], averageScore: 80 },
+      ];
+
+      const atRisk = identifyAtRiskStudents(students);
+
+      expect(atRisk).toHaveLength(1);
+      expect(atRisk[0].riskLevel).toBe('moderate');
+      expect(atRisk[0].reason).toContain('declining');
+    });
+
+    it('does not flag students with stable or improving performance', () => {
+      const students = [
+        { studentId: '1', studentName: 'Good Student', scores: [80, 82, 85, 88, 90], averageScore: 85 },
+      ];
+
+      const atRisk = identifyAtRiskStudents(students);
+
+      expect(atRisk).toHaveLength(0);
+    });
+
+    it('sorts results by average score (lowest first)', () => {
+      const students = [
+        { studentId: '1', studentName: 'Student A', scores: [65, 68], averageScore: 66.5 },
+        { studentId: '2', studentName: 'Student B', scores: [45, 50], averageScore: 47.5 },
+        { studentId: '3', studentName: 'Student C', scores: [58, 62], averageScore: 60 },
+      ];
+
+      const atRisk = identifyAtRiskStudents(students);
+
+      expect(atRisk[0].averageScore).toBeLessThan(atRisk[1].averageScore);
+      expect(atRisk[1].averageScore).toBeLessThan(atRisk[2].averageScore);
+    });
+
+    it('respects custom thresholds', () => {
+      const students = [
+        { studentId: '1', studentName: 'Custom', scores: [65, 68], averageScore: 66.5 },
+      ];
+
+      const atRiskDefault = identifyAtRiskStudents(students);
+      const atRiskCustom = identifyAtRiskStudents(students, 70, 75);
+
+      expect(atRiskDefault).toHaveLength(1);
+      expect(atRiskDefault[0].riskLevel).toBe('high');
+
+      expect(atRiskCustom).toHaveLength(1);
+      expect(atRiskCustom[0].riskLevel).toBe('critical');
+    });
+
+    it('calculates average from scores when averageScore is 0', () => {
+      const students = [
+        { studentId: '1', studentName: 'Calc', scores: [50, 60, 70], averageScore: 0 },
+      ];
+
+      const atRisk = identifyAtRiskStudents(students);
+
+      expect(atRisk).toHaveLength(1);
+      expect(atRisk[0].averageScore).toBe(60);
     });
   });
 });

@@ -420,3 +420,61 @@ export function generatePerformanceInsights(
 
   return insights;
 }
+
+export interface StudentScoreRecord {
+  studentId: string;
+  studentName: string;
+  scores: number[];
+  averageScore: number;
+}
+
+export interface AtRiskStudent {
+  studentId: string;
+  studentName: string;
+  averageScore: number;
+  riskLevel: 'critical' | 'high' | 'moderate';
+  reason: string;
+}
+
+export function identifyAtRiskStudents(
+  students: StudentScoreRecord[],
+  failingThreshold: number = 60,
+  warningThreshold: number = 70
+): AtRiskStudent[] {
+  if (students.length === 0) return [];
+
+  const atRiskStudents: AtRiskStudent[] = [];
+
+  for (const student of students) {
+    const avgScore = student.averageScore || calculateAverage(student.scores);
+    const trend = analyzeTrend(student.scores);
+
+    if (avgScore < failingThreshold) {
+      atRiskStudents.push({
+        studentId: student.studentId,
+        studentName: student.studentName,
+        averageScore: avgScore,
+        riskLevel: 'critical',
+        reason: `Average score (${avgScore}) is below passing threshold (${failingThreshold})`,
+      });
+    } else if (avgScore < warningThreshold) {
+      atRiskStudents.push({
+        studentId: student.studentId,
+        studentName: student.studentName,
+        averageScore: avgScore,
+        riskLevel: 'high',
+        reason: `Average score (${avgScore}) is at risk of falling below passing`,
+      });
+    } else if (trend.direction === 'down' && trend.confidence > 0) {
+      atRiskStudents.push({
+        studentId: student.studentId,
+        studentName: student.studentName,
+        averageScore: avgScore,
+        riskLevel: 'moderate',
+        reason: `Performance trend is declining with ${trend.confidence}% confidence`,
+      });
+    }
+  }
+
+  return atRiskStudents.sort((a, b) => a.averageScore - b.averageScore);
+}
