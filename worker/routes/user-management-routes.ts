@@ -1,11 +1,11 @@
 import { Hono } from "hono";
 import type { Env } from '../core-utils';
 import { ok, bad, notFound, forbidden } from '../core-utils';
-import type { CreateUserData, UpdateUserData, Grade } from "@shared/types";
-import { UserService, CommonDataService, GradeService } from '../domain';
+import type { CreateUserData, UpdateUserData, Grade, CreateAnnouncementData } from "@shared/types";
+import { UserService, CommonDataService, GradeService, AnnouncementService } from '../domain';
 import { withAuth, withErrorHandler, triggerWebhookSafely } from './route-utils';
 import { validateBody, validateParams } from '../middleware/validation';
-import { createUserSchema, updateUserSchema, updateGradeSchema, paramsSchema } from '../middleware/schemas';
+import { createUserSchema, updateUserSchema, updateGradeSchema, updateAnnouncementSchema, paramsSchema } from '../middleware/schemas';
 import type { Context } from 'hono';
 import { getCurrentUserId } from '../type-guards';
 
@@ -71,6 +71,45 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
       triggerWebhookSafely(c.env, 'grade.deleted', { id: gradeId, studentId: grade.studentId, courseId: grade.courseId }, { gradeId });
     }
     return ok(c, { deleted: true, id: gradeId });
+  }));
+
+  app.put('/api/announcements/:id', ...withAuth('teacher', 'admin'), validateParams(paramsSchema), validateBody(updateAnnouncementSchema), withErrorHandler('update announcement')(async (c: Context) => {
+    const { id: announcementId } = c.get('validatedParams') as { id: string };
+    const updates = c.get('validatedBody') as Partial<CreateAnnouncementData>;
+    const userId = getCurrentUserId(c);
+    const user = await CommonDataService.getUserById(c.env, userId);
+
+    const announcement = await AnnouncementService.getAnnouncementById(c.env, announcementId);
+    if (!announcement) {
+      return notFound(c, 'Announcement not found');
+    }
+
+    if (user?.role !== 'admin' && announcement.authorId !== userId) {
+      return forbidden(c, 'You can only update your own announcements');
+    }
+
+    const updatedAnnouncement = await AnnouncementService.updateAnnouncement(c.env, announcementId, updates);
+    triggerWebhookSafely(c.env, 'announcement.updated', updatedAnnouncement, { announcementId: updatedAnnouncement.id });
+    return ok(c, updatedAnnouncement);
+  }));
+
+  app.delete('/api/announcements/:id', ...withAuth('teacher', 'admin'), validateParams(paramsSchema), withErrorHandler('delete announcement')(async (c: Context) => {
+    const { id: announcementId } = c.get('validatedParams') as { id: string };
+    const userId = getCurrentUserId(c);
+    const user = await CommonDataService.getUserById(c.env, userId);
+
+    const announcement = await AnnouncementService.getAnnouncementById(c.env, announcementId);
+    if (!announcement) {
+      return notFound(c, 'Announcement not found');
+    }
+
+    if (user?.role !== 'admin' && announcement.authorId !== userId) {
+      return forbidden(c, 'You can only delete your own announcements');
+    }
+
+    await AnnouncementService.deleteAnnouncement(c.env, announcementId);
+    triggerWebhookSafely(c.env, 'announcement.deleted', { id: announcementId, title: announcement.title, authorId: announcement.authorId }, { announcementId });
+    return ok(c, { deleted: true, id: announcementId });
   }));
 
 }

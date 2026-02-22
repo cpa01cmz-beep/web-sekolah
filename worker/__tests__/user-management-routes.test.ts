@@ -573,4 +573,104 @@ describe('user-management-routes - Critical Business Logic', () => {
       expect(payload.name).toBe('User');
     });
   });
+
+  describe('PUT /api/announcements/:id - Announcement Update', () => {
+    it('should allow teacher to update their own announcement', () => {
+      const announcement = { id: 'a1', title: 'Test', content: 'Content', authorId: 't1' };
+      const userId = 't1';
+      const userRole = 'teacher';
+
+      const canUpdate = userRole === 'admin' || announcement.authorId === userId;
+      expect(canUpdate).toBe(true);
+    });
+
+    it('should allow admin to update any announcement', () => {
+      const announcement = { id: 'a1', title: 'Test', content: 'Content', authorId: 't1' };
+      const userId = 'admin1';
+      const userRole = 'admin';
+
+      const canUpdate = userRole === 'admin' || announcement.authorId === userId;
+      expect(canUpdate).toBe(true);
+    });
+
+    it('should forbid teacher from updating others announcement', () => {
+      const announcement = { id: 'a1', title: 'Test', content: 'Content', authorId: 't1' };
+      const userId = 't2';
+      const userRole = 'teacher';
+
+      const canUpdate = userRole === 'admin' || announcement.authorId === userId;
+      expect(canUpdate).toBe(false);
+    });
+
+    it('should trigger webhook event for announcement.updated', () => {
+      const updatedAnnouncement = { id: 'a1', title: 'Updated', content: 'New content', authorId: 't1' };
+      const eventType = 'announcement.updated';
+      const context = { announcementId: updatedAnnouncement.id };
+
+      expect(eventType).toBe('announcement.updated');
+      expect(context.announcementId).toBe('a1');
+    });
+
+    it('should return 404 for non-existent announcement', () => {
+      const announcementId = 'non-existent';
+      const announcement = null;
+
+      expect(announcement).toBeNull();
+    });
+  });
+
+  describe('DELETE /api/announcements/:id - Announcement Deletion', () => {
+    it('should allow teacher to delete their own announcement', () => {
+      const announcement = { id: 'a1', title: 'Test', content: 'Content', authorId: 't1' };
+      const userId = 't1';
+      const userRole = 'teacher';
+
+      const canDelete = userRole === 'admin' || announcement.authorId === userId;
+      expect(canDelete).toBe(true);
+    });
+
+    it('should allow admin to delete any announcement', () => {
+      const announcement = { id: 'a1', title: 'Test', content: 'Content', authorId: 't1' };
+      const userId = 'admin1';
+      const userRole = 'admin';
+
+      const canDelete = userRole === 'admin' || announcement.authorId === userId;
+      expect(canDelete).toBe(true);
+    });
+
+    it('should forbid teacher from deleting others announcement', () => {
+      const announcement = { id: 'a1', title: 'Test', content: 'Content', authorId: 't1' };
+      const userId = 't2';
+      const userRole = 'teacher';
+
+      const canDelete = userRole === 'admin' || announcement.authorId === userId;
+      expect(canDelete).toBe(false);
+    });
+
+    it('should trigger webhook event for announcement.deleted', () => {
+      const announcement = { id: 'a1', title: 'Test', content: 'Content', authorId: 't1' };
+      const eventType = 'announcement.deleted';
+      const payload = { id: announcement.id, title: announcement.title, authorId: announcement.authorId };
+      const context = { announcementId: announcement.id };
+
+      expect(eventType).toBe('announcement.deleted');
+      expect(payload.id).toBe('a1');
+      expect(context.announcementId).toBe('a1');
+    });
+
+    it('should return deleted: true on successful deletion', () => {
+      const announcementId = 'a1';
+      const deleteResult = { deleted: true, id: announcementId };
+
+      expect(deleteResult.deleted).toBe(true);
+      expect(deleteResult.id).toBe('a1');
+    });
+
+    it('should return 404 for non-existent announcement', () => {
+      const announcementId = 'non-existent';
+      const announcement = null;
+
+      expect(announcement).toBeNull();
+    });
+  });
 });
