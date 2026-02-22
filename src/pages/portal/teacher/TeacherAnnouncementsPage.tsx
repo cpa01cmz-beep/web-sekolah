@@ -81,7 +81,7 @@ export function TeacherAnnouncementsPage() {
           <AlertTitle>Error</AlertTitle>
           <AlertDescription>Failed to load announcements. Please try again later.</AlertDescription>
           <Button variant="outline" size="sm" className="mt-2" onClick={() => refetch()}>
-            <RefreshCw className="h-4 w-4 mr-2" />
+            <RefreshCw className="h-4 w-4 mr-2" aria-hidden="true" />
             Retry
           </Button>
         </Alert>
