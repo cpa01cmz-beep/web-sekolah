@@ -36,7 +36,7 @@ const AnnouncementItem = memo(({ ann, index, total, onDelete, isDeleting }: {
         </div>
         <div className="flex space-x-2">
           <Button variant="outline" size="icon" className="h-8 w-8" aria-label={`Edit announcement: ${ann.title}`}>
-            <Edit className="h-4 w-4" />
+            <Edit className="h-4 w-4" aria-hidden="true" />
           </Button>
           <Button 
             variant="destructive" 
@@ -46,7 +46,7 @@ const AnnouncementItem = memo(({ ann, index, total, onDelete, isDeleting }: {
             aria-label={`Delete announcement: ${ann.title}`}
             disabled={isDeleting}
           >
-            <Trash2 className="h-4 w-4" />
+            <Trash2 className="h-4 w-4" aria-hidden="true" />
           </Button>
         </div>
       </div>

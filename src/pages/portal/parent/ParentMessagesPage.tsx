@@ -148,7 +148,7 @@ export function ParentMessagesPage() {
                       <button
                         key={message.id}
                         onClick={() => setSelectedTeacherId(message.senderId)}
-                        className={`w-full text-left p-3 rounded-lg transition-colors ${
+                        className={`w-full text-left p-3 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
                           !message.isRead && message.recipientId === parentId
                             ? 'bg-primary/5 hover:bg-primary/10'
                             : 'hover:bg-muted'
@@ -202,7 +202,7 @@ export function ParentMessagesPage() {
                       <button
                         key={message.id}
                         onClick={() => setSelectedTeacherId(message.recipientId)}
-                        className="w-full text-left p-3 rounded-lg hover:bg-muted transition-colors"
+                        className="w-full text-left p-3 rounded-lg hover:bg-muted transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                       >
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2">
