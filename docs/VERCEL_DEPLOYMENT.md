@@ -26,13 +26,13 @@ The `vercel.json` includes best-practice configurations:
 | Feature | Description |
 |---------|-------------|
 | **Edge Regions** | Deployed to Singapore (sin1), Tokyo (hnd1), and US East (iad1) |
-| **Image Optimization** | AVIF/WebP with 60s minimum cache TTL |
-| **Security Headers** | CSP, XSS Protection, Frame Options, Permissions Policy |
-| **Caching** | 1-year immutable cache for JS/CSS/assets with Expires headers |
+| **Fluid Compute** | Enabled for optimal serverless function performance |
+| **Image Optimization** | AVIF/WebP with 1 hour minimum cache TTL |
+| **Security Headers** | CSP, HSTS, XSS Protection, Frame Options, Permissions Policy, CORP/COOP |
+| **Caching** | 1-year immutable cache with stale-while-revalidate and stale-if-error directives |
 | **SPA Routing** | Client-side routing with index.html fallback |
 | **Ignore Command** | Skips builds for documentation-only changes (md files, docs/, wiki/, etc.) |
-| **API Rewrite Caching** | Enabled caching for proxied API requests to Cloudflare Workers |
-| **Serverless Functions** | Configured with 1024MB memory and 10s max duration for API routes |
+| **API Rewrite** | Proxies `/api/*` requests to Cloudflare Workers backend |
 
 ## Prerequisites
 
@@ -140,17 +140,28 @@ Default security headers configured:
 | `X-Frame-Options` | `DENY` |
 | `X-XSS-Protection` | `1; mode=block` |
 | `Referrer-Policy` | `strict-origin-when-cross-origin` |
-| `Permissions-Policy` | `geolocation=(), microphone=(), camera=(), payment=(), usb=(), magnetometer=(), gyroscope=(), accelerometer=()` |
+| `Permissions-Policy` | `geolocation=(), microphone=(), camera=(), payment=(), usb=(), magnetometer=(), gyroscope=(), accelerometer=(), interest-cohort=()` |
 | `Content-Security-Policy` | Restrictive policy for scripts, styles, images, and connections |
+| `Strict-Transport-Security` | `max-age=63072000; includeSubDomains; preload` |
+| `X-DNS-Prefetch-Control` | `on` |
+| `Cross-Origin-Opener-Policy` | `same-origin` |
+| `Cross-Origin-Resource-Policy` | `same-origin` |
+| `X-Robots-Tag` | `index, follow` |
 
 ### Caching Strategy
 
-| Asset Type | Cache Duration |
-|------------|----------------|
-| JS/CSS bundles | 1 year (immutable) |
-| Static assets | 1 year (immutable) |
-| Fonts (.woff2) | 1 year (immutable) |
-| HTML (index.html) | No cache (must-revalidate) |
+| Asset Type | Cache Duration | Resilience |
+|------------|----------------|------------|
+| JS/CSS bundles | 1 year (immutable) | stale-if-error: 24h |
+| Static assets | 1 year (immutable) | stale-if-error: 24h |
+| Fonts (.woff2) | 1 year (immutable) | stale-if-error: 24h |
+| Metadata files | 1 day | stale-if-error: 7 days |
+| HTML (index.html) | No cache (must-revalidate) | - |
+
+**Cache Directives:**
+- `immutable`: Assets never change, skip revalidation
+- `stale-while-revalidate=86400`: Serve stale while fetching fresh (24h window)
+- `stale-if-error=86400`: Serve stale content when origin errors (24h for assets, 7d for metadata)
 
 ### Edge Regions
 
