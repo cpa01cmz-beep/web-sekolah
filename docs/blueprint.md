@@ -6024,4 +6024,44 @@ const hasTeacher = await UserEntity.existsBySecondaryIndex(env, 'role', 'teacher
 
 ---
 
+#### ClassEntity and CourseEntity Count/Exists Methods (2026-02-22)
+
+**Problem**: `ClassEntity` and `CourseEntity` were missing `countByTeacherId()` and `existsByTeacherId()` methods that exist in `UserEntity`, creating inconsistency in the entity API and forcing callers to load all entities when only checking for existence or count.
+
+**Solution**: Added `countByTeacherId()` and `existsByTeacherId()` methods to both `ClassEntity` and `CourseEntity` for consistency with `UserEntity` patterns.
+
+**Implementation**:
+- `countByTeacherId()` method in `worker/entities/ClassEntity.ts` and `worker/entities/CourseEntity.ts`
+- `existsByTeacherId()` method in both entities
+- Uses existing `SecondaryIndex.countByValue()` and `existsBySecondaryIndex()` under the hood
+- Consistent with `UserEntity.countByRole()`, `UserEntity.countByClassId()`, `UserEntity.existsByRole()`, `UserEntity.existsByClassId()` patterns
+
+**Benefits**:
+- ✅ Consistent API across all entities with teacherId secondary index
+- ✅ O(1) indexed count and existence checks
+- ✅ Reduced data transfer when only count/existence is needed
+- ✅ Enables efficient referential integrity checks
+
+**Usage Examples**:
+```typescript
+// Check if teacher has any classes without loading them
+const hasClasses = await ClassEntity.existsByTeacherId(env, 'teacher-1');
+
+// Count courses for a teacher
+const courseCount = await CourseEntity.countByTeacherId(env, 'teacher-1');
+
+// Efficient validation before deletion
+if (await ClassEntity.existsByTeacherId(env, teacherId)) {
+  warnings.push('Teacher is assigned to classes');
+}
+```
+
+**Impact**:
+- `worker/entities/ClassEntity.ts`: Added `countByTeacherId()` and `existsByTeacherId()` methods
+- `worker/entities/CourseEntity.ts`: Added `countByTeacherId()` and `existsByTeacherId()` methods
+- All tests passing (0 regressions)
+
+**Success**: ✅ **CLASS AND COURSE ENTITY COUNT/EXISTS METHODS COMPLETE, CONSISTENT API ACROSS ALL ENTITIES, ALL TESTS PASSING, ZERO REGRESSIONS**
+
+---
 
