@@ -9,6 +9,7 @@ import {
   sanitizeNumericString,
   sanitizeAlphanumeric,
   sanitizeIdentifier,
+  isValidWebhookUrl,
 } from '../sanitize';
 
 describe('sanitizeHtml', () => {
@@ -291,5 +292,188 @@ describe('sanitizeIdentifier', () => {
   it('should handle null/undefined', () => {
     expect(sanitizeIdentifier(null as unknown as string)).toBe('');
     expect(sanitizeIdentifier(undefined as unknown as string)).toBe('');
+  });
+});
+
+describe('isValidWebhookUrl', () => {
+  describe('valid URLs', () => {
+    it('should accept valid https URLs', () => {
+      const result = isValidWebhookUrl('https://example.com/webhook');
+      expect(result.valid).toBe(true);
+    });
+
+    it('should accept valid http URLs', () => {
+      const result = isValidWebhookUrl('http://example.com/webhook');
+      expect(result.valid).toBe(true);
+    });
+
+    it('should accept URLs with ports', () => {
+      const result = isValidWebhookUrl('https://example.com:8080/webhook');
+      expect(result.valid).toBe(true);
+    });
+
+    it('should accept URLs with query strings', () => {
+      const result = isValidWebhookUrl('https://example.com/webhook?token=abc');
+      expect(result.valid).toBe(true);
+    });
+  });
+
+  describe('blocked hostnames', () => {
+    it('should block localhost', () => {
+      const result = isValidWebhookUrl('http://localhost/webhook');
+      expect(result.valid).toBe(false);
+      expect(result.reason).toContain('Private');
+    });
+
+    it('should block 127.0.0.1', () => {
+      const result = isValidWebhookUrl('http://127.0.0.1/webhook');
+      expect(result.valid).toBe(false);
+      expect(result.reason).toContain('Private');
+    });
+
+    it('should block 0.0.0.0', () => {
+      const result = isValidWebhookUrl('http://0.0.0.0/webhook');
+      expect(result.valid).toBe(false);
+      expect(result.reason).toContain('Private');
+    });
+
+    it('should block cloud metadata endpoint', () => {
+      const result = isValidWebhookUrl('http://169.254.169.254/latest/meta-data');
+      expect(result.valid).toBe(false);
+      expect(result.reason).toContain('Private');
+    });
+
+    it('should block Google Cloud metadata', () => {
+      const result = isValidWebhookUrl('http://metadata.google.internal/computeMetadata/v1/');
+      expect(result.valid).toBe(false);
+      expect(result.reason).toContain('Private');
+    });
+
+    it('should block Azure metadata', () => {
+      const result = isValidWebhookUrl('http://metadata.azure/metadata/instance');
+      expect(result.valid).toBe(false);
+      expect(result.reason).toContain('Private');
+    });
+  });
+
+  describe('blocked IP ranges', () => {
+    it('should block 10.x.x.x (Class A private)', () => {
+      const result = isValidWebhookUrl('http://10.0.0.1/webhook');
+      expect(result.valid).toBe(false);
+      expect(result.reason).toContain('Private');
+    });
+
+    it('should block 172.16.x.x (Class B private)', () => {
+      const result = isValidWebhookUrl('http://172.16.0.1/webhook');
+      expect(result.valid).toBe(false);
+      expect(result.reason).toContain('Private');
+    });
+
+    it('should block 172.31.x.x (Class B private upper)', () => {
+      const result = isValidWebhookUrl('http://172.31.255.255/webhook');
+      expect(result.valid).toBe(false);
+      expect(result.reason).toContain('Private');
+    });
+
+    it('should block 192.168.x.x (Class C private)', () => {
+      const result = isValidWebhookUrl('http://192.168.1.1/webhook');
+      expect(result.valid).toBe(false);
+      expect(result.reason).toContain('Private');
+    });
+
+    it('should block 169.254.x.x (link-local)', () => {
+      const result = isValidWebhookUrl('http://169.254.1.1/webhook');
+      expect(result.valid).toBe(false);
+      expect(result.reason).toContain('Private');
+    });
+
+    it('should block IPv6 loopback ::1', () => {
+      const result = isValidWebhookUrl('http://[::1]/webhook');
+      expect(result.valid).toBe(false);
+      expect(result.reason).toContain('Private');
+    });
+
+    it('should block IPv6 unique local fc00::', () => {
+      const result = isValidWebhookUrl('http://[fc00::1]/webhook');
+      expect(result.valid).toBe(false);
+      expect(result.reason).toContain('Private');
+    });
+
+    it('should block IPv6 link-local fe80::', () => {
+      const result = isValidWebhookUrl('http://[fe80::1]/webhook');
+      expect(result.valid).toBe(false);
+      expect(result.reason).toContain('Private');
+    });
+  });
+
+  describe('blocked TLDs', () => {
+    it('should block .local domains', () => {
+      const result = isValidWebhookUrl('http://myserver.local/webhook');
+      expect(result.valid).toBe(false);
+      expect(result.reason).toContain('Private');
+    });
+
+    it('should block .internal domains', () => {
+      const result = isValidWebhookUrl('http://api.internal/webhook');
+      expect(result.valid).toBe(false);
+      expect(result.reason).toContain('Private');
+    });
+  });
+
+  describe('protocol validation', () => {
+    it('should block javascript: protocol', () => {
+      const result = isValidWebhookUrl('javascript:alert(1)');
+      expect(result.valid).toBe(false);
+      expect(result.reason).toContain('HTTP');
+    });
+
+    it('should block file: protocol', () => {
+      const result = isValidWebhookUrl('file:///etc/passwd');
+      expect(result.valid).toBe(false);
+      expect(result.reason).toContain('HTTP');
+    });
+
+    it('should block data: protocol', () => {
+      const result = isValidWebhookUrl('data:text/html,<script>');
+      expect(result.valid).toBe(false);
+      expect(result.reason).toContain('HTTP');
+    });
+
+    it('should block ftp: protocol', () => {
+      const result = isValidWebhookUrl('ftp://example.com/file');
+      expect(result.valid).toBe(false);
+      expect(result.reason).toContain('HTTP');
+    });
+  });
+
+  describe('input validation', () => {
+    it('should reject empty string', () => {
+      const result = isValidWebhookUrl('');
+      expect(result.valid).toBe(false);
+      expect(result.reason).toContain('required');
+    });
+
+    it('should reject null', () => {
+      const result = isValidWebhookUrl(null as unknown as string);
+      expect(result.valid).toBe(false);
+      expect(result.reason).toContain('required');
+    });
+
+    it('should reject undefined', () => {
+      const result = isValidWebhookUrl(undefined as unknown as string);
+      expect(result.valid).toBe(false);
+      expect(result.reason).toContain('required');
+    });
+
+    it('should reject malformed URLs', () => {
+      const result = isValidWebhookUrl('not-a-valid-url');
+      expect(result.valid).toBe(false);
+      expect(result.reason).toContain('Invalid URL');
+    });
+
+    it('should reject URLs without protocol', () => {
+      const result = isValidWebhookUrl('example.com/webhook');
+      expect(result.valid).toBe(false);
+    });
   });
 });

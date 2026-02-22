@@ -179,7 +179,7 @@ Vercel Image Optimization is configured with:
 
 - **Formats**: AVIF (preferred), WebP (fallback)
 - **Remote Patterns**: All HTTPS sources allowed
-- **Minimum Cache TTL**: 60 seconds
+- **Minimum Cache TTL**: 3600 seconds (1 hour)
 
 To use optimized images in components:
 
