@@ -40,7 +40,8 @@ export const BaseChart = memo(function BaseChart({
   if (isLoading || !Chart) {
     return (
       <div
-        className={`h-[${height}px] animate-pulse bg-muted rounded-lg ${className || ''}`}
+        className={`animate-pulse motion-reduce:animate-none bg-muted rounded-lg ${className || ''}`}
+        style={{ height: `${height}px` }}
         role="status"
         aria-label="Loading chart"
       />
