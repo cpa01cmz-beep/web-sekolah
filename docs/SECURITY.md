@@ -26,6 +26,7 @@ Akademia Pro maintains a **97/100 security score (A+)** with comprehensive secur
 - HMAC-SHA256 signing algorithm
 - Token expiration: 24 hours (configurable)
 - Secure token generation using Web Crypto API
+- **JWT ID (`jti`)**: Unique UUID per token for tracking and revocation support
 - Middleware-based enforcement (`authenticate()`, `authorize()`)
 - **Issuer claim (`iss`)**: `akademia-pro` - validates token origin
 - **Audience claim (`aud`)**: `akademia-pro-users` - validates intended recipient
@@ -245,6 +246,7 @@ cspDirectives: `default-src 'self'; script-src 'self' 'nonce-${nonce}'; style-sr
 
 | Date | Score | Status | Notes |
 |------|-------|--------|-------|
+| 2026-02-22 | 98/100 (A+) | Secure | JWT ID (jti) claim added for token uniqueness and revocation support |
 | 2026-02-22 | 98/100 (A+) | Secure | JWT issuer/audience claims added, Content-Type validation enforced, IP spoofing detection logging |
 | 2026-02-22 | 97/100 (A+) | Secure | Rate limiting IP validation improved (cf-connecting-ip priority), store size limit added, CSP report validation added |
 | 2026-02-20 | 97/100 (A+) | Secure | Dev dependency vulnerabilities documented (ESLint transitive deps), all controls verified |

@@ -16,6 +16,29 @@ describe('auth-utils', () => {
     });
   });
 
+  describe('JwtPayload Interface', () => {
+    it('should include jti claim in JwtPayload type', () => {
+      const payload: JwtPayload = {
+        sub: 'user-123',
+        email: 'test@example.com',
+        role: 'student',
+        jti: 'unique-token-id',
+        iss: 'akademia-pro',
+        aud: 'akademia-pro-users',
+      };
+      expect(payload.jti).toBe('unique-token-id');
+    });
+
+    it('should allow optional jti claim', () => {
+      const payload: JwtPayload = {
+        sub: 'user-123',
+        email: 'test@example.com',
+        role: 'student',
+      };
+      expect(payload.jti).toBeUndefined();
+    });
+  });
+
   describe('verifyToken', () => {
 
     it('should return null for invalid token', async () => {

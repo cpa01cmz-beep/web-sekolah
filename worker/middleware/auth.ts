@@ -12,6 +12,7 @@ export interface JwtPayload extends JWTPayload {
   role: 'student' | 'teacher' | 'parent' | 'admin';
   iss?: string;
   aud?: string;
+  jti?: string;
 }
 
 const JWT_ISSUER = 'akademia-pro';
@@ -30,16 +31,18 @@ async function getSecretKey(secret: string): Promise<CryptoKey> {
 }
 
 export async function generateToken(
-  payload: Omit<JwtPayload, 'iat' | 'exp' | 'iss' | 'aud'>,
+  payload: Omit<JwtPayload, 'iat' | 'exp' | 'iss' | 'aud' | 'jti'>,
   secret: string,
   expiresIn: string = '1h'
 ): Promise<string> {
   const key = await getSecretKey(secret);
+  const jti = crypto.randomUUID();
   const token = await new SignJWT(payload)
     .setProtectedHeader({ alg: 'HS256' })
     .setIssuedAt()
     .setIssuer(JWT_ISSUER)
     .setAudience(JWT_AUDIENCE)
+    .setJwtId(jti)
     .setExpirationTime(expiresIn)
     .sign(key);
   return token;
