@@ -33,6 +33,14 @@ export class GradeEntity extends IndexedEntity<Grade> {
     return await index.countByValue(courseId);
   }
 
+  static async existsByStudentId(env: Env, studentId: string): Promise<boolean> {
+    return this.existsBySecondaryIndex(env, 'studentId', studentId);
+  }
+
+  static async existsByCourseId(env: Env, courseId: string): Promise<boolean> {
+    return this.existsBySecondaryIndex(env, 'courseId', courseId);
+  }
+
   static async getByStudentIdAndCourseId(env: Env, studentId: string, courseId: string): Promise<Grade | null> {
     const index = new CompoundSecondaryIndex(env, this.entityName, ['studentId', 'courseId']);
     const gradeIds = await index.getByValues([studentId, courseId]);
