@@ -89,7 +89,7 @@ export function StudentCardPage() {
               <p className="text-xs opacity-80">KARTU TANDA PELAJAR</p>
             </div>
           </div>
-          <p className="font-mono text-xs flex-shrink-0">2023/2024</p>
+          <p className="font-mono text-xs flex-shrink-0">2025/2026</p>
         </header>
         <main className="flex items-center gap-4 sm:gap-6 z-10">
           <Avatar className="h-24 w-24 sm:h-32 sm:w-32 border-4 border-white/50 flex-shrink-0">

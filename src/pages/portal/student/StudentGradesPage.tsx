@@ -3,13 +3,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { CardSkeleton } from '@/components/ui/loading-skeletons';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { AlertTriangle } from 'lucide-react';
+import { AlertTriangle, TrendingUp, Award, BookOpen } from 'lucide-react';
 import { PageHeader } from '@/components/PageHeader';
 import { SlideUp } from '@/components/animations';
 import { useStudentDashboard } from '@/hooks/useStudent';
 import { useAuthStore } from '@/lib/authStore';
 import { calculateAverageScore, getGradeColorClass, getGradeLetter } from '@/utils/grades';
 import { ResponsiveTable } from '@/components/ui/responsive-table';
+import { DashboardStatCard } from '@/components/dashboard/DashboardStatCard';
 
 const TABLE_HEADERS = [
   { key: 'no', label: 'No.' },
@@ -27,6 +28,20 @@ export function StudentGradesPage() {
 
   const averageScore = useMemo(() => 
     grades.length > 0 ? calculateAverageScore(grades) : '-',
+    [grades]
+  );
+
+  const gradeDistribution = useMemo(() => {
+    const distribution = { A: 0, B: 0, C: 0, D: 0, F: 0 };
+    grades.forEach(grade => {
+      const letter = getGradeLetter(grade.score);
+      distribution[letter]++;
+    });
+    return distribution;
+  }, [grades]);
+
+  const passingCount = useMemo(() => 
+    grades.filter(g => g.score >= 70).length,
     [grades]
   );
 
@@ -65,10 +80,33 @@ export function StudentGradesPage() {
   return (
     <SlideUp className="space-y-6">
       <PageHeader title="Rapor Akademik" />
+      {grades.length > 0 && (
+        <div className="grid gap-4 md:grid-cols-3" role="region" aria-label="Academic summary">
+          <DashboardStatCard
+            title="Rata-rata Nilai"
+            value={averageScore}
+            icon={<TrendingUp className="h-4 w-4 text-muted-foreground" aria-hidden="true" />}
+            subtitle={grades.length > 0 ? `dari ${grades.length} mata pelajaran` : undefined}
+            valueSize="3xl"
+          />
+          <DashboardStatCard
+            title="Mata Pelajar Lulus"
+            value={`${passingCount}/${grades.length}`}
+            icon={<Award className="h-4 w-4 text-muted-foreground" aria-hidden="true" />}
+            subtitle={grades.length > 0 ? `${Math.round((passingCount / grades.length) * 100)}% lulus` : undefined}
+          />
+          <DashboardStatCard
+            title="Predikat Tertinggi"
+            value={gradeDistribution.A > 0 ? `A (${gradeDistribution.A})` : gradeDistribution.B > 0 ? `B (${gradeDistribution.B})` : '-'}
+            icon={<BookOpen className="h-4 w-4 text-muted-foreground" aria-hidden="true" />}
+            subtitle={gradeDistribution.A > 0 ? 'Nilai excellent' : gradeDistribution.B > 0 ? 'Nilai baik' : undefined}
+          />
+        </div>
+      )}
       <Card className="overflow-hidden">
         <CardHeader>
           <CardTitle>Laporan Hasil Belajar</CardTitle>
-          <CardDescription>Semester Ganjil - Tahun Ajaran 2023/2024</CardDescription>
+          <CardDescription>Semester Ganjil - Tahun Ajaran 2025/2026</CardDescription>
         </CardHeader>
         <CardContent>
           {grades.length > 0 ? (
