@@ -39,3 +39,11 @@ export {
   useParentDashboard,
   useChildSchedule,
 } from './useParent';
+export {
+  createMessageHooks,
+  type UseMessagesOptions,
+  type UseUnreadCountOptions,
+  type UseConversationOptions,
+  type UseSendMessageOptions,
+  type UseMarkAsReadOptions,
+} from './useMessage';
