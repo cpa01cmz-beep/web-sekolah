@@ -65,6 +65,33 @@ export class WebhookDeliveryEntity extends IndexedEntity<WebhookDelivery> {
     return deliveries.filter(d => d && !d.deletedAt) as WebhookDelivery[];
   }
 
+  static async countByStatus(env: Env, status: string): Promise<number> {
+    const index = new SecondaryIndex<string>(env, this.entityName, 'status');
+    return await index.countByValue(status);
+  }
+
+  static async existsByStatus(env: Env, status: string): Promise<boolean> {
+    return this.existsBySecondaryIndex(env, 'status', status);
+  }
+
+  static async countByEventId(env: Env, eventId: string): Promise<number> {
+    const index = new SecondaryIndex<string>(env, this.entityName, 'eventId');
+    return await index.countByValue(eventId);
+  }
+
+  static async existsByEventId(env: Env, eventId: string): Promise<boolean> {
+    return this.existsBySecondaryIndex(env, 'eventId', eventId);
+  }
+
+  static async countByWebhookConfigId(env: Env, webhookConfigId: string): Promise<number> {
+    const index = new SecondaryIndex<string>(env, this.entityName, 'webhookConfigId');
+    return await index.countByValue(webhookConfigId);
+  }
+
+  static async existsByWebhookConfigId(env: Env, webhookConfigId: string): Promise<boolean> {
+    return this.existsBySecondaryIndex(env, 'webhookConfigId', webhookConfigId);
+  }
+
   static async createWithDateIndex(env: Env, state: WebhookDelivery): Promise<WebhookDelivery> {
     const created = await super.create(env, state);
     const dateIndex = new DateSortedSecondaryIndex(env, this.entityName);

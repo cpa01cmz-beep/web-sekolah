@@ -80,6 +80,24 @@ export class MessageEntity extends IndexedEntity<Message> {
     return messages.filter(m => m && !m.deletedAt) as Message[];
   }
 
+  static async countBySenderId(env: Env, senderId: string): Promise<number> {
+    const index = new SecondaryIndex<string>(env, this.entityName, 'senderId');
+    return await index.countByValue(senderId);
+  }
+
+  static async existsBySenderId(env: Env, senderId: string): Promise<boolean> {
+    return this.existsBySecondaryIndex(env, 'senderId', senderId);
+  }
+
+  static async countByRecipientId(env: Env, recipientId: string): Promise<number> {
+    const index = new SecondaryIndex<string>(env, this.entityName, 'recipientId');
+    return await index.countByValue(recipientId);
+  }
+
+  static async existsByRecipientId(env: Env, recipientId: string): Promise<boolean> {
+    return this.existsBySecondaryIndex(env, 'recipientId', recipientId);
+  }
+
   static async updateWithCompoundIndex(env: Env, id: string, updates: Partial<Message>): Promise<Message | null> {
     const inst = new this(env, id);
     const currentState = await inst.getState() as Message | null;
