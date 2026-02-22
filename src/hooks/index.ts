@@ -1,9 +1,13 @@
+export { useAuth } from './useAuth';
+export type { UseAuthReturn } from './useAuth';
 export { useIsMobile } from './use-mobile';
 export { useReducedMotion } from './use-reduced-motion';
 export { useTheme } from './use-theme';
 export { useScheduleGrouping } from './useScheduleGrouping';
 export { useFormValidation } from './useFormValidation';
 export type { Validator, FormValidationConfig, FormValidationResult } from './useFormValidation';
+export { useRecharts } from './useRecharts';
+export type { RechartsComponent, UseRechartsOptions, UseRechartsResult } from './useRecharts';
 export {
   useAdminDashboard,
   useUsers,

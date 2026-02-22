@@ -3,6 +3,7 @@ name = "website-sekolah"
 main = "worker/index.ts"
 compatibility_date = "2026-02-18"
 compatibility_flags = ["nodejs_compat"]
+send_metrics = false
 
 [assets]
 directory = "dist/client"
@@ -30,9 +31,10 @@ class_name = "GlobalDurableObject"
 tag = "v1"
 new_sqlite_classes = ["GlobalDurableObject"]
 
-# Staging Environment
 [env.staging]
 name = "website-sekolah-staging"
+keep_vars = true
+logpush = true
 vars = { ENVIRONMENT = "staging" }
 
 [env.staging.triggers]
@@ -56,7 +58,6 @@ class_name = "GlobalDurableObject"
 tag = "v1"
 new_sqlite_classes = ["GlobalDurableObject"]
 
-# Production Environment
 [env.production]
 name = "website-sekolah-production"
 workers_dev = false
