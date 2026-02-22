@@ -11,7 +11,7 @@ import { docsRoutes } from './docs-routes';
 import { publicRoutes } from './routes/public-routes';
 import { Env, GlobalDurableObject, ok, notFound, serverError } from './core-utils';
 import { logger as pinoLogger } from './logger';
-import { ClientErrorReport, CSPViolationReport } from './types/index';
+import { ClientErrorReport } from './types/index';
 import { defaultRateLimiter, strictRateLimiter } from './middleware/rate-limit';
 import { defaultTimeout } from './middleware/timeout';
 import { securityHeaders } from './middleware/security-headers';
@@ -23,7 +23,7 @@ import { HttpStatusCode, TimeConstants } from './config/time';
 import { DefaultOrigins } from './config/defaults';
 import { handleScheduled } from './scheduled';
 import { validateBody } from './middleware/validation';
-import { clientErrorSchema } from './middleware/schemas';
+import { clientErrorSchema, cspReportSchema } from './middleware/schemas';
 
 // Need to export GlobalDurableObject to make it available in wrangler
 export { GlobalDurableObject };
@@ -138,12 +138,16 @@ app.post('/api/client-errors', validateBody(clientErrorSchema), async (c) => {
 
 app.post('/api/csp-report', async (c) => {
   try {
-    const report = await c.req.json<CSPViolationReport>();
-    const violation = report['csp-report'];
-    pinoLogger.warn('[CSP VIOLATION]', { violation });
+    const body = await c.req.json();
+    const result = cspReportSchema.safeParse(body);
+    if (result.success) {
+      const violation = result.data['csp-report'];
+      pinoLogger.warn('[CSP VIOLATION]', { violation });
+    } else {
+      pinoLogger.warn('[CSP VIOLATION] Invalid report format');
+    }
     return new Response(null, { status: 204 });
-  } catch (error) {
-    pinoLogger.error('[CSP REPORT HANDLER] Failed', error);
+  } catch {
     return new Response(null, { status: 204 });
   }
 });

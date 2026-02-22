@@ -141,3 +141,22 @@ export const newsLimitQuerySchema = z.object({
     })
     .optional(),
 });
+
+const cspReportEntrySchema = z.object({
+  'document-uri': z.string().max(2000).optional(),
+  'referrer': z.string().max(2000).optional(),
+  'violated-directive': z.string().max(200).optional(),
+  'effective-directive': z.string().max(200).optional(),
+  'original-policy': z.string().max(10000).optional(),
+  'disposition': z.string().max(50).optional(),
+  'blocked-uri': z.string().max(2000).optional(),
+  'line-number': z.number().int().positive().optional(),
+  'column-number': z.number().int().positive().optional(),
+  'source-file': z.string().max(2000).optional(),
+  'status-code': z.string().max(10).optional(),
+  'script-sample': z.string().max(1000).optional(),
+});
+
+export const cspReportSchema = z.object({
+  'csp-report': cspReportEntrySchema,
+}).passthrough();

@@ -4,7 +4,7 @@
 
 Akademia Pro maintains a **97/100 security score (A+)** with comprehensive security controls implemented throughout the codebase.
 
-**Last Security Assessment**: 2026-02-20
+**Last Security Assessment**: 2026-02-22
 
 **Production Dependencies**: 0 vulnerabilities
 **Development Dependencies**: 12 vulnerabilities (ESLint transitive deps, ReDoS - LOW risk)
@@ -67,6 +67,12 @@ Multiple rate limiters with configurable windows and limits:
 | Strict | 50 requests | 5 min | Sensitive operations (seed, errors) |
 | Loose | 1000 requests | 1 hour | Less restrictive operations |
 | Auth | 5 requests | 15 min | Login attempts |
+
+**IP Identification**:
+- Primary: `cf-connecting-ip` header (Cloudflare, trustworthy)
+- Fallback: `x-real-ip` header
+- Last resort: `x-forwarded-for` first IP (can be spoofed)
+- Maximum store size: 10,000 entries (prevents memory exhaustion)
 
 **Implementation**: `worker/middleware/rate-limit.ts`
 
@@ -233,6 +239,7 @@ cspDirectives: `default-src 'self'; script-src 'self' 'nonce-${nonce}'; style-sr
 
 | Date | Score | Status | Notes |
 |------|-------|--------|-------|
+| 2026-02-22 | 97/100 (A+) | Secure | Rate limiting IP validation improved (cf-connecting-ip priority), store size limit added, CSP report validation added |
 | 2026-02-20 | 97/100 (A+) | Secure | Dev dependency vulnerabilities documented (ESLint transitive deps), all controls verified |
 | 2026-01-22 | 98/100 (A+) | Secure | Zero vulnerabilities, CSP improvements, all controls verified |
 | 2026-01-08 | 98/100 (A+) | Secure | Zero vulnerabilities, comprehensive controls |
