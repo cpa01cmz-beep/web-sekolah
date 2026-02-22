@@ -8,10 +8,11 @@ import { RetryDelay } from '../../config/time';
 import { WEBHOOK_CONFIG } from '../../webhook-constants';
 import { RETRY_CONFIG } from '@shared/constants';
 import type { Context } from 'hono';
-import { withErrorHandler } from '../route-utils';
+import { withErrorHandler, withAuth } from '../route-utils';
+import { isValidWebhookUrl } from '../../middleware/sanitize';
 
 export function webhookTestRoutes(app: Hono<{ Bindings: Env }>) {
-  app.post('/api/webhooks/test', withErrorHandler('test webhook')(async (c: Context) => {
+  app.post('/api/webhooks/test', ...withAuth('admin'), withErrorHandler('test webhook')(async (c: Context) => {
     const body = await c.req.json<{
       url: string;
       secret: string;
@@ -19,6 +20,11 @@ export function webhookTestRoutes(app: Hono<{ Bindings: Env }>) {
 
     if (!body.url || !body.secret) {
       return bad(c, 'Missing required fields: url, secret');
+    }
+
+    const urlValidation = isValidWebhookUrl(body.url);
+    if (!urlValidation.valid) {
+      return bad(c, urlValidation.reason || 'Invalid webhook URL');
     }
 
     const testPayload = {

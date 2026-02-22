@@ -133,3 +133,58 @@ export function sanitizeIdentifier(input: string): string {
 
   return input.replace(/[^a-zA-Z0-9_-]/g, '');
 }
+
+const SSRF_BLOCKED_HOSTS = [
+  'localhost',
+  '127.0.0.1',
+  '0.0.0.0',
+  '169.254.169.254',
+  'metadata.google.internal',
+  'metadata.azure',
+];
+
+const SSRF_BLOCKED_PATTERNS = [
+  /^10\./,
+  /^172\.(1[6-9]|2[0-9]|3[0-1])\./,
+  /^192\.168\./,
+  /^169\.254\./,
+  /^\[?::1\]?$/i,
+  /^\[?0:0:0:0:0:0:0:1\]?$/i,
+  /^\[?fc00/i,
+  /^\[?fe80/i,
+];
+
+export function isValidWebhookUrl(url: string): { valid: boolean; reason?: string } {
+  if (!url || typeof url !== 'string') {
+    return { valid: false, reason: 'URL is required' };
+  }
+
+  let parsedUrl: URL;
+  try {
+    parsedUrl = new URL(url);
+  } catch {
+    return { valid: false, reason: 'Invalid URL format' };
+  }
+
+  if (!['http:', 'https:'].includes(parsedUrl.protocol)) {
+    return { valid: false, reason: 'Only HTTP and HTTPS protocols are allowed' };
+  }
+
+  const hostname = parsedUrl.hostname.toLowerCase();
+
+  if (SSRF_BLOCKED_HOSTS.includes(hostname)) {
+    return { valid: false, reason: 'Private/internal hostnames are not allowed' };
+  }
+
+  for (const pattern of SSRF_BLOCKED_PATTERNS) {
+    if (pattern.test(hostname)) {
+      return { valid: false, reason: 'Private/internal IP addresses are not allowed' };
+    }
+  }
+
+  if (hostname.endsWith('.local') || hostname.endsWith('.internal')) {
+    return { valid: false, reason: 'Private/internal hostnames are not allowed' };
+  }
+
+  return { valid: true };
+}

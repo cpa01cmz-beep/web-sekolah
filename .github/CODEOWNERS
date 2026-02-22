@@ -1,0 +1,36 @@
+# CODEOWNERS - Define code ownership and review requirements
+# https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# Default owners for everything in the repo
+* @cpa01cmz-beep
+
+# Frontend code - React components and pages
+/src/ @cpa01cmz-beep
+/src/components/ @cpa01cmz-beep
+/src/pages/ @cpa01cmz-beep
+
+# Backend code - Worker/API
+/worker/ @cpa01cmz-beep
+
+# Shared types and utilities
+/shared/ @cpa01cmz-beep
+
+# DevOps and CI/CD
+/.github/workflows/ @cpa01cmz-beep
+/wrangler.toml @cpa01cmz-beep
+/vercel.json @cpa01cmz-beep
+/scripts/ @cpa01cmz-beep
+
+# Configuration files
+/package.json @cpa01cmz-beep
+/tsconfig.json @cpa01cmz-beep
+/.env.example @cpa01cmz-beep
+
+# Documentation
+/docs/ @cpa01cmz-beep
+/README.md @cpa01cmz-beep
+/AGENTS.md @cpa01cmz-beep
+
+# Security
+/.github/security-guidelines.md @cpa01cmz-beep
+/SECURITY-ASSESSMENT.md @cpa01cmz-beep
