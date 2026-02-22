@@ -355,3 +355,68 @@ export function analyzeTrend(values: number[]): TrendAnalysis {
     prediction,
   };
 }
+
+export interface SubjectPerformance {
+  subject: string;
+  score: number;
+  grade: string;
+}
+
+export interface PerformanceInsight {
+  type: 'strength' | 'improvement' | 'warning' | 'encouragement';
+  subject: string;
+  message: string;
+  score?: number;
+}
+
+export function generatePerformanceInsights(
+  performances: SubjectPerformance[]
+): PerformanceInsight[] {
+  if (performances.length === 0) return [];
+
+  const insights: PerformanceInsight[] = [];
+  const sortedByScore = [...performances].sort((a, b) => b.score - a.score);
+
+  const topPerformances = sortedByScore.slice(0, 3);
+  topPerformances.forEach((perf) => {
+    if (perf.score >= 85) {
+      insights.push({
+        type: 'strength',
+        subject: perf.subject,
+        message: `Excellent work in ${perf.subject}! Keep up the outstanding performance.`,
+        score: perf.score,
+      });
+    }
+  });
+
+  const lowPerformances = sortedByScore.filter((p) => p.score < 70);
+  lowPerformances.slice(0, 3).forEach((perf) => {
+    if (perf.score < 60) {
+      insights.push({
+        type: 'warning',
+        subject: perf.subject,
+        message: `${perf.subject} needs immediate attention. Consider seeking help from your teacher.`,
+        score: perf.score,
+      });
+    } else {
+      insights.push({
+        type: 'improvement',
+        subject: perf.subject,
+        message: `Focus more on ${perf.subject} to improve your understanding.`,
+        score: perf.score,
+      });
+    }
+  });
+
+  const goodPerformances = sortedByScore.filter((p) => p.score >= 70 && p.score < 85);
+  goodPerformances.slice(0, 2).forEach((perf) => {
+    insights.push({
+      type: 'encouragement',
+      subject: perf.subject,
+      message: `Good progress in ${perf.subject}! A little more effort can push you to the next level.`,
+      score: perf.score,
+    });
+  });
+
+  return insights;
+}
