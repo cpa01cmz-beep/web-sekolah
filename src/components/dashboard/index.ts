@@ -4,4 +4,6 @@ export { DashboardListCard } from './DashboardListCard';
 export { AnnouncementItem } from './AnnouncementItem';
 export { EnrollmentChart } from './EnrollmentChart';
 export { GradeListItem } from './GradeListItem';
+export { TeacherGradeListItem } from './TeacherGradeListItem';
+export { ScheduleListItem } from './ScheduleListItem';
 export { DashboardCardEmptyState } from './DashboardCardEmptyState';

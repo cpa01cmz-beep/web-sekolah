@@ -1,25 +1,15 @@
-import { memo } from 'react';
 import { PageHeader } from '@/components/PageHeader';
 import { DashboardStatCard } from '@/components/dashboard/DashboardStatCard';
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
 import { DashboardListCard } from '@/components/dashboard/DashboardListCard';
 import { AnnouncementItem } from '@/components/dashboard/AnnouncementItem';
+import { TeacherGradeListItem } from '@/components/dashboard/TeacherGradeListItem';
 import { BookCopy, Megaphone, Award } from 'lucide-react';
 import { SlideUp } from '@/components/animations';
 import { useReducedMotion } from '@/hooks/use-reduced-motion';
 import { useTeacherDashboard } from '@/hooks/useTeacher';
 import { useAuthStore } from '@/lib/authStore';
 import type { TeacherDashboardData } from '@shared/types';
-
-const GradeItem = memo(({ grade }: { grade: TeacherDashboardData['recentGrades'][0] }) => (
-  <div className="text-sm">
-    <p className="font-medium">{grade.studentName}</p>
-    <p className="text-xs text-muted-foreground">
-      {grade.courseName}: Score {grade.score}
-    </p>
-  </div>
-));
-GradeItem.displayName = 'GradeItem';
 
 export function TeacherDashboardPage() {
   const prefersReducedMotion = useReducedMotion();
@@ -52,7 +42,13 @@ export function TeacherDashboardPage() {
                 icon={<Award className="h-4 w-4 text-muted-foreground" aria-hidden="true" />}
                 items={data.recentGrades}
                 emptyMessage="No recent grades recorded."
-                renderItem={(grade) => <GradeItem grade={grade} />}
+                renderItem={(grade) => (
+                  <TeacherGradeListItem
+                    studentName={grade.studentName}
+                    courseName={grade.courseName}
+                    score={grade.score}
+                  />
+                )}
                 getKey={(grade) => grade.id}
                 listClassName="space-y-2"
                 itemAriaLabel={(count) => `${count} recent grades`}

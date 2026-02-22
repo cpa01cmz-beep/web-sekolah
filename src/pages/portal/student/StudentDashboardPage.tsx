@@ -4,23 +4,12 @@ import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
 import { DashboardListCard } from '@/components/dashboard/DashboardListCard';
 import { AnnouncementItem } from '@/components/dashboard/AnnouncementItem';
 import { GradeListItem } from '@/components/dashboard/GradeListItem';
+import { ScheduleListItem } from '@/components/dashboard/ScheduleListItem';
 import { useReducedMotion } from '@/hooks/use-reduced-motion';
 import { Clock, BookOpen, Megaphone } from 'lucide-react';
 import { useStudentDashboard } from '@/hooks/useStudent';
 import { useAuthStore } from '@/lib/authStore';
 import type { StudentDashboardData } from '@shared/types';
-import { memo } from 'react';
-
-const ScheduleItem = memo(({ item }: { item: StudentDashboardData['schedule'][0] }) => (
-  <div className="flex items-start">
-    <div className="text-sm font-semibold w-24">{item.time}</div>
-    <div className="text-sm">
-      <p className="font-medium">{item.courseName}</p>
-      <p className="text-xs text-muted-foreground">{item.teacherName}</p>
-    </div>
-  </div>
-));
-ScheduleItem.displayName = 'ScheduleItem';
 
 export function StudentDashboardPage() {
   const prefersReducedMotion = useReducedMotion();
@@ -45,7 +34,9 @@ export function StudentDashboardPage() {
                   icon={<Clock className="h-4 w-4 text-muted-foreground" aria-hidden="true" />}
                   items={data.schedule.slice(0, 3)}
                   emptyMessage="No classes scheduled for today."
-                  renderItem={(item) => <ScheduleItem item={item} />}
+                  renderItem={(item) => (
+                    <ScheduleListItem item={item} showTeacher teacherName={item.teacherName} />
+                  )}
                   getKey={(item) => `${item.courseId}-${item.time}`}
                   itemAriaLabel={(count) => `${count} scheduled classes`}
                 />

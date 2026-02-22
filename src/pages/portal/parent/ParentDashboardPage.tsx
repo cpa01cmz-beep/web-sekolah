@@ -1,25 +1,15 @@
-import { memo } from 'react';
 import { PageHeader } from '@/components/PageHeader';
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
 import { DashboardListCard } from '@/components/dashboard/DashboardListCard';
 import { AnnouncementItem } from '@/components/dashboard/AnnouncementItem';
 import { GradeListItem } from '@/components/dashboard/GradeListItem';
+import { ScheduleListItem } from '@/components/dashboard/ScheduleListItem';
 import { Award, CalendarCheck, Megaphone } from 'lucide-react';
 import { SlideUp } from '@/components/animations';
 import { useReducedMotion } from '@/hooks/use-reduced-motion';
 import { useParentDashboard } from '@/hooks/useParent';
 import { useAuthStore } from '@/lib/authStore';
 import type { ParentDashboardData } from '@shared/types';
-
-const ScheduleItem = memo(({ item }: { item: ParentDashboardData['childSchedule'][0] }) => (
-  <div className="text-sm">
-    <p className="font-medium">{item.courseName}</p>
-    <p className="text-xs text-muted-foreground">
-      {item.time} - {item.day}
-    </p>
-  </div>
-));
-ScheduleItem.displayName = 'ScheduleItem';
 
 export function ParentDashboardPage() {
   const prefersReducedMotion = useReducedMotion();
@@ -56,7 +46,9 @@ export function ParentDashboardPage() {
                 icon={<CalendarCheck className="h-4 w-4 text-muted-foreground" aria-hidden="true" />}
                 items={data.childSchedule.slice(0, 5)}
                 emptyMessage="No schedule available."
-                renderItem={(item) => <ScheduleItem item={item} />}
+                renderItem={(item) => (
+                  <ScheduleListItem item={item} showDay day={item.day} />
+                )}
                 getKey={(item) => `${item.courseId}-${item.time}`}
                 listClassName="space-y-2"
                 itemAriaLabel={(count) => `${count} scheduled classes`}
