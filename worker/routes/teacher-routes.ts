@@ -74,6 +74,24 @@ export function teacherRoutes(app: Hono<{ Bindings: Env }>) {
     return ok(c, newGrade);
   }));
 
+  app.delete('/api/grades/:id', ...withAuth('teacher'), withErrorHandler('delete grade')(async (c: Context) => {
+    const gradeId = c.req.param('id');
+    const teacherId = getCurrentUserId(c);
+
+    const ownership = await GradeService.verifyTeacherOwnership(c.env, gradeId, teacherId);
+    if (!ownership.valid) {
+      return bad(c, ownership.error || 'Cannot delete grade');
+    }
+
+    const deleted = await GradeService.deleteGrade(c.env, gradeId);
+    if (!deleted) {
+      return notFound(c, 'Grade not found');
+    }
+
+    triggerWebhookSafely(c.env, 'grade.deleted', { id: gradeId, deletedBy: teacherId }, { gradeId });
+    return ok(c, { deleted: true, id: gradeId });
+  }));
+
   app.post('/api/teachers/announcements', ...withAuth('teacher'), validateBody(createAnnouncementSchema), withErrorHandler('create announcement')(async (c: Context) => {
     const announcementData = c.get('validatedBody') as CreateAnnouncementData;
     const authorId = getCurrentUserId(c);

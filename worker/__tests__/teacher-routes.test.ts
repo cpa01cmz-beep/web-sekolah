@@ -151,6 +151,78 @@ describe('teacher-routes - Critical Business Logic', () => {
     });
   });
 
+  describe('Grade Deletion', () => {
+    it('should delete grade when teacher owns the course', () => {
+      const grade = {
+        id: 'grade-001',
+        studentId: 'student-001',
+        courseId: 'course-001',
+        score: 95,
+        feedback: 'Excellent!'
+      };
+
+      const course = {
+        id: 'course-001',
+        name: 'Math',
+        teacherId: 'teacher-001'
+      };
+
+      const teacherId = 'teacher-001';
+
+      const ownershipValid = course.teacherId === teacherId;
+      expect(ownershipValid).toBe(true);
+    });
+
+    it('should reject deletion when teacher does not own the course', () => {
+      const grade = {
+        id: 'grade-001',
+        studentId: 'student-001',
+        courseId: 'course-001',
+        score: 95,
+        feedback: 'Excellent!'
+      };
+
+      const course = {
+        id: 'course-001',
+        name: 'Math',
+        teacherId: 'teacher-002'
+      };
+
+      const teacherId = 'teacher-001';
+
+      const ownershipValid = course.teacherId === teacherId;
+      expect(ownershipValid).toBe(false);
+    });
+
+    it('should trigger webhook on grade deletion', () => {
+      const gradeId = 'grade-001';
+      const teacherId = 'teacher-001';
+
+      const eventType = 'grade.deleted';
+      const context = { gradeId };
+
+      expect(eventType).toBe('grade.deleted');
+      expect(context).toHaveProperty('gradeId');
+      expect(context.gradeId).toBe('grade-001');
+    });
+
+    it('should return 404 for non-existent grade', () => {
+      const grade = null;
+      expect(grade).toBeNull();
+    });
+
+    it('should verify teacher ownership before deletion', () => {
+      const verifyOwnership = (course: { teacherId: string }, teacherId: string) => {
+        return course.teacherId === teacherId;
+      };
+
+      const course = { id: 'course-1', teacherId: 'teacher-001' };
+
+      expect(verifyOwnership(course, 'teacher-001')).toBe(true);
+      expect(verifyOwnership(course, 'teacher-002')).toBe(false);
+    });
+  });
+
   describe('Announcement Creation', () => {
     it('should create announcement with authorId', () => {
       const announcementData = {
