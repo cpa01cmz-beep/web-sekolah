@@ -27,8 +27,10 @@ export function waitUntilWithTimeout(
   timeoutMs: number
 ): void {
   waitUntil(c, async () => {
+    let timeoutId: ReturnType<typeof setTimeout> | undefined;
+    
     const timeoutPromise = new Promise<void>((_, reject) => {
-      setTimeout(() => reject(new Error(`Task timed out after ${timeoutMs}ms`)), timeoutMs);
+      timeoutId = setTimeout(() => reject(new Error(`Task timed out after ${timeoutMs}ms`)), timeoutMs);
     });
 
     try {
@@ -38,6 +40,10 @@ export function waitUntilWithTimeout(
         error: error instanceof Error ? error.message : 'Unknown error',
         timeoutMs 
       });
+    } finally {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
     }
   });
 }

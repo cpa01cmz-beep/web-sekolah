@@ -29,9 +29,11 @@ export class ExternalServiceHealth {
     const startTime = Date.now();
     const timestamp = new Date().toISOString();
 
+    let timeoutId: ReturnType<typeof setTimeout> | undefined;
+
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+      timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
       const response = await fetch(url, {
         method: 'HEAD',
@@ -51,6 +53,9 @@ export class ExternalServiceHealth {
       this.updateHealthStatus(serviceName, result.healthy, timestamp);
       return result;
     } catch (error) {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
       const latency = Date.now() - startTime;
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
 
