@@ -19,9 +19,32 @@ export class AnnouncementEntity extends IndexedEntity<Announcement> {
   }
 
   static async getByTargetRole(env: Env, targetRole: string): Promise<Announcement[]> {
-    const specificRoleAnnouncements = await this.getBySecondaryIndex(env, 'targetRole', targetRole);
-    const allAnnouncements = await this.getBySecondaryIndex(env, 'targetRole', 'all');
+    const [specificRoleAnnouncements, allAnnouncements] = await Promise.all([
+      this.getBySecondaryIndex(env, 'targetRole', targetRole),
+      this.getBySecondaryIndex(env, 'targetRole', 'all')
+    ]);
     return [...specificRoleAnnouncements, ...allAnnouncements];
+  }
+
+  static async getRecentByTargetRole(env: Env, targetRole: string, limit: number): Promise<Announcement[]> {
+    const [specificRoleAnnouncements, allAnnouncements] = await Promise.all([
+      this.getBySecondaryIndex(env, 'targetRole', targetRole),
+      this.getBySecondaryIndex(env, 'targetRole', 'all')
+    ]);
+    
+    const merged = [...specificRoleAnnouncements, ...allAnnouncements];
+    const seen = new Set<string>();
+    const unique = merged.filter(ann => {
+      if (seen.has(ann.id)) return false;
+      seen.add(ann.id);
+      return true;
+    });
+    
+    const sorted = unique.sort((a, b) => 
+      new Date(b.date).getTime() - new Date(a.date).getTime()
+    );
+    
+    return sorted.slice(0, limit);
   }
 
   static async getRecent(env: Env, limit: number): Promise<Announcement[]> {

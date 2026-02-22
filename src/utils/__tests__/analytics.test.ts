@@ -25,6 +25,11 @@ import {
   detectAnomalies,
   analyzeTrend,
   generatePerformanceInsights,
+  generateTrendDataPoints,
+  calculateSubjectComparison,
+  identifyAtRiskStudents,
+  calculatePassingRate,
+  calculateClassPerformanceMetrics,
 } from '../analytics';
 
 describe('Analytics Utilities', () => {
@@ -695,6 +700,169 @@ describe('Analytics Utilities', () => {
 
       const strengths = insights.filter((i) => i.type === 'strength');
       expect(strengths.length).toBe(3);
+    });
+  });
+
+  describe('generateTrendDataPoints', () => {
+    it('returns empty array for empty input', () => {
+      expect(generateTrendDataPoints([])).toEqual([]);
+    });
+
+    it('generates data points with default labels', () => {
+      const result = generateTrendDataPoints([10, 20, 30]);
+      expect(result).toHaveLength(3);
+      expect(result[0]).toEqual({ date: 'Period 1', value: 10, label: undefined });
+      expect(result[1]).toEqual({ date: 'Period 2', value: 20, label: undefined });
+      expect(result[2]).toEqual({ date: 'Period 3', value: 30, label: undefined });
+    });
+
+    it('generates data points with custom labels', () => {
+      const result = generateTrendDataPoints([10, 20, 30], ['Jan', 'Feb', 'Mar']);
+      expect(result).toHaveLength(3);
+      expect(result[0]).toEqual({ date: 'Jan', value: 10, label: 'Jan' });
+      expect(result[1]).toEqual({ date: 'Feb', value: 20, label: 'Feb' });
+      expect(result[2]).toEqual({ date: 'Mar', value: 30, label: 'Mar' });
+    });
+  });
+
+  describe('calculateSubjectComparison', () => {
+    it('returns empty array for empty input', () => {
+      expect(calculateSubjectComparison([])).toEqual([]);
+    });
+
+    it('calculates comparison with default max score', () => {
+      const performances = [
+        { subject: 'Math', score: 90, grade: 'A' },
+        { subject: 'Science', score: 75, grade: 'C' },
+      ];
+      const result = calculateSubjectComparison(performances);
+
+      expect(result).toHaveLength(2);
+      expect(result[0]).toEqual({ subject: 'Math', score: 90, maxScore: 100, percentage: 90 });
+      expect(result[1]).toEqual({ subject: 'Science', score: 75, maxScore: 100, percentage: 75 });
+    });
+
+    it('calculates comparison with custom max score', () => {
+      const performances = [
+        { subject: 'Math', score: 45, grade: 'B' },
+      ];
+      const result = calculateSubjectComparison(performances, 50);
+
+      expect(result[0]).toEqual({ subject: 'Math', score: 45, maxScore: 50, percentage: 90 });
+    });
+  });
+
+  describe('identifyAtRiskStudents', () => {
+    it('returns empty array for empty input', () => {
+      expect(identifyAtRiskStudents([])).toEqual([]);
+    });
+
+    it('identifies high risk students', () => {
+      const students = [
+        { identifier: 'student1', scores: [70, 60, 50, 40], failingCount: 3 },
+        { identifier: 'student2', scores: [80, 85, 90], failingCount: 0 },
+      ];
+      const result = identifyAtRiskStudents(students);
+
+      expect(result).toHaveLength(1);
+      expect(result[0].identifier).toBe('student1');
+      expect(result[0].riskLevel).toBe('high');
+      expect(result[0].trend).toBe('declining');
+    });
+
+    it('identifies medium risk students', () => {
+      const students = [
+        { identifier: 'student1', scores: [65, 60, 55], failingCount: 2 },
+        { identifier: 'student2', scores: [90, 95, 100], failingCount: 0 },
+      ];
+      const result = identifyAtRiskStudents(students);
+
+      expect(result).toHaveLength(1);
+      expect(result[0].identifier).toBe('student1');
+      expect(result[0].riskLevel).toBe('medium');
+    });
+
+    it('excludes low risk students', () => {
+      const students = [
+        { identifier: 'student1', scores: [75, 80, 85], failingCount: 0 },
+      ];
+      const result = identifyAtRiskStudents(students);
+
+      expect(result).toHaveLength(0);
+    });
+
+    it('sorts by risk level (high first)', () => {
+      const students = [
+        { identifier: 'medium', scores: [65, 65, 65], failingCount: 2 },
+        { identifier: 'high', scores: [40, 40, 40], failingCount: 3 },
+      ];
+      const result = identifyAtRiskStudents(students);
+
+      expect(result[0].riskLevel).toBe('high');
+      expect(result[1].riskLevel).toBe('medium');
+    });
+  });
+
+  describe('calculatePassingRate', () => {
+    it('returns zeros for empty array', () => {
+      expect(calculatePassingRate([])).toEqual({ passing: 0, failing: 0, total: 0, rate: 0 });
+    });
+
+    it('calculates passing rate with default threshold', () => {
+      const result = calculatePassingRate([50, 60, 70, 80, 90]);
+      expect(result).toEqual({ passing: 4, failing: 1, total: 5, rate: 80 });
+    });
+
+    it('calculates passing rate with custom threshold', () => {
+      const result = calculatePassingRate([50, 60, 70, 80, 90], 70);
+      expect(result).toEqual({ passing: 3, failing: 2, total: 5, rate: 60 });
+    });
+
+    it('handles all passing', () => {
+      const result = calculatePassingRate([80, 90, 100]);
+      expect(result).toEqual({ passing: 3, failing: 0, total: 3, rate: 100 });
+    });
+
+    it('handles all failing', () => {
+      const result = calculatePassingRate([30, 40, 50]);
+      expect(result).toEqual({ passing: 0, failing: 3, total: 3, rate: 0 });
+    });
+  });
+
+  describe('calculateClassPerformanceMetrics', () => {
+    it('returns zeros for empty array', () => {
+      const result = calculateClassPerformanceMetrics([]);
+      expect(result).toEqual({
+        average: 0,
+        median: 0,
+        passingRate: 0,
+        gradeDistribution: { A: 0, B: 0, C: 0, D: 0, E: 0, F: 0 },
+        topPerformers: [],
+        needsImprovement: [],
+      });
+    });
+
+    it('calculates complete class metrics', () => {
+      const result = calculateClassPerformanceMetrics([50, 60, 70, 80, 90, 95]);
+
+      expect(result.average).toBe(74.17);
+      expect(result.median).toBe(75);
+      expect(result.passingRate).toBe(83);
+      expect(result.gradeDistribution.A).toBe(2);
+      expect(result.topPerformers).toEqual([95, 90, 80, 70, 60]);
+      expect(result.needsImprovement).toEqual([50]);
+    });
+
+    it('handles custom passing threshold', () => {
+      const result = calculateClassPerformanceMetrics([50, 60, 70, 80], 70);
+      expect(result.passingRate).toBe(50);
+      expect(result.needsImprovement).toEqual([50, 60]);
+    });
+
+    it('handles custom top performer count', () => {
+      const result = calculateClassPerformanceMetrics([50, 60, 70, 80, 90, 95], 60, 3);
+      expect(result.topPerformers).toHaveLength(3);
+      expect(result.topPerformers).toEqual([95, 90, 80]);
     });
   });
 });
