@@ -101,10 +101,19 @@ export function TeacherMessagesPage() {
     sendMessageMutation.mutate({ recipientId, subject, content });
   };
 
-  const uniqueParents = useMemo(() => 
-    parents.filter((parent, index, self) =>
-      index === self.findIndex((p) => p.id === parent.id)
-    ), [parents]);
+  const uniqueParents = useMemo(() => {
+    const seen = new Set<string>();
+    return parents.filter(parent => {
+      if (seen.has(parent.id)) return false;
+      seen.add(parent.id);
+      return true;
+    });
+  }, [parents]);
+
+  const parentsMap = useMemo(() => 
+    new Map(uniqueParents.map(p => [p.id, p])),
+    [uniqueParents]
+  );
 
   if (messagesError) {
     return (
@@ -186,7 +195,7 @@ export function TeacherMessagesPage() {
                           <div className="flex items-center gap-2">
                             <User className="h-4 w-4 text-muted-foreground" />
                             <span className="font-medium">
-                              {uniqueParents.find(p => p.id === message.senderId)?.name || 'Parent'}
+                              {parentsMap.get(message.senderId)?.name || 'Parent'}
                             </span>
                             {!message.isRead && message.recipientId === teacherId && (
                               <Badge variant="default" className="text-xs">New</Badge>
@@ -236,7 +245,7 @@ export function TeacherMessagesPage() {
                           <div className="flex items-center gap-2">
                             <User className="h-4 w-4 text-muted-foreground" />
                             <span className="font-medium">
-                              To: {uniqueParents.find(p => p.id === message.recipientId)?.name || 'Parent'}
+                              To: {parentsMap.get(message.recipientId)?.name || 'Parent'}
                             </span>
                           </div>
                           <span className="text-xs text-muted-foreground">
@@ -260,7 +269,7 @@ export function TeacherMessagesPage() {
           <DialogContent className="sm:max-w-[600px] max-h-[80vh]">
             <DialogHeader>
               <DialogTitle>
-                Conversation with {uniqueParents.find(p => p.id === selectedParentId)?.name || 'Parent'}
+                Conversation with {parentsMap.get(selectedParentId)?.name || 'Parent'}
               </DialogTitle>
             </DialogHeader>
             <ScrollArea className="h-[400px] pr-4">

@@ -191,6 +191,18 @@ describe('AnnouncementService', () => {
     });
   });
 
+  describe('getRecentAnnouncementsByRole', () => {
+    it('should return recent announcements filtered by role', async () => {
+      const mockRecentAnnouncements = [mockAnnouncement];
+      vi.mocked(AnnouncementEntity.getRecentByTargetRole).mockResolvedValue(mockRecentAnnouncements);
+
+      const result = await AnnouncementService.getRecentAnnouncementsByRole(mockEnv, 'student', 5);
+
+      expect(result).toEqual(mockRecentAnnouncements);
+      expect(AnnouncementEntity.getRecentByTargetRole).toHaveBeenCalledWith(mockEnv, 'student', 5);
+    });
+  });
+
   describe('deleteAnnouncement', () => {
     it('should delete announcement', async () => {
       vi.mocked(AnnouncementEntity.deleteWithDateIndex).mockResolvedValue(true);
