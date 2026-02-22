@@ -19,8 +19,10 @@ export class AnnouncementEntity extends IndexedEntity<Announcement> {
   }
 
   static async getByTargetRole(env: Env, targetRole: string): Promise<Announcement[]> {
-    const specificRoleAnnouncements = await this.getBySecondaryIndex(env, 'targetRole', targetRole);
-    const allAnnouncements = await this.getBySecondaryIndex(env, 'targetRole', 'all');
+    const [specificRoleAnnouncements, allAnnouncements] = await Promise.all([
+      this.getBySecondaryIndex(env, 'targetRole', targetRole),
+      this.getBySecondaryIndex(env, 'targetRole', 'all')
+    ]);
     return [...specificRoleAnnouncements, ...allAnnouncements];
   }
 
