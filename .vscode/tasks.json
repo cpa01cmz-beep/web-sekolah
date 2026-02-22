@@ -45,6 +45,20 @@
       "group": "test"
     },
     {
+      "label": "Format Code",
+      "type": "npm",
+      "script": "format",
+      "problemMatcher": [],
+      "group": "build"
+    },
+    {
+      "label": "Check Formatting",
+      "type": "npm",
+      "script": "format:check",
+      "problemMatcher": [],
+      "group": "test"
+    },
+    {
       "label": "Run Tests",
       "type": "npm",
       "script": "test:run",
