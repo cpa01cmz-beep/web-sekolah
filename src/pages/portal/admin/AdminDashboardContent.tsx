@@ -2,6 +2,7 @@ import { useMemo, memo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { PageHeader } from '@/components/PageHeader';
 import { DashboardStatCard } from '@/components/dashboard/DashboardStatCard';
+import { DashboardListCard } from '@/components/dashboard/DashboardListCard';
 import { AnnouncementItem } from '@/components/dashboard/AnnouncementItem';
 import { EnrollmentChart } from '@/components/dashboard/EnrollmentChart';
 import { Users, GraduationCap, School, BookCopy } from 'lucide-react';
@@ -99,22 +100,17 @@ const AdminDashboardContent = memo(function AdminDashboardContent({
           </Card>
         </SlideUp>
         <SlideUp delay={0.7} className="lg:col-span-2" style={prefersReducedMotion ? { opacity: 1 } : {}}>
-          <Card className="h-[400px] hover:shadow-lg transition-shadow duration-200">
-            <CardHeader>
-              <CardTitle id="announcements-heading">Recent Announcements</CardTitle>
-            </CardHeader>
-              <CardContent>
-                {data.recentAnnouncements.length === 0 ? (
-                  <p className="text-sm text-muted-foreground text-center py-8" role="status">No announcements available.</p>
-                ) : (
-                  <ul className="space-y-4" aria-labelledby="announcements-heading" aria-label={`${data.recentAnnouncements.length} announcements`}>
-                    {data.recentAnnouncements.map((ann) => (
-                      <AnnouncementItem key={ann.id} announcement={ann} />
-                    ))}
-                  </ul>
-                )}
-              </CardContent>
-          </Card>
+          <DashboardListCard
+            title="Recent Announcements"
+            icon={null}
+            items={data.recentAnnouncements}
+            emptyMessage="No announcements available."
+            renderItem={(ann) => <AnnouncementItem announcement={ann} />}
+            getKey={(ann) => ann.id}
+            className="h-[400px]"
+            listClassName="space-y-4"
+            contentClassName="overflow-auto"
+          />
         </SlideUp>
       </div>
     </SlideUp>

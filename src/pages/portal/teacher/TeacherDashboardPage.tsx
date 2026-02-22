@@ -1,10 +1,9 @@
 import { memo } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { PageHeader } from '@/components/PageHeader';
 import { DashboardStatCard } from '@/components/dashboard/DashboardStatCard';
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
+import { DashboardListCard } from '@/components/dashboard/DashboardListCard';
 import { AnnouncementItem } from '@/components/dashboard/AnnouncementItem';
-import { DashboardCardEmptyState } from '@/components/dashboard/DashboardCardEmptyState';
 import { BookCopy, Megaphone, Award } from 'lucide-react';
 import { SlideUp } from '@/components/animations';
 import { useReducedMotion } from '@/hooks/use-reduced-motion';
@@ -13,12 +12,12 @@ import { useAuthStore } from '@/lib/authStore';
 import type { TeacherDashboardData } from '@shared/types';
 
 const GradeItem = memo(({ grade }: { grade: TeacherDashboardData['recentGrades'][0] }) => (
-  <li className="text-sm">
+  <div className="text-sm">
     <p className="font-medium">{grade.studentName}</p>
     <p className="text-xs text-muted-foreground">
       {grade.courseName}: Score {grade.score}
     </p>
-  </li>
+  </div>
 ));
 GradeItem.displayName = 'GradeItem';
 
@@ -48,42 +47,27 @@ export function TeacherDashboardPage() {
               />
             </SlideUp>
             <SlideUp delay={0.3} style={prefersReducedMotion ? { opacity: 1 } : {}}>
-              <Card className="h-full hover:shadow-lg transition-shadow duration-200">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle id="grades-heading" className="text-sm font-medium">Recent Grades</CardTitle>
-                  <Award className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
-                </CardHeader>
-                <CardContent>
-                  {data.recentGrades.length === 0 ? (
-                    <DashboardCardEmptyState message="No recent grades recorded." />
-                  ) : (
-                    <ul className="space-y-2" aria-labelledby="grades-heading" aria-label={`${data.recentGrades.length} recent grades`}>
-                      {data.recentGrades.map((grade) => (
-                        <GradeItem key={grade.id} grade={grade} />
-                      ))}
-                    </ul>
-                  )}
-                </CardContent>
-              </Card>
+              <DashboardListCard
+                title="Recent Grades"
+                icon={<Award className="h-4 w-4 text-muted-foreground" aria-hidden="true" />}
+                items={data.recentGrades}
+                emptyMessage="No recent grades recorded."
+                renderItem={(grade) => <GradeItem grade={grade} />}
+                getKey={(grade) => grade.id}
+                listClassName="space-y-2"
+                itemAriaLabel={(count) => `${count} recent grades`}
+              />
             </SlideUp>
             <SlideUp delay={0.4} style={prefersReducedMotion ? { opacity: 1 } : {}}>
-              <Card className="h-full hover:shadow-lg transition-shadow duration-200">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle id="announcements-heading" className="text-sm font-medium">Recent Announcements</CardTitle>
-                  <Megaphone className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
-                </CardHeader>
-                <CardContent>
-                  {data.recentAnnouncements.length === 0 ? (
-                    <DashboardCardEmptyState message="No announcements available." />
-                  ) : (
-                    <ul className="space-y-2" aria-labelledby="announcements-heading" aria-label={`${data.recentAnnouncements.length} announcements`}>
-                      {data.recentAnnouncements.map((ann) => (
-                        <AnnouncementItem key={ann.id} announcement={ann} variant="simple" />
-                      ))}
-                    </ul>
-                  )}
-                </CardContent>
-              </Card>
+              <DashboardListCard
+                title="Recent Announcements"
+                icon={<Megaphone className="h-4 w-4 text-muted-foreground" aria-hidden="true" />}
+                items={data.recentAnnouncements}
+                emptyMessage="No announcements available."
+                renderItem={(ann) => <AnnouncementItem announcement={ann} variant="simple" />}
+                getKey={(ann) => ann.id}
+                listClassName="space-y-2"
+              />
             </SlideUp>
           </div>
         </SlideUp>
