@@ -40,6 +40,8 @@ type ComponentType =
 
 type RechartsComponent = ChartType | CartesianType | PolarType | ComponentType;
 
+export type { RechartsComponent };
+
 interface RechartsComponents {
   [key: string]: React.ComponentType<Record<string, unknown>>;
 }
@@ -91,8 +93,7 @@ export function useRecharts({ components: requiredComponents }: UseRechartsOptio
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
-  const sortedKey = useMemo(() => [...requiredComponents].sort().join(','), [requiredComponents]);
-  const sortedComponents = useMemo(() => sortedKey.split(',').filter(Boolean) as RechartsComponent[], [sortedKey]);
+  const componentKey = useMemo(() => [...requiredComponents].sort().join(','), [requiredComponents]);
 
   useEffect(() => {
     let cancelled = false;
@@ -101,8 +102,10 @@ export function useRecharts({ components: requiredComponents }: UseRechartsOptio
       setIsLoading(true);
       setError(null);
 
+      const componentsToLoad = componentKey.split(',').filter(Boolean) as RechartsComponent[];
+
       try {
-        const imports = sortedComponents.map(async (componentName) => {
+        const imports = componentsToLoad.map(async (componentName) => {
           const moduleLoader = componentPaths[componentName];
           if (!moduleLoader) {
             throw new Error(`Unknown Recharts component: ${componentName}`);
@@ -139,7 +142,7 @@ export function useRecharts({ components: requiredComponents }: UseRechartsOptio
     return () => {
       cancelled = true;
     };
-  }, [sortedKey, sortedComponents]);
+  }, [componentKey]);
 
   return {
     components: loadedComponents,

@@ -1,5 +1,5 @@
 import { memo } from 'react';
-import { useRecharts } from '@/hooks/useRecharts';
+import { useRecharts, type RechartsComponent } from '@/hooks/useRecharts';
 import { THEME_COLORS } from '@/theme/colors';
 
 interface EnrollmentChartProps {
@@ -19,7 +19,7 @@ const RECHARTS_COMPONENTS = [
 
 export const EnrollmentChart = memo(function EnrollmentChart({ data }: EnrollmentChartProps) {
   const { components: Chart, isLoading, error } = useRecharts({
-    components: [...RECHARTS_COMPONENTS],
+    components: RECHARTS_COMPONENTS as RechartsComponent[],
   });
 
   if (isLoading || !Chart) {
