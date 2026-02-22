@@ -226,6 +226,41 @@ export abstract class IndexedEntity<S extends { id: string }> extends Entity<S> 
     }
   }
 
+  static async getByIds<TCtor extends CtorAny>(
+    this: HS<TCtor>,
+    env: Env,
+    ids: string[],
+    includeDeleted = false
+  ): Promise<Map<string, IS<TCtor>>> {
+    if (ids.length === 0) return new Map();
+
+    const uniqueIds = [...new Set(ids)];
+    const entities = await Promise.all(
+      uniqueIds.map(async (id) => {
+        try {
+          const inst = new this(env, id);
+          const exists = await inst.exists();
+          if (!exists) return null;
+          const state = await inst.getState();
+          return { id, state };
+        } catch {
+          return null;
+        }
+      })
+    );
+
+    const result = new Map<string, IS<TCtor>>();
+    for (const item of entities) {
+      if (!item) continue;
+      const r = item.state as Record<string, unknown>;
+      if (!includeDeleted && 'deletedAt' in r && r.deletedAt !== null && r.deletedAt !== undefined) {
+        continue;
+      }
+      result.set(item.id, item.state);
+    }
+    return result;
+  }
+
   static async update<TCtor extends CtorAny>(this: HS<TCtor>, env: Env, id: string, updates: Partial<IS<TCtor>>): Promise<IS<TCtor> | null> {
     const inst = new this(env, id);
     try {
