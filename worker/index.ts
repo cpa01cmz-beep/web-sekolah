@@ -91,9 +91,11 @@ app.get('/api/health', healthCheckCache(), async (c) => {
   const metrics = integrationMonitor.getHealthMetrics();
   const webhookSuccessRate = integrationMonitor.getWebhookSuccessRate();
   const rateLimitBlockRate = integrationMonitor.getRateLimitBlockRate();
+  const requestId = c.req.header('X-Request-ID') || crypto.randomUUID();
 
   return ok(c, {
     status: 'healthy',
+    requestId,
     timestamp: new Date().toISOString(),
     uptime: `${(metrics.uptime / 1000).toFixed(2)}s`,
     systemHealth: {
