@@ -53,6 +53,7 @@ export const RETRY_CONFIG = {
   DEFAULT_MAX_RETRIES: 3,
   DEFAULT_BASE_DELAY_MS: 1000,
   DEFAULT_JITTER_MS: 0,
+  MAX_DELAY_MS: 30000,
 } as const;
 
 export const AVATAR_BASE_URL = 'https://i.pravatar.cc/150';
