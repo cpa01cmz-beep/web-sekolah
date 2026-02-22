@@ -5,7 +5,13 @@ export function getUniqueIds(ids: string[]): string[] {
 }
 
 export function buildEntityMap<T extends EntityWithId>(entities: (T | null)[]): Map<string, T> {
-  return new Map(entities.filter((e): e is T => e !== null).map(e => [e.id, e]));
+  const map = new Map<string, T>();
+  for (const entity of entities) {
+    if (entity !== null) {
+      map.set(entity.id, entity);
+    }
+  }
+  return map;
 }
 
 export async function fetchAndMap<T extends EntityWithId>(

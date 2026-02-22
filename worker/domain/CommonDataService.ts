@@ -69,9 +69,17 @@ export class CommonDataService {
   }
 
   static async getRecentAnnouncementsByRole(env: Env, targetRole: string, limit: number): Promise<Announcement[]> {
-    const recentAnnouncements = await AnnouncementEntity.getRecent(env, limit * 2);
-    const roleAnnouncements = recentAnnouncements.filter(ann => ann.targetRole === targetRole || ann.targetRole === 'all');
-    return roleAnnouncements.slice(0, limit);
+    const result: Announcement[] = [];
+    const announcements = await AnnouncementEntity.getRecent(env, limit * 2);
+    
+    for (const ann of announcements) {
+      if (ann.targetRole === targetRole || ann.targetRole === 'all') {
+        result.push(ann);
+        if (result.length >= limit) break;
+      }
+    }
+    
+    return result;
   }
 
   static async getClassStudents(env: Env, classId: string): Promise<SchoolUser[]> {
