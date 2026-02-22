@@ -79,8 +79,8 @@ export function StudentCardPage() {
       <div
         className="w-full max-w-[550px] min-h-[330px] rounded-2xl p-4 sm:p-6 text-white shadow-2xl flex flex-col justify-between relative overflow-hidden" style={{ background: `linear-gradient(to bottom right, ${THEME_COLORS.PRIMARY}, ${THEME_COLORS.SECONDARY})` }}
       >
-        <div className="absolute -top-10 -right-10 w-32 h-32 sm:w-40 sm:h-40 bg-white/10 rounded-full"></div>
-        <div className="absolute -bottom-12 -left-12 w-32 h-32 sm:w-40 sm:h-40 bg-white/10 rounded-full"></div>
+        <div className="absolute -top-10 -right-10 w-32 h-32 sm:w-40 sm:h-40 bg-white/10 rounded-full" aria-hidden="true"></div>
+        <div className="absolute -bottom-12 -left-12 w-32 h-32 sm:w-40 sm:h-40 bg-white/10 rounded-full" aria-hidden="true"></div>
         <header className="flex items-center justify-between z-10 gap-2">
           <div className="flex items-center gap-2 sm:gap-3">
             <GraduationCap className="h-8 w-8 sm:h-10 sm:w-10 flex-shrink-0" />

@@ -37,8 +37,8 @@ function ScheduleGridComponent<T extends ScheduleItemBase>({
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Waktu</TableHead>
-                      <TableHead>Mata Pelajaran</TableHead>
+                      <TableHead scope="col">Waktu</TableHead>
+                      <TableHead scope="col">Mata Pelajaran</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
