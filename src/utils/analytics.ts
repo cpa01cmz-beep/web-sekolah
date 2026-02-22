@@ -275,14 +275,45 @@ export interface PerformanceSummary {
 }
 
 export function calculatePerformanceSummary(scores: number[]): PerformanceSummary {
+  if (scores.length === 0) {
+    return {
+      average: 0,
+      median: 0,
+      min: 0,
+      max: 0,
+      standardDeviation: 0,
+      gpa: 0,
+      gradeDistribution: { A: 0, B: 0, C: 0, D: 0, E: 0, F: 0 },
+    };
+  }
+
+  const sorted = [...scores].sort((a, b) => a - b);
+  const n = scores.length;
+  const min = sorted[0];
+  const max = sorted[n - 1];
+  const sum = scores.reduce((acc, val) => acc + val, 0);
+  const average = sum / n;
+  
+  const distribution: GradeDistribution = { A: 0, B: 0, C: 0, D: 0, E: 0, F: 0 };
+  let totalPoints = 0;
+  
+  for (const score of scores) {
+    const grade = getGradeLetter(score);
+    distribution[grade]++;
+    totalPoints += GRADE_POINTS[grade];
+  }
+  
+  const median = n % 2 !== 0 ? sorted[Math.floor(n / 2)] : (sorted[n / 2 - 1] + sorted[n / 2]) / 2;
+  const variance = scores.reduce((acc, val) => acc + Math.pow(val - average, 2), 0) / n;
+
   return {
-    average: calculateAverage(scores),
-    median: calculateMedian(scores),
-    min: calculateMin(scores),
-    max: calculateMax(scores),
-    standardDeviation: calculateStandardDeviation(scores),
-    gpa: calculateGPA(scores),
-    gradeDistribution: calculateGradeDistribution(scores),
+    average: Math.round(average * 100) / 100,
+    median,
+    min,
+    max,
+    standardDeviation: Math.round(Math.sqrt(variance) * 100) / 100,
+    gpa: Math.round((totalPoints / n) * 100) / 100,
+    gradeDistribution: distribution,
   };
 }
 
