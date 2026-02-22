@@ -4,18 +4,19 @@ import { ok, bad, notFound } from '../../core-utils';
 import { WebhookConfigEntity } from '../../entities';
 import { logger } from '../../logger';
 import type { Context } from 'hono';
-import { withErrorHandler } from '../route-utils';
+import { withErrorHandler, withAuth } from '../route-utils';
 import { validateBody, validateParams } from '../../middleware/validation';
 import { createWebhookConfigSchema, updateWebhookConfigSchema, paramsSchema } from '../../middleware/schemas';
+import { isValidWebhookUrl } from '../../middleware/sanitize';
 
 export function webhookConfigRoutes(app: Hono<{ Bindings: Env }>) {
-  app.get('/api/webhooks', withErrorHandler('list webhooks')(async (c: Context) => {
+  app.get('/api/webhooks', ...withAuth('admin'), withErrorHandler('list webhooks')(async (c: Context) => {
     const configs = await WebhookConfigEntity.list(c.env);
     const itemsWithoutSecrets = configs.items.map(({ secret: _, ...rest }) => rest);
     return ok(c, itemsWithoutSecrets);
   }));
 
-  app.get('/api/webhooks/:id', withErrorHandler('get webhook')(async (c: Context) => {
+  app.get('/api/webhooks/:id', ...withAuth('admin'), withErrorHandler('get webhook')(async (c: Context) => {
     const id = c.req.param('id');
     const config = await new WebhookConfigEntity(c.env, id).getState();
 
@@ -27,8 +28,13 @@ export function webhookConfigRoutes(app: Hono<{ Bindings: Env }>) {
     return ok(c, configWithoutSecret);
   }));
 
-  app.post('/api/webhooks', validateBody(createWebhookConfigSchema), withErrorHandler('create webhook')(async (c: Context) => {
+  app.post('/api/webhooks', ...withAuth('admin'), validateBody(createWebhookConfigSchema), withErrorHandler('create webhook')(async (c: Context) => {
     const body = c.get('validatedBody') as { url: string; events: string[]; secret: string; active?: boolean };
+
+    const urlValidation = isValidWebhookUrl(body.url);
+    if (!urlValidation.valid) {
+      return bad(c, urlValidation.reason || 'Invalid webhook URL');
+    }
 
     const id = `webhook-${crypto.randomUUID()}`;
     const now = new Date().toISOString();
@@ -51,9 +57,16 @@ export function webhookConfigRoutes(app: Hono<{ Bindings: Env }>) {
     return ok(c, configWithoutSecret);
   }));
 
-   app.put('/api/webhooks/:id', validateBody(updateWebhookConfigSchema), withErrorHandler('update webhook')(async (c: Context) => {
+   app.put('/api/webhooks/:id', ...withAuth('admin'), validateBody(updateWebhookConfigSchema), withErrorHandler('update webhook')(async (c: Context) => {
      const id = c.req.param('id');
      const body = c.get('validatedBody') as { url?: string; events?: string[]; secret?: string; active?: boolean };
+
+     if (body.url) {
+       const urlValidation = isValidWebhookUrl(body.url);
+       if (!urlValidation.valid) {
+         return bad(c, urlValidation.reason || 'Invalid webhook URL');
+       }
+     }
 
      const existing = await new WebhookConfigEntity(c.env, id).getState();
 
@@ -79,7 +92,7 @@ export function webhookConfigRoutes(app: Hono<{ Bindings: Env }>) {
       return ok(c, updatedWithoutSecret);
    }));
 
-   app.delete('/api/webhooks/:id', validateParams(paramsSchema), withErrorHandler('delete webhook')(async (c: Context) => {
+   app.delete('/api/webhooks/:id', ...withAuth('admin'), validateParams(paramsSchema), withErrorHandler('delete webhook')(async (c: Context) => {
      const { id } = c.get('validatedParams') as { id: string };
      const existing = await new WebhookConfigEntity(c.env, id).getState();
 
