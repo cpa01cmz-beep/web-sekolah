@@ -133,16 +133,16 @@ check_secret_strength() {
 }
 
 validate_wrangler_config() {
-  local config_file="wrangler.jsonc"
+  local config_file="wrangler.toml"
   
   if [ -f "$config_file" ]; then
-    if grep -q '"name"' "$config_file" && grep -q '"main"' "$config_file"; then
-      add_result "pass" "Wrangler Config" "Valid wrangler.jsonc configuration"
+    if grep -q '^name\s*=' "$config_file" && grep -q '^main\s*=' "$config_file"; then
+      add_result "pass" "Wrangler Config" "Valid wrangler.toml configuration"
     else
-      add_result "fail" "Wrangler Config" "Invalid wrangler.jsonc - missing required fields"
+      add_result "fail" "Wrangler Config" "Invalid wrangler.toml - missing required fields"
     fi
   else
-    add_result "fail" "Wrangler Config" "wrangler.jsonc not found"
+    add_result "fail" "Wrangler Config" "wrangler.toml not found"
   fi
 }
 
