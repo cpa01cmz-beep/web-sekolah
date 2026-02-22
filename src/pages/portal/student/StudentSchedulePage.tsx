@@ -14,6 +14,9 @@ function StudentScheduleContent({ schedule }: { schedule: ScheduleItem[] }) {
       <PageHeader title="Jadwal Pelajaran" />
       <ScheduleGrid
         groupedSchedule={scheduleByDay}
+        timeColumnLabel="Waktu"
+        subjectColumnLabel="Mata Pelajaran"
+        emptyMessage="Tidak ada jadwal"
         renderLessonDetails={(lesson) => (
           <>
             <p className="font-medium">{lesson.courseName}</p>

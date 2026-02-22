@@ -13,13 +13,17 @@ interface ScheduleGridProps<T extends ScheduleItemBase> {
   renderLessonDetails: (lesson: T) => React.ReactNode;
   showCalendarIcon?: boolean;
   emptyMessage?: string;
+  timeColumnLabel?: string;
+  subjectColumnLabel?: string;
 }
 
 function ScheduleGridComponent<T extends ScheduleItemBase>({
   groupedSchedule,
   renderLessonDetails,
   showCalendarIcon = false,
-  emptyMessage = 'Tidak ada jadwal',
+  emptyMessage = 'No schedule available',
+  timeColumnLabel = 'Time',
+  subjectColumnLabel = 'Subject',
 }: ScheduleGridProps<T>) {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
@@ -37,8 +41,8 @@ function ScheduleGridComponent<T extends ScheduleItemBase>({
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Waktu</TableHead>
-                      <TableHead>Mata Pelajaran</TableHead>
+                      <TableHead>{timeColumnLabel}</TableHead>
+                      <TableHead>{subjectColumnLabel}</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>

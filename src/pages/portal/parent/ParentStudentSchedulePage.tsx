@@ -17,6 +17,9 @@ function ParentScheduleContent({ schedule }: { schedule: ScheduleItem[] }) {
       />
       <ScheduleGrid
         groupedSchedule={groupedSchedule}
+        timeColumnLabel="Waktu"
+        subjectColumnLabel="Mata Pelajaran"
+        emptyMessage="Tidak ada jadwal"
         renderLessonDetails={(lesson) => (
           <p className="font-medium">{lesson.courseId}</p>
         )}
