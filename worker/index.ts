@@ -79,6 +79,7 @@ app.use('/api/classes', defaultRateLimiter());
 app.use('/api/auth', strictRateLimiter());
 app.use('/api/webhooks', defaultRateLimiter());
 app.use('/api/admin/webhooks', strictRateLimiter());
+app.use('/api/csp-report', defaultRateLimiter());
 
 authRoutes(app);
 userRoutes(app);
