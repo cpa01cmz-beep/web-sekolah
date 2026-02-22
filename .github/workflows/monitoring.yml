@@ -34,7 +34,7 @@ jobs:
       API_KEY: ${{ secrets.GEMINI_API_KEY }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -54,7 +54,7 @@ jobs:
           git config --global user.email "${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com"
       - name: Install Node.js
         continue-on-error: true
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: "20"
       - name: Install Dependencies
@@ -124,7 +124,7 @@ jobs:
           - cloudflare
           - repository manager
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - name: Configure Git
         run: |
@@ -132,7 +132,7 @@ jobs:
           git config --global user.email "${{ matrix.role }}@bank-sampah.sulhi.workers.dev"
       - name: Setup Node & OpenCode
         continue-on-error: true
-        uses: actions/setup-node@v5
+        uses: actions/setup-node@v6
         with:
           node-version: "20"
       - name: Install OpenCode CLI
@@ -173,14 +173,14 @@ jobs:
     needs: specialists
     runs-on: ubuntu-24.04-arm
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - name: Configure Git
         run: |
           git config --global user.name "PR-Handler"
           git config --global user.email "PR-Handler@bank-sampah.sulhi.workers.dev"
       - name: Setup Node & OpenCode
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: "20"
       - name: Install OpenCode CLI
@@ -210,14 +210,14 @@ jobs:
     needs: PR-Handler
     runs-on: ubuntu-24.04-arm
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - name: Configure Git
         run: |
           git config --global user.name "Fixer"
           git config --global user.email "fixer@bank-sampah.sulhi.workers.dev"
       - name: Setup Node & OpenCode
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: "20"
       - name: Install Dependencies
