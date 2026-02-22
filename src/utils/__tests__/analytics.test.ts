@@ -26,6 +26,8 @@ import {
   analyzeTrend,
   generatePerformanceInsights,
   identifyAtRiskStudents,
+  calculatePassRate,
+  getTopPerformers,
 } from '../analytics';
 
 describe('Analytics Utilities', () => {
@@ -789,6 +791,138 @@ describe('Analytics Utilities', () => {
 
       expect(atRisk).toHaveLength(1);
       expect(atRisk[0].averageScore).toBe(60);
+    });
+  });
+
+  describe('calculatePassRate', () => {
+    it('returns zeros for empty array', () => {
+      expect(calculatePassRate([])).toEqual({
+        passCount: 0,
+        failCount: 0,
+        totalStudents: 0,
+        passRate: 0,
+      });
+    });
+
+    it('calculates pass rate for all passing scores', () => {
+      const result = calculatePassRate([75, 80, 85, 90, 95]);
+
+      expect(result.passCount).toBe(5);
+      expect(result.failCount).toBe(0);
+      expect(result.totalStudents).toBe(5);
+      expect(result.passRate).toBe(100);
+    });
+
+    it('calculates pass rate for all failing scores', () => {
+      const result = calculatePassRate([30, 40, 50, 55]);
+
+      expect(result.passCount).toBe(0);
+      expect(result.failCount).toBe(4);
+      expect(result.totalStudents).toBe(4);
+      expect(result.passRate).toBe(0);
+    });
+
+    it('calculates pass rate for mixed scores', () => {
+      const result = calculatePassRate([45, 65, 75, 55, 85]);
+
+      expect(result.passCount).toBe(3);
+      expect(result.failCount).toBe(2);
+      expect(result.totalStudents).toBe(5);
+      expect(result.passRate).toBe(60);
+    });
+
+    it('respects custom passing threshold', () => {
+      const result = calculatePassRate([65, 70, 75], 70);
+
+      expect(result.passCount).toBe(2);
+      expect(result.failCount).toBe(1);
+      expect(result.passRate).toBe(67);
+    });
+
+    it('handles exact threshold score as passing', () => {
+      const result = calculatePassRate([60, 59, 61]);
+
+      expect(result.passCount).toBe(2);
+      expect(result.failCount).toBe(1);
+      expect(result.passRate).toBe(67);
+    });
+  });
+
+  describe('getTopPerformers', () => {
+    it('returns empty array for empty input', () => {
+      expect(getTopPerformers([])).toEqual([]);
+    });
+
+    it('returns top 5 performers by default', () => {
+      const students = [
+        { studentId: '1', studentName: 'Alice', scores: [95, 98], averageScore: 96.5 },
+        { studentId: '2', studentName: 'Bob', scores: [85, 88], averageScore: 86.5 },
+        { studentId: '3', studentName: 'Carol', scores: [90, 92], averageScore: 91 },
+        { studentId: '4', studentName: 'Dave', scores: [75, 78], averageScore: 76.5 },
+        { studentId: '5', studentName: 'Eve', scores: [80, 82], averageScore: 81 },
+        { studentId: '6', studentName: 'Frank', scores: [70, 72], averageScore: 71 },
+      ];
+
+      const top = getTopPerformers(students);
+
+      expect(top).toHaveLength(5);
+      expect(top[0].studentId).toBe('1');
+      expect(top[0].rank).toBe(1);
+      expect(top[1].studentId).toBe('3');
+      expect(top[2].studentId).toBe('2');
+      expect(top[3].studentId).toBe('5');
+      expect(top[4].studentId).toBe('4');
+      expect(top[4].rank).toBe(5);
+    });
+
+    it('returns specified number of top performers', () => {
+      const students = [
+        { studentId: '1', studentName: 'Alice', scores: [95, 98], averageScore: 96.5 },
+        { studentId: '2', studentName: 'Bob', scores: [85, 88], averageScore: 86.5 },
+        { studentId: '3', studentName: 'Carol', scores: [90, 92], averageScore: 91 },
+      ];
+
+      const top2 = getTopPerformers(students, 2);
+
+      expect(top2).toHaveLength(2);
+      expect(top2[0].studentId).toBe('1');
+      expect(top2[1].studentId).toBe('3');
+    });
+
+    it('calculates average from scores when averageScore is 0', () => {
+      const students = [
+        { studentId: '1', studentName: 'Calc', scores: [90, 95, 100], averageScore: 0 },
+      ];
+
+      const top = getTopPerformers(students);
+
+      expect(top).toHaveLength(1);
+      expect(top[0].averageScore).toBe(95);
+    });
+
+    it('sorts by highest average score', () => {
+      const students = [
+        { studentId: '1', studentName: 'Low', scores: [60, 65], averageScore: 62.5 },
+        { studentId: '2', studentName: 'High', scores: [95, 98], averageScore: 96.5 },
+        { studentId: '3', studentName: 'Mid', scores: [75, 80], averageScore: 77.5 },
+      ];
+
+      const top = getTopPerformers(students);
+
+      expect(top[0].studentName).toBe('High');
+      expect(top[1].studentName).toBe('Mid');
+      expect(top[2].studentName).toBe('Low');
+    });
+
+    it('handles fewer students than requested count', () => {
+      const students = [
+        { studentId: '1', studentName: 'Only', scores: [85, 90], averageScore: 87.5 },
+      ];
+
+      const top = getTopPerformers(students, 5);
+
+      expect(top).toHaveLength(1);
+      expect(top[0].studentId).toBe('1');
     });
   });
 });

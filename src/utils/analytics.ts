@@ -478,3 +478,58 @@ export function identifyAtRiskStudents(
 
   return atRiskStudents.sort((a, b) => a.averageScore - b.averageScore);
 }
+
+export interface PassRateResult {
+  passCount: number;
+  failCount: number;
+  totalStudents: number;
+  passRate: number;
+}
+
+export function calculatePassRate(
+  scores: number[],
+  passingThreshold: number = 60
+): PassRateResult {
+  if (scores.length === 0) {
+    return { passCount: 0, failCount: 0, totalStudents: 0, passRate: 0 };
+  }
+
+  const passCount = scores.filter(score => score >= passingThreshold).length;
+  const failCount = scores.length - passCount;
+  const passRate = Math.round((passCount / scores.length) * 100);
+
+  return {
+    passCount,
+    failCount,
+    totalStudents: scores.length,
+    passRate,
+  };
+}
+
+export interface TopPerformer {
+  studentId: string;
+  studentName: string;
+  averageScore: number;
+  rank: number;
+}
+
+export function getTopPerformers(
+  students: StudentScoreRecord[],
+  count: number = 5
+): TopPerformer[] {
+  if (students.length === 0) return [];
+
+  const studentsWithAvg = students.map(student => ({
+    ...student,
+    calculatedAvg: student.averageScore || calculateAverage(student.scores),
+  }));
+
+  const sorted = [...studentsWithAvg].sort((a, b) => b.calculatedAvg - a.calculatedAvg);
+
+  return sorted.slice(0, count).map((student, index) => ({
+    studentId: student.studentId,
+    studentName: student.studentName,
+    averageScore: student.calculatedAvg,
+    rank: index + 1,
+  }));
+}
