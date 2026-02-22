@@ -113,3 +113,9 @@ export function createMessageHooks(
     useMarkAsRead,
   };
 }
+
+import { teacherService } from '@/services/teacherService';
+import { parentService } from '@/services/parentService';
+
+export const teacherMessageHooks = createMessageHooks(teacherService, 'teacher');
+export const parentMessageHooks = createMessageHooks(parentService, 'parent');

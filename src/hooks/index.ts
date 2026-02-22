@@ -41,6 +41,8 @@ export {
 } from './useParent';
 export {
   createMessageHooks,
+  teacherMessageHooks,
+  parentMessageHooks,
   type UseMessagesOptions,
   type UseUnreadCountOptions,
   type UseConversationOptions,

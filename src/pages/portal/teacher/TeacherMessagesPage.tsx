@@ -12,34 +12,28 @@ import { SlideUp } from '@/components/animations';
 import { useReducedMotion } from '@/hooks/use-reduced-motion';
 import { useAuthStore } from '@/lib/authStore';
 import { teacherService } from '@/services/teacherService';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { formatDistanceToNow } from '@/utils/date';
-import { logger } from '@/lib/logger';
-import { PollingInterval } from '@/config/time';
 import { MessageThread, ComposeDialog } from '@/components/messages';
+import { teacherMessageHooks } from '@/hooks';
 import type { SchoolUser } from '@shared/types';
 
 export function TeacherMessagesPage() {
   const prefersReducedMotion = useReducedMotion();
   const user = useAuthStore((state) => state.user);
-  const queryClient = useQueryClient();
   const [selectedParentId, setSelectedParentId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'inbox' | 'sent'>('inbox');
 
   const teacherId = user?.id || '';
 
-  const { data: messages = [], isLoading: messagesLoading, error: messagesError } = useQuery({
-    queryKey: ['teacher-messages', teacherId, activeTab],
-    queryFn: () => teacherService.getMessages(teacherId, activeTab),
-    enabled: !!teacherId,
+  const { useMessages, useUnreadCount, useConversation, useSendMessage, useMarkAsRead } = teacherMessageHooks;
+
+  const { data: messages = [], isLoading: messagesLoading, error: messagesError } = useMessages({
+    userId: teacherId,
+    type: activeTab,
   });
 
-  const { data: unreadCount = 0 } = useQuery({
-    queryKey: ['teacher-unread-count', teacherId],
-    queryFn: () => teacherService.getUnreadCount(teacherId),
-    enabled: !!teacherId,
-    refetchInterval: PollingInterval.THIRTY_SECONDS,
-  });
+  const { data: unreadCount = 0 } = useUnreadCount({ userId: teacherId });
 
   const { data: classes = [] } = useQuery({
     queryKey: ['teacher-classes', teacherId],
@@ -49,10 +43,9 @@ export function TeacherMessagesPage() {
 
   const classIds = useMemo(() => classes.map(c => c.id), [classes]);
 
-  const { data: conversation = [], isLoading: conversationLoading } = useQuery({
-    queryKey: ['teacher-conversation', teacherId, selectedParentId],
-    queryFn: () => teacherService.getConversation(teacherId, selectedParentId!),
-    enabled: !!teacherId && !!selectedParentId,
+  const { data: conversation = [], isLoading: conversationLoading } = useConversation({
+    userId: teacherId,
+    otherUserId: selectedParentId,
   });
 
   const { data: parents = [] } = useQuery({
@@ -75,27 +68,12 @@ export function TeacherMessagesPage() {
     enabled: classes.length > 0,
   });
 
-  const sendMessageMutation = useMutation({
-    mutationFn: (data: { recipientId: string; subject: string; content: string }) =>
-      teacherService.sendMessage(teacherId, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['teacher-messages'] });
-      queryClient.invalidateQueries({ queryKey: ['teacher-conversation'] });
-      queryClient.invalidateQueries({ queryKey: ['teacher-unread-count'] });
-      setSelectedParentId(null);
-    },
-    onError: (error) => {
-      logger.error('Failed to send message', error);
-    },
+  const sendMessageMutation = useSendMessage({
+    userId: teacherId,
+    onSuccess: () => setSelectedParentId(null),
   });
 
-  const markAsReadMutation = useMutation({
-    mutationFn: (messageId: string) => teacherService.markAsRead(teacherId, messageId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['teacher-messages'] });
-      queryClient.invalidateQueries({ queryKey: ['teacher-unread-count'] });
-    },
-  });
+  const markAsReadMutation = useMarkAsRead({ userId: teacherId });
 
   const handleSendMessage = (recipientId: string, subject: string, content: string) => {
     sendMessageMutation.mutate({ recipientId, subject, content });

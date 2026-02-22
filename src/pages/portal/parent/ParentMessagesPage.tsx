@@ -12,33 +12,27 @@ import { SlideUp } from '@/components/animations';
 import { useReducedMotion } from '@/hooks/use-reduced-motion';
 import { useAuthStore } from '@/lib/authStore';
 import { parentService } from '@/services/parentService';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { formatDistanceToNow } from '@/utils/date';
-import { logger } from '@/lib/logger';
-import { PollingInterval } from '@/config/time';
 import { MessageThread, ComposeDialog } from '@/components/messages';
+import { parentMessageHooks } from '@/hooks';
 
 export function ParentMessagesPage() {
   const prefersReducedMotion = useReducedMotion();
   const user = useAuthStore((state) => state.user);
-  const queryClient = useQueryClient();
   const [selectedTeacherId, setSelectedTeacherId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'inbox' | 'sent'>('inbox');
 
   const parentId = user?.id || '';
 
-  const { data: messages = [], isLoading: messagesLoading, error: messagesError } = useQuery({
-    queryKey: ['parent-messages', parentId, activeTab],
-    queryFn: () => parentService.getMessages(parentId, activeTab),
-    enabled: !!parentId,
+  const { useMessages, useUnreadCount, useConversation, useSendMessage, useMarkAsRead } = parentMessageHooks;
+
+  const { data: messages = [], isLoading: messagesLoading, error: messagesError } = useMessages({
+    userId: parentId,
+    type: activeTab,
   });
 
-  const { data: unreadCount = 0 } = useQuery({
-    queryKey: ['parent-unread-count', parentId],
-    queryFn: () => parentService.getUnreadCount(parentId),
-    enabled: !!parentId,
-    refetchInterval: PollingInterval.THIRTY_SECONDS,
-  });
+  const { data: unreadCount = 0 } = useUnreadCount({ userId: parentId });
 
   const { data: teachers = [], isLoading: teachersLoading } = useQuery({
     queryKey: ['parent-teachers', parentId],
@@ -46,33 +40,17 @@ export function ParentMessagesPage() {
     enabled: !!parentId,
   });
 
-  const { data: conversation = [], isLoading: conversationLoading } = useQuery({
-    queryKey: ['parent-conversation', parentId, selectedTeacherId],
-    queryFn: () => parentService.getConversation(parentId, selectedTeacherId!),
-    enabled: !!parentId && !!selectedTeacherId,
+  const { data: conversation = [], isLoading: conversationLoading } = useConversation({
+    userId: parentId,
+    otherUserId: selectedTeacherId,
   });
 
-  const sendMessageMutation = useMutation({
-    mutationFn: (data: { recipientId: string; subject: string; content: string }) =>
-      parentService.sendMessage(parentId, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['parent-messages'] });
-      queryClient.invalidateQueries({ queryKey: ['parent-conversation'] });
-      queryClient.invalidateQueries({ queryKey: ['parent-unread-count'] });
-      setSelectedTeacherId(null);
-    },
-    onError: (error) => {
-      logger.error('Failed to send message', error);
-    },
+  const sendMessageMutation = useSendMessage({
+    userId: parentId,
+    onSuccess: () => setSelectedTeacherId(null),
   });
 
-  const markAsReadMutation = useMutation({
-    mutationFn: (messageId: string) => parentService.markAsRead(parentId, messageId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['parent-messages'] });
-      queryClient.invalidateQueries({ queryKey: ['parent-unread-count'] });
-    },
-  });
+  const markAsReadMutation = useMarkAsRead({ userId: parentId });
 
   if (messagesError) {
     return (
