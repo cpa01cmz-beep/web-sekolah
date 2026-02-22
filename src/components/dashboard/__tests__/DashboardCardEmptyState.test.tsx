@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { DashboardCardEmptyState } from '@/components/dashboard/DashboardCardEmptyState';
+import { Inbox } from 'lucide-react';
 
 describe('DashboardCardEmptyState', () => {
   describe('Rendering', () => {
@@ -23,28 +24,46 @@ describe('DashboardCardEmptyState', () => {
       const element = container.querySelector('[role="status"]');
       expect(element).toBeInTheDocument();
     });
+
+    it('should render icon when provided', () => {
+      const { container } = render(
+        <DashboardCardEmptyState 
+          message="No data" 
+          icon={<Inbox className="h-8 w-8" />} 
+        />
+      );
+
+      expect(screen.getByText('No data')).toBeInTheDocument();
+      expect(container.querySelector('svg')).toBeInTheDocument();
+    });
+
+    it('should not render icon when not provided', () => {
+      const { container } = render(<DashboardCardEmptyState message="No data" />);
+
+      expect(container.querySelector('svg')).not.toBeInTheDocument();
+    });
   });
 
   describe('Styling', () => {
-    it('should have text-sm class', () => {
-      const { container } = render(<DashboardCardEmptyState message="Empty" />);
+    it('should have text-sm class on message', () => {
+      render(<DashboardCardEmptyState message="Empty" />);
 
-      expect(container.querySelector('.text-sm')).toBeInTheDocument();
+      expect(screen.getByText('Empty')).toHaveClass('text-sm');
     });
 
-    it('should have text-muted-foreground class', () => {
-      const { container } = render(<DashboardCardEmptyState message="Empty" />);
+    it('should have text-muted-foreground class on message', () => {
+      render(<DashboardCardEmptyState message="Empty" />);
 
-      expect(container.querySelector('.text-muted-foreground')).toBeInTheDocument();
+      expect(screen.getByText('Empty')).toHaveClass('text-muted-foreground');
     });
 
-    it('should have text-center class', () => {
-      const { container } = render(<DashboardCardEmptyState message="Empty" />);
+    it('should have text-center class on message', () => {
+      render(<DashboardCardEmptyState message="Empty" />);
 
-      expect(container.querySelector('.text-center')).toBeInTheDocument();
+      expect(screen.getByText('Empty')).toHaveClass('text-center');
     });
 
-    it('should have py-4 class for padding', () => {
+    it('should have py-4 class for padding on container', () => {
       const { container } = render(<DashboardCardEmptyState message="Empty" />);
 
       expect(container.querySelector('.py-4')).toBeInTheDocument();
@@ -65,6 +84,22 @@ describe('DashboardCardEmptyState', () => {
 
       expect(container.querySelector('.custom-class.another-class')).toBeInTheDocument();
     });
+
+    it('should have flex layout classes on container', () => {
+      const { container } = render(<DashboardCardEmptyState message="Empty" />);
+
+      expect(container.querySelector('.flex-col')).toBeInTheDocument();
+      expect(container.querySelector('.items-center')).toBeInTheDocument();
+    });
+
+    it('should have text-muted-foreground on icon wrapper', () => {
+      const { container } = render(
+        <DashboardCardEmptyState message="Empty" icon={<Inbox className="h-8 w-8" />} />
+      );
+
+      const iconWrapper = container.querySelector('.text-muted-foreground');
+      expect(iconWrapper).toBeInTheDocument();
+    });
   });
 
   describe('Accessibility', () => {
@@ -78,6 +113,15 @@ describe('DashboardCardEmptyState', () => {
       render(<DashboardCardEmptyState message="No data" />);
 
       expect(screen.getByText('No data')).toBeVisible();
+    });
+
+    it('should have aria-hidden on icon wrapper for screen readers', () => {
+      const { container } = render(
+        <DashboardCardEmptyState message="No data" icon={<Inbox className="h-8 w-8" />} />
+      );
+
+      const iconWrapper = container.querySelector('[aria-hidden="true"]');
+      expect(iconWrapper).toBeInTheDocument();
     });
   });
 
