@@ -5,6 +5,61 @@ import { validateBody, validateQuery, validateParams, type ValidatedBody, type V
 
 describe('Validation Middleware', () => {
   describe('validateBody', () => {
+    it('should reject request without Content-Type header', async () => {
+      const app = new Hono();
+      const schema = z.object({ name: z.string() });
+      
+      app.use('*', validateBody(schema));
+      app.post('/test', (c) => c.json({ success: true }));
+      
+      const res = await app.request('/test', {
+        method: 'POST',
+        body: JSON.stringify({ name: 'John' }),
+      });
+      
+      expect(res.status).toBe(415);
+      const data = await res.json() as { success: boolean; code: string };
+      expect(data.success).toBe(false);
+      expect(data.code).toBe('INVALID_CONTENT_TYPE');
+    });
+
+    it('should reject request with wrong Content-Type', async () => {
+      const app = new Hono();
+      const schema = z.object({ name: z.string() });
+      
+      app.use('*', validateBody(schema));
+      app.post('/test', (c) => c.json({ success: true }));
+      
+      const res = await app.request('/test', {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain' },
+        body: JSON.stringify({ name: 'John' }),
+      });
+      
+      expect(res.status).toBe(415);
+      const data = await res.json() as { success: boolean; code: string };
+      expect(data.success).toBe(false);
+      expect(data.code).toBe('INVALID_CONTENT_TYPE');
+    });
+
+    it('should accept Content-Type with charset', async () => {
+      const app = new Hono();
+      const schema = z.object({ name: z.string() });
+      
+      app.use('*', validateBody(schema));
+      app.post('/test', (c) => c.json(c.get('validatedBody') as z.infer<typeof schema>));
+      
+      const res = await app.request('/test', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json; charset=utf-8' },
+        body: JSON.stringify({ name: 'John' }),
+      });
+      
+      expect(res.status).toBe(200);
+      const data = await res.json() as z.infer<typeof schema>;
+      expect(data.name).toBe('John');
+    });
+
     it('should pass valid body and set validatedBody in context', async () => {
       const app = new Hono();
       const schema = z.object({ name: z.string(), age: z.number() });

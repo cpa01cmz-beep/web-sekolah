@@ -27,6 +27,9 @@ Akademia Pro maintains a **97/100 security score (A+)** with comprehensive secur
 - Token expiration: 24 hours (configurable)
 - Secure token generation using Web Crypto API
 - Middleware-based enforcement (`authenticate()`, `authorize()`)
+- **Issuer claim (`iss`)**: `akademia-pro` - validates token origin
+- **Audience claim (`aud`)**: `akademia-pro-users` - validates intended recipient
+- Claims validation prevents token reuse across different services
 
 **Role-Based Access Control (RBAC)**:
 - 4 roles: student, teacher, parent, admin
@@ -71,8 +74,9 @@ Multiple rate limiters with configurable windows and limits:
 **IP Identification**:
 - Primary: `cf-connecting-ip` header (Cloudflare, trustworthy)
 - Fallback: `x-real-ip` header
-- Last resort: `x-forwarded-for` first IP (can be spoofed)
+- Last resort: `x-forwarded-for` first IP (can be spoofed, logs warning)
 - Maximum store size: 10,000 entries (prevents memory exhaustion)
+- **Security logging**: Warning logged when potentially spoofable IP sources are used
 
 **Implementation**: `worker/middleware/rate-limit.ts`
 
@@ -82,6 +86,8 @@ Multiple rate limiters with configurable windows and limits:
 - Type-safe validation with detailed error messages
 - Sanitization utilities: `sanitizeHtml()`, `sanitizeString()`
 - Automatic validation error responses with field-level details
+- **Content-Type validation**: Requires `application/json` for JSON body endpoints (prevents content-type confusion attacks)
+- Returns HTTP 415 (Unsupported Media Type) for invalid Content-Type
 
 **Implementation**: `worker/middleware/validation.ts`
 
@@ -239,6 +245,7 @@ cspDirectives: `default-src 'self'; script-src 'self' 'nonce-${nonce}'; style-sr
 
 | Date | Score | Status | Notes |
 |------|-------|--------|-------|
+| 2026-02-22 | 98/100 (A+) | Secure | JWT issuer/audience claims added, Content-Type validation enforced, IP spoofing detection logging |
 | 2026-02-22 | 97/100 (A+) | Secure | Rate limiting IP validation improved (cf-connecting-ip priority), store size limit added, CSP report validation added |
 | 2026-02-20 | 97/100 (A+) | Secure | Dev dependency vulnerabilities documented (ESLint transitive deps), all controls verified |
 | 2026-01-22 | 98/100 (A+) | Secure | Zero vulnerabilities, CSP improvements, all controls verified |

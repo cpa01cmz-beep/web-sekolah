@@ -2,6 +2,7 @@ import type { Context, Next } from 'hono';
 import { integrationMonitor } from '../integration-monitor';
 import { rateLimitExceeded } from '../core-utils';
 import { RateLimitMaxRequests, RateLimitWindow, TimeConstants } from '../config/time';
+import { logger } from '../logger';
 
 const MAX_STORE_SIZE = 10000;
 
@@ -56,10 +57,35 @@ function getKeyFromContext(c: Context, customKeyGenerator?: (c: Context) => stri
     return customKeyGenerator(c);
   }
   
-  const ip = c.req.header('cf-connecting-ip') || 
-             c.req.header('x-real-ip') || 
-             c.req.header('x-forwarded-for')?.split(',')[0].trim() || 
-             'unknown';
+  const cfConnectingIp = c.req.header('cf-connecting-ip');
+  const xRealIp = c.req.header('x-real-ip');
+  const xForwardedFor = c.req.header('x-forwarded-for');
+  
+  let ip: string;
+  let ipSource: string;
+  
+  if (cfConnectingIp) {
+    ip = cfConnectingIp;
+    ipSource = 'cf-connecting-ip';
+  } else if (xRealIp) {
+    ip = xRealIp;
+    ipSource = 'x-real-ip';
+  } else if (xForwardedFor) {
+    ip = xForwardedFor.split(',')[0].trim();
+    ipSource = 'x-forwarded-for';
+    logger.warn('[RATE-LIMIT] Using potentially spoofable IP source (x-forwarded-for)', {
+      path: c.req.path,
+      ip,
+      recommendation: 'Consider using cf-connecting-ip or x-real-ip for production',
+    });
+  } else {
+    ip = 'unknown';
+    ipSource = 'none';
+    logger.warn('[RATE-LIMIT] No IP address found in request headers', {
+      path: c.req.path,
+      method: c.req.method,
+    });
+  }
   
   const path = c.req.path;
   return `${ip}:${path}`;

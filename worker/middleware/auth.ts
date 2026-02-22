@@ -10,7 +10,12 @@ export interface JwtPayload extends JWTPayload {
   sub: string;
   email: string;
   role: 'student' | 'teacher' | 'parent' | 'admin';
+  iss?: string;
+  aud?: string;
 }
+
+const JWT_ISSUER = 'akademia-pro';
+const JWT_AUDIENCE = 'akademia-pro-users';
 
 async function getSecretKey(secret: string): Promise<CryptoKey> {
   const encoder = new TextEncoder();
@@ -25,7 +30,7 @@ async function getSecretKey(secret: string): Promise<CryptoKey> {
 }
 
 export async function generateToken(
-  payload: Omit<JwtPayload, 'iat' | 'exp'>,
+  payload: Omit<JwtPayload, 'iat' | 'exp' | 'iss' | 'aud'>,
   secret: string,
   expiresIn: string = '1h'
 ): Promise<string> {
@@ -33,6 +38,8 @@ export async function generateToken(
   const token = await new SignJWT(payload)
     .setProtectedHeader({ alg: 'HS256' })
     .setIssuedAt()
+    .setIssuer(JWT_ISSUER)
+    .setAudience(JWT_AUDIENCE)
     .setExpirationTime(expiresIn)
     .sign(key);
   return token;
@@ -44,7 +51,10 @@ export async function verifyToken(
 ): Promise<JwtPayload | null> {
   try {
     const key = await getSecretKey(secret);
-    const { payload } = await jwtVerify(token, key);
+    const { payload } = await jwtVerify(token, key, {
+      issuer: JWT_ISSUER,
+      audience: JWT_AUDIENCE,
+    });
     return payload as JwtPayload;
   } catch (error) {
     logger.error('[AUTH] Token verification failed', error);

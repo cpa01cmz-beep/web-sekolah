@@ -4,16 +4,34 @@ import { bad } from '../api/response-helpers';
 import { logger } from '../logger';
 
 const DEFAULT_MAX_BODY_SIZE = 1024 * 1024;
+const JSON_CONTENT_TYPE = 'application/json';
 
 interface ValidateBodyOptions {
   maxSize?: number;
+  requireContentType?: boolean;
 }
 
 export function validateBody<T>(schema: ZodSchema<T>, options?: ValidateBodyOptions) {
   const maxSize = options?.maxSize ?? DEFAULT_MAX_BODY_SIZE;
+  const requireContentType = options?.requireContentType ?? true;
   
   return async (c: Context, next: Next) => {
     try {
+      if (requireContentType) {
+        const contentType = c.req.header('Content-Type');
+        if (!contentType || !contentType.toLowerCase().includes(JSON_CONTENT_TYPE)) {
+          logger.warn('[VALIDATION] Invalid or missing Content-Type header', {
+            path: c.req.path,
+            method: c.req.method,
+            contentType: contentType || 'missing',
+          });
+          return c.json(
+            { success: false, code: 'INVALID_CONTENT_TYPE', message: 'Content-Type must be application/json' },
+            415
+          );
+        }
+      }
+      
       const contentLength = c.req.header('Content-Length');
       if (contentLength) {
         const length = parseInt(contentLength, 10);
