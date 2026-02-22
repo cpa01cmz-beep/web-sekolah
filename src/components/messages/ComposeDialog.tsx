@@ -65,7 +65,7 @@ export function ComposeDialog({
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
         <Button>
-          <Send className="h-4 w-4 mr-2" />
+          <Send className="h-4 w-4 mr-2" aria-hidden="true" />
           New Message
         </Button>
       </DialogTrigger>
@@ -126,7 +126,7 @@ export function ComposeDialog({
             isLoading={isLoading}
             className="w-full"
           >
-            <Send className="h-4 w-4 mr-2" />
+            <Send className="h-4 w-4 mr-2" aria-hidden="true" />
             {isLoading ? 'Sending...' : 'Send Message'}
           </Button>
         </div>
