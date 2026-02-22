@@ -24,6 +24,7 @@ import {
   calculatePerformanceSummary,
   detectAnomalies,
   analyzeTrend,
+  generatePerformanceInsights,
 } from '../analytics';
 
 describe('Analytics Utilities', () => {
@@ -601,6 +602,99 @@ describe('Analytics Utilities', () => {
     it('does not provide prediction for less than 3 values', () => {
       const result = analyzeTrend([10, 20]);
       expect(result.prediction).toBeUndefined();
+    });
+  });
+
+  describe('generatePerformanceInsights', () => {
+    it('returns empty array for empty input', () => {
+      expect(generatePerformanceInsights([])).toEqual([]);
+    });
+
+    it('generates strength insight for high scores', () => {
+      const performances = [
+        { subject: 'Math', score: 95, grade: 'A' },
+        { subject: 'Science', score: 92, grade: 'A' },
+      ];
+      const insights = generatePerformanceInsights(performances);
+
+      expect(insights.length).toBeGreaterThan(0);
+      expect(insights.some((i) => i.type === 'strength')).toBe(true);
+    });
+
+    it('generates warning insight for very low scores', () => {
+      const performances = [
+        { subject: 'History', score: 45, grade: 'F' },
+        { subject: 'Art', score: 88, grade: 'B' },
+      ];
+      const insights = generatePerformanceInsights(performances);
+
+      const warning = insights.find((i) => i.type === 'warning');
+      expect(warning).toBeDefined();
+      expect(warning?.subject).toBe('History');
+      expect(warning?.score).toBe(45);
+    });
+
+    it('generates improvement insight for moderate low scores', () => {
+      const performances = [
+        { subject: 'Physics', score: 65, grade: 'D' },
+        { subject: 'Chemistry', score: 90, grade: 'A' },
+      ];
+      const insights = generatePerformanceInsights(performances);
+
+      const improvement = insights.find((i) => i.type === 'improvement');
+      expect(improvement).toBeDefined();
+      expect(improvement?.subject).toBe('Physics');
+    });
+
+    it('generates encouragement insight for good scores', () => {
+      const performances = [
+        { subject: 'English', score: 75, grade: 'C' },
+        { subject: 'Math', score: 95, grade: 'A' },
+      ];
+      const insights = generatePerformanceInsights(performances);
+
+      const encouragement = insights.find((i) => i.type === 'encouragement');
+      expect(encouragement).toBeDefined();
+      expect(encouragement?.subject).toBe('English');
+    });
+
+    it('includes message in each insight', () => {
+      const performances = [
+        { subject: 'Math', score: 90, grade: 'A' },
+        { subject: 'Science', score: 50, grade: 'F' },
+      ];
+      const insights = generatePerformanceInsights(performances);
+
+      insights.forEach((insight) => {
+        expect(insight.message.length).toBeGreaterThan(0);
+        expect(insight.message).toContain(insight.subject);
+      });
+    });
+
+    it('handles mixed performance correctly', () => {
+      const performances = [
+        { subject: 'Math', score: 95, grade: 'A' },
+        { subject: 'Physics', score: 75, grade: 'C' },
+        { subject: 'Chemistry', score: 55, grade: 'F' },
+        { subject: 'Biology', score: 88, grade: 'B' },
+      ];
+      const insights = generatePerformanceInsights(performances);
+
+      const types = insights.map((i) => i.type);
+      expect(types).toContain('strength');
+      expect(types).toContain('warning');
+    });
+
+    it('sorts subjects by score for top performers', () => {
+      const performances = [
+        { subject: 'Art', score: 98, grade: 'A' },
+        { subject: 'Music', score: 96, grade: 'A' },
+        { subject: 'PE', score: 94, grade: 'A' },
+      ];
+      const insights = generatePerformanceInsights(performances);
+
+      const strengths = insights.filter((i) => i.type === 'strength');
+      expect(strengths.length).toBe(3);
     });
   });
 });
