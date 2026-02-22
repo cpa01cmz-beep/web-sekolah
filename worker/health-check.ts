@@ -30,15 +30,11 @@ export class ExternalServiceHealth {
     const timestamp = new Date().toISOString();
 
     try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
-
       const response = await fetch(url, {
         method: 'HEAD',
-        signal: controller.signal,
+        signal: AbortSignal.timeout(timeoutMs),
       });
 
-      clearTimeout(timeoutId);
       const latency = Date.now() - startTime;
 
       const result: HealthCheckResult = {
