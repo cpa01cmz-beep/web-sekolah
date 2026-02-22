@@ -227,8 +227,12 @@
       "source": "/api/(.*)",
       "headers": [
         {
+          "key": "x-vercel-enable-rewrite-caching",
+          "value": "1"
+        },
+        {
           "key": "Vary",
-          "value": "Accept, Accept-Encoding, Origin"
+          "value": "Accept, Accept-Encoding, Origin, Authorization"
         },
         {
           "key": "Cache-Control",
