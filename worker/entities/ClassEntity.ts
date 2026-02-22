@@ -15,4 +15,9 @@ export class ClassEntity extends IndexedEntity<SchoolClass> {
   static async getByTeacherId(env: Env, teacherId: string): Promise<SchoolClass[]> {
     return this.getBySecondaryIndex(env, 'teacherId', teacherId);
   }
+
+  static async countByTeacherId(env: Env, teacherId: string): Promise<number> {
+    const index = new SecondaryIndex<string>(env, this.entityName, 'teacherId');
+    return await index.countByValue(teacherId);
+  }
 }

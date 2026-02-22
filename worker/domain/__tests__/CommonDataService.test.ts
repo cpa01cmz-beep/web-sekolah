@@ -38,6 +38,8 @@ describe('CommonDataService - Critical Path Testing', () => {
       expect(typeof CommonDataService.getAllUsers).toBe('function');
       expect(typeof CommonDataService.getAllClasses).toBe('function');
       expect(typeof CommonDataService.getUserById).toBe('function');
+      expect(typeof CommonDataService.getClassCountByTeacher).toBe('function');
+      expect(typeof CommonDataService.getCourseCountByTeacher).toBe('function');
     });
   });
 
