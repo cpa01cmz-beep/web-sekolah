@@ -26,6 +26,11 @@ npm run typecheck
 
 # Linting
 npm run lint
+npm run lint:fix
+
+# Formatting
+npm run format
+npm run format:check
 
 # Run tests (watch mode)
 npm test
