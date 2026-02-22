@@ -206,4 +206,105 @@ describe('IndexedEntity', () => {
       expect(result).toBe(0);
     });
   });
+
+  describe('getByIds', () => {
+    it('should return empty map when ids array is empty', async () => {
+      const result = await TestIndexedEntity.getByIds(mockEnv, []);
+
+      expect(result).toBeInstanceOf(Map);
+      expect(result.size).toBe(0);
+      expect(mockStub.getDoc).not.toHaveBeenCalled();
+    });
+
+    it('should return map of entities for valid ids', async () => {
+      const ids = ['id-1', 'id-2'];
+
+      mockStub.has.mockResolvedValue(true);
+      mockStub.getDoc
+        .mockResolvedValueOnce({ v: 1, data: { id: 'id-1', name: 'Test 1', category: 'cat-a', createdAt: '', updatedAt: '', deletedAt: null } })
+        .mockResolvedValueOnce({ v: 1, data: { id: 'id-2', name: 'Test 2', category: 'cat-b', createdAt: '', updatedAt: '', deletedAt: null } });
+
+      const result = await TestIndexedEntity.getByIds(mockEnv, ids);
+
+      expect(result.size).toBe(2);
+      expect(result.get('id-1')).toEqual({ id: 'id-1', name: 'Test 1', category: 'cat-a', createdAt: '', updatedAt: '', deletedAt: null });
+      expect(result.get('id-2')).toEqual({ id: 'id-2', name: 'Test 2', category: 'cat-b', createdAt: '', updatedAt: '', deletedAt: null });
+    });
+
+    it('should filter out soft-deleted entities by default', async () => {
+      const ids = ['id-1', 'id-2'];
+
+      mockStub.has.mockResolvedValue(true);
+      mockStub.getDoc
+        .mockResolvedValueOnce({ v: 1, data: { id: 'id-1', name: 'Test 1', category: 'cat-a', createdAt: '', updatedAt: '', deletedAt: null } })
+        .mockResolvedValueOnce({ v: 1, data: { id: 'id-2', name: 'Test 2', category: 'cat-b', createdAt: '', updatedAt: '', deletedAt: '2024-01-01' } });
+
+      const result = await TestIndexedEntity.getByIds(mockEnv, ids);
+
+      expect(result.size).toBe(1);
+      expect(result.has('id-1')).toBe(true);
+      expect(result.has('id-2')).toBe(false);
+    });
+
+    it('should include soft-deleted entities when includeDeleted is true', async () => {
+      const ids = ['id-1', 'id-2'];
+
+      mockStub.has.mockResolvedValue(true);
+      mockStub.getDoc
+        .mockResolvedValueOnce({ v: 1, data: { id: 'id-1', name: 'Test 1', category: 'cat-a', createdAt: '', updatedAt: '', deletedAt: null } })
+        .mockResolvedValueOnce({ v: 1, data: { id: 'id-2', name: 'Test 2', category: 'cat-b', createdAt: '', updatedAt: '', deletedAt: '2024-01-01' } });
+
+      const result = await TestIndexedEntity.getByIds(mockEnv, ids, true);
+
+      expect(result.size).toBe(2);
+      expect(result.has('id-1')).toBe(true);
+      expect(result.has('id-2')).toBe(true);
+    });
+
+    it('should handle errors gracefully and skip failed fetches', async () => {
+      const ids = ['id-1', 'id-2'];
+
+      mockStub.has
+        .mockResolvedValueOnce(true)
+        .mockImplementationOnce(() => { throw new Error('Storage error'); });
+      mockStub.getDoc
+        .mockResolvedValueOnce({ v: 1, data: { id: 'id-1', name: 'Test 1', category: 'cat-a', createdAt: '', updatedAt: '', deletedAt: null } });
+
+      const result = await TestIndexedEntity.getByIds(mockEnv, ids);
+
+      expect(result.size).toBe(1);
+      expect(result.has('id-1')).toBe(true);
+      expect(result.has('id-2')).toBe(false);
+    });
+
+    it('should deduplicate ids before fetching', async () => {
+      const ids = ['id-1', 'id-1', 'id-2'];
+
+      mockStub.has.mockResolvedValue(true);
+      mockStub.getDoc
+        .mockResolvedValueOnce({ v: 1, data: { id: 'id-1', name: 'Test 1', category: 'cat-a', createdAt: '', updatedAt: '', deletedAt: null } })
+        .mockResolvedValueOnce({ v: 1, data: { id: 'id-2', name: 'Test 2', category: 'cat-b', createdAt: '', updatedAt: '', deletedAt: null } });
+
+      const result = await TestIndexedEntity.getByIds(mockEnv, ids);
+
+      expect(result.size).toBe(2);
+      expect(mockStub.has).toHaveBeenCalledTimes(2);
+    });
+
+    it('should handle non-existent entities (has returns false)', async () => {
+      const ids = ['id-1', 'id-2'];
+
+      mockStub.has
+        .mockResolvedValueOnce(true)
+        .mockResolvedValueOnce(false);
+      mockStub.getDoc
+        .mockResolvedValueOnce({ v: 1, data: { id: 'id-1', name: 'Test 1', category: 'cat-a', createdAt: '', updatedAt: '', deletedAt: null } });
+
+      const result = await TestIndexedEntity.getByIds(mockEnv, ids);
+
+      expect(result.size).toBe(1);
+      expect(result.has('id-1')).toBe(true);
+      expect(result.has('id-2')).toBe(false);
+    });
+  });
 });

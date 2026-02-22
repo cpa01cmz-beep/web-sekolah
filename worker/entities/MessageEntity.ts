@@ -1,5 +1,5 @@
 import { IndexedEntity, SecondaryIndex, CompoundSecondaryIndex, UserDateSortedIndex, type Env } from "../core-utils";
-import type { Message, UserRole } from "@shared/types";
+import type { Message } from "@shared/types";
 
 export class MessageEntity extends IndexedEntity<Message> {
   static readonly entityName = "message";
@@ -78,23 +78,6 @@ export class MessageEntity extends IndexedEntity<Message> {
     }
     const messages = await Promise.all(messageIds.map(id => new this(env, id).getState()));
     return messages.filter(m => m && !m.deletedAt) as Message[];
-  }
-
-  static async createWithCompoundIndex(env: Env, state: Message): Promise<Message> {
-    const created = await super.create(env, state);
-    const compoundIndex = new CompoundSecondaryIndex(env, this.entityName, ['recipientId', 'isRead']);
-    await compoundIndex.add([state.recipientId, state.isRead.toString()], state.id);
-    return created;
-  }
-
-  static async deleteWithCompoundIndex(env: Env, id: string): Promise<boolean> {
-    const inst = new this(env, id);
-    const state = await inst.getState() as Message | null;
-    if (!state) return false;
-
-    const compoundIndex = new CompoundSecondaryIndex(env, this.entityName, ['recipientId', 'isRead']);
-    await compoundIndex.remove([state.recipientId, state.isRead.toString()], id);
-    return await super.delete(env, id);
   }
 
   static async updateWithCompoundIndex(env: Env, id: string, updates: Partial<Message>): Promise<Message | null> {
@@ -181,19 +164,5 @@ export class MessageEntity extends IndexedEntity<Message> {
 
     const updated = await super.update(env, id, { deletedAt: now, updatedAt: now });
     return updated;
-  }
-
-  static async updateWithAllIndexes(env: Env, id: string, updates: Partial<Message>): Promise<Message | null> {
-    const inst = new this(env, id);
-    const currentState = await inst.getState() as Message | null;
-    if (!currentState || currentState.deletedAt) return null;
-
-    if (updates.isRead !== undefined && updates.isRead !== currentState.isRead) {
-      const compoundIndex = new CompoundSecondaryIndex(env, this.entityName, ['recipientId', 'isRead']);
-      await compoundIndex.remove([currentState.recipientId, currentState.isRead.toString()], id);
-      await compoundIndex.add([currentState.recipientId, updates.isRead.toString()], id);
-    }
-
-    return await super.update(env, id, updates);
   }
 }

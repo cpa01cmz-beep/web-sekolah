@@ -34,23 +34,6 @@ export class GradeEntity extends IndexedEntity<Grade> {
     return validGrade || null;
   }
 
-  static async createWithCompoundIndex(env: Env, state: Grade): Promise<Grade> {
-    const created = await super.create(env, state);
-    const compoundIndex = new CompoundSecondaryIndex(env, this.entityName, ['studentId', 'courseId']);
-    await compoundIndex.add([state.studentId, state.courseId], state.id);
-    return created;
-  }
-
-  static async deleteWithCompoundIndex(env: Env, id: string): Promise<boolean> {
-    const inst = new this(env, id);
-    const state = await inst.getState() as Grade | null;
-    if (!state) return false;
-
-    const compoundIndex = new CompoundSecondaryIndex(env, this.entityName, ['studentId', 'courseId']);
-    await compoundIndex.remove([state.studentId, state.courseId], id);
-    return await super.delete(env, id);
-  }
-
   static async getRecentForStudent(env: Env, studentId: string, limit: number): Promise<Grade[]> {
     const dateIndex = new StudentDateSortedIndex(env, this.entityName, studentId);
     const recentGradeIds = await dateIndex.getRecent(limit);
