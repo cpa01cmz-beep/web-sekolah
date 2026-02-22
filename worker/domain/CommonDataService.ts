@@ -2,6 +2,7 @@ import type { Env } from '../core-utils';
 import { UserEntity, ClassEntity, AnnouncementEntity, ScheduleEntity, ClassScheduleState, CourseEntity, GradeEntity } from '../entities';
 import type { SchoolUser, SchoolClass, Announcement, Student, ScheduleItem, Grade, Course, UserRole } from '@shared/types';
 import { getUniqueIds, buildEntityMap, fetchAndMap } from './EntityMapUtils';
+import { PaginationDefaults } from '../config/pagination';
 
 export class CommonDataService {
   static async getStudentWithClassAndSchedule(env: Env, studentId: string): Promise<{
@@ -196,7 +197,7 @@ export class CommonDataService {
     }));
   }
 
-  static async getRecentGradesWithCourseNames(env: Env, studentId: string, limit: number = 10): Promise<(Grade & { courseName: string })[]> {
+  static async getRecentGradesWithCourseNames(env: Env, studentId: string, limit: number = PaginationDefaults.DEFAULT_RECENT_ITEMS_LIMIT): Promise<(Grade & { courseName: string })[]> {
     const studentGrades = await GradeEntity.getRecentForStudent(env, studentId, limit);
 
     if (studentGrades.length === 0) {
@@ -212,7 +213,7 @@ export class CommonDataService {
     }));
   }
 
-  static async getTeacherRecentGradesWithDetails(env: Env, teacherId: string, limit: number = 5): Promise<(Grade & { courseName: string; studentName: string })[]> {
+  static async getTeacherRecentGradesWithDetails(env: Env, teacherId: string, limit: number = PaginationDefaults.DEFAULT_RECENT_GRADES_LIMIT): Promise<(Grade & { courseName: string; studentName: string })[]> {
     const teacherCourses = await CourseEntity.getByTeacherId(env, teacherId);
     
     if (teacherCourses.length === 0) {

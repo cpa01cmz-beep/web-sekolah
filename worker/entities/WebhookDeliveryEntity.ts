@@ -1,6 +1,7 @@
 import { IndexedEntity, SecondaryIndex, type Env } from "../core-utils";
 import type { WebhookDelivery } from "@shared/types";
 import { DateSortedSecondaryIndex } from "../storage/DateSortedSecondaryIndex";
+import { PaginationDefaults } from "../config/pagination";
 
 export class WebhookDeliveryEntity extends IndexedEntity<WebhookDelivery> {
   static readonly entityName = "webhookDelivery";
@@ -55,7 +56,7 @@ export class WebhookDeliveryEntity extends IndexedEntity<WebhookDelivery> {
     return deliveries.filter(d => d && !d.deletedAt) as WebhookDelivery[];
   }
 
-  static async getRecentDeliveries(env: Env, limit: number = 10): Promise<WebhookDelivery[]> {
+  static async getRecentDeliveries(env: Env, limit: number = PaginationDefaults.DEFAULT_RECENT_ITEMS_LIMIT): Promise<WebhookDelivery[]> {
     const index = new DateSortedSecondaryIndex(env, this.entityName);
     const recentIds = await index.getRecent(limit);
     if (recentIds.length === 0) {

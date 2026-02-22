@@ -8,6 +8,7 @@ import type { WebhookDelivery } from '@shared/types';
 import { WebhookEventEntity, WebhookDeliveryEntity, WebhookConfigEntity } from './entities';
 import { withErrorHandler } from './routes/route-utils';
 import type { Context } from 'hono';
+import { PaginationDefaults } from './config/pagination';
 
 export function adminMonitoringRoutes(app: Hono<{ Bindings: Env }>) {
   const adminRouter = new Hono<{ Bindings: Env }>();
@@ -68,7 +69,7 @@ export function adminMonitoringRoutes(app: Hono<{ Bindings: Env }>) {
 
   adminRouter.get('/webhooks/deliveries', withErrorHandler('retrieve webhook deliveries')(async (c: Context) => {
     const pendingDeliveries = await WebhookDeliveryEntity.getPendingRetries(c.env);
-    const recentDeliveries = await WebhookDeliveryEntity.getRecentDeliveries(c.env, 10);
+    const recentDeliveries = await WebhookDeliveryEntity.getRecentDeliveries(c.env, PaginationDefaults.DEFAULT_RECENT_ITEMS_LIMIT);
 
     return ok(c, {
       pending: pendingDeliveries.map((d: WebhookDelivery) => ({

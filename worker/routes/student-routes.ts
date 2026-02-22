@@ -6,6 +6,7 @@ import { GRADE_A_THRESHOLD, GRADE_B_THRESHOLD, GRADE_C_THRESHOLD, PASSING_SCORE_
 import { GradeService, CommonDataService, StudentDashboardService } from '../domain';
 import { withUserValidation, withErrorHandler } from './route-utils';
 import type { Context } from 'hono';
+import { PaginationDefaults } from '../config/pagination';
 
 export function studentRoutes(app: Hono<{ Bindings: Env }>) {
   app.get('/api/students/:id/dashboard', ...withUserValidation('student', 'dashboard'), withErrorHandler('get student dashboard')(async (c: Context) => {
@@ -58,7 +59,7 @@ export function studentRoutes(app: Hono<{ Bindings: Env }>) {
         D: grades.filter(g => g.score >= PASSING_SCORE_THRESHOLD && g.score < GRADE_C_THRESHOLD).length,
         F: grades.filter(g => g.score < PASSING_SCORE_THRESHOLD).length,
       },
-      recentGrades: grades.slice(-5).reverse()
+      recentGrades: grades.slice(-PaginationDefaults.DEFAULT_RECENT_GRADES_LIMIT).reverse()
     };
 
     return ok(c, cardData);

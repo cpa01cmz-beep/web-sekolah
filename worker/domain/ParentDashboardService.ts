@@ -3,6 +3,7 @@ import { UserEntity, ClassEntity } from '../entities';
 import type { ParentDashboardData, Student, ScheduleItem, SchoolUser } from '@shared/types';
 import { getRoleSpecificFields } from '../type-guards';
 import { CommonDataService } from './CommonDataService';
+import { PaginationDefaults } from '../config/pagination';
 
 export class ParentDashboardService {
   static async getDashboardData(env: Env, parentId: string): Promise<ParentDashboardData> {
@@ -31,8 +32,8 @@ export class ParentDashboardService {
     const [child, childSchedule, childGrades, announcements] = await Promise.all([
       this.getChildWithClass(env, childState, childRoleFields.classId),
       childRoleFields.classId ? CommonDataService.getScheduleWithDetails(env, childRoleFields.classId) : Promise.resolve([]),
-      CommonDataService.getRecentGradesWithCourseNames(env, roleFields.childId, 10),
-      CommonDataService.getAnnouncementsWithAuthorNames(env, 5),
+      CommonDataService.getRecentGradesWithCourseNames(env, roleFields.childId, PaginationDefaults.DEFAULT_RECENT_ITEMS_LIMIT),
+      CommonDataService.getAnnouncementsWithAuthorNames(env, PaginationDefaults.DEFAULT_RECENT_GRADES_LIMIT),
     ]);
 
     return { child, childSchedule, childGrades, announcements };
