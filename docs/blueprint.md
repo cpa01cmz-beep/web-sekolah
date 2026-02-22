@@ -453,13 +453,50 @@ To support future soft-delete requirements, `IndexedEntity` now includes:
 - All 2797 tests passing (5 skipped, 0 regression)
 
 **Benefits**:
-- ✅ Message lists load already sorted, no in-memory sorting required
-- ✅ Reduced data transfer and memory usage
-- ✅ Faster message inbox/sent folder load times for users with many messages
-- ✅ Consistent with other date-sorted index patterns (GradeEntity, AnnouncementEntity)
-- ✅ Backward compatible with existing index queries
+ - ✅ Message lists load already sorted, no in-memory sorting required
+ - ✅ Reduced data transfer and memory usage
+ - ✅ Faster message inbox/sent folder load times for users with many messages
+ - ✅ Consistent with other date-sorted index patterns (GradeEntity, AnnouncementEntity)
+ - ✅ Backward compatible with existing index queries
 
-**Problem**: `user-routes.ts` had inconsistent data access patterns - some routes used domain services while others directly accessed entities, violating Separation of Concerns principle
+#### Role-Filtered Date-Sorted Query for Announcements (2026-02-22)
+
+**Problem**: `CommonDataService.getRecentAnnouncementsByRole()` used inefficient query pattern
+- Fetched `limit * 2` announcements from date-sorted index
+- Filtered in-memory by targetRole
+- Could miss matching announcements if many have different roles
+- Loaded more data than necessary
+
+**Solution**: Added optimized `getRecentByTargetRole()` method to `AnnouncementEntity` that uses existing secondary indexes efficiently
+
+**Implementation**:
+- New `getRecentByTargetRole(env, targetRole, limit)` method in `worker/entities/AnnouncementEntity.ts`
+- Fetches from both targetRole secondary index (specific role) AND 'all' index
+- Merges results with deduplication using Set
+- Sorts by date in-memory (only on matching announcements)
+- Returns exactly the requested limit
+
+**Metrics**:
+- Data loaded: All announcements → Only matching role announcements
+- Query efficiency: Loads only relevant data, no over-fetching
+- Memory usage: Reduced by filtering at index level
+- Predictable results: Always returns up to `limit` matching announcements
+
+**Impact**:
+- `worker/entities/AnnouncementEntity.ts`: Added `getRecentByTargetRole()` method (22 lines)
+- `worker/domain/CommonDataService.ts`: Updated `getRecentAnnouncementsByRole()` to use new method
+- `worker/domain/AnnouncementService.ts`: Added `getRecentAnnouncementsByRole()` service method
+- All 3122 tests passing (1 new test added, 0 regression)
+
+**Benefits**:
+- ✅ Efficient role-filtered announcement retrieval
+- ✅ Only loads announcements matching the target role
+- ✅ Deduplicates announcements that appear in both role-specific and 'all' indexes
+- ✅ Sorted by date (newest first) after filtering
+- ✅ Consistent with other entity query patterns
+- ✅ Better performance for dashboards with many announcements
+
+ **Problem**: `user-routes.ts` had inconsistent data access patterns - some routes used domain services while others directly accessed entities, violating Separation of Concerns principle
 
 **Solution**: Created `CommonDataService` to consolidate shared data access patterns across route handlers
 

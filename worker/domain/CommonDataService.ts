@@ -69,9 +69,7 @@ export class CommonDataService {
   }
 
   static async getRecentAnnouncementsByRole(env: Env, targetRole: string, limit: number): Promise<Announcement[]> {
-    const recentAnnouncements = await AnnouncementEntity.getRecent(env, limit * 2);
-    const roleAnnouncements = recentAnnouncements.filter(ann => ann.targetRole === targetRole || ann.targetRole === 'all');
-    return roleAnnouncements.slice(0, limit);
+    return await AnnouncementEntity.getRecentByTargetRole(env, targetRole, limit);
   }
 
   static async getClassStudents(env: Env, classId: string): Promise<SchoolUser[]> {
