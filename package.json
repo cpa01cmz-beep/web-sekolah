@@ -7,6 +7,7 @@
     "node": ">=18.0.0"
   },
   "scripts": {
+    "clean": "rm -rf dist .wrangler .cache tsconfig.tsbuildinfo",
     "dev": "vite --host 0.0.0.0 --port ${PORT:-3000}",
     "build": "vite build",
     "lint": "eslint --cache -f json --quiet .",
@@ -35,6 +36,7 @@
     "test:run": "vitest run",
     "test:coverage": "vitest run --coverage",
     "test:ui": "vitest --ui",
+    "test:changed": "vitest run --changed",
     "validate": "npm run typecheck && npm run lint && npm run test:run",
     "check": "npm run typecheck && npm run lint",
     "validate:env": "./scripts/validate-env.sh staging",
