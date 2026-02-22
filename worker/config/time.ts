@@ -22,6 +22,10 @@ export const RateLimitMaxRequests = {
   AUTH: 5,
 } as const;
 
+export const RateLimitStore = {
+  MAX_ENTRIES: 10000,
+} as const;
+
 export const IntegrationMonitor = {
   DEFAULT_WINDOW_MS: TimeConstants.FIFTEEN_MINUTES_MS,
   MAX_RECENT_ERRORS: 100,

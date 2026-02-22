@@ -2,15 +2,14 @@ import type { Context, Next } from 'hono';
 import type { ZodSchema, ZodError } from 'zod';
 import { bad } from '../api/response-helpers';
 import { logger } from '../logger';
-
-const DEFAULT_MAX_BODY_SIZE = 1024 * 1024;
+import { ValidationConfig } from '../config/validation';
 
 interface ValidateBodyOptions {
   maxSize?: number;
 }
 
 export function validateBody<T>(schema: ZodSchema<T>, options?: ValidateBodyOptions) {
-  const maxSize = options?.maxSize ?? DEFAULT_MAX_BODY_SIZE;
+  const maxSize = options?.maxSize ?? ValidationConfig.DEFAULT_MAX_BODY_SIZE_BYTES;
   
   return async (c: Context, next: Next) => {
     try {
