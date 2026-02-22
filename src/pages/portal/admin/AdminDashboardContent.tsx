@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { PageHeader } from '@/components/PageHeader';
 import { DashboardStatCard } from '@/components/dashboard/DashboardStatCard';
 import { AnnouncementItem } from '@/components/dashboard/AnnouncementItem';
+import { DashboardCardEmptyState } from '@/components/dashboard/DashboardCardEmptyState';
 import { EnrollmentChart } from '@/components/dashboard/EnrollmentChart';
 import { Users, GraduationCap, School, BookCopy } from 'lucide-react';
 import { SlideUp } from '@/components/animations';
@@ -105,7 +106,7 @@ const AdminDashboardContent = memo(function AdminDashboardContent({
             </CardHeader>
               <CardContent>
                 {data.recentAnnouncements.length === 0 ? (
-                  <p className="text-sm text-muted-foreground text-center py-8" role="status">No announcements available.</p>
+                  <DashboardCardEmptyState message="No announcements available." />
                 ) : (
                   <ul className="space-y-4" aria-labelledby="announcements-heading" aria-label={`${data.recentAnnouncements.length} announcements`}>
                     {data.recentAnnouncements.map((ann) => (
