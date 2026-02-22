@@ -116,7 +116,7 @@ export function AdminUserManagementPage() {
       >
         <DialogTrigger asChild>
           <Button onClick={handleAddUser}>
-            <PlusCircle className="mr-2 h-4 w-4" /> Add User
+            <PlusCircle className="mr-2 h-4 w-4" aria-hidden="true" /> Add User
           </Button>
         </DialogTrigger>
       </PageHeader>
