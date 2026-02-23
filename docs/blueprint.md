@@ -502,6 +502,70 @@ To support future soft-delete requirements, `IndexedEntity` now includes:
 - [x] All tests passing (no regressions)
 - [x] Documentation updated
 
+### Shared Analytics Service (2026-02-23)
+
+**Problem**: Grade analytics calculations were duplicated inline in route handlers, violating DRY principle and making it difficult to maintain consistent analytics across dashboards
+
+**Example Scenario**:
+
+- Student card endpoint calculated average score and grade distribution inline (17 lines)
+- Same calculations would be needed for teacher dashboard analytics
+- No centralized place for grade statistics
+
+**Solution**: Created shared `AnalyticsService` for grade statistics calculations
+
+**Implementation**:
+
+- New `AnalyticsService` class in `worker/domain/AnalyticsService.ts`
+- Provides centralized grade analytics methods:
+  - `calculateGradeDistribution(grades)` - Returns { A, B, C, D, F } counts
+  - `calculateAverageScore(grades)` - Returns average score with proper rounding
+  - `calculateGradeStatistics(grades)` - Returns complete statistics object
+  - `calculatePassRate(grades)` - Returns percentage of passing grades
+
+**Metrics**:
+
+| Metric                  | Before                 | After                       | Improvement      |
+| ----------------------- | ---------------------- | --------------------------- | ---------------- |
+| Analytics code location | Inline in routes       | Centralized service         | DRY compliance   |
+| Reusability             | None (route-specific)  | Shared across dashboards    | New capability   |
+| Testability             | Requires route testing | Unit testable independently | Better isolation |
+| Code duplication        | Inline calculations    | Single service              | Eliminated       |
+
+**Impact**:
+
+- `worker/domain/AnalyticsService.ts`: New service (60 lines)
+- `worker/routes/student-routes.ts`: Simplified student card endpoint (17 lines removed)
+- All 3302 tests passing (15 new tests added, 0 regression)
+
+**Benefits**:
+
+- ✅ Centralized grade analytics calculations
+- ✅ Reusable across student, teacher, and parent dashboards
+- ✅ Pure functions - easy to test without mocking
+- ✅ Consistent grade thresholds from shared constants
+- ✅ All 3302 tests passing (no regressions)
+- ✅ Zero breaking changes to existing functionality
+
+**Technical Details**:
+
+**AnalyticsService Methods**:
+
+| Method                     | Input   | Output              | Use Case             |
+| -------------------------- | ------- | ------------------- | -------------------- |
+| calculateGradeDistribution | Grade[] | { A, B, C, D, F }   | Distribution charts  |
+| calculateAverageScore      | Grade[] | number              | Average display      |
+| calculateGradeStatistics   | Grade[] | GradeStatistics     | Complete analytics   |
+| calculatePassRate          | Grade[] | number (percentage) | Pass rate indicators |
+
+**Success Criteria**:
+
+- [x] AnalyticsService created with 4 methods
+- [x] Student card endpoint refactored to use service
+- [x] Unit tests added (15 tests)
+- [x] All tests passing (no regressions)
+- [x] Documentation updated
+
   ### Recent Data Optimizations (2026-01-07)
 
 #### Compound Secondary Index for Grades
