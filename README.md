@@ -288,7 +288,7 @@ npm run build
   # Clean install dependencies
   rm -rf node_modules package-lock.json
   npm install
-  # Check Node.js version (requires v18+)
+  # Check Node.js version (requires v20+)
   node --version
   ```
 
