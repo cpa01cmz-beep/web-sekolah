@@ -1,86 +1,87 @@
-import type { TimestampedEntity, UserRole, AnnouncementTargetRole } from './common-types';
+import type { TimestampedEntity, UserRole, AnnouncementTargetRole } from './common-types'
 
 export interface BaseUser extends TimestampedEntity {
-  id: string;
-  name: string;
-  email: string;
-  role: UserRole;
-  avatarUrl: string;
-  passwordHash?: string | null;
+  id: string
+  name: string
+  email: string
+  role: UserRole
+  avatarUrl: string
+  passwordHash?: string | null
 }
 
 export interface Student extends BaseUser {
-  role: 'student';
-  classId: string;
-  studentIdNumber: string;
+  role: 'student'
+  classId: string
+  studentIdNumber: string
+  parentId?: string
 }
 
 export interface Teacher extends BaseUser {
-  role: 'teacher';
-  classIds: string[];
+  role: 'teacher'
+  classIds: string[]
 }
 
 export interface Parent extends BaseUser {
-  role: 'parent';
-  childId: string;
+  role: 'parent'
+  childId: string
 }
 
 export interface Admin extends BaseUser {
-  role: 'admin';
+  role: 'admin'
 }
 
-export type SchoolUser = Student | Teacher | Parent | Admin;
+export type SchoolUser = Student | Teacher | Parent | Admin
 
 export interface SchoolClass extends TimestampedEntity {
-  id: string;
-  name: string;
-  teacherId: string;
+  id: string
+  name: string
+  teacherId: string
 }
 
 export interface Course extends TimestampedEntity {
-  id: string;
-  name: string;
-  teacherId: string;
+  id: string
+  name: string
+  teacherId: string
 }
 
 export interface Grade extends TimestampedEntity {
-  id: string;
-  studentId: string;
-  courseId: string;
-  score: number;
-  feedback: string;
+  id: string
+  studentId: string
+  courseId: string
+  score: number
+  feedback: string
 }
 
 export interface Announcement extends TimestampedEntity {
-  id: string;
-  title: string;
-  content: string;
-  date: string;
-  authorId: string;
-  targetRole: AnnouncementTargetRole;
+  id: string
+  title: string
+  content: string
+  date: string
+  authorId: string
+  targetRole: AnnouncementTargetRole
 }
 
 export interface ScheduleItem {
-  day: 'Senin' | 'Selasa' | 'Rabu' | 'Kamis' | 'Jumat';
-  time: string;
-  courseId: string;
+  day: 'Senin' | 'Selasa' | 'Rabu' | 'Kamis' | 'Jumat'
+  time: string
+  courseId: string
 }
 
 export interface Message extends TimestampedEntity {
-  id: string;
-  senderId: string;
-  senderRole: UserRole;
-  recipientId: string;
-  recipientRole: UserRole;
-  subject: string;
-  content: string;
-  isRead: boolean;
-  parentMessageId?: string | null;
+  id: string
+  senderId: string
+  senderRole: UserRole
+  recipientId: string
+  recipientRole: UserRole
+  subject: string
+  content: string
+  isRead: boolean
+  parentMessageId?: string | null
 }
 
 export interface MessageThread {
-  message: Message;
-  replies: Message[];
-  sender: SchoolUser;
-  recipient: SchoolUser;
+  message: Message
+  replies: Message[]
+  sender: SchoolUser
+  recipient: SchoolUser
 }

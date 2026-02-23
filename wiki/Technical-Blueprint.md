@@ -18,6 +18,7 @@ Akademia Pro follows a modern, scalable architecture leveraging Cloudflare's edg
 ## Technology Stack
 
 ### Frontend
+
 - **Framework**: React 19 with TypeScript
 - **Build Tool**: Vite 7
 - **Routing**: React Router 7
@@ -28,16 +29,19 @@ Akademia Pro follows a modern, scalable architecture leveraging Cloudflare's edg
 - **Form Handling**: React Hook Form with Zod validation
 
 ### Backend
+
 - **Framework**: Hono.js
 - **Platform**: Cloudflare Workers
 - **API Design**: RESTful principles with JSON responses
 - **Authentication**: JWT-based authentication
 
 ### Data Layer
+
 - **Storage**: Cloudflare Durable Objects
 - **Data Modeling**: TypeScript interfaces shared between frontend and backend
 
 ### Development & Deployment
+
 - **Language**: TypeScript (end-to-end)
 - **Package Manager**: npm
 - **Deployment**: Cloudflare Workers via Wrangler
@@ -76,56 +80,67 @@ akademia-pro/
 ## Core Components
 
 ### 1. User Management
+
 - User roles (student, teacher, parent, admin)
 - User CRUD operations (admin only)
 
 ### 2. Academic Management
+
 - Class management
 - Course management
 - Grade management
 
 ### 3. Data Management
+
 - Durable Objects for each entity type (Users, Classes, Courses, Grades, etc.)
 - Data seeding for initial setup
 
 ### 4. Communication System
+
 - Announcement broadcasting
 
 ## API Design
 
 ### Health Endpoint
+
 ```
 GET    /api/health             # Check API health status
 ```
 
 ### Seed Endpoint
+
 ```
 POST   /api/seed               # Seed database with initial data
 ```
 
 ### Client Error Reporting
+
 ```
 POST   /api/client-errors      # Report client-side errors
 ```
 
 ### Student Endpoints
+
 ```
 GET    /api/students/:id/dashboard  # Get student dashboard data
 ```
 
 ### Teacher Endpoints
+
 ```
 GET    /api/teachers/:id/classes    # Get teacher's assigned classes
 GET    /api/classes/:id/students    # Get students in a class with grades
 ```
 
 ### Grade Endpoints
+
 ```
 POST   /api/grades             # Create a new grade entry
 PUT    /api/grades/:id         # Update an existing grade entry
 ```
 
 ### User Endpoints
+
 ```
 GET    /api/users              # Get all users (admin only)
 POST   /api/users              # Create a new user (admin only)
@@ -136,107 +151,113 @@ DELETE /api/users/:id          # Delete a user (admin only)
 ## Data Models
 
 ### Base Types
+
 ```typescript
 interface ApiResponse<T = unknown> {
-  success: boolean;
-  data?: T;
-  error?: string;
+  success: boolean
+  data?: T
+  error?: string
 }
 
-type UserRole = 'student' | 'teacher' | 'parent' | 'admin';
+type UserRole = 'student' | 'teacher' | 'parent' | 'admin'
 ```
 
 ### User
+
 ```typescript
 interface BaseUser {
-  id: string;
-  name: string;
-  email: string;
-  role: UserRole;
-  avatarUrl: string;
+  id: string
+  name: string
+  email: string
+  role: UserRole
+  avatarUrl: string
 }
 
 interface Student extends BaseUser {
-  role: 'student';
-  classId: string;
-  studentIdNumber: string;
+  role: 'student'
+  classId: string
+  studentIdNumber: string
+  parentId?: string
 }
 
 interface Teacher extends BaseUser {
-  role: 'teacher';
-  classIds: string[];
+  role: 'teacher'
+  classIds: string[]
 }
 
 interface Parent extends BaseUser {
-  role: 'parent';
-  childId: string;
+  role: 'parent'
+  childId: string
 }
 
 interface Admin extends BaseUser {
-  role: 'admin';
+  role: 'admin'
 }
 
-type SchoolUser = Student | Teacher | Parent | Admin;
+type SchoolUser = Student | Teacher | Parent | Admin
 ```
 
 ### School Entities
+
 ```typescript
 interface SchoolClass {
-  id: string;
-  name: string; // e.g., "11-A"
-  teacherId: string;
+  id: string
+  name: string // e.g., "11-A"
+  teacherId: string
 }
 
 interface Course {
-  id: string;
-  name: string;
-  teacherId: string;
+  id: string
+  name: string
+  teacherId: string
 }
 
 interface Grade {
-  id: string;
-  studentId: string;
-  courseId: string;
-  score: number;
-  feedback: string;
+  id: string
+  studentId: string
+  courseId: string
+  score: number
+  feedback: string
 }
 
 interface Announcement {
-  id: string;
-  title: string;
-  content: string;
-  date: string; // ISO 8601 format
-  authorId: string;
+  id: string
+  title: string
+  content: string
+  date: string // ISO 8601 format
+  authorId: string
 }
 
 interface ScheduleItem {
-  day: 'Senin' | 'Selasa' | 'Rabu' | 'Kamis' | 'Jumat';
-  time: string; // "07:30 - 09:00"
-  courseId: string;
+  day: 'Senin' | 'Selasa' | 'Rabu' | 'Kamis' | 'Jumat'
+  time: string // "07:30 - 09:00"
+  courseId: string
 }
 ```
 
 ### API Response Types
+
 ```typescript
 interface StudentDashboardData {
-  schedule: (ScheduleItem & { courseName: string; teacherName: string })[];
-  recentGrades: (Grade & { courseName: string })[];
-  announcements: (Announcement & { authorName: string })[];
+  schedule: (ScheduleItem & { courseName: string; teacherName: string })[]
+  recentGrades: (Grade & { courseName: string })[]
+  announcements: (Announcement & { authorName: string })[]
 }
 
 interface SchoolData {
-  users: SchoolUser[];
-  classes: SchoolClass[];
-  courses: Course[];
-  grades: Grade[];
-  announcements: Announcement[];
-  schedules: (ScheduleItem & { classId: string })[];
+  users: SchoolUser[]
+  classes: SchoolClass[]
+  courses: Course[]
+  grades: Grade[]
+  announcements: Announcement[]
+  schedules: (ScheduleItem & { classId: string })[]
 }
 ```
 
 ## Security Considerations
 
 ### Authentication & Authorization
+
 - CORS configuration for API endpoints
 - JWT token-based authentication for production
 - Role-based access control (RBAC)
@@ -244,6 +265,7 @@ interface SchoolData {
 - Rate limiting on authentication endpoints
 
 ### Data Protection
+
 - HTTPS enforcement for all connections
 - Input validation and sanitization
 - Output encoding to prevent XSS
@@ -251,6 +273,7 @@ interface SchoolData {
 - Sensitive data encryption at rest
 
 ### Infrastructure Security
+
 - Cloudflare WAF with OWASP rules
 - DDoS protection and rate limiting
 - Secure headers configuration (CSP, HSTS, X-Frame-Options)
@@ -258,6 +281,7 @@ interface SchoolData {
 - Regular security audits and dependency updates
 
 ### Monitoring & Logging
+
 - Security event logging
 - Intrusion detection
 - Audit trail for privileged operations

@@ -44,6 +44,7 @@ export function getRoleSpecificFields(user: SchoolUser) {
     return {
       classId: user.classId,
       studentIdNumber: user.studentIdNumber,
+      parentId: user.parentId,
       classIds: undefined,
       childId: undefined,
     }
