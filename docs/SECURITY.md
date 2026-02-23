@@ -2,7 +2,7 @@
 
 ## Security Overview
 
-Akademia Pro maintains a **97/100 security score (A+)** with comprehensive security controls implemented throughout the codebase.
+Akademia Pro maintains a **98/100 security score (A+)** with comprehensive security controls implemented throughout the codebase.
 
 **Last Security Assessment**: 2026-02-23
 
