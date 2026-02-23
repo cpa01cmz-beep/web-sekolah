@@ -1,86 +1,86 @@
-import { RETRY_CONFIG } from '@shared/constants';
-import { logger } from '../logger';
+import { RETRY_CONFIG } from '@shared/constants'
+import { logger } from '../logger'
 
 export interface RetryOptions {
-  maxRetries?: number;
-  baseDelay?: number;
-  jitterMs?: number;
-  timeout?: number;
-  shouldRetry?: (error: unknown, attempt: number) => boolean;
+  maxRetries?: number
+  baseDelay?: number
+  jitterMs?: number
+  timeout?: number
+  shouldRetry?: (error: unknown, attempt: number) => boolean
+  onRetry?: (error: unknown, attempt: number, delay: number) => void
 }
 
-const DEFAULT_MAX_RETRIES = RETRY_CONFIG.DEFAULT_MAX_RETRIES;
-const DEFAULT_BASE_DELAY_MS = RETRY_CONFIG.DEFAULT_BASE_DELAY_MS;
-const DEFAULT_JITTER_MS = RETRY_CONFIG.DEFAULT_JITTER_MS;
-const MAX_DELAY_MS = RETRY_CONFIG.MAX_DELAY_MS;
+const DEFAULT_MAX_RETRIES = RETRY_CONFIG.DEFAULT_MAX_RETRIES
+const DEFAULT_BASE_DELAY_MS = RETRY_CONFIG.DEFAULT_BASE_DELAY_MS
+const DEFAULT_JITTER_MS = RETRY_CONFIG.DEFAULT_JITTER_MS
+const MAX_DELAY_MS = RETRY_CONFIG.MAX_DELAY_MS
 
 async function sleep(ms: number): Promise<void> {
-  return new Promise(resolve => setTimeout(resolve, ms));
+  return new Promise(resolve => setTimeout(resolve, ms))
 }
 
 function calculateDelay(attempt: number, baseDelay: number, jitterMs: number): number {
-  const exponentialDelay = baseDelay * Math.pow(2, attempt);
-  const cappedDelay = Math.min(exponentialDelay, MAX_DELAY_MS);
-  const jitter = Math.random() * jitterMs;
-  return cappedDelay + jitter;
+  const exponentialDelay = baseDelay * Math.pow(2, attempt)
+  const cappedDelay = Math.min(exponentialDelay, MAX_DELAY_MS)
+  const jitter = Math.random() * jitterMs
+  return cappedDelay + jitter
 }
 
-export async function withRetry<T>(
-  fn: () => Promise<T>,
-  options: RetryOptions = {}
-): Promise<T> {
+export async function withRetry<T>(fn: () => Promise<T>, options: RetryOptions = {}): Promise<T> {
   const {
     maxRetries = DEFAULT_MAX_RETRIES,
     baseDelay = DEFAULT_BASE_DELAY_MS,
     jitterMs = DEFAULT_JITTER_MS,
     timeout,
-    shouldRetry
-  } = options;
+    shouldRetry,
+    onRetry,
+  } = options
 
-  let lastError: Error | unknown;
-  let timeoutId: ReturnType<typeof setTimeout> | undefined;
+  let lastError: Error | unknown
+  let timeoutId: ReturnType<typeof setTimeout> | undefined
 
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     try {
       if (timeout) {
-        const controller = new AbortController();
-        timeoutId = setTimeout(() => controller.abort(), timeout);
+        const controller = new AbortController()
+        timeoutId = setTimeout(() => controller.abort(), timeout)
 
         const result = await Promise.race([
           fn(),
           new Promise<T>((_, reject) => {
             controller.signal.addEventListener('abort', () => {
-              reject(new Error('Request timeout'));
-            });
-          })
-        ]);
+              reject(new Error('Request timeout'))
+            })
+          }),
+        ])
 
-        clearTimeout(timeoutId);
-        return result;
+        clearTimeout(timeoutId)
+        return result
       }
 
-      return await fn();
+      return await fn()
     } catch (error) {
-      lastError = error;
+      lastError = error
 
       if (timeoutId) {
-        clearTimeout(timeoutId);
+        clearTimeout(timeoutId)
       }
 
       if (attempt === maxRetries) {
-        break;
+        break
       }
 
       if (shouldRetry && !shouldRetry(error, attempt)) {
-        break;
+        break
       }
 
-      const delay = calculateDelay(attempt, baseDelay, jitterMs);
-      await sleep(delay).catch((error) => {
-        logger.error('Retry sleep delay failed', error);
-      });
+      const delay = calculateDelay(attempt, baseDelay, jitterMs)
+      onRetry?.(error, attempt, delay)
+      await sleep(delay).catch(error => {
+        logger.error('Retry sleep delay failed', error)
+      })
     }
   }
 
-  throw lastError;
+  throw lastError
 }

@@ -4,8 +4,8 @@
 
 ## Status Summary
 
-**Last Updated**: 2026-02-22 (quality-assurance)
-**Overall Test Status**: 3237 tests passing, 5 skipped, 155 todo (104 test files)
+**Last Updated**: 2026-02-23 (repository-manager)
+**Overall Test Status**: 3247 tests passing, 5 skipped, 155 todo (105 test files)
 **Overall Security Status**: EXCELLENT - 0 critical vulnerabilities, 0 pending recommendations (all resolved)
 
                                                 ### Lead Reliability Engineer - Code Sanitizer (2026-01-30) - Completed ✅
@@ -15142,232 +15142,229 @@ for (let attempt = 0; attempt <= maxRetries; attempt++) {
 - Testability: UserForm can be tested independently of page component
 - Future refactoring: Similar pattern applies to GradeForm extraction
 
+  ### [REFACTOR] Extract GradeForm Component from TeacherGradeManagementPage - Completed ✅
 
-    ### [REFACTOR] Extract GradeForm Component from TeacherGradeManagementPage - Completed ✅
+  **Task**: Extract GradeForm component from TeacherGradeManagementPage for improved modularity
 
-    **Task**: Extract GradeForm component from TeacherGradeManagementPage for improved modularity
+  **Problem**:
+  - TeacherGradeManagementPage had 226 lines with inline grade editing dialog
+  - Form validation (score: 0-100) embedded in page component
+  - Score validation constants hardcoded in multiple places
+  - Dialog with form mixed with page-level concerns (data fetching, table rendering)
+  - Violation of Separation of Concerns: UI, logic, data tightly coupled
 
-    **Problem**:
-    - TeacherGradeManagementPage had 226 lines with inline grade editing dialog
-    - Form validation (score: 0-100) embedded in page component
-    - Score validation constants hardcoded in multiple places
-    - Dialog with form mixed with page-level concerns (data fetching, table rendering)
-    - Violation of Separation of Concerns: UI, logic, data tightly coupled
+  **Solution**:
+  - Created dedicated `GradeForm` component with encapsulated form logic
+  - Extracted form state management into GradeForm (useState, useEffect for editing)
+  - Moved form validation and submission logic into component
+  - Extracted score validation constants to src/utils/validation.ts
+  - Page component now only handles data fetching and user actions
+  - GradeForm is atomic, replaceable, and testable
 
-    **Solution**:
-    - Created dedicated `GradeForm` component with encapsulated form logic
-    - Extracted form state management into GradeForm (useState, useEffect for editing)
-    - Moved form validation and submission logic into component
-    - Extracted score validation constants to src/utils/validation.ts
-    - Page component now only handles data fetching and user actions
-    - GradeForm is atomic, replaceable, and testable
+  **Implementation**:
+  1. **Created GradeForm Component** at `src/components/forms/GradeForm.tsx`:
+     - Props: `open`, `onClose`, `editingStudent`, `onSave`, `isLoading`
+     - Form state: `currentScore`, `currentFeedback` (managed internally)
+     - `useEffect` to sync form with editingStudent prop
+     - `handleSubmit` function for form submission with score validation
+     - Encapsulated Dialog with form fields (score: 0-100, feedback: textarea)
+     - Form validation using `isValidScore()` utility
+     - Error handling with aria-invalid and aria-describedby for accessibility
 
-    **Implementation**:
+  2. **Refactored TeacherGradeManagementPage** at `src/pages/portal/teacher/TeacherGradeManagementPage.tsx`:
+     - Removed inline form JSX (Dialog with form fields)
+     - Added GradeForm import
+     - Simplified `handleSaveGrade` to accept `UpdateGradeData` data
+     - Added `handleCloseModal` helper function
+     - Page now only manages: class selection, editing student, mutations
+     - GradeForm component handles all form concerns
 
-    1. **Created GradeForm Component** at `src/components/forms/GradeForm.tsx`:
-       - Props: `open`, `onClose`, `editingStudent`, `onSave`, `isLoading`
-       - Form state: `currentScore`, `currentFeedback` (managed internally)
-       - `useEffect` to sync form with editingStudent prop
-       - `handleSubmit` function for form submission with score validation
-       - Encapsulated Dialog with form fields (score: 0-100, feedback: textarea)
-       - Form validation using `isValidScore()` utility
-       - Error handling with aria-invalid and aria-describedby for accessibility
+  3. **Extracted Score Validation Constants** at `src/utils/validation.ts`:
+     - `MIN_SCORE = 0` constant
+     - `MAX_SCORE = 100` constant
+     - `isValidScore(score: number | null | undefined): score is number` function
+     - Type guard for score validation (0-100 range)
+     - Used by GradeForm component for validation
 
-    2. **Refactored TeacherGradeManagementPage** at `src/pages/portal/teacher/TeacherGradeManagementPage.tsx`:
-       - Removed inline form JSX (Dialog with form fields)
-       - Added GradeForm import
-       - Simplified `handleSaveGrade` to accept `UpdateGradeData` data
-       - Added `handleCloseModal` helper function
-       - Page now only manages: class selection, editing student, mutations
-       - GradeForm component handles all form concerns
+  **Metrics**:
 
-    3. **Extracted Score Validation Constants** at `src/utils/validation.ts`:
-       - `MIN_SCORE = 0` constant
-       - `MAX_SCORE = 100` constant
-       - `isValidScore(score: number | null | undefined): score is number` function
-       - Type guard for score validation (0-100 range)
-       - Used by GradeForm component for validation
+  | Metric                           | Before            | After                        | Improvement            |
+  | -------------------------------- | ----------------- | ---------------------------- | ---------------------- |
+  | TeacherGradeManagementPage lines | 226               | 153                          | 32% reduction          |
+  | GradeForm component              | 0                 | 116                          | New reusable component |
+  | Form logic in page               | Inline (73 lines) | Extracted to component       | 100% separated         |
+  | Validation constants             | Hardcoded         | Centralized in validation.ts | Single source of truth |
+  | Separation of Concerns           | Mixed             | Clean                        | Complete separation    |
+  | Reusability                      | Single use        | Reusable component           | New capability         |
 
-    **Metrics**:
+  **Architectural Impact**:
+  - **Modularity**: Form logic is atomic and replaceable
+  - **Separation of Concerns**: UI (GradeForm) separated from data (Page component)
+  - **Clean Architecture**: Dependencies flow correctly (Page → GradeForm)
+  - **Single Responsibility**: GradeForm handles form concerns, Page handles data concerns
+  - **Open/Closed**: GradeForm can be extended without modifying Page component
+  - **DRY Principle**: Validation constants defined once, used everywhere
 
-    | Metric | Before | After | Improvement |
-    |---------|---------|--------|-------------|
-    | TeacherGradeManagementPage lines | 226 | 153 | 32% reduction |
-    | GradeForm component | 0 | 116 | New reusable component |
-    | Form logic in page | Inline (73 lines) | Extracted to component | 100% separated |
-    | Validation constants | Hardcoded | Centralized in validation.ts | Single source of truth |
-    | Separation of Concerns | Mixed | Clean | Complete separation |
-    | Reusability | Single use | Reusable component | New capability |
+  **Benefits Achieved**:
+  - ✅ GradeForm component created (116 lines, fully self-contained)
+  - ✅ TeacherGradeManagementPage reduced from 226 to 153 lines (32% reduction)
+  - ✅ Form logic extracted (validation, state management, submission)
+  - ✅ Separation of Concerns (UI vs data concerns)
+  - ✅ Single Responsibility (GradeForm: form, Page: data)
+  - ✅ GradeForm is reusable for other grade management contexts
+  - ✅ Score validation constants centralized in validation.ts (MIN_SCORE, MAX_SCORE, isValidScore)
+  - ✅ All 1584 tests passing (2 skipped, 154 todo)
+  - ✅ Linting passed with 0 errors
+  - ✅ TypeScript compilation successful (0 errors)
+  - ✅ Zero breaking changes to existing functionality
 
-    **Architectural Impact**:
-    - **Modularity**: Form logic is atomic and replaceable
-    - **Separation of Concerns**: UI (GradeForm) separated from data (Page component)
-    - **Clean Architecture**: Dependencies flow correctly (Page → GradeForm)
-    - **Single Responsibility**: GradeForm handles form concerns, Page handles data concerns
-    - **Open/Closed**: GradeForm can be extended without modifying Page component
-    - **DRY Principle**: Validation constants defined once, used everywhere
+  **Technical Details**:
 
-    **Benefits Achieved**:
-    - ✅ GradeForm component created (116 lines, fully self-contained)
-    - ✅ TeacherGradeManagementPage reduced from 226 to 153 lines (32% reduction)
-    - ✅ Form logic extracted (validation, state management, submission)
-    - ✅ Separation of Concerns (UI vs data concerns)
-    - ✅ Single Responsibility (GradeForm: form, Page: data)
-    - ✅ GradeForm is reusable for other grade management contexts
-    - ✅ Score validation constants centralized in validation.ts (MIN_SCORE, MAX_SCORE, isValidScore)
-    - ✅ All 1584 tests passing (2 skipped, 154 todo)
-    - ✅ Linting passed with 0 errors
-    - ✅ TypeScript compilation successful (0 errors)
-    - ✅ Zero breaking changes to existing functionality
+  **GradeForm Component Features**:
+  - Controlled form with React state (currentScore, currentFeedback)
+  - useEffect to sync form with editingStudent prop for editing mode
+  - Form validation with HTML5 required attributes (min="0", max="100", step="1")
+  - Score validation using `isValidScore()` utility (0-100 range)
+  - Textarea for feedback input (3 rows)
+  - Loading state handling during mutation
+  - Accessibility: ARIA labels, required field indicators, aria-invalid, aria-describedby
+  - Responsive layout (grid system for labels and inputs)
+  - Error messaging: helper text for score range, error alert for invalid scores
 
-    **Technical Details**:
+  **Validation Constants**:
+  - MIN_SCORE = 0
+  - MAX_SCORE = 100
+  - isValidScore(): Type guard function that returns true for valid scores (0-100)
+  - Type safety: Function uses TypeScript type guard (score is number)
+  - Handles null and undefined gracefully (returns false)
 
-    **GradeForm Component Features**:
-    - Controlled form with React state (currentScore, currentFeedback)
-    - useEffect to sync form with editingStudent prop for editing mode
-    - Form validation with HTML5 required attributes (min="0", max="100", step="1")
-    - Score validation using `isValidScore()` utility (0-100 range)
-    - Textarea for feedback input (3 rows)
-    - Loading state handling during mutation
-    - Accessibility: ARIA labels, required field indicators, aria-invalid, aria-describedby
-    - Responsive layout (grid system for labels and inputs)
-    - Error messaging: helper text for score range, error alert for invalid scores
+  **TeacherGradeManagementPage Simplifications**:
+  - Removed inline form JSX (73 lines)
+  - Removed form validation logic
+  - Added GradeForm import
+  - Simplified grade mutation handling
+  - Added handleCloseModal helper
+  - Clearer data flow: Page → GradeForm → onSave → Mutations
 
-    **Validation Constants**:
-    - MIN_SCORE = 0
-    - MAX_SCORE = 100
-    - isValidScore(): Type guard function that returns true for valid scores (0-100)
-    - Type safety: Function uses TypeScript type guard (score is number)
-    - Handles null and undefined gracefully (returns false)
+  **Success Criteria**:
+  - [x] GradeForm component created at src/components/forms/GradeForm.tsx
+  - [x] TeacherGradeManagementPage reduced from 226 to 153 lines (32% reduction)
+  - [x] Form state extracted to GradeForm (currentScore, currentFeedback)
+  - [x] Form validation logic encapsulated in GradeForm
+  - [x] Score validation constants extracted to src/utils/validation.ts
+  - [x] Page component only handles data fetching and mutations
+  - [x] GradeForm is reusable and atomic
+  - [x] All 1584 tests passing (2 skipped, 154 todo)
+  - [x] Linting passed (0 errors)
+  - [x] TypeScript compilation successful (0 errors)
+  - [x] Zero breaking changes to existing functionality
+  - [x] Separation of Concerns achieved (UI vs data)
+  - [x] Single Responsibility Principle applied
+  - [x] DRY Principle applied (validation constants centralized)
 
-    **TeacherGradeManagementPage Simplifications**:
-    - Removed inline form JSX (73 lines)
-    - Removed form validation logic
-    - Added GradeForm import
-    - Simplified grade mutation handling
-    - Added handleCloseModal helper
-    - Clearer data flow: Page → GradeForm → onSave → Mutations
+  **Impact**:
+  - `src/components/forms/GradeForm.tsx`: New component (116 lines)
+  - `src/pages/portal/teacher/TeacherGradeManagementPage.tsx`: Reduced 226 → 153 lines (73 lines removed)
+  - `src/utils/validation.ts`: Added validation constants (MIN_SCORE, MAX_SCORE, isValidScore)
+  - `src/components/forms/`: New directory for form components (modularity foundation, now contains UserForm and GradeForm)
+  - Component reusability: GradeForm can be used in other grade management contexts
+  - Maintainability: Form logic centralized in one component
+  - Testability: GradeForm can be tested independently of page component
+  - Validation consistency: Single source of truth for score validation (0-100 range)
 
-    **Success Criteria**:
-    - [x] GradeForm component created at src/components/forms/GradeForm.tsx
-    - [x] TeacherGradeManagementPage reduced from 226 to 153 lines (32% reduction)
-    - [x] Form state extracted to GradeForm (currentScore, currentFeedback)
-    - [x] Form validation logic encapsulated in GradeForm
-    - [x] Score validation constants extracted to src/utils/validation.ts
-    - [x] Page component only handles data fetching and mutations
-    - [x] GradeForm is reusable and atomic
-    - [x] All 1584 tests passing (2 skipped, 154 todo)
-    - [x] Linting passed (0 errors)
-    - [x] TypeScript compilation successful (0 errors)
-    - [x] Zero breaking changes to existing functionality
-    - [x] Separation of Concerns achieved (UI vs data)
-    - [x] Single Responsibility Principle applied
-    - [x] DRY Principle applied (validation constants centralized)
+  **Success**: ✅ **GRADEFORM COMPONENT EXTRACTION COMPLETE, 32% CODE REDUCTION, CLEAN SEPARATION OF CONCERNS ACHIEVED**
 
-    **Impact**:
-    - `src/components/forms/GradeForm.tsx`: New component (116 lines)
-    - `src/pages/portal/teacher/TeacherGradeManagementPage.tsx`: Reduced 226 → 153 lines (73 lines removed)
-    - `src/utils/validation.ts`: Added validation constants (MIN_SCORE, MAX_SCORE, isValidScore)
-    - `src/components/forms/`: New directory for form components (modularity foundation, now contains UserForm and GradeForm)
-    - Component reusability: GradeForm can be used in other grade management contexts
-    - Maintainability: Form logic centralized in one component
-    - Testability: GradeForm can be tested independently of page component
-    - Validation consistency: Single source of truth for score validation (0-100 range)
+  ### [REFACTOR] Centralize Theme Color Usage - Completed ✅
 
-    **Success**: ✅ **GRADEFORM COMPONENT EXTRACTION COMPLETE, 32% CODE REDUCTION, CLEAN SEPARATION OF CONCERNS ACHIEVED**
+  **Task**: Extract role badge colors to centralized theme configuration
 
-    ### [REFACTOR] Centralize Theme Color Usage - Completed ✅
+  **Problem**:
+  - Role badge colors hardcoded (bg-blue-500, bg-green-500, bg-purple-500, bg-red-500) in AdminUserManagementPage.tsx
+  - Inline `roleConfig` object duplicated role color mapping
+  - Violates Single Responsibility Principle and DRY principle
 
-    **Task**: Extract role badge colors to centralized theme configuration
+  **Solution**:
+  - Extended THEME_COLORS in src/theme/colors.ts with ROLE_COLORS constant
+  - Added import for ROLE_COLORS in AdminUserManagementPage.tsx
+  - Removed inline `roleConfig` object from AdminUserManagementPage.tsx
+  - Updated all roleConfig references to use ROLE_COLORS
+  - Fixed pre-existing typo: `editingUser` → `editingUser`
 
-    **Problem**:
-    - Role badge colors hardcoded (bg-blue-500, bg-green-500, bg-purple-500, bg-red-500) in AdminUserManagementPage.tsx
-    - Inline `roleConfig` object duplicated role color mapping
-    - Violates Single Responsibility Principle and DRY principle
+  **Implementation**:
+  1. **Extended src/theme/colors.ts**:
+     - Added import for UserRole type from @shared/types
+     - Created ROLE_COLORS constant with role-based color scheme
+     - Role mappings: student (bg-blue-500), teacher (bg-green-500), parent (bg-purple-500), admin (bg-red-500)
 
-    **Solution**:
-    - Extended THEME_COLORS in src/theme/colors.ts with ROLE_COLORS constant
-    - Added import for ROLE_COLORS in AdminUserManagementPage.tsx
-    - Removed inline `roleConfig` object from AdminUserManagementPage.tsx
-    - Updated all roleConfig references to use ROLE_COLORS
-    - Fixed pre-existing typo: `editingUser` → `editingUser`
+  2. **Updated AdminUserManagementPage.tsx**:
+     - Added import: `import { ROLE_COLORS } from '@/theme/colors'`
+     - Removed inline roleConfig object definition (lines 25-30)
+     - Updated line 32: `roleConfig[user.role].color` → `ROLE_COLORS[user.role].color`
+     - Updated line 34: `roleConfig[user.role].label` → `ROLE_COLORS[user.role].label`
+     - Fixed typo on line 63: `editingUser` → `editingUser`
+     - Removed unused imports: CardHeader, CardTitle
 
-    **Implementation**:
+  **Metrics**:
 
-    1. **Extended src/theme/colors.ts**:
-       - Added import for UserRole type from @shared/types
-       - Created ROLE_COLORS constant with role-based color scheme
-       - Role mappings: student (bg-blue-500), teacher (bg-green-500), parent (bg-purple-500), admin (bg-red-500)
+  | Metric                          | Before                   | After                    | Improvement            |
+  | ------------------------------- | ------------------------ | ------------------------ | ---------------------- |
+  | Role color definition locations | 2                        | 1                        | 50% consolidated       |
+  | roleConfig objects in codebase  | 1 (inline)               | 0                        | 100% centralized       |
+  | Code duplication                | roleConfig duplicated    | ROLE_COLORS shared       | Eliminated             |
+  | Type safety                     | Inline object, no export | Exported constant, typed | Improved               |
+  | Maintainability                 | Hard to find colors      | Centralized in theme     | Single source of truth |
 
-    2. **Updated AdminUserManagementPage.tsx**:
-       - Added import: `import { ROLE_COLORS } from '@/theme/colors'`
-       - Removed inline roleConfig object definition (lines 25-30)
-       - Updated line 32: `roleConfig[user.role].color` → `ROLE_COLORS[user.role].color`
-       - Updated line 34: `roleConfig[user.role].label` → `ROLE_COLORS[user.role].label`
-       - Fixed typo on line 63: `editingUser` → `editingUser`
-       - Removed unused imports: CardHeader, CardTitle
+  **Benefits Achieved**:
+  - ✅ ROLE_COLORS centralized in src/theme/colors.ts (9 lines added)
+  - ✅ AdminUserManagementPage.tsx no longer has inline roleConfig (6 lines removed)
+  - ✅ Role color mapping now in single source of truth
+  - ✅ Easier to maintain and update role colors
+  - ✅ Pre-existing bug fixed: `editingUser` → `editingUser` typo
+  - ✅ Unused imports removed (CardHeader, CardTitle)
+  - ✅ All 1303 tests passing (2 skipped, 154 todo)
+  - ✅ Linting passed with 0 errors
+  - ✅ TypeScript compilation successful (0 errors)
+  - ✅ Zero breaking changes to existing functionality
 
-    **Metrics**:
+  **Technical Details**:
 
-    | Metric | Before | After | Improvement |
-    |--------|--------|-------|-------------|
-    | Role color definition locations | 2 | 1 | 50% consolidated |
-    | roleConfig objects in codebase | 1 (inline) | 0 | 100% centralized |
-    | Code duplication | roleConfig duplicated | ROLE_COLORS shared | Eliminated |
-    | Type safety | Inline object, no export | Exported constant, typed | Improved |
-    | Maintainability | Hard to find colors | Centralized in theme | Single source of truth |
+  **ROLE_COLORS Structure**:
+  - Role-based color scheme matching existing visual design
+  - TypeScript-typed with UserRole as key type
+  - Each role has color class and label
+  - Consistent with existing theme color patterns
 
-    **Benefits Achieved**:
-    - ✅ ROLE_COLORS centralized in src/theme/colors.ts (9 lines added)
-    - ✅ AdminUserManagementPage.tsx no longer has inline roleConfig (6 lines removed)
-    - ✅ Role color mapping now in single source of truth
-    - ✅ Easier to maintain and update role colors
-    - ✅ Pre-existing bug fixed: `editingUser` → `editingUser` typo
-    - ✅ Unused imports removed (CardHeader, CardTitle)
-    - ✅ All 1303 tests passing (2 skipped, 154 todo)
-    - ✅ Linting passed with 0 errors
-    - ✅ TypeScript compilation successful (0 errors)
-    - ✅ Zero breaking changes to existing functionality
+  **Code Organization**:
+  - Role colors now in src/theme/colors.ts (theme layer)
+  - Component layer imports from theme (separation of concerns)
+  - No inline configuration in components (clean architecture)
 
-    **Technical Details**:
+  **Architectural Impact**:
+  - **Separation of Concerns**: Theme configuration separated from component logic
+  - **DRY Principle**: Role color mapping defined once, used everywhere
+  - **Maintainability**: Single source of truth for role colors
+  - **Type Safety**: Exported constant with proper TypeScript types
+  - **Single Responsibility**: Theme file handles colors, components handle UI
 
-    **ROLE_COLORS Structure**:
-    - Role-based color scheme matching existing visual design
-    - TypeScript-typed with UserRole as key type
-    - Each role has color class and label
-    - Consistent with existing theme color patterns
+  **Success Criteria**:
+  - [x] ROLE_COLORS constant added to src/theme/colors.ts
+  - [x] AdminUserManagementPage.tsx imports ROLE_COLORS from theme
+  - [x] Inline roleConfig object removed from AdminUserManagementPage.tsx
+  - [x] All roleConfig references updated to ROLE_COLORS
+  - [x] Pre-existing bug fixed (editingUser typo)
+  - [x] All 1303 tests passing (2 skipped, 154 todo)
+  - [x] Linting passed (0 errors)
+  - [x] TypeScript compilation successful (0 errors)
+  - [x] Zero breaking changes to existing functionality
 
-    **Code Organization**:
-    - Role colors now in src/theme/colors.ts (theme layer)
-    - Component layer imports from theme (separation of concerns)
-    - No inline configuration in components (clean architecture)
+  **Impact**:
+  - `src/theme/colors.ts`: Added ROLE_COLORS constant (9 lines)
+  - `src/pages/portal/admin/AdminUserManagementPage.tsx`: Removed inline roleConfig (6 lines), added import
+  - Code organization: Role colors centralized in theme layer
+  - Maintainability: Single source of truth for role colors
+  - Bug fix: `editingUser` typo corrected
 
-    **Architectural Impact**:
-    - **Separation of Concerns**: Theme configuration separated from component logic
-    - **DRY Principle**: Role color mapping defined once, used everywhere
-    - **Maintainability**: Single source of truth for role colors
-    - **Type Safety**: Exported constant with proper TypeScript types
-    - **Single Responsibility**: Theme file handles colors, components handle UI
-
-    **Success Criteria**:
-    - [x] ROLE_COLORS constant added to src/theme/colors.ts
-    - [x] AdminUserManagementPage.tsx imports ROLE_COLORS from theme
-    - [x] Inline roleConfig object removed from AdminUserManagementPage.tsx
-    - [x] All roleConfig references updated to ROLE_COLORS
-    - [x] Pre-existing bug fixed (editingUser typo)
-    - [x] All 1303 tests passing (2 skipped, 154 todo)
-    - [x] Linting passed (0 errors)
-    - [x] TypeScript compilation successful (0 errors)
-    - [x] Zero breaking changes to existing functionality
-
-    **Impact**:
-    - `src/theme/colors.ts`: Added ROLE_COLORS constant (9 lines)
-    - `src/pages/portal/admin/AdminUserManagementPage.tsx`: Removed inline roleConfig (6 lines), added import
-    - Code organization: Role colors centralized in theme layer
-    - Maintainability: Single source of truth for role colors
-    - Bug fix: `editingUser` typo corrected
-
-    **Success**: ✅ **CENTRALIZE THEME COLOR USAGE COMPLETE, ROLE COLORS CENTRALIZED IN THEME CONFIGURATION**
+  **Success**: ✅ **CENTRALIZE THEME COLOR USAGE COMPLETE, ROLE COLORS CENTRALIZED IN THEME CONFIGURATION**
 
 ### [REFACTOR] Split Router Configuration into Route Groups
 
@@ -15377,41 +15374,40 @@ for (let attempt = 0; attempt <= maxRetries; attempt++) {
 - Priority: Low
 - Effort: Small
 
+  ### [REFACTOR] Replace console.log with Logger in Components
+  - Location: Multiple components with 28 console statements across src/
+  - Issue: Direct console.log/error/warn calls bypass centralized logger, missing structured logging and error reporting integration
+  - Suggestion: Replace all console.log/error/warn with logger from @/lib/logger. Use appropriate log levels (info, warn, error, debug). Ensure error objects are logged with context.
+  - Priority: Low
+  - Effort: Small
 
-    ### [REFACTOR] Replace console.log with Logger in Components
-    - Location: Multiple components with 28 console statements across src/
-    - Issue: Direct console.log/error/warn calls bypass centralized logger, missing structured logging and error reporting integration
-    - Suggestion: Replace all console.log/error/warn with logger from @/lib/logger. Use appropriate log levels (info, warn, error, debug). Ensure error objects are logged with context.
-    - Priority: Low
-    - Effort: Small
+  ### [REFACTOR] Extract DownloadCard Component from LinksDownloadPage
+  - Location: src/pages/LinksDownloadPage.tsx
+  - Issue: Repetitive download card rendering code (6 similar card patterns with inline button rendering). Duplicated layout logic for academic documents and forms. Violates DRY principle.
+  - Suggestion: Create reusable DownloadCard component with props: title, description, fileType, fileSize, onDownload. Extract card rendering to dedicated component. Reduce page from 142 lines and improve maintainability.
+  - Priority: Medium
+  - Effort: Small
 
-    ### [REFACTOR] Extract DownloadCard Component from LinksDownloadPage
-    - Location: src/pages/LinksDownloadPage.tsx
-    - Issue: Repetitive download card rendering code (6 similar card patterns with inline button rendering). Duplicated layout logic for academic documents and forms. Violates DRY principle.
-    - Suggestion: Create reusable DownloadCard component with props: title, description, fileType, fileSize, onDownload. Extract card rendering to dedicated component. Reduce page from 142 lines and improve maintainability.
-    - Priority: Medium
-    - Effort: Small
+  ### [REFACTOR] Extract MaterialCard Component from LinksDownloadPage
+  - Location: src/pages/LinksDownloadPage.tsx
+  - Issue: Repetitive material card rendering code (3 similar patterns with inline badge styling). Hardcoded color classes (blue-100, green-100, purple-100) scattered across JSX. Violates Single Responsibility and DRY principles.
+  - Suggestion: Create reusable MaterialCard component with props: title, description, subject, badgeColor, badgeType. Extract material card layout and badge rendering. Centralize color classes in theme configuration.
+  - Priority: Medium
+  - Effort: Small
 
-    ### [REFACTOR] Extract MaterialCard Component from LinksDownloadPage
-    - Location: src/pages/LinksDownloadPage.tsx
-    - Issue: Repetitive material card rendering code (3 similar patterns with inline badge styling). Hardcoded color classes (blue-100, green-100, purple-100) scattered across JSX. Violates Single Responsibility and DRY principles.
-    - Suggestion: Create reusable MaterialCard component with props: title, description, subject, badgeColor, badgeType. Extract material card layout and badge rendering. Centralize color classes in theme configuration.
-    - Priority: Medium
-    - Effort: Small
+  ### [REFACTOR] Extract MobileNavigation Component from SiteHeader
+  - Location: src/components/SiteHeader.tsx
+  - Issue: Mobile navigation menu logic (56 lines) mixed in SiteHeader component. Creates large component (158 lines) with multiple responsibilities. Desktop and mobile navigation logic tightly coupled. Harder to test mobile menu independently.
+  - Suggestion: Extract MobileNavigation component with props: isOpen, onOpenChange, navLinks. Move mobile menu SheetContent and navigation rendering to separate component. SiteHeader becomes cleaner with clear separation between desktop and mobile navigation.
+  - Priority: Low
+  - Effort: Small
 
-    ### [REFACTOR] Extract MobileNavigation Component from SiteHeader
-    - Location: src/components/SiteHeader.tsx
-    - Issue: Mobile navigation menu logic (56 lines) mixed in SiteHeader component. Creates large component (158 lines) with multiple responsibilities. Desktop and mobile navigation logic tightly coupled. Harder to test mobile menu independently.
-    - Suggestion: Extract MobileNavigation component with props: isOpen, onOpenChange, navLinks. Move mobile menu SheetContent and navigation rendering to separate component. SiteHeader becomes cleaner with clear separation between desktop and mobile navigation.
-    - Priority: Low
-    - Effort: Small
-
-    ### [REFACTOR] Split API Client into Focused Modules
-    - Location: src/lib/api-client.ts (298 lines)
-    - Issue: Single large file handles multiple responsibilities: query client configuration, circuit breaker integration, retry logic, request execution, error handling, token management. Violates Single Responsibility Principle. Difficult to test individual concerns in isolation.
-    - Suggestion: Extract into focused modules: QueryClientConfig.ts (default options), RequestExecutor.ts (fetchWithTimeout, executeRequest), ErrorHandler.ts (error parsing, status code mapping), ApiClient.ts (main wrapper combining modules). Improve testability and maintainability.
-    - Priority: Medium
-    - Effort: Medium
+  ### [REFACTOR] Split API Client into Focused Modules
+  - Location: src/lib/api-client.ts (298 lines)
+  - Issue: Single large file handles multiple responsibilities: query client configuration, circuit breaker integration, retry logic, request execution, error handling, token management. Violates Single Responsibility Principle. Difficult to test individual concerns in isolation.
+  - Suggestion: Extract into focused modules: QueryClientConfig.ts (default options), RequestExecutor.ts (fetchWithTimeout, executeRequest), ErrorHandler.ts (error parsing, status code mapping), ApiClient.ts (main wrapper combining modules). Improve testability and maintainability.
+  - Priority: Medium
+  - Effort: Medium
 
 ### ParentDashboardService Critical Path Testing (2026-01-08) - Completed ✅
 
@@ -15434,16 +15430,14 @@ for (let attempt = 0; attempt <= maxRetries; attempt++) {
 **Implementation**:
 
 1. **Created Test File** `worker/domain/__tests__/ParentDashboardService.test.ts`:
-
-
-    - 74 tests covering all aspects of ParentDashboardService
-    - Module loading and documentation tests
-    - Happy path tests for getDashboardData
-    - Validation and edge case tests (missing IDs, non-existent entities, null/undefined)
-    - Data structure tests for child, schedule, grades, announcements
-    - Private method testing (getChild, getChildSchedule, getSchedule, getChildGrades, getAnnouncements)
-    - Edge cases for data integrity (deleted entities)
-    - Performance tests for batch retrieval patterns
+   - 74 tests covering all aspects of ParentDashboardService
+   - Module loading and documentation tests
+   - Happy path tests for getDashboardData
+   - Validation and edge case tests (missing IDs, non-existent entities, null/undefined)
+   - Data structure tests for child, schedule, grades, announcements
+   - Private method testing (getChild, getChildSchedule, getSchedule, getChildGrades, getAnnouncements)
+   - Edge cases for data integrity (deleted entities)
+   - Performance tests for batch retrieval patterns
 
 2. **Test Coverage**:
 
