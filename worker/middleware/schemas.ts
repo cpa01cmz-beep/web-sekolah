@@ -18,7 +18,10 @@ export const createUserSchema = z.object({
   }),
   password: z
     .string()
-    .min(8, 'Password must be at least 8 characters')
+    .min(
+      ValidationLimits.PASSWORD_STRONG_MIN_LENGTH,
+      `Password must be at least ${ValidationLimits.PASSWORD_STRONG_MIN_LENGTH} characters`
+    )
     .regex(/[A-Z]/, 'Password must contain at least one uppercase letter')
     .regex(/[a-z]/, 'Password must contain at least one lowercase letter')
     .regex(/[0-9]/, 'Password must contain at least one number')
@@ -26,7 +29,11 @@ export const createUserSchema = z.object({
   classId: z.string().uuid('Invalid class ID').optional(),
   classIds: z.array(z.string().uuid()).optional(),
   childId: z.string().uuid('Invalid child ID').optional(),
-  studentIdNumber: z.string().min(3).max(20).optional(),
+  studentIdNumber: z
+    .string()
+    .min(ValidationLimits.STUDENT_ID_NUMBER_MIN_LENGTH)
+    .max(ValidationLimits.STUDENT_ID_NUMBER_MAX_LENGTH)
+    .optional(),
   avatarUrl: z.string().url().optional(),
 })
 
@@ -60,7 +67,11 @@ export const createClassSchema = z.object({
     .string()
     .min(ValidationLimits.USER_NAME_MIN_LENGTH)
     .max(ValidationLimits.USER_NAME_MAX_LENGTH),
-  gradeLevel: z.number().int().min(1).max(12),
+  gradeLevel: z
+    .number()
+    .int()
+    .min(ValidationLimits.GRADE_LEVEL_MIN)
+    .max(ValidationLimits.GRADE_LEVEL_MAX),
   teacherId: z.string().uuid('Invalid teacher ID'),
   academicYear: z.string().regex(/^\d{4}-\d{4}$/, 'Academic year must be in format YYYY-YYYY'),
 })
@@ -118,8 +129,14 @@ export const clientErrorSchema = z.object({
 export const updateSettingsSchema = z.object({
   schoolName: z
     .string()
-    .min(2, 'School name must be at least 2 characters')
-    .max(100, 'School name must be less than 100 characters')
+    .min(
+      ValidationLimits.SCHOOL_NAME_MIN_LENGTH,
+      `School name must be at least ${ValidationLimits.SCHOOL_NAME_MIN_LENGTH} characters`
+    )
+    .max(
+      ValidationLimits.SCHOOL_NAME_MAX_LENGTH,
+      `School name must be less than ${ValidationLimits.SCHOOL_NAME_MAX_LENGTH} characters`
+    )
     .optional(),
   academicYear: z
     .string()
@@ -140,8 +157,11 @@ export const createWebhookConfigSchema = z.object({
   events: z.array(webhookEventTypeSchema).min(1, 'At least one event must be specified'),
   secret: z
     .string()
-    .min(16, 'Webhook secret must be at least 16 characters')
-    .max(500, 'Webhook secret is too long'),
+    .min(
+      ValidationLimits.WEBHOOK_SECRET_MIN_LENGTH,
+      `Webhook secret must be at least ${ValidationLimits.WEBHOOK_SECRET_MIN_LENGTH} characters`
+    )
+    .max(ValidationLimits.WEBHOOK_SECRET_MAX_LENGTH, 'Webhook secret is too long'),
   active: z.boolean().optional(),
 })
 
@@ -150,8 +170,11 @@ export const updateWebhookConfigSchema = z.object({
   events: z.array(webhookEventTypeSchema).min(1, 'At least one event must be specified').optional(),
   secret: z
     .string()
-    .min(16, 'Webhook secret must be at least 16 characters')
-    .max(500, 'Webhook secret is too long')
+    .min(
+      ValidationLimits.WEBHOOK_SECRET_MIN_LENGTH,
+      `Webhook secret must be at least ${ValidationLimits.WEBHOOK_SECRET_MIN_LENGTH} characters`
+    )
+    .max(ValidationLimits.WEBHOOK_SECRET_MAX_LENGTH, 'Webhook secret is too long')
     .optional(),
   active: z.boolean().optional(),
 })
@@ -163,7 +186,13 @@ export const adminUsersQuerySchema = z.object({
     })
     .optional(),
   classId: z.string().uuid('Invalid class ID format').optional(),
-  search: z.string().max(100, 'Search query must be less than 100 characters').optional(),
+  search: z
+    .string()
+    .max(
+      ValidationLimits.SEARCH_QUERY_MAX_LENGTH,
+      `Search query must be less than ${ValidationLimits.SEARCH_QUERY_MAX_LENGTH} characters`
+    )
+    .optional(),
 })
 
 export const createMessageSchema = z.object({
@@ -199,18 +228,18 @@ export const newsLimitQuerySchema = z.object({
 })
 
 const cspReportEntrySchema = z.object({
-  'document-uri': z.string().max(2000).optional(),
-  referrer: z.string().max(2000).optional(),
-  'violated-directive': z.string().max(200).optional(),
-  'effective-directive': z.string().max(200).optional(),
-  'original-policy': z.string().max(10000).optional(),
-  disposition: z.string().max(50).optional(),
-  'blocked-uri': z.string().max(2000).optional(),
+  'document-uri': z.string().max(ValidationLimits.CSP_URI_MAX_LENGTH).optional(),
+  referrer: z.string().max(ValidationLimits.CSP_URI_MAX_LENGTH).optional(),
+  'violated-directive': z.string().max(ValidationLimits.CSP_DIRECTIVE_MAX_LENGTH).optional(),
+  'effective-directive': z.string().max(ValidationLimits.CSP_DIRECTIVE_MAX_LENGTH).optional(),
+  'original-policy': z.string().max(ValidationLimits.CSP_POLICY_MAX_LENGTH).optional(),
+  disposition: z.string().max(ValidationLimits.CSP_DISPOSITION_MAX_LENGTH).optional(),
+  'blocked-uri': z.string().max(ValidationLimits.CSP_URI_MAX_LENGTH).optional(),
   'line-number': z.number().int().positive().optional(),
   'column-number': z.number().int().positive().optional(),
-  'source-file': z.string().max(2000).optional(),
-  'status-code': z.string().max(10).optional(),
-  'script-sample': z.string().max(1000).optional(),
+  'source-file': z.string().max(ValidationLimits.CSP_URI_MAX_LENGTH).optional(),
+  'status-code': z.string().max(ValidationLimits.CSP_STATUS_CODE_MAX_LENGTH).optional(),
+  'script-sample': z.string().max(ValidationLimits.CSP_SCRIPT_SAMPLE_MAX_LENGTH).optional(),
 })
 
 export const cspReportSchema = z
