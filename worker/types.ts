@@ -49,13 +49,7 @@ export class GlobalDurableObject extends DurableObject<Env, unknown> {
   }
 
   async del(key: string): Promise<boolean> {
-    const storage = this.ctx.storage
-    const existed = await storage.get(key)
-    if (existed !== undefined) {
-      await storage.delete(key)
-      return true
-    }
-    return false
+    return this.ctx.storage.delete(key)
   }
 
   async has(key: string): Promise<boolean> {
@@ -109,31 +103,31 @@ export class GlobalDurableObject extends DurableObject<Env, unknown> {
 
   async indexRemoveBatch(items: string[]): Promise<number> {
     const storage = this.ctx.storage
-    let removed = 0
-
     const keys = items.map(item => `i:${item}`)
+    let totalRemoved = 0
 
-    for (const key of keys) {
-      const existed = await storage.get(key)
-      if (existed !== undefined) {
-        await storage.delete(key)
-        removed++
-      }
+    for (let i = 0; i < keys.length; i += 128) {
+      const batch = keys.slice(i, i + 128)
+      const removed = await storage.delete(batch)
+      totalRemoved += removed
     }
 
-    return removed
+    return totalRemoved
   }
 
-  async indexDrop(indexKey: string): Promise<void> {
+  async indexDrop(prefix: string = 'i:'): Promise<number> {
     const storage = this.ctx.storage
-    const prefix = `i:`
-
     const existing = await storage.list({ prefix })
     const keys = Array.from(existing.keys())
+    let totalRemoved = 0
 
-    for (const key of keys) {
-      await storage.delete(key)
+    for (let i = 0; i < keys.length; i += 128) {
+      const batch = keys.slice(i, i + 128)
+      const removed = await storage.delete(batch)
+      totalRemoved += removed
     }
+
+    return totalRemoved
   }
 }
 
