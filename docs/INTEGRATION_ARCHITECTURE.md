@@ -612,6 +612,7 @@ const isValid = await verifySignature(payloadString, receivedSignature, webhookS
 | `announcement.deleted` | An announcement has been deleted          | Admin deletes an announcement              | ✅ Active |
 | `message.created`      | A new message has been created            | Teacher/Parent sends a message             | ✅ Active |
 | `message.read`         | A message has been read                   | Teacher/Parent marks message as read       | ✅ Active |
+| `message.deleted`      | A message has been deleted                | Teacher/Parent deletes a message           | ✅ Active |
 
 **Idempotency**: Each event delivery is idempotent. Triggering the same event multiple times will only result in one webhook delivery per configured webhook endpoint.
 
@@ -830,6 +831,6 @@ Returns current system health:
 
 ---
 
-**Last Updated**: 2026-02-22 (Technical Writer - Documentation consistency update)
+**Last Updated**: 2026-02-23 (Integration Engineer - Webhook event type documentation sync)
 
 **Status**: ✅ **Production Ready** - Integration patterns fully implemented.
