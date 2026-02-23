@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo } from 'react'
 import {
   calculateGPA,
   calculateAverage,
@@ -10,32 +10,33 @@ import {
   calculatePerformanceSummary,
   analyzeTrend,
   generatePerformanceInsights,
+  getGradeLetter,
   type PerformanceSummary,
   type GradeDistribution,
   type TrendAnalysis,
   type PerformanceInsight,
   type SubjectPerformance,
-} from '@/utils/analytics';
+} from '@/utils/analytics'
 
 export interface GradeData {
-  score: number;
-  subject?: string;
-  courseName?: string;
+  score: number
+  subject?: string
+  courseName?: string
 }
 
 export interface PerformanceAnalyticsResult {
-  gpa: number;
-  averageScore: number;
-  minScore: number;
-  maxScore: number;
-  medianScore: number;
-  standardDeviation: number;
-  gradeDistribution: GradeDistribution;
-  summary: PerformanceSummary;
-  trend: TrendAnalysis;
-  insights: PerformanceInsight[];
-  totalGrades: number;
-  hasData: boolean;
+  gpa: number
+  averageScore: number
+  minScore: number
+  maxScore: number
+  medianScore: number
+  standardDeviation: number
+  gradeDistribution: GradeDistribution
+  summary: PerformanceSummary
+  trend: TrendAnalysis
+  insights: PerformanceInsight[]
+  totalGrades: number
+  hasData: boolean
 }
 
 const EMPTY_GRADE_DISTRIBUTION: GradeDistribution = {
@@ -45,13 +46,13 @@ const EMPTY_GRADE_DISTRIBUTION: GradeDistribution = {
   D: 0,
   E: 0,
   F: 0,
-};
+}
 
 const EMPTY_TREND: TrendAnalysis = {
   direction: 'stable',
   slope: 0,
   confidence: 0,
-};
+}
 
 const EMPTY_SUMMARY: PerformanceSummary = {
   average: 0,
@@ -61,7 +62,7 @@ const EMPTY_SUMMARY: PerformanceSummary = {
   standardDeviation: 0,
   gpa: 0,
   gradeDistribution: EMPTY_GRADE_DISTRIBUTION,
-};
+}
 
 export function usePerformanceAnalytics(grades: GradeData[]): PerformanceAnalyticsResult {
   return useMemo(() => {
@@ -79,15 +80,15 @@ export function usePerformanceAnalytics(grades: GradeData[]): PerformanceAnalyti
         insights: [],
         totalGrades: 0,
         hasData: false,
-      };
+      }
     }
 
-    const scores = grades.map((g) => g.score);
-    const subjectPerformances: SubjectPerformance[] = grades.map((g) => ({
+    const scores = grades.map(g => g.score)
+    const subjectPerformances: SubjectPerformance[] = grades.map(g => ({
       subject: g.subject || g.courseName || 'Unknown',
       score: g.score,
-      grade: g.score >= 90 ? 'A' : g.score >= 80 ? 'B' : g.score >= 70 ? 'C' : g.score >= 60 ? 'D' : g.score >= 50 ? 'E' : 'F',
-    }));
+      grade: getGradeLetter(g.score),
+    }))
 
     return {
       gpa: calculateGPA(scores),
@@ -102,6 +103,6 @@ export function usePerformanceAnalytics(grades: GradeData[]): PerformanceAnalyti
       insights: generatePerformanceInsights(subjectPerformances),
       totalGrades: grades.length,
       hasData: true,
-    };
-  }, [grades]);
+    }
+  }, [grades])
 }
