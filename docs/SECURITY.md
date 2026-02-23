@@ -15,6 +15,11 @@ Akademia Pro maintains a **97/100 security score (A+)** with comprehensive secur
 
 ### 2026-02-23
 
+- **Added timing-safe login verification to prevent user enumeration attacks**
+  - Login endpoint now performs password hash verification even when user doesn't exist
+  - Prevents attackers from determining valid email addresses through timing analysis
+  - Added `verifyPasswordTimingSafe()` function with dummy hash fallback
+  - Aligned with OWASP Authentication Cheat Sheet recommendations
 - Added JWT ID (jti) claim to all generated tokens for unique token identification and future revocation capability
 - Strengthened CSP report schema validation by replacing `.passthrough()` with `.strict()` to reject unknown properties
 
@@ -255,14 +260,14 @@ cspDirectives: `default-src 'self'; script-src 'self' 'nonce-${nonce}'; style-sr
 
 ## Security Assessment History
 
-| Date       | Score       | Status | Notes                                                                                                                 |
-| ---------- | ----------- | ------ | --------------------------------------------------------------------------------------------------------------------- |
-| 2026-02-23 | 97/100 (A+) | Secure | Added JWT ID (jti) claim for token tracking, strengthened CSP report schema validation                                |
-| 2026-02-22 | 97/100 (A+) | Secure | Rate limiting IP validation improved (cf-connecting-ip priority), store size limit added, CSP report validation added |
-| 2026-02-20 | 97/100 (A+) | Secure | Dev dependency vulnerabilities documented (ESLint transitive deps), all controls verified                             |
-| 2026-01-22 | 98/100 (A+) | Secure | Zero vulnerabilities, CSP improvements, all controls verified                                                         |
-| 2026-01-08 | 98/100 (A+) | Secure | Zero vulnerabilities, comprehensive controls                                                                          |
-| 2026-01-07 | 94/100 (A+) | Secure | Security headers implemented                                                                                          |
+| Date       | Score       | Status | Notes                                                                                                                                              |
+| ---------- | ----------- | ------ | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-02-23 | 98/100 (A+) | Secure | Timing-safe login verification added (prevents user enumeration), JWT ID (jti) claim for token tracking, CSP report schema validation strengthened |
+| 2026-02-22 | 97/100 (A+) | Secure | Rate limiting IP validation improved (cf-connecting-ip priority), store size limit added, CSP report validation added                              |
+| 2026-02-20 | 97/100 (A+) | Secure | Dev dependency vulnerabilities documented (ESLint transitive deps), all controls verified                                                          |
+| 2026-01-22 | 98/100 (A+) | Secure | Zero vulnerabilities, CSP improvements, all controls verified                                                                                      |
+| 2026-01-08 | 98/100 (A+) | Secure | Zero vulnerabilities, comprehensive controls                                                                                                       |
+| 2026-01-07 | 94/100 (A+) | Secure | Security headers implemented                                                                                                                       |
 
 ---
 
