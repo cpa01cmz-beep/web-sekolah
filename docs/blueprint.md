@@ -382,6 +382,40 @@ To support future soft-delete requirements, `IndexedEntity` now includes:
 - [x] All tests passing (no regressions)
 - [x] Documentation updated
 
+### MessageEntity Count/Exists Methods for parentMessageId (2026-02-23)
+
+**Problem**: MessageEntity had `countBySenderId`, `existsBySenderId`, `countByRecipientId`, and `existsByRecipientId` methods but was missing count/exists methods for its `parentMessageId` secondary index, inconsistent with other entity patterns in the codebase.
+
+**Solution**: Added `countByParentMessageId` and `existsByParentMessageId` methods to maintain consistency with other entity patterns.
+
+**Implementation**:
+
+- Added `countByParentMessageId(env, parentMessageId)`: Count message replies by parent message ID
+- Added `existsByParentMessageId(env, parentMessageId)`: Check if replies exist for a message
+
+**Metrics**:
+
+| Method                    | Complexity   | Use Case                 |
+| ------------------------- | ------------ | ------------------------ |
+| `countByParentMessageId`  | O(1) indexed | Thread depth analytics   |
+| `existsByParentMessageId` | O(1) indexed | Thread validation checks |
+
+**Benefits**:
+
+- ✅ Consistent with other entity patterns (UserEntity, GradeEntity, DeadLetterQueueWebhookEntity)
+- ✅ O(1) indexed lookups instead of O(n) full table scans
+- ✅ Enables efficient thread analytics and validation
+- ✅ All 3251 tests passing (4 new tests added)
+- ✅ Zero breaking changes to existing functionality
+
+**Success Criteria**:
+
+- [x] Added countByParentMessageId method
+- [x] Added existsByParentMessageId method
+- [x] Unit tests added for all new methods
+- [x] All tests passing (no regressions)
+- [x] Documentation updated
+
   ### Recent Data Optimizations (2026-01-07)
 
 #### Compound Secondary Index for Grades
