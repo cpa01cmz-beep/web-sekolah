@@ -1,73 +1,81 @@
-import { Hono } from "hono";
-import type { Env } from '../core-utils';
-import { ok, notFound } from '../core-utils';
-import type { StudentDashboardData, StudentCardData } from "@shared/types";
-import { GRADE_A_THRESHOLD, GRADE_B_THRESHOLD, GRADE_C_THRESHOLD, PASSING_SCORE_THRESHOLD, GRADE_PRECISION_FACTOR } from '../constants';
-import { GradeService, CommonDataService, StudentDashboardService } from '../domain';
-import { withUserValidation, withErrorHandler } from './route-utils';
-import type { Context } from 'hono';
+import { Hono } from 'hono'
+import type { Env } from '../core-utils'
+import { ok, notFound } from '../core-utils'
+import type { StudentDashboardData, StudentCardData } from '@shared/types'
+import {
+  GradeService,
+  CommonDataService,
+  StudentDashboardService,
+  AnalyticsService,
+} from '../domain'
+import { withUserValidation, withErrorHandler } from './route-utils'
+import type { Context } from 'hono'
 
 export function studentRoutes(app: Hono<{ Bindings: Env }>) {
-  app.get('/api/students/:id/dashboard', ...withUserValidation('student', 'dashboard'), withErrorHandler('get student dashboard')(async (c: Context) => {
-    const requestedStudentId = c.req.param('id');
-    try {
-      const dashboardData = await StudentDashboardService.getDashboardData(c.env, requestedStudentId);
-      return ok(c, dashboardData);
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      if (errorMessage.includes('not found')) {
-        return notFound(c, errorMessage);
+  app.get(
+    '/api/students/:id/dashboard',
+    ...withUserValidation('student', 'dashboard'),
+    withErrorHandler('get student dashboard')(async (c: Context) => {
+      const requestedStudentId = c.req.param('id')
+      try {
+        const dashboardData = await StudentDashboardService.getDashboardData(
+          c.env,
+          requestedStudentId
+        )
+        return ok(c, dashboardData)
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : String(error)
+        if (errorMessage.includes('not found')) {
+          return notFound(c, errorMessage)
+        }
+        throw error
       }
-      throw error;
-    }
-  }));
+    })
+  )
 
-  app.get('/api/students/:id/schedule', ...withUserValidation('student', 'schedule'), withErrorHandler('get student schedule')(async (c: Context) => {
-    const requestedStudentId = c.req.param('id');
-    const { student, classData, schedule } = await CommonDataService.getStudentWithClassAndSchedule(c.env, requestedStudentId);
-    if (!student || !student.classId || !classData || !schedule) {
-      return notFound(c, 'Student or class not found');
-    }
-    return ok(c, schedule?.items || []);
-  }));
+  app.get(
+    '/api/students/:id/schedule',
+    ...withUserValidation('student', 'schedule'),
+    withErrorHandler('get student schedule')(async (c: Context) => {
+      const requestedStudentId = c.req.param('id')
+      const { student, classData, schedule } =
+        await CommonDataService.getStudentWithClassAndSchedule(c.env, requestedStudentId)
+      if (!student || !student.classId || !classData || !schedule) {
+        return notFound(c, 'Student or class not found')
+      }
+      return ok(c, schedule?.items || [])
+    })
+  )
 
-  app.get('/api/students/:id/card', ...withUserValidation('student', 'card'), withErrorHandler('get student card')(async (c: Context) => {
-    const requestedStudentId = c.req.param('id');
-    const { student, classData } = await CommonDataService.getStudentForGrades(c.env, requestedStudentId);
-    if (!student || student.role !== 'student') {
-      return notFound(c, 'Student not found');
-    }
+  app.get(
+    '/api/students/:id/card',
+    ...withUserValidation('student', 'card'),
+    withErrorHandler('get student card')(async (c: Context) => {
+      const requestedStudentId = c.req.param('id')
+      const { student, classData } = await CommonDataService.getStudentForGrades(
+        c.env,
+        requestedStudentId
+      )
+      if (!student || student.role !== 'student') {
+        return notFound(c, 'Student not found')
+      }
 
-    const grades = await GradeService.getStudentGrades(c.env, requestedStudentId);
-    
-    let sum = 0;
-    const distribution = { A: 0, B: 0, C: 0, D: 0, F: 0 };
-    
-    for (const g of grades) {
-      sum += g.score;
-      if (g.score >= GRADE_A_THRESHOLD) distribution.A++;
-      else if (g.score >= GRADE_B_THRESHOLD) distribution.B++;
-      else if (g.score >= GRADE_C_THRESHOLD) distribution.C++;
-      else if (g.score >= PASSING_SCORE_THRESHOLD) distribution.D++;
-      else distribution.F++;
-    }
-    
-    const averageScore = grades.length > 0
-      ? sum / grades.length
-      : 0;
+      const grades = await GradeService.getStudentGrades(c.env, requestedStudentId)
+      const stats = AnalyticsService.calculateGradeStatistics(grades)
 
-    const cardData: StudentCardData = {
-      studentId: student.id,
-      name: student.name,
-      email: student.email,
-      avatarUrl: student.avatarUrl || '',
-      className: classData?.name || 'N/A',
-      averageScore: Math.round(averageScore * GRADE_PRECISION_FACTOR) / GRADE_PRECISION_FACTOR,
-      totalGrades: grades.length,
-      gradeDistribution: distribution,
-      recentGrades: grades.slice(-5).reverse()
-    };
+      const cardData: StudentCardData = {
+        studentId: student.id,
+        name: student.name,
+        email: student.email,
+        avatarUrl: student.avatarUrl || '',
+        className: classData?.name || 'N/A',
+        averageScore: stats.averageScore,
+        totalGrades: stats.totalGrades,
+        gradeDistribution: stats.distribution,
+        recentGrades: grades.slice(-5).reverse(),
+      }
 
-    return ok(c, cardData);
-  }));
+      return ok(c, cardData)
+    })
+  )
 }
