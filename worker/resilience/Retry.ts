@@ -37,19 +37,34 @@ export async function withRetry<T>(fn: () => Promise<T>, options: RetryOptions =
   } = options
 
   let lastError: Error | unknown
+  let timeoutId: ReturnType<typeof setTimeout> | undefined
 
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     try {
       if (timeout) {
-        const timeoutPromise = new Promise<T>((_, reject) => {
-          setTimeout(() => reject(new Error('Request timeout')), timeout)
-        })
-        return await Promise.race([fn(), timeoutPromise])
+        const controller = new AbortController()
+        timeoutId = setTimeout(() => controller.abort(), timeout)
+
+        const result = await Promise.race([
+          fn(),
+          new Promise<T>((_, reject) => {
+            controller.signal.addEventListener('abort', () => {
+              reject(new Error('Request timeout'))
+            })
+          }),
+        ])
+
+        clearTimeout(timeoutId)
+        return result
       }
 
       return await fn()
     } catch (error) {
       lastError = error
+
+      if (timeoutId) {
+        clearTimeout(timeoutId)
+      }
 
       if (attempt === maxRetries) {
         break
