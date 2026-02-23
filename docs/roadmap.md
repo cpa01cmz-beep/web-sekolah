@@ -259,10 +259,10 @@ These are potential future features for consideration:
 
 - Cloudflare Workers (runtime)
 - Cloudflare Durable Objects (storage)
-- React 18+ (UI framework)
+- React 19+ (UI framework)
 - React Query 5+ (data fetching)
 - Hono 3+ (API framework)
-- Tailwind CSS 3+ (styling)
+- Tailwind CSS 4+ (styling)
 
 ### Internal Dependencies
 
