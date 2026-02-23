@@ -26,7 +26,7 @@ cp .env.example .env
 npm run dev
 ```
 
-Open `http://localhost:3000` → Visit `/api/seed` → Login with `student@example.com` / `password123`
+Open `http://localhost:3000` → visit `/api/seed` → Login with `student@example.com` / `password123`
 
 ## Table of Contents
 
