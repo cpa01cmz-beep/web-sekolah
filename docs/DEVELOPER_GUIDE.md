@@ -18,7 +18,7 @@ This guide helps developers contribute to Akademia Pro. For API documentation, s
 
 ### Prerequisites
 
-- [Node.js](https://nodejs.org/) (recommended: v18 or later)
+- [Node.js](https://nodejs.org/) (recommended: v20 or later, matches .nvmrc)
 - [npm](https://www.npmjs.com/) (comes with Node.js)
 - [Wrangler CLI](https://developers.cloudflare.com/workers/wrangler/install-and-update/)
 - Git
@@ -125,6 +125,7 @@ shared/
 ### UI Components (src/components/)
 
 **When to Create:**
+
 - Reusable across multiple pages
 - Pure UI without business logic
 - Follows shadcn/ui patterns
@@ -150,6 +151,7 @@ export function MyComponent({ className, children }: MyComponentProps) {
 ```
 
 **Best Practices:**
+
 - Use `cn()` for className merging
 - Accept `className` prop for flexibility
 - Keep components small and focused
@@ -158,6 +160,7 @@ export function MyComponent({ className, children }: MyComponentProps) {
 ### Page Components (src/pages/)
 
 **When to Create:**
+
 - Route-specific pages
 - Domain-specific UI
 - Uses custom hooks for data
@@ -187,6 +190,7 @@ export function StudentDashboardPage() {
 ```
 
 **Best Practices:**
+
 - Use domain-specific hooks (never call `useQuery` directly)
 - Handle loading, error, and empty states
 - Keep presentation logic, not business logic
@@ -222,6 +226,7 @@ Dashboard components provide reusable UI elements for displaying statistics and 
 Reusable card component for displaying dashboard statistics with optional icons and subtitles.
 
 **When to Use:**
+
 - Displaying metrics (counts, totals, averages)
 - Dashboard overview sections
 - Statistical summaries across all portals
@@ -250,16 +255,17 @@ import { DashboardStatCard } from '@/components/dashboard/DashboardStatCard'
 
 **Props:**
 
-| Prop | Type | Required | Default | Description |
-|------|------|----------|----------|-------------|
-| title | string | Yes | - | Card title/label |
-| value | string \| number | Yes | - | Primary value to display |
-| icon | React.ReactNode | No | - | Optional icon component |
-| subtitle | string | No | - | Optional subtitle text |
-| valueSize | '2xl' \| '3xl' | No | '2xl' | Size of the value text |
-| className | string | No | - | Additional Tailwind classes |
+| Prop      | Type             | Required | Default | Description                 |
+| --------- | ---------------- | -------- | ------- | --------------------------- |
+| title     | string           | Yes      | -       | Card title/label            |
+| value     | string \| number | Yes      | -       | Primary value to display    |
+| icon      | React.ReactNode  | No       | -       | Optional icon component     |
+| subtitle  | string           | No       | -       | Optional subtitle text      |
+| valueSize | '2xl' \| '3xl'   | No       | '2xl'   | Size of the value text      |
+| className | string           | No       | -       | Additional Tailwind classes |
 
 **Best Practices:**
+
 - Use for consistency across dashboard pages (Admin, Teacher, Student, Parent)
 - Icons should use aria-hidden for accessibility
 - Subtitles provide context (e.g., "Total students: 25")
@@ -286,91 +292,97 @@ export interface StudentService {
 
 ```typescript
 // src/repositories/ApiRepository.ts
-import { apiClient } from '@/lib/api-client';
-import type { IRepository, ApiRequestOptions } from './IRepository';
+import { apiClient } from '@/lib/api-client'
+import type { IRepository, ApiRequestOptions } from './IRepository'
 
 export class ApiRepository implements IRepository {
   async get<T>(path: string, options?: ApiRequestOptions): Promise<T> {
-    return apiClient<T>(path, { method: 'GET', ...options });
+    return apiClient<T>(path, { method: 'GET', ...options })
   }
 
   async post<T>(path: string, body?: unknown, options?: ApiRequestOptions): Promise<T> {
     return apiClient<T>(path, {
       method: 'POST',
       body: body ? JSON.stringify(body) : undefined,
-      ...options
-    });
+      ...options,
+    })
   }
 
   async put<T>(path: string, body?: unknown, options?: ApiRequestOptions): Promise<T> {
     return apiClient<T>(path, {
       method: 'PUT',
       body: body ? JSON.stringify(body) : undefined,
-      ...options
-    });
+      ...options,
+    })
   }
 
   async delete<T>(path: string, options?: ApiRequestOptions): Promise<T> {
-    return apiClient<T>(path, { method: 'DELETE', ...options });
+    return apiClient<T>(path, { method: 'DELETE', ...options })
   }
 
   async patch<T>(path: string, body?: unknown, options?: ApiRequestOptions): Promise<T> {
     return apiClient<T>(path, {
       method: 'PATCH',
       body: body ? JSON.stringify(body) : undefined,
-      ...options
-    });
+      ...options,
+    })
   }
 }
 
-export const apiRepository = new ApiRepository();
+export const apiRepository = new ApiRepository()
 
 // src/services/studentService.ts
-import type { StudentService } from './serviceContracts';
-import type { StudentDashboardData, Grade, ScheduleItem, StudentCardData } from '@shared/types';
-import type { IRepository } from '@/repositories/IRepository';
-import { apiRepository } from '@/repositories/ApiRepository';
+import type { StudentService } from './serviceContracts'
+import type { StudentDashboardData, Grade, ScheduleItem, StudentCardData } from '@shared/types'
+import type { IRepository } from '@/repositories/IRepository'
+import { apiRepository } from '@/repositories/ApiRepository'
 
 export function createStudentService(repository: IRepository = apiRepository): StudentService {
   return {
     async getDashboard(studentId: string): Promise<StudentDashboardData> {
-      return repository.get<StudentDashboardData>(`/api/students/${studentId}/dashboard`);
+      return repository.get<StudentDashboardData>(`/api/students/${studentId}/dashboard`)
     },
 
     async getGrades(studentId: string): Promise<Grade[]> {
-      return repository.get<Grade[]>(`/api/students/${studentId}/grades`);
+      return repository.get<Grade[]>(`/api/students/${studentId}/grades`)
     },
 
     async getSchedule(studentId: string): Promise<ScheduleItem[]> {
-      return repository.get<ScheduleItem[]>(`/api/students/${studentId}/schedule`);
+      return repository.get<ScheduleItem[]>(`/api/students/${studentId}/schedule`)
     },
 
     async getCard(studentId: string): Promise<StudentCardData> {
-      return repository.get<StudentCardData>(`/api/students/${studentId}/card`);
-    }
-  };
+      return repository.get<StudentCardData>(`/api/students/${studentId}/card`)
+    },
+  }
 }
 
-export const studentService = createStudentService();
+export const studentService = createStudentService()
 ```
 
 ### Step 3: Create Custom Hook
 
 ```typescript
 // src/hooks/useStudent.ts
-import { useQuery as useTanstackQuery, UseQueryOptions } from '@tanstack/react-query';
-import { studentService } from '@/services/studentService';
-import type { StudentDashboardData, Grade, ScheduleItem, StudentCardData } from '@shared/types';
-import { CachingTime } from '@/config/time';
-import { createQueryOptions } from '@/config/query-config';
+import { useQuery as useTanstackQuery, UseQueryOptions } from '@tanstack/react-query'
+import { studentService } from '@/services/studentService'
+import type { StudentDashboardData, Grade, ScheduleItem, StudentCardData } from '@shared/types'
+import { CachingTime } from '@/config/time'
+import { createQueryOptions } from '@/config/query-config'
 
-export function useStudentDashboard(studentId: string, options?: UseQueryOptions<StudentDashboardData>) {
+export function useStudentDashboard(
+  studentId: string,
+  options?: UseQueryOptions<StudentDashboardData>
+) {
   return useTanstackQuery({
     queryKey: ['students', studentId, 'dashboard'],
     queryFn: () => studentService.getDashboard(studentId),
-    ...createQueryOptions<StudentDashboardData>({ enabled: !!studentId, staleTime: CachingTime.FIVE_MINUTES }),
+    ...createQueryOptions<StudentDashboardData>({
+      enabled: !!studentId,
+      staleTime: CachingTime.FIVE_MINUTES,
+    }),
     ...options,
-  });
+  })
 }
 
 export function useStudentGrades(studentId: string, options?: UseQueryOptions<Grade[]>) {
@@ -379,30 +391,33 @@ export function useStudentGrades(studentId: string, options?: UseQueryOptions<Gr
     queryFn: () => studentService.getGrades(studentId),
     ...createQueryOptions<Grade[]>({ enabled: !!studentId, staleTime: CachingTime.THIRTY_MINUTES }),
     ...options,
-  });
+  })
 }
 
 export function useStudentSchedule(studentId: string, options?: UseQueryOptions<ScheduleItem[]>) {
   return useTanstackQuery({
     queryKey: ['students', studentId, 'schedule'],
     queryFn: () => studentService.getSchedule(studentId),
-    ...createQueryOptions<ScheduleItem[]>({ enabled: !!studentId, staleTime: CachingTime.ONE_HOUR }),
+    ...createQueryOptions<ScheduleItem[]>({
+      enabled: !!studentId,
+      staleTime: CachingTime.ONE_HOUR,
+    }),
     ...options,
-  });
+  })
 }
 
 export function useStudentCard(studentId: string, options?: UseQueryOptions<StudentCardData>) {
   return useTanstackQuery({
     queryKey: ['students', studentId, 'card'],
     queryFn: () => studentService.getCard(studentId),
-    ...createQueryOptions<StudentCardData>({ 
+    ...createQueryOptions<StudentCardData>({
       enabled: !!studentId,
       staleTime: CachingTime.TWENTY_FOUR_HOURS,
       gcTime: CachingTime.SEVEN_DAYS,
       refetchOnReconnect: false,
     }),
     ...options,
-  });
+  })
 }
 ```
 
@@ -410,8 +425,8 @@ export function useStudentCard(studentId: string, options?: UseQueryOptions<Stud
 
 ```typescript
 // src/pages/portal/student/StudentDashboardPage.tsx
-import { useStudentDashboard } from '@/hooks/useStudent';
-import { useAuth } from '@/hooks/useAuth';
+import { useStudentDashboard } from '@/hooks/useStudent'
+import { useAuth } from '@/hooks/useAuth'
 
 export function StudentDashboardPage() {
   const { user } = useAuth()
@@ -427,7 +442,7 @@ export function StudentDashboardPage() {
 
 ```typescript
 // worker/student-routes.ts
-app.get('/api/students/:id/dashboard', authenticate(), authorize('student'), async (c) => {
+app.get('/api/students/:id/dashboard', authenticate(), authorize('student'), async c => {
   const studentId = c.req.param('id')
   const dashboard = await StudentService.getDashboard(c.env, studentId)
   return c.json({ success: true, data: dashboard })
@@ -442,7 +457,7 @@ export async function getDashboard(env: Env, studentId: string): Promise<Student
   const [schedule, grades, announcements] = await Promise.all([
     ScheduleEntity.getByStudentId(env, studentId),
     GradeEntity.getByStudentId(env, studentId),
-    AnnouncementEntity.getRecent(env, 10)
+    AnnouncementEntity.getRecent(env, 10),
   ])
 
   return { schedule, grades, announcements }
@@ -645,14 +660,17 @@ curl http://localhost:3000/api/health
 ### Common Issues
 
 **Tests failing?**
+
 - Run `npm install` to update dependencies
 - Check TypeScript compilation: `npx tsc --noEmit`
 
 **Build failing?**
+
 - Check for linting errors: `npm run lint`
 - Verify TypeScript types: `npx tsc --noEmit`
 
 **API requests failing?**
+
 - Check worker is running
 - Verify environment variables in `.env`
 - Check browser console for CORS errors
@@ -669,6 +687,7 @@ curl http://localhost:3000/api/health
 6. Push and create pull request
 
 **Pull Request Checklist:**
+
 - [ ] Tests added/updated
 - [ ] All tests passing
 - [ ] No linting errors
