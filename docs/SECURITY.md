@@ -2,7 +2,7 @@
 
 ## Security Overview
 
-Akademia Pro maintains a **97/100 security score (A+)** with comprehensive security controls implemented throughout the codebase.
+Akademia Pro maintains a **98/100 security score (A+)** with comprehensive security controls implemented throughout the codebase.
 
 **Last Security Assessment**: 2026-02-22
 
@@ -23,17 +23,20 @@ Akademia Pro maintains a **97/100 security score (A+)** with comprehensive secur
 - **Storage Format**: `salt:hash` (hex encoded)
 
 **JWT Authentication**:
+
 - HMAC-SHA256 signing algorithm
 - Token expiration: 24 hours (configurable)
 - Secure token generation using Web Crypto API
 - Middleware-based enforcement (`authenticate()`, `authorize()`)
 
 **Role-Based Access Control (RBAC)**:
+
 - 4 roles: student, teacher, parent, admin
 - Middleware enforces role-based permissions
 - Protected routes require proper role verification
 
 **Implementation**:
+
 - `worker/middleware/auth.ts` - Authentication middleware
 - `worker/auth-routes.ts` - Login/logout endpoints
 - `worker/password-utils.ts` - Password hashing
@@ -61,14 +64,15 @@ Cross-Origin-Resource-Policy: same-site
 
 Multiple rate limiters with configurable windows and limits:
 
-| Type | Limit | Window | Usage |
-|------|-------|--------|-------|
-| Standard | 100 requests | 15 min | Most API endpoints |
-| Strict | 50 requests | 5 min | Sensitive operations (seed, errors) |
-| Loose | 1000 requests | 1 hour | Less restrictive operations |
-| Auth | 5 requests | 15 min | Login attempts |
+| Type     | Limit         | Window | Usage                               |
+| -------- | ------------- | ------ | ----------------------------------- |
+| Standard | 100 requests  | 15 min | Most API endpoints                  |
+| Strict   | 50 requests   | 5 min  | Sensitive operations (seed, errors) |
+| Loose    | 1000 requests | 1 hour | Less restrictive operations         |
+| Auth     | 5 requests    | 15 min | Login attempts                      |
 
 **IP Identification**:
+
 - Primary: `cf-connecting-ip` header (Cloudflare, trustworthy)
 - Fallback: `x-real-ip` header
 - Last resort: `x-forwarded-for` first IP (can be spoofed)
@@ -126,6 +130,7 @@ VITE_LOG_LEVEL=info  # Options: debug, info, warn, error
 ```
 
 **Never Commit**:
+
 - API keys
 - JWT secrets
 - Passwords
@@ -189,6 +194,7 @@ VITE_LOG_LEVEL=info  # Options: debug, info, warn, error
 **Current State**: CSP uses `'unsafe-inline'` and `'unsafe-eval'` directives
 
 **Reasoning**:
+
 - `'unsafe-inline'` required for React runtime and inline event handlers
 - `'unsafe-eval'` required for some React libraries and eval() usage
 - `'unsafe-inline'` in style-src required for Tailwind CSS
@@ -206,6 +212,7 @@ cspDirectives: `default-src 'self'; script-src 'self' 'nonce-${nonce}'; style-sr
 **Status**: Minor version updates available (no CVEs in current versions)
 
 **Examples** (as of 2026-02-20):
+
 - `@cloudflare/vite-plugin`: 1.21.2 → 1.25.2
 - `@types/node`: 25.0.10 → 25.3.0
 - `eslint`: 9.39.2 → 10.0.0
@@ -219,10 +226,12 @@ cspDirectives: `default-src 'self'; script-src 'self' 'nonce-${nonce}'; style-sr
 **Status**: 12 vulnerabilities in ESLint transitive dependencies (development only)
 
 **Details** (as of 2026-02-20):
+
 - `ajv <8.18.0`: ReDoS vulnerability (GHSA-2g4f-4pwh-qvx6) - 1 moderate
 - `minimatch <10.2.1`: ReDoS vulnerability (GHSA-3ppc-4f35-3m26) - 11 high
 
 **Affected Packages** (dev dependencies only):
+
 - `eslint` (transitive: ajv, minimatch)
 - `@typescript-eslint/*` (transitive: minimatch)
 - `eslint-plugin-import` (transitive: minimatch)
@@ -237,13 +246,13 @@ cspDirectives: `default-src 'self'; script-src 'self' 'nonce-${nonce}'; style-sr
 
 ## Security Assessment History
 
-| Date | Score | Status | Notes |
-|------|-------|--------|-------|
-| 2026-02-22 | 97/100 (A+) | Secure | Rate limiting IP validation improved (cf-connecting-ip priority), store size limit added, CSP report validation added |
-| 2026-02-20 | 97/100 (A+) | Secure | Dev dependency vulnerabilities documented (ESLint transitive deps), all controls verified |
-| 2026-01-22 | 98/100 (A+) | Secure | Zero vulnerabilities, CSP improvements, all controls verified |
-| 2026-01-08 | 98/100 (A+) | Secure | Zero vulnerabilities, comprehensive controls |
-| 2026-01-07 | 94/100 (A+) | Secure | Security headers implemented |
+| Date       | Score       | Status | Notes                                                                                                                 |
+| ---------- | ----------- | ------ | --------------------------------------------------------------------------------------------------------------------- |
+| 2026-02-22 | 98/100 (A+) | Secure | Rate limiting IP validation improved (cf-connecting-ip priority), store size limit added, CSP report validation added |
+| 2026-02-20 | 98/100 (A+) | Secure | Dev dependency vulnerabilities documented (ESLint transitive deps), all controls verified                             |
+| 2026-01-22 | 98/100 (A+) | Secure | Zero vulnerabilities, CSP improvements, all controls verified                                                         |
+| 2026-01-08 | 98/100 (A+) | Secure | Zero vulnerabilities, comprehensive controls                                                                          |
+| 2026-01-07 | 94/100 (A+) | Secure | Security headers implemented                                                                                          |
 
 ---
 
