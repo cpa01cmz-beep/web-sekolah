@@ -1,40 +1,51 @@
-import { Entity, EntityStatics } from './Entity';
-import { Index } from '../storage/Index';
-import { SecondaryIndex } from '../storage/SecondaryIndex';
-import type { Env } from '../types';
+import { Entity, EntityStatics } from './Entity'
+import { Index } from '../storage/Index'
+import { SecondaryIndex } from '../storage/SecondaryIndex'
+import type { Env } from '../types'
 
-type IS<T> = T extends new (env: Env, id: string) => IndexedEntity<infer S> ? S : never;
-type HS<TCtor> = TCtor & { indexName: string; keyOf(state: IS<TCtor>): string; seedData?: ReadonlyArray<IS<TCtor>>; secondaryIndexes?: SecondaryIndexConfig[] };
-type CtorAny = new (env: Env, id: string) => IndexedEntity<{ id: string }>;
+type IS<T> = T extends new (env: Env, id: string) => IndexedEntity<infer S> ? S : never
+type HS<TCtor> = TCtor & {
+  indexName: string
+  keyOf(state: IS<TCtor>): string
+  seedData?: ReadonlyArray<IS<TCtor>>
+  secondaryIndexes?: SecondaryIndexConfig[]
+}
+type CtorAny = new (env: Env, id: string) => IndexedEntity<{ id: string }>
 
 interface SecondaryIndexConfig {
-  fieldName: string;
-  getValue: (state: IS<CtorAny>) => string;
+  fieldName: string
+  getValue: (state: IS<CtorAny>) => string
 }
 
 export abstract class IndexedEntity<S extends { id: string }> extends Entity<S> {
-  static readonly indexName: string;
-  static keyOf<U extends { id: string }>(state: U): string { return state.id; }
+  static readonly indexName: string
+  static keyOf<U extends { id: string }>(state: U): string {
+    return state.id
+  }
 
-  static async create<TCtor extends CtorAny>(this: HS<TCtor>, env: Env, state: IS<TCtor>): Promise<IS<TCtor>> {
-    const id = this.keyOf(state);
-    const inst = new this(env, id);
-    const withTimestamps = inst.applyTimestamps({}, state) as IS<TCtor>;
-    await inst.save(withTimestamps);
-    const idx = new Index<string>(env, this.indexName);
-    await idx.add(id);
+  static async create<TCtor extends CtorAny>(
+    this: HS<TCtor>,
+    env: Env,
+    state: IS<TCtor>
+  ): Promise<IS<TCtor>> {
+    const id = this.keyOf(state)
+    const inst = new this(env, id)
+    const withTimestamps = inst.applyTimestamps({}, state) as IS<TCtor>
+    await inst.save(withTimestamps)
+    const idx = new Index<string>(env, this.indexName)
+    await idx.add(id)
 
-    const secondaryIndexes = this.secondaryIndexes;
+    const secondaryIndexes = this.secondaryIndexes
     if (secondaryIndexes) {
-      const entityName = inst.entityName;
+      const entityName = inst.entityName
       for (const config of secondaryIndexes) {
-        const idx = new SecondaryIndex<string>(env, entityName, config.fieldName as string);
-        const fieldValue = config.getValue(withTimestamps);
-        await idx.add(fieldValue, id);
+        const idx = new SecondaryIndex<string>(env, entityName, config.fieldName as string)
+        const fieldValue = config.getValue(withTimestamps)
+        await idx.add(fieldValue, id)
       }
     }
 
-    return withTimestamps;
+    return withTimestamps
   }
 
   static async list<TCtor extends CtorAny>(
@@ -44,148 +55,166 @@ export abstract class IndexedEntity<S extends { id: string }> extends Entity<S> 
     limit?: number,
     includeDeleted = false
   ): Promise<{ items: IS<TCtor>[]; next: string | null }> {
-    const idx = new Index<string>(env, this.indexName);
-    const { items: ids, next } = await idx.page(cursor, limit);
-    const rows = (await Promise.all(ids.map((id) => new this(env, id).getState()))) as IS<TCtor>[];
-    
+    const idx = new Index<string>(env, this.indexName)
+    const { items: ids, next } = await idx.page(cursor, limit)
+    const rows = (await Promise.all(ids.map(id => new this(env, id).getState()))) as IS<TCtor>[]
+
     if (!includeDeleted) {
-      const filtered = rows.filter((row) => {
-        const r = row as Record<string, unknown>;
-        return !('deletedAt' in r) || r.deletedAt === null || r.deletedAt === undefined;
-      });
-      return { items: filtered, next };
+      const filtered = rows.filter(row => {
+        const r = row as Record<string, unknown>
+        return !('deletedAt' in r) || r.deletedAt === null || r.deletedAt === undefined
+      })
+      return { items: filtered, next }
     }
-    
-    return { items: rows, next };
+
+    return { items: rows, next }
   }
 
   static async ensureSeed<TCtor extends CtorAny>(this: HS<TCtor>, env: Env): Promise<void> {
-    const idx = new Index<string>(env, this.indexName);
-    const ids = await idx.list();
-    const seeds = this.seedData;
+    const idx = new Index<string>(env, this.indexName)
+    const ids = await idx.list()
+    const seeds = this.seedData
     if (ids.length === 0 && seeds && seeds.length > 0) {
-      await Promise.all(seeds.map(s => new this(env, this.keyOf(s)).save(s)));
-      await idx.addBatch(seeds.map(s => this.keyOf(s)));
+      await Promise.all(seeds.map(s => new this(env, this.keyOf(s)).save(s)))
+      await idx.addBatch(seeds.map(s => this.keyOf(s)))
     }
   }
 
-  static async softDeleteWithIndexCleanup<TCtor extends CtorAny>(this: HS<TCtor>, env: Env, id: string): Promise<boolean> {
-    const inst = new this(env, id);
-    const state = await inst.getState();
+  static async softDeleteWithIndexCleanup<TCtor extends CtorAny>(
+    this: HS<TCtor>,
+    env: Env,
+    id: string
+  ): Promise<boolean> {
+    const inst = new this(env, id)
+    const state = await inst.getState()
 
-    const softDeleted = await inst.softDelete();
-    if (!softDeleted) return false;
+    const softDeleted = await inst.softDelete()
+    if (!softDeleted) return false
 
-    const idx = new Index<string>(env, this.indexName);
-    await idx.remove(id);
+    const idx = new Index<string>(env, this.indexName)
+    await idx.remove(id)
 
-    const secondaryIndexes = this.secondaryIndexes;
+    const secondaryIndexes = this.secondaryIndexes
     if (secondaryIndexes) {
-      const entityName = inst.entityName;
+      const entityName = inst.entityName
       for (const config of secondaryIndexes) {
-        const idx = new SecondaryIndex<string>(env, entityName, config.fieldName as string);
-        const fieldValue = config.getValue(state);
-        await idx.remove(fieldValue, id);
+        const idx = new SecondaryIndex<string>(env, entityName, config.fieldName as string)
+        const fieldValue = config.getValue(state)
+        await idx.remove(fieldValue, id)
       }
     }
 
-    return true;
+    return true
   }
 
-  static async restoreWithIndexCleanup<TCtor extends CtorAny>(this: HS<TCtor>, env: Env, id: string): Promise<boolean> {
-    const inst = new this(env, id);
-    const state = await inst.getState();
+  static async restoreWithIndexCleanup<TCtor extends CtorAny>(
+    this: HS<TCtor>,
+    env: Env,
+    id: string
+  ): Promise<boolean> {
+    const inst = new this(env, id)
+    const state = await inst.getState()
 
-    const restored = await inst.restore();
-    if (!restored) return false;
+    const restored = await inst.restore()
+    if (!restored) return false
 
-    const idx = new Index<string>(env, this.indexName);
-    await idx.add(id);
+    const idx = new Index<string>(env, this.indexName)
+    await idx.add(id)
 
-    const secondaryIndexes = this.secondaryIndexes;
+    const secondaryIndexes = this.secondaryIndexes
     if (secondaryIndexes) {
-      const entityName = inst.entityName;
+      const entityName = inst.entityName
       for (const config of secondaryIndexes) {
-        const idx = new SecondaryIndex<string>(env, entityName, config.fieldName as string);
-        const fieldValue = config.getValue(state);
-        await idx.add(fieldValue, id);
+        const idx = new SecondaryIndex<string>(env, entityName, config.fieldName as string)
+        const fieldValue = config.getValue(state)
+        await idx.add(fieldValue, id)
       }
     }
 
-    return true;
+    return true
   }
 
-  static async delete<TCtor extends CtorAny>(this: HS<TCtor>, env: Env, id: string): Promise<boolean> {
-    const inst = new this(env, id);
-    const state = await inst.getState();
-    const existed = await inst.delete();
-    if (!existed) return false;
+  static async delete<TCtor extends CtorAny>(
+    this: HS<TCtor>,
+    env: Env,
+    id: string
+  ): Promise<boolean> {
+    const inst = new this(env, id)
+    const state = await inst.getState()
+    const existed = await inst.delete()
+    if (!existed) return false
 
-    const idx = new Index<string>(env, this.indexName);
-    await idx.remove(id);
+    const idx = new Index<string>(env, this.indexName)
+    await idx.remove(id)
 
-    const secondaryIndexes = this.secondaryIndexes;
+    const secondaryIndexes = this.secondaryIndexes
     if (secondaryIndexes) {
-      const entityName = inst.entityName;
+      const entityName = inst.entityName
       for (const config of secondaryIndexes) {
-        const idx = new SecondaryIndex<string>(env, entityName, config.fieldName as string);
-        const fieldValue = config.getValue(state);
-        await idx.remove(fieldValue, id);
+        const idx = new SecondaryIndex<string>(env, entityName, config.fieldName as string)
+        const fieldValue = config.getValue(state)
+        await idx.remove(fieldValue, id)
       }
     }
 
-    return existed;
+    return existed
   }
 
-  static async deleteMany<TCtor extends CtorAny>(this: HS<TCtor>, env: Env, ids: string[]): Promise<number> {
-    if (ids.length === 0) return 0;
+  static async deleteMany<TCtor extends CtorAny>(
+    this: HS<TCtor>,
+    env: Env,
+    ids: string[]
+  ): Promise<number> {
+    if (ids.length === 0) return 0
 
     const states = await Promise.all(
-      ids.map(async (id) => {
-        const inst = new this(env, id);
+      ids.map(async id => {
+        const inst = new this(env, id)
         try {
-          const state = await inst.getState();
-          return { id, state, inst };
+          const state = await inst.getState()
+          return { id, state, inst }
         } catch {
-          return null;
+          return null
         }
       })
-    );
+    )
 
-    const validStates = states.filter((s): s is NonNullable<typeof s> => s !== null);
+    const validStates = states.filter((s): s is NonNullable<typeof s> => s !== null)
 
-    const deleteResults = await Promise.all(
-      validStates.map(async ({ inst }) => inst.delete())
-    );
+    const deleteResults = await Promise.all(validStates.map(async ({ inst }) => inst.delete()))
 
-    const idx = new Index<string>(env, this.indexName);
-    await idx.removeBatch(ids);
+    const idx = new Index<string>(env, this.indexName)
+    await idx.removeBatch(ids)
 
-    const secondaryIndexes = this.secondaryIndexes;
+    const secondaryIndexes = this.secondaryIndexes
     if (secondaryIndexes && validStates.length > 0) {
-      const entityName = validStates[0].inst.entityName;
+      const entityName = validStates[0].inst.entityName
       for (const config of secondaryIndexes) {
-        const secIdx = new SecondaryIndex<string>(env, entityName, config.fieldName as string);
+        const secIdx = new SecondaryIndex<string>(env, entityName, config.fieldName as string)
         await Promise.all(
           validStates.map(async ({ state, id }) => {
-            const fieldValue = config.getValue(state);
-            await secIdx.remove(fieldValue, id);
+            const fieldValue = config.getValue(state)
+            await secIdx.remove(fieldValue, id)
           })
-        );
+        )
       }
     }
 
-    return deleteResults.filter(Boolean).length;
+    return deleteResults.filter(Boolean).length
   }
 
-  static async removeFromIndex<TCtor extends CtorAny>(this: HS<TCtor>, env: Env, id: string): Promise<void> {
-    const idx = new Index<string>(env, this.indexName);
-    await idx.remove(id);
+  static async removeFromIndex<TCtor extends CtorAny>(
+    this: HS<TCtor>,
+    env: Env,
+    id: string
+  ): Promise<void> {
+    const idx = new Index<string>(env, this.indexName)
+    await idx.remove(id)
   }
 
   static async count<TCtor extends CtorAny>(this: HS<TCtor>, env: Env): Promise<number> {
-    const idx = new Index<string>(env, this.indexName);
-    return await idx.count();
+    const idx = new Index<string>(env, this.indexName)
+    return await idx.count()
   }
 
   static async countBySecondaryIndex<TCtor extends CtorAny>(
@@ -194,10 +223,10 @@ export abstract class IndexedEntity<S extends { id: string }> extends Entity<S> 
     fieldName: string,
     value: string
   ): Promise<number> {
-    const inst = new this(env, 'dummy');
-    const entityName = inst.entityName;
-    const idx = new SecondaryIndex<string>(env, entityName, fieldName);
-    return await idx.countByValue(value);
+    const inst = new this(env, 'dummy')
+    const entityName = inst.entityName
+    const idx = new SecondaryIndex<string>(env, entityName, fieldName)
+    return await idx.countByValue(value)
   }
 
   static async existsBySecondaryIndex<TCtor extends CtorAny>(
@@ -206,23 +235,27 @@ export abstract class IndexedEntity<S extends { id: string }> extends Entity<S> 
     fieldName: string,
     value: string
   ): Promise<boolean> {
-    const inst = new this(env, 'dummy');
-    const entityName = inst.entityName;
-    const idx = new SecondaryIndex<string>(env, entityName, fieldName);
-    return await idx.existsByValue(value);
+    const inst = new this(env, 'dummy')
+    const entityName = inst.entityName
+    const idx = new SecondaryIndex<string>(env, entityName, fieldName)
+    return await idx.existsByValue(value)
   }
 
-  static async get<TCtor extends CtorAny>(this: HS<TCtor>, env: Env, id: string): Promise<IS<TCtor> | null> {
-    const inst = new this(env, id);
+  static async get<TCtor extends CtorAny>(
+    this: HS<TCtor>,
+    env: Env,
+    id: string
+  ): Promise<IS<TCtor> | null> {
+    const inst = new this(env, id)
     try {
-      const state = await inst.getState();
-      const r = state as Record<string, unknown>;
+      const state = await inst.getState()
+      const r = state as Record<string, unknown>
       if ('deletedAt' in r && r.deletedAt !== null && r.deletedAt !== undefined) {
-        return null;
+        return null
       }
-      return state;
+      return state
     } catch {
-      return null;
+      return null
     }
   }
 
@@ -232,47 +265,77 @@ export abstract class IndexedEntity<S extends { id: string }> extends Entity<S> 
     ids: string[],
     includeDeleted = false
   ): Promise<Map<string, IS<TCtor>>> {
-    if (ids.length === 0) return new Map();
+    if (ids.length === 0) return new Map()
 
-    const uniqueIds = [...new Set(ids)];
+    const uniqueIds = [...new Set(ids)]
     const entities = await Promise.all(
-      uniqueIds.map(async (id) => {
+      uniqueIds.map(async id => {
         try {
-          const inst = new this(env, id);
-          const exists = await inst.exists();
-          if (!exists) return null;
-          const state = await inst.getState();
-          return { id, state };
+          const inst = new this(env, id)
+          const exists = await inst.exists()
+          if (!exists) return null
+          const state = await inst.getState()
+          return { id, state }
         } catch {
-          return null;
+          return null
         }
       })
-    );
+    )
 
-    const result = new Map<string, IS<TCtor>>();
+    const result = new Map<string, IS<TCtor>>()
     for (const item of entities) {
-      if (!item) continue;
-      const r = item.state as Record<string, unknown>;
-      if (!includeDeleted && 'deletedAt' in r && r.deletedAt !== null && r.deletedAt !== undefined) {
-        continue;
+      if (!item) continue
+      const r = item.state as Record<string, unknown>
+      if (
+        !includeDeleted &&
+        'deletedAt' in r &&
+        r.deletedAt !== null &&
+        r.deletedAt !== undefined
+      ) {
+        continue
       }
-      result.set(item.id, item.state);
+      result.set(item.id, item.state)
     }
-    return result;
+    return result
   }
 
-  static async update<TCtor extends CtorAny>(this: HS<TCtor>, env: Env, id: string, updates: Partial<IS<TCtor>>): Promise<IS<TCtor> | null> {
-    const inst = new this(env, id);
+  static async update<TCtor extends CtorAny>(
+    this: HS<TCtor>,
+    env: Env,
+    id: string,
+    updates: Partial<IS<TCtor>>
+  ): Promise<IS<TCtor> | null> {
+    const inst = new this(env, id)
     try {
-      const currentState = await inst.getState();
-      const r = currentState as Record<string, unknown>;
+      const currentState = await inst.getState()
+      const r = currentState as Record<string, unknown>
       if ('deletedAt' in r && r.deletedAt !== null && r.deletedAt !== undefined) {
-        return null;
+        return null
       }
-      await inst.patch(updates as Partial<S>);
-      return await inst.getState();
+
+      const secondaryIndexes = this.secondaryIndexes
+      if (secondaryIndexes) {
+        const entityName = inst.entityName
+        for (const config of secondaryIndexes) {
+          const fieldName = config.fieldName as string
+          if (fieldName in updates) {
+            const oldValue = config.getValue(currentState)
+            const newState = { ...currentState, ...updates }
+            const newValue = config.getValue(newState)
+
+            if (oldValue !== newValue) {
+              const idx = new SecondaryIndex<string>(env, entityName, fieldName)
+              await idx.remove(oldValue, id)
+              await idx.add(newValue, id)
+            }
+          }
+        }
+      }
+
+      await inst.patch(updates as Partial<S>)
+      return await inst.getState()
     } catch {
-      return null;
+      return null
     }
   }
 
@@ -283,39 +346,39 @@ export abstract class IndexedEntity<S extends { id: string }> extends Entity<S> 
     value: string,
     includeDeleted = false
   ): Promise<IS<TCtor>[]> {
-    const inst = new this(env, 'dummy');
-    const entityName = inst.entityName;
-    const idx = new SecondaryIndex<string>(env, entityName, fieldName);
-    const entityIds = await idx.getByValue(value);
+    const inst = new this(env, 'dummy')
+    const entityName = inst.entityName
+    const idx = new SecondaryIndex<string>(env, entityName, fieldName)
+    const entityIds = await idx.getByValue(value)
     const entities = await Promise.all(
-      entityIds.map(async (id) => {
+      entityIds.map(async id => {
         try {
-          return await new this(env, id).getState();
+          return await new this(env, id).getState()
         } catch {
-          return null;
+          return null
         }
       })
-    );
+    )
 
-    const nonNullEntities = entities.filter((e): e is IS<TCtor> => e !== null);
+    const nonNullEntities = entities.filter((e): e is IS<TCtor> => e !== null)
 
     if (!includeDeleted) {
-      return nonNullEntities.filter((row) => {
-        const r = row as Record<string, unknown>;
-        return !('deletedAt' in r) || r.deletedAt === null || r.deletedAt === undefined;
-      });
+      return nonNullEntities.filter(row => {
+        const r = row as Record<string, unknown>
+        return !('deletedAt' in r) || r.deletedAt === null || r.deletedAt === undefined
+      })
     }
 
-    return nonNullEntities;
+    return nonNullEntities
   }
 
   protected override async ensureState(): Promise<S> {
-    const s = (await super.ensureState()) as S;
+    const s = (await super.ensureState()) as S
     if (!s.id) {
-      const withId = { ...s, id: this.id } as S;
-      this._state = withId;
-      return withId;
+      const withId = { ...s, id: this.id } as S
+      this._state = withId
+      return withId
     }
-    return s;
+    return s
   }
 }
