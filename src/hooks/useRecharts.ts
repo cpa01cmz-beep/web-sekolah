@@ -1,16 +1,16 @@
-import { useState, useEffect, useMemo } from 'react';
-import { logger } from '@/lib/logger';
+import { useState, useEffect, useMemo, useRef } from 'react'
+import { logger } from '@/lib/logger'
 
-type ChartType = 
+type ChartType =
   | 'BarChart'
   | 'LineChart'
   | 'PieChart'
   | 'AreaChart'
   | 'RadarChart'
   | 'ScatterChart'
-  | 'ComposedChart';
+  | 'ComposedChart'
 
-type CartesianType = 
+type CartesianType =
   | 'Bar'
   | 'Line'
   | 'Area'
@@ -19,15 +19,11 @@ type CartesianType =
   | 'ZAxis'
   | 'CartesianGrid'
   | 'Scatter'
-  | 'Brush';
+  | 'Brush'
 
-type PolarType =
-  | 'Radar'
-  | 'PolarGrid'
-  | 'PolarAngleAxis'
-  | 'PolarRadiusAxis';
+type PolarType = 'Radar' | 'PolarGrid' | 'PolarAngleAxis' | 'PolarRadiusAxis'
 
-type ComponentType = 
+type ComponentType =
   | 'Tooltip'
   | 'Legend'
   | 'ResponsiveContainer'
@@ -36,24 +32,24 @@ type ComponentType =
   | 'LabelList'
   | 'ReferenceLine'
   | 'ReferenceArea'
-  | 'ReferenceDot';
+  | 'ReferenceDot'
 
-type RechartsComponent = ChartType | CartesianType | PolarType | ComponentType;
+type RechartsComponent = ChartType | CartesianType | PolarType | ComponentType
 
-export type { RechartsComponent };
+export type { RechartsComponent }
 
 interface RechartsComponents {
-  [key: string]: React.ComponentType<Record<string, unknown>>;
+  [key: string]: React.ComponentType<Record<string, unknown>>
 }
 
 interface UseRechartsOptions {
-  components: RechartsComponent[];
+  components: RechartsComponent[]
 }
 
 interface UseRechartsResult {
-  components: RechartsComponents | null;
-  isLoading: boolean;
-  error: Error | null;
+  components: RechartsComponents | null
+  isLoading: boolean
+  error: Error | null
 }
 
 const componentPaths: Record<RechartsComponent, () => Promise<{ [key: string]: unknown }>> = {
@@ -86,67 +82,100 @@ const componentPaths: Record<RechartsComponent, () => Promise<{ [key: string]: u
   PolarGrid: () => import('recharts/es6/polar/PolarGrid'),
   PolarAngleAxis: () => import('recharts/es6/polar/PolarAngleAxis'),
   PolarRadiusAxis: () => import('recharts/es6/polar/PolarRadiusAxis'),
-};
+}
 
-export function useRecharts({ components: requiredComponents }: UseRechartsOptions): UseRechartsResult {
-  const [loadedComponents, setLoadedComponents] = useState<RechartsComponents | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
+const globalComponentCache: Map<
+  RechartsComponent,
+  React.ComponentType<Record<string, unknown>>
+> = new Map()
+const pendingLoads: Map<RechartsComponent, Promise<void>> = new Map()
 
-  const componentKey = useMemo(() => [...requiredComponents].sort().join(','), [requiredComponents]);
+async function loadComponent(name: RechartsComponent): Promise<void> {
+  if (globalComponentCache.has(name)) {
+    return
+  }
+
+  if (pendingLoads.has(name)) {
+    return pendingLoads.get(name)!
+  }
+
+  const loader = componentPaths[name]
+  if (!loader) {
+    throw new Error(`Unknown Recharts component: ${name}`)
+  }
+
+  const promise = loader().then(module => {
+    const component = module[name] as React.ComponentType<Record<string, unknown>>
+    globalComponentCache.set(name, component)
+    pendingLoads.delete(name)
+  })
+
+  pendingLoads.set(name, promise)
+  return promise
+}
+
+export function useRecharts({
+  components: requiredComponents,
+}: UseRechartsOptions): UseRechartsResult {
+  const allLoaded = useMemo(
+    () => requiredComponents.every(c => globalComponentCache.has(c)),
+    [requiredComponents]
+  )
+  const [isLoading, setIsLoading] = useState(!allLoaded)
+  const [error, setError] = useState<Error | null>(null)
+  const isMountedRef = useRef(true)
+
+  const componentKey = useMemo(() => [...requiredComponents].sort().join(','), [requiredComponents])
 
   useEffect(() => {
-    let cancelled = false;
+    isMountedRef.current = true
 
-    const loadComponents = async () => {
-      setIsLoading(true);
-      setError(null);
+    const componentsToLoad = componentKey.split(',').filter(Boolean) as RechartsComponent[]
+    const currentAllLoaded = componentsToLoad.every(c => globalComponentCache.has(c))
 
-      const componentsToLoad = componentKey.split(',').filter(Boolean) as RechartsComponent[];
+    if (currentAllLoaded) {
+      return
+    }
 
+    const loadAllComponents = async () => {
+      setError(null)
       try {
-        const imports = componentsToLoad.map(async (componentName) => {
-          const moduleLoader = componentPaths[componentName];
-          if (!moduleLoader) {
-            throw new Error(`Unknown Recharts component: ${componentName}`);
-          }
-          const module = await moduleLoader();
-          return [componentName, module[componentName]] as const;
-        });
+        await Promise.all(componentsToLoad.map(loadComponent))
 
-        const results = await Promise.all(imports);
-        
-        if (cancelled) return;
+        if (!isMountedRef.current) return
 
-        const componentsMap: RechartsComponents = {};
-        
-        for (const [name, component] of results) {
-          componentsMap[name] = component as React.ComponentType<Record<string, unknown>>;
-        }
-
-        setLoadedComponents(componentsMap);
+        setIsLoading(false)
       } catch (err) {
-        if (cancelled) return;
-        const loadError = err instanceof Error ? err : new Error('Failed to load Recharts components');
-        logger.error('Failed to load Recharts components:', loadError);
-        setError(loadError);
-      } finally {
-        if (!cancelled) {
-          setIsLoading(false);
-        }
+        if (!isMountedRef.current) return
+        const loadError =
+          err instanceof Error ? err : new Error('Failed to load Recharts components')
+        logger.error('Failed to load Recharts components:', loadError)
+        setError(loadError)
+        setIsLoading(false)
       }
-    };
+    }
 
-    loadComponents();
+    loadAllComponents()
 
     return () => {
-      cancelled = true;
-    };
-  }, [componentKey]);
+      isMountedRef.current = false
+    }
+  }, [componentKey])
+
+  const loadedComponents = useMemo(() => {
+    const result: RechartsComponents = {}
+    for (const name of requiredComponents) {
+      const cached = globalComponentCache.get(name)
+      if (cached) {
+        result[name] = cached
+      }
+    }
+    return Object.keys(result).length === requiredComponents.length ? result : null
+  }, [requiredComponents])
 
   return {
     components: loadedComponents,
     isLoading,
     error,
-  };
+  }
 }
