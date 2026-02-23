@@ -1,11 +1,12 @@
-import { QueryClient } from '@tanstack/react-query';
-import { CachingTime, RetryDelay, RetryCount } from '../../config/time';
+import { QueryClient } from '@tanstack/react-query'
+import { CachingTime, RetryDelay, RetryCount } from '../../config/time'
+import { HttpStatusCode } from '@shared/constants'
 
 export interface ApiError extends Error {
-  status?: number;
-  code?: string;
-  retryable?: boolean;
-  requestId?: string;
+  status?: number
+  code?: string
+  retryable?: boolean
+  requestId?: string
 }
 
 export const queryClient = new QueryClient({
@@ -17,20 +18,21 @@ export const queryClient = new QueryClient({
       refetchOnMount: false,
       refetchOnReconnect: true,
       retry: (failureCount, error: ApiError) => {
-        if (!error.retryable) return false;
-        if (error.status === 404) return false;
-        if (error.code === 'VALIDATION_ERROR') return false;
-        if (error.code === 'UNAUTHORIZED') return false;
-        if (error.code === 'FORBIDDEN') return false;
-        return failureCount < 3;
+        if (!error.retryable) return false
+        if (error.status === HttpStatusCode.NOT_FOUND) return false
+        if (error.code === 'VALIDATION_ERROR') return false
+        if (error.code === 'UNAUTHORIZED') return false
+        if (error.code === 'FORBIDDEN') return false
+        return failureCount < 3
       },
-      retryDelay: (attemptIndex) => Math.min(RetryDelay.ONE_SECOND * Math.pow(2, attemptIndex), RetryDelay.THIRTY_SECONDS),
+      retryDelay: attemptIndex =>
+        Math.min(RetryDelay.ONE_SECOND * Math.pow(2, attemptIndex), RetryDelay.THIRTY_SECONDS),
     },
     mutations: {
       retry: (failureCount, error: ApiError) => {
-        if (!error.retryable) return false;
-        return failureCount < 2;
+        if (!error.retryable) return false
+        return failureCount < 2
       },
     },
   },
-});
+})
