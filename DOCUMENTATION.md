@@ -434,7 +434,7 @@ npm run lint
 
 **Test Statistics** (as of 2026-02-23):
 
-- Total tests: 3397 (3237 passing, 5 skipped, 155 todo)
+- Total tests: 3407 (3247 passing, 5 skipped, 155 todo)
 - Test files: 104
 - Coverage: Critical infrastructure, services, hooks, utilities, validation, domain services, rate limiting, query optimization
 
