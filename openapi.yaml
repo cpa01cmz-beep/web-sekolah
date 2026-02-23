@@ -1302,6 +1302,127 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
+  /api/announcements/{id}:
+    put:
+      tags:
+        - Teachers
+      summary: Update announcement
+      description: Updates an existing announcement. Teachers can only update their own announcements, admins can update any announcement.
+      operationId: updateAnnouncement
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Announcement ID
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                  description: Announcement title
+                content:
+                  type: string
+                  description: Announcement content
+                targetRole:
+                  type: string
+                  enum: [student, teacher, parent, all]
+                  description: Target role for announcement
+      responses:
+        '200':
+          description: Announcement updated successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Announcement'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden - can only update own announcements
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Announcement not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    delete:
+      tags:
+        - Teachers
+      summary: Delete announcement
+      description: Deletes an announcement. Teachers can only delete their own announcements, admins can delete any announcement.
+      operationId: deleteAnnouncement
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Announcement ID
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Announcement deleted successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          id:
+                            type: string
+                          deleted:
+                            type: boolean
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden - can only delete own announcements
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Announcement not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
   /api/admin/settings:
     get:
       tags:
