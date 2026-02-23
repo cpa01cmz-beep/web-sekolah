@@ -1,23 +1,18 @@
-import { memo } from 'react';
-import { Skeleton } from './skeleton';
-import { Card, CardContent, CardHeader } from './card';
+import { memo } from 'react'
+import { Skeleton } from './skeleton'
+import { Card, CardContent, CardHeader } from './card'
 
 export const TableSkeleton = memo(function TableSkeleton({
   columns = 4,
   rows = 5,
   showHeader = true,
 }: {
-  columns?: number;
-  rows?: number;
-  showHeader?: boolean;
+  columns?: number
+  rows?: number
+  showHeader?: boolean
 }) {
   return (
-    <div 
-      className="space-y-3" 
-      role="status" 
-      aria-label="Loading table data" 
-      aria-live="polite"
-    >
+    <div className="space-y-3" role="status" aria-label="Loading table data" aria-live="polite">
       {showHeader && (
         <div className="flex gap-4 pb-2 border-b">
           {Array.from({ length: columns }).map((_, i) => (
@@ -37,25 +32,20 @@ export const TableSkeleton = memo(function TableSkeleton({
         </div>
       ))}
     </div>
-  );
-});
+  )
+})
 
 export const DashboardSkeleton = memo(function DashboardSkeleton({
   cards = 3,
   showTitle = true,
   showSubtitle = true,
 }: {
-  cards?: number;
-  showTitle?: boolean;
-  showSubtitle?: boolean;
+  cards?: number
+  showTitle?: boolean
+  showSubtitle?: boolean
 }) {
   return (
-    <div 
-      className="space-y-6" 
-      role="status" 
-      aria-label="Loading dashboard data" 
-      aria-live="polite"
-    >
+    <div className="space-y-6" role="status" aria-label="Loading dashboard data" aria-live="polite">
       {showTitle && (
         <div className="space-y-2">
           <Skeleton className="h-8 w-1/2" aria-hidden="true" />
@@ -76,15 +66,15 @@ export const DashboardSkeleton = memo(function DashboardSkeleton({
         ))}
       </div>
     </div>
-  );
-});
+  )
+})
 
 export const CardSkeleton = memo(function CardSkeleton({
   lines = 3,
   showHeader = true,
 }: {
-  lines?: number;
-  showHeader?: boolean;
+  lines?: number
+  showHeader?: boolean
 }) {
   return (
     <Card role="status" aria-label="Loading card content" aria-live="polite">
@@ -102,17 +92,17 @@ export const CardSkeleton = memo(function CardSkeleton({
         </div>
       </CardContent>
     </Card>
-  );
-});
+  )
+})
 
-const SCHEDULE_DAYS = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat'] as const;
+const SCHEDULE_DAYS = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat'] as const
 
 export const ScheduleSkeleton = memo(function ScheduleSkeleton({
   days = SCHEDULE_DAYS,
   itemsPerDay = 3,
 }: {
-  days?: readonly string[];
-  itemsPerDay?: number;
+  days?: readonly string[]
+  itemsPerDay?: number
 }) {
   return (
     <div
@@ -121,7 +111,7 @@ export const ScheduleSkeleton = memo(function ScheduleSkeleton({
       aria-label="Loading schedule data"
       aria-live="polite"
     >
-      {days.map((day) => (
+      {days.map(day => (
         <Card key={day} className="h-full">
           <CardHeader>
             <Skeleton className="h-6 w-1/3" aria-hidden="true" />
@@ -142,5 +132,32 @@ export const ScheduleSkeleton = memo(function ScheduleSkeleton({
         </Card>
       ))}
     </div>
-  );
-});
+  )
+})
+
+export const AnnouncementSkeleton = memo(function AnnouncementSkeleton({
+  title = 'Announcements',
+}: {
+  title?: string
+}) {
+  return (
+    <div
+      className="space-y-6"
+      role="status"
+      aria-label="Loading announcements data"
+      aria-live="polite"
+    >
+      <div className="space-y-2">
+        <Skeleton className="h-8 w-1/3" aria-hidden="true" />
+      </div>
+      <div className="grid gap-8 md:grid-cols-3">
+        <div className="md:col-span-1">
+          <CardSkeleton lines={2} />
+        </div>
+        <div className="md:col-span-2">
+          <CardSkeleton lines={5} />
+        </div>
+      </div>
+    </div>
+  )
+})

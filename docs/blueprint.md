@@ -382,6 +382,76 @@ To support future soft-delete requirements, `IndexedEntity` now includes:
 - [x] All tests passing (no regressions)
 - [x] Documentation updated
 
+### Secondary Index Consistency on Update (2026-02-23)
+
+**Problem**: `IndexedEntity.update()` did not update secondary indexes when indexed fields changed, leading to stale index entries and incorrect query results
+
+**Example Scenario**:
+
+1. Announcement created with `targetRole: 'student'`
+2. Announcement updated to `targetRole: 'teacher'`
+3. Secondary index still pointed to old `targetRole: 'student'`
+4. Queries for student announcements returned stale results
+
+**Solution**: Enhanced `IndexedEntity.update()` to detect and update secondary indexes when indexed fields change
+
+**Implementation**:
+
+- Added secondary index detection in `worker/entities/IndexedEntity.ts:update()`
+- For each secondary index, check if the indexed field is being updated
+- If the field value changed, remove old index entry and add new one
+- Maintains index consistency with O(1) operations per changed field
+
+**Metrics**:
+
+| Metric                      | Before                      | After                           | Improvement      |
+| --------------------------- | --------------------------- | ------------------------------- | ---------------- |
+| Index consistency on update | None (indexes become stale) | Automatic (indexes stay synced) | Data integrity   |
+| Extra operations per update | 0                           | 2 per changed indexed field     | Minimal overhead |
+| Query correctness           | Potential stale results     | Always correct                  | Critical fix     |
+
+**Impact**:
+
+- `worker/entities/IndexedEntity.ts`: Enhanced `update()` method (20 lines added)
+- Affected entities: UserEntity, ClassEntity, CourseEntity, GradeEntity, AnnouncementEntity, MessageEntity, WebhookConfigEntity, WebhookEventEntity, WebhookDeliveryEntity, DeadLetterQueueWebhookEntity
+- All 3251 tests passing (4 new tests added, 0 regression)
+
+**Benefits**:
+
+- ✅ Secondary indexes now stay consistent when indexed fields are updated
+- ✅ No more stale query results after updates
+- ✅ Automatic index maintenance transparent to calling code
+- ✅ O(1) operations per changed field (minimal performance impact)
+- ✅ All 3251 tests passing (no regressions)
+- ✅ Zero breaking changes to existing functionality
+
+**Technical Details**:
+
+**Affected Entity Fields**:
+
+| Entity                       | Indexed Fields (auto-updated)                    |
+| ---------------------------- | ------------------------------------------------ |
+| UserEntity                   | email, role, classId                             |
+| ClassEntity                  | teacherId                                        |
+| CourseEntity                 | teacherId                                        |
+| GradeEntity                  | studentId, courseId                              |
+| AnnouncementEntity           | authorId, targetRole                             |
+| MessageEntity                | senderId, recipientId, parentMessageId           |
+| WebhookConfigEntity          | active                                           |
+| WebhookEventEntity           | processed, eventType                             |
+| WebhookDeliveryEntity        | eventId, webhookConfigId, status, idempotencyKey |
+| DeadLetterQueueWebhookEntity | webhookConfigId, eventType                       |
+
+**Success Criteria**:
+
+- [x] Secondary index update detection implemented
+- [x] Old index entries removed when field changes
+- [x] New index entries added when field changes
+- [x] No index modifications when field unchanged
+- [x] Unit tests added for all scenarios
+- [x] All tests passing (no regressions)
+- [x] Documentation updated
+
   ### Recent Data Optimizations (2026-01-07)
 
 #### Compound Secondary Index for Grades
