@@ -19,6 +19,7 @@ import type {
   UserRole,
 } from '@shared/types'
 import { getUniqueIds, buildEntityMap, fetchAndMap } from './EntityMapUtils'
+import { UserRoleValues } from '@shared/constants'
 
 export class CommonDataService {
   static async getStudentWithClassAndSchedule(
@@ -32,7 +33,7 @@ export class CommonDataService {
     const studentEntity = new UserEntity(env, studentId)
     const student = (await studentEntity.getState()) as SchoolUser | null
 
-    if (!student || student.role !== 'student') {
+    if (!student || student.role !== UserRoleValues.STUDENT) {
       return { student: null, classData: null, schedule: null }
     }
 
@@ -55,7 +56,7 @@ export class CommonDataService {
     const studentEntity = new UserEntity(env, studentId)
     const student = (await studentEntity.getState()) as SchoolUser | null
 
-    if (!student || student.role !== 'student') {
+    if (!student || student.role !== UserRoleValues.STUDENT) {
       return { student: null, classData: null }
     }
 
@@ -132,14 +133,19 @@ export class CommonDataService {
     let users: SchoolUser[]
 
     if (role && !search) {
-      const validRoles: UserRole[] = ['student', 'teacher', 'parent', 'admin']
+      const validRoles: UserRole[] = [
+        UserRoleValues.STUDENT,
+        UserRoleValues.TEACHER,
+        UserRoleValues.PARENT,
+        UserRoleValues.ADMIN,
+      ]
       const typedRole = role as UserRole
       if (validRoles.includes(typedRole)) {
         users = await UserEntity.getByRole(env, typedRole)
       } else {
         users = await this.getAllUsers(env)
       }
-    } else if (classId && role === 'student' && !search) {
+    } else if (classId && role === UserRoleValues.STUDENT && !search) {
       users = await UserEntity.getByClassId(env, classId)
     } else {
       users = await this.getAllUsers(env)
@@ -153,7 +159,7 @@ export class CommonDataService {
 
     if (classId && !search) {
       filteredUsers = filteredUsers.filter(
-        u => u.role === 'student' && 'classId' in u && u.classId === classId
+        u => u.role === UserRoleValues.STUDENT && 'classId' in u && u.classId === classId
       )
     }
 

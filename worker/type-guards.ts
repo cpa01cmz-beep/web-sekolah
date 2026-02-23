@@ -1,41 +1,42 @@
-import type { SchoolUser, Student, Teacher, Parent, Admin } from '@shared/types';
-import type { Context } from 'hono';
-import type { AuthUser } from './types';
+import type { SchoolUser, Student, Teacher, Parent, Admin } from '@shared/types'
+import type { Context } from 'hono'
+import type { AuthUser } from './types'
+import { UserRoleValues } from '@shared/constants'
 
 type ExtendedContext = Context & {
-  set(key: string, value: unknown): void;
-};
+  set(key: string, value: unknown): void
+}
 
 export function getAuthUser(c: Context): AuthUser | undefined {
-  return c.get('user') as AuthUser | undefined;
+  return c.get('user') as AuthUser | undefined
 }
 
 export function getCurrentUserId(c: Context): string {
-  const user = getAuthUser(c);
+  const user = getAuthUser(c)
   if (!user) {
-    throw new Error('User not authenticated');
+    throw new Error('User not authenticated')
   }
-  return user.id;
+  return user.id
 }
 
 export function setAuthUser(c: Context, user: AuthUser): void {
-  (c as ExtendedContext).set('user', user);
+  ;(c as ExtendedContext).set('user', user)
 }
 
 export function isStudent(user: SchoolUser): user is Student {
-  return user.role === 'student';
+  return user.role === UserRoleValues.STUDENT
 }
 
 export function isTeacher(user: SchoolUser): user is Teacher {
-  return user.role === 'teacher';
+  return user.role === UserRoleValues.TEACHER
 }
 
 export function isParent(user: SchoolUser): user is Parent {
-  return user.role === 'parent';
+  return user.role === UserRoleValues.PARENT
 }
 
 export function isAdmin(user: SchoolUser): user is Admin {
-  return user.role === 'admin';
+  return user.role === UserRoleValues.ADMIN
 }
 
 export function getRoleSpecificFields(user: SchoolUser) {
@@ -45,7 +46,7 @@ export function getRoleSpecificFields(user: SchoolUser) {
       studentIdNumber: user.studentIdNumber,
       classIds: undefined,
       childId: undefined,
-    };
+    }
   }
   if (isTeacher(user)) {
     return {
@@ -53,7 +54,7 @@ export function getRoleSpecificFields(user: SchoolUser) {
       studentIdNumber: undefined,
       classIds: user.classIds,
       childId: undefined,
-    };
+    }
   }
   if (isParent(user)) {
     return {
@@ -61,12 +62,12 @@ export function getRoleSpecificFields(user: SchoolUser) {
       studentIdNumber: undefined,
       classIds: undefined,
       childId: user.childId,
-    };
+    }
   }
   return {
     classId: undefined,
     studentIdNumber: undefined,
     classIds: undefined,
     childId: undefined,
-  };
+  }
 }

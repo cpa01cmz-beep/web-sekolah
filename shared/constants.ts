@@ -22,6 +22,18 @@ export const ValidationLimits = {
   MESSAGE_CONTENT_MAX_LENGTH: 10000,
 } as const
 
+export const UserRoleValues = {
+  STUDENT: 'student',
+  TEACHER: 'teacher',
+  PARENT: 'parent',
+  ADMIN: 'admin',
+} as const
+
+export const AnnouncementTargetRoles = {
+  ...UserRoleValues,
+  ALL: 'all',
+} as const
+
 export const StatusCodeRanges = {
   SUCCESS_MIN: 200,
   SUCCESS_MAX: 300,
