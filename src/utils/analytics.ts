@@ -1,67 +1,68 @@
-import type { ChartDataPoint } from '@/components/charts/types';
+import type { ChartDataPoint } from '@/components/charts/types'
+import { GradeThresholds } from '@shared/constants'
 
 export function calculateAverage(values: number[]): number {
-  if (values.length === 0) return 0;
-  const sum = values.reduce((acc, val) => acc + val, 0);
-  return Math.round((sum / values.length) * 100) / 100;
+  if (values.length === 0) return 0
+  const sum = values.reduce((acc, val) => acc + val, 0)
+  return Math.round((sum / values.length) * 100) / 100
 }
 
 export function calculateSum(values: number[]): number {
-  return values.reduce((acc, val) => acc + val, 0);
+  return values.reduce((acc, val) => acc + val, 0)
 }
 
 export function calculateMin(values: number[]): number {
-  if (values.length === 0) return 0;
-  return Math.min(...values);
+  if (values.length === 0) return 0
+  return Math.min(...values)
 }
 
 export function calculateMax(values: number[]): number {
-  if (values.length === 0) return 0;
-  return Math.max(...values);
+  if (values.length === 0) return 0
+  return Math.max(...values)
 }
 
 export function calculateMedian(values: number[]): number {
-  if (values.length === 0) return 0;
-  const sorted = [...values].sort((a, b) => a - b);
-  const mid = Math.floor(sorted.length / 2);
-  return sorted.length % 2 !== 0 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
+  if (values.length === 0) return 0
+  const sorted = [...values].sort((a, b) => a - b)
+  const mid = Math.floor(sorted.length / 2)
+  return sorted.length % 2 !== 0 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2
 }
 
 export function calculateStandardDeviation(values: number[]): number {
-  if (values.length === 0) return 0;
-  const avg = calculateAverage(values);
-  const squareDiffs = values.map(value => Math.pow(value - avg, 2));
-  const avgSquareDiff = calculateAverage(squareDiffs);
-  return Math.round(Math.sqrt(avgSquareDiff) * 100) / 100;
+  if (values.length === 0) return 0
+  const avg = calculateAverage(values)
+  const squareDiffs = values.map(value => Math.pow(value - avg, 2))
+  const avgSquareDiff = calculateAverage(squareDiffs)
+  return Math.round(Math.sqrt(avgSquareDiff) * 100) / 100
 }
 
 export interface GradeDistribution {
-  A: number;
-  B: number;
-  C: number;
-  D: number;
-  E: number;
-  F: number;
+  A: number
+  B: number
+  C: number
+  D: number
+  E: number
+  F: number
 }
 
 export function getGradeLetter(score: number): string {
-  if (score >= 90) return 'A';
-  if (score >= 80) return 'B';
-  if (score >= 70) return 'C';
-  if (score >= 60) return 'D';
-  if (score >= 50) return 'E';
-  return 'F';
+  if (score >= GradeThresholds.A) return 'A'
+  if (score >= GradeThresholds.B) return 'B'
+  if (score >= GradeThresholds.C) return 'C'
+  if (score >= GradeThresholds.D) return 'D'
+  if (score >= GradeThresholds.E) return 'E'
+  return 'F'
 }
 
 export function calculateGradeDistribution(scores: number[]): GradeDistribution {
-  const distribution: GradeDistribution = { A: 0, B: 0, C: 0, D: 0, E: 0, F: 0 };
-  
+  const distribution: GradeDistribution = { A: 0, B: 0, C: 0, D: 0, E: 0, F: 0 }
+
   scores.forEach(score => {
-    const grade = getGradeLetter(score);
-    distribution[grade]++;
-  });
-  
-  return distribution;
+    const grade = getGradeLetter(score)
+    distribution[grade]++
+  })
+
+  return distribution
 }
 
 export function gradeDistributionToChartData(distribution: GradeDistribution): ChartDataPoint[] {
@@ -72,47 +73,50 @@ export function gradeDistributionToChartData(distribution: GradeDistribution): C
     { name: 'D (60-69)', value: distribution.D },
     { name: 'E (50-59)', value: distribution.E },
     { name: 'F (0-49)', value: distribution.F },
-  ].filter(item => item.value > 0);
+  ].filter(item => item.value > 0)
 }
 
 export interface TrendData {
-  date: string;
-  value: number;
+  date: string
+  value: number
 }
 
 export function calculateTrendDirection(values: number[]): 'up' | 'down' | 'stable' {
-  if (values.length < 2) return 'stable';
-  
-  const firstHalf = values.slice(0, Math.floor(values.length / 2));
-  const secondHalf = values.slice(Math.floor(values.length / 2));
-  
-  const firstAvg = calculateAverage(firstHalf);
-  const secondAvg = calculateAverage(secondHalf);
-  
-  const threshold = 2;
-  
-  if (secondAvg > firstAvg + threshold) return 'up';
-  if (secondAvg < firstAvg - threshold) return 'down';
-  return 'stable';
+  if (values.length < 2) return 'stable'
+
+  const firstHalf = values.slice(0, Math.floor(values.length / 2))
+  const secondHalf = values.slice(Math.floor(values.length / 2))
+
+  const firstAvg = calculateAverage(firstHalf)
+  const secondAvg = calculateAverage(secondHalf)
+
+  const threshold = 2
+
+  if (secondAvg > firstAvg + threshold) return 'up'
+  if (secondAvg < firstAvg - threshold) return 'down'
+  return 'stable'
 }
 
 export function calculatePercentageChange(oldValue: number, newValue: number): number {
-  if (oldValue === 0) return newValue === 0 ? 0 : 100;
-  return Math.round(((newValue - oldValue) / oldValue) * 100);
+  if (oldValue === 0) return newValue === 0 ? 0 : 100
+  return Math.round(((newValue - oldValue) / oldValue) * 100)
 }
 
 export function groupByField<T extends Record<string, unknown>>(
   data: T[],
   field: keyof T
 ): Record<string, T[]> {
-  return data.reduce((acc, item) => {
-    const key = String(item[field]);
-    if (!acc[key]) {
-      acc[key] = [];
-    }
-    acc[key].push(item);
-    return acc;
-  }, {} as Record<string, T[]>);
+  return data.reduce(
+    (acc, item) => {
+      const key = String(item[field])
+      if (!acc[key]) {
+        acc[key] = []
+      }
+      acc[key].push(item)
+      return acc
+    },
+    {} as Record<string, T[]>
+  )
 }
 
 export function aggregateByField<T extends Record<string, unknown>>(
@@ -121,101 +125,94 @@ export function aggregateByField<T extends Record<string, unknown>>(
   valueField: keyof T,
   operation: 'sum' | 'avg' | 'count' = 'sum'
 ): ChartDataPoint[] {
-  const grouped = groupByField(data, groupBy);
-  
+  const grouped = groupByField(data, groupBy)
+
   return Object.entries(grouped).map(([key, items]) => {
-    const values = items
-      .map(item => Number(item[valueField]))
-      .filter(val => !isNaN(val));
-    
-    let value: number;
+    const values = items.map(item => Number(item[valueField])).filter(val => !isNaN(val))
+
+    let value: number
     switch (operation) {
       case 'avg':
-        value = calculateAverage(values);
-        break;
+        value = calculateAverage(values)
+        break
       case 'count':
-        value = items.length;
-        break;
+        value = items.length
+        break
       case 'sum':
       default:
-        value = calculateSum(values);
-        break;
+        value = calculateSum(values)
+        break
     }
-    
-    return { name: key, value };
-  });
+
+    return { name: key, value }
+  })
 }
 
-export function normalizeData(
-  data: ChartDataPoint[],
-  maxValue: number = 100
-): ChartDataPoint[] {
-  const maxDataValue = Math.max(...data.map(d => d.value));
-  if (maxDataValue === 0) return data;
-  
+export function normalizeData(data: ChartDataPoint[], maxValue: number = 100): ChartDataPoint[] {
+  const maxDataValue = Math.max(...data.map(d => d.value))
+  if (maxDataValue === 0) return data
+
   return data.map(item => ({
     ...item,
     value: Math.round((item.value / maxDataValue) * maxValue),
-  }));
+  }))
 }
 
 export function sortByValue(
   data: ChartDataPoint[],
   order: 'asc' | 'desc' = 'desc'
 ): ChartDataPoint[] {
-  return [...data].sort((a, b) => 
-    order === 'desc' ? b.value - a.value : a.value - b.value
-  );
+  return [...data].sort((a, b) => (order === 'desc' ? b.value - a.value : a.value - b.value))
 }
 
 export function topN(data: ChartDataPoint[], n: number): ChartDataPoint[] {
-  return sortByValue(data, 'desc').slice(0, n);
+  return sortByValue(data, 'desc').slice(0, n)
 }
 
 export function calculatePercentile(values: number[], percentile: number): number {
-  if (values.length === 0) return 0;
-  if (percentile < 0 || percentile > 100) return 0;
-  
-  const sorted = [...values].sort((a, b) => a - b);
-  
-  if (percentile === 0) return sorted[0];
-  if (percentile === 100) return sorted[sorted.length - 1];
-  
-  const index = (percentile / 100) * (sorted.length - 1);
-  const lower = Math.floor(index);
-  const upper = Math.ceil(index);
-  
-  if (lower === upper) return sorted[lower];
-  
-  const weight = index - lower;
-  return Math.round((sorted[lower] * (1 - weight) + sorted[upper] * weight) * 100) / 100;
+  if (values.length === 0) return 0
+  if (percentile < 0 || percentile > 100) return 0
+
+  const sorted = [...values].sort((a, b) => a - b)
+
+  if (percentile === 0) return sorted[0]
+  if (percentile === 100) return sorted[sorted.length - 1]
+
+  const index = (percentile / 100) * (sorted.length - 1)
+  const lower = Math.floor(index)
+  const upper = Math.ceil(index)
+
+  if (lower === upper) return sorted[lower]
+
+  const weight = index - lower
+  return Math.round((sorted[lower] * (1 - weight) + sorted[upper] * weight) * 100) / 100
 }
 
 export function calculateMode(values: number[]): number | null {
-  if (values.length === 0) return null;
-  
-  const frequency: Map<number, number> = new Map();
-  let maxFreq = 0;
-  let mode: number | null = null;
-  
+  if (values.length === 0) return null
+
+  const frequency: Map<number, number> = new Map()
+  let maxFreq = 0
+  let mode: number | null = null
+
   for (const value of values) {
-    const freq = (frequency.get(value) || 0) + 1;
-    frequency.set(value, freq);
-    
+    const freq = (frequency.get(value) || 0) + 1
+    frequency.set(value, freq)
+
     if (freq > maxFreq) {
-      maxFreq = freq;
-      mode = value;
+      maxFreq = freq
+      mode = value
     }
   }
-  
-  if (maxFreq === 1) return null;
-  
-  return mode;
+
+  if (maxFreq === 1) return null
+
+  return mode
 }
 
 export function calculateRange(values: number[]): number {
-  if (values.length === 0) return 0;
-  return calculateMax(values) - calculateMin(values);
+  if (values.length === 0) return 0
+  return calculateMax(values) - calculateMin(values)
 }
 
 const GRADE_POINTS: Record<string, number> = {
@@ -225,53 +222,50 @@ const GRADE_POINTS: Record<string, number> = {
   D: 1.0,
   E: 0.5,
   F: 0.0,
-};
+}
 
 export function calculateGPA(scores: number[]): number {
-  if (scores.length === 0) return 0;
-  
+  if (scores.length === 0) return 0
+
   const totalPoints = scores.reduce((sum, score) => {
-    const grade = getGradeLetter(score);
-    return sum + GRADE_POINTS[grade];
-  }, 0);
-  
-  return Math.round((totalPoints / scores.length) * 100) / 100;
+    const grade = getGradeLetter(score)
+    return sum + GRADE_POINTS[grade]
+  }, 0)
+
+  return Math.round((totalPoints / scores.length) * 100) / 100
 }
 
 export interface ClassRankResult {
-  rank: number;
-  totalStudents: number;
-  percentile: number;
+  rank: number
+  totalStudents: number
+  percentile: number
 }
 
-export function calculateClassRank(
-  studentScore: number,
-  allScores: number[]
-): ClassRankResult {
+export function calculateClassRank(studentScore: number, allScores: number[]): ClassRankResult {
   if (allScores.length === 0) {
-    return { rank: 0, totalStudents: 0, percentile: 0 };
+    return { rank: 0, totalStudents: 0, percentile: 0 }
   }
 
-  const sortedScores = [...allScores].sort((a, b) => b - a);
-  const rank = sortedScores.findIndex(score => score === studentScore) + 1;
-  const actualRank = rank > 0 ? rank : allScores.length;
-  const percentile = Math.round(((allScores.length - actualRank) / allScores.length) * 100);
+  const sortedScores = [...allScores].sort((a, b) => b - a)
+  const rank = sortedScores.findIndex(score => score === studentScore) + 1
+  const actualRank = rank > 0 ? rank : allScores.length
+  const percentile = Math.round(((allScores.length - actualRank) / allScores.length) * 100)
 
   return {
     rank: actualRank,
     totalStudents: allScores.length,
     percentile,
-  };
+  }
 }
 
 export interface PerformanceSummary {
-  average: number;
-  median: number;
-  min: number;
-  max: number;
-  standardDeviation: number;
-  gpa: number;
-  gradeDistribution: GradeDistribution;
+  average: number
+  median: number
+  min: number
+  max: number
+  standardDeviation: number
+  gpa: number
+  gradeDistribution: GradeDistribution
 }
 
 export function calculatePerformanceSummary(scores: number[]): PerformanceSummary {
@@ -284,27 +278,27 @@ export function calculatePerformanceSummary(scores: number[]): PerformanceSummar
       standardDeviation: 0,
       gpa: 0,
       gradeDistribution: { A: 0, B: 0, C: 0, D: 0, E: 0, F: 0 },
-    };
+    }
   }
 
-  const sorted = [...scores].sort((a, b) => a - b);
-  const n = scores.length;
-  const min = sorted[0];
-  const max = sorted[n - 1];
-  const sum = scores.reduce((acc, val) => acc + val, 0);
-  const average = sum / n;
-  
-  const distribution: GradeDistribution = { A: 0, B: 0, C: 0, D: 0, E: 0, F: 0 };
-  let totalPoints = 0;
-  
+  const sorted = [...scores].sort((a, b) => a - b)
+  const n = scores.length
+  const min = sorted[0]
+  const max = sorted[n - 1]
+  const sum = scores.reduce((acc, val) => acc + val, 0)
+  const average = sum / n
+
+  const distribution: GradeDistribution = { A: 0, B: 0, C: 0, D: 0, E: 0, F: 0 }
+  let totalPoints = 0
+
   for (const score of scores) {
-    const grade = getGradeLetter(score);
-    distribution[grade]++;
-    totalPoints += GRADE_POINTS[grade];
+    const grade = getGradeLetter(score)
+    distribution[grade]++
+    totalPoints += GRADE_POINTS[grade]
   }
-  
-  const median = n % 2 !== 0 ? sorted[Math.floor(n / 2)] : (sorted[n / 2 - 1] + sorted[n / 2]) / 2;
-  const variance = scores.reduce((acc, val) => acc + Math.pow(val - average, 2), 0) / n;
+
+  const median = n % 2 !== 0 ? sorted[Math.floor(n / 2)] : (sorted[n / 2 - 1] + sorted[n / 2]) / 2
+  const variance = scores.reduce((acc, val) => acc + Math.pow(val - average, 2), 0) / n
 
   return {
     average: Math.round(average * 100) / 100,
@@ -314,212 +308,208 @@ export function calculatePerformanceSummary(scores: number[]): PerformanceSummar
     standardDeviation: Math.round(Math.sqrt(variance) * 100) / 100,
     gpa: Math.round((totalPoints / n) * 100) / 100,
     gradeDistribution: distribution,
-  };
+  }
 }
 
 export interface AnomalyDetectionResult {
-  outliers: number[];
-  lowerBound: number;
-  upperBound: number;
-  iqr: number;
+  outliers: number[]
+  lowerBound: number
+  upperBound: number
+  iqr: number
 }
 
 export function detectAnomalies(values: number[]): AnomalyDetectionResult {
   if (values.length < 4) {
-    return { outliers: [], lowerBound: 0, upperBound: 0, iqr: 0 };
+    return { outliers: [], lowerBound: 0, upperBound: 0, iqr: 0 }
   }
 
-  const sorted = [...values].sort((a, b) => a - b);
-  const q1 = calculatePercentile(sorted, 25);
-  const q3 = calculatePercentile(sorted, 75);
-  const iqr = q3 - q1;
-  const lowerBound = q1 - 1.5 * iqr;
-  const upperBound = q3 + 1.5 * iqr;
-  const outliers = values.filter(v => v < lowerBound || v > upperBound);
+  const sorted = [...values].sort((a, b) => a - b)
+  const q1 = calculatePercentile(sorted, 25)
+  const q3 = calculatePercentile(sorted, 75)
+  const iqr = q3 - q1
+  const lowerBound = q1 - 1.5 * iqr
+  const upperBound = q3 + 1.5 * iqr
+  const outliers = values.filter(v => v < lowerBound || v > upperBound)
 
   return {
     outliers,
     lowerBound: Math.round(lowerBound * 100) / 100,
     upperBound: Math.round(upperBound * 100) / 100,
     iqr: Math.round(iqr * 100) / 100,
-  };
+  }
 }
 
 export interface TrendAnalysis {
-  direction: 'up' | 'down' | 'stable';
-  slope: number;
-  confidence: number;
-  prediction?: number;
+  direction: 'up' | 'down' | 'stable'
+  slope: number
+  confidence: number
+  prediction?: number
 }
 
 export function analyzeTrend(values: number[]): TrendAnalysis {
   if (values.length < 2) {
-    return { direction: 'stable', slope: 0, confidence: 0 };
+    return { direction: 'stable', slope: 0, confidence: 0 }
   }
 
-  const n = values.length;
-  const xMean = (n - 1) / 2;
-  const yMean = calculateAverage(values);
+  const n = values.length
+  const xMean = (n - 1) / 2
+  const yMean = calculateAverage(values)
 
-  let numerator = 0;
-  let denominator = 0;
+  let numerator = 0
+  let denominator = 0
 
   for (let i = 0; i < n; i++) {
-    numerator += (i - xMean) * (values[i] - yMean);
-    denominator += Math.pow(i - xMean, 2);
+    numerator += (i - xMean) * (values[i] - yMean)
+    denominator += Math.pow(i - xMean, 2)
   }
 
-  const slope = denominator === 0 ? 0 : numerator / denominator;
-  const slopeAbs = Math.abs(slope);
-  const stdDev = calculateStandardDeviation(values);
-  const confidence = stdDev > 0 ? Math.min(slopeAbs / stdDev * 10, 100) : 0;
+  const slope = denominator === 0 ? 0 : numerator / denominator
+  const slopeAbs = Math.abs(slope)
+  const stdDev = calculateStandardDeviation(values)
+  const confidence = stdDev > 0 ? Math.min((slopeAbs / stdDev) * 10, 100) : 0
 
-  const direction: 'up' | 'down' | 'stable' =
-    slopeAbs < 0.1 ? 'stable' : slope > 0 ? 'up' : 'down';
+  const direction: 'up' | 'down' | 'stable' = slopeAbs < 0.1 ? 'stable' : slope > 0 ? 'up' : 'down'
 
-  const prediction = values.length >= 3 ? Math.round((yMean + slope * n) * 100) / 100 : undefined;
+  const prediction = values.length >= 3 ? Math.round((yMean + slope * n) * 100) / 100 : undefined
 
   return {
     direction,
     slope: Math.round(slope * 100) / 100,
     confidence: Math.round(confidence),
     prediction,
-  };
+  }
 }
 
 export interface SubjectPerformance {
-  subject: string;
-  score: number;
-  grade: string;
+  subject: string
+  score: number
+  grade: string
 }
 
 export interface PerformanceInsight {
-  type: 'strength' | 'improvement' | 'warning' | 'encouragement';
-  subject: string;
-  message: string;
-  score?: number;
+  type: 'strength' | 'improvement' | 'warning' | 'encouragement'
+  subject: string
+  message: string
+  score?: number
 }
 
 export function generatePerformanceInsights(
   performances: SubjectPerformance[]
 ): PerformanceInsight[] {
-  if (performances.length === 0) return [];
+  if (performances.length === 0) return []
 
-  const insights: PerformanceInsight[] = [];
-  const sortedByScore = [...performances].sort((a, b) => b.score - a.score);
+  const insights: PerformanceInsight[] = []
+  const sortedByScore = [...performances].sort((a, b) => b.score - a.score)
 
-  const topPerformances = sortedByScore.slice(0, 3);
-  topPerformances.forEach((perf) => {
+  const topPerformances = sortedByScore.slice(0, 3)
+  topPerformances.forEach(perf => {
     if (perf.score >= 85) {
       insights.push({
         type: 'strength',
         subject: perf.subject,
         message: `Excellent work in ${perf.subject}! Keep up the outstanding performance.`,
         score: perf.score,
-      });
+      })
     }
-  });
+  })
 
-  const lowPerformances = sortedByScore.filter((p) => p.score < 70);
-  lowPerformances.slice(0, 3).forEach((perf) => {
+  const lowPerformances = sortedByScore.filter(p => p.score < 70)
+  lowPerformances.slice(0, 3).forEach(perf => {
     if (perf.score < 60) {
       insights.push({
         type: 'warning',
         subject: perf.subject,
         message: `${perf.subject} needs immediate attention. Consider seeking help from your teacher.`,
         score: perf.score,
-      });
+      })
     } else {
       insights.push({
         type: 'improvement',
         subject: perf.subject,
         message: `Focus more on ${perf.subject} to improve your understanding.`,
         score: perf.score,
-      });
+      })
     }
-  });
+  })
 
-  const goodPerformances = sortedByScore.filter((p) => p.score >= 70 && p.score < 85);
-  goodPerformances.slice(0, 2).forEach((perf) => {
+  const goodPerformances = sortedByScore.filter(p => p.score >= 70 && p.score < 85)
+  goodPerformances.slice(0, 2).forEach(perf => {
     insights.push({
       type: 'encouragement',
       subject: perf.subject,
       message: `Good progress in ${perf.subject}! A little more effort can push you to the next level.`,
       score: perf.score,
-    });
-  });
+    })
+  })
 
-  return insights;
+  return insights
 }
 
 export interface TrendDataPoint {
-  date: string;
-  value: number;
-  label?: string;
+  date: string
+  value: number
+  label?: string
 }
 
-export function generateTrendDataPoints(
-  values: number[],
-  labels?: string[]
-): TrendDataPoint[] {
-  if (values.length === 0) return [];
+export function generateTrendDataPoints(values: number[], labels?: string[]): TrendDataPoint[] {
+  if (values.length === 0) return []
 
   return values.map((value, index) => ({
     date: labels?.[index] ?? `Period ${index + 1}`,
     value,
     label: labels?.[index],
-  }));
+  }))
 }
 
 export interface SubjectComparison {
-  subject: string;
-  score: number;
-  maxScore: number;
-  percentage: number;
+  subject: string
+  score: number
+  maxScore: number
+  percentage: number
 }
 
 export function calculateSubjectComparison(
   performances: SubjectPerformance[],
   maxScore: number = 100
 ): SubjectComparison[] {
-  if (performances.length === 0) return [];
+  if (performances.length === 0) return []
 
-  return performances.map((perf) => ({
+  return performances.map(perf => ({
     subject: perf.subject,
     score: perf.score,
     maxScore,
     percentage: Math.round((perf.score / maxScore) * 100),
-  }));
+  }))
 }
 
 export interface AtRiskStudent {
-  identifier: string;
-  averageScore: number;
-  failingSubjects: number;
-  trend: 'declining' | 'stable' | 'improving';
-  riskLevel: 'high' | 'medium' | 'low';
+  identifier: string
+  averageScore: number
+  failingSubjects: number
+  trend: 'declining' | 'stable' | 'improving'
+  riskLevel: 'high' | 'medium' | 'low'
 }
 
 export function identifyAtRiskStudents(
   studentData: Array<{
-    identifier: string;
-    scores: number[];
-    failingCount: number;
+    identifier: string
+    scores: number[]
+    failingCount: number
   }>,
-  failingThreshold: number = 60
+  failingThreshold: number = GradeThresholds.PASSING_SCORE
 ): AtRiskStudent[] {
-  if (studentData.length === 0) return [];
+  if (studentData.length === 0) return []
 
   return studentData
-    .map((student) => {
-      const avgScore = calculateAverage(student.scores);
-      const trend = calculateTrendDirection(student.scores);
-      const riskLevel: 'high' | 'medium' | 'low' = 
+    .map(student => {
+      const avgScore = calculateAverage(student.scores)
+      const trend = calculateTrendDirection(student.scores)
+      const riskLevel: 'high' | 'medium' | 'low' =
         avgScore < failingThreshold || student.failingCount >= 3
           ? 'high'
           : avgScore < failingThreshold + 10 || student.failingCount >= 2
             ? 'medium'
-            : 'low';
+            : 'low'
 
       return {
         identifier: student.identifier,
@@ -527,49 +517,49 @@ export function identifyAtRiskStudents(
         failingSubjects: student.failingCount,
         trend: trend === 'down' ? 'declining' : trend === 'up' ? 'improving' : 'stable',
         riskLevel,
-      };
+      }
     })
-    .filter((student) => student.riskLevel !== 'low')
+    .filter(student => student.riskLevel !== 'low')
     .sort((a, b) => {
-      const riskOrder = { high: 0, medium: 1, low: 2 };
-      return riskOrder[a.riskLevel] - riskOrder[b.riskLevel];
-    });
+      const riskOrder = { high: 0, medium: 1, low: 2 }
+      return riskOrder[a.riskLevel] - riskOrder[b.riskLevel]
+    })
 }
 
 export interface PassingRateResult {
-  passing: number;
-  failing: number;
-  total: number;
-  rate: number;
+  passing: number
+  failing: number
+  total: number
+  rate: number
 }
 
 export function calculatePassingRate(
   scores: number[],
-  passingThreshold: number = 60
+  passingThreshold: number = GradeThresholds.PASSING_SCORE
 ): PassingRateResult {
   if (scores.length === 0) {
-    return { passing: 0, failing: 0, total: 0, rate: 0 };
+    return { passing: 0, failing: 0, total: 0, rate: 0 }
   }
 
-  const passing = scores.filter((score) => score >= passingThreshold).length;
-  const failing = scores.length - passing;
-  const rate = Math.round((passing / scores.length) * 100);
+  const passing = scores.filter(score => score >= passingThreshold).length
+  const failing = scores.length - passing
+  const rate = Math.round((passing / scores.length) * 100)
 
-  return { passing, failing, total: scores.length, rate };
+  return { passing, failing, total: scores.length, rate }
 }
 
 export interface ClassPerformanceMetrics {
-  average: number;
-  median: number;
-  passingRate: number;
-  gradeDistribution: GradeDistribution;
-  topPerformers: number[];
-  needsImprovement: number[];
+  average: number
+  median: number
+  passingRate: number
+  gradeDistribution: GradeDistribution
+  topPerformers: number[]
+  needsImprovement: number[]
 }
 
 export function calculateClassPerformanceMetrics(
   scores: number[],
-  passingThreshold: number = 60,
+  passingThreshold: number = GradeThresholds.PASSING_SCORE,
   topCount: number = 5
 ): ClassPerformanceMetrics {
   if (scores.length === 0) {
@@ -580,11 +570,11 @@ export function calculateClassPerformanceMetrics(
       gradeDistribution: { A: 0, B: 0, C: 0, D: 0, E: 0, F: 0 },
       topPerformers: [],
       needsImprovement: [],
-    };
+    }
   }
 
-  const sortedScores = [...scores].sort((a, b) => b - a);
-  const passingRateResult = calculatePassingRate(scores, passingThreshold);
+  const sortedScores = [...scores].sort((a, b) => b - a)
+  const passingRateResult = calculatePassingRate(scores, passingThreshold)
 
   return {
     average: calculateAverage(scores),
@@ -592,6 +582,6 @@ export function calculateClassPerformanceMetrics(
     passingRate: passingRateResult.rate,
     gradeDistribution: calculateGradeDistribution(scores),
     topPerformers: sortedScores.slice(0, topCount),
-    needsImprovement: sortedScores.filter((s) => s < passingThreshold).reverse(),
-  };
+    needsImprovement: sortedScores.filter(s => s < passingThreshold).reverse(),
+  }
 }
