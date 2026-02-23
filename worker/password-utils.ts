@@ -122,3 +122,17 @@ export function isValidPasswordHashFormat(hash: string): boolean {
     parts.length === 2 && parts[0].length === SALT_LENGTH * 2 && parts[1].length === HASH_LENGTH * 2
   )
 }
+
+export function getDummyPasswordHash(): string {
+  const dummySalt = 'a'.repeat(SALT_LENGTH * 2)
+  const dummyHash = 'b'.repeat(HASH_LENGTH * 2)
+  return `${dummySalt}:${dummyHash}`
+}
+
+export async function verifyPasswordTimingSafe(
+  password: string,
+  storedHash: string | null | undefined
+): Promise<boolean> {
+  const hashToUse = storedHash || getDummyPasswordHash()
+  return verifyPassword(password, hashToUse)
+}
