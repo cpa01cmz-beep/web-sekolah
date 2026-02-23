@@ -1,20 +1,21 @@
 # Akademia Pro - Complete Documentation
 
 ## Table of Contents
+
 1. [Introduction](#introduction)
 2. [Getting Started](#getting-started)
-    - [Prerequisites](#prerequisites)
-    - [Installation](#installation)
-    - [Development Setup](#development-setup)
+   - [Prerequisites](#prerequisites)
+   - [Installation](#installation)
+   - [Development Setup](#development-setup)
 3. [Project Structure](#project-structure)
 4. [Frontend Architecture](#frontend-architecture)
-    - [Components](#components)
-    - [State Management](#state-management)
-    - [Routing](#routing)
+   - [Components](#components)
+   - [State Management](#state-management)
+   - [Routing](#routing)
 5. [Backend Architecture](#backend-architecture)
-    - [API Endpoints](#api-endpoints)
-    - [Authentication](#authentication)
-    - [Webhook System](#webhook-system)
+   - [API Endpoints](#api-endpoints)
+   - [Authentication](#authentication)
+   - [Webhook System](#webhook-system)
 6. [Data Layer](#data-layer)
 7. [Resilience & Performance](#resilience--performance)
 8. [Deployment](#deployment)
@@ -31,6 +32,7 @@ Akademia Pro is a modern, all-in-one school management portal designed to stream
 ### Prerequisites
 
 Before you begin, ensure you have following installed:
+
 - [Node.js](https://nodejs.org/) (recommended: v18 or later)
 - [npm](https://www.npmjs.com/) (comes with Node.js)
 - [Wrangler CLI](https://developers.cloudflare.com/workers/wrangler/install-and-update/) (Cloudflare Workers CLI)
@@ -39,40 +41,45 @@ Before you begin, ensure you have following installed:
 ### Installation
 
 1. Clone repository:
-    ```bash
-    git clone https://github.com/cpa01cmz-beep/web-sekolah.git
-    ```
+
+   ```bash
+   git clone https://github.com/cpa01cmz-beep/web-sekolah.git
+   ```
 
 2. Navigate to project directory:
-    ```bash
-    cd web-sekolah
-    ```
+
+   ```bash
+   cd web-sekolah
+   ```
 
 3. Install dependencies:
-    ```bash
-    npm install
-    ```
+
+   ```bash
+   npm install
+   ```
 
 4. Configure environment variables:
-    ```bash
-    cp .env.example .env
-    ```
 
-    Update `.env` file with your configuration. For local development, defaults in `.env.example` should work. For production deployment, ensure you update `ALLOWED_ORIGINS` and `JWT_SECRET` values.
+   ```bash
+   cp .env.example .env
+   ```
+
+   Update `.env` file with your configuration. For local development, defaults in `.env.example` should work. For production deployment, ensure you update `ALLOWED_ORIGINS` and `JWT_SECRET` values.
 
 ### Development Setup
 
 1. Start development server:
-    ```bash
-    npm run dev
-    ```
+
+   ```bash
+   npm run dev
+   ```
 
 2. The application will be available at `http://localhost:3000` (or port specified in your environment).
 
 3. For backend-only development, you can also run worker separately:
-    ```bash
-    wrangler dev worker/index.ts
-    ```
+   ```bash
+   wrangler dev worker/index.ts
+   ```
 
 ## Project Structure
 
@@ -116,6 +123,7 @@ web-sekolah/
 The frontend uses a component-based architecture with shadcn/ui components as foundation. All components are built with React and TypeScript, following modern best practices.
 
 Key component categories:
+
 - Layout components (PortalLayout, PortalSidebar, SiteHeader)
 - Form components (Input, Select, Button, Dialog)
 - Data display components (Table, Card, Badge, EmptyState)
@@ -157,6 +165,7 @@ The service layer provides a clean abstraction between UI and backend APIs:
 - **Repository Pattern**: `IRepository` interface with `ApiRepository` implementation for testability
 
 **Benefits**:
+
 - Separates business logic from UI components
 - Makes components easier to test by mocking repositories
 - Provides a single point of maintenance for API endpoints
@@ -164,21 +173,22 @@ The service layer provides a clean abstraction between UI and backend APIs:
 - Facilitates code reusability across components
 
 **Example Usage**:
+
 ```typescript
 // Custom hook wrapping service call
-const { data, isLoading, error } = useStudentDashboard(studentId);
+const { data, isLoading, error } = useStudentDashboard(studentId)
 
 // Service implementation
 export const studentService: StudentService = {
   async getDashboard(studentId: string): Promise<StudentDashboardData> {
-    return repository.get<StudentDashboardData>(`/api/students/${studentId}/dashboard`);
-  }
+    return repository.get<StudentDashboardData>(`/api/students/${studentId}/dashboard`)
+  },
   // ... other methods
-};
+}
 
 // With custom repository for testing
-const mockRepo = new MockRepository();
-const testStudentService = createStudentService(mockRepo);
+const mockRepo = new MockRepository()
+const testStudentService = createStudentService(mockRepo)
 ```
 
 ### State Management
@@ -205,26 +215,31 @@ React Router v6 is used for client-side routing. Routes are organized by user ro
 The backend is built with Hono.js and runs on Cloudflare Workers. API endpoints follow RESTful conventions with comprehensive documentation available in `docs/blueprint.md`.
 
 **Authentication**:
+
 - `POST /api/auth/login` - User login with JWT token generation
 - `POST /api/auth/logout` - User logout
 - `GET /api/auth/verify` - Verify JWT token
 
 **Student Portal**:
+
 - `GET /api/students/:id/dashboard` - Get student dashboard (schedule, grades, announcements)
 
 **Teacher Portal**:
+
 - `GET /api/teachers/:id/classes` - Get teacher's classes
 - `GET /api/classes/:id/students` - Get students in a class with grades
 - `POST /api/grades` - Create a new grade
 - `PUT /api/grades/:id` - Update an existing grade
 
 **Admin Portal**:
+
 - `GET /api/users` - Get all users (with filtering)
 - `POST /api/users` - Create a new user
 - `PUT /api/users/:id` - Update a user
 - `DELETE /api/users/:id` - Delete a user (with referential integrity)
 
 **Webhooks**:
+
 - `GET /api/webhooks` - List webhook configurations
 - `POST /api/webhooks` - Create webhook configuration
 - `PUT /api/webhooks/:id` - Update webhook configuration
@@ -246,6 +261,7 @@ Authentication is fully implemented using JWT (JSON Web Tokens) with role-based 
 6. Role-based authorization is enforced using `authorize()` middleware
 
 **Protected Routes**:
+
 - Student portal: `/api/students/*` (requires `student` role)
 - Teacher portal: `/api/teachers/*` and `/api/grades/*` (requires `teacher` role)
 - Admin portal: `/api/users/*` and `/api/admin/*` (requires `admin` role)
@@ -257,6 +273,7 @@ For detailed authentication implementation, see [docs/blueprint.md](./docs/bluep
 The application includes a comprehensive webhook system for real-time notifications:
 
 **Features**:
+
 - Event-based triggers (grade created/updated, user created/updated/deleted, announcements)
 - Queue system for reliable delivery
 - Exponential backoff retry logic (1m, 5m, 15m, 30m, 1h, 2h)
@@ -266,6 +283,7 @@ The application includes a comprehensive webhook system for real-time notificati
 - Test endpoint for debugging
 
 **Supported Events**:
+
 - `grade.created` - New grade submitted
 - `grade.updated` - Grade modified
 - `user.created` - New user account created
@@ -279,12 +297,14 @@ For complete webhook documentation, see [docs/blueprint.md](./docs/blueprint.md#
 ## Data Layer
 
 Data is stored using Cloudflare Durable Objects, which provide:
+
 - Strong consistency
 - Low latency
 - Global distribution
 - Automatic scaling
 
 Each entity type has its own Durable Object class with secondary indexes for efficient queries:
+
 - `UserEntity` - User accounts and profiles (indexes: role, classId)
 - `ClassEntity` - Class information (index: teacherId)
 - `CourseEntity` - Course information (index: teacherId)
@@ -304,22 +324,26 @@ The application implements multiple resilience patterns for reliability and perf
 ### Resilience Patterns
 
 **Circuit Breaker**:
+
 - Threshold: 5 consecutive failures
 - Timeout: 60 seconds
 - Reset timeout: 30 seconds
 - Prevents cascading failures and enables fast recovery
 
 **Retry Logic**:
+
 - Max retries: 3 (queries), 2 (mutations)
 - Exponential backoff with jitter
 - Non-retryable errors: 404, validation, auth errors
 
 **Timeout Protection**:
+
 - Default: 30 seconds (configurable)
 - Applied on both client and server
 - Prevents hanging requests
 
 **Rate Limiting**:
+
 - Standard: 100 requests / 15 minutes
 - Strict: 50 requests / 5 minutes (seed, errors)
 - Loose: 1000 requests / 1 hour
@@ -328,17 +352,20 @@ The application implements multiple resilience patterns for reliability and perf
 ### Performance Optimizations
 
 **Caching Strategy**:
+
 - Intelligent caching with React Query
 - Cache duration by data type (dynamic: 5min, semi-static: 30min-1h, static: 24h)
 - 82% reduction in API calls per session
 - Automatic cache invalidation on mutations
 
 **Asset Optimization**:
+
 - CSS animations instead of Framer Motion for simple transitions
 - 4-5x faster page load performance
 - Reduced JavaScript execution overhead
 
 **Bundle Optimization**:
+
 - Lazy loading of heavy libraries (PDF, charts)
 - Code splitting with manual chunks
 - 99%+ reduction in initial page load for affected pages
@@ -350,14 +377,15 @@ For detailed resilience patterns and monitoring, see [docs/blueprint.md](./docs/
 ### Production Deployment
 
 1. Build application:
-    ```bash
-    npm run build
-    ```
+
+   ```bash
+   npm run build
+   ```
 
 2. Deploy to Cloudflare:
-    ```bash
-    npm run deploy
-    ```
+   ```bash
+   npm run deploy
+   ```
 
 Alternatively, use the one-click deployment button in the README.
 
@@ -366,14 +394,17 @@ Alternatively, use the one-click deployment button in the README.
 The following environment variables are available:
 
 **Required for Production**:
+
 - `JWT_SECRET`: Secret key for JWT signing (generate strong random string for production)
 - `ALLOWED_ORIGINS`: Comma-separated list of allowed origins (e.g., `https://yourdomain.com`)
 
 **Optional**:
+
 - `VITE_LOG_LEVEL` / `LOG_LEVEL`: Logging level (debug, info, warn, error) - default: debug (dev), info (prod)
 - `PORT`: Development server port (default: 3000)
 
 **For Local Development**:
+
 - Use defaults from `.env.example` - no changes required
 
 ### Health Monitoring
@@ -401,9 +432,10 @@ npm run test:ui
 npm run lint
 ```
 
-**Test Statistics** (as of 2026-02-21):
-- Total tests: 3292 (3132 passing, 5 skipped, 155 todo)
-- Test files: 98
+**Test Statistics** (as of 2026-02-23):
+
+- Total tests: 3397 (3237 passing, 5 skipped, 155 todo)
+- Test files: 104
 - Coverage: Critical infrastructure, services, hooks, utilities, validation, domain services, rate limiting, query optimization
 
 For detailed testing strategy, see [docs/task.md](./docs/task.md).
@@ -423,6 +455,7 @@ We welcome contributions to Akademia Pro! Please follow these steps:
 Please ensure your code follows the project's coding standards and includes appropriate tests.
 
 **Code Style Guidelines**:
+
 - Use TypeScript for all new code
 - Follow existing naming conventions
 - Add comments for complex/non-obvious logic
