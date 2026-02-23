@@ -1,119 +1,131 @@
-import { useState, useMemo } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { EmptyState } from '@/components/ui/empty-state';
-import { PageHeader } from '@/components/PageHeader';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Mail, Send, Inbox, User, AlertTriangle, Loader2 } from 'lucide-react';
-import { SlideUp } from '@/components/animations';
-import { useReducedMotion } from '@/hooks/use-reduced-motion';
-import { useAuthStore } from '@/lib/authStore';
-import { teacherService } from '@/services/teacherService';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { formatDistanceToNow } from '@/utils/date';
-import { logger } from '@/lib/logger';
-import { PollingInterval } from '@/config/time';
-import { MessageThread, ComposeDialog } from '@/components/messages';
-import type { SchoolUser } from '@shared/types';
+import { useState, useMemo } from 'react'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
+import { EmptyState } from '@/components/ui/empty-state'
+import { PageHeader } from '@/components/PageHeader'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { ScrollArea } from '@/components/ui/scroll-area'
+import { Mail, Send, Inbox, User, AlertTriangle, Loader2 } from 'lucide-react'
+import { SlideUp } from '@/components/animations'
+import { useReducedMotion } from '@/hooks/use-reduced-motion'
+import { useAuthStore } from '@/lib/authStore'
+import { teacherService } from '@/services/teacherService'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { formatDistanceToNow } from '@/utils/date'
+import { logger } from '@/lib/logger'
+import { PollingInterval } from '@/config/time'
+import { MessageThread, ComposeDialog } from '@/components/messages'
+import type { SchoolUser } from '@shared/types'
 
 export function TeacherMessagesPage() {
-  const prefersReducedMotion = useReducedMotion();
-  const user = useAuthStore((state) => state.user);
-  const queryClient = useQueryClient();
-  const [selectedParentId, setSelectedParentId] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'inbox' | 'sent'>('inbox');
+  const prefersReducedMotion = useReducedMotion()
+  const user = useAuthStore(state => state.user)
+  const queryClient = useQueryClient()
+  const [selectedParentId, setSelectedParentId] = useState<string | null>(null)
+  const [activeTab, setActiveTab] = useState<'inbox' | 'sent'>('inbox')
 
-  const teacherId = user?.id || '';
+  const teacherId = user?.id || ''
 
-  const { data: messages = [], isLoading: messagesLoading, error: messagesError } = useQuery({
+  const {
+    data: messages = [],
+    isLoading: messagesLoading,
+    error: messagesError,
+  } = useQuery({
     queryKey: ['teacher-messages', teacherId, activeTab],
     queryFn: () => teacherService.getMessages(teacherId, activeTab),
     enabled: !!teacherId,
-  });
+  })
 
   const { data: unreadCount = 0 } = useQuery({
     queryKey: ['teacher-unread-count', teacherId],
     queryFn: () => teacherService.getUnreadCount(teacherId),
     enabled: !!teacherId,
     refetchInterval: PollingInterval.THIRTY_SECONDS,
-  });
+  })
 
   const { data: classes = [] } = useQuery({
     queryKey: ['teacher-classes', teacherId],
     queryFn: () => teacherService.getClasses(teacherId),
     enabled: !!teacherId,
-  });
+  })
 
-  const classIds = useMemo(() => classes.map(c => c.id), [classes]);
+  const classIds = useMemo(() => classes.map(c => c.id), [classes])
 
   const { data: conversation = [], isLoading: conversationLoading } = useQuery({
     queryKey: ['teacher-conversation', teacherId, selectedParentId],
     queryFn: () => teacherService.getConversation(teacherId, selectedParentId!),
     enabled: !!teacherId && !!selectedParentId,
-  });
+  })
 
   const { data: parents = [] } = useQuery({
     queryKey: ['class-parents', classIds],
     queryFn: async () => {
-      const allParents: SchoolUser[] = [];
+      const parentIdSet = new Set<string>()
+      const allStudents: { parentId?: string }[] = []
+
       for (const cls of classes) {
-        const students = await teacherService.getClassStudentsWithGrades(cls.id);
-        for (const student of students) {
-          if (student.parentId) {
-            const parent = await fetch(`/api/users/${student.parentId}`).then(r => r.json());
-            if (parent && !allParents.find(p => p.id === parent.id)) {
-              allParents.push(parent);
-            }
-          }
+        const students = await teacherService.getClassStudentsWithGrades(cls.id)
+        allStudents.push(...students)
+      }
+
+      for (const student of allStudents) {
+        if (student.parentId) {
+          parentIdSet.add(student.parentId)
         }
       }
-      return allParents;
+
+      if (parentIdSet.size === 0) {
+        return []
+      }
+
+      const parentPromises = Array.from(parentIdSet).map(parentId =>
+        fetch(`/api/users/${parentId}`).then(r => r.json())
+      )
+
+      const parentResults = await Promise.all(parentPromises)
+      return parentResults.filter((p): p is SchoolUser => p != null)
     },
     enabled: classes.length > 0,
-  });
+  })
 
   const sendMessageMutation = useMutation({
     mutationFn: (data: { recipientId: string; subject: string; content: string }) =>
       teacherService.sendMessage(teacherId, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['teacher-messages'] });
-      queryClient.invalidateQueries({ queryKey: ['teacher-conversation'] });
-      queryClient.invalidateQueries({ queryKey: ['teacher-unread-count'] });
-      setSelectedParentId(null);
+      queryClient.invalidateQueries({ queryKey: ['teacher-messages'] })
+      queryClient.invalidateQueries({ queryKey: ['teacher-conversation'] })
+      queryClient.invalidateQueries({ queryKey: ['teacher-unread-count'] })
+      setSelectedParentId(null)
     },
-    onError: (error) => {
-      logger.error('Failed to send message', error);
+    onError: error => {
+      logger.error('Failed to send message', error)
     },
-  });
+  })
 
   const markAsReadMutation = useMutation({
     mutationFn: (messageId: string) => teacherService.markAsRead(teacherId, messageId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['teacher-messages'] });
-      queryClient.invalidateQueries({ queryKey: ['teacher-unread-count'] });
+      queryClient.invalidateQueries({ queryKey: ['teacher-messages'] })
+      queryClient.invalidateQueries({ queryKey: ['teacher-unread-count'] })
     },
-  });
+  })
 
   const handleSendMessage = (recipientId: string, subject: string, content: string) => {
-    sendMessageMutation.mutate({ recipientId, subject, content });
-  };
+    sendMessageMutation.mutate({ recipientId, subject, content })
+  }
 
   const uniqueParents = useMemo(() => {
-    const seen = new Set<string>();
+    const seen = new Set<string>()
     return parents.filter(parent => {
-      if (seen.has(parent.id)) return false;
-      seen.add(parent.id);
-      return true;
-    });
-  }, [parents]);
+      if (seen.has(parent.id)) return false
+      seen.add(parent.id)
+      return true
+    })
+  }, [parents])
 
-  const parentsMap = useMemo(() => 
-    new Map(uniqueParents.map(p => [p.id, p])),
-    [uniqueParents]
-  );
+  const parentsMap = useMemo(() => new Map(uniqueParents.map(p => [p.id, p])), [uniqueParents])
 
   if (messagesError) {
     return (
@@ -122,16 +134,13 @@ export function TeacherMessagesPage() {
         <AlertTitle>Error</AlertTitle>
         <AlertDescription>Failed to load messages. Please try again later.</AlertDescription>
       </Alert>
-    );
+    )
   }
 
   return (
     <SlideUp delay={0} className="space-y-6" style={prefersReducedMotion ? { opacity: 1 } : {}}>
       <SlideUp delay={0.1} style={prefersReducedMotion ? { opacity: 1 } : {}}>
-        <PageHeader
-          title="Messages"
-          description="Communicate with parents"
-        />
+        <PageHeader title="Messages" description="Communicate with parents" />
       </SlideUp>
 
       <div className="flex justify-between items-center">
@@ -150,7 +159,7 @@ export function TeacherMessagesPage() {
         />
       </div>
 
-      <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'inbox' | 'sent')}>
+      <Tabs value={activeTab} onValueChange={v => setActiveTab(v as 'inbox' | 'sent')}>
         <TabsList>
           <TabsTrigger value="inbox">
             <Inbox className="h-4 w-4 mr-2" />
@@ -181,7 +190,7 @@ export function TeacherMessagesPage() {
               ) : (
                 <ScrollArea className="h-[400px]">
                   <div className="space-y-2">
-                    {messages.map((message) => (
+                    {messages.map(message => (
                       <button
                         key={message.id}
                         onClick={() => setSelectedParentId(message.senderId)}
@@ -198,7 +207,9 @@ export function TeacherMessagesPage() {
                               {parentsMap.get(message.senderId)?.name || 'Parent'}
                             </span>
                             {!message.isRead && message.recipientId === teacherId && (
-                              <Badge variant="default" className="text-xs">New</Badge>
+                              <Badge variant="default" className="text-xs">
+                                New
+                              </Badge>
                             )}
                           </div>
                           <span className="text-xs text-muted-foreground">
@@ -235,7 +246,7 @@ export function TeacherMessagesPage() {
               ) : (
                 <ScrollArea className="h-[400px]">
                   <div className="space-y-2">
-                    {messages.map((message) => (
+                    {messages.map(message => (
                       <button
                         key={message.id}
                         onClick={() => setSelectedParentId(message.recipientId)}
@@ -281,7 +292,7 @@ export function TeacherMessagesPage() {
                 <MessageThread
                   messages={conversation}
                   currentUserId={teacherId}
-                  onMarkAsRead={(messageId) => markAsReadMutation.mutate(messageId)}
+                  onMarkAsRead={messageId => markAsReadMutation.mutate(messageId)}
                 />
               )}
             </ScrollArea>
@@ -289,7 +300,7 @@ export function TeacherMessagesPage() {
         </Dialog>
       )}
     </SlideUp>
-  );
+  )
 }
 
-export default TeacherMessagesPage;
+export default TeacherMessagesPage

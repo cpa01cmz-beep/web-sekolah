@@ -1,21 +1,39 @@
-import { useState, useCallback } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { FormField } from '@/components/ui/form-field';
-import { Send } from 'lucide-react';
-import { useFormValidation } from '@/hooks/useFormValidation';
-import { validateRecipient, validateSubject, validateMessage } from '@/utils/validation';
-import type { SchoolUser } from '@shared/types';
+import { useState, useCallback, useMemo } from 'react'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import { FormField } from '@/components/ui/form-field'
+import { Send } from 'lucide-react'
+import { useFormValidation } from '@/hooks/useFormValidation'
+import { validateRecipient, validateSubject, validateMessage } from '@/utils/validation'
+import type { SchoolUser } from '@shared/types'
 
 interface ComposeDialogProps {
-  recipients: SchoolUser[];
-  recipientLabel: string;
-  recipientPlaceholder: string;
-  onSend: (recipientId: string, subject: string, content: string) => void;
-  isLoading: boolean;
+  recipients: SchoolUser[]
+  recipientLabel: string
+  recipientPlaceholder: string
+  onSend: (recipientId: string, subject: string, content: string) => void
+  isLoading: boolean
+}
+
+const composeValidators = {
+  recipientId: validateRecipient,
+  subject: (value: string, show: boolean) => validateSubject(value, show, 3, 100),
+  content: (value: string, show: boolean) => validateMessage(value, show, 10),
 }
 
 export function ComposeDialog({
@@ -23,43 +41,49 @@ export function ComposeDialog({
   recipientLabel,
   recipientPlaceholder,
   onSend,
-  isLoading
+  isLoading,
 }: ComposeDialogProps) {
-  const [open, setOpen] = useState(false);
-  const [recipientId, setRecipientId] = useState('');
-  const [subject, setSubject] = useState('');
-  const [content, setContent] = useState('');
+  const [open, setOpen] = useState(false)
+  const [recipientId, setRecipientId] = useState('')
+  const [subject, setSubject] = useState('')
+  const [content, setContent] = useState('')
 
-  const formData = { recipientId, subject, content };
-  const { errors, validateAll, reset: resetValidation } = useFormValidation(formData, {
-    validators: {
-      recipientId: validateRecipient,
-      subject: (value, show) => validateSubject(value, show, 3, 100),
-      content: (value, show) => validateMessage(value, show, 10),
-    },
-  });
+  const formData = useMemo(
+    () => ({ recipientId, subject, content }),
+    [recipientId, subject, content]
+  )
+  const {
+    errors,
+    validateAll,
+    reset: resetValidation,
+  } = useFormValidation(formData, {
+    validators: composeValidators,
+  })
 
   const handleClose = useCallback(() => {
-    setRecipientId('');
-    setSubject('');
-    setContent('');
-    resetValidation();
-    setOpen(false);
-  }, [resetValidation]);
+    setRecipientId('')
+    setSubject('')
+    setContent('')
+    resetValidation()
+    setOpen(false)
+  }, [resetValidation])
 
-  const handleOpenChange = useCallback((newOpen: boolean) => {
-    if (!newOpen) {
-      handleClose();
-    } else {
-      setOpen(true);
-    }
-  }, [handleClose]);
+  const handleOpenChange = useCallback(
+    (newOpen: boolean) => {
+      if (!newOpen) {
+        handleClose()
+      } else {
+        setOpen(true)
+      }
+    },
+    [handleClose]
+  )
 
   const handleSend = () => {
-    if (!validateAll()) return;
-    onSend(recipientId, subject.trim(), content.trim());
-    handleClose();
-  };
+    if (!validateAll()) return
+    onSend(recipientId, subject.trim(), content.trim())
+    handleClose()
+  }
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
@@ -74,18 +98,13 @@ export function ComposeDialog({
           <DialogTitle>Compose Message</DialogTitle>
         </DialogHeader>
         <div className="space-y-4 py-4">
-          <FormField
-            id="recipient"
-            label={recipientLabel}
-            error={errors.recipientId}
-            required
-          >
+          <FormField id="recipient" label={recipientLabel} error={errors.recipientId} required>
             <Select value={recipientId} onValueChange={setRecipientId}>
               <SelectTrigger>
                 <SelectValue placeholder={recipientPlaceholder} />
               </SelectTrigger>
               <SelectContent>
-                {recipients.map((recipient) => (
+                {recipients.map(recipient => (
                   <SelectItem key={recipient.id} value={recipient.id}>
                     {recipient.name}
                   </SelectItem>
@@ -103,7 +122,7 @@ export function ComposeDialog({
             <Input
               placeholder="Enter subject..."
               value={subject}
-              onChange={(e) => setSubject(e.target.value)}
+              onChange={e => setSubject(e.target.value)}
             />
           </FormField>
           <FormField
@@ -116,7 +135,7 @@ export function ComposeDialog({
             <Textarea
               placeholder="Type your message..."
               value={content}
-              onChange={(e) => setContent(e.target.value)}
+              onChange={e => setContent(e.target.value)}
               rows={5}
             />
           </FormField>
@@ -132,5 +151,5 @@ export function ComposeDialog({
         </div>
       </DialogContent>
     </Dialog>
-  );
+  )
 }
