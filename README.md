@@ -93,7 +93,7 @@ To get a local copy up and running, follow these simple steps.
 
 Make sure you have following installed:
 
-- [Node.js](https://nodejs.org/) (recommended: v18 or later)
+- [Node.js](https://nodejs.org/) (recommended: v20 or later, matches .nvmrc)
 - [npm](https://www.npmjs.com/) (comes with Node.js)
 - [Wrangler CLI](https://developers.cloudflare.com/workers/wrangler/install-and-update/)
 

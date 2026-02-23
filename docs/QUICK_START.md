@@ -18,44 +18,47 @@ This guide helps you get started with Akademia Pro for common use cases. For com
 
 ### Prerequisites
 
-- Node.js installed (recommended: v18 or later)
+- Node.js installed (recommended: v20 or later, matches .nvmrc)
 - npm (comes with Node.js)
 - Wrangler CLI (for Cloudflare Workers)
 
 ### Installation
 
 1. **Clone the repository:**
+
    ```bash
    git clone https://github.com/cpa01cmz-beep/web-sekolah.git
    cd web-sekolah
    ```
 
 2. **Install dependencies:**
-    ```bash
-    npm install
-    ```
+
+   ```bash
+   npm install
+   ```
 
 3. **Configure environment:**
-    ```bash
-    cp .env.example .env
-    ```
 
-    For local development, the defaults in `.env.example` work fine.
+   ```bash
+   cp .env.example .env
+   ```
+
+   For local development, the defaults in `.env.example` work fine.
 
 4. **Seed the database:**
-    ```bash
-    npm run dev
-    ```
-    Then visit `http://localhost:3000/api/seed` to create sample data.
+   ```bash
+   npm run dev
+   ```
+   Then visit `http://localhost:3000/api/seed` to create sample data.
 
 ### Default Login Credentials
 
-| Role | Email | Password |
-|------|-------|----------|
+| Role    | Email                 | Password      |
+| ------- | --------------------- | ------------- |
 | Student | `student@example.com` | `password123` |
 | Teacher | `teacher@example.com` | `password123` |
-| Parent | `parent@example.com` | `password123` |
-| Admin | `admin@example.com` | `password123` |
+| Parent  | `parent@example.com`  | `password123` |
+| Admin   | `admin@example.com`   | `password123` |
 
 ---
 
@@ -77,12 +80,14 @@ Prospective students can apply for admission online without logging in.
 ### Admission Information
 
 **Schedule** (2025/2026 Academic Year):
+
 - Online Registration: December 1, 2025 - January 31, 2026
 - Selection Test: February 15, 2026
 - Results Announcement: March 1, 2026
 - Re-registration: March 5-10, 2026
 
 **Requirements**:
+
 - Birth certificate photocopy (2 copies)
 - Family card photocopy (2 copies)
 - 3x4 photo (4 copies)
@@ -90,6 +95,7 @@ Prospective students can apply for admission online without logging in.
 - Report cards for semesters 1-5 (certified copies)
 
 **Contact Information**:
+
 - Phone: (021) 123-4567
 - Email: ppdb@akademia.pro
 
@@ -252,6 +258,7 @@ Manage users and oversee school-wide data.
 ### Creating a New Student
 
 **Admin creates student account:**
+
 1. Login as Admin
 2. Go to User Management → Add User
 3. Select "Student" role
@@ -259,6 +266,7 @@ Manage users and oversee school-wide data.
 5. Save
 
 **Student logs in:**
+
 1. Visit login page
 2. Select "Student" role
 3. Enter email and password
@@ -303,16 +311,19 @@ Manage users and oversee school-wide data.
 Common issues and solutions:
 
 **Can't log in?**
+
 - Verify email and password are correct
 - Ensure you selected the correct role
 - Check that user account exists in system
 
 **Data not appearing?**
+
 - Ensure database has been seeded: `POST /api/seed`
 - Check browser console for errors
 - Verify backend worker is running
 
 **Permission denied?**
+
 - Verify you have the correct role for the action
 - Contact administrator if you believe this is an error
 
