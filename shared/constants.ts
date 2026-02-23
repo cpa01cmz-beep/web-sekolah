@@ -33,6 +33,7 @@ export const GradeThresholds = {
   B: 80,
   C: 70,
   D: 60,
+  E: 50,
   PASSING_SCORE: 60,
   PRECISION_FACTOR: 10,
 } as const;
@@ -45,6 +46,8 @@ export const GRADE_C_THRESHOLD = GradeThresholds.C;
 
 export const GRADE_D_THRESHOLD = GradeThresholds.D;
 
+export const GRADE_E_THRESHOLD = GradeThresholds.E;
+
 export const PASSING_SCORE_THRESHOLD = GradeThresholds.PASSING_SCORE;
 
 export const GRADE_PRECISION_FACTOR = GradeThresholds.PRECISION_FACTOR;
@@ -54,6 +57,21 @@ export const RETRY_CONFIG = {
   DEFAULT_BASE_DELAY_MS: 1000,
   DEFAULT_JITTER_MS: 0,
   MAX_DELAY_MS: 30000,
+} as const;
+
+export const AnalyticsConstants = {
+  PERCENTAGE_MULTIPLIER: 100,
+  DECIMAL_PRECISION: 2,
+  TREND_THRESHOLD: 2,
+  IQR_MULTIPLIER: 1.5,
+  SLOPE_STABILITY_THRESHOLD: 0.1,
+  MIN_VALUES_FOR_TREND: 2,
+  MIN_VALUES_FOR_ANOMALY: 4,
+  TOP_PERFORMERS_COUNT: 3,
+  ENCOURAGEMENT_SUGGESTIONS_COUNT: 2,
+  EXCELLENT_SCORE_THRESHOLD: 85,
+  IMPROVEMENT_SCORE_THRESHOLD: 70,
+  WARNING_SCORE_THRESHOLD: 60,
 } as const;
 
 export const AVATAR_BASE_URL = 'https://i.pravatar.cc/150';

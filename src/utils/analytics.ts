@@ -1,9 +1,25 @@
 import type { ChartDataPoint } from '@/components/charts/types';
+import { AnalyticsConstants, GRADE_A_THRESHOLD, GRADE_B_THRESHOLD, GRADE_C_THRESHOLD, GRADE_D_THRESHOLD, GRADE_E_THRESHOLD } from '@shared/constants';
+
+const {
+  PERCENTAGE_MULTIPLIER,
+  DECIMAL_PRECISION,
+  TREND_THRESHOLD,
+  IQR_MULTIPLIER,
+  SLOPE_STABILITY_THRESHOLD,
+  MIN_VALUES_FOR_TREND,
+  MIN_VALUES_FOR_ANOMALY,
+  TOP_PERFORMERS_COUNT,
+  ENCOURAGEMENT_SUGGESTIONS_COUNT,
+  EXCELLENT_SCORE_THRESHOLD,
+  IMPROVEMENT_SCORE_THRESHOLD,
+  WARNING_SCORE_THRESHOLD,
+} = AnalyticsConstants;
 
 export function calculateAverage(values: number[]): number {
   if (values.length === 0) return 0;
   const sum = values.reduce((acc, val) => acc + val, 0);
-  return Math.round((sum / values.length) * 100) / 100;
+  return Math.round((sum / values.length) * PERCENTAGE_MULTIPLIER) / PERCENTAGE_MULTIPLIER;
 }
 
 export function calculateSum(values: number[]): number {
@@ -32,7 +48,7 @@ export function calculateStandardDeviation(values: number[]): number {
   const avg = calculateAverage(values);
   const squareDiffs = values.map(value => Math.pow(value - avg, 2));
   const avgSquareDiff = calculateAverage(squareDiffs);
-  return Math.round(Math.sqrt(avgSquareDiff) * 100) / 100;
+  return Math.round(Math.sqrt(avgSquareDiff) * PERCENTAGE_MULTIPLIER) / PERCENTAGE_MULTIPLIER;
 }
 
 export interface GradeDistribution {
@@ -45,11 +61,11 @@ export interface GradeDistribution {
 }
 
 export function getGradeLetter(score: number): string {
-  if (score >= 90) return 'A';
-  if (score >= 80) return 'B';
-  if (score >= 70) return 'C';
-  if (score >= 60) return 'D';
-  if (score >= 50) return 'E';
+  if (score >= GRADE_A_THRESHOLD) return 'A';
+  if (score >= GRADE_B_THRESHOLD) return 'B';
+  if (score >= GRADE_C_THRESHOLD) return 'C';
+  if (score >= GRADE_D_THRESHOLD) return 'D';
+  if (score >= GRADE_E_THRESHOLD) return 'E';
   return 'F';
 }
 
@@ -81,7 +97,7 @@ export interface TrendData {
 }
 
 export function calculateTrendDirection(values: number[]): 'up' | 'down' | 'stable' {
-  if (values.length < 2) return 'stable';
+  if (values.length < MIN_VALUES_FOR_TREND) return 'stable';
   
   const firstHalf = values.slice(0, Math.floor(values.length / 2));
   const secondHalf = values.slice(Math.floor(values.length / 2));
@@ -89,7 +105,7 @@ export function calculateTrendDirection(values: number[]): 'up' | 'down' | 'stab
   const firstAvg = calculateAverage(firstHalf);
   const secondAvg = calculateAverage(secondHalf);
   
-  const threshold = 2;
+  const threshold = TREND_THRESHOLD;
   
   if (secondAvg > firstAvg + threshold) return 'up';
   if (secondAvg < firstAvg - threshold) return 'down';
@@ -97,8 +113,8 @@ export function calculateTrendDirection(values: number[]): 'up' | 'down' | 'stab
 }
 
 export function calculatePercentageChange(oldValue: number, newValue: number): number {
-  if (oldValue === 0) return newValue === 0 ? 0 : 100;
-  return Math.round(((newValue - oldValue) / oldValue) * 100);
+  if (oldValue === 0) return newValue === 0 ? 0 : PERCENTAGE_MULTIPLIER;
+  return Math.round(((newValue - oldValue) / oldValue) * PERCENTAGE_MULTIPLIER);
 }
 
 export function groupByField<T extends Record<string, unknown>>(
@@ -148,7 +164,7 @@ export function aggregateByField<T extends Record<string, unknown>>(
 
 export function normalizeData(
   data: ChartDataPoint[],
-  maxValue: number = 100
+  maxValue: number = PERCENTAGE_MULTIPLIER
 ): ChartDataPoint[] {
   const maxDataValue = Math.max(...data.map(d => d.value));
   if (maxDataValue === 0) return data;
@@ -174,21 +190,21 @@ export function topN(data: ChartDataPoint[], n: number): ChartDataPoint[] {
 
 export function calculatePercentile(values: number[], percentile: number): number {
   if (values.length === 0) return 0;
-  if (percentile < 0 || percentile > 100) return 0;
+  if (percentile < 0 || percentile > PERCENTAGE_MULTIPLIER) return 0;
   
   const sorted = [...values].sort((a, b) => a - b);
   
   if (percentile === 0) return sorted[0];
-  if (percentile === 100) return sorted[sorted.length - 1];
+  if (percentile === PERCENTAGE_MULTIPLIER) return sorted[sorted.length - 1];
   
-  const index = (percentile / 100) * (sorted.length - 1);
+  const index = (percentile / PERCENTAGE_MULTIPLIER) * (sorted.length - 1);
   const lower = Math.floor(index);
   const upper = Math.ceil(index);
   
   if (lower === upper) return sorted[lower];
   
   const weight = index - lower;
-  return Math.round((sorted[lower] * (1 - weight) + sorted[upper] * weight) * 100) / 100;
+  return Math.round((sorted[lower] * (1 - weight) + sorted[upper] * weight) * PERCENTAGE_MULTIPLIER) / PERCENTAGE_MULTIPLIER;
 }
 
 export function calculateMode(values: number[]): number | null {
@@ -235,7 +251,7 @@ export function calculateGPA(scores: number[]): number {
     return sum + GRADE_POINTS[grade];
   }, 0);
   
-  return Math.round((totalPoints / scores.length) * 100) / 100;
+  return Math.round((totalPoints / scores.length) * PERCENTAGE_MULTIPLIER) / PERCENTAGE_MULTIPLIER;
 }
 
 export interface ClassRankResult {
@@ -255,7 +271,7 @@ export function calculateClassRank(
   const sortedScores = [...allScores].sort((a, b) => b - a);
   const rank = sortedScores.findIndex(score => score === studentScore) + 1;
   const actualRank = rank > 0 ? rank : allScores.length;
-  const percentile = Math.round(((allScores.length - actualRank) / allScores.length) * 100);
+  const percentile = Math.round(((allScores.length - actualRank) / allScores.length) * PERCENTAGE_MULTIPLIER);
 
   return {
     rank: actualRank,
@@ -294,7 +310,7 @@ export interface AnomalyDetectionResult {
 }
 
 export function detectAnomalies(values: number[]): AnomalyDetectionResult {
-  if (values.length < 4) {
+  if (values.length < MIN_VALUES_FOR_ANOMALY) {
     return { outliers: [], lowerBound: 0, upperBound: 0, iqr: 0 };
   }
 
@@ -302,15 +318,15 @@ export function detectAnomalies(values: number[]): AnomalyDetectionResult {
   const q1 = calculatePercentile(sorted, 25);
   const q3 = calculatePercentile(sorted, 75);
   const iqr = q3 - q1;
-  const lowerBound = q1 - 1.5 * iqr;
-  const upperBound = q3 + 1.5 * iqr;
+  const lowerBound = q1 - IQR_MULTIPLIER * iqr;
+  const upperBound = q3 + IQR_MULTIPLIER * iqr;
   const outliers = values.filter(v => v < lowerBound || v > upperBound);
 
   return {
     outliers,
-    lowerBound: Math.round(lowerBound * 100) / 100,
-    upperBound: Math.round(upperBound * 100) / 100,
-    iqr: Math.round(iqr * 100) / 100,
+    lowerBound: Math.round(lowerBound * PERCENTAGE_MULTIPLIER) / PERCENTAGE_MULTIPLIER,
+    upperBound: Math.round(upperBound * PERCENTAGE_MULTIPLIER) / PERCENTAGE_MULTIPLIER,
+    iqr: Math.round(iqr * PERCENTAGE_MULTIPLIER) / PERCENTAGE_MULTIPLIER,
   };
 }
 
@@ -322,7 +338,7 @@ export interface TrendAnalysis {
 }
 
 export function analyzeTrend(values: number[]): TrendAnalysis {
-  if (values.length < 2) {
+  if (values.length < MIN_VALUES_FOR_TREND) {
     return { direction: 'stable', slope: 0, confidence: 0 };
   }
 
@@ -341,16 +357,16 @@ export function analyzeTrend(values: number[]): TrendAnalysis {
   const slope = denominator === 0 ? 0 : numerator / denominator;
   const slopeAbs = Math.abs(slope);
   const stdDev = calculateStandardDeviation(values);
-  const confidence = stdDev > 0 ? Math.min(slopeAbs / stdDev * 10, 100) : 0;
+  const confidence = stdDev > 0 ? Math.min(slopeAbs / stdDev * 10, PERCENTAGE_MULTIPLIER) : 0;
 
   const direction: 'up' | 'down' | 'stable' =
-    slopeAbs < 0.1 ? 'stable' : slope > 0 ? 'up' : 'down';
+    slopeAbs < SLOPE_STABILITY_THRESHOLD ? 'stable' : slope > 0 ? 'up' : 'down';
 
-  const prediction = values.length >= 3 ? Math.round((yMean + slope * n) * 100) / 100 : undefined;
+  const prediction = values.length >= MIN_VALUES_FOR_ANOMALY ? Math.round((yMean + slope * n) * PERCENTAGE_MULTIPLIER) / PERCENTAGE_MULTIPLIER : undefined;
 
   return {
     direction,
-    slope: Math.round(slope * 100) / 100,
+    slope: Math.round(slope * PERCENTAGE_MULTIPLIER) / PERCENTAGE_MULTIPLIER,
     confidence: Math.round(confidence),
     prediction,
   };
@@ -377,9 +393,9 @@ export function generatePerformanceInsights(
   const insights: PerformanceInsight[] = [];
   const sortedByScore = [...performances].sort((a, b) => b.score - a.score);
 
-  const topPerformances = sortedByScore.slice(0, 3);
+  const topPerformances = sortedByScore.slice(0, TOP_PERFORMERS_COUNT);
   topPerformances.forEach((perf) => {
-    if (perf.score >= 85) {
+    if (perf.score >= EXCELLENT_SCORE_THRESHOLD) {
       insights.push({
         type: 'strength',
         subject: perf.subject,
@@ -389,9 +405,9 @@ export function generatePerformanceInsights(
     }
   });
 
-  const lowPerformances = sortedByScore.filter((p) => p.score < 70);
-  lowPerformances.slice(0, 3).forEach((perf) => {
-    if (perf.score < 60) {
+  const lowPerformances = sortedByScore.filter((p) => p.score < IMPROVEMENT_SCORE_THRESHOLD);
+  lowPerformances.slice(0, TOP_PERFORMERS_COUNT).forEach((perf) => {
+    if (perf.score < WARNING_SCORE_THRESHOLD) {
       insights.push({
         type: 'warning',
         subject: perf.subject,
@@ -408,8 +424,8 @@ export function generatePerformanceInsights(
     }
   });
 
-  const goodPerformances = sortedByScore.filter((p) => p.score >= 70 && p.score < 85);
-  goodPerformances.slice(0, 2).forEach((perf) => {
+  const goodPerformances = sortedByScore.filter((p) => p.score >= IMPROVEMENT_SCORE_THRESHOLD && p.score < EXCELLENT_SCORE_THRESHOLD);
+  goodPerformances.slice(0, ENCOURAGEMENT_SUGGESTIONS_COUNT).forEach((perf) => {
     insights.push({
       type: 'encouragement',
       subject: perf.subject,
