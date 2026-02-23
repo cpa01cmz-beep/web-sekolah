@@ -1,7 +1,7 @@
 # UI/UX Best Practices and Keyboard Shortcuts
 
-**Last Updated**: 2026-02-18  
-**Version**: 1.1
+**Last Updated**: 2026-02-23  
+**Version**: 1.2
 
 ---
 
@@ -27,32 +27,32 @@ Akademia Pro follows WCAG 2.1 AA standards and best practices for inclusive desi
 
 ### Global Navigation
 
-| Key Combination | Action | Availability |
-|----------------|---------|--------------|
-| `Tab` / `Shift + Tab` | Navigate forward/backward through interactive elements | Everywhere |
-| `Enter` / `Space` | Activate buttons, links, and form controls | Interactive elements |
-| `Escape` | Close modals, dialogs, and dropdowns | Modals, dropdowns |
-| `Home` / `End` | Navigate to first/last item in lists | Lists, tables |
-| `Arrow Keys` | Navigate within menus and grids | Menus, data grids |
+| Key Combination       | Action                                                 | Availability         |
+| --------------------- | ------------------------------------------------------ | -------------------- |
+| `Tab` / `Shift + Tab` | Navigate forward/backward through interactive elements | Everywhere           |
+| `Enter` / `Space`     | Activate buttons, links, and form controls             | Interactive elements |
+| `Escape`              | Close modals, dialogs, and dropdowns                   | Modals, dropdowns    |
+| `Home` / `End`        | Navigate to first/last item in lists                   | Lists, tables        |
+| `Arrow Keys`          | Navigate within menus and grids                        | Menus, data grids    |
 
 ### Form Navigation
 
-| Key Combination | Action | Availability |
-|----------------|---------|--------------|
-| `Tab` | Move to next form field | Forms |
-| `Shift + Tab` | Move to previous form field | Forms |
-| `Enter` | Submit form (if focused on submit button) | Forms |
-| `Space` | Toggle checkboxes and radio buttons | Checkboxes, radio buttons |
+| Key Combination | Action                                    | Availability              |
+| --------------- | ----------------------------------------- | ------------------------- |
+| `Tab`           | Move to next form field                   | Forms                     |
+| `Shift + Tab`   | Move to previous form field               | Forms                     |
+| `Enter`         | Submit form (if focused on submit button) | Forms                     |
+| `Space`         | Toggle checkboxes and radio buttons       | Checkboxes, radio buttons |
 
 ### Table Navigation
 
-| Key Combination | Action | Availability |
-|----------------|---------|--------------|
-| `Arrow Left/Right` | Move between columns | Sortable tables |
-| `Arrow Up/Down` | Move between rows | Tables |
-| `Home` | Move to first row | Tables |
-| `End` | Move to last row | Tables |
-| `Page Up/Down` | Move up/down one page | Tables |
+| Key Combination    | Action                | Availability    |
+| ------------------ | --------------------- | --------------- |
+| `Arrow Left/Right` | Move between columns  | Sortable tables |
+| `Arrow Up/Down`    | Move between rows     | Tables          |
+| `Home`             | Move to first row     | Tables          |
+| `End`              | Move to last row      | Tables          |
+| `Page Up/Down`     | Move up/down one page | Tables          |
 
 ---
 
@@ -61,16 +61,19 @@ Akademia Pro follows WCAG 2.1 AA standards and best practices for inclusive desi
 ### Color Usage
 
 **PRIMARY (#0D47A1)**:
+
 - Use for: Text, headings, primary actions, important buttons
 - WCAG AA: Compliant for all text sizes on light backgrounds
 - Do NOT use for: Decorative elements, secondary actions
 
 **SECONDARY (#00ACC1)**:
+
 - Use for: Icons, badges, large text (18pt+), decorative elements
 - WCAG AA: Compliant for large text and graphics only (3:1 minimum)
 - Do NOT use for: Normal text (below 18pt), primary text on light backgrounds
 
 **BACKGROUND (#F5F7FA)**:
+
 - Use for: Page backgrounds, card backgrounds, section backgrounds
 - Provides excellent contrast for dark text
 
@@ -98,35 +101,29 @@ Akademia Pro follows WCAG 2.1 AA standards and best practices for inclusive desi
 // Tailwind spacing scale (4px = 1 unit)
 // 1: 4px, 2: 8px, 3: 12px, 4: 16px, 6: 24px, 8: 32px
 
-className="p-4"    // padding: 16px
-className="gap-2"   // gap: 8px
-className="space-y-4"  // vertical spacing: 16px between children
-className="mt-6 mb-6" // margin-top: 24px, margin-bottom: 24px
+className = 'p-4' // padding: 16px
+className = 'gap-2' // gap: 8px
+className = 'space-y-4' // vertical spacing: 16px between children
+className = 'mt-6 mb-6' // margin-top: 24px, margin-bottom: 24px
 ```
 
 ### Component Patterns
 
 #### Card Pattern
+
 ```tsx
 <Card className="hover:shadow-lg transition-shadow duration-200">
   <CardHeader>
     <CardTitle>Title</CardTitle>
   </CardHeader>
-  <CardContent>
-    {/* Content */}
-  </CardContent>
+  <CardContent>{/* Content */}</CardContent>
 </Card>
 ```
 
 #### Form Field Pattern
+
 ```tsx
-<FormField
-  id="email"
-  label="Email"
-  helperText="Enter your email address"
-  required
-  error={error}
->
+<FormField id="email" label="Email" helperText="Enter your email address" required error={error}>
   <Input
     id="email"
     type="email"
@@ -139,10 +136,11 @@ className="mt-6 mb-6" // margin-top: 24px, margin-bottom: 24px
 ```
 
 #### Button Pattern
+
 ```tsx
 <Button
-  variant="default"  // default | destructive | outline | secondary | ghost | link
-  size="default"     // default | sm | lg | icon
+  variant="default" // default | destructive | outline | secondary | ghost | link
+  size="default" // default | sm | lg | icon
   disabled={isLoading}
   aria-busy={isLoading}
 >
@@ -178,11 +176,47 @@ import { DashboardStatCard } from '@/components/dashboard/DashboardStatCard'
 ```
 
 **Best Practices**:
+
 - Use `valueSize="3xl"` for primary metrics (main dashboard numbers)
 - Use `valueSize="2xl"` for secondary metrics (supporting statistics)
 - Subtitles provide context (e.g., "Total students: 25")
 - Icons use muted-foreground color for non-primary visual elements
 - Consistent hover effects (`hover:shadow-lg`) across all stat cards
+
+#### Dashboard Card Empty State Pattern
+
+**Purpose**: Consistent empty state display within dashboard cards with optional icons.
+
+**Accessibility**: Icon marked with `aria-hidden`. Uses `role="status"` for screen readers.
+
+```tsx
+import { DashboardCardEmptyState } from '@/components/dashboard/DashboardCardEmptyState'
+import { FileX, Calendar, Bell } from 'lucide-react'
+
+// Default with Inbox icon
+<DashboardCardEmptyState message="No data available" />
+
+// With custom icon for context
+<DashboardCardEmptyState
+  message="No grades recorded yet."
+  icon={FileX}
+/>
+<DashboardCardEmptyState
+  message="No schedule available."
+  icon={Calendar}
+/>
+<DashboardCardEmptyState
+  message="No announcements available."
+  icon={Bell}
+/>
+```
+
+**Best Practices**:
+
+- Use contextually relevant icons for better visual feedback
+- Default `Inbox` icon works well for general empty states
+- Keep messages concise and informative
+- Icon is optional - existing usages without icon continue to work
 
 ---
 
@@ -238,14 +272,10 @@ Always design for mobile first, then enhance for larger screens:
 ### Async Operations
 
 ```tsx
-const [isLoading, setIsLoading] = useState(false);
+const [isLoading, setIsLoading] = useState(false)
 
 // Button with loading state
-<Button 
-  onClick={handleAction}
-  disabled={isLoading}
-  aria-busy={isLoading}
->
+;<Button onClick={handleAction} disabled={isLoading} aria-busy={isLoading}>
   {isLoading && <Loader2 className="animate-spin" aria-hidden="true" />}
   {isLoading ? 'Loading...' : 'Submit'}
 </Button>
@@ -259,14 +289,12 @@ const [isLoading, setIsLoading] = useState(false);
 
 ```tsx
 const getError = () => {
-  if (value === '') return 'This field is required';
-  if (!/^\S+@\S+\.\S+$/.test(value)) return 'Please enter a valid email';
-  return undefined;
-};
+  if (value === '') return 'This field is required'
+  if (!/^\S+@\S+\.\S+$/.test(value)) return 'Please enter a valid email'
+  return undefined
+}
 
-<FormField
-  error={getError()}
->
+;<FormField error={getError()}>
   <Input
     aria-invalid={!!getError()}
     aria-describedby={getError() ? 'email-error' : 'email-helper'}
@@ -285,16 +313,16 @@ const getError = () => {
 ### Toast Notifications
 
 ```tsx
-import { toast } from 'sonner';
+import { toast } from 'sonner'
 
 // Success
-toast.success('Operation completed successfully');
+toast.success('Operation completed successfully')
 
 // Error
-toast.error('Something went wrong. Please try again.');
+toast.error('Something went wrong. Please try again.')
 
 // Loading
-toast.loading('Processing...', { duration: Infinity });
+toast.loading('Processing...', { duration: Infinity })
 ```
 
 ---
@@ -304,19 +332,16 @@ toast.loading('Processing...', { duration: Infinity });
 ### Respect Reduced Motion
 
 ```tsx
-import { useReducedMotion } from '@/hooks/use-reduced-motion';
+import { useReducedMotion } from '@/hooks/use-reduced-motion'
 
 function MyComponent() {
-  const prefersReducedMotion = useReducedMotion();
+  const prefersReducedMotion = useReducedMotion()
 
   return (
-    <SlideUp 
-      delay={0.2} 
-      style={prefersReducedMotion ? { opacity: 1 } : {}}
-    >
+    <SlideUp delay={0.2} style={prefersReducedMotion ? { opacity: 1 } : {}}>
       {/* Content */}
     </SlideUp>
-  );
+  )
 }
 ```
 
@@ -388,10 +413,10 @@ npm run test:run
 
 ```tsx
 // Lazy load heavy components (charts, PDF generation)
-const EnrollmentChart = lazy(() => import('@/components/charts/EnrollmentChart'));
+const EnrollmentChart = lazy(() => import('@/components/charts/EnrollmentChart'))
 
 // Use Suspense for loading state
-<Suspense fallback={<Skeleton />}>
+;<Suspense fallback={<Skeleton />}>
   <EnrollmentChart data={data} />
 </Suspense>
 ```
@@ -423,8 +448,8 @@ const EnrollmentChart = lazy(() => import('@/components/charts/EnrollmentChart')
 
 ```tsx
 // Use Zod schemas for validation
-const emailSchema = z.string().email('Please enter a valid email');
-const passwordSchema = z.string().min(6, 'Password must be at least 6 characters');
+const emailSchema = z.string().email('Please enter a valid email')
+const passwordSchema = z.string().min(6, 'Password must be at least 6 characters')
 
 // Never trust client-side validation only
 // Always validate on the server
@@ -479,5 +504,5 @@ const passwordSchema = z.string().min(6, 'Password must be at least 6 characters
 ---
 
 **Document Maintainer**: UI/UX Engineer  
-**Last Review**: 2026-02-18  
-**Next Review**: 2026-03-18
+**Last Review**: 2026-02-23  
+**Next Review**: 2026-03-23
