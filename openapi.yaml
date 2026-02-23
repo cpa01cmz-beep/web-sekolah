@@ -3,29 +3,29 @@ info:
   title: Akademia Pro API
   description: |
     School management system API for students, teachers, parents, and administrators.
-    
+
     ## Authentication
-    
+
     Most endpoints require authentication via JWT token. Include the token in the `Authorization` header:
-    
+
     ```
     Authorization: Bearer eyJhbGciOiJIUzI1NiIs...
     ```
-    
+
     Tokens are obtained via the `/api/auth/login` endpoint and expire after 24 hours.
-    
+
     ## Rate Limiting
-    
+
     All endpoints are rate-limited. Check the response headers for rate limit information:
-    
+
     - `X-RateLimit-Limit`: Maximum requests per window
     - `X-RateLimit-Remaining`: Remaining requests in current window
     - `X-RateLimit-Reset`: Unix timestamp when window resets
-    
+
     ## Error Handling
-    
+
     All errors follow a standard format:
-    
+
     ```json
     {
       "success": false,
@@ -35,7 +35,7 @@ info:
       "details": {}
     }
     ```
-    
+
     See the error codes section for a complete list of possible error codes.
   version: 1.0.0
   contact:
@@ -1053,8 +1053,8 @@ paths:
                   - $ref: '#/components/schemas/SuccessResponse'
                   - type: object
                     properties:
-                       data:
-                         $ref: '#/components/schemas/AdminDashboardData'
+                      data:
+                        $ref: '#/components/schemas/AdminDashboardData'
         '401':
           description: Unauthorized
           content:
@@ -2207,6 +2207,55 @@ paths:
                           message:
                             type: string
 
+  /api/client-errors:
+    post:
+      tags:
+        - Monitoring
+      summary: Report client-side error
+      description: Receives and logs client-side JavaScript errors for monitoring and debugging purposes
+      operationId: reportClientError
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClientErrorReport'
+      responses:
+        '200':
+          description: Error report received successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+        '400':
+          description: Invalid error report format
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/csp-report:
+    post:
+      tags:
+        - Monitoring
+      summary: CSP violation report
+      description: Receives Content Security Policy violation reports from browsers. This endpoint is called automatically by browsers when CSP violations occur.
+      operationId: reportCspViolation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CSPViolationReport'
+      responses:
+        '204':
+          description: CSP report received (no content returned)
+
 components:
   securitySchemes:
     BearerAuth:
@@ -2258,6 +2307,91 @@ components:
           type: object
           description: Additional error details
           additionalProperties: true
+
+    ClientErrorReport:
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          type: string
+          description: Error message
+          minLength: 1
+          maxLength: 2000
+        url:
+          type: string
+          format: uri
+          description: URL where the error occurred
+        userAgent:
+          type: string
+          description: Browser user agent string
+          maxLength: 500
+        timestamp:
+          type: string
+          format: date-time
+          description: Time when the error occurred
+        stack:
+          type: string
+          description: JavaScript stack trace
+        componentStack:
+          type: string
+          description: React component stack trace
+        errorBoundary:
+          type: boolean
+          description: Whether error was caught by an error boundary
+        source:
+          type: string
+          description: Source file where the error occurred
+          maxLength: 200
+        lineno:
+          type: integer
+          description: Line number in source file
+        colno:
+          type: integer
+          description: Column number in source file
+
+    CSPViolationReport:
+      type: object
+      properties:
+        csp-report:
+          type: object
+          properties:
+            document-uri:
+              type: string
+              description: URI of the document where the violation occurred
+            referrer:
+              type: string
+              description: Referrer of the request
+            violated-directive:
+              type: string
+              description: The CSP directive that was violated
+            effective-directive:
+              type: string
+              description: The effective directive that was violated
+            original-policy:
+              type: string
+              description: The original CSP policy
+            disposition:
+              type: string
+              description: The disposition of the policy (enforce or report)
+            blocked-uri:
+              type: string
+              description: URI of the resource that was blocked
+            line-number:
+              type: integer
+              description: Line number in the source file
+            column-number:
+              type: integer
+              description: Column number in the source file
+            source-file:
+              type: string
+              description: Source file where the violation occurred
+            status-code:
+              type: string
+              description: HTTP status code
+            script-sample:
+              type: string
+              description: Sample of the script that caused the violation
 
     HealthResponse:
       allOf:
@@ -2361,7 +2495,7 @@ components:
         time:
           type: string
           description: Time slot
-          example: "08:00 - 09:30"
+          example: '08:00 - 09:30'
         courseId:
           type: string
           description: Course ID
