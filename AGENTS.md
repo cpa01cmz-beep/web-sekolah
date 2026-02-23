@@ -5,6 +5,7 @@ This file provides guidance for AI assistants working with this codebase.
 ## Project Overview
 
 Akademia Pro - A modern school management portal built with:
+
 - **Frontend**: React 19, Vite 7, React Router 7, Tailwind CSS 4, shadcn/ui, Zustand, React Query
 - **Backend**: Hono on Cloudflare Workers with Durable Objects
 - **Language**: TypeScript (strict mode)
@@ -45,12 +46,15 @@ npm run test:coverage
 ## Pre-commit Requirements
 
 Before committing changes, always run:
+
 ```bash
 npm run validate
 ```
+
 This runs typecheck, lint, and tests. All three must pass without errors.
 
 Alternatively, run individually:
+
 ```bash
 npm run typecheck && npm run lint && npm run test:run
 ```
@@ -88,7 +92,7 @@ npm run typecheck && npm run lint && npm run test:run
 - Vitest is the test framework
 - Test files use `.test.ts` suffix
 - Tests are co-located with source files in `__tests__/` directories
-- All 3132 tests should pass
+- All 3237 tests should pass
 
 ## Architecture Patterns
 

@@ -49,6 +49,7 @@ This guide provides comprehensive testing patterns, strategies, and best practic
 ```
 
 **Distribution**:
+
 - **Unit Tests (70%)**: Fast, focused, test specific functions/components
 - **Integration Tests (20%)**: Test module interactions, API endpoints
 - **E2E Tests (10%)**: Critical user journeys, happy paths
@@ -90,13 +91,13 @@ worker/
 
 ### Naming Conventions
 
-| Type | Pattern | Example |
-|------|----------|---------|
-| Component | `[ComponentName].test.tsx` | `Button.test.tsx` |
-| Hook | `[HookName].test.ts` | `useStudent.test.ts` |
-| Service | `[ServiceName].test.ts` | `studentService.test.ts` |
-| Entity | `[EntityName].test.ts` | `UserEntity.test.ts` |
-| Module | `[ModuleName].test.ts` | `CircuitBreaker.test.ts` |
+| Type      | Pattern                    | Example                  |
+| --------- | -------------------------- | ------------------------ |
+| Component | `[ComponentName].test.tsx` | `Button.test.tsx`        |
+| Hook      | `[HookName].test.ts`       | `useStudent.test.ts`     |
+| Service   | `[ServiceName].test.ts`    | `studentService.test.ts` |
+| Entity    | `[EntityName].test.ts`     | `UserEntity.test.ts`     |
+| Module    | `[ModuleName].test.ts`     | `CircuitBreaker.test.ts` |
 
 ---
 
@@ -104,27 +105,28 @@ worker/
 
 ### When to Write Tests
 
-| Scenario | Test Type |
-|----------|------------|
-| New feature added | Unit tests + Integration tests |
-| Bug fixed | Regression test + Unit test |
-| Refactoring | Ensure all tests still pass |
-| API endpoint added | Route test + Service test |
-| Component created | Component test + Snapshot |
-| Complex logic added | Unit tests with edge cases |
+| Scenario            | Test Type                      |
+| ------------------- | ------------------------------ |
+| New feature added   | Unit tests + Integration tests |
+| Bug fixed           | Regression test + Unit test    |
+| Refactoring         | Ensure all tests still pass    |
+| API endpoint added  | Route test + Service test      |
+| Component created   | Component test + Snapshot      |
+| Complex logic added | Unit tests with edge cases     |
 
 ### Test Coverage Goals
 
-| Layer | Coverage Target | Current Status |
-|-------|----------------|----------------|
-| Services | 95%+ | 98% |
-| Hooks | 90%+ | 95% |
-| Components | 85%+ | 88% |
-| Entities | 100% | 100% |
-| Routes | 100% | 95% |
-| Middleware | 100% | 100% |
+| Layer      | Coverage Target | Current Status |
+| ---------- | --------------- | -------------- |
+| Services   | 95%+            | 98%            |
+| Hooks      | 90%+            | 95%            |
+| Components | 85%+            | 88%            |
+| Entities   | 100%            | 100%           |
+| Routes     | 100%            | 95%            |
+| Middleware | 100%            | 100%           |
 
 **Run Coverage**:
+
 ```bash
 npm run test:coverage
 ```
@@ -284,28 +286,23 @@ describe('studentService', () => {
   it('fetches student grades', async () => {
     vi.mock('@/repositories/ApiRepository', () => ({
       apiRepository: {
-        get: vi.fn().mockResolvedValue([
-          { id: '1', courseId: 'math', score: 95 }
-        ])
-      }
+        get: vi.fn().mockResolvedValue([{ id: '1', courseId: 'math', score: 95 }]),
+      },
     }))
 
     const grades = await studentService.getGrades('student-1')
 
-    expect(grades).toEqual([
-      { id: '1', courseId: 'math', score: 95 }
-    ])
+    expect(grades).toEqual([{ id: '1', courseId: 'math', score: 95 }])
   })
 
   it('handles API errors', async () => {
     vi.mock('@/repositories/ApiRepository', () => ({
       apiRepository: {
-        get: vi.fn().mockRejectedValue(new Error('API Error'))
-      }
+        get: vi.fn().mockRejectedValue(new Error('API Error')),
+      },
     }))
 
-    await expect(studentService.getGrades('student-1'))
-      .rejects.toThrow('API Error')
+    await expect(studentService.getGrades('student-1')).rejects.toThrow('API Error')
   })
 })
 ```
@@ -367,7 +364,7 @@ describe('UserEntity', () => {
     const user = await UserEntity.create(env, {
       name: 'John Doe',
       email: 'john@example.com',
-      role: 'student'
+      role: 'student',
     })
 
     expect(user.id).toBeDefined()
@@ -378,7 +375,7 @@ describe('UserEntity', () => {
     await UserEntity.create(env, {
       name: 'John Doe',
       email: 'john@example.com',
-      role: 'student'
+      role: 'student',
     })
 
     const user = await UserEntity.getByEmail(env, 'john@example.com')
@@ -391,7 +388,7 @@ describe('UserEntity', () => {
     const user = await UserEntity.create(env, {
       name: 'John Doe',
       email: 'john@example.com',
-      role: 'student'
+      role: 'student',
     })
 
     await UserEntity.delete(env, user.id)
@@ -457,7 +454,7 @@ describe('Student Routes', () => {
 
   it('GET /api/students/:id/grades returns student grades', async () => {
     const res = await app.request('/api/students/student-1/grades', {
-      headers: mockAuthHeaders('student-1', 'student')
+      headers: mockAuthHeaders('student-1', 'student'),
     })
 
     expect(res.status).toBe(200)
@@ -474,7 +471,7 @@ describe('Student Routes', () => {
 
   it('rejects cross-user access', async () => {
     const res = await app.request('/api/students/student-2/grades', {
-      headers: mockAuthHeaders('student-1', 'student')
+      headers: mockAuthHeaders('student-1', 'student'),
     })
 
     expect(res.status).toBe(403)
@@ -498,13 +495,13 @@ describe('authenticate middleware', () => {
     env = createTestEnv()
     app = new Hono()
     app.use('*', authenticate(env))
-    app.get('/protected', (c) => c.json({ success: true }))
+    app.get('/protected', c => c.json({ success: true }))
   })
 
   it('allows authenticated requests', async () => {
     const token = generateValidToken(env, 'user-1', 'student')
     const res = await app.request('/protected', {
-      headers: { 'Authorization': `Bearer ${token}` }
+      headers: { Authorization: `Bearer ${token}` },
     })
 
     expect(res.status).toBe(200)
@@ -520,7 +517,7 @@ describe('authenticate middleware', () => {
 
   it('rejects invalid tokens', async () => {
     const res = await app.request('/protected', {
-      headers: { 'Authorization': 'Bearer invalid-token' }
+      headers: { Authorization: 'Bearer invalid-token' },
     })
 
     expect(res.status).toBe(401)
@@ -550,13 +547,13 @@ export function createMockDurableObject() {
     get: (key: string) => storage.get(key),
     put: (key: string, value: string) => storage.set(key, value),
     delete: (key: string) => storage.delete(key),
-    list: () => ({ items: Array.from(storage.entries()).map(([id, data]) => ({ id, data })) })
+    list: () => ({ items: Array.from(storage.entries()).map(([id, data]) => ({ id, data })) }),
   }
 }
 
 export function mockAuthHeaders(userId: string, role: string) {
   const token = generateValidToken(createTestEnv(), userId, role)
-  return { 'Authorization': `Bearer ${token}` }
+  return { Authorization: `Bearer ${token}` }
 }
 ```
 
@@ -567,13 +564,13 @@ export async function seedTestData(env: Env) {
   const student = await UserEntity.create(env, {
     name: 'Test Student',
     email: 'student@test.com',
-    role: 'student'
+    role: 'student',
   })
 
   const teacher = await UserEntity.create(env, {
     name: 'Test Teacher',
     email: 'teacher@test.com',
-    role: 'teacher'
+    role: 'teacher',
   })
 
   return { student, teacher }
@@ -587,7 +584,7 @@ export function createTestGrade(overrides?: Partial<Grade>) {
     score: 95,
     feedback: 'Great work',
     createdAt: new Date().toISOString(),
-    ...overrides
+    ...overrides,
   }
 }
 ```
@@ -599,10 +596,7 @@ export function flushPromises(): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, 0))
 }
 
-export async function waitForCondition(
-  condition: () => boolean,
-  timeout = 5000
-): Promise<void> {
+export async function waitForCondition(condition: () => boolean, timeout = 5000): Promise<void> {
   const start = Date.now()
   while (!condition()) {
     if (Date.now() - start > timeout) {
@@ -627,8 +621,8 @@ vi.mock('@/services/studentService', () => ({
   studentService: {
     getDashboard: vi.fn(),
     getGrades: vi.fn(),
-    getSchedule: vi.fn()
-  }
+    getSchedule: vi.fn(),
+  },
 }))
 
 // In tests:
@@ -643,8 +637,8 @@ vi.mock('@/repositories/ApiRepository', () => ({
     get: vi.fn().mockResolvedValue(data),
     post: vi.fn().mockResolvedValue(response),
     put: vi.fn().mockResolvedValue(response),
-    delete: vi.fn().mockResolvedValue(undefined)
-  }
+    delete: vi.fn().mockResolvedValue(undefined),
+  },
 }))
 ```
 
@@ -679,7 +673,7 @@ import { renderHook } from '@testing-library/react'
 import { useAuth } from '@/hooks/useAuth'
 
 vi.mock('@/hooks/useAuth', () => ({
-  useAuth: vi.fn()
+  useAuth: vi.fn(),
 }))
 
 // In tests:
@@ -877,6 +871,7 @@ describe('Grade Management', () => {
 **Issue**: Tests pass individually but fail when run together
 
 **Solution**: Test isolation issue - ensure tests clean up after themselves:
+
 ```typescript
 afterEach(() => {
   vi.clearAllMocks()
@@ -887,6 +882,7 @@ afterEach(() => {
 **Issue**: "not wrapped in act()" warning
 
 **Solution**: Wrap state updates in act():
+
 ```typescript
 await act(async () => {
   await result.current.mutate(data)
@@ -896,6 +892,7 @@ await act(async () => {
 **Issue**: Async tests timeout
 
 **Solution**: Increase timeout or use waitFor:
+
 ```typescript
 it('loads data', async () => {
   render(<Component />)
@@ -908,6 +905,7 @@ it('loads data', async () => {
 **Issue**: Mock not being called
 
 **Solution**: Ensure mock is called before importing module:
+
 ```typescript
 vi.mock('./module') // Must be before imports
 import { function } from './module'
@@ -916,6 +914,7 @@ import { function } from './module'
 **Issue**: Tests fail in CI but pass locally
 
 **Solution**: Check environment variables and timing:
+
 ```bash
 # Run with same environment as CI
 NODE_ENV=test npm test
@@ -1030,4 +1029,4 @@ jobs:
 
 **Last Updated**: 2026-02-22
 
-**Status**: ✅ Complete - 3132 tests passing (98% coverage)
+**Status**: ✅ Complete - 3237 tests passing (98% coverage)

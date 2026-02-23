@@ -4,7 +4,7 @@
 
 [![🤖 iFlow CLI Automation](https://img.shields.io/badge/iFlow--CLI-Automation-blue)](https://github.com/iflow-ai/iflow-cli-action)
 
-[![Tests: 3132 passing](https://img.shields.io/badge/Tests-3132%20passing-brightgreen)](https://github.com/cpa01cmz-beep/web-sekolah/actions)
+[![Tests: 3237 passing](https://img.shields.io/badge/Tests-3237%20passing-brightgreen)](https://github.com/cpa01cmz-beep/web-sekolah/actions)
 [![Security: 98/100](https://img.shields.io/badge/Security-98%2F100-success)](./docs/SECURITY_ASSESSMENT_2026-01-22.md)
 [![TypeScript: Strict](https://img.shields.io/badge/TypeScript-Strict-blue)](https://www.typescriptlang.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
@@ -65,7 +65,7 @@ The system is built on Cloudflare's high-performance serverless infrastructure, 
 - **Load Time**: < 2 seconds on 3G connection
 - **API Response**: < 100ms average (Cloudflare Workers)
 - **Security**: 98/100 score (Production Ready ✅)
-- **Test Coverage**: 3292 tests total (3132 passing, 5 skipped, 155 todo)
+- **Test Coverage**: 3397 tests total (3237 passing, 5 skipped, 155 todo)
 
 ## Technology Stack
 
@@ -92,6 +92,7 @@ To get a local copy up and running, follow these simple steps.
 ### Prerequisites
 
 Make sure you have following installed:
+
 - [Node.js](https://nodejs.org/) (recommended: v18 or later)
 - [npm](https://www.npmjs.com/) (comes with Node.js)
 - [Wrangler CLI](https://developers.cloudflare.com/workers/wrangler/install-and-update/)
@@ -111,10 +112,11 @@ Make sure you have following installed:
     npm install
     ```
 4.  Configure environment variables:
+
     ```bash
     cp .env.example .env
     ```
-    
+
     Update the `.env` file with your configuration. For local development, the defaults in `.env.example` should work. For production deployment, ensure you update the `ALLOWED_ORIGINS` and `JWT_SECRET` values.
 
 ## Usage
@@ -147,46 +149,52 @@ After starting the application:
    - Click "Login" to access your role-specific portal
 
 3. **Explore Your Portal**:
-    - **Student Portal**: View your schedule, grades, student card, and announcements
-    - **Teacher Portal**: Manage your classes, submit grades, and post announcements
-    - **Parent Portal**: Monitor your child's academic progress
-    - **Admin Portal**: Manage users and oversee school-wide data
-    - **PPDB Portal**: New students can apply for admission at `/ppdb`
+   - **Student Portal**: View your schedule, grades, student card, and announcements
+   - **Teacher Portal**: Manage your classes, submit grades, and post announcements
+   - **Parent Portal**: Monitor your child's academic progress
+   - **Admin Portal**: Manage users and oversee school-wide data
+   - **PPDB Portal**: New students can apply for admission at `/ppdb`
 
 ### Example User Credentials
 
-| Role | Email | Password |
-|------|-------|----------|
+| Role    | Email               | Password    |
+| ------- | ------------------- | ----------- |
 | Student | student@example.com | password123 |
 | Teacher | teacher@example.com | password123 |
-| Parent | parent@example.com | password123 |
-| Admin | admin@example.com | password123 |
+| Parent  | parent@example.com  | password123 |
+| Admin   | admin@example.com   | password123 |
 
 ## Documentation
 
 **📖 Essential Reading**
+
 - [Quick Start Guide](./docs/QUICK_START.md) - 5-minute setup for each user role
 - [Developer Guide](./docs/DEVELOPER_GUIDE.md) - Architecture, component patterns, and testing
 - [Testing Guide](./docs/TESTING_GUIDE.md) - Comprehensive testing patterns and strategies
 - [API Blueprint](./docs/blueprint.md) - Complete API reference with 40+ endpoints
 
 **🏗️ Architecture & Best Practices**
+
 - [Integration Architecture](./docs/INTEGRATION_ARCHITECTURE.md) - Circuit breakers, retries, webhook reliability
 - [State Management](./docs/STATE_MANAGEMENT.md) - Zustand and React Query patterns
 - [Validation Guide](./docs/VALIDATION_GUIDE.md) - Input validation with Zod schemas
 
 **🔒 Security**
+
 - [Security Guide](./docs/SECURITY.md) - Security controls and deployment checklist
 - [Security Assessment](./docs/SECURITY_ASSESSMENT_2026-01-22.md) - 98/100 score, production ready
 
 **🚀 Deployment**
+
 - [Deployment Guide](./docs/DEPLOYMENT.md) - CI/CD procedures, environments, and rollback
 
 **🎨 UI/UX & Accessibility**
+
 - [UI/UX Best Practices](./docs/UI_UX_BEST_PRACTICES.md) - WCAG AA compliance and design patterns
 - [Color Contrast Verification](./docs/COLOR_CONTRAST_VERIFICATION.md) - Accessibility verification
 
 **📊 Development & Roadmap**
+
 - [Architectural Task List](./docs/task.md) - Implementation status and recent improvements
 
 Full documentation available in the [docs/](./docs/) directory.
@@ -201,7 +209,7 @@ Run the test suite to verify everything is working:
 npm test
 ```
 
-All tests should pass (currently 3132 tests passing, 5 skipped, 155 todo).
+All tests should pass (currently 3237 tests passing, 5 skipped, 155 todo).
 
 ### Type Checking
 
@@ -232,6 +240,7 @@ npm run build
 ### Common Issues
 
 **Problem**: Application won't start after `npm run dev`
+
 - **Solution**: Check if port 3000 is already in use:
   ```bash
   lsof -ti:3000 | xargs kill  # macOS/Linux
@@ -240,6 +249,7 @@ npm run build
   Or change port in `.env`: `PORT=4000`
 
 **Problem**: Seed data not appearing
+
 - **Solution**: Ensure you've run `POST /api/seed`:
   ```bash
   curl -X POST http://localhost:3000/api/seed
@@ -247,12 +257,14 @@ npm run build
   Check browser console (F12) for network errors.
 
 **Problem**: Login fails with "Invalid credentials"
+
 - **Solution**: Verify credentials from seed data:
   - Password: `password123` (all users)
   - Email: Check exact spelling from example table
   - Role: Must match user's assigned role
 
 **Problem**: 404 errors on API endpoints
+
 - **Solution**: Ensure backend worker is running:
   ```bash
   # Check if worker is running on port 3000
@@ -262,6 +274,7 @@ npm run build
   ```
 
 **Problem**: CORS errors in browser console
+
 - **Solution**: Update `ALLOWED_ORIGINS` in `.env`:
   ```
   ALLOWED_ORIGINS=http://localhost:3000,http://localhost:5173
@@ -269,6 +282,7 @@ npm run build
   Restart server after changing `.env`.
 
 **Problem**: Tests failing
+
 - **Solution**:
   ```bash
   # Clean install dependencies
@@ -279,6 +293,7 @@ npm run build
   ```
 
 **Problem**: Build fails with TypeScript errors
+
 - **Solution**: Run type check first:
   ```bash
   npx tsc --noEmit
@@ -300,6 +315,7 @@ This provides detailed logs for troubleshooting API requests, database operation
 We welcome contributions! Please follow these guidelines:
 
 **1. Setup Development Environment**
+
 ```bash
 git clone https://github.com/cpa01cmz-beep/web-sekolah.git
 cd web-sekolah
@@ -308,11 +324,13 @@ npm run dev
 ```
 
 **2. Create Feature Branch**
+
 ```bash
 git checkout -b feature/your-feature-name
 ```
 
 **3. Make Changes**
+
 - Write code following [Developer Guide](./docs/DEVELOPER_GUIDE.md)
 - Add tests for new functionality (aim for 98% coverage)
 - Run tests: `npm test`
@@ -320,19 +338,22 @@ git checkout -b feature/your-feature-name
 - Type check: `npx tsc --noEmit`
 
 **4. Commit Changes**
+
 ```bash
 git add .
 git commit -m "feat: add your feature description"
 ```
 
 **5. Push and Create PR**
+
 ```bash
 git push origin feature/your-feature-name
 # Open pull request on GitHub
 ```
 
 **Contribution Guidelines**
-- ✅ All tests passing (3132 tests)
+
+- ✅ All tests passing (3237 tests)
 - ✅ Zero linting errors
 - ✅ TypeScript compilation successful
 - ✅ Documentation updated for new features
@@ -348,10 +369,10 @@ This project is configured for seamless deployment to Cloudflare.
     wrangler login
     ```
 2.  Run the deployment script:
-    ```bash
-    npm run deploy
-    ```
-This command will build the application and deploy it to your Cloudflare account.
+    `bash
+npm run deploy
+`
+    This command will build the application and deploy it to your Cloudflare account.
 
 Alternatively, you can deploy directly from your GitHub repository.
 
@@ -425,6 +446,7 @@ To learn more about iFlow CLI, visit [iflow.ai](https://iflow.ai).
 ```
 
 **Key Architectural Patterns**
+
 - **Frontend**: React Query for server state, Zustand for global state, local state for UI
 - **Backend**: Clean layered architecture (routes → services → entities → storage)
 - **Data**: Durable Objects with primary and secondary indexes for O(1) lookups
