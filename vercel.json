@@ -12,6 +12,13 @@
   "poweredByHeader": false,
   "fluid": true,
   "regions": ["sin1", "hnd1", "iad1"],
+  "functions": {
+    "api/**": {
+      "memory": 1024,
+      "maxDuration": 10
+    }
+  },
+  "supportResponseINT": true,
   "ignoreCommand": "git diff --quiet $VERCEL_GIT_PREVIOUS_SHA $VERCEL_GIT_COMMIT_SHA -- . ':!*.md' ':!docs/' ':!wiki/' ':!prompts/' ':!.github/' ':!SECURITY*.md' ':!CHANGELOG*.md' ':!IFLOW.md' ':!ROADMAP.md' ':!DOCUMENTATION.md' ':!CACHING_OPTIMIZATION.md' 2>/dev/null || exit 1",
   "images": {
     "remotePatterns": [
@@ -276,6 +283,22 @@
         {
           "key": "Vercel-CDN-Cache-Control",
           "value": "public, max-age=0, must-revalidate"
+        },
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        },
+        {
+          "key": "Access-Control-Allow-Methods",
+          "value": "GET, POST, PUT, PATCH, DELETE, OPTIONS"
+        },
+        {
+          "key": "Access-Control-Allow-Headers",
+          "value": "Content-Type, Authorization, X-Requested-With, Accept, Origin, Cache-Control"
+        },
+        {
+          "key": "Access-Control-Max-Age",
+          "value": "86400"
         }
       ]
     },
