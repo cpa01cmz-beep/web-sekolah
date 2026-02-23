@@ -7,6 +7,7 @@ interface CloudflareCacheConfig {
   staleIfError?: number
   useCacheAPI?: boolean
   cacheKey?: (c: Context) => string
+  varyHeaders?: string[]
 }
 
 function getCache(): Cache | null {
@@ -17,6 +18,15 @@ function getCache(): Cache | null {
   }
 }
 
+function normalizeCacheKey(url: string, varyHeaders?: string[]): Request {
+  const cacheUrl = new URL(url)
+  cacheUrl.hash = ''
+  const cacheRequest = new Request(cacheUrl, {
+    method: 'GET',
+  })
+  return cacheRequest
+}
+
 export function cloudflareCache(config: CloudflareCacheConfig = {}) {
   const {
     browserTTL = 0,
@@ -25,16 +35,17 @@ export function cloudflareCache(config: CloudflareCacheConfig = {}) {
     staleIfError = 0,
     useCacheAPI = false,
     cacheKey,
+    varyHeaders,
   } = config
 
   return async (c: Context, next: Next) => {
     if (useCacheAPI && cdnTTL > 0 && c.req.method === 'GET') {
       const cache = getCache()
       const key = cacheKey ? cacheKey(c) : c.req.url
-      const cacheUrl = new URL(key)
+      const cacheRequest = normalizeCacheKey(key, varyHeaders)
 
       if (cache) {
-        const cachedResponse = await cache.match(cacheUrl)
+        const cachedResponse = await cache.match(cacheRequest)
 
         if (cachedResponse) {
           const response = new Response(cachedResponse.body, cachedResponse)
@@ -72,7 +83,7 @@ export function cloudflareCache(config: CloudflareCacheConfig = {}) {
           headers,
         })
 
-        c.executionCtx?.waitUntil?.(cache.put(cacheUrl, cachedResponse))
+        c.executionCtx?.waitUntil?.(cache.put(cacheRequest, cachedResponse))
       }
 
       c.res.headers.set('X-Cache-Status', 'MISS')
