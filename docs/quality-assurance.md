@@ -4,9 +4,28 @@
 
 ### Current Test Coverage
 
-- **Test Files**: 111
-- **Tests**: 3394 passing, 3 skipped, 155 todo
+- **Test Files**: 116
+- **Tests**: 3437 passing, 3 skipped, 155 todo
 - **Pass Rate**: 100%
+
+### Portal Page Component Tests
+
+Added page component tests for critical portal pages:
+
+| Page Component       | Test File                       | Tests |
+| -------------------- | ------------------------------- | ----- |
+| StudentDashboardPage | `StudentDashboardPage.test.tsx` | 6     |
+| TeacherDashboardPage | `TeacherDashboardPage.test.tsx` | 7     |
+| AdminDashboardPage   | `AdminDashboardPage.test.tsx`   | 5     |
+| ParentDashboardPage  | `ParentDashboardPage.test.tsx`  | 7     |
+
+Each page test covers:
+
+- Loading state
+- Error state
+- Empty data state
+- Success state with data
+- Accessibility (ARIA roles)
 
 ### Validation Commands
 
