@@ -1,9 +1,10 @@
-import type { Env } from '../core-utils';
-import { UserEntity } from '../entities';
-import type { SchoolUser, CreateUserData, UpdateUserData } from '@shared/types';
-import { hashPassword } from '../password-utils';
-import { ReferentialIntegrity } from '../referential-integrity';
-import { UserCreationStrategyFactory, type BaseUserFields } from './UserCreationStrategy';
+import type { Env } from '../core-utils'
+import { UserEntity } from '../entities'
+import type { SchoolUser, CreateUserData, UpdateUserData } from '@shared/types'
+import { hashPassword } from '../password-utils'
+import { ReferentialIntegrity } from '../referential-integrity'
+import { UserCreationStrategyFactory, type BaseUserFields } from './UserCreationStrategy'
+import { NotFoundError } from '../errors'
 
 // UserService - Domain Service for User Business Logic
 // ==================================================
@@ -16,40 +17,45 @@ import { UserCreationStrategyFactory, type BaseUserFields } from './UserCreation
 
 export class UserService {
   /**
-    * Creates a new user with role-specific fields and password hashing
-    *
-    * @param env - Cloudflare Workers environment with Durable Object bindings
-    * @param userData - User data including role (student/teacher/parent/admin)
-    * @returns Created user object (without passwordHash)
-    *
-    * Role-specific fields:
-    * - student: classId, studentIdNumber
-    * - teacher: classIds (array)
-    * - parent: childId
-    * - admin: no additional fields
-    *
-    * Password handling:
-    * - If password provided, hashes using PBKDF2 with 100,000 iterations
-    * - If no password provided, sets passwordHash to null (for OAuth/future auth methods)
-    *
-    * Architecture note: Uses Strategy Pattern for role-specific creation logic.
-    * Adding new roles only requires creating a new strategy class (Open/Closed Principle).
-    */
+   * Creates a new user with role-specific fields and password hashing
+   *
+   * @param env - Cloudflare Workers environment with Durable Object bindings
+   * @param userData - User data including role (student/teacher/parent/admin)
+   * @returns Created user object (without passwordHash)
+   *
+   * Role-specific fields:
+   * - student: classId, studentIdNumber
+   * - teacher: classIds (array)
+   * - parent: childId
+   * - admin: no additional fields
+   *
+   * Password handling:
+   * - If password provided, hashes using PBKDF2 with 100,000 iterations
+   * - If no password provided, sets passwordHash to null (for OAuth/future auth methods)
+   *
+   * Architecture note: Uses Strategy Pattern for role-specific creation logic.
+   * Adding new roles only requires creating a new strategy class (Open/Closed Principle).
+   */
   static async createUser(env: Env, userData: CreateUserData): Promise<SchoolUser> {
-    const now = new Date().toISOString();
-    const base: BaseUserFields = { id: crypto.randomUUID(), createdAt: now, updatedAt: now, avatarUrl: '' };
-
-    let passwordHash = null;
-    if (userData.password) {
-      const { hash } = await hashPassword(userData.password);
-      passwordHash = hash;
+    const now = new Date().toISOString()
+    const base: BaseUserFields = {
+      id: crypto.randomUUID(),
+      createdAt: now,
+      updatedAt: now,
+      avatarUrl: '',
     }
 
-    const strategy = UserCreationStrategyFactory.getStrategy(userData.role);
-    const newUser = strategy.create(base, userData, passwordHash);
+    let passwordHash = null
+    if (userData.password) {
+      const { hash } = await hashPassword(userData.password)
+      passwordHash = hash
+    }
 
-    await UserEntity.create(env, newUser);
-    return newUser;
+    const strategy = UserCreationStrategyFactory.getStrategy(userData.role)
+    const newUser = strategy.create(base, userData, passwordHash)
+
+    await UserEntity.create(env, newUser)
+    return newUser
   }
 
   /**
@@ -66,24 +72,24 @@ export class UserService {
    * - Always updates updatedAt timestamp
    */
   static async updateUser(env: Env, userId: string, userData: UpdateUserData): Promise<SchoolUser> {
-    const userEntity = new UserEntity(env, userId);
+    const userEntity = new UserEntity(env, userId)
 
-    if (!await userEntity.exists()) {
-      throw new Error('User not found');
+    if (!(await userEntity.exists())) {
+      throw new NotFoundError('User not found')
     }
 
-    let updateData: Partial<SchoolUser> = userData;
+    let updateData: Partial<SchoolUser> = userData
 
     if (userData.password) {
-      const { hash } = await hashPassword(userData.password);
-      updateData = { ...userData, passwordHash: hash };
+      const { hash } = await hashPassword(userData.password)
+      updateData = { ...userData, passwordHash: hash }
     }
 
-    updateData.updatedAt = new Date().toISOString();
+    updateData.updatedAt = new Date().toISOString()
 
-    await userEntity.patch(updateData);
-    const updatedUser = await userEntity.getState();
-    return updatedUser!;
+    await userEntity.patch(updateData)
+    const updatedUser = await userEntity.getState()
+    return updatedUser!
   }
 
   /**
@@ -104,15 +110,18 @@ export class UserService {
    * - Parent: Has dependent students (cannot delete if child exists)
    * - Admin: Has dependents (careful deletion required)
    */
-  static async deleteUser(env: Env, userId: string): Promise<{ id: string; deleted: boolean; warnings: string[] }> {
-    const warnings = await this.checkDependents(env, userId);
+  static async deleteUser(
+    env: Env,
+    userId: string
+  ): Promise<{ id: string; deleted: boolean; warnings: string[] }> {
+    const warnings = await this.checkDependents(env, userId)
 
     if (warnings.length > 0) {
-      return { id: userId, deleted: false, warnings };
+      return { id: userId, deleted: false, warnings }
     }
 
-    const deleted = await UserEntity.delete(env, userId);
-    return { id: userId, deleted, warnings: [] };
+    const deleted = await UserEntity.delete(env, userId)
+    return { id: userId, deleted, warnings: [] }
   }
 
   /**
@@ -129,7 +138,7 @@ export class UserService {
    * - Other entity dependencies
    */
   static async checkDependents(env: Env, userId: string): Promise<string[]> {
-    return await ReferentialIntegrity.checkDependents(env, 'user', userId);
+    return await ReferentialIntegrity.checkDependents(env, 'user', userId)
   }
 
   /**
@@ -144,8 +153,8 @@ export class UserService {
    * - This prevents accidental password exposure in UI/queries
    */
   static async getAllUsers(env: Env): Promise<SchoolUser[]> {
-    const { items: users } = await UserEntity.list(env);
-    return users.map(({ passwordHash: _, ...rest }) => rest);
+    const { items: users } = await UserEntity.list(env)
+    return users.map(({ passwordHash: _, ...rest }) => rest)
   }
 
   /**
@@ -161,15 +170,15 @@ export class UserService {
    * - Use getUserWithoutPassword for token verification (alias to same function)
    */
   static async getUserById(env: Env, userId: string): Promise<SchoolUser | null> {
-    const userEntity = new UserEntity(env, userId);
-    const user = await userEntity.getState();
+    const userEntity = new UserEntity(env, userId)
+    const user = await userEntity.getState()
 
     if (!user) {
-      return null;
+      return null
     }
 
-    const { passwordHash: _, ...userWithoutPassword } = user;
-    return userWithoutPassword;
+    const { passwordHash: _, ...userWithoutPassword } = user
+    return userWithoutPassword
   }
 
   /**
@@ -185,7 +194,7 @@ export class UserService {
    * - Consistent with getUserById behavior (passwords never exposed)
    */
   static async getUserWithoutPassword(env: Env, userId: string): Promise<SchoolUser | null> {
-    const user = await this.getUserById(env, userId);
-    return user;
+    const user = await this.getUserById(env, userId)
+    return user
   }
 }
