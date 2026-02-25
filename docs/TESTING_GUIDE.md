@@ -122,8 +122,10 @@ worker/
 | Hooks      | 90%+            | 95%            |
 | Components | 85%+            | 88%            |
 | Entities   | 100%            | 100%           |
-| Routes     | 100%            | 95%            |
+| Routes     | 100%            | 30% (see note) |
 | Middleware | 100%            | 100%           |
+
+**Note on Routes**: Route integration tests require live Cloudflare Workers environment with Durable Objects. Currently, only health routes (which don't require Durable Objects) are fully tested. Other routes (student, teacher, parent, admin, public) delegate to well-tested services, so the route-level gap is less critical. See [Route Testing](#route-testing) for details.
 
 **Run Coverage**:
 
@@ -435,6 +437,81 @@ describe('StudentService', () => {
 ```
 
 ### Route Testing
+
+This section documents the route testing approach for the Cloudflare Workers backend.
+
+#### Current State
+
+Most route integration tests are **skipped** because they require a live Cloudflare Workers environment with Durable Objects, which isn't available in the standard test environment.
+
+**Tested Routes**:
+
+- Health routes (`worker/routes/__tests__/health-routes.test.ts`) - Works because it doesn't require Durable Objects
+
+**Skipped Routes** (require Durable Objects):
+
+- Student routes (`student-routes.ts`)
+- Teacher routes (`teacher-routes.ts`)
+- Parent routes (`parent-routes.ts`)
+- Admin routes (`admin-routes.ts`)
+- Public routes (`public-routes.ts`)
+
+#### Why Route Tests Are Limited
+
+Routes in this codebase are **thin wrappers** that:
+
+1. Parse input from request
+2. Call service methods
+3. Format responses
+
+The business logic is in domain services (`worker/domain/`), which are thoroughly tested. Since services are well-tested, the route-level gap is less critical.
+
+#### Service-Layer Coverage
+
+The service layer provides adequate coverage:
+
+- **Entity tests**: `worker/__tests__/` - 100% coverage
+- **Domain service tests**: `worker/domain/*/*.test.ts` - 98% coverage
+- **Middleware tests**: `worker/middleware/__tests__/` - 100% coverage
+
+If service tests pass, route logic is validated because routes merely delegate to services.
+
+#### Manual Route Testing
+
+To test routes manually (requires Cloudflare Workers):
+
+```bash
+# Start wrangler dev
+cd worker
+npx wrangler dev
+
+# In another terminal, test routes
+curl http://localhost:8787/api/students/student-1/grades \
+  -H "Authorization: Bearer <token>"
+
+curl http://localhost:8787/api/teachers/teacher-1/schedule \
+  -H "Authorization: Bearer <token>"
+```
+
+#### Running Route Tests
+
+Only health route tests run in CI:
+
+```bash
+# Run all tests (health routes only)
+npm run test:run
+
+# Run specific route test
+npm test -- health-routes.test.ts
+```
+
+#### Future Improvements
+
+If full route integration testing is needed:
+
+1. **Option 1**: Use `wrangler dev` in test setup - realistic but slower
+2. **Option 2**: Create mock Durable Object storage - requires significant mocking infrastructure
+3. **Option 3**: Add more service-level tests - already the current approach
 
 ```typescript
 import { describe, it, expect, beforeEach } from 'vitest'
