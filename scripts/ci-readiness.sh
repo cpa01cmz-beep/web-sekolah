@@ -204,6 +204,23 @@ check_env_example() {
   fi
 }
 
+check_agent_docs() {
+  local agent_docs=("docs/ai-agent-engineer.md" "docs/backend-engineer.md" "docs/frontend-engineer.md")
+  local found=0
+  
+  for doc in "${agent_docs[@]}"; do
+    if [ -f "$doc" ]; then
+      found=$((found + 1))
+    fi
+  done
+  
+  if [ $found -gt 0 ]; then
+    add_result "pass" "Agent Documentation" "$found agent docs found"
+  else
+    add_result "warn" "Agent Documentation" "No agent documentation found" "Create docs/ai-agent-engineer.md"
+  fi
+}
+
 check_git_clean() {
   if git diff-index --quiet HEAD -- 2>/dev/null; then
     add_result "pass" "Git Working Tree" "Clean"
@@ -267,6 +284,7 @@ check_dependencies_integrity
 check_typescript_config
 check_wrangler_config
 check_env_example
+check_agent_docs
 
 log ""
 log "Checking build setup..."
