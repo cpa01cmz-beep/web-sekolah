@@ -232,7 +232,7 @@ check_git_clean() {
 }
 
 check_required_scripts() {
-  local scripts=("build" "test:run" "typecheck" "lint")
+  local scripts=("build" "test:run" "typecheck" "lint" "validate")
   local missing=0
   
   for script in "${scripts[@]}"; do
