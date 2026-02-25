@@ -68,6 +68,12 @@ const CSP_INLINE_SCRIPT_HASH = "'sha256-xsWpBSh+88Gpp+H1+XSGjqLj67OrRo+q9tmTvaO4
 // - ✅ Enables cross-origin isolation to prevent side-channel attacks
 // - ✅ Required for powerful features like SharedArrayBuffer
 //
+// SECURITY IMPROVEMENTS (2026-02-28):
+// - ✅ Added 'upgrade-insecure-requests' to CSP
+// - ✅ Automatically upgrades HTTP requests to HTTPS
+// - ✅ Works with HSTS for complete transport security
+// - ✅ Defense-in-depth security improvement
+//
 // FUTURE IMPROVEMENTS:
 
 const DEFAULT_SECURITY_HEADERS: SecurityHeadersConfig = {
@@ -77,7 +83,7 @@ const DEFAULT_SECURITY_HEADERS: SecurityHeadersConfig = {
   enableXContentTypeOptions: true,
   enableReferrerPolicy: true,
   enablePermissionsPolicy: true,
-  cspDirectives: `default-src 'self'; script-src 'self' ${CSP_INLINE_SCRIPT_HASH} 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self'; frame-src 'self'; frame-ancestors 'none'; object-src 'none'; worker-src 'self'; base-uri 'self'; form-action 'self'; report-uri /api/csp-report;`,
+  cspDirectives: `default-src 'self'; script-src 'self' ${CSP_INLINE_SCRIPT_HASH} 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self'; frame-src 'self'; frame-ancestors 'none'; object-src 'none'; worker-src 'self'; base-uri 'self'; form-action 'self'; report-uri /api/csp-report; upgrade-insecure-requests;`,
   hstsMaxAge: 31536000,
 }
 
