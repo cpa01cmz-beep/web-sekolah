@@ -29,6 +29,14 @@ This document serves as the long-term memory for the security-engineer agent, tr
 
 ### 2026-02-28
 
+- **Added logout endpoint with Clear-Site-Data header**
+  - Added `/api/auth/logout` endpoint in auth-routes.ts
+  - Returns `Clear-Site-Data: "cookies", "storage", "cache"` header on logout
+  - Clears browser data when users log out, preventing session fixation attacks
+  - Ensures no sensitive data remains in browser after logout
+  - Updated frontend AuthService to call the logout API endpoint
+  - Small, atomic change with no breaking impact
+
 - **Added upgrade-insecure-requests directive to CSP**
   - Added `upgrade-insecure-requests` to CSP in security-headers.ts
   - Automatically upgrades HTTP requests to HTTPS

@@ -9,7 +9,7 @@ import { logger } from './logger'
 import { verifyPassword, verifyPasswordTimingSafe } from './password-utils'
 import { UserService } from './domain'
 import { getRoleSpecificFields, getAuthUser } from './type-guards'
-import { withErrorHandler, triggerWebhookSafely } from './routes/route-utils'
+import { withErrorHandler, triggerWebhookSafely, withAuth } from './routes/route-utils'
 import type { Context } from 'hono'
 
 export function authRoutes(app: Hono<{ Bindings: Env }>) {
@@ -123,6 +123,36 @@ export function authRoutes(app: Hono<{ Bindings: Env }>) {
         token,
         user: userResponse,
       })
+    })
+  )
+
+  app.post(
+    '/api/auth/logout',
+    withAuth('student', 'teacher', 'parent', 'admin'),
+    withErrorHandler('logout user')(async (c: Context) => {
+      const user = getAuthUser(c)
+
+      logger.info('[AUTH] User logged out', {
+        userId: user?.id,
+        email: user?.email,
+        role: user?.role,
+      })
+
+      triggerWebhookSafely(
+        c.env,
+        'user.logout',
+        {
+          userId: user?.id,
+          email: user?.email,
+          role: user?.role,
+          logoutAt: new Date().toISOString(),
+        },
+        { userId: user?.id }
+      )
+
+      c.res.headers.set('Clear-Site-Data', '"cookies", "storage", "cache"')
+
+      return ok(c, { message: 'Logged out successfully' })
     })
   )
 }
