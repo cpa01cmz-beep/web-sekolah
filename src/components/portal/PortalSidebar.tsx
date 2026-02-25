@@ -1,5 +1,5 @@
 import { NavLink, useNavigate } from 'react-router-dom';
-import { useAuthStore } from '@/lib/authStore';
+import { useAuthStore } from '@/stores/authStore';
 import { Button } from '@/components/ui/button';
 import { LogOut, GraduationCap, ChevronLeft, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';

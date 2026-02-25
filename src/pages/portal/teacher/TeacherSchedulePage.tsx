@@ -5,7 +5,7 @@ import { ScheduleGrid } from '@/components/dashboard/ScheduleGrid'
 import { ScheduleLayout } from '@/components/dashboard/ScheduleLayout'
 import { useTeacherSchedule } from '@/hooks/useTeacher'
 import { useScheduleGrouping } from '@/hooks/useScheduleGrouping'
-import { useAuthStore } from '@/lib/authStore'
+import { useAuthStore } from '@/stores/authStore'
 import type { TeacherScheduleItem } from '@shared/types'
 
 const TeacherScheduleContent = memo(function TeacherScheduleContent({

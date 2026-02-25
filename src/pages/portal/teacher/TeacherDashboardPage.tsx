@@ -9,7 +9,7 @@ import { BookCopy, Megaphone, Award } from 'lucide-react';
 import { SlideUp } from '@/components/animations';
 import { useReducedMotion } from '@/hooks/use-reduced-motion';
 import { useTeacherDashboard } from '@/hooks/useTeacher';
-import { useAuthStore } from '@/lib/authStore';
+import { useAuthStore } from '@/stores/authStore';
 import type { TeacherDashboardData } from '@shared/types';
 
 const GradeItem = memo(({ grade }: { grade: TeacherDashboardData['recentGrades'][0] }) => (

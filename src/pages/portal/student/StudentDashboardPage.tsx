@@ -9,7 +9,7 @@ import { ScheduleListItem } from '@/components/dashboard/ScheduleListItem'
 import { useReducedMotion } from '@/hooks/use-reduced-motion'
 import { Clock, BookOpen, Megaphone } from 'lucide-react'
 import { useStudentDashboard } from '@/hooks/useStudent'
-import { useAuthStore } from '@/lib/authStore'
+import { useAuthStore } from '@/stores/authStore'
 import type { StudentDashboardData } from '@shared/types'
 
 export function StudentDashboardPage() {

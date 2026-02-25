@@ -4,7 +4,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { PageHeader } from '@/components/PageHeader';
 import { SlideUp } from '@/components/animations';
 import { toast } from 'sonner';
-import { useAuthStore } from '@/lib/authStore';
+import { useAuthStore } from '@/stores/authStore';
 import { useMutation, queryClient } from '@/lib/api-client';
 import { useTeacherClasses, useTeacherClassStudents } from '@/hooks/useTeacher';
 import { Skeleton } from '@/components/ui/skeleton';

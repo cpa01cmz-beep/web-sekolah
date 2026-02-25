@@ -2,7 +2,7 @@ import { PageHeader } from '@/components/PageHeader';
 import { SlideUp } from '@/components/animations';
 import { ScheduleGrid } from '@/components/dashboard/ScheduleGrid';
 import { ScheduleLayout } from '@/components/dashboard/ScheduleLayout';
-import { useAuthStore } from '@/lib/authStore';
+import { useAuthStore } from '@/stores/authStore';
 import { useChildSchedule } from '@/hooks/useParent';
 import { useScheduleGrouping } from '@/hooks/useScheduleGrouping';
 import type { ScheduleItem } from '@shared/types';

@@ -1,5 +1,5 @@
 import { Outlet, Navigate, NavLink } from 'react-router-dom';
-import { useAuthStore } from '@/lib/authStore';
+import { useAuthStore } from '@/stores/authStore';
 import { PortalSidebar } from '@/components/portal/PortalSidebar';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';

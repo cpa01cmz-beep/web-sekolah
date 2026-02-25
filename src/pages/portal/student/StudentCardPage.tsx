@@ -1,4 +1,4 @@
-import { useAuthStore } from '@/lib/authStore';
+import { useAuthStore } from '@/stores/authStore';
 import { useStudentCard } from '@/hooks/useStudent';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
