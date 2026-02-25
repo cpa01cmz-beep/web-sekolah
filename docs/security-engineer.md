@@ -27,6 +27,15 @@ This document serves as the long-term memory for the security-engineer agent, tr
 
 ## Completed Improvements
 
+### 2026-02-27
+
+- **Added Cross-Origin-Embedder-Policy (COEP) header**
+  - Added `Cross-Origin-Embedder-Policy: require-corp` to security-headers.ts
+  - Works with COOP (already set to 'same-origin') for cross-origin isolation
+  - Enables cross-origin isolation to prevent side-channel attacks (e.g., Spectre)
+  - Required for powerful features like SharedArrayBuffer
+  - Small, atomic change with no breaking impact
+
 ### 2026-02-26
 
 - **Added X-DNS-Prefetch-Control header**
