@@ -12,6 +12,7 @@ import { calculateAverageScore, getGradeColorClass, getGradeLetter } from '@/uti
 import { ResponsiveTable } from '@/components/ui/responsive-table'
 import { PieChart } from '@/components/charts/PieChart'
 import type { ChartDataPoint } from '@/components/charts/types'
+import { GRADE_COLORS } from '@/theme/colors'
 
 const TABLE_HEADERS = [
   { key: 'no', label: 'No.' },
@@ -20,14 +21,6 @@ const TABLE_HEADERS = [
   { key: 'grade', label: 'Predikat', className: 'text-center' },
   { key: 'feedback', label: 'Keterangan' },
 ]
-
-const GRADE_DISTRIBUTION_COLORS: Record<string, string> = {
-  A: '#22c55e',
-  B: '#3b82f6',
-  C: '#f59e0b',
-  D: '#ef4444',
-  F: '#dc2626',
-}
 
 function calculateGradeDistribution(grades: { score: number }[]): ChartDataPoint[] {
   const distribution: Record<string, number> = { A: 0, B: 0, C: 0, D: 0, F: 0 }
@@ -40,7 +33,7 @@ function calculateGradeDistribution(grades: { score: number }[]): ChartDataPoint
     .map(([name, value]) => ({
       name,
       value,
-      color: GRADE_DISTRIBUTION_COLORS[name],
+      color: GRADE_COLORS[name],
     }))
 }
 
