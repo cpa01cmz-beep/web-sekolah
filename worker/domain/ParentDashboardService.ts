@@ -27,19 +27,6 @@ export class ParentDashboardService {
       throw new NotFoundError('Child not found')
     }
 
-    const roleFields = getRoleSpecificFields(parentState)
-
-    if (!roleFields.childId) {
-      throw new Error('Parent has no associated child')
-    }
-
-    const childEntity = new UserEntity(env, roleFields.childId)
-    const childState = await childEntity.getState()
-
-    if (!childState || childState.role !== 'student') {
-      throw new Error('Child not found')
-    }
-
     const childRoleFields = getRoleSpecificFields(childState)
 
     const [child, childSchedule, childGrades, announcements] = await Promise.all([

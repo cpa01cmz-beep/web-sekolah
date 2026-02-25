@@ -32,12 +32,6 @@ export class TeacherService {
     const teacher = (await new UserEntity(env, classState.teacherId).getState()) as Teacher
 
     if (teacher.id !== teacherId) {
-      throw new ValidationError('Teacher not assigned to this class')
-    }
-
-    const teacher = (await new UserEntity(env, classState.teacherId).getState()) as Teacher
-
-    if (teacher.id !== teacherId) {
       throw new Error('Teacher not assigned to this class')
     }
 
