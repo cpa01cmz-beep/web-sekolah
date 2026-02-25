@@ -10,6 +10,21 @@ This document serves as the long-term memory and domain knowledge for the Growth
 
 ## Implemented Improvements
 
+### 3. SEO: Fix Empty Canonical and Open Graph URLs (Feb 2026)
+
+**Issue**: Empty canonical URL and og:url in index.html
+
+**Changes**:
+
+- Set canonical URL to production URL: https://akademia-pro.vercel.app/
+- Set og:url to production URL: https://akademia-pro.vercel.app/
+
+**Impact**:
+
+- Prevents duplicate content issues with search engines
+- Ensures proper social media previews when links are shared
+- Improves SEO by providing a consistent canonical URL
+
 ### 2. Skip to Main Content Link (Feb 2026)
 
 **Issue**: Missing keyboard accessibility bypass for navigation
