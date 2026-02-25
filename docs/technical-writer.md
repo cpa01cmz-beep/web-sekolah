@@ -6,7 +6,7 @@ This document tracks the technical writer agent's evolution and best practices f
 
 ## Past Work
 
-- (2026-02-25) Updated roadmap.md test counts: 3346→3412 passing, 5→3 skipped
+- (2026-02-25) Updated roadmap.md test counts: 3412→3437 passing, 3 skipped
 - Issue #1175: Split oversized blueprint.md into focused documentation
   - Extracted: Cache Configuration → docs/CACHE_CONFIG.md
   - Extracted: Scheduled Tasks → docs/SCHEDULED_TASKS.md
