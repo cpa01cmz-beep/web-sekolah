@@ -16,6 +16,7 @@ This document serves as the long-term memory for the Autonomous R&D Specialist a
 - No open RnD issues or PRs found
 - Codebase is well-maintained with good practices
 - PR #1188: Made security.txt configurable via SITE_URL environment variable
+- PR #1203: Made robots.txt configurable via SITE_URL environment variable (open)
 
 ## Potential Improvements Identified
 
