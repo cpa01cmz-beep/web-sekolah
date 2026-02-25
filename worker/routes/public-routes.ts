@@ -22,38 +22,43 @@ import {
 
 import { PaginationDefaults } from '../config'
 
-const SECURITY_TXT = `# Security Policy
+const DEFAULT_SITE_URL = 'https://example.com'
+
+function buildSecurityTxt(siteUrl: string): string {
+  return `# Security Policy
 # https://securitytxt.org
 
 # Contact: Email address for reporting security vulnerabilities
-Contact: security@example.com
+Contact: security@${new URL(siteUrl).hostname}
 
 # Preferred-Languages: Languages for security reports
 Preferred-Languages: en
 
 # Canonical: Canonical URI for this security.txt
-Canonical: https://example.com/.well-known/security.txt
+Canonical: ${siteUrl}/.well-known/security.txt
 
 # Policy: Link to security policy
-Policy: https://example.com/security-policy
+Policy: ${siteUrl}/security-policy
 
 # Acknowledgments: Link to acknowledgments page
-Acknowledgments: https://example.com/security/acknowledgments
+Acknowledgments: ${siteUrl}/security/acknowledgments
 
 # Hiring: Link to security-related job openings
-Hiring: https://example.com/careers#security
+Hiring: ${siteUrl}/careers#security
 
 # Expires: Expiration date for this file (YYYY-MM-DDTHH:MM:SS.000Z)
 Expires: 2027-02-21T00:00:00.000Z
 `
+}
 
 export function publicRoutes(app: Hono<{ Bindings: Env }>) {
   app.get(
     '/api/public/security.txt',
     withErrorHandler('get security policy')(async (c: Context) => {
+      const siteUrl = c.env.SITE_URL || DEFAULT_SITE_URL
       c.header('Content-Type', 'text/plain; charset=utf-8')
       c.header('Cache-Control', 'public, max-age=86400')
-      return c.text(SECURITY_TXT)
+      return c.text(buildSecurityTxt(siteUrl))
     })
   )
 
