@@ -51,6 +51,14 @@ Expires: 2027-02-21T00:00:00.000Z
 `
 }
 
+function buildRobotsTxt(siteUrl: string): string {
+  return `User-agent: *
+Allow: /
+
+Sitemap: ${siteUrl}/sitemap.xml
+`
+}
+
 export function publicRoutes(app: Hono<{ Bindings: Env }>) {
   app.get(
     '/api/public/security.txt',
@@ -59,6 +67,16 @@ export function publicRoutes(app: Hono<{ Bindings: Env }>) {
       c.header('Content-Type', 'text/plain; charset=utf-8')
       c.header('Cache-Control', 'public, max-age=86400')
       return c.text(buildSecurityTxt(siteUrl))
+    })
+  )
+
+  app.get(
+    '/api/public/robots.txt',
+    withErrorHandler('get robots.txt')(async (c: Context) => {
+      const siteUrl = c.env.SITE_URL || DEFAULT_SITE_URL
+      c.header('Content-Type', 'text/plain; charset=utf-8')
+      c.header('Cache-Control', 'public, max-age=86400')
+      return c.text(buildRobotsTxt(siteUrl))
     })
   )
 
