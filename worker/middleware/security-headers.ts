@@ -62,6 +62,12 @@ const CSP_INLINE_SCRIPT_HASH = "'sha256-xsWpBSh+88Gpp+H1+XSGjqLj67OrRo+q9tmTvaO4
 // - ✅ Enhances privacy by preventing browsers from pre-resolving domains
 // - ✅ Small defense-in-depth security improvement
 //
+// SECURITY IMPROVEMENTS (2026-02-27):
+// - ✅ Added 'Cross-Origin-Embedder-Policy: require-corp' for cross-origin isolation
+// - ✅ Works with COOP (already set to 'same-origin') for enhanced security
+// - ✅ Enables cross-origin isolation to prevent side-channel attacks
+// - ✅ Required for powerful features like SharedArrayBuffer
+//
 // FUTURE IMPROVEMENTS:
 
 const DEFAULT_SECURITY_HEADERS: SecurityHeadersConfig = {
@@ -119,6 +125,7 @@ export function securityHeaders(config: SecurityHeadersConfig = {}) {
     response.headers.set('X-Permitted-Cross-Domain-Policies', 'none')
     response.headers.set('Cross-Origin-Opener-Policy', 'same-origin')
     response.headers.set('Cross-Origin-Resource-Policy', 'same-site')
+    response.headers.set('Cross-Origin-Embedder-Policy', 'require-corp')
     response.headers.set('Origin-Agent-Cluster', '?1')
     response.headers.set('X-DNS-Prefetch-Control', 'off')
     response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate')
