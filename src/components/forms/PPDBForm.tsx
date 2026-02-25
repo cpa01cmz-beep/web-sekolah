@@ -1,26 +1,38 @@
-import { Button } from '@/components/ui/button';
-import { FormField } from '@/components/ui/form-field';
-import { FormFieldInput } from '@/components/ui/form-field-input';
-import { FormSuccess } from '@/components/ui/form-success';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useState, useCallback, useMemo } from 'react';
-import { toast } from 'sonner';
-import { validateName, validateEmail, validatePhone, validateNisn, validateRequired } from '@/utils/validation';
-import { useFormValidation } from '@/hooks/useFormValidation';
+import { Button } from '@/components/ui/button'
+import { FormField } from '@/components/ui/form-field'
+import { FormFieldInput } from '@/components/ui/form-field-input'
+import { FormSuccess } from '@/components/ui/form-success'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import { useState, useCallback, useMemo } from 'react'
+import { toast } from 'sonner'
+import {
+  validateName,
+  validateEmail,
+  validatePhone,
+  validateNisn,
+  validateRequired,
+} from '@/utils/validation'
+import { useFormValidation } from '@/hooks/useFormValidation'
 
 interface PPDBFormData {
-  name: string;
-  placeOfBirth: string;
-  dateOfBirth: string;
-  nisn: string;
-  school: string;
-  level: string;
-  email: string;
-  phone: string;
+  name: string
+  placeOfBirth: string
+  dateOfBirth: string
+  nisn: string
+  school: string
+  level: string
+  email: string
+  phone: string
 }
 
 interface PPDBFormProps {
-  onSubmit?: (data: PPDBFormData) => void;
+  onSubmit?: (data: PPDBFormData) => void
 }
 
 export function PPDBForm({ onSubmit }: PPDBFormProps) {
@@ -33,11 +45,15 @@ export function PPDBForm({ onSubmit }: PPDBFormProps) {
     level: '',
     email: '',
     phone: '',
-  });
-  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-  const [isSuccess, setIsSuccess] = useState<boolean>(false);
+  })
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
+  const [isSuccess, setIsSuccess] = useState<boolean>(false)
 
-  const { errors, validateAll, reset: resetValidation } = useFormValidation(formData, {
+  const {
+    errors,
+    validateAll,
+    reset: resetValidation,
+  } = useFormValidation(formData, {
     validators: {
       name: (value, show) => validateName(value, show, 3),
       placeOfBirth: (value, show) => validateRequired(value, show, 'Tempat lahir'),
@@ -48,51 +64,59 @@ export function PPDBForm({ onSubmit }: PPDBFormProps) {
       email: validateEmail,
       phone: (value, show) => validatePhone(value, show, 10, 13),
     },
-  });
+  })
 
   const handleInputChange = useCallback((field: keyof PPDBFormData, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: String(value) }));
-  }, []);
+    setFormData(prev => ({ ...prev, [field]: String(value) }))
+  }, [])
 
   const handleReset = useCallback(() => {
-    setIsSuccess(false);
-    resetValidation();
-  }, [resetValidation]);
+    setIsSuccess(false)
+    resetValidation()
+  }, [resetValidation])
 
-  const successAction = useMemo(() => ({
-    label: "Daftar Siswa Lain",
-    onClick: handleReset,
-  }), [handleReset]);
+  const successAction = useMemo(
+    () => ({
+      label: 'Daftar Siswa Lain',
+      onClick: handleReset,
+    }),
+    [handleReset]
+  )
 
-  const handleSubmit = useCallback(async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (!validateAll()) {
-      toast.error('Mohon lengkapi formulir dengan benar.');
-      return;
-    }
+  const handleSubmit = useCallback(
+    async (e: React.FormEvent<HTMLFormElement>) => {
+      e.preventDefault()
+      if (!validateAll()) {
+        toast.error('Mohon lengkapi formulir dengan benar.')
+        return
+      }
 
-    setIsSubmitting(true);
-    try {
-      await onSubmit?.(formData);
-      setIsSuccess(true);
-      toast.success('Pendaftaran berhasil dikirim! Silakan cek email untuk instruksi selanjutnya.');
-      setFormData({
-        name: '',
-        placeOfBirth: '',
-        dateOfBirth: '',
-        nisn: '',
-        school: '',
-        level: '',
-        email: '',
-        phone: '',
-      });
-      resetValidation();
-    } catch (error) {
-      toast.error('Pendaftaran gagal. Silakan coba lagi.');
-    } finally {
-      setIsSubmitting(false);
-    }
-  }, [validateAll, onSubmit, formData, resetValidation]);
+      setIsSubmitting(true)
+      try {
+        await onSubmit?.(formData)
+        setIsSuccess(true)
+        toast.success(
+          'Pendaftaran berhasil dikirim! Silakan cek email untuk instruksi selanjutnya.'
+        )
+        setFormData({
+          name: '',
+          placeOfBirth: '',
+          dateOfBirth: '',
+          nisn: '',
+          school: '',
+          level: '',
+          email: '',
+          phone: '',
+        })
+        resetValidation()
+      } catch (error) {
+        toast.error('Pendaftaran gagal. Silakan coba lagi.')
+      } finally {
+        setIsSubmitting(false)
+      }
+    },
+    [validateAll, onSubmit, formData, resetValidation]
+  )
 
   if (isSuccess) {
     return (
@@ -101,7 +125,7 @@ export function PPDBForm({ onSubmit }: PPDBFormProps) {
         description="Terima kasih telah mendaftar. Silakan cek email Anda untuk instruksi selanjutnya."
         action={successAction}
       />
-    );
+    )
   }
 
   return (
@@ -115,9 +139,10 @@ export function PPDBForm({ onSubmit }: PPDBFormProps) {
           helperText="Masukkan nama lengkap sesuai akta kelahiran"
           placeholder="Masukkan nama lengkap"
           value={formData.name}
-          onChange={(value) => handleInputChange('name', value)}
+          onChange={value => handleInputChange('name', value)}
           disabled={isSubmitting}
           required
+          autoComplete="name"
         />
 
         <div className="grid grid-cols-2 gap-4">
@@ -128,9 +153,10 @@ export function PPDBForm({ onSubmit }: PPDBFormProps) {
             helperText="Kota tempat lahir"
             placeholder="Tempat lahir"
             value={formData.placeOfBirth}
-            onChange={(value) => handleInputChange('placeOfBirth', value)}
+            onChange={value => handleInputChange('placeOfBirth', value)}
             disabled={isSubmitting}
             required
+            autoComplete="address-level2"
           />
           <FormFieldInput
             id="dateOfBirth"
@@ -140,7 +166,20 @@ export function PPDBForm({ onSubmit }: PPDBFormProps) {
             helperText="Tanggal lahir sesuai akta"
             placeholder="Tanggal lahir"
             value={formData.dateOfBirth}
-            onChange={(value) => handleInputChange('dateOfBirth', value)}
+            onChange={value => handleInputChange('dateOfBirth', value)}
+            disabled={isSubmitting}
+            required
+            autoComplete="bday"
+          />
+          <FormFieldInput
+            id="dateOfBirth"
+            label="Tanggal Lahir"
+            type="date"
+            error={errors.dateOfBirth}
+            helperText="Tanggal lahir sesuai akta"
+            placeholder="Tanggal lahir"
+            value={formData.dateOfBirth}
+            onChange={value => handleInputChange('dateOfBirth', value)}
             disabled={isSubmitting}
             required
           />
@@ -153,7 +192,7 @@ export function PPDBForm({ onSubmit }: PPDBFormProps) {
           helperText="Nomor Induk Siswa Nasional (10 digit)"
           placeholder="Nomor Induk Siswa Nasional"
           value={formData.nisn}
-          onChange={(value) => handleInputChange('nisn', value)}
+          onChange={value => handleInputChange('nisn', value)}
           disabled={isSubmitting}
           required
         />
@@ -165,9 +204,10 @@ export function PPDBForm({ onSubmit }: PPDBFormProps) {
           helperText="Nama sekolah sebelumnya"
           placeholder="Nama sekolah sebelumnya"
           value={formData.school}
-          onChange={(value) => handleInputChange('school', value)}
+          onChange={value => handleInputChange('school', value)}
           disabled={isSubmitting}
           required
+          autoComplete="school-name"
         />
 
         <FormField
@@ -177,7 +217,10 @@ export function PPDBForm({ onSubmit }: PPDBFormProps) {
           helperText="Pilih jenjang pendidikan yang dituju"
           required
         >
-          <Select onValueChange={(value) => handleInputChange('level', value)} disabled={isSubmitting}>
+          <Select
+            onValueChange={value => handleInputChange('level', value)}
+            disabled={isSubmitting}
+          >
             <SelectTrigger id="level" aria-labelledby="level-label" aria-busy={isSubmitting}>
               <SelectValue placeholder="Pilih jenjang" />
             </SelectTrigger>
@@ -196,9 +239,10 @@ export function PPDBForm({ onSubmit }: PPDBFormProps) {
           helperText="Email aktif untuk menerima konfirmasi"
           placeholder="email@contoh.com"
           value={formData.email}
-          onChange={(value) => handleInputChange('email', value)}
+          onChange={value => handleInputChange('email', value)}
           disabled={isSubmitting}
           required
+          autoComplete="email"
         />
 
         <FormFieldInput
@@ -209,7 +253,21 @@ export function PPDBForm({ onSubmit }: PPDBFormProps) {
           helperText="Nomor WhatsApp yang bisa dihubungi"
           placeholder="081234567890"
           value={formData.phone}
-          onChange={(value) => handleInputChange('phone', value)}
+          onChange={value => handleInputChange('phone', value)}
+          disabled={isSubmitting}
+          required
+          autoComplete="tel"
+        />
+
+        <FormFieldInput
+          id="phone"
+          label="Nomor Telepon"
+          type="tel"
+          error={errors.phone}
+          helperText="Nomor WhatsApp yang bisa dihubungi"
+          placeholder="081234567890"
+          value={formData.phone}
+          onChange={value => handleInputChange('phone', value)}
           disabled={isSubmitting}
           required
         />
@@ -219,5 +277,5 @@ export function PPDBForm({ onSubmit }: PPDBFormProps) {
         </Button>
       </form>
     </div>
-  );
+  )
 }

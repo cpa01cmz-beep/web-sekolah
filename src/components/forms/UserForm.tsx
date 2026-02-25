@@ -1,69 +1,99 @@
-import { useState, useCallback, memo } from 'react';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter, DialogClose } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Button } from '@/components/ui/button';
-import { FormField } from '@/components/ui/form-field';
-import { UserRole, SchoolUser } from '@shared/types';
-import { validateName, validateEmail, validateRole } from '@/utils/validation';
-import { useFormValidation } from '@/hooks/useFormValidation';
+import { useState, useCallback, memo } from 'react'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogClose,
+} from '@/components/ui/dialog'
+import { Input } from '@/components/ui/input'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import { Button } from '@/components/ui/button'
+import { FormField } from '@/components/ui/form-field'
+import { UserRole, SchoolUser } from '@shared/types'
+import { validateName, validateEmail, validateRole } from '@/utils/validation'
+import { useFormValidation } from '@/hooks/useFormValidation'
 
 interface UserFormData {
-  name: string;
-  email: string;
-  role: UserRole;
+  name: string
+  email: string
+  role: UserRole
 }
 
 interface UserFormProps {
-  open: boolean;
-  onClose: () => void;
-  editingUser: SchoolUser | null;
-  onSave: (data: UserFormData) => void;
-  isLoading: boolean;
+  open: boolean
+  onClose: () => void
+  editingUser: SchoolUser | null
+  onSave: (data: UserFormData) => void
+  isLoading: boolean
 }
 
-export const UserForm = memo(function UserForm({ open, onClose, editingUser, onSave, isLoading }: UserFormProps) {
-  const [userName, setUserName] = useState<string>(() => editingUser?.name || '');
-  const [userEmail, setUserEmail] = useState<string>(() => editingUser?.email || '');
-  const [userRole, setUserRole] = useState<UserRole>(() => editingUser?.role || 'student');
+export const UserForm = memo(function UserForm({
+  open,
+  onClose,
+  editingUser,
+  onSave,
+  isLoading,
+}: UserFormProps) {
+  const [userName, setUserName] = useState<string>(() => editingUser?.name || '')
+  const [userEmail, setUserEmail] = useState<string>(() => editingUser?.email || '')
+  const [userRole, setUserRole] = useState<UserRole>(() => editingUser?.role || 'student')
 
-  const formData = { name: userName, email: userEmail, role: userRole };
-  const { errors, validateAll, reset: resetValidation } = useFormValidation(formData, {
+  const formData = { name: userName, email: userEmail, role: userRole }
+  const {
+    errors,
+    validateAll,
+    reset: resetValidation,
+  } = useFormValidation(formData, {
     validators: {
       name: validateName,
       email: validateEmail,
       role: validateRole,
     },
-  });
+  })
 
-  const handleOpenChange = useCallback((newOpen: boolean) => {
-    if (!newOpen) {
-      setUserName('');
-      setUserEmail('');
-      setUserRole('student');
-      resetValidation();
-      onClose();
-    } else if (editingUser) {
-      setUserName(editingUser.name);
-      setUserEmail(editingUser.email);
-      setUserRole(editingUser.role);
-      resetValidation();
-    }
-  }, [editingUser, onClose, resetValidation]);
+  const handleOpenChange = useCallback(
+    (newOpen: boolean) => {
+      if (!newOpen) {
+        setUserName('')
+        setUserEmail('')
+        setUserRole('student')
+        resetValidation()
+        onClose()
+      } else if (editingUser) {
+        setUserName(editingUser.name)
+        setUserEmail(editingUser.email)
+        setUserRole(editingUser.role)
+        resetValidation()
+      }
+    },
+    [editingUser, onClose, resetValidation]
+  )
 
-  const handleSubmit = useCallback((e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (!validateAll()) {
-      return;
-    }
+  const handleSubmit = useCallback(
+    (e: React.FormEvent<HTMLFormElement>) => {
+      e.preventDefault()
+      if (!validateAll()) {
+        return
+      }
 
-    const userData: UserFormData = {
-      name: userName.trim(),
-      email: userEmail.trim(),
-      role: userRole,
-    };
-    onSave(userData);
-  }, [validateAll, userName, userEmail, userRole, onSave]);
+      const userData: UserFormData = {
+        name: userName.trim(),
+        email: userEmail.trim(),
+        role: userRole,
+      }
+      onSave(userData)
+    },
+    [validateAll, userName, userEmail, userRole, onSave]
+  )
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
@@ -71,7 +101,9 @@ export const UserForm = memo(function UserForm({ open, onClose, editingUser, onS
         <DialogHeader>
           <DialogTitle>{editingUser ? 'Edit User' : 'Add New User'}</DialogTitle>
           <DialogDescription>
-            {editingUser ? 'Update details for this user.' : 'Fill in the details to create a new user.'}
+            {editingUser
+              ? 'Update details for this user.'
+              : 'Fill in the details to create a new user.'}
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit}>
@@ -88,8 +120,9 @@ export const UserForm = memo(function UserForm({ open, onClose, editingUser, onS
                 <Input
                   name="name"
                   value={userName}
-                  onChange={(e) => setUserName(e.target.value)}
+                  onChange={e => setUserName(e.target.value)}
                   required
+                  autoComplete="name"
                 />
               </FormField>
             </div>
@@ -106,9 +139,10 @@ export const UserForm = memo(function UserForm({ open, onClose, editingUser, onS
                   name="email"
                   type="email"
                   value={userEmail}
-                  onChange={(e) => setUserEmail(e.target.value)}
+                  onChange={e => setUserEmail(e.target.value)}
                   required
                   placeholder="user@example.com"
+                  autoComplete="email"
                 />
               </FormField>
             </div>
@@ -127,7 +161,9 @@ export const UserForm = memo(function UserForm({ open, onClose, editingUser, onS
                   onValueChange={(value: UserRole) => setUserRole(value)}
                   required
                 >
-                  <SelectTrigger className="col-span-3" aria-labelledby="role-label"><SelectValue placeholder="Select a role" /></SelectTrigger>
+                  <SelectTrigger className="col-span-3" aria-labelledby="role-label">
+                    <SelectValue placeholder="Select a role" />
+                  </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="student">Student</SelectItem>
                     <SelectItem value="teacher">Teacher</SelectItem>
@@ -139,7 +175,11 @@ export const UserForm = memo(function UserForm({ open, onClose, editingUser, onS
             </div>
           </div>
           <DialogFooter>
-            <DialogClose asChild><Button type="button" variant="secondary">Cancel</Button></DialogClose>
+            <DialogClose asChild>
+              <Button type="button" variant="secondary">
+                Cancel
+              </Button>
+            </DialogClose>
             <Button type="submit" disabled={isLoading} aria-busy={isLoading}>
               {isLoading ? 'Saving...' : 'Save changes'}
             </Button>
@@ -147,6 +187,6 @@ export const UserForm = memo(function UserForm({ open, onClose, editingUser, onS
         </form>
       </DialogContent>
     </Dialog>
-  );
-});
-UserForm.displayName = 'UserForm';
+  )
+})
+UserForm.displayName = 'UserForm'

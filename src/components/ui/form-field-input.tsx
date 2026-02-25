@@ -1,12 +1,13 @@
-import { Input } from '@/components/ui/input';
-import { FormField, type FormFieldProps } from '@/components/ui/form-field';
+import { Input } from '@/components/ui/input'
+import { FormField, type FormFieldProps } from '@/components/ui/form-field'
 
 export interface FormFieldInputProps extends Omit<FormFieldProps, 'children'> {
-  type?: 'text' | 'email' | 'password' | 'tel' | 'number' | 'date';
-  placeholder?: string;
-  value: string;
-  onChange: (value: string) => void;
-  disabled?: boolean;
+  type?: 'text' | 'email' | 'password' | 'tel' | 'number' | 'date'
+  placeholder?: string
+  value: string
+  onChange: (value: string) => void
+  disabled?: boolean
+  autoComplete?: string
 }
 
 export function FormFieldInput({
@@ -22,6 +23,7 @@ export function FormFieldInput({
   value,
   onChange,
   disabled = false,
+  autoComplete,
 }: FormFieldInputProps) {
   return (
     <FormField
@@ -38,11 +40,12 @@ export function FormFieldInput({
         id={id}
         placeholder={placeholder}
         value={value}
-        onChange={(e) => onChange(e.target.value)}
+        onChange={e => onChange(e.target.value)}
         required={required}
         disabled={disabled}
         aria-busy={disabled}
+        autoComplete={autoComplete}
       />
     </FormField>
-  );
+  )
 }

@@ -1,62 +1,72 @@
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { FormField } from '@/components/ui/form-field';
-import { FormSuccess } from '@/components/ui/form-success';
-import { useState, memo, useCallback, useMemo } from 'react';
-import { validateName, validateEmail, validateMessage } from '@/utils/validation';
-import { logger } from '@/lib/logger';
-import { useFormValidation } from '@/hooks/useFormValidation';
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
+import { FormField } from '@/components/ui/form-field'
+import { FormSuccess } from '@/components/ui/form-success'
+import { useState, memo, useCallback, useMemo } from 'react'
+import { validateName, validateEmail, validateMessage } from '@/utils/validation'
+import { logger } from '@/lib/logger'
+import { useFormValidation } from '@/hooks/useFormValidation'
 
 interface ContactFormProps {
-  onSubmit?: (data: { name: string; email: string; message: string }) => Promise<void> | void;
+  onSubmit?: (data: { name: string; email: string; message: string }) => Promise<void> | void
 }
 
 export const ContactForm = memo(function ContactForm({ onSubmit }: ContactFormProps) {
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [message, setMessage] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isSuccess, setIsSuccess] = useState(false);
+  const [name, setName] = useState('')
+  const [email, setEmail] = useState('')
+  const [message, setMessage] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isSuccess, setIsSuccess] = useState(false)
 
-  const formData = { name, email, message };
-  const { errors, validateAll, reset: resetValidation } = useFormValidation(formData, {
+  const formData = { name, email, message }
+  const {
+    errors,
+    validateAll,
+    reset: resetValidation,
+  } = useFormValidation(formData, {
     validators: {
       name: validateName,
       email: validateEmail,
       message: validateMessage,
     },
-  });
+  })
 
-  const handleSubmit = useCallback(async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!validateAll()) {
-      return;
-    }
-    setIsSubmitting(true);
-    try {
-      await onSubmit?.({ name, email, message });
-      setIsSuccess(true);
-      setName('');
-      setEmail('');
-      setMessage('');
-      resetValidation();
-    } catch (error) {
-      logger.error('Contact form submission failed', error);
-    } finally {
-      setIsSubmitting(false);
-    }
-  }, [validateAll, onSubmit, name, email, message, resetValidation]);
+  const handleSubmit = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault()
+      if (!validateAll()) {
+        return
+      }
+      setIsSubmitting(true)
+      try {
+        await onSubmit?.({ name, email, message })
+        setIsSuccess(true)
+        setName('')
+        setEmail('')
+        setMessage('')
+        resetValidation()
+      } catch (error) {
+        logger.error('Contact form submission failed', error)
+      } finally {
+        setIsSubmitting(false)
+      }
+    },
+    [validateAll, onSubmit, name, email, message, resetValidation]
+  )
 
   const handleReset = useCallback(() => {
-    setIsSuccess(false);
-    resetValidation();
-  }, [resetValidation]);
+    setIsSuccess(false)
+    resetValidation()
+  }, [resetValidation])
 
-  const successAction = useMemo(() => ({
-    label: "Send Another Message",
-    onClick: handleReset,
-  }), [handleReset]);
+  const successAction = useMemo(
+    () => ({
+      label: 'Send Another Message',
+      onClick: handleReset,
+    }),
+    [handleReset]
+  )
 
   if (isSuccess) {
     return (
@@ -65,7 +75,7 @@ export const ContactForm = memo(function ContactForm({ onSubmit }: ContactFormPr
         description="Thank you for reaching out. We'll get back to you as soon as possible."
         action={successAction}
       />
-    );
+    )
   }
 
   return (
@@ -73,7 +83,7 @@ export const ContactForm = memo(function ContactForm({ onSubmit }: ContactFormPr
       <FormField
         id="contact-name"
         label="Full Name"
-          error={errors.name}
+        error={errors.name}
         helperText="Enter your full name"
         required
       >
@@ -81,16 +91,17 @@ export const ContactForm = memo(function ContactForm({ onSubmit }: ContactFormPr
           type="text"
           placeholder="John Doe"
           value={name}
-          onChange={(e) => setName(e.target.value)}
+          onChange={e => setName(e.target.value)}
           required
           disabled={isSubmitting}
           aria-busy={isSubmitting}
+          autoComplete="name"
         />
       </FormField>
       <FormField
         id="contact-email"
         label="Email"
-          error={errors.email}
+        error={errors.email}
         helperText="We'll never share your email with anyone else"
         required
       >
@@ -98,10 +109,11 @@ export const ContactForm = memo(function ContactForm({ onSubmit }: ContactFormPr
           type="email"
           placeholder="john.doe@example.com"
           value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          onChange={e => setEmail(e.target.value)}
           required
           disabled={isSubmitting}
           aria-busy={isSubmitting}
+          autoComplete="email"
         />
       </FormField>
       <FormField
@@ -115,7 +127,7 @@ export const ContactForm = memo(function ContactForm({ onSubmit }: ContactFormPr
           placeholder="Your message..."
           rows={5}
           value={message}
-          onChange={(e) => setMessage(e.target.value)}
+          onChange={e => setMessage(e.target.value)}
           required
           disabled={isSubmitting}
           aria-busy={isSubmitting}
@@ -125,6 +137,6 @@ export const ContactForm = memo(function ContactForm({ onSubmit }: ContactFormPr
         {isSubmitting ? 'Sending...' : 'Send Message'}
       </Button>
     </form>
-  );
-});
-ContactForm.displayName = 'ContactForm';
+  )
+})
+ContactForm.displayName = 'ContactForm'
