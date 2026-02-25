@@ -1,48 +1,52 @@
-import { AlertTriangle, RefreshCw, Home } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
+import { AlertTriangle, RefreshCw, Home } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
 
 export interface ErrorFallbackProps {
-  title?: string;
-  message?: string;
-  error?: Error | unknown;
-  onRetry?: () => void;
-  onGoHome?: () => void;
-  showErrorDetails?: boolean;
-  statusMessage?: string;
+  title?: string
+  message?: string
+  error?: Error | unknown
+  onRetry?: () => void
+  onGoHome?: () => void
+  showErrorDetails?: boolean
+  statusMessage?: string
 }
 
 export function ErrorFallback({
-  title = "Oops! Something went wrong",
+  title = 'Oops! Something went wrong',
   message = "We're aware of the issue and actively working to fix it. Your experience matters to us.",
   error,
   onRetry,
   onGoHome,
   showErrorDetails = true,
-  statusMessage = "Our team has been notified"
+  statusMessage = 'Our team has been notified',
 }: ErrorFallbackProps) {
   const handleRetry = () => {
     if (onRetry) {
-      onRetry();
+      onRetry()
     } else {
-      window.location.reload();
+      window.location.reload()
     }
-  };
+  }
 
   const handleGoHome = () => {
     if (onGoHome) {
-      onGoHome();
+      onGoHome()
     } else {
-      window.location.href = '/';
+      window.location.href = '/'
     }
-  };
+  }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-4">
+    <div
+      className="min-h-screen flex items-center justify-center bg-background p-4"
+      role="alert"
+      aria-labelledby="error-title"
+    >
       <div className="w-full max-w-md">
         {/* Animated background gradient */}
         <div className="absolute inset-0 bg-gradient-rainbow opacity-5 dark:opacity-10" />
-        
+
         {/* Error card */}
         <Card className="relative backdrop-blur-sm shadow-2xl">
           <CardContent className="p-8 space-y-6">
@@ -51,14 +55,22 @@ export function ErrorFallback({
               <div className="mx-auto w-16 h-16 rounded-2xl bg-destructive/10 flex items-center justify-center">
                 <AlertTriangle className="w-8 h-8 text-destructive" aria-hidden="true" />
               </div>
-              <h1 className="text-2xl font-bold">{title}</h1>
+              <h1 id="error-title" className="text-2xl font-bold">
+                {title}
+              </h1>
               <p className="text-muted-foreground">{message}</p>
             </div>
 
             {/* Status indicator */}
             {statusMessage && (
-              <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
-                <div className="w-2 h-2 rounded-full bg-orange-500 animate-pulse motion-reduce:animate-none" />
+              <div
+                className="flex items-center justify-center gap-2 text-sm text-muted-foreground"
+                role="status"
+              >
+                <div
+                  className="w-2 h-2 rounded-full bg-orange-500 animate-pulse motion-reduce:animate-none"
+                  aria-hidden="true"
+                />
                 <span>{statusMessage}</span>
               </div>
             )}
@@ -83,7 +95,12 @@ export function ErrorFallback({
                 </summary>
                 <pre className="mt-3 text-xs overflow-auto max-h-40 text-muted-foreground">
                   {error instanceof Error ? error.message : String(error)}
-                  {error instanceof Error && error.stack && '\n\n' + error.stack + '\n\n' + (error as Error & { componentStack?: string }).componentStack}
+                  {error instanceof Error &&
+                    error.stack &&
+                    '\n\n' +
+                      error.stack +
+                      '\n\n' +
+                      (error as Error & { componentStack?: string }).componentStack}
                 </pre>
               </details>
             )}
@@ -96,5 +113,5 @@ export function ErrorFallback({
         </p>
       </div>
     </div>
-  );
+  )
 }
