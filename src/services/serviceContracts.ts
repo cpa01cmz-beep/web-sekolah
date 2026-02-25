@@ -28,6 +28,7 @@ import type {
   ClassStudentWithGrade,
   Message,
 } from '@shared/types'
+import type { UpdateGradeData } from '@shared/service.types'
 
 export interface SendMessageData {
   recipientId: string
@@ -50,6 +51,8 @@ export interface TeacherService {
     teacherId: string
   ): Promise<(ScheduleItem & { className: string; courseName: string })[]>
   submitGrade(gradeData: SubmitGradeData): Promise<Grade>
+  updateGrade(gradeId: string, gradeData: UpdateGradeData): Promise<Grade>
+  deleteGrade(gradeId: string): Promise<void>
   getAnnouncements(teacherId: string): Promise<Announcement[]>
   createAnnouncement(announcement: CreateAnnouncementData): Promise<Announcement>
   getClassStudentsWithGrades(classId: string): Promise<ClassStudentWithGrade[]>

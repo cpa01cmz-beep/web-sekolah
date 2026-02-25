@@ -5,6 +5,7 @@ import type {
   Grade,
   Announcement,
   SubmitGradeData,
+  UpdateGradeData,
   CreateAnnouncementData,
   ClassStudentWithGrade,
   ScheduleItem,
@@ -52,6 +53,14 @@ export function createTeacherService(repository: IRepository = apiRepository): T
 
     async submitGrade(gradeData: SubmitGradeData): Promise<Grade> {
       return repository.post<Grade>(API_ENDPOINTS.TEACHERS.GRADES, gradeData)
+    },
+
+    async updateGrade(gradeId: string, gradeData: UpdateGradeData): Promise<Grade> {
+      return repository.put<Grade>(API_ENDPOINTS.TEACHERS.GRADE(gradeId), gradeData)
+    },
+
+    async deleteGrade(gradeId: string): Promise<void> {
+      return repository.delete<void>(API_ENDPOINTS.TEACHERS.GRADE(gradeId))
     },
 
     getAnnouncements: (teacherId: string) => announcementService.getAnnouncements(teacherId),
