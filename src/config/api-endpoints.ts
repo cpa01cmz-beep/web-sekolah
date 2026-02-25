@@ -25,6 +25,8 @@ export const API_ENDPOINTS = {
     MESSAGE_CONVERSATION: (teacherId: string, otherUserId: string) =>
       `/api/teachers/${teacherId}/messages/${otherUserId}/conversation`,
     UNREAD_COUNT: (teacherId: string) => `/api/teachers/${teacherId}/messages/unread-count`,
+    DELETE_MESSAGE: (teacherId: string, messageId: string) =>
+      `/api/teachers/${teacherId}/messages/${messageId}`,
   },
   CLASSES: {
     STUDENTS: (classId: string) => `/api/classes/${classId}/students`,
@@ -39,6 +41,8 @@ export const API_ENDPOINTS = {
       `/api/parents/${parentId}/messages/${otherUserId}/conversation`,
     UNREAD_COUNT: (parentId: string) => `/api/parents/${parentId}/messages/unread-count`,
     TEACHERS: (parentId: string) => `/api/parents/${parentId}/teachers`,
+    DELETE_MESSAGE: (parentId: string, messageId: string) =>
+      `/api/parents/${parentId}/messages/${messageId}`,
   },
   ADMIN: {
     DASHBOARD: '/api/admin/dashboard',

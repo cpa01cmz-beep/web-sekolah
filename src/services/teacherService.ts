@@ -22,6 +22,7 @@ const teacherMessageEndpoints = {
   messageRead: API_ENDPOINTS.TEACHERS.MESSAGE_READ,
   messageConversation: API_ENDPOINTS.TEACHERS.MESSAGE_CONVERSATION,
   unreadCount: API_ENDPOINTS.TEACHERS.UNREAD_COUNT,
+  deleteMessage: API_ENDPOINTS.TEACHERS.DELETE_MESSAGE,
 }
 
 const teacherAnnouncementEndpoints = {
@@ -80,6 +81,8 @@ export function createTeacherService(repository: IRepository = apiRepository): T
       messageService.sendMessage(teacherId, data),
     markAsRead: (teacherId: string, messageId: string) =>
       messageService.markAsRead(teacherId, messageId),
+    deleteMessage: (teacherId: string, messageId: string) =>
+      messageService.deleteMessage(teacherId, messageId),
   }
 }
 
