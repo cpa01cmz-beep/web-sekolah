@@ -4,7 +4,10 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Akademia Pro - Modern School Management Portal for Students, Teachers, Parents, and Administrators" />
+    <meta
+      name="description"
+      content="Akademia Pro - Modern School Management Portal for Students, Teachers, Parents, and Administrators"
+    />
     <meta name="theme-color" content="#2563eb" />
     <meta name="application-name" content="Akademia Pro" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -18,26 +21,49 @@
     <link rel="apple-touch-icon" href="/vite.svg" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
+    <link rel="canonical" href="https://akademiapro.example.com" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://akademiapro.example.com" />
+    <meta property="og:title" content="Akademia Pro - School Management Portal" />
+    <meta
+      property="og:description"
+      content="Modern school management portal for Students, Teachers, Parents, and Administrators"
+    />
+    <meta property="og:image" content="/og-image.svg" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Akademia Pro - School Management Portal" />
+    <meta
+      name="twitter:description"
+      content="Modern school management portal for Students, Teachers, Parents, and Administrators"
+    />
+    <meta name="twitter:image" content="/og-image.svg" />
     <title>Akademia Pro - School Management Portal</title>
   </head>
   <body>
     <div id="root"></div>
     <script>
-        window.addEventListener('error', (event) => {
-          const isOurAppError = event.filename && event.filename.startsWith(window.location.origin);
+      window.addEventListener(
+        'error',
+        event => {
+          const isOurAppError = event.filename && event.filename.startsWith(window.location.origin)
           if (isOurAppError) {
-            navigator.sendBeacon('/api/client-errors', JSON.stringify({
-              message: event.message,
-              url: window.location.href,
-              userAgent: navigator.userAgent,
-              source: event.filename,
-              lineno: event.lineno,
-              colno: event.colno,
-              stack: event.error ? event.error.stack : null,
-              timestamp: new Date().toISOString()
-            }));
+            navigator.sendBeacon(
+              '/api/client-errors',
+              JSON.stringify({
+                message: event.message,
+                url: window.location.href,
+                userAgent: navigator.userAgent,
+                source: event.filename,
+                lineno: event.lineno,
+                colno: event.colno,
+                stack: event.error ? event.error.stack : null,
+                timestamp: new Date().toISOString(),
+              })
+            )
           }
-        }, true);
+        },
+        true
+      )
     </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
