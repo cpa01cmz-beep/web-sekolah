@@ -1,8 +1,8 @@
 export interface ApiResponse<T = unknown> {
-  success: boolean;
-  data?: T;
-  error?: string;
-  code?: string;
+  success: boolean
+  data?: T
+  error?: string
+  code?: string
 }
 
 export enum ErrorCode {
@@ -20,11 +20,14 @@ export enum ErrorCode {
   INTERNAL_SERVER_ERROR = 'INTERNAL_SERVER_ERROR',
 }
 
-export type UserRole = 'student' | 'teacher' | 'parent' | 'admin';
-export type AnnouncementTargetRole = UserRole | 'all';
+export type UserRole = 'student' | 'teacher' | 'parent' | 'admin'
+export type AnnouncementTargetRole = UserRole | 'all'
 
 export interface TimestampedEntity {
-  createdAt: string;
-  updatedAt: string;
-  deletedAt?: string | null;
+  createdAt: string
+  updatedAt: string
+  deletedAt?: string | null
 }
+
+export const SCHEDULE_DAYS = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat'] as const
+export type ScheduleDay = (typeof SCHEDULE_DAYS)[number]

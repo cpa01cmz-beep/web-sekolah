@@ -31,6 +31,31 @@ Deliver small, safe, measurable improvements strictly inside the Product-Archite
 
 ## Improvements Log
 
+### 2026-02-25: Schedule Days Centralization
+
+**Issue**: Schedule days constant and type were duplicated in multiple locations:
+
+- `shared/entities.types.ts` - Hardcoded day union type: `'Senin' | 'Selasa' | 'Rabu' | 'Kamis' | 'Jumat'`
+- `src/hooks/useScheduleGrouping.ts` - Had its own SCHEDULE_DAYS constant and ScheduleDay type
+
+**Solution**:
+
+1. Added `SCHEDULE_DAYS` constant and `ScheduleDay` type to `shared/common-types.ts`
+2. Updated `shared/entities.types.ts` to import and use the centralized ScheduleDay type
+3. Updated `src/hooks/useScheduleGrouping.ts` to import from @shared/types instead of defining locally
+
+**Files Changed**:
+
+- `shared/common-types.ts` - Added `SCHEDULE_DAYS` constant and `ScheduleDay` type
+- `shared/entities.types.ts` - Updated to import and use centralized type
+- `src/hooks/useScheduleGrouping.ts` - Updated to import from shared types
+
+**Verification**:
+
+- TypeScript: ✅ 0 errors
+- Lint: ✅ 0 errors
+- Tests: ✅ 3412 passing
+
 ### 2026-02-25: Chart Colors Centralization
 
 **Issue**: Chart colors were duplicated in multiple locations:
@@ -92,4 +117,3 @@ Deliver small, safe, measurable improvements strictly inside the Product-Archite
 - Review large page components for potential refactoring
 - Extract router configuration to dedicated module (already organized, verify)
 - Review and centralize any remaining duplicated constants
-- Centralize SCHEDULE_DAYS constant with ScheduleItem day type
