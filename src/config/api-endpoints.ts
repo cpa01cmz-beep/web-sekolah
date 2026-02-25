@@ -18,8 +18,10 @@ export const API_ENDPOINTS = {
     ANNOUNCEMENTS: (teacherId: string) => `/api/teachers/${teacherId}/announcements`,
     CREATE_ANNOUNCEMENT: '/api/teachers/announcements',
     MESSAGES: (teacherId: string) => `/api/teachers/${teacherId}/messages`,
-    MESSAGE_READ: (teacherId: string, messageId: string) => `/api/teachers/${teacherId}/messages/${messageId}/read`,
-    MESSAGE_CONVERSATION: (teacherId: string, otherUserId: string) => `/api/teachers/${teacherId}/messages/${otherUserId}/conversation`,
+    MESSAGE_READ: (teacherId: string, messageId: string) =>
+      `/api/teachers/${teacherId}/messages/${messageId}/read`,
+    MESSAGE_CONVERSATION: (teacherId: string, otherUserId: string) =>
+      `/api/teachers/${teacherId}/messages/${otherUserId}/conversation`,
     UNREAD_COUNT: (teacherId: string) => `/api/teachers/${teacherId}/messages/unread-count`,
   },
   CLASSES: {
@@ -29,8 +31,10 @@ export const API_ENDPOINTS = {
     DASHBOARD: (parentId: string) => `/api/parents/${parentId}/dashboard`,
     SCHEDULE: (parentId: string) => `/api/parents/${parentId}/schedule`,
     MESSAGES: (parentId: string) => `/api/parents/${parentId}/messages`,
-    MESSAGE_READ: (parentId: string, messageId: string) => `/api/parents/${parentId}/messages/${messageId}/read`,
-    MESSAGE_CONVERSATION: (parentId: string, otherUserId: string) => `/api/parents/${parentId}/messages/${otherUserId}/conversation`,
+    MESSAGE_READ: (parentId: string, messageId: string) =>
+      `/api/parents/${parentId}/messages/${messageId}/read`,
+    MESSAGE_CONVERSATION: (parentId: string, otherUserId: string) =>
+      `/api/parents/${parentId}/messages/${otherUserId}/conversation`,
     UNREAD_COUNT: (parentId: string) => `/api/parents/${parentId}/messages/unread-count`,
     TEACHERS: (parentId: string) => `/api/parents/${parentId}/teachers`,
   },
@@ -40,6 +44,7 @@ export const API_ENDPOINTS = {
     USER: (userId: string) => `/api/admin/users/${userId}`,
     ANNOUNCEMENTS: '/api/admin/announcements',
     ANNOUNCEMENT: (announcementId: string) => `/api/admin/announcements/${announcementId}`,
+    UPDATE_ANNOUNCEMENT: (announcementId: string) => `/api/admin/announcements/${announcementId}`,
     SETTINGS: '/api/admin/settings',
   },
   PUBLIC: {
@@ -54,4 +59,4 @@ export const API_ENDPOINTS = {
     LINKS: '/api/public/links',
     DOWNLOADS: '/api/public/downloads',
   },
-} as const;
+} as const

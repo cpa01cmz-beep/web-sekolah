@@ -5,12 +5,17 @@ export interface AnnouncementEndpoints {
   list: () => string
   listByUser?: (userId: string) => string
   create: () => string
+  update?: (announcementId: string) => string
   delete?: (announcementId: string) => string
 }
 
 export interface AnnouncementService {
   getAnnouncements(userId?: string): Promise<Announcement[]>
   createAnnouncement(announcement: CreateAnnouncementData): Promise<Announcement>
+  updateAnnouncement?(
+    announcementId: string,
+    announcement: Partial<CreateAnnouncementData>
+  ): Promise<Announcement>
   deleteAnnouncement?(announcementId: string): Promise<void>
 }
 
@@ -28,6 +33,16 @@ export function createAnnouncementService(
 
     async createAnnouncement(announcement: CreateAnnouncementData): Promise<Announcement> {
       return repository.post<Announcement>(endpoints.create(), announcement)
+    },
+
+    async updateAnnouncement(
+      announcementId: string,
+      announcement: Partial<CreateAnnouncementData>
+    ): Promise<Announcement> {
+      if (endpoints.update) {
+        return repository.put<Announcement>(endpoints.update(announcementId), announcement)
+      }
+      throw new Error('Update announcement endpoint not configured')
     },
 
     async deleteAnnouncement(announcementId: string): Promise<void> {

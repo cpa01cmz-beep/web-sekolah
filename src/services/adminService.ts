@@ -17,6 +17,7 @@ import { createAnnouncementService } from './announcementService'
 const adminAnnouncementEndpoints = {
   list: () => API_ENDPOINTS.ADMIN.ANNOUNCEMENTS,
   create: () => API_ENDPOINTS.ADMIN.ANNOUNCEMENTS,
+  update: API_ENDPOINTS.ADMIN.UPDATE_ANNOUNCEMENT,
   delete: API_ENDPOINTS.ADMIN.ANNOUNCEMENT,
 }
 
@@ -56,6 +57,8 @@ export function createAdminService(repository: IRepository = apiRepository): Adm
     getAnnouncements: () => announcementService.getAnnouncements(),
     createAnnouncement: (announcement: CreateAnnouncementData) =>
       announcementService.createAnnouncement(announcement),
+    updateAnnouncement: (announcementId: string, announcement: Partial<CreateAnnouncementData>) =>
+      announcementService.updateAnnouncement!(announcementId, announcement),
     deleteAnnouncement: (announcementId: string) =>
       announcementService.deleteAnnouncement!(announcementId),
 
