@@ -1,5 +1,6 @@
 import type { Context } from 'hono';
 import { logger } from '../logger';
+import { TimeoutError } from '../errors/TimeoutError';
 
 type BackgroundTask = () => Promise<void>;
 
@@ -28,7 +29,7 @@ export function waitUntilWithTimeout(
 ): void {
   waitUntil(c, async () => {
     const timeoutPromise = new Promise<void>((_, reject) => {
-      setTimeout(() => reject(new Error(`Task timed out after ${timeoutMs}ms`)), timeoutMs);
+      setTimeout(() => reject(new TimeoutError(timeoutMs, `Task timed out after ${timeoutMs}ms`)), timeoutMs);
     });
 
     try {

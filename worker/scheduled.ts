@@ -3,6 +3,7 @@ import { logger } from './logger';
 import { integrationMonitor } from './integration-monitor';
 import { WebhookService } from './webhook-service';
 import { ScheduledTaskConfig as TaskConfig } from './config/time';
+import { TimeoutError } from './errors/TimeoutError';
 
 type ScheduledTask = (env: Env) => Promise<void>;
 
@@ -37,7 +38,7 @@ async function withTimeout<T>(
 ): Promise<T> {
   return new Promise((resolve, reject) => {
     const timeoutId = setTimeout(() => {
-      reject(new Error(`Task '${taskName}' timed out after ${timeoutMs}ms`));
+      reject(new TimeoutError(timeoutMs, `Task '${taskName}' timed out after ${timeoutMs}ms`));
     }, timeoutMs);
 
     fn()

@@ -1,5 +1,6 @@
 import { RETRY_CONFIG } from '@shared/constants'
 import { logger } from '../logger'
+import { TimeoutError } from '../errors/TimeoutError'
 
 export interface RetryOptions {
   maxRetries?: number
@@ -49,7 +50,7 @@ export async function withRetry<T>(fn: () => Promise<T>, options: RetryOptions =
           fn(),
           new Promise<T>((_, reject) => {
             controller.signal.addEventListener('abort', () => {
-              reject(new Error('Request timeout'))
+              reject(new TimeoutError(timeout, 'Request timeout'))
             })
           }),
         ])

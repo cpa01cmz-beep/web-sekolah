@@ -72,3 +72,25 @@ npm run build      # Production build
 **Files Changed**:
 
 - `worker/middleware/__tests__/error-monitoring.test.ts` - converted 2 skipped tests to unit tests
+
+### 2026-02-25: Use TimeoutError Class for Consistency
+
+**Problem**: Timeout errors in resilience and scheduled task modules were throwing generic `Error` objects instead of the custom `TimeoutError` class, leading to inconsistent error handling and missing error codes.
+
+**Solution**: Updated three files to use `TimeoutError` instead of generic `Error`:
+
+1. `worker/scheduled.ts` - scheduled task timeout handling
+2. `worker/resilience/waitUntil.ts` - background task timeout handling
+3. `worker/resilience/Retry.ts` - retry mechanism timeout handling
+
+**Benefits**:
+
+- Consistent error codes (`ErrorCode.TIMEOUT`) across all timeout scenarios
+- Better error monitoring and tracking
+- Proper error classification for debugging
+
+**Files Changed**:
+
+- `worker/scheduled.ts` - use TimeoutError in withTimeout function
+- `worker/resilience/waitUntil.ts` - use TimeoutError in waitUntilWithTimeout
+- `worker/resilience/Retry.ts` - use TimeoutError in withRetry timeout handling
