@@ -10,6 +10,22 @@ This document serves as the long-term memory and domain knowledge for the Growth
 
 ## Implemented Improvements
 
+### 2. Skip to Main Content Link (Feb 2026)
+
+**Issue**: Missing keyboard accessibility bypass for navigation
+
+**Changes**:
+
+- Added skip link in App.tsx that links to `#main-content`
+- Added CSS styles for skip link positioning (hidden initially, visible on focus)
+- Link is positioned absolutely and slides into view when focused
+
+**Impact**:
+
+- Enables keyboard-only users to bypass navigation and skip to main content
+- Improves screen reader experience by allowing quick navigation to content
+- Meets WCAG 2.1 Success Criterion 2.4.1 (Bypass Blocks)
+
 ### 1. SEO Enhancement (Feb 2026)
 
 **Issue**: Missing social sharing and search engine optimization meta tags
