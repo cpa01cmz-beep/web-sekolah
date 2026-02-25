@@ -1,289 +1,320 @@
-import { describe, it, expect } from 'vitest';
-import { Hono } from 'hono';
-import { securityHeaders } from '../security-headers';
+import { describe, it, expect } from 'vitest'
+import { Hono } from 'hono'
+import { securityHeaders, getCSPNonce } from '../security-headers'
 
 describe('Security Headers Middleware', () => {
   it('should add all default security headers', async () => {
-    const app = new Hono();
-    app.use('*', securityHeaders());
-    app.get('/test', (c) => c.json({ success: true }));
+    const app = new Hono()
+    app.use('*', securityHeaders())
+    app.get('/test', c => c.json({ success: true }))
 
-    const res = await app.request('/test');
+    const res = await app.request('/test')
 
-    expect(res.status).toBe(200);
-    expect(res.headers.get('Strict-Transport-Security')).toBe('max-age=31536000; includeSubDomains; preload');
-    expect(res.headers.get('Content-Security-Policy')).toBeDefined();
-    expect(res.headers.get('X-Frame-Options')).toBe('DENY');
-    expect(res.headers.get('X-Content-Type-Options')).toBe('nosniff');
-    expect(res.headers.get('Referrer-Policy')).toBe('strict-origin-when-cross-origin');
-    expect(res.headers.get('Permissions-Policy')).toBeDefined();
-    expect(res.headers.get('X-XSS-Protection')).toBe('1; mode=block');
-    expect(res.headers.get('X-Permitted-Cross-Domain-Policies')).toBe('none');
-    expect(res.headers.get('Cross-Origin-Opener-Policy')).toBe('same-origin');
-    expect(res.headers.get('Cross-Origin-Resource-Policy')).toBe('same-site');
-  });
+    expect(res.status).toBe(200)
+    expect(res.headers.get('Strict-Transport-Security')).toBe(
+      'max-age=31536000; includeSubDomains; preload'
+    )
+    expect(res.headers.get('Content-Security-Policy')).toBeDefined()
+    expect(res.headers.get('X-Frame-Options')).toBe('DENY')
+    expect(res.headers.get('X-Content-Type-Options')).toBe('nosniff')
+    expect(res.headers.get('Referrer-Policy')).toBe('strict-origin-when-cross-origin')
+    expect(res.headers.get('Permissions-Policy')).toBeDefined()
+    expect(res.headers.get('X-XSS-Protection')).toBe('1; mode=block')
+    expect(res.headers.get('X-Permitted-Cross-Domain-Policies')).toBe('none')
+    expect(res.headers.get('Cross-Origin-Opener-Policy')).toBe('same-origin')
+    expect(res.headers.get('Cross-Origin-Resource-Policy')).toBe('same-site')
+  })
 
   it('should use default CSP directives with hash-based script-src', async () => {
-    const app = new Hono();
-    app.use('*', securityHeaders());
-    app.get('/', (c) => c.text('Hello'));
+    const app = new Hono()
+    app.use('*', securityHeaders())
+    app.get('/', c => c.text('Hello'))
 
-    const res = await app.request('/');
-    const csp = res.headers.get('Content-Security-Policy');
+    const res = await app.request('/')
+    const csp = res.headers.get('Content-Security-Policy')
 
-    expect(csp).toBeDefined();
-    expect(csp).toContain("script-src 'self' 'sha256-1LjDIY7ayXpv8ODYzP8xZXqNvuMhUBdo39lNMQ1oGHI=' 'unsafe-eval'");
-    expect(csp).not.toContain("script-src 'self' 'unsafe-inline'");
-    expect(csp).toContain("style-src 'self' 'unsafe-inline'");
-  });
+    expect(csp).toBeDefined()
+    expect(csp).toContain(
+      "script-src 'self' 'sha256-xsWpBSh+88Gpp+H1+XSGjqLj67OrRo+q9tmTvaO4nhs=' 'unsafe-eval'"
+    )
+    expect(csp).not.toContain("script-src 'self' 'unsafe-inline'")
+    expect(csp).toContain("style-src 'self' 'unsafe-inline'")
+  })
 
   it('should include report-uri for CSP violation monitoring', async () => {
-    const app = new Hono();
-    app.use('*', securityHeaders());
-    app.get('/', (c) => c.text('Hello'));
+    const app = new Hono()
+    app.use('*', securityHeaders())
+    app.get('/', c => c.text('Hello'))
 
-    const res = await app.request('/');
-    const csp = res.headers.get('Content-Security-Policy');
+    const res = await app.request('/')
+    const csp = res.headers.get('Content-Security-Policy')
 
-    expect(csp).toBeDefined();
-    expect(csp).toContain("report-uri /api/csp-report");
-  });
+    expect(csp).toBeDefined()
+    expect(csp).toContain('report-uri /api/csp-report')
+  })
 
   it('should allow HSTS configuration to be disabled', async () => {
-    const app = new Hono();
-    app.use('*', securityHeaders({ enableHSTS: false }));
-    app.get('/test', (c) => c.json({ success: true }));
+    const app = new Hono()
+    app.use('*', securityHeaders({ enableHSTS: false }))
+    app.get('/test', c => c.json({ success: true }))
 
-    const res = await app.request('/test');
+    const res = await app.request('/test')
 
-    expect(res.status).toBe(200);
-    expect(res.headers.get('Strict-Transport-Security')).toBeNull();
-  });
+    expect(res.status).toBe(200)
+    expect(res.headers.get('Strict-Transport-Security')).toBeNull()
+  })
 
   it('should allow CSP to be disabled', async () => {
-    const app = new Hono();
-    app.use('*', securityHeaders({ enableCSP: false }));
-    app.get('/test', (c) => c.json({ success: true }));
+    const app = new Hono()
+    app.use('*', securityHeaders({ enableCSP: false }))
+    app.get('/test', c => c.json({ success: true }))
 
-    const res = await app.request('/test');
+    const res = await app.request('/test')
 
-    expect(res.status).toBe(200);
-    expect(res.headers.get('Content-Security-Policy')).toBeNull();
-  });
+    expect(res.status).toBe(200)
+    expect(res.headers.get('Content-Security-Policy')).toBeNull()
+  })
 
   it('should allow custom CSP directives', async () => {
-    const app = new Hono();
-    const customCSP = "default-src 'self'; script-src 'self';";
-    app.use('*', securityHeaders({ cspDirectives: customCSP }));
-    app.get('/test', (c) => c.json({ success: true }));
+    const app = new Hono()
+    const customCSP = "default-src 'self'; script-src 'self';"
+    app.use('*', securityHeaders({ cspDirectives: customCSP }))
+    app.get('/test', c => c.json({ success: true }))
 
-    const res = await app.request('/test');
+    const res = await app.request('/test')
 
-    expect(res.status).toBe(200);
-    expect(res.headers.get('Content-Security-Policy')).toBe(customCSP);
-  });
+    expect(res.status).toBe(200)
+    expect(res.headers.get('Content-Security-Policy')).toBe(customCSP)
+  })
 
   it('should allow custom HSTS max age', async () => {
-    const app = new Hono();
-    app.use('*', securityHeaders({ hstsMaxAge: 86400 }));
-    app.get('/test', (c) => c.json({ success: true }));
+    const app = new Hono()
+    app.use('*', securityHeaders({ hstsMaxAge: 86400 }))
+    app.get('/test', c => c.json({ success: true }))
 
-    const res = await app.request('/test');
+    const res = await app.request('/test')
 
-    expect(res.status).toBe(200);
-    expect(res.headers.get('Strict-Transport-Security')).toBe('max-age=86400; includeSubDomains; preload');
-  });
+    expect(res.status).toBe(200)
+    expect(res.headers.get('Strict-Transport-Security')).toBe(
+      'max-age=86400; includeSubDomains; preload'
+    )
+  })
 
   it('should allow X-Frame-Options to be disabled', async () => {
-    const app = new Hono();
-    app.use('*', securityHeaders({ enableXFrameOptions: false }));
-    app.get('/test', (c) => c.json({ success: true }));
+    const app = new Hono()
+    app.use('*', securityHeaders({ enableXFrameOptions: false }))
+    app.get('/test', c => c.json({ success: true }))
 
-    const res = await app.request('/test');
+    const res = await app.request('/test')
 
-    expect(res.status).toBe(200);
-    expect(res.headers.get('X-Frame-Options')).toBeNull();
-  });
+    expect(res.status).toBe(200)
+    expect(res.headers.get('X-Frame-Options')).toBeNull()
+  })
 
   it('should allow X-Content-Type-Options to be disabled', async () => {
-    const app = new Hono();
-    app.use('*', securityHeaders({ enableXContentTypeOptions: false }));
-    app.get('/test', (c) => c.json({ success: true }));
+    const app = new Hono()
+    app.use('*', securityHeaders({ enableXContentTypeOptions: false }))
+    app.get('/test', c => c.json({ success: true }))
 
-    const res = await app.request('/test');
+    const res = await app.request('/test')
 
-    expect(res.status).toBe(200);
-    expect(res.headers.get('X-Content-Type-Options')).toBeNull();
-  });
+    expect(res.status).toBe(200)
+    expect(res.headers.get('X-Content-Type-Options')).toBeNull()
+  })
 
   it('should allow Referrer-Policy to be disabled', async () => {
-    const app = new Hono();
-    app.use('*', securityHeaders({ enableReferrerPolicy: false }));
-    app.get('/test', (c) => c.json({ success: true }));
+    const app = new Hono()
+    app.use('*', securityHeaders({ enableReferrerPolicy: false }))
+    app.get('/test', c => c.json({ success: true }))
 
-    const res = await app.request('/test');
+    const res = await app.request('/test')
 
-    expect(res.status).toBe(200);
-    expect(res.headers.get('Referrer-Policy')).toBeNull();
-  });
+    expect(res.status).toBe(200)
+    expect(res.headers.get('Referrer-Policy')).toBeNull()
+  })
 
   it('should allow Permissions-Policy to be disabled', async () => {
-    const app = new Hono();
-    app.use('*', securityHeaders({ enablePermissionsPolicy: false }));
-    app.get('/test', (c) => c.json({ success: true }));
+    const app = new Hono()
+    app.use('*', securityHeaders({ enablePermissionsPolicy: false }))
+    app.get('/test', c => c.json({ success: true }))
 
-    const res = await app.request('/test');
+    const res = await app.request('/test')
 
-    expect(res.status).toBe(200);
-    expect(res.headers.get('Permissions-Policy')).toBeNull();
-  });
+    expect(res.status).toBe(200)
+    expect(res.headers.get('Permissions-Policy')).toBeNull()
+  })
 
   it('should combine multiple custom configurations', async () => {
-    const app = new Hono();
-    const customCSP = "default-src 'self';";
-    app.use('*', securityHeaders({
-      enableHSTS: false,
-      cspDirectives: customCSP,
-      hstsMaxAge: 86400,
-    }));
-    app.get('/test', (c) => c.json({ success: true }));
+    const app = new Hono()
+    const customCSP = "default-src 'self';"
+    app.use(
+      '*',
+      securityHeaders({
+        enableHSTS: false,
+        cspDirectives: customCSP,
+        hstsMaxAge: 86400,
+      })
+    )
+    app.get('/test', c => c.json({ success: true }))
 
-    const res = await app.request('/test');
+    const res = await app.request('/test')
 
-    expect(res.status).toBe(200);
-    expect(res.headers.get('Strict-Transport-Security')).toBeNull();
-    expect(res.headers.get('Content-Security-Policy')).toBe(customCSP);
-  });
+    expect(res.status).toBe(200)
+    expect(res.headers.get('Strict-Transport-Security')).toBeNull()
+    expect(res.headers.get('Content-Security-Policy')).toBe(customCSP)
+  })
 
   it('should always include X-XSS-Protection header', async () => {
-    const app = new Hono();
-    app.use('*', securityHeaders());
-    app.get('/test', (c) => c.json({ success: true }));
+    const app = new Hono()
+    app.use('*', securityHeaders())
+    app.get('/test', c => c.json({ success: true }))
 
-    const res = await app.request('/test');
+    const res = await app.request('/test')
 
-    expect(res.status).toBe(200);
-    expect(res.headers.get('X-XSS-Protection')).toBe('1; mode=block');
-  });
+    expect(res.status).toBe(200)
+    expect(res.headers.get('X-XSS-Protection')).toBe('1; mode=block')
+  })
 
   it('should always include X-Permitted-Cross-Domain-Policies header', async () => {
-    const app = new Hono();
-    app.use('*', securityHeaders());
-    app.get('/test', (c) => c.json({ success: true }));
+    const app = new Hono()
+    app.use('*', securityHeaders())
+    app.get('/test', c => c.json({ success: true }))
 
-    const res = await app.request('/test');
+    const res = await app.request('/test')
 
-    expect(res.status).toBe(200);
-    expect(res.headers.get('X-Permitted-Cross-Domain-Policies')).toBe('none');
-  });
+    expect(res.status).toBe(200)
+    expect(res.headers.get('X-Permitted-Cross-Domain-Policies')).toBe('none')
+  })
 
   it('should always include Cross-Origin-Opener-Policy header', async () => {
-    const app = new Hono();
-    app.use('*', securityHeaders());
-    app.get('/test', (c) => c.json({ success: true }));
+    const app = new Hono()
+    app.use('*', securityHeaders())
+    app.get('/test', c => c.json({ success: true }))
 
-    const res = await app.request('/test');
+    const res = await app.request('/test')
 
-    expect(res.status).toBe(200);
-    expect(res.headers.get('Cross-Origin-Opener-Policy')).toBe('same-origin');
-  });
+    expect(res.status).toBe(200)
+    expect(res.headers.get('Cross-Origin-Opener-Policy')).toBe('same-origin')
+  })
 
   it('should always include Cross-Origin-Resource-Policy header', async () => {
-    const app = new Hono();
-    app.use('*', securityHeaders());
-    app.get('/test', (c) => c.json({ success: true }));
+    const app = new Hono()
+    app.use('*', securityHeaders())
+    app.get('/test', c => c.json({ success: true }))
 
-    const res = await app.request('/test');
+    const res = await app.request('/test')
 
-    expect(res.status).toBe(200);
-    expect(res.headers.get('Cross-Origin-Resource-Policy')).toBe('same-site');
-  });
+    expect(res.status).toBe(200)
+    expect(res.headers.get('Cross-Origin-Resource-Policy')).toBe('same-site')
+  })
 
   it('should use correct default Permissions-Policy value', async () => {
-    const app = new Hono();
-    app.use('*', securityHeaders());
-    app.get('/test', (c) => c.json({ success: true }));
+    const app = new Hono()
+    app.use('*', securityHeaders())
+    app.get('/test', c => c.json({ success: true }))
 
-    const res = await app.request('/test');
+    const res = await app.request('/test')
 
-    expect(res.status).toBe(200);
-    const permissionsPolicy = res.headers.get('Permissions-Policy');
-    expect(permissionsPolicy).toContain('geolocation=()');
-    expect(permissionsPolicy).toContain('microphone=()');
-    expect(permissionsPolicy).toContain('camera=()');
-    expect(permissionsPolicy).toContain('payment=()');
-  });
+    expect(res.status).toBe(200)
+    const permissionsPolicy = res.headers.get('Permissions-Policy')
+    expect(permissionsPolicy).toContain('geolocation=()')
+    expect(permissionsPolicy).toContain('microphone=()')
+    expect(permissionsPolicy).toContain('camera=()')
+    expect(permissionsPolicy).toContain('payment=()')
+  })
 
   it('should add Cache-Control header to prevent sensitive data caching', async () => {
-    const app = new Hono();
-    app.use('*', securityHeaders());
-    app.get('/test', (c) => c.json({ success: true }));
+    const app = new Hono()
+    app.use('*', securityHeaders())
+    app.get('/test', c => c.json({ success: true }))
 
-    const res = await app.request('/test');
+    const res = await app.request('/test')
 
-    expect(res.status).toBe(200);
-    const cacheControl = res.headers.get('Cache-Control');
-    expect(cacheControl).toBe('no-store, no-cache, must-revalidate, proxy-revalidate');
-  });
+    expect(res.status).toBe(200)
+    const cacheControl = res.headers.get('Cache-Control')
+    expect(cacheControl).toBe('no-store, no-cache, must-revalidate, proxy-revalidate')
+  })
 
   it('should add Pragma header for legacy HTTP/1.0 compatibility', async () => {
-    const app = new Hono();
-    app.use('*', securityHeaders());
-    app.get('/test', (c) => c.json({ success: true }));
+    const app = new Hono()
+    app.use('*', securityHeaders())
+    app.get('/test', c => c.json({ success: true }))
 
-    const res = await app.request('/test');
+    const res = await app.request('/test')
 
-    expect(res.status).toBe(200);
-    expect(res.headers.get('Pragma')).toBe('no-cache');
-  });
+    expect(res.status).toBe(200)
+    expect(res.headers.get('Pragma')).toBe('no-cache')
+  })
 
   it('should add Expires header to prevent caching', async () => {
-    const app = new Hono();
-    app.use('*', securityHeaders());
-    app.get('/test', (c) => c.json({ success: true }));
+    const app = new Hono()
+    app.use('*', securityHeaders())
+    app.get('/test', c => c.json({ success: true }))
 
-    const res = await app.request('/test');
+    const res = await app.request('/test')
 
-    expect(res.status).toBe(200);
-    expect(res.headers.get('Expires')).toBe('0');
-  });
+    expect(res.status).toBe(200)
+    expect(res.headers.get('Expires')).toBe('0')
+  })
 
   it('should add Surrogate-Control header for CDN caching control', async () => {
-    const app = new Hono();
-    app.use('*', securityHeaders());
-    app.get('/test', (c) => c.json({ success: true }));
+    const app = new Hono()
+    app.use('*', securityHeaders())
+    app.get('/test', c => c.json({ success: true }))
 
-    const res = await app.request('/test');
+    const res = await app.request('/test')
 
-    expect(res.status).toBe(200);
-    expect(res.headers.get('Surrogate-Control')).toBe('no-store');
-  });
+    expect(res.status).toBe(200)
+    expect(res.headers.get('Surrogate-Control')).toBe('no-store')
+  })
 
   it('should include all cache-related headers for sensitive API responses', async () => {
-    const app = new Hono();
-    app.use('*', securityHeaders());
-    app.get('/api/user', (c) => c.json({ user: { id: '1', email: 'test@example.com' } }));
+    const app = new Hono()
+    app.use('*', securityHeaders())
+    app.get('/api/user', c => c.json({ user: { id: '1', email: 'test@example.com' } }))
 
-    const res = await app.request('/api/user');
+    const res = await app.request('/api/user')
 
-    expect(res.status).toBe(200);
-    expect(res.headers.get('Cache-Control')).toBe('no-store, no-cache, must-revalidate, proxy-revalidate');
-    expect(res.headers.get('Pragma')).toBe('no-cache');
-    expect(res.headers.get('Expires')).toBe('0');
-    expect(res.headers.get('Surrogate-Control')).toBe('no-store');
-  });
+    expect(res.status).toBe(200)
+    expect(res.headers.get('Cache-Control')).toBe(
+      'no-store, no-cache, must-revalidate, proxy-revalidate'
+    )
+    expect(res.headers.get('Pragma')).toBe('no-cache')
+    expect(res.headers.get('Expires')).toBe('0')
+    expect(res.headers.get('Surrogate-Control')).toBe('no-store')
+  })
 
   it('should include usb in Permissions-Policy restrictions', async () => {
-    const app = new Hono();
-    app.use('*', securityHeaders());
-    app.get('/test', (c) => c.json({ success: true }));
+    const app = new Hono()
+    app.use('*', securityHeaders())
+    app.get('/test', c => c.json({ success: true }))
 
-    const res = await app.request('/test');
+    const res = await app.request('/test')
 
-    expect(res.status).toBe(200);
-    const permissionsPolicy = res.headers.get('Permissions-Policy');
-    expect(permissionsPolicy).toContain('usb=()');
-    expect(permissionsPolicy).toContain('magnetometer=()');
-    expect(permissionsPolicy).toContain('gyroscope=()');
-  });
-});
+    expect(res.status).toBe(200)
+    const permissionsPolicy = res.headers.get('Permissions-Policy')
+    expect(permissionsPolicy).toContain('usb=()')
+    expect(permissionsPolicy).toContain('magnetometer=()')
+    expect(permissionsPolicy).toContain('gyroscope=()')
+  })
+
+  it('should generate unique nonce per request', async () => {
+    const app = new Hono()
+    app.use('*', securityHeaders())
+    app.get('/test', c => {
+      const nonce = getCSPNonce(c)
+      return c.json({ nonce })
+    })
+
+    const res1 = await app.request('/test')
+    const res2 = await app.request('/test')
+
+    expect(res1.status).toBe(200)
+    expect(res2.status).toBe(200)
+    const body1 = await res1.json()
+    const body2 = await res2.json()
+    expect(body1.nonce).toBeDefined()
+    expect(body2.nonce).toBeDefined()
+    expect(body1.nonce).not.toBe(body2.nonce)
+  })
+})
