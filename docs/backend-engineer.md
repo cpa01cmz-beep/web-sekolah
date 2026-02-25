@@ -94,3 +94,47 @@ npm run build      # Production build
 - `worker/scheduled.ts` - use TimeoutError in withTimeout function
 - `worker/resilience/waitUntil.ts` - use TimeoutError in waitUntilWithTimeout
 - `worker/resilience/Retry.ts` - use TimeoutError in withRetry timeout handling
+
+### 2026-02-25: DomainError Classes for Consistent Error Handling
+
+**Problem**: Domain services were throwing generic `Error` objects without error codes, causing the error handler to return generic "operation failed" messages to users.
+
+**Solution**: Created typed error classes extending a base `DomainError` that carry error codes:
+
+1. Created `worker/errors/DomainError.ts` with:
+   - `DomainError` - base class with error code
+   - `NotFoundError` - for NOT_FOUND error code (returns 404)
+   - `ValidationError` - for VALIDATION_ERROR code (returns 400)
+   - `ConflictError` - for CONFLICT error code (returns 409)
+
+2. Updated domain services to use typed errors:
+   - `AnnouncementService` - uses ValidationError, NotFoundError
+   - `GradeService` - uses ValidationError, NotFoundError
+   - `ParentDashboardService` - uses NotFoundError, ValidationError
+   - `StudentDashboardService` - uses NotFoundError
+   - `TeacherService` - uses NotFoundError, ValidationError
+   - `UserService` - uses NotFoundError
+
+3. Updated `withErrorHandler` in route-utils to:
+   - Detect error type and return appropriate HTTP status code
+   - Return the actual error message to the user (not generic message)
+   - Log appropriately based on error type
+
+**Benefits**:
+
+- Users receive meaningful error messages (e.g., "Announcement not found" instead of "Failed to get announcement")
+- Proper HTTP status codes returned (404, 400, 409)
+- Consistent error handling across all domain services
+- Error codes included in API responses for better debugging
+
+**Files Changed**:
+
+- `worker/errors/DomainError.ts` - new file with error classes
+- `worker/errors/index.ts` - exports new error classes
+- `worker/domain/AnnouncementService.ts` - uses DomainError
+- `worker/domain/GradeService.ts` - uses DomainError
+- `worker/domain/ParentDashboardService.ts` - uses DomainError
+- `worker/domain/StudentDashboardService.ts` - uses DomainError
+- `worker/domain/TeacherService.ts` - uses DomainError
+- `worker/domain/UserService.ts` - uses DomainError
+- `worker/routes/route-utils.ts` - error handler now handles DomainError
