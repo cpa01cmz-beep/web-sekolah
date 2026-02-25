@@ -49,7 +49,6 @@ export const ContactForm = memo(function ContactForm({ onSubmit }: ContactFormPr
         setEmail('')
         setMessage('')
         resetValidation()
-<<<<<<< HEAD
       } catch (err) {
         logger.error('Contact form submission failed', err)
         const message =

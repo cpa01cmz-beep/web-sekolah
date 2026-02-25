@@ -6,6 +6,15 @@
 
 ## Recent Improvements
 
+### ContactForm Error Feedback (2026-02-25)
+
+Added user-facing error feedback to ContactForm submission failures:
+
+- Added error state to track submission failures
+- Display error toast notification on failure using sonner
+- Show inline error message with proper accessibility (`role="alert"`)
+- Error state properly reset on retry
+
 ### Autocomplete Attributes for Forms (2026-02-25)
 
 Added `autoComplete` attributes to form inputs across the application for better user experience and browser autofill support:
