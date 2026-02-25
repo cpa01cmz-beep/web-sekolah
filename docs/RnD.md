@@ -16,6 +16,13 @@ This document serves as the long-term memory for the Autonomous R&D Specialist a
 - No open RnD issues or PRs found
 - Codebase is well-maintained with good practices
 
+### Work Item: Issue #1172 - Remove hardcoded example.com URLs
+
+- **Status**: PR #1183 created and linked
+- **Solution**: Replaced hardcoded example.com URLs in index.html with empty strings
+- **Rationale**: Empty canonical and og:url tags allow search engines/social platforms to use the actual URL
+- **Verification**: All checks pass (typecheck, lint, build, 3392 tests)
+
 ## Potential Improvements Identified
 
 1. Security.txt has hardcoded example.com URLs - could be made configurable
@@ -37,3 +44,8 @@ This document serves as the long-term memory for the Autonomous R&D Specialist a
 - Caching strategies
 - Error monitoring improvements
 - Security enhancements
+
+## Lessons Learned
+
+- Vite build may fail with EISDIR error if using "/" as href/src in HTML meta tags
+- Using empty strings "" for canonical and og:url is a safe alternative that lets crawlers determine the actual URL
