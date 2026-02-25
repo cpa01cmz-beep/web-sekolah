@@ -107,6 +107,7 @@ export function LoginPage() {
                     onChange={e => setEmail(e.target.value)}
                     required
                     disabled={!!isLoading}
+                    autoComplete="email"
                   />
                 </FormField>
                 <FormField
@@ -123,6 +124,7 @@ export function LoginPage() {
                     onChange={e => setPassword(e.target.value)}
                     required
                     disabled={!!isLoading}
+                    autoComplete="current-password"
                   />
                 </FormField>
               </CardContent>

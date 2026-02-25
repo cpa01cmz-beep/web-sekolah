@@ -1,0 +1,89 @@
+# UI/UX Engineer Agent - Long-time Memory
+
+**Last Updated**: 2026-02-25
+
+---
+
+## Recent Improvements
+
+### Autocomplete Attributes for Forms (2026-02-25)
+
+Added `autoComplete` attributes to form inputs across the application for better user experience and browser autofill support:
+
+- **LoginPage**: Added `autoComplete="email"` and `autoComplete="current-password"` to email and password inputs
+- **FormFieldInput component**: Added `autoComplete` prop support
+- **PPDBForm**: Added autocomplete attributes:
+  - Name: `autoComplete="name"`
+  - Place of birth: `autoComplete="address-level2"`
+  - Date of birth: `autoComplete="bday"`
+  - School: `autoComplete="school-name"`
+  - Email: `autoComplete="email"`
+  - Phone: `autoComplete="tel"`
+- **UserForm**: Added `autoComplete="name"` and `autoComplete="email"`
+- **ContactForm**: Added `autoComplete="name"` and `autoComplete="email"`
+
+---
+
+## Common UI/UX Issues to Address
+
+### Accessibility
+
+- Icon-only buttons must have `aria-label` or be wrapped with Tooltip
+- All form inputs must have associated labels
+- Loading states should use `aria-busy` and `aria-live` regions
+- Focus indicators must be visible on all interactive elements
+
+### Forms
+
+- All form inputs should have appropriate `autoComplete` attributes
+- Required fields should have `aria-required="true"` (handled by FormField)
+- Error states should use `aria-invalid` and `role="alert"` (handled by FormField)
+- Submit buttons should show loading state with `aria-busy`
+
+### Best Practices
+
+- Use semantic HTML elements
+- Follow WCAG 2.1 AA guidelines
+- Use loading skeletons for async data
+- Use empty states when no data is available
+
+---
+
+## Files to Check for UI/UX Issues
+
+### Components to Review
+
+- `src/components/ui/` - Base UI components
+- `src/components/forms/` - Form components
+- `src/components/tables/` - Table components
+- `src/pages/` - Page components
+
+### Common Patterns
+
+- Loading states: Check for `isLoading` and proper skeleton components
+- Empty states: Check for `EmptyState` or `DashboardCardEmptyState` usage
+- Error states: Check for proper error handling and display
+- Accessibility: Check for `aria-*` attributes on interactive elements
+
+---
+
+## Commands
+
+```bash
+# Run lint
+npm run lint
+
+# Run typecheck
+npm run typecheck
+
+# Run tests
+npm run test:run
+
+# Run all validations
+npm run validate
+```
+
+---
+
+**Document Maintainer**: UI/UX Engineer Agent
+**Next Review**: 2026-03-25
