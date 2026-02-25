@@ -50,10 +50,14 @@ const CSP_INLINE_SCRIPT_HASH = "'sha256-xsWpBSh+88Gpp+H1+XSGjqLj67OrRo+q9tmTvaO4
 // SECURITY IMPROVEMENTS (2026-02-25):
 // - ✅ Added nonce-based CSP support per request
 // - ✅ Updated inline script hash to current version
+// - ✅ Added 'Origin-Agent-Cluster: ?1' for process isolation security
+// - ✅ Provides additional browser process isolation per origin
 // - ⚠️  'unsafe-eval' still required for React runtime in SPA mode
 // - ⚠️  'unsafe-inline' still required for style-src (Tailwind CSS in SPA mode)
 // NOTE: True nonce-based CSP requires SSR. Current implementation provides nonce for
 // future enhancement when SSR is implemented.
+//
+// FUTURE IMPROVEMENTS:
 
 const DEFAULT_SECURITY_HEADERS: SecurityHeadersConfig = {
   enableHSTS: true,
@@ -74,7 +78,6 @@ export function securityHeaders(config: SecurityHeadersConfig = {}) {
     c.set('csp-nonce', nonce)
 
     await next()
-
     const response = c.res
 
     if (finalConfig.enableHSTS) {
@@ -111,6 +114,7 @@ export function securityHeaders(config: SecurityHeadersConfig = {}) {
     response.headers.set('X-Permitted-Cross-Domain-Policies', 'none')
     response.headers.set('Cross-Origin-Opener-Policy', 'same-origin')
     response.headers.set('Cross-Origin-Resource-Policy', 'same-site')
+    response.headers.set('Origin-Agent-Cluster', '?1')
     response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate')
     response.headers.set('Pragma', 'no-cache')
     response.headers.set('Expires', '0')
