@@ -27,6 +27,14 @@ This document serves as the long-term memory for the security-engineer agent, tr
 
 ## Completed Improvements
 
+### 2026-02-26
+
+- **Added X-DNS-Prefetch-Control header**
+  - Added `X-DNS-Prefetch-Control: off` to security-headers.ts
+  - Prevents browsers from pre-resolving DNS for linked domains
+  - Enhances privacy by reducing information leakage
+  - Small, atomic change with no breaking impact
+
 ### 2026-02-25
 
 - **Added Origin-Agent-Cluster header**

@@ -57,6 +57,11 @@ const CSP_INLINE_SCRIPT_HASH = "'sha256-xsWpBSh+88Gpp+H1+XSGjqLj67OrRo+q9tmTvaO4
 // NOTE: True nonce-based CSP requires SSR. Current implementation provides nonce for
 // future enhancement when SSR is implemented.
 //
+// SECURITY IMPROVEMENTS (2026-02-26):
+// - ✅ Added 'X-DNS-Prefetch-Control: off' to prevent DNS prefetching
+// - ✅ Enhances privacy by preventing browsers from pre-resolving domains
+// - ✅ Small defense-in-depth security improvement
+//
 // FUTURE IMPROVEMENTS:
 
 const DEFAULT_SECURITY_HEADERS: SecurityHeadersConfig = {
@@ -115,6 +120,7 @@ export function securityHeaders(config: SecurityHeadersConfig = {}) {
     response.headers.set('Cross-Origin-Opener-Policy', 'same-origin')
     response.headers.set('Cross-Origin-Resource-Policy', 'same-site')
     response.headers.set('Origin-Agent-Cluster', '?1')
+    response.headers.set('X-DNS-Prefetch-Control', 'off')
     response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate')
     response.headers.set('Pragma', 'no-cache')
     response.headers.set('Expires', '0')
