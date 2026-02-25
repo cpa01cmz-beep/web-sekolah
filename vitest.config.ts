@@ -1,6 +1,6 @@
-import { defineConfig } from 'vitest/config';
-import react from '@vitejs/plugin-react';
-import path from 'path';
+import { defineConfig } from 'vitest/config'
+import react from '@vitejs/plugin-react'
+import path from 'path'
 
 export default defineConfig({
   plugins: [react()],
@@ -24,8 +24,6 @@ export default defineConfig({
     exclude: [
       'node_modules/',
       'dist/',
-      'worker/__tests__/webhook-reliability.test.ts',
-      'worker/__tests__/webhook-entities.test.ts',
       'worker/__tests__/referential-integrity.test.ts',
       'worker/domain/__tests__/CommonDataService.test.ts',
       'worker/domain/__tests__/StudentDashboardService.test.ts',
@@ -41,4 +39,4 @@ export default defineConfig({
       'cloudflare:workers': path.resolve(__dirname, './__mocks__/cloudflare:workers.ts'),
     },
   },
-});
+})

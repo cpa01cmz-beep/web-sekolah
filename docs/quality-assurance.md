@@ -42,8 +42,6 @@ The following tests are excluded from the test suite in `vitest.config.ts`:
 
 | Test File                                                 | Reason                                                         |
 | --------------------------------------------------------- | -------------------------------------------------------------- |
-| `worker/__tests__/webhook-reliability.test.ts`            | Does not exist                                                 |
-| `worker/__tests__/webhook-entities.test.ts`               | Does not exist                                                 |
 | `worker/__tests__/referential-integrity.test.ts`          | Requires proper env mock with `GlobalDurableObject.idFromName` |
 | `worker/domain/__tests__/CommonDataService.test.ts`       | Requires Cloudflare Workers environment                        |
 | `worker/domain/__tests__/StudentDashboardService.test.ts` | Requires Cloudflare Workers environment                        |
