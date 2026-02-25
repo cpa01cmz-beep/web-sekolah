@@ -31,6 +31,37 @@ Deliver small, safe, measurable improvements strictly inside the Product-Archite
 
 ## Improvements Log
 
+### 2026-02-25: Remove Hardcoded example.com URLs from SEO Meta Tags
+
+**Issue**: index.html contained hardcoded placeholder URLs using example.com domain:
+
+- `canonical` href was set to `https://akademiapro.example.com`
+- `og:url` meta property was set to `https://akademiapro.example.com`
+
+**Solution**:
+
+1. Added `VITE_APP_URL` environment variable to `.env.example`
+2. Replaced hardcoded URLs with `%VITE_APP_URL%` placeholder in index.html
+3. This allows proper configuration for different environments (dev, staging, production)
+
+**Files Changed**:
+
+- `.env.example` - Added `VITE_APP_URL` variable
+- `index.html` - Replaced hardcoded URLs with environment variable placeholder
+
+**Verification**:
+
+- TypeScript: ✅ 0 errors
+- Lint: ✅ 0 errors
+- Build: ✅ Success
+- Tests: ✅ 3392 passing
+
+**Lessons Learned**:
+
+- Vite build may fail with EISDIR error if using "/" or "." as href in HTML meta tags
+- Using environment variable placeholders is the preferred approach for configurable URLs
+- Using empty strings "" is a safe alternative that lets crawlers determine the actual URL
+
 ### 2026-02-25: Grade Colors Centralization
 
 **Issue**: Grade colors were duplicated in multiple locations:
