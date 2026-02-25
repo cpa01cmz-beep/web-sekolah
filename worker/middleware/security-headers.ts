@@ -76,6 +76,12 @@ const CSP_INLINE_SCRIPT_HASH = "'sha256-xsWpBSh+88Gpp+H1+XSGjqLj67OrRo+q9tmTvaO4
 //
 // FUTURE IMPROVEMENTS:
 
+// SECURITY IMPROVEMENTS (2026-02-25):
+// - ✅ Added clipboard-read and clipboard-write to Permissions-Policy
+// - ✅ Prevents unauthorized clipboard access by embedded content
+// - ✅ Added idle-detection to prevent idle detection API usage
+// - ✅ Defense-in-depth security improvement
+
 const DEFAULT_SECURITY_HEADERS: SecurityHeadersConfig = {
   enableHSTS: true,
   enableCSP: true,
@@ -123,7 +129,7 @@ export function securityHeaders(config: SecurityHeadersConfig = {}) {
     if (finalConfig.enablePermissionsPolicy) {
       response.headers.set(
         'Permissions-Policy',
-        'geolocation=(), microphone=(), camera=(), payment=(), usb=(), magnetometer=(), gyroscope=()'
+        'geolocation=(), microphone=(), camera=(), payment=(), usb=(), magnetometer=(), gyroscope=(), clipboard-read=(), clipboard-write=(), idle-detection=()'
       )
     }
 
