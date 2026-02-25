@@ -6,6 +6,7 @@ export interface Env {
   JWT_SECRET?: string
   DEFAULT_PASSWORD?: string
   ENVIRONMENT?: 'development' | 'staging' | 'production'
+  SITE_URL?: string
 }
 
 interface StorageValue {
