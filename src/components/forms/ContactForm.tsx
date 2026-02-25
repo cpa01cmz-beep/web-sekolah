@@ -4,6 +4,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { FormField } from '@/components/ui/form-field'
 import { FormSuccess } from '@/components/ui/form-success'
 import { useState, memo, useCallback, useMemo } from 'react'
+import { toast } from 'sonner'
 import { validateName, validateEmail, validateMessage } from '@/utils/validation'
 import { logger } from '@/lib/logger'
 import { useFormValidation } from '@/hooks/useFormValidation'
@@ -48,6 +49,7 @@ export const ContactForm = memo(function ContactForm({ onSubmit }: ContactFormPr
         resetValidation()
       } catch (error) {
         logger.error('Contact form submission failed', error)
+        toast.error('Failed to send message. Please try again.')
       } finally {
         setIsSubmitting(false)
       }
