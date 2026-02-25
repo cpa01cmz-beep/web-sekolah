@@ -2,10 +2,10 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { BrowserRouter } from 'react-router-dom'
 import { LoginPage } from '@/pages/LoginPage'
-import { useAuthStore } from '@/lib/authStore'
+import { useAuthStore } from '@/stores/authStore'
 import { toast } from 'sonner'
 
-vi.mock('@/lib/authStore', () => ({
+vi.mock('@/stores/authStore', () => ({
   useAuthStore: vi.fn(() => ({
     login: vi.fn().mockResolvedValue({}),
   })),

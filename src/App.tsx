@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { useAuthStore } from '@/lib/authStore'
+import { useAuthStore } from '@/stores/authStore'
 import { ErrorBoundary } from '@/components/ErrorBoundary'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClient } from '@/lib/api-client'

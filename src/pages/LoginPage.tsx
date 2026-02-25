@@ -10,7 +10,7 @@ import {
 } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { FormField } from '@/components/ui/form-field'
-import { useAuthStore } from '@/lib/authStore'
+import { useAuthStore } from '@/stores/authStore'
 import { logger } from '@/lib/logger'
 import { GraduationCap, ArrowRight } from 'lucide-react'
 import { UserRole } from '@shared/types'
