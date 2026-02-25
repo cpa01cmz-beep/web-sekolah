@@ -205,13 +205,15 @@ check_env_example() {
 }
 
 check_agent_docs() {
-  local agent_docs=("docs/ai-agent-engineer.md" "docs/backend-engineer.md" "docs/frontend-engineer.md")
+  local agent_docs=("docs"/*"-engineer.md" "docs"/*"-architect.md" "docs"/*"-specialist.md" "docs"/*"-writer.md" "docs"/*"-strategist.md")
   local found=0
   
-  for doc in "${agent_docs[@]}"; do
-    if [ -f "$doc" ]; then
-      found=$((found + 1))
-    fi
+  for pattern in "${agent_docs[@]}"; do
+    for doc in $pattern; do
+      if [ -f "$doc" ]; then
+        found=$((found + 1))
+      fi
+    done
   done
   
   if [ $found -gt 0 ]; then
