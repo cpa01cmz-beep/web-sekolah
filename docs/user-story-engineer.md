@@ -57,3 +57,26 @@ User-story-engineer: Deliver small, safe, measurable improvements strictly insid
 
 - Could proactively scan for other entities (grades, users, etc.) that may have similar gaps
 - Could check for any other service methods that exist in backend but not frontend
+
+## Implemented Features (Current Session)
+
+- Added DELETE_MESSAGE endpoint to API_ENDPOINTS for TEACHERS and PARENTS
+- Added deleteMessage to MessageEndpoints interface
+- Added deleteMessage method to MessageService implementation
+- Added deleteMessage to TeacherService and ParentService contracts
+- Added deleteMessage method to teacherService.ts and parentService.ts implementations
+- Created PR #1206
+
+## Files Modified (Current Session)
+
+- src/config/api-endpoints.ts - Added DELETE_MESSAGE for TEACHERS and PARENTS
+- src/services/messageService.ts - Added deleteMessage to interface and implementation
+- src/services/serviceContracts.ts - Added deleteMessage to TeacherService and ParentService
+- src/services/teacherService.ts - Added deleteMessage endpoint config and method
+- src/services/parentService.ts - Added deleteMessage endpoint config and method
+
+## Key Learnings (Current Session)
+
+- Backend has DELETE message endpoints at `/api/teachers/:id/messages/:messageId` and `/api/parents/:id/messages/:messageId`
+- MessageService uses a factory pattern with configurable endpoints (MessageEndpoints)
+- Message deletion was missing from the frontend but existed in backend - same pattern as announcements
