@@ -8,6 +8,7 @@ import { toast } from 'sonner'
 import { validateName, validateEmail, validateMessage } from '@/utils/validation'
 import { logger } from '@/lib/logger'
 import { useFormValidation } from '@/hooks/useFormValidation'
+import { toast } from 'sonner'
 
 interface ContactFormProps {
   onSubmit?: (data: { name: string; email: string; message: string }) => Promise<void> | void
