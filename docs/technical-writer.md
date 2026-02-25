@@ -4,14 +4,12 @@
 
 This document tracks the technical writer agent's evolution and best practices for documentation improvements.
 
-## Active Work
-
-- Issue #1175: Split oversized blueprint.md into focused documentation
-- Currently extracting: Cache Configuration and Scheduled Tasks sections
-
 ## Past Work
 
-- (To be added as work progresses)
+- (2026-02-25) Updated roadmap.md test counts: 3346→3412 passing, 5→3 skipped
+- Issue #1175: Split oversized blueprint.md into focused documentation
+  - Extracted: Cache Configuration → docs/CACHE_CONFIG.md
+  - Extracted: Scheduled Tasks → docs/SCHEDULED_TASKS.md
 
 ## Best Practices
 
@@ -20,16 +18,13 @@ This document tracks the technical writer agent's evolution and best practices f
 3. Create index/navigation for related docs
 4. Update references when splitting content
 
-## Current Splitting Strategy
+## Current Focus
 
-Starting with extracting clearly defined sections from blueprint.md:
+Maintaining documentation accuracy by:
 
-1. Cache Configuration (lines 39-104)
-2. Scheduled Tasks (lines 106-270)
-3. Entity definitions and indexes (to be determined)
+- Updating test counts when they change
+- Ensuring consistency across all docs
 
-## Next Steps
+## Issues to Watch
 
-- Extract Cache Configuration → docs/CACHE_CONFIG.md
-- Extract Scheduled Tasks → docs/SCHEDULED_TASKS.md
-- Update blueprint.md to reference new docs
+- Issue #555: Complete and update all documentation - ongoing task
