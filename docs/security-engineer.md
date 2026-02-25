@@ -27,6 +27,15 @@ This document serves as the long-term memory for the security-engineer agent, tr
 
 ## Completed Improvements
 
+### 2026-02-28
+
+- **Added upgrade-insecure-requests directive to CSP**
+  - Added `upgrade-insecure-requests` to CSP in security-headers.ts
+  - Automatically upgrades HTTP requests to HTTPS
+  - Works with HSTS for complete transport security
+  - Defense-in-depth security improvement
+  - Small, atomic change with no breaking impact
+
 ### 2026-02-27
 
 - **Added Cross-Origin-Embedder-Policy (COEP) header**
