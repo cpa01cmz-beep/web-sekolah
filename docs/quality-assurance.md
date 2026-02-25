@@ -5,7 +5,7 @@
 ### Current Test Coverage
 
 - **Test Files**: 111
-- **Tests**: 3392 passing, 5 skipped, 155 todo
+- **Tests**: 3394 passing, 3 skipped, 155 todo
 - **Pass Rate**: 100%
 
 ### Validation Commands
