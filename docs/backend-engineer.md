@@ -60,3 +60,15 @@ npm run build      # Production build
 - Current score: 98/100 (A+)
 - Nonce infrastructure ready for SSR migration
 - Hash-based CSP for inline scripts in place
+
+### 2026-02-25: Enable Skipped Error Monitoring Tests
+
+**Issue**: 2 skipped tests in error-monitoring.test.ts
+
+**Problem**: The integration tests tried to test error catching in Hono routes using `app.use(errorMonitoring())` and throwing errors in route handlers. However, Hono's default error handler catches thrown errors before middleware can intercept them, making these tests impossible to pass.
+
+**Solution**: Converted the broken integration tests to proper unit tests using the mockContext approach that was already working in the file. This follows the existing test patterns in the file.
+
+**Files Changed**:
+
+- `worker/middleware/__tests__/error-monitoring.test.ts` - converted 2 skipped tests to unit tests
