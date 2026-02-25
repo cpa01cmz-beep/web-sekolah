@@ -8,7 +8,6 @@ import { toast } from 'sonner'
 import { validateName, validateEmail, validateMessage } from '@/utils/validation'
 import { logger } from '@/lib/logger'
 import { useFormValidation } from '@/hooks/useFormValidation'
-import { toast } from 'sonner'
 
 interface ContactFormProps {
   onSubmit?: (data: { name: string; email: string; message: string }) => Promise<void> | void
@@ -20,6 +19,7 @@ export const ContactForm = memo(function ContactForm({ onSubmit }: ContactFormPr
   const [message, setMessage] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   const formData = { name, email, message }
   const {
@@ -41,6 +41,7 @@ export const ContactForm = memo(function ContactForm({ onSubmit }: ContactFormPr
         return
       }
       setIsSubmitting(true)
+      setError(null)
       try {
         await onSubmit?.({ name, email, message })
         setIsSuccess(true)
@@ -48,9 +49,12 @@ export const ContactForm = memo(function ContactForm({ onSubmit }: ContactFormPr
         setEmail('')
         setMessage('')
         resetValidation()
-      } catch (error) {
-        logger.error('Contact form submission failed', error)
-        toast.error('Failed to send message. Please try again.')
+      } catch (err) {
+        logger.error('Contact form submission failed', err)
+        const message =
+          err instanceof Error ? err.message : 'Failed to send message. Please try again.'
+        setError(message)
+        toast.error(message)
       } finally {
         setIsSubmitting(false)
       }
@@ -60,6 +64,7 @@ export const ContactForm = memo(function ContactForm({ onSubmit }: ContactFormPr
 
   const handleReset = useCallback(() => {
     setIsSuccess(false)
+    setError(null)
     resetValidation()
   }, [resetValidation])
 
@@ -83,6 +88,11 @@ export const ContactForm = memo(function ContactForm({ onSubmit }: ContactFormPr
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6" noValidate>
+      {error && (
+        <div className="p-3 text-sm text-red-600 bg-red-50 rounded-md" role="alert">
+          {error}
+        </div>
+      )}
       <FormField
         id="contact-name"
         label="Full Name"

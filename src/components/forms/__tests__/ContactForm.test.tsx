@@ -9,6 +9,12 @@ vi.mock('@/lib/logger', () => ({
   },
 }))
 
+vi.mock('sonner', () => ({
+  toast: {
+    error: vi.fn(),
+  },
+}))
+
 describe('ContactForm', () => {
   beforeEach(() => {
     vi.clearAllMocks()
@@ -157,6 +163,37 @@ describe('ContactForm', () => {
       await waitFor(() => {
         const nameInput = screen.getByLabelText(/full name/i) as HTMLInputElement
         expect(nameInput.value).toBe('John Doe')
+      })
+    })
+
+    it('should show error toast when onSubmit throws', async () => {
+      const user = userEvent.setup()
+      const onSubmit = vi.fn().mockRejectedValue(new Error('Submission failed'))
+      const { toast } = await import('sonner')
+      render(<ContactForm onSubmit={onSubmit} />)
+
+      await user.type(screen.getByLabelText(/full name/i), 'John Doe')
+      await user.type(screen.getByLabelText(/email/i), 'john@example.com')
+      await user.type(screen.getByLabelText(/message/i), 'This is a test message')
+      await user.click(screen.getByRole('button', { name: /send message/i }))
+
+      await waitFor(() => {
+        expect(toast.error).toHaveBeenCalledWith('Submission failed')
+      })
+    })
+
+    it('should show inline error message when onSubmit throws', async () => {
+      const user = userEvent.setup()
+      const onSubmit = vi.fn().mockRejectedValue(new Error('Submission failed'))
+      render(<ContactForm onSubmit={onSubmit} />)
+
+      await user.type(screen.getByLabelText(/full name/i), 'John Doe')
+      await user.type(screen.getByLabelText(/email/i), 'john@example.com')
+      await user.type(screen.getByLabelText(/message/i), 'This is a test message')
+      await user.click(screen.getByRole('button', { name: /send message/i }))
+
+      await waitFor(() => {
+        expect(screen.getByRole('alert')).toBeInTheDocument()
       })
     })
   })
