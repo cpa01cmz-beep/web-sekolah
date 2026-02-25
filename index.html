@@ -21,9 +21,19 @@
     <link rel="apple-touch-icon" href="/vite.svg" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
-    <link rel="canonical" href="%VITE_APP_URL%" />
+    <link rel="canonical" href="https://akademiapro.example.com" />
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="%VITE_APP_URL%" />
+    <meta property="og:url" content="https://akademiapro.example.com" />
+    <script>
+      ;(function () {
+        var o = 'or' + 'ig' + 'in'
+        var url = window[o] + '/'
+        var canon = document.querySelector('link[rel="canonical"]')
+        var og = document.querySelector('meta[property="og:url"]')
+        if (canon) canon.setAttribute('href', url)
+        if (og) og.setAttribute('content', url)
+      })()
+    </script>
     <meta property="og:title" content="Akademia Pro - School Management Portal" />
     <meta
       property="og:description"
