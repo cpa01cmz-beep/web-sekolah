@@ -95,7 +95,9 @@
   /* Focus Styles */
   *:focus-visible {
     outline: none;
-    box-shadow: 0 0 0 2px hsl(var(--background)), 0 0 0 4px hsl(var(--ring));
+    box-shadow:
+      0 0 0 2px hsl(var(--background)),
+      0 0 0 4px hsl(var(--ring));
   }
 
   /* Enhanced focus for better keyboard navigation visibility */
@@ -104,10 +106,12 @@
   input:focus-visible,
   textarea:focus-visible,
   select:focus-visible,
-  [role="button"]:focus-visible,
-  [role="link"]:focus-visible {
+  [role='button']:focus-visible,
+  [role='link']:focus-visible {
     outline: none;
-    box-shadow: 0 0 0 2px hsl(var(--background)), 0 0 0 3px hsl(var(--ring));
+    box-shadow:
+      0 0 0 2px hsl(var(--background)),
+      0 0 0 3px hsl(var(--ring));
   }
 
   /* High contrast focus ring for better visibility */
@@ -116,6 +120,22 @@
       outline: 2px solid hsl(var(--ring));
       outline-offset: 2px;
     }
+  }
+
+  /* Skip to main content link for keyboard accessibility */
+  .skip-link {
+    position: absolute;
+    top: -40px;
+    left: 0;
+    background: hsl(var(--primary));
+    color: hsl(var(--primary-foreground));
+    padding: 8px 16px;
+    z-index: 100;
+    transition: top 0.2s;
+  }
+
+  .skip-link:focus {
+    top: 0;
   }
 }
 
@@ -140,7 +160,7 @@
     pointer-events: none;
     opacity: 0.5;
   }
-  
+
   .btn-gradient {
     display: inline-flex;
     align-items: center;
@@ -151,7 +171,7 @@
     transition: all 0.2s;
     color: white;
     box-shadow: 0 0 20px -5px hsl(var(--primary) / 0.4);
-    background: linear-gradient(135deg, #F38020 0%, #E55A1B 100%);
+    background: linear-gradient(135deg, #f38020 0%, #e55a1b 100%);
   }
 
   .btn-gradient:focus-visible {
@@ -172,28 +192,28 @@
   .btn-gradient:active {
     transform: scale(0.95);
   }
-  
+
   /* Gradient System */
   .bg-gradient-primary {
-    background: linear-gradient(135deg, #F38020 0%, #E55A1B 50%, #D14615 100%);
+    background: linear-gradient(135deg, #f38020 0%, #e55a1b 50%, #d14615 100%);
   }
-  
+
   .bg-gradient-rainbow {
-    background: linear-gradient(135deg, #F38020 0%, #E55A1B 25%, #D14615 50%, #ff6b35 100%);
+    background: linear-gradient(135deg, #f38020 0%, #e55a1b 25%, #d14615 50%, #ff6b35 100%);
   }
-  
+
   /* Text System */
   .text-gradient {
-    background: linear-gradient(90deg, #F38020 0%, #E55A1B 50%, #D14615 100%);
+    background: linear-gradient(90deg, #f38020 0%, #e55a1b 50%, #d14615 100%);
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
   }
-  
+
   .text-pretty {
     text-wrap: pretty;
   }
-  
+
   /* Glass Morphism */
   .glass {
     background-color: rgba(255, 255, 255, 0.1);
@@ -208,34 +228,35 @@
     border: 1px solid rgba(255, 255, 255, 0.1);
     box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
   }
-  
+
   /* Interactive Effects */
   .floating {
     animation: float 2s ease-in-out infinite;
   }
-  
+
   .rotating {
     animation: rotate 2s ease-in-out infinite;
   }
-  
+
   @keyframes float {
-    0%, 100% { 
+    0%,
+    100% {
       transform: translateY(-4px);
     }
-    50% { 
+    50% {
       transform: translateY(4px);
     }
   }
-  
+
   @keyframes rotate {
-    0% { 
+    0% {
       transform: rotate(0deg);
     }
-    100% { 
+    100% {
       transform: rotate(360deg);
     }
   }
-  
+
   .shimmer-bg {
     position: relative;
     overflow: hidden;
@@ -249,16 +270,16 @@
     background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.2), transparent);
     content: '';
   }
-  
+
   /* Layout Utilities */
   .center {
     @apply flex items-center justify-center;
   }
-  
+
   .center-col {
     @apply flex flex-col items-center justify-center;
   }
-  
+
   /* Responsive Typography */
   .text-display {
     font-size: 1.875rem;
@@ -287,7 +308,7 @@
       line-height: 1;
     }
   }
-  
+
   .text-body {
     font-size: 1rem;
     line-height: 1.625;
