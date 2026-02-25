@@ -1,26 +1,23 @@
-import { useMemo } from 'react';
-
-const SCHEDULE_DAYS = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat'] as const;
-type ScheduleDay = (typeof SCHEDULE_DAYS)[number];
+import { useMemo } from 'react'
+import { SCHEDULE_DAYS, type ScheduleDay } from '@shared/types'
 
 interface ScheduleItemBase {
-  day: ScheduleDay;
+  day: ScheduleDay
 }
 
-export function useScheduleGrouping<T extends ScheduleItemBase>(schedule: T[]): Record<string, T[]> {
+export function useScheduleGrouping<T extends ScheduleItemBase>(
+  schedule: T[]
+): Record<ScheduleDay, T[]> {
   return useMemo(() => {
-    const grouped: Record<string, T[]> = {
-      Senin: [],
-      Selasa: [],
-      Rabu: [],
-      Kamis: [],
-      Jumat: [],
-    };
-    schedule.forEach((item) => {
+    const grouped: Record<ScheduleDay, T[]> = SCHEDULE_DAYS.reduce(
+      (acc, day) => ({ ...acc, [day]: [] }),
+      {} as Record<ScheduleDay, T[]>
+    )
+    schedule.forEach(item => {
       if (grouped[item.day]) {
-        grouped[item.day].push(item);
+        grouped[item.day].push(item)
       }
-    });
-    return grouped;
-  }, [schedule]);
+    })
+    return grouped
+  }, [schedule])
 }
