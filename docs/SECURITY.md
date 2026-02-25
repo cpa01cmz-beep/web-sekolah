@@ -4,16 +4,39 @@
 
 Akademia Pro maintains a **98/100 security score (A+)** with comprehensive security controls implemented throughout the codebase.
 
-**Last Security Assessment**: 2026-02-23
+**Last Security Assessment**: 2026-02-25
 
 **Production Dependencies**: 0 vulnerabilities
-**Development Dependencies**: 12 vulnerabilities (ESLint transitive deps, ReDoS - LOW risk)
+**Development Dependencies**: 2 vulnerabilities (ESLint transitive deps - accepted risk, see below)
+
+### Known Vulnerability Acceptance
+
+The following vulnerabilities exist in development dependencies only (not included in production bundles):
+
+| Dependency                         | Severity | CVE                 | Description                   | Status        |
+| ---------------------------------- | -------- | ------------------- | ----------------------------- | ------------- |
+| ajv <6.14.0                        | Moderate | GHSA-2g4f-4pwh-qvx6 | ReDoS when using $data option | Accepted risk |
+| minimatch <3.1.3 or >=9.0.0 <9.0.6 | High     | GHSA-3ppc-4f35-3m26 | ReDoS via repeated wildcards  | Accepted risk |
+
+**Justification for Acceptance**:
+
+- Both are transitive dependencies of ESLint
+- Not included in production builds (devDependencies only)
+- Would require ESLint 10.x upgrade (significant migration effort)
+- Risk limited to development machine exploitation
+- Plan to address when ESLint 10 becomes stable
 
 ---
 
 ## Recent Security Improvements
 
 ### 2026-02-25
+
+- **Documented ESLint transitive dependency vulnerabilities**
+  - Updated vulnerability count from 12 to 2 (vulnerabilities fixed over time)
+  - Added acceptance justification for ajv and minimatch ReDoS vulnerabilities
+  - These are dev-only dependencies not included in production builds
+  - Risk accepted until ESLint 10.x upgrade is feasible
 
 - **Implemented nonce-based CSP support**
   - Added cryptographic nonce generation per request in security headers middleware
