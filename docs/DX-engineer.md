@@ -31,6 +31,13 @@ DX-engineer focuses on improving Developer Experience through small, safe, measu
 - Documentation improvements
 - Build and test configuration
 - Developer tooling
+- Security vulnerability fixes via `npm audit`
+
+## Past Improvements
+
+- **2026-02-25**: Fixed 3 security vulnerabilities (ajv, hono, minimatch) via npm audit fix
+  - PR: https://github.com/cpa01cmz-beep/web-sekolah/pull/1224
+- **2026-02-25**: Attempted to fix 349 files with Prettier formatting issues, but reverted due to size (not atomic)
 
 ## Notes
 
