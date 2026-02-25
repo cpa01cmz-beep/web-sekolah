@@ -16,6 +16,19 @@ export const GRADE_COLORS: Record<string, string> = {
   F: '#dc2626',
 } as const
 
+export const CHART_COLORS = {
+  primary: THEME_COLORS.PRIMARY,
+  secondary: THEME_COLORS.SECONDARY,
+  success: GRADE_COLORS.A,
+  warning: GRADE_COLORS.C,
+  error: GRADE_COLORS.D,
+  info: '#3b82f6',
+  purple: '#a855f7',
+  pink: '#ec4899',
+  teal: '#14b8a6',
+  orange: '#f97316',
+} as const
+
 export const ROLE_COLORS: Record<UserRole, { color: string; label: string }> = {
   student: { color: 'bg-blue-500', label: 'Student' },
   teacher: { color: 'bg-green-500', label: 'Teacher' },
