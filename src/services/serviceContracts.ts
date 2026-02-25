@@ -61,6 +61,7 @@ export interface TeacherService {
   getConversation(teacherId: string, parentId: string): Promise<Message[]>
   sendMessage(teacherId: string, data: SendMessageData): Promise<Message>
   markAsRead(teacherId: string, messageId: string): Promise<Message>
+  deleteMessage(teacherId: string, messageId: string): Promise<{ deleted: boolean; id: string }>
 }
 
 export interface ParentService {
@@ -71,6 +72,7 @@ export interface ParentService {
   getConversation(parentId: string, teacherId: string): Promise<Message[]>
   sendMessage(parentId: string, data: SendMessageData): Promise<Message>
   markAsRead(parentId: string, messageId: string): Promise<Message>
+  deleteMessage(parentId: string, messageId: string): Promise<{ deleted: boolean; id: string }>
   getChildTeachers(parentId: string): Promise<SchoolUser[]>
 }
 
