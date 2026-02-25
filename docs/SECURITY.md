@@ -13,6 +13,15 @@ Akademia Pro maintains a **98/100 security score (A+)** with comprehensive secur
 
 ## Recent Security Improvements
 
+### 2026-02-25
+
+- **Implemented nonce-based CSP support**
+  - Added cryptographic nonce generation per request in security headers middleware
+  - Nonce is stored in request context for future use in SSR scenarios
+  - Added `getCSPNonce()` helper function for retrieving nonce in route handlers
+  - Updated inline script hash to current version (`sha256-xsWpBSh+88Gpp+H1+XSGjqLj67OrRo+q9tmTvaO4nhs=`)
+  - Provides foundation for full nonce-based CSP when SSR is implemented
+
 ### 2026-02-23
 
 - **Added timing-safe login verification to prevent user enumeration attacks**
@@ -205,21 +214,24 @@ VITE_LOG_LEVEL=info  # Options: debug, info, warn, error
 
 ### Content Security Policy (CSP)
 
-**Current State**: CSP uses `'unsafe-inline'` and `'unsafe-eval'` directives
+**Current State**: CSP uses hash-based CSP for inline scripts and `'unsafe-inline'`/`'unsafe-eval'` for React runtime
 
-**Reasoning**:
+**Implementation Details**:
 
-- `'unsafe-inline'` required for React runtime and inline event handlers
-- `'unsafe-eval'` required for some React libraries and eval() usage
-- `'unsafe-inline'` in style-src required for Tailwind CSS
+- **Inline Scripts**: Protected using SHA-256 hash (`'sha256-xsWpBSh+88Gpp+H1+XSGjqLj67OrRo+q9tmTvaO4nhs='`)
+- **React Runtime**: Requires `'unsafe-eval'` for Just-In-Time compilation
+- **Styles**: Requires `'unsafe-inline'` for Tailwind CSS dynamic classes
+- **Nonce Support**: Cryptographic nonce (32 chars) generated per request
 
-**Future Enhancement**: For maximum security, implement nonce-based CSP:
+**Current CSP Header**:
 
-```typescript
-cspDirectives: `default-src 'self'; script-src 'self' 'nonce-${nonce}'; style-src 'self' 'nonce-${nonce}'; ...`
+```
+Content-Security-Policy: default-src 'self'; script-src 'self' 'sha256-xsWpBSh+88Gpp+H1+XSGjqLj67OrRo+q9tmTvaO4nhs=' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self'; frame-src 'self'; frame-ancestors 'none'; object-src 'none'; worker-src 'self'; base-uri 'self'; form-action 'self'; report-uri /api/csp-report;
 ```
 
-**Impact**: Medium effort (1-2 days), requires HTML templating changes
+**Future Enhancement**: Full nonce-based CSP requires Server-Side Rendering (SSR). Current implementation provides nonce infrastructure for future SSR migration.
+
+**Implementation**: `worker/middleware/security-headers.ts`
 
 ### Outdated Dependencies
 
@@ -262,6 +274,7 @@ cspDirectives: `default-src 'self'; script-src 'self' 'nonce-${nonce}'; style-sr
 
 | Date       | Score       | Status | Notes                                                                                                                                              |
 | ---------- | ----------- | ------ | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-02-25 | 98/100 (A+) | Secure | Nonce-based CSP support added (per-request nonce generation), inline script hash updated, infrastructure ready for SSR migration                   |
 | 2026-02-23 | 98/100 (A+) | Secure | Timing-safe login verification added (prevents user enumeration), JWT ID (jti) claim for token tracking, CSP report schema validation strengthened |
 | 2026-02-22 | 97/100 (A+) | Secure | Rate limiting IP validation improved (cf-connecting-ip priority), store size limit added, CSP report validation added                              |
 | 2026-02-20 | 97/100 (A+) | Secure | Dev dependency vulnerabilities documented (ESLint transitive deps), all controls verified                                                          |
