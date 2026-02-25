@@ -1,24 +1,24 @@
-import { HealthCheckConfig } from './config/security';
+import { HealthCheckConfig } from './config/security'
 
 export interface HealthCheckResult {
-  service: string;
-  healthy: boolean;
-  latency: number;
-  timestamp: string;
-  error?: string;
+  service: string
+  healthy: boolean
+  latency: number
+  timestamp: string
+  error?: string
 }
 
 export interface ServiceHealthStatus {
-  service: string;
-  lastCheck: string;
-  lastSuccess: string | null;
-  lastFailure: string | null;
-  consecutiveFailures: number;
-  isHealthy: boolean;
-  lastError: string | null;
+  service: string
+  lastCheck: string
+  lastSuccess: string | null
+  lastFailure: string | null
+  consecutiveFailures: number
+  isHealthy: boolean
+  lastError: string | null
 }
 
-const healthStatus = new Map<string, ServiceHealthStatus>();
+const healthStatus = new Map<string, ServiceHealthStatus>()
 
 export class ExternalServiceHealth {
   private static async checkService(
@@ -26,29 +26,29 @@ export class ExternalServiceHealth {
     url: string,
     timeoutMs: number = HealthCheckConfig.DEFAULT_TIMEOUT_MS
   ): Promise<HealthCheckResult> {
-    const startTime = Date.now();
-    const timestamp = new Date().toISOString();
+    const startTime = Date.now()
+    const timestamp = new Date().toISOString()
 
     try {
       const response = await fetch(url, {
         method: 'HEAD',
         signal: AbortSignal.timeout(timeoutMs),
-      });
+      })
 
-      const latency = Date.now() - startTime;
+      const latency = Date.now() - startTime
 
       const result: HealthCheckResult = {
         service: serviceName,
         healthy: response.ok,
         latency,
         timestamp,
-      };
+      }
 
-      this.updateHealthStatus(serviceName, result.healthy, timestamp);
-      return result;
+      this.updateHealthStatus(serviceName, result.healthy, timestamp)
+      return result
     } catch (error) {
-      const latency = Date.now() - startTime;
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const latency = Date.now() - startTime
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error'
 
       const result: HealthCheckResult = {
         service: serviceName,
@@ -56,43 +56,62 @@ export class ExternalServiceHealth {
         latency,
         timestamp,
         error: errorMessage,
-      };
+      }
 
-      this.updateHealthStatus(serviceName, false, timestamp, errorMessage);
-      return result;
+      this.updateHealthStatus(serviceName, false, timestamp, errorMessage)
+      return result
     }
   }
 
-  static async checkWebhookService(url: string, timeoutMs: number = HealthCheckConfig.DEFAULT_TIMEOUT_MS): Promise<HealthCheckResult> {
-    return this.checkService('webhook', url, timeoutMs);
+  static async checkWebhookService(
+    url: string,
+    timeoutMs: number = HealthCheckConfig.DEFAULT_TIMEOUT_MS
+  ): Promise<HealthCheckResult> {
+    return this.checkService('webhook', url, timeoutMs)
   }
 
-  static async checkDocsService(url: string, timeoutMs: number = HealthCheckConfig.DEFAULT_TIMEOUT_MS): Promise<HealthCheckResult> {
-    return this.checkService('docs', url, timeoutMs);
+  static async checkDocsService(
+    url: string,
+    timeoutMs: number = HealthCheckConfig.DEFAULT_TIMEOUT_MS
+  ): Promise<HealthCheckResult> {
+    return this.checkService('docs', url, timeoutMs)
+  }
+
+  static async checkCustomService(
+    name: string,
+    url: string,
+    timeoutMs: number = HealthCheckConfig.DEFAULT_TIMEOUT_MS
+  ): Promise<HealthCheckResult> {
+    return this.checkService(name, url, timeoutMs)
   }
 
   static getHealthStatus(service: string): ServiceHealthStatus | null {
-    return healthStatus.get(service) || null;
+    return healthStatus.get(service) || null
   }
 
   static getAllHealthStatus(): Record<string, ServiceHealthStatus> {
-    return Object.fromEntries(healthStatus);
+    return Object.fromEntries(healthStatus)
   }
 
   static resetHealthStatus(service: string): void {
-    healthStatus.delete(service);
+    healthStatus.delete(service)
   }
 
   static resetAllHealthStatus(): void {
-    healthStatus.clear();
+    healthStatus.clear()
   }
 
-  private static updateHealthStatus(service: string, healthy: boolean, timestamp: string, error?: string): void {
-    const existing = healthStatus.get(service);
-    
+  private static updateHealthStatus(
+    service: string,
+    healthy: boolean,
+    timestamp: string,
+    error?: string
+  ): void {
+    const existing = healthStatus.get(service)
+
     if (existing) {
-      const consecutiveFailures = healthy ? 0 : existing.consecutiveFailures + 1;
-      
+      const consecutiveFailures = healthy ? 0 : existing.consecutiveFailures + 1
+
       healthStatus.set(service, {
         service,
         lastCheck: timestamp,
@@ -101,7 +120,7 @@ export class ExternalServiceHealth {
         consecutiveFailures,
         isHealthy: consecutiveFailures < HealthCheckConfig.MAX_CONSECUTIVE_FAILURES,
         lastError: error ?? null,
-      });
+      })
     } else {
       healthStatus.set(service, {
         service,
@@ -111,7 +130,7 @@ export class ExternalServiceHealth {
         consecutiveFailures: healthy ? 0 : 1,
         isHealthy: healthy,
         lastError: error ?? null,
-      });
+      })
     }
   }
 }
