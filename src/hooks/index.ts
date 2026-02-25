@@ -1,13 +1,15 @@
-export { useAuth } from './useAuth';
-export type { UseAuthReturn } from './useAuth';
-export { useIsMobile } from './use-mobile';
-export { useReducedMotion } from './use-reduced-motion';
-export { useTheme } from './use-theme';
-export { useScheduleGrouping } from './useScheduleGrouping';
-export { useFormValidation } from './useFormValidation';
-export type { Validator, FormValidationConfig, FormValidationResult } from './useFormValidation';
-export { useRecharts } from './useRecharts';
-export type { RechartsComponent, UseRechartsOptions, UseRechartsResult } from './useRecharts';
+export { useAuth } from './useAuth'
+export type { UseAuthReturn } from './useAuth'
+export { useIsMobile } from './use-mobile'
+export { useReducedMotion } from './use-reduced-motion'
+export { useTheme } from './use-theme'
+export { useScheduleGrouping } from './useScheduleGrouping'
+export { useFormValidation } from './useFormValidation'
+export type { Validator, FormValidationConfig, FormValidationResult } from './useFormValidation'
+export { useFormSubmission } from './useFormSubmission'
+export type { UseFormSubmissionOptions, UseFormSubmissionReturn } from './useFormSubmission'
+export { useRecharts } from './useRecharts'
+export type { RechartsComponent, UseRechartsOptions, UseRechartsResult } from './useRecharts'
 export {
   useAdminDashboard,
   useUsers,
@@ -19,13 +21,13 @@ export {
   useDeleteAnnouncement,
   useSettings,
   useUpdateSettings,
-} from './useAdmin';
+} from './useAdmin'
 export {
   useStudentDashboard,
   useStudentGrades,
   useStudentSchedule,
   useStudentCard,
-} from './useStudent';
+} from './useStudent'
 export {
   useTeacherDashboard,
   useTeacherClasses,
@@ -34,15 +36,7 @@ export {
   useTeacherAnnouncements,
   useCreateAnnouncement as useCreateTeacherAnnouncement,
   useTeacherClassStudents,
-} from './useTeacher';
-export {
-  useParentDashboard,
-  useChildSchedule,
-} from './useParent';
-export {
-  usePerformanceAnalytics,
-} from './usePerformanceAnalytics';
-export type {
-  GradeData,
-  PerformanceAnalyticsResult,
-} from './usePerformanceAnalytics';
+} from './useTeacher'
+export { useParentDashboard, useChildSchedule } from './useParent'
+export { usePerformanceAnalytics } from './usePerformanceAnalytics'
+export type { GradeData, PerformanceAnalyticsResult } from './usePerformanceAnalytics'

@@ -86,3 +86,66 @@ Frontend engineering - focusing on React, TypeScript, testing, and frontend impr
 - All 3412 tests pass (18 new + 3394 existing)
 - Typecheck passes with zero errors
 - Lint passes with zero warnings
+
+## Session Results (2026-02-25) - Session 4
+
+- Created `useFormSubmission` hook (`src/hooks/useFormSubmission.ts`)
+- Added error toast to ContactForm on submission failure
+- Standardized form error handling pattern across forms
+- All 3437 tests pass
+- Typecheck passes with zero errors
+- Lint passes with zero warnings
+
+## Form Error Handling Patterns
+
+### Pattern 1: Direct Submission Forms (try/catch)
+
+Forms that submit directly (like ContactForm, PPDBForm) should:
+
+- Wrap submission in try/catch
+- Show error toast on failure using `toast.error()`
+- Always reset loading state in finally block
+
+```tsx
+try {
+  await onSubmit?.(data)
+  toast.success('Success message')
+} catch (error) {
+  logger.error('Form submission failed', error)
+  toast.error('Failed. Please try again.')
+} finally {
+  setIsSubmitting(false)
+}
+```
+
+### Pattern 2: Callback Forms (React Query Mutations)
+
+Forms that use callback pattern (like AnnouncementForm, UserForm) should:
+
+- Handle errors at the parent component level
+- Use React Query mutation's onError callback for toast notifications
+
+```tsx
+const createMutation = useCreateAnnouncement({
+  onSuccess: () => {
+    toast.success('Success!')
+    setIsFormOpen(false)
+  },
+  onError: err => {
+    toast.error(`Failed: ${err.message}`)
+  },
+})
+```
+
+### useFormSubmission Hook
+
+Available in `src/hooks/useFormSubmission.ts` for reusable form submission logic:
+
+```tsx
+const { isSubmitting, error, submit, reset } = useFormSubmission({
+  onSuccess: data => onSubmit?.(data),
+  onError: err => console.error(err),
+  successMessage: 'Submission successful',
+  errorMessage: 'Submission failed. Please try again.',
+})
+```
