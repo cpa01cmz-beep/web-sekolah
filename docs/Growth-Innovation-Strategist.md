@@ -10,6 +10,25 @@ This document serves as the long-term memory and domain knowledge for the Growth
 
 ## Implemented Improvements
 
+### 4. JSON-LD Structured Data for EducationalOrganization (Feb 2026)
+
+**Issue**: Missing structured data (JSON-LD) for search engine understanding
+
+**Changes**:
+
+- Added EducationalOrganization schema in index.html with:
+  - Organization name, description, URL, and logo
+  - Social media links (Facebook, Instagram, YouTube)
+  - Contact point with available language (Indonesian)
+  - Address with country (Indonesia)
+
+**Impact**:
+
+- Enables rich snippets in Google search results
+- Helps search engines understand the organization better
+- Improves SEO by providing structured entity information
+- Can improve click-through rates with enhanced search results
+
 ### 3. SEO: Fix Empty Canonical and Open Graph URLs (Feb 2026)
 
 **Issue**: Empty canonical URL and og:url in index.html
