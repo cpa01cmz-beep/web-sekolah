@@ -31,6 +31,29 @@ Deliver small, safe, measurable improvements strictly inside the Product-Archite
 
 ## Improvements Log
 
+### 2026-02-25: Chart Colors Centralization
+
+**Issue**: Chart colors were duplicated in multiple locations:
+
+- `src/components/charts/types.ts` - Had hardcoded hex colors
+- `src/theme/colors.ts` - Already had GRADE_COLORS with matching colors
+
+**Solution**:
+
+1. Added `CHART_COLORS` constant to `src/theme/colors.ts` that reuses `GRADE_COLORS` where applicable
+2. Updated `src/components/charts/types.ts` to re-export from theme/colors
+
+**Files Changed**:
+
+- `src/theme/colors.ts` - Added `CHART_COLORS` constant (reusing GRADE_COLORS.A/C/D)
+- `src/components/charts/types.ts` - Updated to re-export from theme/colors
+
+**Verification**:
+
+- TypeScript: ✅ 0 errors
+- Lint: ✅ 0 errors
+- Tests: ✅ 3394 passing
+
 ### 2026-02-25: Grade Colors Centralization
 
 **Issue**: Grade colors were duplicated in multiple locations:
@@ -66,7 +89,7 @@ Deliver small, safe, measurable improvements strictly inside the Product-Archite
 
 ## Future Opportunities
 
-- Continue centralizing remaining hardcoded colors
 - Review large page components for potential refactoring
-- Extract router configuration to dedicated module
+- Extract router configuration to dedicated module (already organized, verify)
 - Review and centralize any remaining duplicated constants
+- Centralize SCHEDULE_DAYS constant with ScheduleItem day type
