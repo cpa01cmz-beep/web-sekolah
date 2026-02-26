@@ -10,6 +10,20 @@ This document serves as the long-term memory and domain knowledge for the Growth
 
 ## Implemented Improvements
 
+### 5. PWA Manifest Language Fix (Feb 2026)
+
+**Issue**: manifest.json `lang` attribute was set to "en" instead of "id"
+
+**Changes**:
+
+- Changed manifest.json `lang` attribute from "en" to "id"
+
+**Impact**:
+
+- Better language consistency between HTML and PWA manifest
+- Improves browser's ability to serve correct language content
+- Improves PWA compliance and browser language detection for Indonesian users
+
 ### 4. JSON-LD Structured Data for EducationalOrganization (Feb 2026)
 
 **Issue**: Missing structured data (JSON-LD) for search engine understanding
