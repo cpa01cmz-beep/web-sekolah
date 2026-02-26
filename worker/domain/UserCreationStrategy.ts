@@ -1,31 +1,32 @@
-import type { SchoolUser, Student, Teacher, Parent, Admin, CreateUserData } from '@shared/types';
+import type { SchoolUser, Student, Teacher, Parent, Admin, CreateUserData } from '@shared/types'
+import { ValidationError } from '../errors'
 
 /**
  * UserCreationStrategy - Strategy Interface for Role-Specific User Creation
- * 
+ *
  * Defines the contract for creating users with different roles.
  * Each strategy knows how to construct its specific user type.
  */
 export interface UserCreationStrategy {
   /**
    * Creates a user object with role-specific fields
-   * 
+   *
    * @param base - Base user fields (id, createdAt, updatedAt, avatarUrl)
    * @param userData - User creation data from API request
    * @param passwordHash - Hashed password (or null if not provided)
    * @returns Complete user object for the specific role
    */
-  create(base: BaseUserFields, userData: CreateUserData, passwordHash: string | null): SchoolUser;
+  create(base: BaseUserFields, userData: CreateUserData, passwordHash: string | null): SchoolUser
 }
 
 /**
  * BaseUserFields - Common fields shared across all user types
  */
 export interface BaseUserFields {
-  id: string;
-  createdAt: string;
-  updatedAt: string;
-  avatarUrl: string;
+  id: string
+  createdAt: string
+  updatedAt: string
+  avatarUrl: string
 }
 
 /**
@@ -39,8 +40,8 @@ export class StudentCreationStrategy implements UserCreationStrategy {
       role: 'student',
       classId: userData.classId ?? '',
       studentIdNumber: userData.studentIdNumber ?? '',
-      passwordHash
-    } as Student;
+      passwordHash,
+    } as Student
   }
 }
 
@@ -54,8 +55,8 @@ export class TeacherCreationStrategy implements UserCreationStrategy {
       ...userData,
       role: 'teacher',
       classIds: userData.classIds ?? [],
-      passwordHash
-    } as Teacher;
+      passwordHash,
+    } as Teacher
   }
 }
 
@@ -69,8 +70,8 @@ export class ParentCreationStrategy implements UserCreationStrategy {
       ...userData,
       role: 'parent',
       childId: userData.childId ?? '',
-      passwordHash
-    } as Parent;
+      passwordHash,
+    } as Parent
   }
 }
 
@@ -83,8 +84,8 @@ export class AdminCreationStrategy implements UserCreationStrategy {
       ...base,
       ...userData,
       role: 'admin',
-      passwordHash
-    } as Admin;
+      passwordHash,
+    } as Admin
   }
 }
 
@@ -96,14 +97,14 @@ export class UserCreationStrategyFactory {
     student: new StudentCreationStrategy(),
     teacher: new TeacherCreationStrategy(),
     parent: new ParentCreationStrategy(),
-    admin: new AdminCreationStrategy()
-  };
+    admin: new AdminCreationStrategy(),
+  }
 
   static getStrategy(role: string): UserCreationStrategy {
-    const strategy = this.strategies[role];
+    const strategy = this.strategies[role]
     if (!strategy) {
-      throw new Error(`Invalid user role: ${role}`);
+      throw new ValidationError(`Invalid user role: ${role}`)
     }
-    return strategy;
+    return strategy
   }
 }
