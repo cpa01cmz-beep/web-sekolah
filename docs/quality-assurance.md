@@ -4,20 +4,23 @@
 
 ### Current Test Coverage
 
-- **Test Files**: 116
-- **Tests**: 3437 passing, 3 skipped, 155 todo
+- **Test Files**: 119
+- **Tests**: 3448 passing, 3 skipped, 155 todo
 - **Pass Rate**: 100%
 
 ### Portal Page Component Tests
 
 Added page component tests for critical portal pages:
 
-| Page Component       | Test File                       | Tests |
-| -------------------- | ------------------------------- | ----- |
-| StudentDashboardPage | `StudentDashboardPage.test.tsx` | 6     |
-| TeacherDashboardPage | `TeacherDashboardPage.test.tsx` | 7     |
-| AdminDashboardPage   | `AdminDashboardPage.test.tsx`   | 5     |
-| ParentDashboardPage  | `ParentDashboardPage.test.tsx`  | 7     |
+| Page Component             | Test File                             | Tests |
+| -------------------------- | ------------------------------------- | ----- |
+| StudentDashboardPage       | `StudentDashboardPage.test.tsx`       | 6     |
+| StudentGradesPage          | `StudentGradesPage.test.tsx`          | 4     |
+| TeacherDashboardPage       | `TeacherDashboardPage.test.tsx`       | 7     |
+| TeacherGradeManagementPage | `TeacherGradeManagementPage.test.tsx` | 2     |
+| AdminDashboardPage         | `AdminDashboardPage.test.tsx`         | 5     |
+| AdminUserManagementPage    | `AdminUserManagementPage.test.tsx`    | 3     |
+| ParentDashboardPage        | `ParentDashboardPage.test.tsx`        | 7     |
 
 Each page test covers:
 
