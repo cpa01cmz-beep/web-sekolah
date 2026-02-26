@@ -10,6 +10,24 @@ This document serves as the long-term memory and domain knowledge for the Growth
 
 ## Implemented Improvements
 
+### 7. Robots and Viewport-fit Meta Tags (Feb 2026)
+
+**Issue**: Missing SEO meta tags for search engine control and iOS notch handling.
+
+**Changes**:
+
+- Added `robots` meta tag: `index, follow`
+- Added `viewport-fit=cover` to viewport meta for iOS notch displays
+- Added favicon sizes (32x32, 16x16) for better browser support
+- Added apple-touch-icon with sizes (180x180) for iOS home screen
+
+**Impact**:
+
+- Improves SEO by providing proper search engine directives
+- Better mobile experience on iOS devices with notch displays
+- Better favicon support across different browsers and contexts
+- Follows modern web best practices
+
 ### 6. Absolute URLs for Social Media Images (Feb 2026)
 
 **Issue**: The `og:image` and `twitter:image` meta tags used relative paths which may not display properly when links are shared on social media platforms.
