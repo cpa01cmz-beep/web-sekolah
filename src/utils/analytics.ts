@@ -1,5 +1,6 @@
 import type { ChartDataPoint } from '@/components/charts/types'
 import { GradeThresholds } from '@shared/constants'
+import { getGradeLetter } from './grades'
 
 export function calculateAverage(values: number[]): number {
   if (values.length === 0) return 0
@@ -45,14 +46,7 @@ export interface GradeDistribution {
   F: number
 }
 
-export function getGradeLetter(score: number): string {
-  if (score >= GradeThresholds.A) return 'A'
-  if (score >= GradeThresholds.B) return 'B'
-  if (score >= GradeThresholds.C) return 'C'
-  if (score >= GradeThresholds.D) return 'D'
-  if (score >= GradeThresholds.E) return 'E'
-  return 'F'
-}
+export { getGradeLetter }
 
 export function calculateGradeDistribution(scores: number[]): GradeDistribution {
   const distribution: GradeDistribution = { A: 0, B: 0, C: 0, D: 0, E: 0, F: 0 }
