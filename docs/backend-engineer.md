@@ -244,3 +244,39 @@ response.headers.set(
 - Used vitest with mock Durable Object stubs
 - Mocked GlobalDurableObject and listPrefix for index operations
 - Followed patterns from existing entity tests in worker/entities/**tests**/
+
+
+### 2026-02-26: Fix Security Headers Comments and Add Test
+
+**Problem**: The security-headers.ts file had several issues:
+1. Duplicate SECURITY IMPROVEMENTS section with wrong date (2026-02-29 - future date)
+2. Duplicate sections with same date (2026-02-25) referencing different improvements
+3. Orphaned "FUTURE IMPROVEMENTS:" section without content
+4. Missing test for Cross-Origin-Embedder-Policy header
+
+**Solution**:
+
+1. Fixed duplicate/wrong date entries:
+   - Changed "2026-02-29" to "2026-02-26" for report-to directive improvements
+   - Changed "2026-02-25" to "2026-02-26" for clipboard and idle-detection improvements
+
+2. Removed orphaned "FUTURE IMPROVEMENTS:" section
+
+3. Added test for Cross-Origin-Embedder-Policy header in security-headers.test.ts
+
+**Files Changed**:
+
+- `worker/middleware/security-headers.ts` - fixed dates and removed orphaned section
+- `worker/middleware/__tests__/security-headers.test.ts` - added COEP header test
+
+**Benefits**:
+
+- Clean, accurate documentation of security improvements
+- Better test coverage for security headers
+- Consistent dating in comments
+
+**Testing**:
+
+- All 3572 tests pass
+- Typecheck passes
+- Lint passes

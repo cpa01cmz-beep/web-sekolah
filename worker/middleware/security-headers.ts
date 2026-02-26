@@ -74,15 +74,13 @@ const CSP_INLINE_SCRIPT_HASH = "'sha256-xsWpBSh+88Gpp+H1+XSGjqLj67OrRo+q9tmTvaO4
 // - ✅ Works with HSTS for complete transport security
 // - ✅ Defense-in-depth security improvement
 //
-// FUTURE IMPROVEMENTS:
-
-// SECURITY IMPROVEMENTS (2026-02-29):
+// SECURITY IMPROVEMENTS (2026-02-26):
 // - ✅ Added 'report-to' directive to CSP for modern browser Reporting API support
 // - ✅ Works alongside report-uri for backward compatibility
 // - ✅ Added Report-To header with endpoint configuration
 // - ✅ Provides structured CSP violation reports in modern browsers
 
-// SECURITY IMPROVEMENTS (2026-02-25):
+// SECURITY IMPROVEMENTS (2026-02-26):
 // - ✅ Added clipboard-read and clipboard-write to Permissions-Policy
 // - ✅ Prevents unauthorized clipboard access by embedded content
 // - ✅ Added idle-detection to prevent idle detection API usage
