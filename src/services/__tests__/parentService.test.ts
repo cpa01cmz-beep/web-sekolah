@@ -1,21 +1,21 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { createParentService } from '../parentService';
-import { MockRepository } from '@/test/utils/mocks';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest'
+import { createParentService } from '../parentService'
+import { MockRepository, createMockApiError } from '@/test/utils/mocks'
 
 describe('ParentService', () => {
-  let mockRepository: MockRepository;
+  let mockRepository: MockRepository
 
   beforeEach(() => {
-    mockRepository = new MockRepository();
-  });
+    mockRepository = new MockRepository()
+  })
 
   afterEach(() => {
-    mockRepository.reset();
-  });
+    mockRepository.reset()
+  })
 
   describe('getDashboard', () => {
     it('should fetch parent dashboard data', async () => {
-      const parentId = 'parent-01';
+      const parentId = 'parent-01'
       const mockData = {
         child: {
           id: 'student-01',
@@ -56,33 +56,31 @@ describe('ParentService', () => {
             authorName: 'Ibu Siti',
           },
         ],
-      };
+      }
 
-      mockRepository.setMockData(`/api/parents/${parentId}/dashboard`, mockData);
-      const parentService = createParentService(mockRepository);
+      mockRepository.setMockData(`/api/parents/${parentId}/dashboard`, mockData)
+      const parentService = createParentService(mockRepository)
 
-      const result = await parentService.getDashboard(parentId);
+      const result = await parentService.getDashboard(parentId)
 
-      expect(result).toEqual(mockData);
-      expect(result.child.name).toBe('Budi Hartono');
-    });
+      expect(result).toEqual(mockData)
+      expect(result.child.name).toBe('Budi Hartono')
+    })
 
     it('should handle parent with no children', async () => {
-      const parentId = 'parent-01';
-      const mockError = new Error('No children found');
-      mockError.name = 'ApiError';
-      (mockError as any).status = 404;
+      const parentId = 'parent-01'
+      const mockError = createMockApiError('No children found', 404)
 
-      mockRepository.setMockError(`/api/parents/${parentId}/dashboard`, mockError);
-      const parentService = createParentService(mockRepository);
+      mockRepository.setMockError(`/api/parents/${parentId}/dashboard`, mockError)
+      const parentService = createParentService(mockRepository)
 
-      await expect(parentService.getDashboard(parentId)).rejects.toThrow('No children found');
-    });
-  });
+      await expect(parentService.getDashboard(parentId)).rejects.toThrow('No children found')
+    })
+  })
 
   describe('getChildSchedule', () => {
     it('should fetch child schedule', async () => {
-      const parentId = 'parent-01';
+      const parentId = 'parent-01'
       const mockData = [
         {
           day: 'Senin',
@@ -94,39 +92,37 @@ describe('ParentService', () => {
           time: '09:15 - 10:45',
           courseId: 'eng-01',
         },
-      ];
+      ]
 
-      mockRepository.setMockData(`/api/parents/${parentId}/schedule`, mockData);
-      const parentService = createParentService(mockRepository);
+      mockRepository.setMockData(`/api/parents/${parentId}/schedule`, mockData)
+      const parentService = createParentService(mockRepository)
 
-      const result = await parentService.getChildSchedule(parentId);
+      const result = await parentService.getChildSchedule(parentId)
 
-      expect(result).toEqual(mockData);
-      expect(result).toHaveLength(2);
-    });
+      expect(result).toEqual(mockData)
+      expect(result).toHaveLength(2)
+    })
 
     it('should handle empty schedule', async () => {
-      const parentId = 'parent-01';
-      const mockData: any[] = [];
+      const parentId = 'parent-01'
+      const mockData: any[] = []
 
-      mockRepository.setMockData(`/api/parents/${parentId}/schedule`, mockData);
-      const parentService = createParentService(mockRepository);
+      mockRepository.setMockData(`/api/parents/${parentId}/schedule`, mockData)
+      const parentService = createParentService(mockRepository)
 
-      const result = await parentService.getChildSchedule(parentId);
+      const result = await parentService.getChildSchedule(parentId)
 
-      expect(result).toEqual([]);
-    });
+      expect(result).toEqual([])
+    })
 
     it('should handle invalid parent ID', async () => {
-      const parentId = 'invalid-parent';
-      const mockError = new Error('Parent not found');
-      mockError.name = 'ApiError';
-      (mockError as any).status = 404;
+      const parentId = 'invalid-parent'
+      const mockError = createMockApiError('Parent not found', 404)
 
-      mockRepository.setMockError(`/api/parents/${parentId}/schedule`, mockError);
-      const parentService = createParentService(mockRepository);
+      mockRepository.setMockError(`/api/parents/${parentId}/schedule`, mockError)
+      const parentService = createParentService(mockRepository)
 
-      await expect(parentService.getChildSchedule(parentId)).rejects.toThrow('Parent not found');
-    });
-  });
-});
+      await expect(parentService.getChildSchedule(parentId)).rejects.toThrow('Parent not found')
+    })
+  })
+})
