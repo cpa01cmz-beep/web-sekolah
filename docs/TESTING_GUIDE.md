@@ -757,6 +757,28 @@ vi.mock('@/hooks/useAuth', () => ({
 useAuth.mockReturnValue({ user: mockUser, logout: vi.fn() })
 ```
 
+### Using `any` Type in Tests
+
+The use of `any` type in test files is acceptable and common for mock setup, particularly when:
+
+- Mocking external dependencies (e.g., Cloudflare environment, database stubs)
+- Setting up test data fixtures for complex objects
+- Creating mock implementations of classes or services
+
+```typescript
+// Example: Mocking Cloudflare environment
+let mockEnv: any
+let mockStub: any
+
+// Example: Mock data fixtures
+const mockData: any[] = []
+const mockResponse: any = { status: 200 }
+```
+
+**Rationale**: Tests are not production code and benefit from flexibility in mock setup. Type safety in tests provides diminishing returns compared to the overhead of creating extensive typed mock factories.
+
+**Best Practice**: While `any` is acceptable in tests, prefer explicit types when the mock structure is simple and well-known.
+
 ---
 
 ## Testing Patterns
