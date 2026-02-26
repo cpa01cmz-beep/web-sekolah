@@ -224,6 +224,17 @@ describe('Security Headers Middleware', () => {
     expect(res.headers.get('Cross-Origin-Resource-Policy')).toBe('same-site')
   })
 
+  it('should always include Cross-Origin-Embedder-Policy header', async () => {
+    const app = new Hono()
+    app.use('*', securityHeaders())
+    app.get('/test', c => c.json({ success: true }))
+
+    const res = await app.request('/test')
+
+    expect(res.status).toBe(200)
+    expect(res.headers.get('Cross-Origin-Embedder-Policy')).toBe('require-corp')
+  })
+
   it('should use correct default Permissions-Policy value', async () => {
     const app = new Hono()
     app.use('*', securityHeaders())
