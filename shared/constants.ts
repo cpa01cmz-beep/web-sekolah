@@ -77,6 +77,14 @@ export const getAvatarUrl = (userId: string): string => {
   return `${AVATAR_BASE_URL}?u=${encodeURIComponent(userId)}`
 }
 
+export const getCurrentTimestamp = (): string => new Date().toISOString()
+
+export const getCurrentTimestampMs = (): number => Date.now()
+
+export const addMilliseconds = (timestamp: number, ms: number): string => {
+  return new Date(timestamp + ms).toISOString()
+}
+
 export const HttpStatusCode = {
   CONTINUE: 100,
   SWITCHING_PROTOCOLS: 101,
