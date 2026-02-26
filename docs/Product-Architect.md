@@ -178,3 +178,38 @@ Deliver small, safe, measurable improvements strictly inside the Product-Archite
 - TypeScript: ✅ 0 errors
 - Lint: ✅ 0 errors
 - Tests: ✅ 3469 passing
+
+### 2026-02-26: Grade E Centralization and Bug Fix
+
+**Issue**: The `getGradeLetter` function was duplicated in two locations:
+
+- `src/utils/grades.ts` - Missing E grade entirely (bug)
+- `src/utils/analytics.ts` - Had duplicate implementation with E grade
+
+Additionally, GradeThresholds in `shared/constants.ts` defines E: 50, but grades.ts was not handling it.
+
+**Solution**:
+
+1. Added missing E grade to `src/utils/grades.ts`:
+   - Added E grade threshold (50-59) to GRADE_THRESHOLDS
+   - Updated GradeLetter type to include 'E'
+   - Added distinct colors: D=orange, E=red, F=dark red
+
+2. Removed duplicate getGradeLetter from `src/utils/analytics.ts`:
+   - Now imports from centralized `src/utils/grades.ts`
+   - Re-exports for backward compatibility with tests
+
+3. Updated tests in `src/utils/__tests__/grades.test.ts` to cover E grade
+
+**Files Changed**:
+
+- `src/utils/grades.ts` - Added E grade support
+- `src/utils/analytics.ts` - Removed duplicate, imports from grades.ts
+- `src/utils/__tests__/grades.test.ts` - Added E grade tests
+
+**Verification**:
+
+- TypeScript: ✅ 0 errors
+- Lint: ✅ 0 errors
+- Tests: ✅ 3491 passing
+- Build: ✅ Success
