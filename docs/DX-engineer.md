@@ -35,6 +35,8 @@ DX-engineer focuses on improving Developer Experience through small, safe, measu
 
 ## Past Improvements
 
+- **2026-02-26**: Added partial format npm scripts (`format:src`, `format:worker`, `format:shared`) for incremental Prettier formatting
+  - PR: https://github.com/cpa01cmz-beep/web-sekolah/pull/1257
 - **2026-02-26**: Fixed high severity security vulnerability in rollup (Arbitrary File Write via Path Traversal) by upgrading from 4.57.1 to 4.59.0
   - PR: https://github.com/cpa01cmz-beep/web-sekolah/pull/1238
 - **2026-02-25**: Fixed 3 security vulnerabilities (ajv, hono, minimatch) via npm audit fix
