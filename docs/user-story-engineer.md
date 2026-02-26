@@ -96,3 +96,19 @@ User-story-engineer: Deliver small, safe, measurable improvements strictly insid
 - SEO meta tags should use absolute URLs for proper social media previews
 - og:url already uses absolute URL, og:image and twitter:image were inconsistent
 - JSON-LD schema already uses absolute URLs for logo - this aligns with that pattern
+
+## Implemented Features (Current Session - SEO Meta Tags)
+
+- Added viewport-fit=cover to viewport meta tag for iOS notch handling
+- Added robots meta tag with "index, follow" for search engine control
+- Issue #1276 - simple, safe, measurable improvement for SEO
+
+## Files Modified (Current Session - SEO Meta Tags)
+
+- index.html - Added viewport-fit=cover and robots meta tags
+
+## Key Learnings (Current Session - SEO Meta Tags)
+
+- viewport-fit=cover ensures content extends into the safe area on iOS devices with notches
+- robots meta tag with "index, follow" allows search engines to crawl and index the site
+- These are standard SEO best practices for modern web applications
