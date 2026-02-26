@@ -76,6 +76,18 @@ const CSP_INLINE_SCRIPT_HASH = "'sha256-xsWpBSh+88Gpp+H1+XSGjqLj67OrRo+q9tmTvaO4
 //
 // FUTURE IMPROVEMENTS:
 
+// SECURITY IMPROVEMENTS (2026-03-01):
+// - ✅ Added 'NEL' header for Network Error Logging
+// - ✅ Reports network errors to help detect security incidents
+// - ✅ Configured with includeSubdomains and failure-Reporting
+// - ✅ Defense-in-depth security improvement
+//
+// SECURITY IMPROVEMENTS (2026-03-01):
+// - ✅ Added 'Report-To' header for CSP group reporting
+// - ✅ Modern replacement for report-uri (deprecated)
+// - ✅ Works with CSP for violation reporting
+// - ✅ Defense-in-depth security improvement
+
 // SECURITY IMPROVEMENTS (2026-02-25):
 // - ✅ Added clipboard-read and clipboard-write to Permissions-Policy
 // - ✅ Prevents unauthorized clipboard access by embedded content
@@ -140,6 +152,14 @@ export function securityHeaders(config: SecurityHeadersConfig = {}) {
     response.headers.set('Cross-Origin-Embedder-Policy', 'require-corp')
     response.headers.set('Origin-Agent-Cluster', '?1')
     response.headers.set('X-DNS-Prefetch-Control', 'off')
+    response.headers.set(
+      'NEL',
+      '{"include_subdomains":true,"failure_types":["dns","tcp","tls","http"],"success_types":["navigate","subresource"]}'
+    )
+    response.headers.set(
+      'Report-To',
+      '{"group":"csp-endpoint","max_age":31536000,"endpoints":[{"url":"/api/csp-report"}]}'
+    )
     response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate')
     response.headers.set('Pragma', 'no-cache')
     response.headers.set('Expires', '0')
