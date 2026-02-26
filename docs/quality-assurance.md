@@ -4,8 +4,8 @@
 
 ### Current Test Coverage
 
-- **Test Files**: 122
-- **Tests**: 3539 passing, 3 skipped, 155 todo
+- **Test Files**: 123
+- **Tests**: 3571 passing, 3 skipped, 155 todo
 - **Pass Rate**: 100%
 
 ### Portal Page Component Tests
