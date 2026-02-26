@@ -10,6 +10,21 @@ This document serves as the long-term memory and domain knowledge for the Growth
 
 ## Implemented Improvements
 
+### 6. Absolute URLs for Social Media Images (Feb 2026)
+
+**Issue**: The `og:image` and `twitter:image` meta tags used relative paths which may not display properly when links are shared on social media platforms.
+
+**Changes**:
+
+- Changed og:image from `/og-image.svg` to `https://akademia-pro.vercel.app/og-image.svg`
+- Changed twitter:image from `/og-image.svg` to `https://akademia-pro.vercel.app/og-image.svg`
+
+**Impact**:
+
+- Ensures proper social media previews when links are shared on Facebook, Twitter, LinkedIn, etc.
+- Follows Open Graph and Twitter Card specification best practices
+- Improves SEO by providing absolute URLs for image assets
+
 ### 5. PWA Manifest Language Fix (Feb 2026)
 
 **Issue**: manifest.json `lang` attribute was set to "en" instead of "id"
