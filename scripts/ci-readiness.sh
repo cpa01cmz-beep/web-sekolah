@@ -191,8 +191,14 @@ check_wrangler_config() {
     else
       add_result "fail" "wrangler.toml" "Invalid configuration" "Check wrangler.toml has name and main fields"
     fi
+  elif [ -f "wrangler.jsonc" ]; then
+    if grep -q '"name"' wrangler.jsonc && grep -q '"main"' wrangler.jsonc; then
+      add_result "pass" "wrangler.jsonc" "Valid configuration"
+    else
+      add_result "fail" "wrangler.jsonc" "Invalid configuration" "Check wrangler.jsonc has name and main fields"
+    fi
   else
-    add_result "warn" "wrangler.toml" "Missing (optional for frontend-only)"
+    add_result "warn" "wrangler config" "Missing (optional for frontend-only)"
   fi
 }
 
