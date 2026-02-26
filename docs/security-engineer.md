@@ -27,6 +27,15 @@ This document serves as the long-term memory for the security-engineer agent, tr
 
 ## Completed Improvements
 
+### 2026-02-29
+
+- **Added CSP report-to directive for modern browser Reporting API support**
+  - Added `report-to csp-endpoint` directive to CSP in security-headers.ts
+  - Added `Report-To` header with endpoint configuration
+  - Works alongside report-uri for backward compatibility
+  - Provides structured CSP violation reports in modern browsers
+  - Small, atomic change with no breaking impact
+
 ### 2026-02-28
 
 - **Added logout endpoint with Clear-Site-Data header**

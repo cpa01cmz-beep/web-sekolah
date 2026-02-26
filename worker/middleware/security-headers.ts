@@ -76,6 +76,12 @@ const CSP_INLINE_SCRIPT_HASH = "'sha256-xsWpBSh+88Gpp+H1+XSGjqLj67OrRo+q9tmTvaO4
 //
 // FUTURE IMPROVEMENTS:
 
+// SECURITY IMPROVEMENTS (2026-02-29):
+// - ✅ Added 'report-to' directive to CSP for modern browser Reporting API support
+// - ✅ Works alongside report-uri for backward compatibility
+// - ✅ Added Report-To header with endpoint configuration
+// - ✅ Provides structured CSP violation reports in modern browsers
+
 // SECURITY IMPROVEMENTS (2026-02-25):
 // - ✅ Added clipboard-read and clipboard-write to Permissions-Policy
 // - ✅ Prevents unauthorized clipboard access by embedded content
@@ -89,7 +95,7 @@ const DEFAULT_SECURITY_HEADERS: SecurityHeadersConfig = {
   enableXContentTypeOptions: true,
   enableReferrerPolicy: true,
   enablePermissionsPolicy: true,
-  cspDirectives: `default-src 'self'; script-src 'self' ${CSP_INLINE_SCRIPT_HASH} 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self'; frame-src 'self'; frame-ancestors 'none'; object-src 'none'; worker-src 'self'; base-uri 'self'; form-action 'self'; report-uri /api/csp-report; upgrade-insecure-requests;`,
+  cspDirectives: `default-src 'self'; script-src 'self' ${CSP_INLINE_SCRIPT_HASH} 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self'; frame-src 'self'; frame-ancestors 'none'; object-src 'none'; worker-src 'self'; base-uri 'self'; form-action 'self'; report-uri /api/csp-report; report-to csp-endpoint; upgrade-insecure-requests;`,
   hstsMaxAge: 31536000,
 }
 
@@ -143,6 +149,10 @@ export function securityHeaders(config: SecurityHeadersConfig = {}) {
     response.headers.set('Cross-Origin-Embedder-Policy', 'require-corp')
     response.headers.set('Origin-Agent-Cluster', '?1')
     response.headers.set('X-DNS-Prefetch-Control', 'off')
+    response.headers.set(
+      'Report-To',
+      '{"group":"csp-endpoint","endpoints":[{"url":"/api/csp-report"}],"includeSubdomains":true}'
+    )
     response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate')
     response.headers.set('Pragma', 'no-cache')
     response.headers.set('Expires', '0')
