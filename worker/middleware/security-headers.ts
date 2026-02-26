@@ -111,7 +111,10 @@ export function securityHeaders(config: SecurityHeadersConfig = {}) {
     }
 
     if (finalConfig.enableCSP) {
-      response.headers.set('Content-Security-Policy', finalConfig.cspDirectives!)
+      response.headers.set(
+        'Content-Security-Policy',
+        finalConfig.cspDirectives ?? DEFAULT_SECURITY_HEADERS.cspDirectives!
+      )
     }
 
     if (finalConfig.enableXFrameOptions) {
