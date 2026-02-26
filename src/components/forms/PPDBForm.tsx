@@ -220,20 +220,6 @@ export function PPDBForm({ onSubmit }: PPDBFormProps) {
         </FormField>
 
         <FormFieldInput
-          id="email"
-          label="Email Orang Tua"
-          type="email"
-          error={errors.email}
-          helperText="Email aktif untuk menerima konfirmasi"
-          placeholder="email@contoh.com"
-          value={formData.email}
-          onChange={value => handleInputChange('email', value)}
-          disabled={isSubmitting}
-          required
-          autoComplete="email"
-        />
-
-        <FormFieldInput
           id="phone"
           label="Nomor Telepon"
           type="tel"
