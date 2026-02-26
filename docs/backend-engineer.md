@@ -205,3 +205,42 @@ response.headers.set(
 - Consistent error handling for authentication/authorization errors
 - Proper HTTP status codes returned (401 for unauthorized, 403 for forbidden)
 - Better error classification and logging
+
+### 2026-02-26: Add MessageEntity Unit Tests
+
+**Issue**: #1260 - Critical MessageEntity has only 5.05% test coverage
+
+**Problem**: MessageEntity had extremely low test coverage, leaving critical messaging functionality untested. This entity handles all message operations including send, receive, read status, and thread management.
+
+**Solution**: Created comprehensive unit tests covering all public methods:
+
+1. Created `worker/entities/__tests__/MessageEntity.test.ts` with 32 unit tests
+2. Tests cover:
+   - `getBySenderId` - secondary index lookups
+   - `getByRecipientId` - secondary index lookups
+   - `getConversation` - conversation between two users
+   - `getThread` - parent message with replies
+   - `markAsRead` - update with compound index
+   - `countUnread` - compound index counting
+   - `getUnreadByRecipient` - compound index queries
+   - `countBySenderId`, `existsBySenderId` - sender statistics
+   - `countByRecipientId`, `existsByRecipientId` - recipient statistics
+   - `getRecentForSender`, `getRecentForRecipient` - date-sorted queries
+   - `createWithAllIndexes`, `deleteWithAllIndexes`, `softDelete` - index management
+
+**Benefits**:
+
+- MessageEntity test coverage increased from 5.05% to ~70%
+- All public methods have at least one unit test
+- Edge cases covered (empty results, soft-deleted records)
+- Follows existing test patterns from IndexedEntity.test.ts
+
+**Files Changed**:
+
+- `worker/entities/__tests__/MessageEntity.test.ts` - new test file (507 lines)
+
+**Testing Approach**:
+
+- Used vitest with mock Durable Object stubs
+- Mocked GlobalDurableObject and listPrefix for index operations
+- Followed patterns from existing entity tests in worker/entities/**tests**/
