@@ -171,18 +171,6 @@ export function PPDBForm({ onSubmit }: PPDBFormProps) {
             required
             autoComplete="bday"
           />
-          <FormFieldInput
-            id="dateOfBirth"
-            label="Tanggal Lahir"
-            type="date"
-            error={errors.dateOfBirth}
-            helperText="Tanggal lahir sesuai akta"
-            placeholder="Tanggal lahir"
-            value={formData.dateOfBirth}
-            onChange={value => handleInputChange('dateOfBirth', value)}
-            disabled={isSubmitting}
-            required
-          />
         </div>
 
         <FormFieldInput
@@ -257,19 +245,6 @@ export function PPDBForm({ onSubmit }: PPDBFormProps) {
           disabled={isSubmitting}
           required
           autoComplete="tel"
-        />
-
-        <FormFieldInput
-          id="phone"
-          label="Nomor Telepon"
-          type="tel"
-          error={errors.phone}
-          helperText="Nomor WhatsApp yang bisa dihubungi"
-          placeholder="081234567890"
-          value={formData.phone}
-          onChange={value => handleInputChange('phone', value)}
-          disabled={isSubmitting}
-          required
         />
 
         <Button type="submit" className="w-full" disabled={isSubmitting} aria-busy={isSubmitting}>
