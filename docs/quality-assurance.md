@@ -4,8 +4,8 @@
 
 ### Current Test Coverage
 
-- **Test Files**: 121
-- **Tests**: 3488 passing, 3 skipped, 155 todo
+- **Test Files**: 122
+- **Tests**: 3539 passing, 3 skipped, 155 todo
 - **Pass Rate**: 100%
 
 ### Portal Page Component Tests
@@ -29,6 +29,14 @@ Each page test covers:
 - Empty data state
 - Success state with data
 - Accessibility (ARIA roles)
+
+### Entity Tests
+
+Added tests for MessageEntity covering configuration and type validation:
+
+| Entity        | Test File               | Tests |
+| ------------- | ----------------------- | ----- |
+| MessageEntity | `MessageEntity.test.ts` | 12    |
 
 ### Validation Commands
 
