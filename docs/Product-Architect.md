@@ -246,3 +246,28 @@ Updated mapping:
 - TypeScript: ✅ 0 errors
 - Lint: ✅ 0 errors
 - Tests: ✅ 3527 passing
+
+### 2026-02-26: Distributed Rate Limiting Fix
+
+**Issue**: Rate limiting middleware used an in-memory `Map` to track rate limit entries. In a distributed Cloudflare Workers environment with multiple instances, each worker maintained its own separate rate limit store, allowing users to bypass rate limits by sending requests to different workers.
+
+**Solution**:
+
+1. Implemented distributed rate limiting using `GlobalDurableObject`:
+   - Uses atomic CAS (Compare-And-Swap) operations for concurrent access
+   - Rate limit entries are now shared across all worker instances
+   - Added local cache (1s TTL) to reduce DO calls and improve performance
+
+2. Maintained backward compatibility:
+   - Falls back to in-memory store when DO is not available (testing)
+   - All 46 existing rate limiting tests pass without modification
+
+**Files Changed**:
+
+- `worker/middleware/rate-limit.ts` - Complete rewrite to use Durable Objects
+
+**Verification**:
+
+- TypeScript: ✅ 0 errors
+- Tests: ✅ 46 rate limiting tests passing
+- PR: #1299
