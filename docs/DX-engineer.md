@@ -35,6 +35,8 @@ DX-engineer focuses on improving Developer Experience through small, safe, measu
 
 ## Past Improvements
 
+- **2026-02-26**: Fixed rollup high severity vulnerability (Arbitrary File Write via Path Traversal)
+  - PR: https://github.com/cpa01cmz-beep/web-sekolah/pull/1227
 - **2026-02-25**: Fixed 3 security vulnerabilities (ajv, hono, minimatch) via npm audit fix
   - PR: https://github.com/cpa01cmz-beep/web-sekolah/pull/1224
 - **2026-02-25**: Attempted to fix 349 files with Prettier formatting issues, but reverted due to size (not atomic)
