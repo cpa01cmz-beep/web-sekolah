@@ -53,6 +53,22 @@ describe('Security Headers Middleware', () => {
     expect(csp).toContain('report-uri /api/csp-report')
   })
 
+  it('should include report-to directive and Report-To header for modern browsers', async () => {
+    const app = new Hono()
+    app.use('*', securityHeaders())
+    app.get('/', c => c.text('Hello'))
+
+    const res = await app.request('/')
+    const csp = res.headers.get('Content-Security-Policy')
+    const reportTo = res.headers.get('Report-To')
+
+    expect(csp).toBeDefined()
+    expect(csp).toContain('report-to csp-endpoint')
+    expect(reportTo).toBeDefined()
+    expect(reportTo).toContain('csp-endpoint')
+    expect(reportTo).toContain('/api/csp-report')
+  })
+
   it('should allow HSTS configuration to be disabled', async () => {
     const app = new Hono()
     app.use('*', securityHeaders({ enableHSTS: false }))
