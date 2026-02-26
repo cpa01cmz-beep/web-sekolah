@@ -27,6 +27,14 @@ This document serves as the long-term memory for the security-engineer agent, tr
 
 ## Completed Improvements
 
+### 2026-02-26
+
+- **Added CSP-Report-Only header support**
+  - Added `enableCSPReportOnly` config option in security-headers.ts
+  - Disabled by default, can be enabled for testing CSP without blocking
+  - Allows gradual rollout of stricter CSP policies
+  - Small, atomic change with no breaking impact
+
 ### 2026-02-28
 
 - **Added logout endpoint with Clear-Site-Data header**

@@ -7,7 +7,9 @@ interface SecurityHeadersConfig {
   enableXContentTypeOptions?: boolean
   enableReferrerPolicy?: boolean
   enablePermissionsPolicy?: boolean
+  enableCSPReportOnly?: boolean
   cspDirectives?: string
+  cspReportOnlyDirectives?: string
   hstsMaxAge?: number
 }
 
@@ -82,6 +84,11 @@ const CSP_INLINE_SCRIPT_HASH = "'sha256-xsWpBSh+88Gpp+H1+XSGjqLj67OrRo+q9tmTvaO4
 // - ✅ Added idle-detection to prevent idle detection API usage
 // - ✅ Defense-in-depth security improvement
 
+// SECURITY IMPROVEMENTS (2026-02-28):
+// - ✅ Added Content-Security-Policy-Report-Only header support
+// - ✅ Allows testing CSP rules without enforcing them
+// - ✅ Useful for gradually rolling out stricter CSP policies
+
 const DEFAULT_SECURITY_HEADERS: SecurityHeadersConfig = {
   enableHSTS: true,
   enableCSP: true,
@@ -89,7 +96,9 @@ const DEFAULT_SECURITY_HEADERS: SecurityHeadersConfig = {
   enableXContentTypeOptions: true,
   enableReferrerPolicy: true,
   enablePermissionsPolicy: true,
+  enableCSPReportOnly: false,
   cspDirectives: `default-src 'self'; script-src 'self' ${CSP_INLINE_SCRIPT_HASH} 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self'; frame-src 'self'; frame-ancestors 'none'; object-src 'none'; worker-src 'self'; base-uri 'self'; form-action 'self'; report-uri /api/csp-report; upgrade-insecure-requests;`,
+  cspReportOnlyDirectives: `default-src 'self'; script-src 'self' ${CSP_INLINE_SCRIPT_HASH} 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self'; frame-src 'self'; frame-ancestors 'none'; object-src 'none'; worker-src 'self'; base-uri 'self'; form-action 'self'; report-uri /api/csp-report; upgrade-insecure-requests;`,
   hstsMaxAge: 31536000,
 }
 
@@ -114,6 +123,13 @@ export function securityHeaders(config: SecurityHeadersConfig = {}) {
       response.headers.set(
         'Content-Security-Policy',
         finalConfig.cspDirectives ?? DEFAULT_SECURITY_HEADERS.cspDirectives!
+      )
+    }
+
+    if (finalConfig.enableCSPReportOnly) {
+      response.headers.set(
+        'Content-Security-Policy-Report-Only',
+        finalConfig.cspReportOnlyDirectives ?? DEFAULT_SECURITY_HEADERS.cspReportOnlyDirectives!
       )
     }
 
