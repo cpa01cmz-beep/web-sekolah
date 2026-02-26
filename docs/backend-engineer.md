@@ -138,3 +138,20 @@ npm run build      # Production build
 - `worker/domain/TeacherService.ts` - uses DomainError
 - `worker/domain/UserService.ts` - uses DomainError
 - `worker/routes/route-utils.ts` - error handler now handles DomainError
+
+### 2026-02-26: Use ValidationError in Remaining Domain Services
+
+**Problem**: Two domain services were still using generic `Error` instead of `DomainError` classes:
+
+- `TeacherService` - authorization check for class access
+- `UserCreationStrategyFactory` - invalid role validation
+
+**Solution**: Updated both files to use `ValidationError` for consistent error handling:
+
+- Returns proper HTTP 400 status code instead of 500
+- Provides meaningful error messages to users
+
+**Files Changed**:
+
+- `worker/domain/TeacherService.ts` - use ValidationError for authorization check
+- `worker/domain/UserCreationStrategy.ts` - use ValidationError for invalid role
