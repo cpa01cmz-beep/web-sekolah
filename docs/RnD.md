@@ -17,6 +17,7 @@ This document serves as the long-term memory for the Autonomous R&D Specialist a
 - Codebase is well-maintained with good practices
 - PR #1188: Made security.txt configurable via SITE_URL environment variable
 - PR #1203: Made robots.txt configurable via SITE_URL environment variable (open)
+- PR #1229: Added offline support with service worker for improved UX
 
 ## Potential Improvements Identified
 
