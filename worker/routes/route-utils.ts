@@ -1,12 +1,19 @@
 import type { Context, Next } from 'hono'
 import type { Env } from '../core-utils'
 import { logger } from '../logger'
-import { forbidden, serverError, bad, notFound, conflict } from '../core-utils'
+import { forbidden, serverError, bad, notFound, conflict, unauthorized } from '../core-utils'
 import { authenticate, authorize } from '../middleware/auth'
 import { getCurrentUserId } from '../type-guards'
 import { WebhookService } from '../webhook-service'
 import { toWebhookPayload } from '../webhook-types'
-import { DomainError, NotFoundError, ValidationError, ConflictError } from '../errors'
+import {
+  DomainError,
+  NotFoundError,
+  ValidationError,
+  ConflictError,
+  UnauthorizedError,
+  ForbiddenError,
+} from '../errors'
 import { ErrorCode } from '@shared/common-types'
 
 export function validateUserAccess(
@@ -65,6 +72,14 @@ export function withErrorHandler(operationName: string) {
         if (error instanceof ConflictError) {
           logger.warn(`Conflict during ${operationName}: ${error.message}`)
           return conflict(c, error.message)
+        }
+        if (error instanceof UnauthorizedError) {
+          logger.warn(`Unauthorized error during ${operationName}: ${error.message}`)
+          return unauthorized(c, error.message)
+        }
+        if (error instanceof ForbiddenError) {
+          logger.warn(`Forbidden error during ${operationName}: ${error.message}`)
+          return forbidden(c, error.message)
         }
         if (error instanceof DomainError) {
           logger.error(`Domain error during ${operationName}`, error)
