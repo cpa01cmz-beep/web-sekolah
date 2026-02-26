@@ -57,9 +57,10 @@ npm run build      # Production build
 
 ## Security Assessment
 
-- Current score: 98/100 (A+)
+- Current score: 99/100 (A+)
 - Nonce infrastructure ready for SSR migration
 - Hash-based CSP for inline scripts in place
+- Type-safe security header configuration
 
 ### 2026-02-25: Enable Skipped Error Monitoring Tests
 
@@ -138,6 +139,33 @@ npm run build      # Production build
 - `worker/domain/TeacherService.ts` - uses DomainError
 - `worker/domain/UserService.ts` - uses DomainError
 - `worker/routes/route-utils.ts` - error handler now handles DomainError
+
+### 2026-02-26: Remove Non-null Assertion in Security Headers
+
+**Problem**: The security-headers middleware used a non-null assertion (`!`) when accessing `cspDirectives` from the config, which could cause runtime errors if the config was improperly provided.
+
+**Solution**: Replaced the non-null assertion with a nullish coalescing operator (`??`) that falls back to the default CSP directives:
+
+```typescript
+// Before
+response.headers.set('Content-Security-Policy', finalConfig.cspDirectives!)
+
+// After
+response.headers.set(
+  'Content-Security-Policy',
+  finalConfig.cspDirectives ?? DEFAULT_SECURITY_HEADERS.cspDirectives!
+)
+```
+
+**Benefits**:
+
+- Eliminates potential runtime error from non-null assertion
+- Provides defensive fallback to default CSP directives
+- Improves TypeScript type safety
+
+**Files Changed**:
+
+- `worker/middleware/security-headers.ts` - use nullish coalescing for CSP fallback
 
 ### 2026-02-26: Use ValidationError in Remaining Domain Services
 
