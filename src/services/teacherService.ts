@@ -29,6 +29,8 @@ const teacherAnnouncementEndpoints = {
   list: () => API_ENDPOINTS.TEACHERS.CREATE_ANNOUNCEMENT,
   listByUser: API_ENDPOINTS.TEACHERS.ANNOUNCEMENTS,
   create: () => API_ENDPOINTS.TEACHERS.CREATE_ANNOUNCEMENT,
+  update: API_ENDPOINTS.TEACHERS.ANNOUNCEMENT,
+  delete: API_ENDPOINTS.TEACHERS.ANNOUNCEMENT,
 }
 
 export function createTeacherService(repository: IRepository = apiRepository): TeacherService {
@@ -67,6 +69,10 @@ export function createTeacherService(repository: IRepository = apiRepository): T
     getAnnouncements: (teacherId: string) => announcementService.getAnnouncements(teacherId),
     createAnnouncement: (announcement: CreateAnnouncementData) =>
       announcementService.createAnnouncement(announcement),
+    updateAnnouncement: (announcementId: string, announcement: Partial<CreateAnnouncementData>) =>
+      announcementService.updateAnnouncement!(announcementId, announcement),
+    deleteAnnouncement: (announcementId: string) =>
+      announcementService.deleteAnnouncement!(announcementId),
 
     async getClassStudentsWithGrades(classId: string): Promise<ClassStudentWithGrade[]> {
       return repository.get<ClassStudentWithGrade[]>(API_ENDPOINTS.CLASSES.STUDENTS(classId))

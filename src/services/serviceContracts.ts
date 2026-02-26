@@ -55,6 +55,11 @@ export interface TeacherService {
   deleteGrade(gradeId: string): Promise<void>
   getAnnouncements(teacherId: string): Promise<Announcement[]>
   createAnnouncement(announcement: CreateAnnouncementData): Promise<Announcement>
+  updateAnnouncement(
+    announcementId: string,
+    announcement: Partial<CreateAnnouncementData>
+  ): Promise<Announcement>
+  deleteAnnouncement(announcementId: string): Promise<void>
   getClassStudentsWithGrades(classId: string): Promise<ClassStudentWithGrade[]>
   getMessages(teacherId: string, type?: 'inbox' | 'sent'): Promise<Message[]>
   getUnreadCount(teacherId: string): Promise<number>
