@@ -50,3 +50,18 @@ Key automation scripts in `/scripts/`:
 - Focus on small, measurable improvements
 - Prioritize safety and reversibility
 - Document changes clearly
+
+## Process Learnings
+
+### INITIATE Phase
+
+- Always check for existing PRs with ai-agent-engineer label first
+- If PR exists and changes are already in main, close as stale
+- No issues = do proactive scan of domain area
+
+### Key Observations
+
+- ci-readiness.sh is the main validation script for local CI readiness
+- validate script runs typecheck, lint, and test:run in sequence
+- All 3448 tests should pass for PR to be merged
+- Both wrangler.toml and wrangler.jsonc may exist (toml is primary)
