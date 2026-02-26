@@ -688,6 +688,38 @@ export async function waitForCondition(condition: () => boolean, timeout = 5000)
 
 ## Mocking Strategies
 
+### Using `any` in Test Mocks
+
+Using `any` type in test files is **acceptable and recommended** for test setup and mocking. This is a deliberate exception to TypeScript's strict type checking.
+
+**Why `any` is acceptable in tests:**
+
+- Tests focus on behavior verification, not type safety
+- Mock objects often don't need full type coverage
+- It improves test readability and reduces boilerplate
+
+**Common acceptable uses:**
+
+```typescript
+// Mock data arrays
+const mockData: any[] = [];
+
+// External library mocks
+let mockPinoLogger: any;
+let mockEnv: any;
+
+// Promise resolution helpers
+let resolveFetch: any;
+
+// Error handling in try-catch
+} catch (error: any) {
+
+// Hono context mocks
+const customHandler = vi.fn((c: any, info: any) => { ... })
+```
+
+**Note**: Production code (`src/`, `worker/`, `shared/`) should have zero `any` types. Only test files may use `any` for mocking purposes.
+
 ### Mocking Services
 
 ```typescript
