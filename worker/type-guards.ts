@@ -2,6 +2,7 @@ import type { SchoolUser, Student, Teacher, Parent, Admin } from '@shared/types'
 import type { Context } from 'hono'
 import type { AuthUser } from './types'
 import { UserRoleValues } from '@shared/constants'
+import { UnauthorizedError } from './errors'
 
 type ExtendedContext = Context & {
   set(key: string, value: unknown): void
@@ -14,7 +15,7 @@ export function getAuthUser(c: Context): AuthUser | undefined {
 export function getCurrentUserId(c: Context): string {
   const user = getAuthUser(c)
   if (!user) {
-    throw new Error('User not authenticated')
+    throw new UnauthorizedError('User not authenticated')
   }
   return user.id
 }

@@ -183,3 +183,25 @@ response.headers.set(
 
 - `worker/domain/TeacherService.ts` - use ValidationError for authorization check
 - `worker/domain/UserCreationStrategy.ts` - use ValidationError for invalid role
+
+### 2026-02-26: Add UnauthorizedError and ForbiddenError Classes
+
+**Problem**: Authentication and authorization errors were using generic `Error` instead of typed domain errors, making it difficult to distinguish between different error types and return appropriate HTTP status codes.
+
+**Solution**: Added two new error classes extending `DomainError`:
+
+1. Created `UnauthorizedError` - for UNAUTHORIZED error code (returns 401)
+2. Created `ForbiddenError` - for FORBIDDEN error code (returns 403)
+
+**Files Changed**:
+
+- `worker/errors/DomainError.ts` - added UnauthorizedError and ForbiddenError classes
+- `worker/errors/index.ts` - exports new error classes
+- `worker/type-guards.ts` - use UnauthorizedError in getCurrentUserId
+- `worker/routes/route-utils.ts` - error handler now handles UnauthorizedError and ForbiddenError
+
+**Benefits**:
+
+- Consistent error handling for authentication/authorization errors
+- Proper HTTP status codes returned (401 for unauthorized, 403 for forbidden)
+- Better error classification and logging

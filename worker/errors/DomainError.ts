@@ -38,3 +38,19 @@ export class ConflictError extends DomainError {
     Object.setPrototypeOf(this, ConflictError.prototype)
   }
 }
+
+export class UnauthorizedError extends DomainError {
+  constructor(message: string = 'Authentication required') {
+    super(ErrorCode.UNAUTHORIZED, message)
+    this.name = 'UnauthorizedError'
+    Object.setPrototypeOf(this, UnauthorizedError.prototype)
+  }
+}
+
+export class ForbiddenError extends DomainError {
+  constructor(message: string = 'Access denied') {
+    super(ErrorCode.FORBIDDEN, message)
+    this.name = 'ForbiddenError'
+    Object.setPrototypeOf(this, ForbiddenError.prototype)
+  }
+}
