@@ -25,10 +25,10 @@ function MessageListItemInner({
   const isUnread = !message.isRead && message.recipientId === currentUserId
 
   const buttonClass = isInbox
-    ? `w-full text-left p-3 rounded-lg transition-colors ${
+    ? `w-full text-left p-3 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
         isUnread ? 'bg-primary/5 hover:bg-primary/10' : 'hover:bg-muted'
       }`
-    : 'w-full text-left p-3 rounded-lg hover:bg-muted transition-colors'
+    : 'w-full text-left p-3 rounded-lg hover:bg-muted transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2'
 
   return (
     <button onClick={onClick} className={buttonClass}>

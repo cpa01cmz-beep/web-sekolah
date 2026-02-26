@@ -102,7 +102,7 @@ export function LinksRelatedPage() {
               <div className="grid md:grid-cols-3 gap-6">
                 <a
                   href="#"
-                  className="block p-6 bg-card rounded-lg shadow-sm hover:shadow-md transition-shadow text-center"
+                  className="block p-6 bg-card rounded-lg shadow-sm hover:shadow-md transition-shadow text-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                 >
                   <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
                     <span className="text-blue-600 font-bold">UNESCO</span>
@@ -115,7 +115,7 @@ export function LinksRelatedPage() {
 
                 <a
                   href="#"
-                  className="block p-6 bg-card rounded-lg shadow-sm hover:shadow-md transition-shadow text-center"
+                  className="block p-6 bg-card rounded-lg shadow-sm hover:shadow-md transition-shadow text-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                 >
                   <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
                     <span className="text-green-600 font-bold">OECD</span>
@@ -128,7 +128,7 @@ export function LinksRelatedPage() {
 
                 <a
                   href="#"
-                  className="block p-6 bg-card rounded-lg shadow-sm hover:shadow-md transition-shadow text-center"
+                  className="block p-6 bg-card rounded-lg shadow-sm hover:shadow-md transition-shadow text-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                 >
                   <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
                     <span className="text-purple-600 font-bold">WB</span>
