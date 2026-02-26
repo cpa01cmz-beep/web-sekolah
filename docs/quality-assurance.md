@@ -101,7 +101,7 @@ The mock file (`__mocks__/cloudflare:workers.ts`) has been enhanced with:
 
 ### Security
 
-- No security vulnerabilities detected in dependencies (2 moderate/high in dev-only deps)
+- No security vulnerabilities detected in dependencies (0 vulnerabilities)
 
 ## Notes
 
