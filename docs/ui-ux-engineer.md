@@ -6,11 +6,21 @@
 
 ## Recent Improvements
 
+### PR #1253 - PPDBForm Duplicate Fields (2026-02-26)
+
+Reviewed and commented on PR #1253 which was attempting to fix duplicate fields in PPDBForm:
+
+- The duplicate fields issue (Tanggal Lahir and Nomor Telepon) was already fixed in PR #1259 (merged)
+- The email field removal in PR #1253 was incorrect (email is still needed)
+- PR #1253 should be closed as obsolete
+
 ### Focus-visible Styles for Keyboard Accessibility (2026-02-26)
 
 Added focus-visible styles to improve keyboard navigation accessibility:
 
-- **LinksRelatedPage**: Added `focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2` to all 9 anchor tags
+- **MessageListItem.tsx**: Added focus-visible ring styles to inbox and sent message buttons
+- **LinksRelatedPage**: Added focus-visible ring styles to 3 international organization links (UNESCO, OECD, World Bank)
+- **LinksRelatedPage**: Added focus-visible ring styles to all 9 anchor tags in related links page
 - **ProfileExtracurricularPage**: Added focus-visible ring styles to CTA button
 
 ### ContactForm Error Feedback (2026-02-25)
