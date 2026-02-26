@@ -1,10 +1,17 @@
 # UI/UX Engineer Agent - Long-time Memory
 
-**Last Updated**: 2026-02-25
+**Last Updated**: 2026-02-26
 
 ---
 
 ## Recent Improvements
+
+### Focus-visible Styles for Keyboard Accessibility (2026-02-26)
+
+Added focus-visible styles to improve keyboard navigation accessibility:
+
+- **LinksRelatedPage**: Added `focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2` to all 9 anchor tags
+- **ProfileExtracurricularPage**: Added focus-visible ring styles to CTA button
 
 ### ContactForm Error Feedback (2026-02-25)
 
@@ -41,6 +48,8 @@ Added `autoComplete` attributes to form inputs across the application for better
 - All form inputs must have associated labels
 - Loading states should use `aria-busy` and `aria-live` regions
 - Focus indicators must be visible on all interactive elements
+- **Anchor tags** (`<a>`) should have `focus-visible` styles for keyboard users
+- **Buttons** should have `focus-visible` styles for keyboard users
 
 ### Forms
 
@@ -95,4 +104,4 @@ npm run validate
 ---
 
 **Document Maintainer**: UI/UX Engineer Agent
-**Next Review**: 2026-03-25
+**Next Review**: 2026-03-26
