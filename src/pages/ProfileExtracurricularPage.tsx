@@ -1,9 +1,12 @@
-import { SiteHeader } from '@/components/SiteHeader';
-import { SiteFooter } from '@/components/SiteFooter';
-import { SkipLink } from '@/components/SkipLink';
-import { SlideUp } from '@/components/animations';
-import { ContentCard } from '@/components/ContentCard';
-import { EXTRACURRICULAR_ACTIVITIES, EXTRACURRICULAR_PAGE_CONTENT } from '@/constants/extracurricular';
+import { SiteHeader } from '@/components/SiteHeader'
+import { SiteFooter } from '@/components/SiteFooter'
+import { SkipLink } from '@/components/SkipLink'
+import { SlideUp } from '@/components/animations'
+import { ContentCard } from '@/components/ContentCard'
+import {
+  EXTRACURRICULAR_ACTIVITIES,
+  EXTRACURRICULAR_PAGE_CONTENT,
+} from '@/constants/extracurricular'
 
 export function ProfileExtracurricularPage() {
   return (
@@ -42,11 +45,13 @@ export function ProfileExtracurricularPage() {
 
           <SlideUp>
             <div className="mt-24 text-center">
-              <h2 className="text-3xl font-bold text-foreground mb-6">{EXTRACURRICULAR_PAGE_CONTENT.joiningSection.title}</h2>
+              <h2 className="text-3xl font-bold text-foreground mb-6">
+                {EXTRACURRICULAR_PAGE_CONTENT.joiningSection.title}
+              </h2>
               <p className="max-w-2xl mx-auto text-muted-foreground mb-8">
                 {EXTRACURRICULAR_PAGE_CONTENT.joiningSection.description}
               </p>
-              <button className="px-6 py-3 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-colors">
+              <button className="px-6 py-3 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
                 {EXTRACURRICULAR_PAGE_CONTENT.joiningSection.ctaText}
               </button>
             </div>
@@ -55,5 +60,5 @@ export function ProfileExtracurricularPage() {
       </main>
       <SiteFooter />
     </div>
-  );
+  )
 }
