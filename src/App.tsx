@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { useAuthStore } from '@/stores/authStore'
 import { ErrorBoundary } from '@/components/ErrorBoundary'
+import { OfflineIndicator } from '@/components/OfflineIndicator'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClient } from '@/lib/api-client'
 import { RouterProvider } from 'react-router-dom'
@@ -23,6 +24,7 @@ export function App() {
       <QueryClientProvider client={queryClient}>
         <RouterProvider router={router} fallbackElement={<LoadingFallback />} />
       </QueryClientProvider>
+      <OfflineIndicator />
     </ErrorBoundary>
   )
 }
