@@ -80,3 +80,19 @@ User-story-engineer: Deliver small, safe, measurable improvements strictly insid
 - Backend has DELETE message endpoints at `/api/teachers/:id/messages/:messageId` and `/api/parents/:id/messages/:messageId`
 - MessageService uses a factory pattern with configurable endpoints (MessageEndpoints)
 - Message deletion was missing from the frontend but existed in backend - same pattern as announcements
+
+## Implemented Features (Current Session - SEO Fix)
+
+- Fixed absolute URLs for SEO meta tags (og:image, twitter:image) in index.html
+- Changed from relative path `/og-image.svg` to absolute URL `https://akademia-pro.vercel.app/og-image.svg`
+- Issue #1246 - simple, safe, measurable improvement for social media previews
+
+## Files Modified (Current Session - SEO Fix)
+
+- index.html - Changed og:image and twitter:image to use absolute URLs
+
+## Key Learnings (Current Session - SEO Fix)
+
+- SEO meta tags should use absolute URLs for proper social media previews
+- og:url already uses absolute URL, og:image and twitter:image were inconsistent
+- JSON-LD schema already uses absolute URLs for logo - this aligns with that pattern
