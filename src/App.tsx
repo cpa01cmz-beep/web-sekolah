@@ -7,6 +7,7 @@ import { RouterProvider } from 'react-router-dom'
 import '@/index.css'
 import { router } from './router'
 import { LoadingFallback } from './router-utils'
+import { OfflineIndicator } from '@/components/offline-indicator'
 
 export function App() {
   const initializeAuth = useAuthStore(state => state.initializeAuth)
@@ -22,6 +23,7 @@ export function App() {
       </a>
       <QueryClientProvider client={queryClient}>
         <RouterProvider router={router} fallbackElement={<LoadingFallback />} />
+        <OfflineIndicator />
       </QueryClientProvider>
     </ErrorBoundary>
   )
