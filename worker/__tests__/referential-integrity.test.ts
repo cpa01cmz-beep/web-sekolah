@@ -1,158 +1,159 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect } from 'vitest'
+import { createMockEnv } from './utils/mocks'
 
 describe('ReferentialIntegrity', () => {
   describe('Module Loading', () => {
     it('should be able to import module', async () => {
-      const module = await import('../referential-integrity');
-      expect(module).toBeDefined();
-      expect(module.ReferentialIntegrity).toBeDefined();
-    });
+      const module = await import('../referential-integrity')
+      expect(module).toBeDefined()
+      expect(module.ReferentialIntegrity).toBeDefined()
+    })
 
     it('should export all validation methods', async () => {
-      const { ReferentialIntegrity } = await import('../referential-integrity');
+      const { ReferentialIntegrity } = await import('../referential-integrity')
 
-      expect(typeof ReferentialIntegrity.validateGrade).toBe('function');
-      expect(typeof ReferentialIntegrity.validateClass).toBe('function');
-      expect(typeof ReferentialIntegrity.validateCourse).toBe('function');
-      expect(typeof ReferentialIntegrity.validateStudent).toBe('function');
-      expect(typeof ReferentialIntegrity.validateAnnouncement).toBe('function');
-      expect(typeof ReferentialIntegrity.checkDependents).toBe('function');
-    });
-  });
+      expect(typeof ReferentialIntegrity.validateGrade).toBe('function')
+      expect(typeof ReferentialIntegrity.validateClass).toBe('function')
+      expect(typeof ReferentialIntegrity.validateCourse).toBe('function')
+      expect(typeof ReferentialIntegrity.validateStudent).toBe('function')
+      expect(typeof ReferentialIntegrity.validateAnnouncement).toBe('function')
+      expect(typeof ReferentialIntegrity.checkDependents).toBe('function')
+    })
+  })
 
   describe('Validation Method Signatures', () => {
     it('validateGrade should return correct structure', async () => {
-      const { ReferentialIntegrity } = await import('../referential-integrity');
-      const mockEnv = {} as any;
+      const { ReferentialIntegrity } = await import('../referential-integrity')
+      const mockEnv = createMockEnv()
 
       const result = await ReferentialIntegrity.validateGrade(mockEnv, {
         studentId: 'student-01',
         courseId: 'course-01',
         score: 95,
         feedback: 'Excellent',
-      });
+      })
 
-      expect(result).toHaveProperty('valid');
-      expect(result).toHaveProperty('error');
-      expect(typeof result.valid).toBe('boolean');
-      expect(result.error === undefined || typeof result.error === 'string').toBe(true);
-    });
+      expect(result).toHaveProperty('valid')
+      expect(result).toHaveProperty('error')
+      expect(typeof result.valid).toBe('boolean')
+      expect(result.error === undefined || typeof result.error === 'string').toBe(true)
+    })
 
     it('validateGrade should fail when studentId is missing', async () => {
-      const { ReferentialIntegrity } = await import('../referential-integrity');
-      const mockEnv = {} as any;
+      const { ReferentialIntegrity } = await import('../referential-integrity')
+      const mockEnv = createMockEnv()
 
       const result = await ReferentialIntegrity.validateGrade(mockEnv, {
         courseId: 'course-01',
         score: 95,
-      });
+      })
 
-      expect(result.valid).toBe(false);
-      expect(result.error).toBeDefined();
-      expect(result.error).toContain('student');
-    });
+      expect(result.valid).toBe(false)
+      expect(result.error).toBeDefined()
+      expect(result.error).toContain('student')
+    })
 
     it('validateGrade should fail when courseId is missing', async () => {
-      const { ReferentialIntegrity } = await import('../referential-integrity');
-      const mockEnv = {} as any;
+      const { ReferentialIntegrity } = await import('../referential-integrity')
+      const mockEnv = createMockEnv()
 
       const result = await ReferentialIntegrity.validateGrade(mockEnv, {
         studentId: 'student-01',
         score: 95,
-      });
+      })
 
-      expect(result.valid).toBe(false);
-      expect(result.error).toBeDefined();
-      expect(result.error).toContain('course');
-    });
+      expect(result.valid).toBe(false)
+      expect(result.error).toBeDefined()
+      expect(result.error).toContain('course')
+    })
 
     it('validateGrade should handle null studentId', async () => {
-      const { ReferentialIntegrity } = await import('../referential-integrity');
-      const mockEnv = {} as any;
+      const { ReferentialIntegrity } = await import('../referential-integrity')
+      const mockEnv = createMockEnv()
 
       const result = await ReferentialIntegrity.validateGrade(mockEnv, {
-        studentId: null as any,
+        studentId: null!,
         courseId: 'course-01',
         score: 95,
-      });
+      })
 
-      expect(result.valid).toBe(false);
-      expect(result.error).toBe('Grade must reference a valid student');
-    });
+      expect(result.valid).toBe(false)
+      expect(result.error).toBe('Grade must reference a valid student')
+    })
 
     it('validateGrade should handle undefined studentId', async () => {
-      const { ReferentialIntegrity } = await import('../referential-integrity');
-      const mockEnv = {} as any;
+      const { ReferentialIntegrity } = await import('../referential-integrity')
+      const mockEnv = createMockEnv()
 
       const result = await ReferentialIntegrity.validateGrade(mockEnv, {
-        studentId: undefined as any,
+        studentId: undefined,
         courseId: 'course-01',
         score: 95,
-      });
+      })
 
-      expect(result.valid).toBe(false);
-      expect(result.error).toBe('Grade must reference a valid student');
-    });
+      expect(result.valid).toBe(false)
+      expect(result.error).toBe('Grade must reference a valid student')
+    })
 
     it('validateGrade should handle null courseId', async () => {
-      const { ReferentialIntegrity } = await import('../referential-integrity');
-      const mockEnv = {} as any;
+      const { ReferentialIntegrity } = await import('../referential-integrity')
+      const mockEnv = createMockEnv()
 
       const result = await ReferentialIntegrity.validateGrade(mockEnv, {
         studentId: 'student-01',
-        courseId: null as any,
+        courseId: null!,
         score: 95,
-      });
+      })
 
-      expect(result.valid).toBe(false);
-      expect(result.error).toBe('Grade must reference a valid course');
-    });
+      expect(result.valid).toBe(false)
+      expect(result.error).toBe('Grade must reference a valid course')
+    })
 
     it('validateGrade should handle undefined courseId', async () => {
-      const { ReferentialIntegrity } = await import('../referential-integrity');
-      const mockEnv = {} as any;
+      const { ReferentialIntegrity } = await import('../referential-integrity')
+      const mockEnv = createMockEnv()
 
       const result = await ReferentialIntegrity.validateGrade(mockEnv, {
         studentId: 'student-01',
-        courseId: undefined as any,
+        courseId: undefined,
         score: 95,
-      });
+      })
 
-      expect(result.valid).toBe(false);
-      expect(result.error).toBe('Grade must reference a valid course');
-    });
+      expect(result.valid).toBe(false)
+      expect(result.error).toBe('Grade must reference a valid course')
+    })
 
     it('validateGrade should handle empty studentId', async () => {
-      const { ReferentialIntegrity } = await import('../referential-integrity');
-      const mockEnv = {} as any;
+      const { ReferentialIntegrity } = await import('../referential-integrity')
+      const mockEnv = createMockEnv()
 
       const result = await ReferentialIntegrity.validateGrade(mockEnv, {
         studentId: '',
         courseId: 'course-01',
         score: 95,
-      } as any);
+      } as any)
 
-      expect(result.valid).toBe(false);
-      expect(result.error).toBe('Grade must reference a valid student');
-    });
+      expect(result.valid).toBe(false)
+      expect(result.error).toBe('Grade must reference a valid student')
+    })
 
     it('validateGrade should handle empty courseId', async () => {
-      const { ReferentialIntegrity } = await import('../referential-integrity');
-      const mockEnv = {} as any;
+      const { ReferentialIntegrity } = await import('../referential-integrity')
+      const mockEnv = createMockEnv()
 
       const result = await ReferentialIntegrity.validateGrade(mockEnv, {
         studentId: 'student-01',
         courseId: '',
         score: 95,
-      } as any);
+      } as any)
 
-      expect(result.valid).toBe(false);
-      expect(result.error).toBe('Grade must reference a valid course');
-    });
+      expect(result.valid).toBe(false)
+      expect(result.error).toBe('Grade must reference a valid course')
+    })
 
     it('validateGrade should handle score at boundaries', async () => {
-      const { ReferentialIntegrity } = await import('../referential-integrity');
-      const mockEnv = {} as any;
+      const { ReferentialIntegrity } = await import('../referential-integrity')
+      const mockEnv = createMockEnv()
 
       const boundaryTests = [
         { score: 0, description: 'minimum score (0)' },
@@ -161,7 +162,7 @@ describe('ReferentialIntegrity', () => {
         { score: 95.5, description: 'decimal score (95.5)' },
         { score: -1, description: 'below minimum (-1)' },
         { score: 101, description: 'above maximum (101)' },
-      ];
+      ]
 
       for (const test of boundaryTests) {
         const result = await ReferentialIntegrity.validateGrade(mockEnv, {
@@ -169,21 +170,21 @@ describe('ReferentialIntegrity', () => {
           courseId: 'course-01',
           score: test.score,
           feedback: 'Test feedback',
-        });
+        })
 
         if (test.score >= 0 && test.score <= 100) {
-          expect(result.valid).toBe(true);
-          expect(result.error).toBeUndefined();
+          expect(result.valid).toBe(true)
+          expect(result.error).toBeUndefined()
         } else {
-          expect(result.valid).toBe(false);
-          expect(result.error).toBe('Score must be between 0 and 100');
+          expect(result.valid).toBe(false)
+          expect(result.error).toBe('Score must be between 0 and 100')
         }
       }
-    });
+    })
 
     it('validateGrade should handle feedback edge cases', async () => {
-      const { ReferentialIntegrity } = await import('../referential-integrity');
-      const mockEnv = {} as any;
+      const { ReferentialIntegrity } = await import('../referential-integrity')
+      const mockEnv = createMockEnv()
 
       const feedbackTests = [
         { feedback: '', description: 'empty feedback' },
@@ -191,7 +192,7 @@ describe('ReferentialIntegrity', () => {
         { feedback: 'A'.repeat(1000), description: 'long feedback (1000 chars)' },
         { feedback: 'Gréât 👍', description: 'special characters' },
         { feedback: 'Line 1\nLine 2', description: 'multiline feedback' },
-      ];
+      ]
 
       for (const test of feedbackTests) {
         const result = await ReferentialIntegrity.validateGrade(mockEnv, {
@@ -199,369 +200,373 @@ describe('ReferentialIntegrity', () => {
           courseId: 'course-01',
           score: 95,
           feedback: test.feedback,
-        });
+        })
 
-        expect(result.valid).toBe(true);
-        expect(result.error).toBeUndefined();
+        expect(result.valid).toBe(true)
+        expect(result.error).toBeUndefined()
       }
-    });
+    })
 
     it('validateClass should return correct structure', async () => {
-      const { ReferentialIntegrity } = await import('../referential-integrity');
-      const mockEnv = {} as any;
+      const { ReferentialIntegrity } = await import('../referential-integrity')
+      const mockEnv = createMockEnv()
 
       const result = await ReferentialIntegrity.validateClass(mockEnv, {
         id: 'class-01',
         name: 'Class 11-A',
         teacherId: 'teacher-01',
-      });
+      })
 
-      expect(result).toHaveProperty('valid');
-      expect(result).toHaveProperty('error');
-      expect(typeof result.valid).toBe('boolean');
-    });
+      expect(result).toHaveProperty('valid')
+      expect(result).toHaveProperty('error')
+      expect(typeof result.valid).toBe('boolean')
+    })
 
     it('validateClass should fail when teacherId is missing', async () => {
-      const { ReferentialIntegrity } = await import('../referential-integrity');
-      const mockEnv = {} as any;
+      const { ReferentialIntegrity } = await import('../referential-integrity')
+      const mockEnv = createMockEnv()
 
       const result = await ReferentialIntegrity.validateClass(mockEnv, {
         id: 'class-01',
         name: 'Class 11-A',
-      } as any);
+      } as any)
 
-      expect(result.valid).toBe(false);
-      expect(result.error).toBeDefined();
-      expect(result.error).toContain('teacher');
-    });
+      expect(result.valid).toBe(false)
+      expect(result.error).toBeDefined()
+      expect(result.error).toContain('teacher')
+    })
 
     it('validateClass should handle null teacherId', async () => {
-      const { ReferentialIntegrity } = await import('../referential-integrity');
-      const mockEnv = {} as any;
+      const { ReferentialIntegrity } = await import('../referential-integrity')
+      const mockEnv = createMockEnv()
 
       const result = await ReferentialIntegrity.validateClass(mockEnv, {
         id: 'class-01',
         name: 'Class 11-A',
-        teacherId: null as any,
-      });
+        teacherId: null!,
+      })
 
-      expect(result.valid).toBe(false);
-      expect(result.error).toBe('Class must reference a valid teacher');
-    });
+      expect(result.valid).toBe(false)
+      expect(result.error).toBe('Class must reference a valid teacher')
+    })
 
     it('validateClass should handle undefined teacherId', async () => {
-      const { ReferentialIntegrity } = await import('../referential-integrity');
-      const mockEnv = {} as any;
+      const { ReferentialIntegrity } = await import('../referential-integrity')
+      const mockEnv = createMockEnv()
 
       const result = await ReferentialIntegrity.validateClass(mockEnv, {
         id: 'class-01',
         name: 'Class 11-A',
-        teacherId: undefined as any,
-      });
+        teacherId: undefined,
+      })
 
-      expect(result.valid).toBe(false);
-      expect(result.error).toBe('Class must reference a valid teacher');
-    });
+      expect(result.valid).toBe(false)
+      expect(result.error).toBe('Class must reference a valid teacher')
+    })
 
     it('validateClass should handle empty teacherId', async () => {
-      const { ReferentialIntegrity } = await import('../referential-integrity');
-      const mockEnv = {} as any;
+      const { ReferentialIntegrity } = await import('../referential-integrity')
+      const mockEnv = createMockEnv()
 
       const result = await ReferentialIntegrity.validateClass(mockEnv, {
         id: 'class-01',
         name: 'Class 11-A',
         teacherId: '',
-      } as any);
+      } as any)
 
-      expect(result.valid).toBe(false);
-      expect(result.error).toBe('Class must reference a valid teacher');
-    });
+      expect(result.valid).toBe(false)
+      expect(result.error).toBe('Class must reference a valid teacher')
+    })
 
     it('validateCourse should return correct structure', async () => {
-      const { ReferentialIntegrity } = await import('../referential-integrity');
-      const mockEnv = {} as any;
+      const { ReferentialIntegrity } = await import('../referential-integrity')
+      const mockEnv = createMockEnv()
 
       const result = await ReferentialIntegrity.validateCourse(mockEnv, {
         teacherId: 'teacher-01',
-      });
+      })
 
-      expect(result).toHaveProperty('valid');
-      expect(result).toHaveProperty('error');
-      expect(typeof result.valid).toBe('boolean');
-    });
+      expect(result).toHaveProperty('valid')
+      expect(result).toHaveProperty('error')
+      expect(typeof result.valid).toBe('boolean')
+    })
 
     it('validateCourse should fail when teacherId is missing', async () => {
-      const { ReferentialIntegrity } = await import('../referential-integrity');
-      const mockEnv = {} as any;
+      const { ReferentialIntegrity } = await import('../referential-integrity')
+      const mockEnv = createMockEnv()
 
       const result = await ReferentialIntegrity.validateCourse(mockEnv, {
         teacherId: '',
-      });
+      })
 
-      expect(result.valid).toBe(false);
-      expect(result.error).toBeDefined();
-      expect(result.error).toContain('teacher');
-    });
+      expect(result.valid).toBe(false)
+      expect(result.error).toBeDefined()
+      expect(result.error).toContain('teacher')
+    })
 
     it('validateCourse should handle null teacherId', async () => {
-      const { ReferentialIntegrity } = await import('../referential-integrity');
-      const mockEnv = {} as any;
+      const { ReferentialIntegrity } = await import('../referential-integrity')
+      const mockEnv = createMockEnv()
 
       const result = await ReferentialIntegrity.validateCourse(mockEnv, {
-        teacherId: null as any,
-      });
+        teacherId: null!,
+      })
 
-      expect(result.valid).toBe(false);
-      expect(result.error).toBe('Course must reference a valid teacher');
-    });
+      expect(result.valid).toBe(false)
+      expect(result.error).toBe('Course must reference a valid teacher')
+    })
 
     it('validateCourse should handle undefined teacherId', async () => {
-      const { ReferentialIntegrity } = await import('../referential-integrity');
-      const mockEnv = {} as any;
+      const { ReferentialIntegrity } = await import('../referential-integrity')
+      const mockEnv = createMockEnv()
 
       const result = await ReferentialIntegrity.validateCourse(mockEnv, {
-        teacherId: undefined as any,
-      });
+        teacherId: undefined,
+      })
 
-      expect(result.valid).toBe(false);
-      expect(result.error).toBe('Course must reference a valid teacher');
-    });
+      expect(result.valid).toBe(false)
+      expect(result.error).toBe('Course must reference a valid teacher')
+    })
 
     it('validateStudent should return correct structure', async () => {
-      const { ReferentialIntegrity } = await import('../referential-integrity');
-      const mockEnv = {} as any;
+      const { ReferentialIntegrity } = await import('../referential-integrity')
+      const mockEnv = createMockEnv()
 
       const result = await ReferentialIntegrity.validateStudent(mockEnv, {
         classId: 'class-01',
-      });
+      })
 
-      expect(result).toHaveProperty('valid');
-      expect(result).toHaveProperty('error');
-      expect(typeof result.valid).toBe('boolean');
-    });
+      expect(result).toHaveProperty('valid')
+      expect(result).toHaveProperty('error')
+      expect(typeof result.valid).toBe('boolean')
+    })
 
     it('validateStudent should fail when classId is missing', async () => {
-      const { ReferentialIntegrity } = await import('../referential-integrity');
-      const mockEnv = {} as any;
+      const { ReferentialIntegrity } = await import('../referential-integrity')
+      const mockEnv = createMockEnv()
 
       const result = await ReferentialIntegrity.validateStudent(mockEnv, {
         classId: '',
-      });
+      })
 
-      expect(result.valid).toBe(false);
-      expect(result.error).toBeDefined();
-      expect(result.error).toContain('class');
-    });
+      expect(result.valid).toBe(false)
+      expect(result.error).toBeDefined()
+      expect(result.error).toContain('class')
+    })
 
     it('validateStudent should handle null classId', async () => {
-      const { ReferentialIntegrity } = await import('../referential-integrity');
-      const mockEnv = {} as any;
+      const { ReferentialIntegrity } = await import('../referential-integrity')
+      const mockEnv = createMockEnv()
 
       const result = await ReferentialIntegrity.validateStudent(mockEnv, {
-        classId: null as any,
-      });
+        classId: null!,
+      })
 
-      expect(result.valid).toBe(false);
-      expect(result.error).toBe('Student must belong to a class');
-    });
+      expect(result.valid).toBe(false)
+      expect(result.error).toBe('Student must belong to a class')
+    })
 
     it('validateStudent should handle undefined classId', async () => {
-      const { ReferentialIntegrity } = await import('../referential-integrity');
-      const mockEnv = {} as any;
+      const { ReferentialIntegrity } = await import('../referential-integrity')
+      const mockEnv = createMockEnv()
 
       const result = await ReferentialIntegrity.validateStudent(mockEnv, {
-        classId: undefined as any,
-      });
+        classId: undefined,
+      })
 
-      expect(result.valid).toBe(false);
-      expect(result.error).toBe('Student must belong to a class');
-    });
+      expect(result.valid).toBe(false)
+      expect(result.error).toBe('Student must belong to a class')
+    })
 
     it('validateStudent should handle null parentId', async () => {
-      const { ReferentialIntegrity } = await import('../referential-integrity');
-      const mockEnv = {} as any;
+      const { ReferentialIntegrity } = await import('../referential-integrity')
+      const mockEnv = createMockEnv()
 
       const result = await ReferentialIntegrity.validateStudent(mockEnv, {
         classId: 'class-01',
-        parentId: null as any,
-      });
+        parentId: null!,
+      })
 
-      expect(result.valid).toBe(true);
-      expect(result.error).toBeUndefined();
-    });
+      expect(result.valid).toBe(true)
+      expect(result.error).toBeUndefined()
+    })
 
     it('validateStudent should handle undefined parentId', async () => {
-      const { ReferentialIntegrity } = await import('../referential-integrity');
-      const mockEnv = {} as any;
+      const { ReferentialIntegrity } = await import('../referential-integrity')
+      const mockEnv = createMockEnv()
 
       const result = await ReferentialIntegrity.validateStudent(mockEnv, {
         classId: 'class-01',
-        parentId: undefined as any,
-      });
+        parentId: undefined,
+      })
 
-      expect(result.valid).toBe(true);
-      expect(result.error).toBeUndefined();
-    });
+      expect(result.valid).toBe(true)
+      expect(result.error).toBeUndefined()
+    })
 
     it('validateAnnouncement should return correct structure', async () => {
-      const { ReferentialIntegrity } = await import('../referential-integrity');
-      const mockEnv = {} as any;
+      const { ReferentialIntegrity } = await import('../referential-integrity')
+      const mockEnv = createMockEnv()
 
       const result = await ReferentialIntegrity.validateAnnouncement(mockEnv, {
         id: 'ann-01',
         title: 'Test Announcement',
         content: 'Test content',
         authorId: 'teacher-01',
-      });
+      })
 
-      expect(result).toHaveProperty('valid');
-      expect(result).toHaveProperty('error');
-      expect(typeof result.valid).toBe('boolean');
-    });
+      expect(result).toHaveProperty('valid')
+      expect(result).toHaveProperty('error')
+      expect(typeof result.valid).toBe('boolean')
+    })
 
     it('validateAnnouncement should fail when authorId is missing', async () => {
-      const { ReferentialIntegrity } = await import('../referential-integrity');
-      const mockEnv = {} as any;
+      const { ReferentialIntegrity } = await import('../referential-integrity')
+      const mockEnv = createMockEnv()
 
       const result = await ReferentialIntegrity.validateAnnouncement(mockEnv, {
         title: 'Test Announcement',
         content: 'Test content',
-      } as any);
+      } as any)
 
-      expect(result.valid).toBe(false);
-      expect(result.error).toBeDefined();
-      expect(result.error).toContain('author');
-    });
+      expect(result.valid).toBe(false)
+      expect(result.error).toBeDefined()
+      expect(result.error).toContain('author')
+    })
 
     it('validateAnnouncement should handle null authorId', async () => {
-      const { ReferentialIntegrity } = await import('../referential-integrity');
-      const mockEnv = {} as any;
+      const { ReferentialIntegrity } = await import('../referential-integrity')
+      const mockEnv = createMockEnv()
 
       const result = await ReferentialIntegrity.validateAnnouncement(mockEnv, {
         title: 'Test Announcement',
         content: 'Test content',
-        authorId: null as any,
-      });
+        authorId: null!,
+      })
 
-      expect(result.valid).toBe(false);
-      expect(result.error).toBe('Announcement must reference a valid author');
-    });
+      expect(result.valid).toBe(false)
+      expect(result.error).toBe('Announcement must reference a valid author')
+    })
 
     it('validateAnnouncement should handle undefined authorId', async () => {
-      const { ReferentialIntegrity } = await import('../referential-integrity');
-      const mockEnv = {} as any;
+      const { ReferentialIntegrity } = await import('../referential-integrity')
+      const mockEnv = createMockEnv()
 
       const result = await ReferentialIntegrity.validateAnnouncement(mockEnv, {
         title: 'Test Announcement',
         content: 'Test content',
-        authorId: undefined as any,
-      });
+        authorId: undefined,
+      })
 
-      expect(result.valid).toBe(false);
-      expect(result.error).toBe('Announcement must reference a valid author');
-    });
-  });
+      expect(result.valid).toBe(false)
+      expect(result.error).toBe('Announcement must reference a valid author')
+    })
+  })
 
   describe('checkDependents Method', () => {
     it('checkDependents should return array', async () => {
-      const { ReferentialIntegrity } = await import('../referential-integrity');
-      const mockEnv = {} as any;
+      const { ReferentialIntegrity } = await import('../referential-integrity')
+      const mockEnv = createMockEnv()
 
-      const warnings = await ReferentialIntegrity.checkDependents(mockEnv, 'user', 'test-id');
+      const warnings = await ReferentialIntegrity.checkDependents(mockEnv, 'user', 'test-id')
 
-      expect(Array.isArray(warnings)).toBe(true);
-      expect(warnings.every((w: any) => typeof w === 'string')).toBe(true);
-    });
+      expect(Array.isArray(warnings)).toBe(true)
+      expect(warnings.every((w: any) => typeof w === 'string')).toBe(true)
+    })
 
     it('checkDependents should handle all entity types', async () => {
-      const { ReferentialIntegrity } = await import('../referential-integrity');
-      const mockEnv = {} as any;
-      const entityTypes = ['user', 'class', 'course'] as const;
+      const { ReferentialIntegrity } = await import('../referential-integrity')
+      const mockEnv = createMockEnv()
+      const entityTypes = ['user', 'class', 'course'] as const
 
       for (const entityType of entityTypes) {
-        const warnings = await ReferentialIntegrity.checkDependents(mockEnv, entityType, 'test-id');
-        expect(Array.isArray(warnings)).toBe(true);
+        const warnings = await ReferentialIntegrity.checkDependents(mockEnv, entityType, 'test-id')
+        expect(Array.isArray(warnings)).toBe(true)
       }
-    });
+    })
 
     it('checkDependents should handle empty results', async () => {
-      const { ReferentialIntegrity } = await import('../referential-integrity');
-      const mockEnv = {} as any;
+      const { ReferentialIntegrity } = await import('../referential-integrity')
+      const mockEnv = createMockEnv()
 
-      const warnings = await ReferentialIntegrity.checkDependents(mockEnv, 'user', 'non-existent-id');
+      const warnings = await ReferentialIntegrity.checkDependents(
+        mockEnv,
+        'user',
+        'non-existent-id'
+      )
 
-      expect(Array.isArray(warnings)).toBe(true);
-      expect(warnings).toHaveLength(0);
-    });
-  });
+      expect(Array.isArray(warnings)).toBe(true)
+      expect(warnings).toHaveLength(0)
+    })
+  })
 
   describe('Edge Cases', () => {
     it('should handle empty grade object gracefully', async () => {
-      const { ReferentialIntegrity } = await import('../referential-integrity');
-      const mockEnv = {} as any;
+      const { ReferentialIntegrity } = await import('../referential-integrity')
+      const mockEnv = createMockEnv()
 
-      const result = await ReferentialIntegrity.validateGrade(mockEnv, {} as any);
+      const result = await ReferentialIntegrity.validateGrade(mockEnv, createMockEnv())
 
-      expect(result).toHaveProperty('valid');
-      expect(result).toHaveProperty('error');
-      expect(result.valid).toBe(false);
-    });
+      expect(result).toHaveProperty('valid')
+      expect(result).toHaveProperty('error')
+      expect(result.valid).toBe(false)
+    })
 
     it('should handle empty class object gracefully', async () => {
-      const { ReferentialIntegrity } = await import('../referential-integrity');
-      const mockEnv = {} as any;
+      const { ReferentialIntegrity } = await import('../referential-integrity')
+      const mockEnv = createMockEnv()
 
-      const result = await ReferentialIntegrity.validateClass(mockEnv, {} as any);
+      const result = await ReferentialIntegrity.validateClass(mockEnv, createMockEnv())
 
-      expect(result).toHaveProperty('valid');
-      expect(result).toHaveProperty('error');
-      expect(result.valid).toBe(false);
-    });
+      expect(result).toHaveProperty('valid')
+      expect(result).toHaveProperty('error')
+      expect(result.valid).toBe(false)
+    })
 
     it('should handle empty course object gracefully', async () => {
-      const { ReferentialIntegrity } = await import('../referential-integrity');
-      const mockEnv = {} as any;
+      const { ReferentialIntegrity } = await import('../referential-integrity')
+      const mockEnv = createMockEnv()
 
-      const result = await ReferentialIntegrity.validateCourse(mockEnv, {} as any);
+      const result = await ReferentialIntegrity.validateCourse(mockEnv, createMockEnv())
 
-      expect(result).toHaveProperty('valid');
-      expect(result).toHaveProperty('error');
-      expect(result.valid).toBe(false);
-    });
+      expect(result).toHaveProperty('valid')
+      expect(result).toHaveProperty('error')
+      expect(result.valid).toBe(false)
+    })
 
     it('should handle empty student object gracefully', async () => {
-      const { ReferentialIntegrity } = await import('../referential-integrity');
-      const mockEnv = {} as any;
+      const { ReferentialIntegrity } = await import('../referential-integrity')
+      const mockEnv = createMockEnv()
 
-      const result = await ReferentialIntegrity.validateStudent(mockEnv, {} as any);
+      const result = await ReferentialIntegrity.validateStudent(mockEnv, createMockEnv())
 
-      expect(result).toHaveProperty('valid');
-      expect(result).toHaveProperty('error');
-      expect(result.valid).toBe(false);
-    });
+      expect(result).toHaveProperty('valid')
+      expect(result).toHaveProperty('error')
+      expect(result.valid).toBe(false)
+    })
 
     it('should handle empty announcement object gracefully', async () => {
-      const { ReferentialIntegrity } = await import('../referential-integrity');
-      const mockEnv = {} as any;
+      const { ReferentialIntegrity } = await import('../referential-integrity')
+      const mockEnv = createMockEnv()
 
-      const result = await ReferentialIntegrity.validateAnnouncement(mockEnv, {} as any);
+      const result = await ReferentialIntegrity.validateAnnouncement(mockEnv, createMockEnv())
 
-      expect(result).toHaveProperty('valid');
-      expect(result).toHaveProperty('error');
-      expect(result.valid).toBe(false);
-    });
+      expect(result).toHaveProperty('valid')
+      expect(result).toHaveProperty('error')
+      expect(result.valid).toBe(false)
+    })
 
     it('should handle undefined entity gracefully', async () => {
-      const { ReferentialIntegrity } = await import('../referential-integrity');
-      const mockEnv = {} as any;
+      const { ReferentialIntegrity } = await import('../referential-integrity')
+      const mockEnv = createMockEnv()
 
-      const result = await ReferentialIntegrity.validateGrade(mockEnv, undefined as any);
+      const result = await ReferentialIntegrity.validateGrade(mockEnv, undefined)
 
-      expect(result).toHaveProperty('valid');
-      expect(result).toHaveProperty('error');
-      expect(result.valid).toBe(false);
-    });
-  });
+      expect(result).toHaveProperty('valid')
+      expect(result).toHaveProperty('error')
+      expect(result.valid).toBe(false)
+    })
+  })
 
   describe('Testing Documentation', () => {
     it('should document testing improvements', () => {
@@ -574,7 +579,7 @@ Previous State:
 - Only tested module structure and method signatures
 - Basic input validation (missing required fields)
 - No entity relationship validation tested
-- Empty mocks (mockEnv = {} as any)
+- Empty mocks (mockEnv = createMockEnv())
 
 New Tests Added (36 total):
 
@@ -659,10 +664,10 @@ Future Improvements (requires Cloudflare Workers setup):
 6. Test dependent record checking
 
 =============================================================================
-      `);
+      `)
 
-      expect(true).toBe(true);
-    });
+      expect(true).toBe(true)
+    })
 
     it('should document testing limitations', () => {
       console.log(`
@@ -702,9 +707,9 @@ Production Safety:
   - All existing tests pass without regression
 
 =============================================================================
-      `);
+      `)
 
-      expect(true).toBe(true);
-    });
-  });
-});
+      expect(true).toBe(true)
+    })
+  })
+})
