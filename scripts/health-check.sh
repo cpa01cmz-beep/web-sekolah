@@ -66,11 +66,11 @@ show_version() {
 
 for arg in "$@"; do
   case $arg in
-    --help)
+    --help|-h)
       show_help
       exit 0
       ;;
-    --version)
+    --version|-v)
       show_version
       exit 0
       ;;
