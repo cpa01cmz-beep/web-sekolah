@@ -1,13 +1,9 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { StudentDateSortedIndex } from '../StudentDateSortedIndex'
+import { createMockEnv } from '../../__tests__/utils/mocks'
 
 describe('StudentDateSortedIndex', () => {
-  const mockEnv = {
-    GlobalDurableObject: {
-      get: vi.fn(),
-      idFromName: vi.fn((name: string) => ({ name })),
-    },
-  } as any
+  const mockEnv = createMockEnv()
 
   const mockStub = {
     casPut: vi.fn(),
@@ -18,12 +14,12 @@ describe('StudentDateSortedIndex', () => {
 
   beforeEach(() => {
     vi.clearAllMocks()
-    mockEnv.GlobalDurableObject.get.mockReturnValue(mockStub as any)
+    mockEnv.GlobalDurableObject.get.mockReturnValue(mockStub)
   })
 
   describe('constructor', () => {
     it('should create index with correct ID', () => {
-      mockEnv.GlobalDurableObject.idFromName.mockReturnValue({ name: 'test-doid' } as any)
+      mockEnv.GlobalDurableObject.idFromName.mockReturnValue({ name: 'test-doid' })
 
       new StudentDateSortedIndex(mockEnv, 'grade', 'student-123')
 
