@@ -157,3 +157,24 @@ Deliver small, safe, measurable improvements strictly inside the Product-Archite
 
 - TypeScript: ✅ 0 errors
 - Tests: ✅ 3448 passing
+
+### 2026-02-26: Date Utility Functions Centralization
+
+**Issue**: Date timestamp generation was scattered throughout the codebase with 137+ occurrences of `new Date().toISOString()` and `Date.now()` patterns in both worker and src directories.
+
+**Solution**:
+
+1. Added centralized date utility functions in `shared/constants.ts`:
+   - `getCurrentTimestamp(): string` - returns current time as ISO string
+   - `getCurrentTimestampMs(): number` - returns current time in milliseconds
+   - `addMilliseconds(timestamp: number, ms: number): string` - adds milliseconds to timestamp
+
+**Files Changed**:
+
+- `shared/constants.ts` - Added date utility functions
+
+**Verification**:
+
+- TypeScript: ✅ 0 errors
+- Lint: ✅ 0 errors
+- Tests: ✅ 3469 passing
