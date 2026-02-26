@@ -1,21 +1,21 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { createStudentService } from '../studentService';
-import { MockRepository } from '@/test/utils/mocks';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest'
+import { createStudentService } from '../studentService'
+import { MockRepository, createMockApiError } from '@/test/utils/mocks'
 
 describe('StudentService', () => {
-  let mockRepository: MockRepository;
+  let mockRepository: MockRepository
 
   beforeEach(() => {
-    mockRepository = new MockRepository();
-  });
+    mockRepository = new MockRepository()
+  })
 
   afterEach(() => {
-    mockRepository.reset();
-  });
+    mockRepository.reset()
+  })
 
   describe('getDashboard', () => {
     it('should fetch student dashboard data', async () => {
-      const studentId = 'student-01';
+      const studentId = 'student-01'
       const mockData = {
         schedule: [
           {
@@ -46,32 +46,30 @@ describe('StudentService', () => {
             authorName: 'Ibu Siti',
           },
         ],
-      };
+      }
 
-      mockRepository.setMockData(`/api/students/${studentId}/dashboard`, mockData);
-      const studentService = createStudentService(mockRepository);
+      mockRepository.setMockData(`/api/students/${studentId}/dashboard`, mockData)
+      const studentService = createStudentService(mockRepository)
 
-      const result = await studentService.getDashboard(studentId);
+      const result = await studentService.getDashboard(studentId)
 
-      expect(result).toEqual(mockData);
-    });
+      expect(result).toEqual(mockData)
+    })
 
     it('should handle errors when fetching dashboard', async () => {
-      const studentId = 'student-01';
-      const mockError = new Error('Student not found');
-      mockError.name = 'ApiError';
-      (mockError as any).status = 404;
+      const studentId = 'student-01'
+      const mockError = createMockApiError('Student not found', 404)
 
-      mockRepository.setMockError(`/api/students/${studentId}/dashboard`, mockError);
-      const studentService = createStudentService(mockRepository);
+      mockRepository.setMockError(`/api/students/${studentId}/dashboard`, mockError)
+      const studentService = createStudentService(mockRepository)
 
-      await expect(studentService.getDashboard(studentId)).rejects.toThrow('Student not found');
-    });
-  });
+      await expect(studentService.getDashboard(studentId)).rejects.toThrow('Student not found')
+    })
+  })
 
   describe('getGrades', () => {
     it('should fetch student grades', async () => {
-      const studentId = 'student-01';
+      const studentId = 'student-01'
       const mockData = [
         {
           id: 'grade-01',
@@ -87,45 +85,43 @@ describe('StudentService', () => {
           score: 88,
           feedback: 'Good effort',
         },
-      ];
+      ]
 
-      mockRepository.setMockData(`/api/students/${studentId}/grades`, mockData);
-      const studentService = createStudentService(mockRepository);
+      mockRepository.setMockData(`/api/students/${studentId}/grades`, mockData)
+      const studentService = createStudentService(mockRepository)
 
-      const result = await studentService.getGrades(studentId);
+      const result = await studentService.getGrades(studentId)
 
-      expect(result).toEqual(mockData);
-      expect(result).toHaveLength(2);
-    });
+      expect(result).toEqual(mockData)
+      expect(result).toHaveLength(2)
+    })
 
     it('should return empty array for student with no grades', async () => {
-      const studentId = 'student-01';
-      const mockData: any[] = [];
+      const studentId = 'student-01'
+      const mockData: any[] = []
 
-      mockRepository.setMockData(`/api/students/${studentId}/grades`, mockData);
-      const studentService = createStudentService(mockRepository);
+      mockRepository.setMockData(`/api/students/${studentId}/grades`, mockData)
+      const studentService = createStudentService(mockRepository)
 
-      const result = await studentService.getGrades(studentId);
+      const result = await studentService.getGrades(studentId)
 
-      expect(result).toEqual([]);
-    });
+      expect(result).toEqual([])
+    })
 
     it('should handle errors when fetching grades', async () => {
-      const studentId = 'student-01';
-      const mockError = new Error('Failed to fetch grades');
-      mockError.name = 'ApiError';
-      (mockError as any).status = 500;
+      const studentId = 'student-01'
+      const mockError = createMockApiError('Failed to fetch grades', 500)
 
-      mockRepository.setMockError(`/api/students/${studentId}/grades`, mockError);
-      const studentService = createStudentService(mockRepository);
+      mockRepository.setMockError(`/api/students/${studentId}/grades`, mockError)
+      const studentService = createStudentService(mockRepository)
 
-      await expect(studentService.getGrades(studentId)).rejects.toThrow('Failed to fetch grades');
-    });
-  });
+      await expect(studentService.getGrades(studentId)).rejects.toThrow('Failed to fetch grades')
+    })
+  })
 
   describe('getSchedule', () => {
     it('should fetch student schedule', async () => {
-      const studentId = 'student-01';
+      const studentId = 'student-01'
       const mockData = [
         {
           day: 'Senin',
@@ -137,33 +133,33 @@ describe('StudentService', () => {
           time: '09:15 - 10:45',
           courseId: 'eng-01',
         },
-      ];
+      ]
 
-      mockRepository.setMockData(`/api/students/${studentId}/schedule`, mockData);
-      const studentService = createStudentService(mockRepository);
+      mockRepository.setMockData(`/api/students/${studentId}/schedule`, mockData)
+      const studentService = createStudentService(mockRepository)
 
-      const result = await studentService.getSchedule(studentId);
+      const result = await studentService.getSchedule(studentId)
 
-      expect(result).toEqual(mockData);
-      expect(result).toHaveLength(2);
-    });
+      expect(result).toEqual(mockData)
+      expect(result).toHaveLength(2)
+    })
 
     it('should handle empty schedule', async () => {
-      const studentId = 'student-01';
-      const mockData: any[] = [];
+      const studentId = 'student-01'
+      const mockData: any[] = []
 
-      mockRepository.setMockData(`/api/students/${studentId}/schedule`, mockData);
-      const studentService = createStudentService(mockRepository);
+      mockRepository.setMockData(`/api/students/${studentId}/schedule`, mockData)
+      const studentService = createStudentService(mockRepository)
 
-      const result = await studentService.getSchedule(studentId);
+      const result = await studentService.getSchedule(studentId)
 
-      expect(result).toEqual([]);
-    });
-  });
+      expect(result).toEqual([])
+    })
+  })
 
   describe('getCard', () => {
     it('should fetch student card data', async () => {
-      const studentId = 'student-01';
+      const studentId = 'student-01'
       const mockData = {
         id: 'student-01',
         name: 'Budi Hartono',
@@ -172,27 +168,25 @@ describe('StudentService', () => {
         className: '11-A',
         photoUrl: 'https://example.com/photo.jpg',
         validUntil: '2026-12-31',
-      };
+      }
 
-      mockRepository.setMockData(`/api/students/${studentId}/card`, mockData);
-      const studentService = createStudentService(mockRepository);
+      mockRepository.setMockData(`/api/students/${studentId}/card`, mockData)
+      const studentService = createStudentService(mockRepository)
 
-      const result = await studentService.getCard(studentId);
+      const result = await studentService.getCard(studentId)
 
-      expect(result).toEqual(mockData);
-      expect(result.name).toBe('Budi Hartono');
-    });
+      expect(result).toEqual(mockData)
+      expect(result.name).toBe('Budi Hartono')
+    })
 
     it('should handle errors when fetching card data', async () => {
-      const studentId = 'student-01';
-      const mockError = new Error('Card data not found');
-      mockError.name = 'ApiError';
-      (mockError as any).status = 404;
+      const studentId = 'student-01'
+      const mockError = createMockApiError('Card data not found', 404)
 
-      mockRepository.setMockError(`/api/students/${studentId}/card`, mockError);
-      const studentService = createStudentService(mockRepository);
+      mockRepository.setMockError(`/api/students/${studentId}/card`, mockError)
+      const studentService = createStudentService(mockRepository)
 
-      await expect(studentService.getCard(studentId)).rejects.toThrow('Card data not found');
-    });
-  });
-});
+      await expect(studentService.getCard(studentId)).rejects.toThrow('Card data not found')
+    })
+  })
+})

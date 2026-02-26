@@ -1,17 +1,17 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { createPublicService } from '../publicService';
-import { MockRepository } from '@/test/utils/mocks';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest'
+import { createPublicService } from '../publicService'
+import { MockRepository, createMockApiError } from '@/test/utils/mocks'
 
 describe('PublicService', () => {
-  let mockRepository: MockRepository;
+  let mockRepository: MockRepository
 
   beforeEach(() => {
-    mockRepository = new MockRepository();
-  });
+    mockRepository = new MockRepository()
+  })
 
   afterEach(() => {
-    mockRepository.reset();
-  });
+    mockRepository.reset()
+  })
 
   describe('getSchoolProfile', () => {
     it('should fetch school profile', async () => {
@@ -24,28 +24,26 @@ describe('PublicService', () => {
         phone: '+62-123-4567',
         email: 'info@school.com',
         principalName: 'Dr. Smith',
-      };
+      }
 
-      mockRepository.setMockData('/api/public/profile', mockData);
-      const publicService = createPublicService(mockRepository);
+      mockRepository.setMockData('/api/public/profile', mockData)
+      const publicService = createPublicService(mockRepository)
 
-      const result = await publicService.getSchoolProfile();
+      const result = await publicService.getSchoolProfile()
 
-      expect(result).toEqual(mockData);
-      expect(result.name).toBe('SMA Harapan Bangsa');
-    });
+      expect(result).toEqual(mockData)
+      expect(result.name).toBe('SMA Harapan Bangsa')
+    })
 
     it('should handle errors when fetching school profile', async () => {
-      const mockError = new Error('Failed to fetch profile');
-      mockError.name = 'ApiError';
-      (mockError as any).status = 500;
+      const mockError = createMockApiError('Failed to fetch profile', 500)
 
-      mockRepository.setMockError('/api/public/profile', mockError);
-      const publicService = createPublicService(mockRepository);
+      mockRepository.setMockError('/api/public/profile', mockError)
+      const publicService = createPublicService(mockRepository)
 
-      await expect(publicService.getSchoolProfile()).rejects.toThrow('Failed to fetch profile');
-    });
-  });
+      await expect(publicService.getSchoolProfile()).rejects.toThrow('Failed to fetch profile')
+    })
+  })
 
   describe('getServices', () => {
     it('should fetch school services', async () => {
@@ -62,28 +60,28 @@ describe('PublicService', () => {
           description: 'Various sports facilities',
           icon: 'trophy',
         },
-      ];
+      ]
 
-      mockRepository.setMockData('/api/public/services', mockData);
-      const publicService = createPublicService(mockRepository);
+      mockRepository.setMockData('/api/public/services', mockData)
+      const publicService = createPublicService(mockRepository)
 
-      const result = await publicService.getServices();
+      const result = await publicService.getServices()
 
-      expect(result).toEqual(mockData);
-      expect(result).toHaveLength(2);
-    });
+      expect(result).toEqual(mockData)
+      expect(result).toHaveLength(2)
+    })
 
     it('should handle empty services list', async () => {
-      const mockData: any[] = [];
+      const mockData: any[] = []
 
-      mockRepository.setMockData('/api/public/services', mockData);
-      const publicService = createPublicService(mockRepository);
+      mockRepository.setMockData('/api/public/services', mockData)
+      const publicService = createPublicService(mockRepository)
 
-      const result = await publicService.getServices();
+      const result = await publicService.getServices()
 
-      expect(result).toEqual([]);
-    });
-  });
+      expect(result).toEqual([])
+    })
+  })
 
   describe('getAchievements', () => {
     it('should fetch school achievements', async () => {
@@ -96,32 +94,32 @@ describe('PublicService', () => {
           category: 'Academic',
           image: 'https://example.com/award.jpg',
         },
-      ];
+      ]
 
-      mockRepository.setMockData('/api/public/achievements', mockData);
-      const publicService = createPublicService(mockRepository);
+      mockRepository.setMockData('/api/public/achievements', mockData)
+      const publicService = createPublicService(mockRepository)
 
-      const result = await publicService.getAchievements();
+      const result = await publicService.getAchievements()
 
-      expect(result).toEqual(mockData);
-      expect(result[0].title).toBe('National Olympiad Winner');
-    });
+      expect(result).toEqual(mockData)
+      expect(result[0].title).toBe('National Olympiad Winner')
+    })
 
     it('should handle empty achievements', async () => {
-      const mockData: any[] = [];
+      const mockData: any[] = []
 
-      mockRepository.setMockData('/api/public/achievements', mockData);
-      const publicService = createPublicService(mockRepository);
+      mockRepository.setMockData('/api/public/achievements', mockData)
+      const publicService = createPublicService(mockRepository)
 
-      const result = await publicService.getAchievements();
+      const result = await publicService.getAchievements()
 
-      expect(result).toEqual([]);
-    });
-  });
+      expect(result).toEqual([])
+    })
+  })
 
   describe('getNews', () => {
     it('should fetch news with limit', async () => {
-      const limit = 5;
+      const limit = 5
       const mockData = [
         {
           id: 'news-01',
@@ -131,31 +129,31 @@ describe('PublicService', () => {
           author: 'Admin',
           category: 'Events',
         },
-      ];
+      ]
 
-      mockRepository.setMockData('/api/public/news?limit=5', mockData);
-      const publicService = createPublicService(mockRepository);
+      mockRepository.setMockData('/api/public/news?limit=5', mockData)
+      const publicService = createPublicService(mockRepository)
 
-      const result = await publicService.getNews(limit);
+      const result = await publicService.getNews(limit)
 
-      expect(result).toEqual(mockData);
-    });
+      expect(result).toEqual(mockData)
+    })
 
     it('should fetch news without limit', async () => {
-      const mockData: any[] = [];
+      const mockData: any[] = []
 
-      mockRepository.setMockData('/api/public/news', mockData);
-      const publicService = createPublicService(mockRepository);
+      mockRepository.setMockData('/api/public/news', mockData)
+      const publicService = createPublicService(mockRepository)
 
-      const result = await publicService.getNews();
+      const result = await publicService.getNews()
 
-      expect(result).toEqual([]);
-    });
-  });
+      expect(result).toEqual([])
+    })
+  })
 
   describe('getNewsDetails', () => {
     it('should fetch news details by ID', async () => {
-      const newsId = 'news-01';
+      const newsId = 'news-01'
       const mockData = {
         id: 'news-01',
         title: 'School Wins Award',
@@ -164,29 +162,27 @@ describe('PublicService', () => {
         author: 'Admin',
         category: 'Events',
         image: 'https://example.com/news.jpg',
-      };
+      }
 
-      mockRepository.setMockData(`/api/public/news/${newsId}`, mockData);
-      const publicService = createPublicService(mockRepository);
+      mockRepository.setMockData(`/api/public/news/${newsId}`, mockData)
+      const publicService = createPublicService(mockRepository)
 
-      const result = await publicService.getNewsDetails(newsId);
+      const result = await publicService.getNewsDetails(newsId)
 
-      expect(result).toEqual(mockData);
-      expect(result.title).toBe('School Wins Award');
-    });
+      expect(result).toEqual(mockData)
+      expect(result.title).toBe('School Wins Award')
+    })
 
     it('should handle non-existent news', async () => {
-      const newsId = 'non-existent';
-      const mockError = new Error('News not found');
-      mockError.name = 'ApiError';
-      (mockError as any).status = 404;
+      const newsId = 'non-existent'
+      const mockError = createMockApiError('News not found', 404)
 
-      mockRepository.setMockError(`/api/public/news/${newsId}`, mockError);
-      const publicService = createPublicService(mockRepository);
+      mockRepository.setMockError(`/api/public/news/${newsId}`, mockError)
+      const publicService = createPublicService(mockRepository)
 
-      await expect(publicService.getNewsDetails(newsId)).rejects.toThrow('News not found');
-    });
-  });
+      await expect(publicService.getNewsDetails(newsId)).rejects.toThrow('News not found')
+    })
+  })
 
   describe('getGallery', () => {
     it('should fetch gallery items', async () => {
@@ -199,27 +195,27 @@ describe('PublicService', () => {
           date: '2025-01-07',
           category: 'Events',
         },
-      ];
+      ]
 
-      mockRepository.setMockData('/api/public/gallery', mockData);
-      const publicService = createPublicService(mockRepository);
+      mockRepository.setMockData('/api/public/gallery', mockData)
+      const publicService = createPublicService(mockRepository)
 
-      const result = await publicService.getGallery();
+      const result = await publicService.getGallery()
 
-      expect(result).toEqual(mockData);
-    });
+      expect(result).toEqual(mockData)
+    })
 
     it('should handle empty gallery', async () => {
-      const mockData: any[] = [];
+      const mockData: any[] = []
 
-      mockRepository.setMockData('/api/public/gallery', mockData);
-      const publicService = createPublicService(mockRepository);
+      mockRepository.setMockData('/api/public/gallery', mockData)
+      const publicService = createPublicService(mockRepository)
 
-      const result = await publicService.getGallery();
+      const result = await publicService.getGallery()
 
-      expect(result).toEqual([]);
-    });
-  });
+      expect(result).toEqual([])
+    })
+  })
 
   describe('getWorks', () => {
     it('should fetch works/activities', async () => {
@@ -232,27 +228,27 @@ describe('PublicService', () => {
           date: '2025-01-07',
           author: 'Student Team',
         },
-      ];
+      ]
 
-      mockRepository.setMockData('/api/public/work', mockData);
-      const publicService = createPublicService(mockRepository);
+      mockRepository.setMockData('/api/public/work', mockData)
+      const publicService = createPublicService(mockRepository)
 
-      const result = await publicService.getWorks();
+      const result = await publicService.getWorks()
 
-      expect(result).toEqual(mockData);
-    });
+      expect(result).toEqual(mockData)
+    })
 
     it('should handle empty works list', async () => {
-      const mockData: any[] = [];
+      const mockData: any[] = []
 
-      mockRepository.setMockData('/api/public/work', mockData);
-      const publicService = createPublicService(mockRepository);
+      mockRepository.setMockData('/api/public/work', mockData)
+      const publicService = createPublicService(mockRepository)
 
-      const result = await publicService.getWorks();
+      const result = await publicService.getWorks()
 
-      expect(result).toEqual([]);
-    });
-  });
+      expect(result).toEqual([])
+    })
+  })
 
   describe('getLinks', () => {
     it('should fetch useful links', async () => {
@@ -264,28 +260,28 @@ describe('PublicService', () => {
           description: 'Main school website',
           category: 'Resources',
         },
-      ];
+      ]
 
-      mockRepository.setMockData('/api/public/links', mockData);
-      const publicService = createPublicService(mockRepository);
+      mockRepository.setMockData('/api/public/links', mockData)
+      const publicService = createPublicService(mockRepository)
 
-      const result = await publicService.getLinks();
+      const result = await publicService.getLinks()
 
-      expect(result).toEqual(mockData);
-      expect(result[0].url).toBe('https://school.example.com');
-    });
+      expect(result).toEqual(mockData)
+      expect(result[0].url).toBe('https://school.example.com')
+    })
 
     it('should handle empty links list', async () => {
-      const mockData: any[] = [];
+      const mockData: any[] = []
 
-      mockRepository.setMockData('/api/public/links', mockData);
-      const publicService = createPublicService(mockRepository);
+      mockRepository.setMockData('/api/public/links', mockData)
+      const publicService = createPublicService(mockRepository)
 
-      const result = await publicService.getLinks();
+      const result = await publicService.getLinks()
 
-      expect(result).toEqual([]);
-    });
-  });
+      expect(result).toEqual([])
+    })
+  })
 
   describe('getDownloads', () => {
     it('should fetch downloadable files', async () => {
@@ -299,26 +295,26 @@ describe('PublicService', () => {
           fileType: 'PDF',
           date: '2025-01-01',
         },
-      ];
+      ]
 
-      mockRepository.setMockData('/api/public/downloads', mockData);
-      const publicService = createPublicService(mockRepository);
+      mockRepository.setMockData('/api/public/downloads', mockData)
+      const publicService = createPublicService(mockRepository)
 
-      const result = await publicService.getDownloads();
+      const result = await publicService.getDownloads()
 
-      expect(result).toEqual(mockData);
-      expect(result[0].title).toBe('School Calendar 2025');
-    });
+      expect(result).toEqual(mockData)
+      expect(result[0].title).toBe('School Calendar 2025')
+    })
 
     it('should handle empty downloads list', async () => {
-      const mockData: any[] = [];
+      const mockData: any[] = []
 
-      mockRepository.setMockData('/api/public/downloads', mockData);
-      const publicService = createPublicService(mockRepository);
+      mockRepository.setMockData('/api/public/downloads', mockData)
+      const publicService = createPublicService(mockRepository)
 
-      const result = await publicService.getDownloads();
+      const result = await publicService.getDownloads()
 
-      expect(result).toEqual([]);
-    });
-  });
-});
+      expect(result).toEqual([])
+    })
+  })
+})
