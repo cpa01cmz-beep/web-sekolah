@@ -64,6 +64,13 @@ This document serves as the long-term memory for the security-engineer agent, tr
 
 ### 2026-02-26
 
+- **Enforced minimum password length on login endpoint**
+  - Changed login password validation from `min(1)` to `min(6)` using `ValidationLimits.PASSWORD_MIN_LENGTH`
+  - Aligns backend validation with frontend requirements
+  - Matches user creation password requirements (8+ chars minimum)
+  - Prevents weak password authentication attempts at API level
+  - Small, atomic change with no breaking impact
+
 - **Added X-DNS-Prefetch-Control header**
   - Added `X-DNS-Prefetch-Control: off` to security-headers.ts
   - Prevents browsers from pre-resolving DNS for linked domains

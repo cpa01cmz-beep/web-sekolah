@@ -82,7 +82,12 @@ export const updateAnnouncementSchema = createAnnouncementSchema.partial().omit(
 
 export const loginSchema = z.object({
   email: z.string().email('Invalid email address'),
-  password: z.string().min(1, 'Password is required'),
+  password: z
+    .string()
+    .min(
+      ValidationLimits.PASSWORD_MIN_LENGTH,
+      `Password must be at least ${ValidationLimits.PASSWORD_MIN_LENGTH} characters`
+    ),
   role: z.enum(['student', 'teacher', 'parent', 'admin'], {
     message: 'Invalid role. Must be student, teacher, parent, or admin',
   }),

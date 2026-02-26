@@ -599,7 +599,7 @@ describe('Validation Schemas', () => {
       const result = loginSchema.safeParse(data)
       expect(result.success).toBe(false)
       if (!result.success) {
-        expect(result.error.issues[0].message).toContain('Password is required')
+        expect(result.error.issues[0].message).toContain('Password must be at least')
       }
     })
 
