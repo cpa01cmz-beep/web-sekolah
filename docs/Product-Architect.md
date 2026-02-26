@@ -117,3 +117,21 @@ Deliver small, safe, measurable improvements strictly inside the Product-Archite
 - Review large page components for potential refactoring
 - Extract router configuration to dedicated module (already organized, verify)
 - Review and centralize any remaining duplicated constants
+
+### 2026-02-26: Notification Utilities Export
+
+**Issue**: Notification utility functions in `src/utils/notifications.ts` were not exported from the main utils index, making them less discoverable and harder to use across the codebase.
+
+**Solution**:
+
+1. Added export for `notifications.ts` module in `src/utils/index.ts`
+
+**Files Changed**:
+
+- `src/utils/index.ts` - Added export for notifications module
+
+**Verification**:
+
+- TypeScript: ✅ 0 errors
+- Lint: ✅ 0 errors
+- Tests: ✅ 3439 passing
