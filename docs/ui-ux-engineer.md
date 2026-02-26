@@ -14,6 +14,13 @@ Reviewed and commented on PR #1253 which was attempting to fix duplicate fields 
 - The email field removal in PR #1253 was incorrect (email is still needed)
 - PR #1253 should be closed as obsolete
 
+### LoginPage Focus-visible Styles (2026-02-26)
+
+Added focus-visible styles to the "Back to Home" link in LoginPage for keyboard accessibility:
+
+- Added `focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded px-1 -mx-1` to the anchor tag
+- Ensures keyboard users can see focus indicator when navigating to home page
+
 ### Focus-visible Styles for Keyboard Accessibility (2026-02-26)
 
 Added focus-visible styles to improve keyboard navigation accessibility:

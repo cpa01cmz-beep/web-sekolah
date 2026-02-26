@@ -137,7 +137,7 @@ export function LoginPage() {
                 />
                 <Link
                   to="/"
-                  className="text-sm text-primary hover:underline mt-4 flex items-center gap-1"
+                  className="text-sm text-primary hover:underline mt-4 flex items-center gap-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded px-1 -mx-1"
                 >
                   Back to Home <ArrowRight className="h-4 w-4" aria-hidden="true" />
                 </Link>
