@@ -81,6 +81,57 @@ export function publicRoutes(app: Hono<{ Bindings: Env }>) {
   )
 
   app.get(
+    '/api/public/sitemap.xml',
+    publicCacheWithEdgeCache(),
+    withErrorHandler('get sitemap')(async (c: Context) => {
+      const siteUrl = c.env.SITE_URL || DEFAULT_SITE_URL
+      const baseUrl = new URL(siteUrl).origin
+
+      const staticPages = [
+        { loc: '/', priority: '1.0', changefreq: 'daily' },
+        { loc: '/about', priority: '0.8', changefreq: 'monthly' },
+        { loc: '/contact', priority: '0.8', changefreq: 'monthly' },
+        { loc: '/services', priority: '0.7', changefreq: 'weekly' },
+        { loc: '/achievements', priority: '0.7', changefreq: 'weekly' },
+        { loc: '/facilities', priority: '0.7', changefreq: 'weekly' },
+        { loc: '/news', priority: '0.9', changefreq: 'daily' },
+        { loc: '/gallery', priority: '0.6', changefreq: 'weekly' },
+        { loc: '/work', priority: '0.6', changefreq: 'weekly' },
+        { loc: '/downloads', priority: '0.5', changefreq: 'monthly' },
+      ]
+
+      const news = await NewsEntity.getRecent(c.env, 50)
+      const newsUrls = news.map(item => ({
+        loc: `/news/${item.id}`,
+        priority: '0.7',
+        changefreq: 'weekly',
+        lastmod: item.updatedAt || item.createdAt,
+      }))
+
+      const allUrls = [...staticPages, ...newsUrls]
+      const today = new Date().toISOString().split('T')[0]
+
+      const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${allUrls
+  .map(
+    page => `  <url>
+    <loc>${baseUrl}${page.loc}</loc>
+    <changefreq>${page.changefreq}</changefreq>
+    <priority>${page.priority}</priority>
+    ${page.lastmod ? `    <lastmod>${page.lastmod}</lastmod>` : ''}
+  </url>`
+  )
+  .join('\n')}
+</urlset>`
+
+      c.header('Content-Type', 'application/xml; charset=utf-8')
+      c.header('Cache-Control', 'public, max-age=86400')
+      return c.text(sitemap)
+    })
+  )
+
+  app.get(
     '/api/public/profile',
     publicCacheWithEdgeCache(),
     withErrorHandler('get school profile')(async (c: Context) => {
