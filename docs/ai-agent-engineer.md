@@ -65,3 +65,9 @@ Key automation scripts in `/scripts/`:
 - validate script runs typecheck, lint, and test:run in sequence
 - All 3448 tests should pass for PR to be merged
 - Both wrangler.toml and wrangler.jsonc may exist (toml is primary)
+
+### Implementation Notes
+
+- When adding CLI flags to scripts, always support both long (--help) and short (-h) forms for consistency
+- pre-deploy-check.sh serves as the reference implementation for flag handling
+- Run `npm run validate` before creating PR (typecheck + lint + test:run)
