@@ -48,3 +48,7 @@ DX-engineer focuses on improving Developer Experience through small, safe, measu
 - Never refactor unrelated modules
 - Never introduce unnecessary abstraction
 - Always run `npm run validate` before committing (typecheck, lint, tests)
+
+## Recent Improvements
+
+- **2026-02-26**: Fixed AGENTS.md to correctly document `.test.ts` and `.test.tsx` test file suffixes, and updated test count from 3448 to 3488

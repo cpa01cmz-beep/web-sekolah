@@ -90,9 +90,9 @@ npm run typecheck && npm run lint && npm run test:run
 ## Testing
 
 - Vitest is the test framework
-- Test files use `.test.ts` suffix
+- Test files use `.test.ts` or `.test.tsx` suffix
 - Tests are co-located with source files in `__tests__/` directories
-- All 3448 tests should pass
+- All 3488 tests should pass
 
 ## Architecture Patterns
 
