@@ -213,3 +213,36 @@ Additionally, GradeThresholds in `shared/constants.ts` defines E: 50, but grades
 - Lint: ✅ 0 errors
 - Tests: ✅ 3491 passing
 - Build: ✅ Success
+
+### 2026-02-26: GRADE_COLORS Consistency Fix
+
+**Issue**: GRADE_COLORS in `src/theme/colors.ts` was inconsistent with grade definitions:
+
+- Missing E grade entirely (bug)
+- D grade had incorrect color (red #ef4444 instead of orange #f97316)
+
+While `src/utils/grades.ts` correctly defined all 6 grades (A-F) with proper Tailwind color classes, GRADE_COLORS was out of sync.
+
+**Solution**:
+
+1. Added missing E grade color (#ef4444 - red) to GRADE_COLORS
+2. Fixed D grade color from red (#ef4444) to orange (#f97316) to match grades.ts
+
+Updated mapping:
+
+- A: #22c55e (green) ✓
+- B: #3b82f6 (blue) ✓
+- C: #f59e0b (yellow) ✓
+- D: #f97316 (orange) - FIXED
+- E: #ef4444 (red) - ADDED
+- F: #dc2626 (dark red) ✓
+
+**Files Changed**:
+
+- `src/theme/colors.ts` - Fixed GRADE_COLORS to include E and correct D color
+
+**Verification**:
+
+- TypeScript: ✅ 0 errors
+- Lint: ✅ 0 errors
+- Tests: ✅ 3527 passing
