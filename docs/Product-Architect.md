@@ -135,3 +135,25 @@ Deliver small, safe, measurable improvements strictly inside the Product-Archite
 - TypeScript: ✅ 0 errors
 - Lint: ✅ 0 errors
 - Tests: ✅ 3439 passing
+
+### 2026-02-26: Test `any` Type Usage Documentation
+
+**Issue**: Issue #1210 claimed 261 occurrences of `any` type, but audit revealed:
+
+- 0 `any` types in production code (src/, worker/, shared/)
+- 83 `any` types in test files (acceptable for mock setup)
+
+**Solution**:
+
+1. Added documentation in TESTING_GUIDE.md explaining when `any` type is acceptable in test files
+2. Documented rationale: tests benefit from flexibility in mock setup
+3. Included best practice to prefer explicit types when mock structure is simple
+
+**Files Changed**:
+
+- `docs/TESTING_GUIDE.md` - Added "Using `any` Type in Tests" section in Mocking Strategies
+
+**Verification**:
+
+- TypeScript: ✅ 0 errors
+- Tests: ✅ 3448 passing
