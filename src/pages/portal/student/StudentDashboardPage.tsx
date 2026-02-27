@@ -16,46 +16,7 @@ import { LineChart } from '@/components/charts/LineChart'
 import { RadarChart } from '@/components/charts/RadarChart'
 import { CHART_COLORS } from '@/theme/colors'
 import { useMemo } from 'react'
-
-function calculateAverageScore(grades: { score: number }[]): number {
-  if (grades.length === 0) return 0
-  const sum = grades.reduce((acc, g) => acc + g.score, 0)
-  return Math.round((sum / grades.length) * 10) / 10
-}
-
-function getUniqueSubjects(grades: { courseName: string }[]): string[] {
-  return [...new Set(grades.map(g => g.courseName))]
-}
-
-function generatePerformanceTrend(grades: { courseName: string; score: number }[]) {
-  const subjects = getUniqueSubjects(grades)
-  if (subjects.length === 0) return []
-
-  const sortedGrades = [...grades].sort((a, b) => a.courseName.localeCompare(b.courseName))
-
-  return sortedGrades.map((grade, index) => ({
-    name: grade.courseName.substring(0, 8),
-    score: grade.score,
-  }))
-}
-
-function generateSubjectComparison(grades: { courseName: string; score: number }[]) {
-  const subjects = getUniqueSubjects(grades)
-  if (subjects.length === 0) return []
-
-  const subjectAverages: Record<string, number[]> = {}
-  grades.forEach(g => {
-    if (!subjectAverages[g.courseName]) {
-      subjectAverages[g.courseName] = []
-    }
-    subjectAverages[g.courseName].push(g.score)
-  })
-
-  return Object.entries(subjectAverages).map(([name, scores]) => ({
-    name,
-    average: Math.round(scores.reduce((a, b) => a + b, 0) / scores.length),
-  }))
-}
+import { calculateAverage, aggregateByField, generateTrendDataPoints } from '@/utils/analytics'
 
 export function StudentDashboardPage() {
   const prefersReducedMotion = useReducedMotion()
@@ -65,10 +26,23 @@ export function StudentDashboardPage() {
   const analyticsData = useMemo(() => {
     if (!data) return null
     const grades = data.recentGrades
-    const avgScore = calculateAverageScore(grades)
-    const uniqueSubjects = getUniqueSubjects(grades)
-    const performanceTrend = generatePerformanceTrend(grades)
-    const subjectComparison = generateSubjectComparison(grades)
+    const scores = grades.map(g => g.score)
+    const avgScore = grades.length > 0 ? Math.round(calculateAverage(scores) * 10) / 10 : 0
+    const uniqueSubjects = [...new Set(grades.map(g => g.courseName))]
+    const performanceTrend =
+      grades.length > 0
+        ? generateTrendDataPoints(
+            scores,
+            grades.map(g => g.courseName.substring(0, 8))
+          )
+        : []
+    const subjectComparison =
+      grades.length > 0
+        ? aggregateByField(grades, 'courseName', 'score', 'avg').map(item => ({
+            name: item.name,
+            average: item.value,
+          }))
+        : []
     return {
       avgScore,
       totalSubjects: uniqueSubjects.length,
