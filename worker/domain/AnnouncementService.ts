@@ -3,6 +3,7 @@ import { AnnouncementEntity } from '../entities'
 import type { Announcement, CreateAnnouncementData } from '@shared/types'
 import { ReferentialIntegrity } from '../referential-integrity'
 import { NotFoundError, ValidationError } from '../errors'
+import { sanitizeHtml } from '../middleware/sanitize'
 
 export class AnnouncementService {
   static async createAnnouncement(
@@ -17,8 +18,8 @@ export class AnnouncementService {
     const now = new Date().toISOString()
     const newAnnouncement: Announcement = {
       id: crypto.randomUUID(),
-      title: announcementData.title,
-      content: announcementData.content,
+      title: sanitizeHtml(announcementData.title),
+      content: sanitizeHtml(announcementData.content),
       date: now,
       targetRole: announcementData.targetRole || 'all',
       authorId,
@@ -51,7 +52,8 @@ export class AnnouncementService {
     }
 
     const updateData: Partial<Announcement> = {
-      ...updates,
+      ...(updates.title && { title: sanitizeHtml(updates.title) }),
+      ...(updates.content && { content: sanitizeHtml(updates.content) }),
       updatedAt: new Date().toISOString(),
     }
 

@@ -27,6 +27,15 @@ This document serves as the long-term memory for the security-engineer agent, tr
 
 ## Completed Improvements
 
+### 2026-02-27
+
+- **Added input sanitization for user-generated content**
+  - Applied `sanitizeHtml()` to announcement title and content in AnnouncementService.ts
+  - Applied `sanitizeHtml()` to message subject and content in parent-routes.ts and teacher-routes.ts
+  - Prevents stored XSS attacks by sanitizing user input before storing in database
+  - Uses existing sanitizeHtml function that removes script tags and event handlers
+  - Small, atomic change with no breaking impact
+
 ### 2026-02-29
 
 - **Added CSP report-to directive for modern browser Reporting API support**
