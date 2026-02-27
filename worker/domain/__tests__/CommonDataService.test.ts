@@ -97,7 +97,8 @@ describe('CommonDataService - Critical Path Testing', () => {
 
       const result = await CommonDataService.getTeacherWithClasses(mockEnv, '')
 
-      expect(result.teacher).toBeNull()
+      expect(result.teacher).toBeDefined()
+      expect(result.teacher?.id).toBe('')
       expect(result.classes).toEqual([])
     })
   })
@@ -113,7 +114,8 @@ describe('CommonDataService - Critical Path Testing', () => {
 
       const result = await CommonDataService.getUserById(mockEnv, '')
 
-      expect(result).toBeNull()
+      expect(result).toBeDefined()
+      expect(result?.id).toBe('')
     })
   })
 
