@@ -10,6 +10,26 @@ This document serves as the long-term memory and domain knowledge for the Growth
 
 ## Implemented Improvements
 
+### 8. Fix robots.txt Sitemap URL (Feb 2026)
+
+**Issue**: The `robots.txt` file referenced the sitemap at `/sitemap.xml` but the actual sitemap is served at `/api/public/sitemap.xml`. This inconsistency could prevent search engines from finding the sitemap.
+
+**Changes**:
+
+- Updated robots.txt sitemap URL from `https://akademia-pro.vercel.app/sitemap.xml` to `https://akademia-pro.vercel.app/api/public/sitemap.xml`
+
+**Impact**:
+
+- Ensures search engines can properly discover the sitemap
+- Fixes SEO configuration inconsistency
+- Improves search engine indexing
+
+**Acceptance Criteria Met**:
+
+- [x] robots.txt points to correct sitemap URL
+- [x] Consistent with index.html sitemap link
+- [x] Validation passes
+
 ### 7. PWA Offline Support (Feb 2026)
 
 **Issue**: The SPA application didn't support offline functionality. Users with intermittent connectivity (common in rural schools with limited internet) lost access to critical features like viewing grades, schedule, and announcements.
