@@ -4,8 +4,8 @@
 
 ### Current Test Coverage
 
-- **Test Files**: 127
-- **Tests**: 3676 passing, 3 skipped, 155 todo
+- **Test Files**: 128
+- **Tests**: 3709 passing, 3 skipped, 155 todo
 - **Pass Rate**: 100%
 
 ### Portal Page Component Tests
@@ -37,6 +37,22 @@ Added tests for MessageEntity covering configuration and type validation:
 | Entity        | Test File               | Tests |
 | ------------- | ----------------------- | ----- |
 | MessageEntity | `MessageEntity.test.ts` | 12    |
+
+### Route Tests
+
+Added integration tests for user management routes:
+
+| Route File                | Test File                        | Tests |
+| ------------------------- | -------------------------------- | ----- |
+| user-management-routes.ts | `user-management-routes.test.ts` | 3     |
+
+Route tests cover:
+
+- Authorization (403 for unauthorized roles)
+- Happy path (200 with data for authorized roles)
+- Service mocking for business logic
+
+**Note**: Route tests require mocking authentication middleware. The test pattern uses `x-role` header to simulate different user roles.
 
 ### Validation Commands
 
