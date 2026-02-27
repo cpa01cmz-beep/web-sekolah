@@ -328,3 +328,38 @@ response.headers.set(
 - All 21 new tests pass
 - Typecheck passes
 - Lint passes
+
+### 2026-02-27: Add WebhookEventEntity Unit Tests
+
+**Issue**: #1318 - Critical WebhookService Test Coverage (1.01%)
+
+**Problem**: WebhookEventEntity had no unit tests, leaving webhook event functionality untested.
+
+**Solution**: Created comprehensive unit tests covering all public static methods:
+
+1. Created `worker/entities/__tests__/WebhookEventEntity.test.ts` with 16 unit tests
+2. Tests cover:
+   - Entity configuration (entityName, indexName, initialState, secondaryIndexes)
+   - `getPending` - retrieve pending webhook events by processed status
+   - `getByEventType` - retrieve events filtered by event type
+   - `countPending` - count total pending events
+   - `existsPending` - check if any pending events exist
+   - `countByEventType` - count events by specific event type
+   - `existsByEventType` - check if events exist for event type
+
+**Benefits**:
+
+- WebhookEventEntity now has proper test coverage
+- All public methods have at least one unit test
+- Edge cases covered (empty results)
+- Follows existing entity test patterns
+
+**Files Changed**:
+
+- `worker/entities/__tests__/WebhookEventEntity.test.ts` - new test file (223 lines)
+
+**Testing**:
+
+- All 3649 tests pass (16 new)
+- Typecheck passes
+- Lint passes
