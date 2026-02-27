@@ -43,7 +43,7 @@ export const PortalLayout = memo(function PortalLayout() {
                     <GraduationCap className="h-7 w-7" style={{ color: THEME_COLORS.PRIMARY }} aria-hidden="true" />
                     <span className="ml-2 text-lg font-bold">Akademia Pro</span>
                   </div>
-                  <nav className="flex-grow p-4 space-y-2" role="navigation" aria-label={`${user.role} portal navigation`}>
+                  <nav className="flex-grow p-4 space-y-2" aria-label={`${user.role} portal navigation`}>
                     <h3 className="sr-only">Navigation Menu</h3>
                     {navLinks.map((link: NavLinkType) => (
                       <NavLink
