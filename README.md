@@ -4,7 +4,7 @@
 
 [![🤖 iFlow CLI Automation](https://img.shields.io/badge/iFlow--CLI-Automation-blue)](https://github.com/iflow-ai/iflow-cli-action)
 
-[![Tests: 3571 passing](https://img.shields.io/badge/Tests-3571%20passing-brightgreen)](https://github.com/cpa01cmz-beep/web-sekolah/actions)
+[![Tests: 3597 passing](https://img.shields.io/badge/Tests-3597%20passing-brightgreen)](https://github.com/cpa01cmz-beep/web-sekolah/actions)
 [![Security: 98/100](https://img.shields.io/badge/Security-98%2F100-success)](./docs/SECURITY_ASSESSMENT_2026-01-22.md)
 [![TypeScript: Strict](https://img.shields.io/badge/TypeScript-Strict-blue)](https://www.typescriptlang.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
