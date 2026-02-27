@@ -271,3 +271,35 @@ Updated mapping:
 - TypeScript: ✅ 0 errors
 - Tests: ✅ 46 rate limiting tests passing
 - PR: #1299
+
+### 2026-02-27: Centralized Analytics Functions
+
+**Issue**: Duplicate analytics utility functions in student pages:
+
+- `StudentDashboardPage.tsx` - Had 4 local functions: `calculateAverageScore`, `getUniqueSubjects`, `generatePerformanceTrend`, `generateSubjectComparison`
+- `StudentGradesPage.tsx` - Had local `calculateGradeDistribution` function that was missing E grade
+
+**Solution**:
+
+1. Updated `StudentDashboardPage.tsx` to import centralized functions from `@/utils/analytics`:
+   - `calculateAverage` - replaces local `calculateAverageScore`
+   - `aggregateByField` - replaces local `generateSubjectComparison`
+   - `generateTrendDataPoints` - replaces local `generatePerformanceTrend`
+   - Uses native Set for `getUniqueSubjects`
+
+2. Updated `StudentGradesPage.tsx` to use centralized functions:
+   - `calculateGradeDistribution` - replaces local function
+   - `gradeDistributionToChartData` - converts to chart format
+   - Fixes bug: now correctly includes E grade in distribution (was A,B,C,D,F only)
+
+**Files Changed**:
+
+- `src/pages/portal/student/StudentDashboardPage.tsx` - Removed 4 local functions, now imports from analytics
+- `src/pages/portal/student/StudentGradesPage.tsx` - Removed local function, now imports from analytics
+
+**Verification**:
+
+- TypeScript: ✅ 0 errors
+- Lint: ✅ 0 errors
+- Tests: ✅ 3633 passing
+- PR: #1341
