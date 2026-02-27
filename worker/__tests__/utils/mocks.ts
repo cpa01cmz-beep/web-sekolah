@@ -1,5 +1,74 @@
 import { vi } from 'vitest'
 import type { Env, GlobalDurableObject, Doc } from '../types'
+import type { Student, Teacher, Parent, Admin, SchoolUser } from '@shared/types'
+
+export const createMockStudent = (overrides?: Partial<Student>): Student => ({
+  id: 'student-1',
+  name: 'Test Student',
+  email: 'student@test.com',
+  role: 'student',
+  avatarUrl: '',
+  classId: 'class-1',
+  studentIdNumber: 'S001',
+  createdAt: new Date().toISOString(),
+  updatedAt: new Date().toISOString(),
+  passwordHash: null,
+  ...overrides,
+})
+
+export const createMockTeacher = (overrides?: Partial<Teacher>): Teacher => ({
+  id: 'teacher-1',
+  name: 'Test Teacher',
+  email: 'teacher@test.com',
+  role: 'teacher',
+  avatarUrl: '',
+  classIds: ['class-1'],
+  createdAt: new Date().toISOString(),
+  updatedAt: new Date().toISOString(),
+  passwordHash: null,
+  ...overrides,
+})
+
+export const createMockParent = (overrides?: Partial<Parent>): Parent => ({
+  id: 'parent-1',
+  name: 'Test Parent',
+  email: 'parent@test.com',
+  role: 'parent',
+  avatarUrl: '',
+  childId: 'student-1',
+  createdAt: new Date().toISOString(),
+  updatedAt: new Date().toISOString(),
+  passwordHash: null,
+  ...overrides,
+})
+
+export const createMockAdmin = (overrides?: Partial<Admin>): Admin => ({
+  id: 'admin-1',
+  name: 'Test Admin',
+  email: 'admin@test.com',
+  role: 'admin',
+  avatarUrl: '',
+  createdAt: new Date().toISOString(),
+  updatedAt: new Date().toISOString(),
+  passwordHash: null,
+  ...overrides,
+})
+
+export const createMockSchoolUser = (
+  role: SchoolUser['role'],
+  overrides?: Partial<SchoolUser>
+): SchoolUser => {
+  switch (role) {
+    case 'student':
+      return createMockStudent(overrides as Partial<Student>)
+    case 'teacher':
+      return createMockTeacher(overrides as Partial<Teacher>)
+    case 'parent':
+      return createMockParent(overrides as Partial<Parent>)
+    case 'admin':
+      return createMockAdmin(overrides as Partial<Admin>)
+  }
+}
 
 export const createMockFetch = (
   response: Response | { ok: boolean; json?: () => Promise<unknown> }
