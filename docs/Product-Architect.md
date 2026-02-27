@@ -303,3 +303,24 @@ Updated mapping:
 - Lint: ✅ 0 errors
 - Tests: ✅ 3633 passing
 - PR: #1341
+
+### 2026-02-27: Remove Unused Grades Constants
+
+**Issue**: Unused `src/constants/grades.ts` file that was not imported anywhere in the codebase (only its own test file). This file just re-exports from `@shared/constants`, making it redundant.
+
+**Solution**:
+
+1. Removed `src/constants/grades.ts` - Grade threshold constants are already available in `@shared/constants`
+2. Removed corresponding test file `src/constants/__tests__/grades.test.ts` - tests for unused code
+
+**Files Changed**:
+
+- `src/constants/grades.ts` - Deleted (not used anywhere)
+- `src/constants/__tests__/grades.test.ts` - Deleted (test for unused file)
+
+**Verification**:
+
+- TypeScript: ✅ 0 errors
+- Lint: ✅ 0 errors
+- Tests: ✅ 3690 passing
+
