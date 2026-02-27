@@ -1,5 +1,5 @@
-import { useMemo, useState, useEffect, useCallback } from 'react';
-import { logger } from '@/lib/logger';
+import { useMemo, useState, useEffect, useCallback } from 'react'
+import { logger } from '@/lib/logger'
 
 export function useChartData<T extends Record<string, unknown>>(
   data: T[] | undefined,
@@ -7,59 +7,87 @@ export function useChartData<T extends Record<string, unknown>>(
   error: Error | null
 ) {
   return useMemo(() => {
-    if (isLoading) return { status: 'loading' as const, data: null };
-    if (error) return { status: 'error' as const, data: null };
-    if (!data || data.length === 0) return { status: 'empty' as const, data: null };
-    return { status: 'ready' as const, data };
-  }, [data, isLoading, error]);
+    if (isLoading) return { status: 'loading' as const, data: null }
+    if (error) return { status: 'error' as const, data: null }
+    if (!data || data.length === 0) return { status: 'empty' as const, data: null }
+    return { status: 'ready' as const, data }
+  }, [data, isLoading, error])
 }
 
-type ChartComponentType = 
-  | 'LineChart' | 'BarChart' | 'PieChart' | 'AreaChart' | 'RadarChart' | 'ScatterChart'
-  | 'Line' | 'Bar' | 'Pie' | 'Area' | 'Radar' | 'Scatter'
-  | 'XAxis' | 'YAxis' | 'ZAxis' | 'CartesianGrid' | 'PolarGrid' | 'PolarAngleAxis' | 'PolarRadiusAxis'
-  | 'Tooltip' | 'Legend' | 'ResponsiveContainer' | 'Cell'
-  | 'ReferenceLine' | 'Brush' | 'ErrorBar';
+type ChartComponentType =
+  | 'LineChart'
+  | 'BarChart'
+  | 'PieChart'
+  | 'AreaChart'
+  | 'RadarChart'
+  | 'ScatterChart'
+  | 'Line'
+  | 'Bar'
+  | 'Pie'
+  | 'Area'
+  | 'Radar'
+  | 'Scatter'
+  | 'XAxis'
+  | 'YAxis'
+  | 'ZAxis'
+  | 'CartesianGrid'
+  | 'PolarGrid'
+  | 'PolarAngleAxis'
+  | 'PolarRadiusAxis'
+  | 'Tooltip'
+  | 'Legend'
+  | 'ResponsiveContainer'
+  | 'Cell'
+  | 'ReferenceLine'
+  | 'Brush'
+  | 'ErrorBar'
 
-type ChartComponentsMap = Partial<Record<ChartComponentType, React.ComponentType<Record<string, unknown>>>>;
+type ChartComponentsMap = Partial<
+  Record<ChartComponentType, React.ComponentType<Record<string, unknown>>>
+>
 
 export function useChartComponents<T extends ChartComponentType>(
   componentNames: readonly T[]
 ): {
-  components: Pick<ChartComponentsMap, T> | null;
-  isLoading: boolean;
+  components: Pick<ChartComponentsMap, T> | null
+  isLoading: boolean
 } {
-  const [components, setComponents] = useState<Pick<ChartComponentsMap, T> | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [components, setComponents] = useState<Pick<ChartComponentsMap, T> | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
 
   const loadComponents = useCallback(async () => {
     try {
       const imports = await Promise.all(
-        componentNames.map(async (name) => {
-          const module = await importComponent(name);
-          return [name, module] as const;
+        componentNames.map(async name => {
+          const module = await importComponent(name)
+          return [name, module] as const
         })
-      );
+      )
 
-      const loadedComponents = Object.fromEntries(imports) as Pick<ChartComponentsMap, T>;
-      setComponents(loadedComponents);
+      const loadedComponents = Object.fromEntries(imports) as Pick<ChartComponentsMap, T>
+      setComponents(loadedComponents)
     } catch (error) {
-      logger.error('Failed to load chart components:', error);
-      setComponents(null);
+      logger.error('Failed to load chart components:', error)
+      setComponents(null)
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
-  }, [componentNames]);
+  }, [componentNames])
 
   useEffect(() => {
-    loadComponents();
-  }, [loadComponents]);
+    loadComponents()
+  }, [loadComponents])
 
-  return { components, isLoading };
+  return { components, isLoading }
 }
 
-async function importComponent(name: ChartComponentType): Promise<React.ComponentType<Record<string, unknown>>> {
-  const imports: Record<ChartComponentType, () => Promise<{ [key: string]: React.ComponentType<Record<string, unknown>> }>> = {
+async function importComponent(
+  name: ChartComponentType
+): Promise<React.ComponentType<Record<string, unknown>>> {
+  const imports: Record<
+    ChartComponentType,
+    () => Promise<{ [key: string]: React.ComponentType<Record<string, unknown>> }>
+  > = {
     LineChart: () => import('recharts/es6/chart/LineChart'),
     BarChart: () => import('recharts/es6/chart/BarChart'),
     PieChart: () => import('recharts/es6/chart/PieChart'),
@@ -86,8 +114,8 @@ async function importComponent(name: ChartComponentType): Promise<React.Componen
     ReferenceLine: () => import('recharts/es6/cartesian/ReferenceLine'),
     Brush: () => import('recharts/es6/cartesian/Brush'),
     ErrorBar: () => import('recharts/es6/cartesian/ErrorBar'),
-  };
+  }
 
-  const module = await imports[name]();
-  return module[name];
+  const module = await imports[name]()
+  return module[name]
 }

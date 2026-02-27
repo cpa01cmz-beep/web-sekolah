@@ -1,34 +1,27 @@
-import { memo } from 'react';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { EmptyState } from '@/components/ui/empty-state';
-import { DashboardSkeleton } from '@/components/ui/loading-skeletons';
-import { AlertTriangle, Inbox } from 'lucide-react';
+import { memo } from 'react'
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
+import { EmptyState } from '@/components/ui/empty-state'
+import { DashboardSkeleton } from '@/components/ui/loading-skeletons'
+import { AlertTriangle, Inbox } from 'lucide-react'
 
 interface DashboardLayoutProps<T> {
-  isLoading: boolean;
-  error: Error | null;
-  data: T | undefined;
-  children: React.ReactNode | ((data: T) => React.ReactNode);
+  isLoading: boolean
+  error: Error | null
+  data: T | undefined
+  children: React.ReactNode | ((data: T) => React.ReactNode)
 }
 
-function DashboardLayoutInner<T>({
-  isLoading,
-  error,
-  data,
-  children,
-}: DashboardLayoutProps<T>) {
-  if (isLoading) return <DashboardSkeleton />;
+function DashboardLayoutInner<T>({ isLoading, error, data, children }: DashboardLayoutProps<T>) {
+  if (isLoading) return <DashboardSkeleton />
 
   if (error) {
     return (
       <Alert variant="destructive" role="alert">
         <AlertTriangle className="h-4 w-4" aria-hidden="true" />
         <AlertTitle>Error</AlertTitle>
-        <AlertDescription>
-          Failed to load dashboard data. Please try again later.
-        </AlertDescription>
+        <AlertDescription>Failed to load dashboard data. Please try again later.</AlertDescription>
       </Alert>
-    );
+    )
   }
 
   if (!data) {
@@ -39,18 +32,18 @@ function DashboardLayoutInner<T>({
         description="We couldn't find any data for your dashboard. Please try again later or contact support if issue persists."
         variant="error"
       />
-    );
+    )
   }
 
   if (typeof children === 'function') {
-    return <>{children(data)}</>;
+    return <>{children(data)}</>
   }
 
-  return <>{children}</>;
+  return <>{children}</>
 }
 
 export const DashboardLayout = memo(DashboardLayoutInner) as <T>(
   props: DashboardLayoutProps<T>
-) => React.ReactElement;
+) => React.ReactElement
 
-DashboardLayout.displayName = 'DashboardLayout';
+DashboardLayout.displayName = 'DashboardLayout'

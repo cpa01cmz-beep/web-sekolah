@@ -1,7 +1,7 @@
-import { memo } from 'react';
-import { CHART_COLORS, CHART_DEFAULTS, type ChartDataPoint } from './types';
-import { ChartSkeleton } from './ChartSkeleton';
-import { useChartComponents } from './chart-hooks';
+import { memo } from 'react'
+import { CHART_COLORS, CHART_DEFAULTS, type ChartDataPoint } from './types'
+import { ChartSkeleton } from './ChartSkeleton'
+import { useChartComponents } from './chart-hooks'
 
 const BAR_CHART_COMPONENTS = [
   'BarChart',
@@ -13,20 +13,20 @@ const BAR_CHART_COMPONENTS = [
   'Legend',
   'ResponsiveContainer',
   'Cell',
-] as const;
+] as const
 
 export interface BarChartProps {
-  data: ChartDataPoint[];
-  dataKey?: string;
-  xAxisKey?: string;
-  color?: string;
-  height?: number;
-  showGrid?: boolean;
-  showLegend?: boolean;
-  showTooltip?: boolean;
-  className?: string;
-  ariaLabel?: string;
-  emptyMessage?: string;
+  data: ChartDataPoint[]
+  dataKey?: string
+  xAxisKey?: string
+  color?: string
+  height?: number
+  showGrid?: boolean
+  showLegend?: boolean
+  showTooltip?: boolean
+  className?: string
+  ariaLabel?: string
+  emptyMessage?: string
 }
 
 export const BarChart = memo(function BarChart({
@@ -42,10 +42,10 @@ export const BarChart = memo(function BarChart({
   ariaLabel = 'Bar chart',
   emptyMessage = 'No data available',
 }: BarChartProps) {
-  const { components: Chart, isLoading } = useChartComponents(BAR_CHART_COMPONENTS);
+  const { components: Chart, isLoading } = useChartComponents(BAR_CHART_COMPONENTS)
 
   if (isLoading) {
-    return <ChartSkeleton height={height} className={className} />;
+    return <ChartSkeleton height={height} className={className} />
   }
 
   if (!data || data.length === 0) {
@@ -57,11 +57,11 @@ export const BarChart = memo(function BarChart({
       >
         <p className="text-sm text-muted-foreground">{emptyMessage}</p>
       </div>
-    );
+    )
   }
 
   if (!Chart) {
-    return <ChartSkeleton height={height} className={className} />;
+    return <ChartSkeleton height={height} className={className} />
   }
 
   return (
@@ -84,5 +84,5 @@ export const BarChart = memo(function BarChart({
         </Chart.BarChart>
       </Chart.ResponsiveContainer>
     </div>
-  );
-});
+  )
+})
