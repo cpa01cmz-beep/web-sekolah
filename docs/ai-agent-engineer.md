@@ -59,15 +59,15 @@ Key automation scripts in `/scripts/`:
 - If PR exists and changes are already in main, close as stale
 - No issues = do proactive scan of domain area
 
-### Key Observations
-
-- ci-readiness.sh is the main validation script for local CI readiness
-- validate script runs typecheck, lint, and test:run in sequence
-- All 3593 tests should pass for PR to be merged
-- Both wrangler.toml and wrangler.jsonc may exist (toml is primary)
-
 ### Implementation Notes
 
 - When adding CLI flags to scripts, always support both long (--help) and short (-h) forms for consistency
 - pre-deploy-check.sh serves as the reference implementation for flag handling
 - Run `npm run validate` before creating PR (typecheck + lint + test:run)
+
+### Test Coverage Improvements
+
+- Issue #1318: Added WebhookService crypto tests for generateSignature and verifySignature functions
+- Added 8 new tests for cryptographic operations
+- Tests verify signature generation, validation, and rejection of invalid/tampered signatures
+- Removed complex entity mocks that didn't work; kept simple direct imports for crypto functions
