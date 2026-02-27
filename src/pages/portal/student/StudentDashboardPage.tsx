@@ -6,16 +6,77 @@ import { AnnouncementItem } from '@/components/dashboard/AnnouncementItem'
 import { GradeListItem } from '@/components/dashboard/GradeListItem'
 import { DashboardCardEmptyState } from '@/components/dashboard/DashboardCardEmptyState'
 import { ScheduleListItem } from '@/components/dashboard/ScheduleListItem'
+import { DashboardStatCard } from '@/components/dashboard/DashboardStatCard'
 import { useReducedMotion } from '@/hooks/use-reduced-motion'
-import { Clock, BookOpen, Megaphone } from 'lucide-react'
+import { Clock, BookOpen, Megaphone, TrendingUp, Target, Award } from 'lucide-react'
 import { useStudentDashboard } from '@/hooks/useStudent'
 import { useAuthStore } from '@/stores/authStore'
 import type { StudentDashboardData } from '@shared/types'
+import { LineChart } from '@/components/charts/LineChart'
+import { RadarChart } from '@/components/charts/RadarChart'
+import { CHART_COLORS } from '@/theme/colors'
+import { useMemo } from 'react'
+
+function calculateAverageScore(grades: { score: number }[]): number {
+  if (grades.length === 0) return 0
+  const sum = grades.reduce((acc, g) => acc + g.score, 0)
+  return Math.round((sum / grades.length) * 10) / 10
+}
+
+function getUniqueSubjects(grades: { courseName: string }[]): string[] {
+  return [...new Set(grades.map(g => g.courseName))]
+}
+
+function generatePerformanceTrend(grades: { courseName: string; score: number }[]) {
+  const subjects = getUniqueSubjects(grades)
+  if (subjects.length === 0) return []
+
+  const sortedGrades = [...grades].sort((a, b) => a.courseName.localeCompare(b.courseName))
+
+  return sortedGrades.map((grade, index) => ({
+    name: grade.courseName.substring(0, 8),
+    score: grade.score,
+  }))
+}
+
+function generateSubjectComparison(grades: { courseName: string; score: number }[]) {
+  const subjects = getUniqueSubjects(grades)
+  if (subjects.length === 0) return []
+
+  const subjectAverages: Record<string, number[]> = {}
+  grades.forEach(g => {
+    if (!subjectAverages[g.courseName]) {
+      subjectAverages[g.courseName] = []
+    }
+    subjectAverages[g.courseName].push(g.score)
+  })
+
+  return Object.entries(subjectAverages).map(([name, scores]) => ({
+    name,
+    average: Math.round(scores.reduce((a, b) => a + b, 0) / scores.length),
+  }))
+}
 
 export function StudentDashboardPage() {
   const prefersReducedMotion = useReducedMotion()
   const user = useAuthStore(state => state.user)
   const { data, isLoading, error } = useStudentDashboard(user?.id || '')
+
+  const analyticsData = useMemo(() => {
+    if (!data) return null
+    const grades = data.recentGrades
+    const avgScore = calculateAverageScore(grades)
+    const uniqueSubjects = getUniqueSubjects(grades)
+    const performanceTrend = generatePerformanceTrend(grades)
+    const subjectComparison = generateSubjectComparison(grades)
+    return {
+      avgScore,
+      totalSubjects: uniqueSubjects.length,
+      totalGrades: grades.length,
+      performanceTrend,
+      subjectComparison,
+    }
+  }, [data])
 
   return (
     <DashboardLayout<StudentDashboardData> isLoading={isLoading} error={error} data={data}>
@@ -28,6 +89,81 @@ export function StudentDashboardPage() {
                 description="Here's a summary of your academic activities."
               />
             </SlideUp>
+            {analyticsData && analyticsData.totalGrades > 0 && (
+              <SlideUp delay={0.15} style={prefersReducedMotion ? { opacity: 1 } : {}}>
+                <div
+                  className="grid gap-4 md:grid-cols-3"
+                  role="region"
+                  aria-label="Academic performance metrics"
+                >
+                  <DashboardStatCard
+                    title="Average Score"
+                    value={analyticsData.avgScore.toString()}
+                    icon={TrendingUp}
+                    description="Your overall average"
+                  />
+                  <DashboardStatCard
+                    title="Subjects"
+                    value={analyticsData.totalSubjects.toString()}
+                    icon={BookOpen}
+                    description="Courses enrolled"
+                  />
+                  <DashboardStatCard
+                    title="Total Grades"
+                    value={analyticsData.totalGrades.toString()}
+                    icon={Award}
+                    description="Grades recorded"
+                  />
+                </div>
+              </SlideUp>
+            )}
+            {analyticsData && analyticsData.performanceTrend.length > 0 && (
+              <SlideUp delay={0.2} style={prefersReducedMotion ? { opacity: 1 } : {}}>
+                <Card className="hover:shadow-lg transition-shadow duration-200">
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle id="analytics-heading" className="text-sm font-medium">
+                      Performance Trends
+                    </CardTitle>
+                    <TrendingUp className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
+                  </CardHeader>
+                  <CardContent>
+                    <LineChart
+                      data={analyticsData.performanceTrend}
+                      series={[{ dataKey: 'score', name: 'Score', color: CHART_COLORS.primary }]}
+                      xAxisKey="name"
+                      height={250}
+                      showLegend={false}
+                      showDots
+                      ariaLabel="Performance trends across subjects"
+                    />
+                  </CardContent>
+                </Card>
+              </SlideUp>
+            )}
+            {analyticsData && analyticsData.subjectComparison.length > 0 && (
+              <SlideUp delay={0.25} style={prefersReducedMotion ? { opacity: 1 } : {}}>
+                <Card className="hover:shadow-lg transition-shadow duration-200">
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle id="subjects-heading" className="text-sm font-medium">
+                      Subject Performance
+                    </CardTitle>
+                    <Target className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
+                  </CardHeader>
+                  <CardContent>
+                    <RadarChart
+                      data={analyticsData.subjectComparison}
+                      series={[
+                        { dataKey: 'average', name: 'Average', color: CHART_COLORS.secondary },
+                      ]}
+                      angleKey="name"
+                      height={280}
+                      showLegend={false}
+                      ariaLabel="Subject performance comparison"
+                    />
+                  </CardContent>
+                </Card>
+              </SlideUp>
+            )}
             <div
               className="grid gap-6 md:grid-cols-2 lg:grid-cols-3"
               role="region"

@@ -78,6 +78,41 @@ vi.mock('@/components/dashboard/DashboardCardEmptyState', () => ({
   ),
 }))
 
+vi.mock('@/components/dashboard/DashboardStatCard', () => ({
+  DashboardStatCard: ({
+    title,
+    value,
+    description,
+  }: {
+    title: string
+    value: string
+    description: string
+  }) => (
+    <div data-testid="stat-card">
+      {title}: {value} - {description}
+    </div>
+  ),
+}))
+
+vi.mock('@/components/charts/LineChart', () => ({
+  LineChart: ({ data }: { data: any[] }) => (
+    <div data-testid="line-chart">{data?.length || 0} data points</div>
+  ),
+}))
+
+vi.mock('@/components/charts/RadarChart', () => ({
+  RadarChart: ({ data }: { data: any[] }) => (
+    <div data-testid="radar-chart">{data?.length || 0} data points</div>
+  ),
+}))
+
+vi.mock('@/theme/colors', () => ({
+  CHART_COLORS: {
+    primary: '#000000',
+    secondary: '#000000',
+  },
+}))
+
 const createWrapper = () => {
   const testQueryClient = new QueryClient({
     defaultOptions: {
