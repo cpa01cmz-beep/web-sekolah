@@ -63,7 +63,7 @@ Key automation scripts in `/scripts/`:
 
 - ci-readiness.sh is the main validation script for local CI readiness
 - validate script runs typecheck, lint, and test:run in sequence
-- All 3571 tests should pass for PR to be merged
+- All 3593 tests should pass for PR to be merged
 - Both wrangler.toml and wrangler.jsonc may exist (toml is primary)
 
 ### Implementation Notes
