@@ -21,6 +21,7 @@ import { healthCheckCache } from './middleware/cloudflare-cache'
 import { integrationMonitor } from './integration-monitor'
 import { HttpStatusCode, TimeConstants } from './constants'
 import { DefaultOrigins } from './config/defaults'
+import { validateEnvStrict, isProductionEnv } from './config/env-validator'
 import { handleScheduled } from './scheduled'
 import { validateBody } from './middleware/validation'
 import { clientErrorSchema, cspReportSchema } from './middleware/schemas'
@@ -33,6 +34,18 @@ const app = new Hono<{ Bindings: Env }>()
 app.use('*', logger())
 
 app.use('/api/*', async (c, next) => {
+  try {
+    validateEnvStrict(c.env)
+  } catch (error) {
+    pinoLogger.error('[ENV VALIDATION FAILED]', error)
+    return new Response('Invalid environment configuration', { status: 500 })
+  }
+
+  if (isProductionEnv(c.env) && !c.env.JWT_SECRET) {
+    pinoLogger.error('[SECURITY] JWT_SECRET is required in production')
+    return new Response('JWT_SECRET is required in production', { status: 500 })
+  }
+
   const allowedOrigins = (c.env.ALLOWED_ORIGINS?.split(',') || DefaultOrigins.LOCAL_DEV) as string[]
   const origin = c.req.header('Origin')
 
