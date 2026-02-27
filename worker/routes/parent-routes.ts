@@ -1,178 +1,250 @@
-import { Hono } from "hono";
-import type { Env } from '../core-utils';
-import { ok, notFound, bad } from '../core-utils';
-import { ParentDashboardService, CommonDataService, getRoleSpecificFields, getUniqueIds, fetchAndMap } from '../domain';
-import { withUserValidation, withErrorHandler, withAuth, triggerWebhookSafely } from './route-utils';
-import { validateBody, validateQuery } from '../middleware/validation';
-import { createMessageSchema, messageTypeQuerySchema } from '../middleware/schemas';
-import { MessageEntity, CourseEntity } from '../entities';
-import type { Context } from 'hono';
-import type { Message } from '@shared/types';
-import { getCurrentUserId } from '../type-guards';
+import { Hono } from 'hono'
+import type { Env } from '../core-utils'
+import { ok, notFound, bad } from '../core-utils'
+import {
+  ParentDashboardService,
+  CommonDataService,
+  getRoleSpecificFields,
+  getUniqueIds,
+  fetchAndMap,
+} from '../domain'
+import { withUserValidation, withErrorHandler, withAuth, triggerWebhookSafely } from './route-utils'
+import { validateBody, validateQuery } from '../middleware/validation'
+import { createMessageSchema, messageTypeQuerySchema } from '../middleware/schemas'
+import { MessageEntity, CourseEntity } from '../entities'
+import type { Context } from 'hono'
+import type { Message } from '@shared/types'
+import { getCurrentUserId } from '../type-guards'
+import { sanitizeHtml } from '../middleware/sanitize'
 
 export function parentRoutes(app: Hono<{ Bindings: Env }>) {
-  app.get('/api/parents/:id/dashboard', ...withUserValidation('parent', 'dashboard'), withErrorHandler('get parent dashboard')(async (c: Context) => {
-    const requestedParentId = c.req.param('id');
-    try {
-      const dashboardData = await ParentDashboardService.getDashboardData(c.env, requestedParentId);
-      return ok(c, dashboardData);
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      if (errorMessage.includes('not found') || errorMessage.includes('no associated child')) {
-        return notFound(c, errorMessage);
+  app.get(
+    '/api/parents/:id/dashboard',
+    ...withUserValidation('parent', 'dashboard'),
+    withErrorHandler('get parent dashboard')(async (c: Context) => {
+      const requestedParentId = c.req.param('id')
+      try {
+        const dashboardData = await ParentDashboardService.getDashboardData(
+          c.env,
+          requestedParentId
+        )
+        return ok(c, dashboardData)
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : String(error)
+        if (errorMessage.includes('not found') || errorMessage.includes('no associated child')) {
+          return notFound(c, errorMessage)
+        }
+        throw error
       }
-      throw error;
-    }
-  }));
+    })
+  )
 
-  app.get('/api/parents/:id/schedule', ...withUserValidation('parent', 'schedule'), withErrorHandler('get parent schedule')(async (c: Context) => {
-    const requestedParentId = c.req.param('id');
-    const parent = await CommonDataService.getUserById(c.env, requestedParentId);
+  app.get(
+    '/api/parents/:id/schedule',
+    ...withUserValidation('parent', 'schedule'),
+    withErrorHandler('get parent schedule')(async (c: Context) => {
+      const requestedParentId = c.req.param('id')
+      const parent = await CommonDataService.getUserById(c.env, requestedParentId)
 
-    if (!parent) {
-      return notFound(c, 'Parent not found');
-    }
+      if (!parent) {
+        return notFound(c, 'Parent not found')
+      }
 
-    if (parent.role !== 'parent') {
-      return notFound(c, 'Parent not found');
-    }
+      if (parent.role !== 'parent') {
+        return notFound(c, 'Parent not found')
+      }
 
-    const roleFields = getRoleSpecificFields(parent);
+      const roleFields = getRoleSpecificFields(parent)
 
-    if (!roleFields.childId) {
-      return notFound(c, 'Parent has no associated child');
-    }
+      if (!roleFields.childId) {
+        return notFound(c, 'Parent has no associated child')
+      }
 
-    const { schedule } = await CommonDataService.getStudentWithClassAndSchedule(c.env, roleFields.childId);
+      const { schedule } = await CommonDataService.getStudentWithClassAndSchedule(
+        c.env,
+        roleFields.childId
+      )
 
-    if (!schedule) {
-      return ok(c, []);
-    }
+      if (!schedule) {
+        return ok(c, [])
+      }
 
-    return ok(c, schedule.items || []);
-  }));
+      return ok(c, schedule.items || [])
+    })
+  )
 
-  app.get('/api/parents/:id/messages', ...withUserValidation('parent', 'messages'), validateQuery(messageTypeQuerySchema), withErrorHandler('get parent messages')(async (c: Context) => {
-    const parentId = c.req.param('id');
-    const { type } = c.get('validatedQuery') as { type: 'inbox' | 'sent' };
-    
-    let messages: Message[];
-    if (type === 'sent') {
-      messages = await MessageEntity.getRecentForSender(c.env, parentId);
-    } else {
-      messages = await MessageEntity.getRecentForRecipient(c.env, parentId);
-    }
-    
-    return ok(c, messages);
-  }));
+  app.get(
+    '/api/parents/:id/messages',
+    ...withUserValidation('parent', 'messages'),
+    validateQuery(messageTypeQuerySchema),
+    withErrorHandler('get parent messages')(async (c: Context) => {
+      const parentId = c.req.param('id')
+      const { type } = c.get('validatedQuery') as { type: 'inbox' | 'sent' }
 
-  app.get('/api/parents/:id/messages/unread-count', ...withUserValidation('parent', 'messages'), withErrorHandler('get parent unread count')(async (c: Context) => {
-    const parentId = c.req.param('id');
-    const count = await MessageEntity.countUnread(c.env, parentId);
-    return ok(c, { count });
-  }));
+      let messages: Message[]
+      if (type === 'sent') {
+        messages = await MessageEntity.getRecentForSender(c.env, parentId)
+      } else {
+        messages = await MessageEntity.getRecentForRecipient(c.env, parentId)
+      }
 
-  app.get('/api/parents/:id/messages/:teacherId/conversation', ...withUserValidation('parent', 'messages'), withErrorHandler('get parent conversation')(async (c: Context) => {
-    const parentId = c.req.param('id');
-    const teacherId = c.req.param('teacherId');
-    const conversation = await MessageEntity.getConversation(c.env, parentId, teacherId);
-    return ok(c, conversation.filter(msg => !msg.deletedAt));
-  }));
+      return ok(c, messages)
+    })
+  )
 
-  app.post('/api/parents/:id/messages', ...withAuth('parent'), validateBody(createMessageSchema), withErrorHandler('send parent message')(async (c: Context) => {
-    const parentId = getCurrentUserId(c);
-    const { recipientId, subject, content, parentMessageId } = c.get('validatedBody');
+  app.get(
+    '/api/parents/:id/messages/unread-count',
+    ...withUserValidation('parent', 'messages'),
+    withErrorHandler('get parent unread count')(async (c: Context) => {
+      const parentId = c.req.param('id')
+      const count = await MessageEntity.countUnread(c.env, parentId)
+      return ok(c, { count })
+    })
+  )
 
-    const recipient = await CommonDataService.getUserById(c.env, recipientId);
-    if (!recipient || recipient.role !== 'teacher') {
-      return bad(c, 'Invalid recipient. Parents can only message teachers.');
-    }
+  app.get(
+    '/api/parents/:id/messages/:teacherId/conversation',
+    ...withUserValidation('parent', 'messages'),
+    withErrorHandler('get parent conversation')(async (c: Context) => {
+      const parentId = c.req.param('id')
+      const teacherId = c.req.param('teacherId')
+      const conversation = await MessageEntity.getConversation(c.env, parentId, teacherId)
+      return ok(
+        c,
+        conversation.filter(msg => !msg.deletedAt)
+      )
+    })
+  )
 
-    const message = await MessageEntity.createWithAllIndexes(c.env, {
-      id: crypto.randomUUID(),
-      senderId: parentId,
-      senderRole: 'parent',
-      recipientId,
-      recipientRole: 'teacher',
-      subject,
-      content,
-      isRead: false,
-      parentMessageId: parentMessageId || null,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      deletedAt: null
-    });
+  app.post(
+    '/api/parents/:id/messages',
+    ...withAuth('parent'),
+    validateBody(createMessageSchema),
+    withErrorHandler('send parent message')(async (c: Context) => {
+      const parentId = getCurrentUserId(c)
+      const { recipientId, subject, content, parentMessageId } = c.get('validatedBody')
 
-    triggerWebhookSafely(c.env, 'message.created', message, { messageId: message.id });
+      const recipient = await CommonDataService.getUserById(c.env, recipientId)
+      if (!recipient || recipient.role !== 'teacher') {
+        return bad(c, 'Invalid recipient. Parents can only message teachers.')
+      }
 
-    return ok(c, message);
-  }));
+      const message = await MessageEntity.createWithAllIndexes(c.env, {
+        id: crypto.randomUUID(),
+        senderId: parentId,
+        senderRole: 'parent',
+        recipientId,
+        recipientRole: 'teacher',
+        subject: sanitizeHtml(subject),
+        content: sanitizeHtml(content),
+        isRead: false,
+        parentMessageId: parentMessageId || null,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        deletedAt: null,
+      })
 
-  app.post('/api/parents/:id/messages/:messageId/read', ...withAuth('parent'), withErrorHandler('mark parent message read')(async (c: Context) => {
-    const messageId = c.req.param('messageId');
-    const parentId = getCurrentUserId(c);
-    const message = await MessageEntity.markAsRead(c.env, messageId);
-    if (!message) {
-      return notFound(c, 'Message not found');
-    }
-    triggerWebhookSafely(c.env, 'message.read', { id: message.id, readAt: message.updatedAt, readBy: parentId }, { messageId: message.id });
-    return ok(c, message);
-  }));
+      triggerWebhookSafely(c.env, 'message.created', message, { messageId: message.id })
 
-  app.delete('/api/parents/:id/messages/:messageId', ...withAuth('parent'), withErrorHandler('delete parent message')(async (c: Context) => {
-    const messageId = c.req.param('messageId');
-    const parentId = getCurrentUserId(c);
-    
-    const message = await MessageEntity.get(c.env, messageId);
-    if (!message) {
-      return notFound(c, 'Message not found');
-    }
-    
-    if (message.senderId !== parentId && message.recipientId !== parentId) {
-      return notFound(c, 'Message not found');
-    }
-    
-    const deleted = await MessageEntity.softDelete(c.env, messageId);
-    if (!deleted) {
-      return notFound(c, 'Message not found');
-    }
-    
-    triggerWebhookSafely(c.env, 'message.deleted', { id: messageId, deletedBy: parentId }, { messageId });
-    return ok(c, { deleted: true, id: messageId });
-  }));
+      return ok(c, message)
+    })
+  )
 
-  app.get('/api/parents/:id/teachers', ...withUserValidation('parent', 'messages'), withErrorHandler('get child teachers')(async (c: Context) => {
-    const parentId = c.req.param('id');
-    const parent = await CommonDataService.getUserById(c.env, parentId);
+  app.post(
+    '/api/parents/:id/messages/:messageId/read',
+    ...withAuth('parent'),
+    withErrorHandler('mark parent message read')(async (c: Context) => {
+      const messageId = c.req.param('messageId')
+      const parentId = getCurrentUserId(c)
+      const message = await MessageEntity.markAsRead(c.env, messageId)
+      if (!message) {
+        return notFound(c, 'Message not found')
+      }
+      triggerWebhookSafely(
+        c.env,
+        'message.read',
+        { id: message.id, readAt: message.updatedAt, readBy: parentId },
+        { messageId: message.id }
+      )
+      return ok(c, message)
+    })
+  )
 
-    if (!parent || parent.role !== 'parent') {
-      return notFound(c, 'Parent not found');
-    }
+  app.delete(
+    '/api/parents/:id/messages/:messageId',
+    ...withAuth('parent'),
+    withErrorHandler('delete parent message')(async (c: Context) => {
+      const messageId = c.req.param('messageId')
+      const parentId = getCurrentUserId(c)
 
-    const roleFields = getRoleSpecificFields(parent);
-    if (!roleFields.childId) {
-      return notFound(c, 'Parent has no associated child');
-    }
+      const message = await MessageEntity.get(c.env, messageId)
+      if (!message) {
+        return notFound(c, 'Message not found')
+      }
 
-    const { classData, schedule } = await CommonDataService.getStudentWithClassAndSchedule(c.env, roleFields.childId);
-    
-    if (!classData) {
-      return ok(c, []);
-    }
+      if (message.senderId !== parentId && message.recipientId !== parentId) {
+        return notFound(c, 'Message not found')
+      }
 
-    const courseIds = schedule?.items?.map(item => item.courseId) || [];
-    const uniqueCourseIds = getUniqueIds(courseIds);
-    const coursesMap = await fetchAndMap(uniqueCourseIds, id => new CourseEntity(c.env, id).getState());
+      const deleted = await MessageEntity.softDelete(c.env, messageId)
+      if (!deleted) {
+        return notFound(c, 'Message not found')
+      }
 
-    const teacherIds = new Set<string>();
-    coursesMap.forEach(course => {
-      if (course.teacherId) teacherIds.add(course.teacherId);
-    });
+      triggerWebhookSafely(
+        c.env,
+        'message.deleted',
+        { id: messageId, deletedBy: parentId },
+        { messageId }
+      )
+      return ok(c, { deleted: true, id: messageId })
+    })
+  )
 
-    const teachers = await Promise.all(
-      Array.from(teacherIds).map(id => CommonDataService.getUserById(c.env, id))
-    );
+  app.get(
+    '/api/parents/:id/teachers',
+    ...withUserValidation('parent', 'messages'),
+    withErrorHandler('get child teachers')(async (c: Context) => {
+      const parentId = c.req.param('id')
+      const parent = await CommonDataService.getUserById(c.env, parentId)
 
-    return ok(c, teachers.filter(t => t !== null));
-  }));
+      if (!parent || parent.role !== 'parent') {
+        return notFound(c, 'Parent not found')
+      }
+
+      const roleFields = getRoleSpecificFields(parent)
+      if (!roleFields.childId) {
+        return notFound(c, 'Parent has no associated child')
+      }
+
+      const { classData, schedule } = await CommonDataService.getStudentWithClassAndSchedule(
+        c.env,
+        roleFields.childId
+      )
+
+      if (!classData) {
+        return ok(c, [])
+      }
+
+      const courseIds = schedule?.items?.map(item => item.courseId) || []
+      const uniqueCourseIds = getUniqueIds(courseIds)
+      const coursesMap = await fetchAndMap(uniqueCourseIds, id =>
+        new CourseEntity(c.env, id).getState()
+      )
+
+      const teacherIds = new Set<string>()
+      coursesMap.forEach(course => {
+        if (course.teacherId) teacherIds.add(course.teacherId)
+      })
+
+      const teachers = await Promise.all(
+        Array.from(teacherIds).map(id => CommonDataService.getUserById(c.env, id))
+      )
+
+      return ok(
+        c,
+        teachers.filter(t => t !== null)
+      )
+    })
+  )
 }
