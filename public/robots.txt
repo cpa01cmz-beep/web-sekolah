@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://akademia-pro.vercel.app/sitemap.xml
+Sitemap: https://akademia-pro.vercel.app/api/public/sitemap.xml
