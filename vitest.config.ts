@@ -24,7 +24,6 @@ export default defineConfig({
     exclude: [
       'node_modules/',
       'dist/',
-      'worker/domain/__tests__/CommonDataService.test.ts',
       'worker/domain/__tests__/StudentDashboardService.test.ts',
       'worker/domain/__tests__/TeacherService.test.ts',
       'worker/domain/__tests__/UserService.test.ts',
