@@ -363,3 +363,52 @@ response.headers.set(
 - All 3649 tests pass (16 new)
 - Typecheck passes
 - Lint passes
+
+### 2026-02-27: Add GradeEntity and WebhookDeliveryEntity Unit Tests
+
+**Issue**: #1289 - Add Missing Test Coverage for GradeService and Related Entities
+
+**Problem**: GradeEntity and WebhookDeliveryEntity had critically low test coverage:
+
+- GradeEntity: 10.63%
+- WebhookDeliveryEntity: 6.55%
+
+**Solution**: Created comprehensive unit tests for both entities following existing test patterns:
+
+1. Created `worker/entities/__tests__/GradeEntity.test.ts` with 21 unit tests:
+   - getByStudentId - secondary index lookups
+   - getByCourseId - secondary index lookups
+   - countByStudentId, existsByStudentId - student statistics
+   - countByCourseId, existsByCourseId - course statistics
+   - getByStudentIdAndCourseId - compound index lookup
+   - getRecentForStudent - date-sorted queries
+   - createWithAllIndexes, deleteWithAllIndexes - index management
+
+2. Created `worker/entities/__tests__/WebhookDeliveryEntity.test.ts` with 26 unit tests:
+   - getPendingRetries - pending delivery retries
+   - getByIdempotencyKey - idempotent delivery lookup
+   - getByEventId, getByWebhookConfigId - secondary index lookups
+   - getRecentDeliveries - date-sorted queries
+   - countByStatus, existsByStatus - status statistics
+   - countByEventId, existsByEventId - event statistics
+   - countByWebhookConfigId, existsByWebhookConfigId - config statistics
+   - createWithDateIndex, deleteWithDateIndex - date index management
+
+**Benefits**:
+
+- GradeEntity test coverage increased from 10.63% to ~70%
+- WebhookDeliveryEntity test coverage increased from 6.55% to ~60%
+- All public methods have at least one unit test
+- Edge cases covered (empty results, soft-deleted records)
+- Follows existing entity test patterns from MessageEntity.test.ts
+
+**Files Changed**:
+
+- `worker/entities/__tests__/GradeEntity.test.ts` - new test file (326 lines)
+- `worker/entities/__tests__/WebhookDeliveryEntity.test.ts` - new test file (366 lines)
+
+**Testing**:
+
+- All 3753 tests pass (47 new)
+- Typecheck passes
+- Lint passes
