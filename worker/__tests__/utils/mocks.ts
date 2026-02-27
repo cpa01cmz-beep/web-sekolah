@@ -92,14 +92,41 @@ export const createMockResponse = (
 }
 
 export const createMockEnv = (overrides?: Partial<Env>): Env => {
+  const createMockStub = () => ({
+    get: vi.fn().mockResolvedValue({
+      waitUntil: () => {},
+      storage: {
+        get: vi.fn().mockResolvedValue(null),
+        put: vi.fn().mockResolvedValue(undefined),
+        delete: vi.fn().mockResolvedValue(true),
+        list: vi.fn().mockResolvedValue(new Map()),
+      },
+    }),
+    getDoc: vi.fn().mockResolvedValue(null),
+    casPut: vi.fn().mockResolvedValue({ ok: true, v: 1 }),
+    del: vi.fn().mockResolvedValue(true),
+    has: vi.fn().mockResolvedValue(false),
+    listPrefix: vi.fn().mockResolvedValue({ keys: [], next: null }),
+  })
+
   const mockDO = {
-    get: vi.fn(),
-    idFromName: vi.fn().mockReturnValue({ name: 'test-doid' }),
-    idFromString: vi.fn(),
+    idFromName: vi.fn().mockReturnValue({ name: 'test-doid', toString: () => 'test-doid' }),
+    idFromString: vi.fn().mockReturnValue({ name: 'test-doid', toString: () => 'test-doid' }),
+    get: vi.fn().mockImplementation(() => createMockStub()),
   } as unknown as Env['GlobalDurableObject']
 
   return {
     GlobalDurableObject: mockDO,
+    USERS: mockDO,
+    CLASSES: mockDO,
+    COURSES: mockDO,
+    GRADES: mockDO,
+    ANNOUNCEMENTS: mockDO,
+    STUDENTS: mockDO,
+    TEACHERS: mockDO,
+    PARENTS: mockDO,
+    ATTENDANCE: mockDO,
+    MESSAGES: mockDO,
     ALLOWED_ORIGINS: 'http://localhost:5173',
     JWT_SECRET: 'test-secret',
     DEFAULT_PASSWORD: 'test-password',
