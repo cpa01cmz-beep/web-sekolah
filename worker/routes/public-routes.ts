@@ -61,6 +61,16 @@ Sitemap: ${siteUrl}/sitemap.xml
 
 export function publicRoutes(app: Hono<{ Bindings: Env }>) {
   app.get(
+    '/api/public/.well-known/security.txt',
+    withErrorHandler('get security policy (well-known)')(async (c: Context) => {
+      const siteUrl = c.env.SITE_URL || DEFAULT_SITE_URL
+      c.header('Content-Type', 'text/plain; charset=utf-8')
+      c.header('Cache-Control', 'public, max-age=86400')
+      return c.text(buildSecurityTxt(siteUrl))
+    })
+  )
+
+  app.get(
     '/api/public/security.txt',
     withErrorHandler('get security policy')(async (c: Context) => {
       const siteUrl = c.env.SITE_URL || DEFAULT_SITE_URL

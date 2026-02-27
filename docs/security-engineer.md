@@ -29,6 +29,15 @@ This document serves as the long-term memory for the security-engineer agent, tr
 
 ### 2026-02-27
 
+- **Added .well-known/security.txt endpoint for RFC 9116 compliance**
+  - Added endpoint at `/api/public/.well-known/security.txt`
+  - Complements existing `/api/public/security.txt` endpoint
+  - Enables security researchers to find the canonical security contact location
+  - Provides proper vulnerability disclosure mechanism
+  - Small, atomic change with no breaking impact
+
+### 2026-02-27
+
 - **Added input sanitization for user-generated content**
   - Applied `sanitizeHtml()` to announcement title and content in AnnouncementService.ts
   - Applied `sanitizeHtml()` to message subject and content in parent-routes.ts and teacher-routes.ts
