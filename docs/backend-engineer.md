@@ -245,10 +245,10 @@ response.headers.set(
 - Mocked GlobalDurableObject and listPrefix for index operations
 - Followed patterns from existing entity tests in worker/entities/**tests**/
 
-
 ### 2026-02-26: Fix Security Headers Comments and Add Test
 
 **Problem**: The security-headers.ts file had several issues:
+
 1. Duplicate SECURITY IMPROVEMENTS section with wrong date (2026-02-29 - future date)
 2. Duplicate sections with same date (2026-02-25) referencing different improvements
 3. Orphaned "FUTURE IMPROVEMENTS:" section without content
@@ -278,5 +278,53 @@ response.headers.set(
 **Testing**:
 
 - All 3572 tests pass
+- Typecheck passes
+- Lint passes
+
+### 2026-02-27: Add Runtime Environment Variable Validation
+
+**Issue**: #1290 - Add Runtime Environment Variable Validation
+
+**Problem**: The application lacked runtime validation for required environment variables. If critical environment variables like `JWT_SECRET` were missing or misconfigured, the application could fail silently or produce unexpected behavior.
+
+**Solution**: Created centralized environment validation module:
+
+1. Created `worker/config/env-validator.ts` with Zod schema for:
+   - JWT_SECRET (optional, min 64 chars for production security)
+   - ENVIRONMENT (development/staging/production, defaults to development)
+   - ALLOWED_ORIGINS (optional)
+   - SITE_URL (optional, must be valid URL)
+   - DEFAULT_PASSWORD (optional, min 8 chars)
+
+2. Added validation at worker startup in `worker/index.ts`:
+   - Validates env on every request to catch misconfiguration early
+   - Enforces JWT_SECRET requirement in production
+   - Logs validation failures
+
+3. Created 21 unit tests covering:
+   - Valid environments (development, staging, production)
+   - Default values
+   - Invalid ENVIRONMENT values
+   - Invalid JWT_SECRET length
+   - Invalid SITE_URL
+   - Helper functions (isProductionEnv, isDevelopmentEnv)
+
+**Files Changed**:
+
+- `worker/config/env-validator.ts` - new validation module
+- `worker/config/__tests__/env-validator.test.ts` - 21 unit tests
+- `worker/config/index.ts` - export new validator
+- `worker/index.ts` - integrate validation at startup
+
+**Benefits**:
+
+- Centralized validation with clear error messages
+- Fail-fast behavior for misconfigured environments
+- Production safety (JWT_SECRET required in production)
+- Type-safe environment configuration
+
+**Testing**:
+
+- All 21 new tests pass
 - Typecheck passes
 - Lint passes
