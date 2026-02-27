@@ -16,6 +16,8 @@ export const API_ENDPOINTS = {
     SCHEDULE: (teacherId: string) => `/api/teachers/${teacherId}/schedule`,
     GRADES: '/api/teachers/grades',
     GRADE: (gradeId: string) => `/api/grades/${gradeId}`,
+    UPDATE_GRADE: (gradeId: string) => `/api/grades/${gradeId}`,
+    DELETE_GRADE: (gradeId: string) => `/api/grades/${gradeId}`,
     ANNOUNCEMENTS: (teacherId: string) => `/api/teachers/${teacherId}/announcements`,
     CREATE_ANNOUNCEMENT: '/api/teachers/announcements',
     ANNOUNCEMENT: (announcementId: string) => `/api/announcements/${announcementId}`,
