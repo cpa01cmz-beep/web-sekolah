@@ -10,6 +10,31 @@ This document serves as the long-term memory and domain knowledge for the Growth
 
 ## Implemented Improvements
 
+### 9. Image Lazy Loading for Below-Fold Images (Feb 2026)
+
+**Issue**: Several images below the fold were missing the `loading="lazy"` attribute, causing unnecessary initial page load and bandwidth usage.
+
+**Changes**:
+
+- Added `loading="lazy"` to values section image in HomePage.tsx
+- Added `loading="lazy"` to history section image in AboutPage.tsx
+- Added `loading="lazy"` to author avatar in ContentCard.tsx
+
+**Impact**:
+
+- Faster initial page load time
+- Reduced bandwidth usage for users
+- Better Core Web Vitals scores (LCP improvement)
+- Improved user experience, especially on slower connections
+
+**Acceptance Criteria Met**:
+
+- [x] Typecheck passes
+- [x] Lint passes
+- [x] Tests pass (3633 tests)
+- [x] Zero warnings
+- [x] PR #1333 created
+
 ### 8. Fix robots.txt Sitemap URL (Feb 2026)
 
 **Issue**: The `robots.txt` file referenced the sitemap at `/sitemap.xml` but the actual sitemap is served at `/api/public/sitemap.xml`. This inconsistency could prevent search engines from finding the sitemap.
