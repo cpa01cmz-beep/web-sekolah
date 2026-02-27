@@ -19,6 +19,10 @@ export const createUserSchema = z.object({
   password: z
     .string()
     .min(8, 'Password must be at least 8 characters')
+    .max(
+      ValidationLimits.PASSWORD_MAX_LENGTH,
+      `Password must be less than ${ValidationLimits.PASSWORD_MAX_LENGTH} characters`
+    )
     .regex(/[A-Z]/, 'Password must contain at least one uppercase letter')
     .regex(/[a-z]/, 'Password must contain at least one lowercase letter')
     .regex(/[0-9]/, 'Password must contain at least one number')
@@ -87,6 +91,10 @@ export const loginSchema = z.object({
     .min(
       ValidationLimits.PASSWORD_MIN_LENGTH,
       `Password must be at least ${ValidationLimits.PASSWORD_MIN_LENGTH} characters`
+    )
+    .max(
+      ValidationLimits.PASSWORD_MAX_LENGTH,
+      `Password must be less than ${ValidationLimits.PASSWORD_MAX_LENGTH} characters`
     ),
   role: z.enum(['student', 'teacher', 'parent', 'admin'], {
     message: 'Invalid role. Must be student, teacher, parent, or admin',
