@@ -206,6 +206,7 @@ export function PPDBForm({ onSubmit }: PPDBFormProps) {
           required
         >
           <Select
+            value={formData.level}
             onValueChange={value => handleInputChange('level', value)}
             disabled={isSubmitting}
           >
