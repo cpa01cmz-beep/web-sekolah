@@ -51,4 +51,6 @@ DX-engineer focuses on improving Developer Experience through small, safe, measu
 
 ## Recent Improvements
 
+- **2026-02-27**: Added `check:all` npm script that combines typecheck, lint, and format:check for comprehensive code quality verification
+  - PR: https://github.com/cpa01cmz-beep/web-sekolah/pull/1307
 - **2026-02-26**: Fixed AGENTS.md to correctly document `.test.ts` and `.test.tsx` test file suffixes, and updated test count from 3448 to 3488
