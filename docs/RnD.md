@@ -17,7 +17,7 @@ This document serves as the long-term memory for the Autonomous R&D Specialist a
 - Codebase is well-maintained with good practices
 - PR #1188: Made security.txt configurable via SITE_URL environment variable
 - PR #1203: Made robots.txt configurable via SITE_URL environment variable (open)
-- Issue #1261: TypeScript any type casts - Reduced from 489 to 197 (60% reduction)
+- Issue #1261: TypeScript any type casts - Reduced from 489 to 132 (73% reduction)
 - PR #1300: Add dynamic sitemap.xml endpoint for improved SEO
 
 ## Issue #1261: TypeScript any Type Casts Reduction
@@ -46,15 +46,16 @@ The codebase contained 489 instances of `as any` type casts in test files, under
 
 ### Results
 
-- Reduced `as any` from 489 to 295 (40% reduction)
+- Reduced `as any` from 489 to 132 (73% reduction)
 - Created reusable typed mock factories
-- All tests pass
+- Updated frontend hook tests to use typed fetch mocks
+- All tests pass (3597 tests)
 - TypeScript strict mode checks pass
 - ESLint passes
 
 ### Remaining Work
 
-- Continue reducing remaining 295 instances (target: under 30)
+- Continue reducing remaining 132 instances (target: under 30)
 - The remaining instances are in more complex patterns requiring:
   - Array type assertions (`] as any[]`)
   - Complex mock configurations in route tests
@@ -63,7 +64,7 @@ The codebase contained 489 instances of `as any` type casts in test files, under
 ## Potential Improvements Identified
 
 1. ~~Security.txt has hardcoded example.com URLs - could be made configurable~~ (RESOLVED in #1188)
-2. ~~TypeScript any type casts undermine type safety~~ (RESOLVED - 60% reduction, 197 remaining)
+2. ~~TypeScript any type casts undermine type safety~~ (RESOLVED - 73% reduction, 132 remaining)
 3. ~~Sitemap.xml endpoint missing despite reference in robots.txt~~ (RESOLVED in #1300)
 4. Extensive use of example.com in test data - acceptable for testing
 5. Code follows TypeScript strict mode
@@ -72,7 +73,7 @@ The codebase contained 489 instances of `as any` type casts in test files, under
 
 ## Codebase Health
 
-- Tests: Comprehensive test coverage (3571 tests)
+- Tests: Comprehensive test coverage (3597 tests)
 - Linting: ESLint configured
 - Type checking: TypeScript strict mode
 - Formatting: Prettier configured
