@@ -1,117 +1,195 @@
-import { defineConfig, loadEnv, ViteDevServer } from "vite";
-import path from "path";
-import react from "@vitejs/plugin-react";
-import { exec } from "node:child_process";
-import { cloudflare } from "@cloudflare/vite-plugin";
+import { defineConfig, loadEnv, ViteDevServer } from 'vite'
+import path from 'path'
+import react from '@vitejs/plugin-react'
+import { exec } from 'node:child_process'
+import { cloudflare } from '@cloudflare/vite-plugin'
+import { VitePWA } from 'vite-plugin-pwa'
 
 const stripAnsi = (str: string) =>
   str.replace(
     // eslint-disable-next-line no-control-regex -- Allow ANSI escape stripping
     /[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g,
-    ""
-  );
+    ''
+  )
 
-const LOG_MESSAGE_BOUNDARY = /\n(?=\[[A-Z][^\]]*\])/g;
+const LOG_MESSAGE_BOUNDARY = /\n(?=\[[A-Z][^\]]*\])/g
 
-const emitLog = (level: "info" | "warn" | "error", rawMessage: string) => {
-  const cleaned = stripAnsi(rawMessage).replace(/\r\n/g, "\n");
+const emitLog = (level: 'info' | 'warn' | 'error', rawMessage: string) => {
+  const cleaned = stripAnsi(rawMessage).replace(/\r\n/g, '\n')
   const parts = cleaned
     .split(LOG_MESSAGE_BOUNDARY)
-    .map((part) => part.trimEnd())
-    .filter((part) => part.trim().length > 0);
+    .map(part => part.trimEnd())
+    .filter(part => part.trim().length > 0)
 
   if (parts.length === 0) {
-    console[level](cleaned.trimEnd());
-    return;
+    console[level](cleaned.trimEnd())
+    return
   }
 
   for (const part of parts) {
-    console[level](part);
+    console[level](part)
   }
-};
+}
 
 const customLogger = {
-  warnOnce: (msg: string) => emitLog("warn", msg),
-  info: (msg: string) => emitLog("info", msg),
-  warn: (msg: string) => emitLog("warn", msg),
-  error: (msg: string) => emitLog("error", msg),
+  warnOnce: (msg: string) => emitLog('warn', msg),
+  info: (msg: string) => emitLog('info', msg),
+  warn: (msg: string) => emitLog('warn', msg),
+  error: (msg: string) => emitLog('error', msg),
   hasErrorLogged: () => false,
   clearScreen: () => {},
   hasWarned: false,
-};
+}
 
 function watchDependenciesPlugin() {
   return {
-    name: "watch-dependencies",
+    name: 'watch-dependencies',
     configureServer(server: ViteDevServer) {
-      const filesToWatch = [
-        path.resolve("package.json"),
-        path.resolve("bun.lock"),
-      ];
+      const filesToWatch = [path.resolve('package.json'), path.resolve('bun.lock')]
 
-      server.watcher.add(filesToWatch);
+      server.watcher.add(filesToWatch)
 
-      server.watcher.on("change", (filePath: string) => {
+      server.watcher.on('change', (filePath: string) => {
         if (filesToWatch.includes(filePath)) {
           console.log(
-            `\n📦 Dependency file changed: ${path.basename(
-              filePath
-            )}. Clearing caches...`
-          );
+            `\n📦 Dependency file changed: ${path.basename(filePath)}. Clearing caches...`
+          )
 
-          exec(
-            "rm -f .eslintcache tsconfig.tsbuildinfo",
-            (err, stdout, stderr) => {
-              if (err) {
-                console.error("Failed to clear caches:", stderr);
-                return;
-              }
-              console.log("✅ Caches cleared successfully.\n");
+          exec('rm -f .eslintcache tsconfig.tsbuildinfo', (err, stdout, stderr) => {
+            if (err) {
+              console.error('Failed to clear caches:', stderr)
+              return
             }
-          );
+            console.log('✅ Caches cleared successfully.\n')
+          })
         }
-      });
+      })
     },
-  };
+  }
 }
 
 export default ({ mode }: { mode: string }) => {
-  const env = loadEnv(mode, process.cwd());
+  const env = loadEnv(mode, process.cwd())
   return defineConfig({
-    plugins: [react(), cloudflare(), watchDependenciesPlugin()],
+    plugins: [
+      react(),
+      cloudflare(),
+      watchDependenciesPlugin(),
+      VitePWA({
+        registerType: 'autoUpdate',
+        includeAssets: ['favicon.ico', 'robots.txt', 'apple-touch-icon.png'],
+        manifest: {
+          name: 'Akademia Pro',
+          short_name: 'Akademia',
+          description: 'Modern school management portal',
+          theme_color: '#2563eb',
+          background_color: '#ffffff',
+          display: 'standalone',
+          orientation: 'portrait',
+          scope: '/',
+          start_url: '/',
+          icons: [
+            {
+              src: '/icon-192.png',
+              sizes: '192x192',
+              type: 'image/png',
+            },
+            {
+              src: '/icon-512.png',
+              sizes: '512x512',
+              type: 'image/png',
+            },
+            {
+              src: '/icon-512.png',
+              sizes: '512x512',
+              type: 'image/png',
+              purpose: 'any maskable',
+            },
+          ],
+        },
+        workbox: {
+          globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+          runtimeCaching: [
+            {
+              urlPattern: /^https:\/\/api\./,
+              handler: 'NetworkFirst',
+              options: {
+                cacheName: 'api-cache',
+                networkTimeoutSeconds: 10,
+                expiration: {
+                  maxEntries: 100,
+                  maxAgeSeconds: 60 * 60 * 24,
+                },
+                cacheableResponse: {
+                  statuses: [0, 200],
+                },
+              },
+            },
+            {
+              urlPattern: /^https:\/\/fonts\.googleapis\.com/,
+              handler: 'CacheFirst',
+              options: {
+                cacheName: 'google-fonts-cache',
+                expiration: {
+                  maxEntries: 10,
+                  maxAgeSeconds: 60 * 60 * 24 * 365,
+                },
+                cacheableResponse: {
+                  statuses: [0, 200],
+                },
+              },
+            },
+            {
+              urlPattern: /^https:\/\/fonts\.gstatic\.com/,
+              handler: 'CacheFirst',
+              options: {
+                cacheName: 'gstatic-fonts-cache',
+                expiration: {
+                  maxEntries: 10,
+                  maxAgeSeconds: 60 * 60 * 24 * 365,
+                },
+                cacheableResponse: {
+                  statuses: [0, 200],
+                },
+              },
+            },
+          ],
+        },
+      }),
+    ],
     build: {
       minify: true,
       sourcemap: false,
       rollupOptions: {
         output: {
-          manualChunks: (id) => {
+          manualChunks: id => {
             if (id.includes('node_modules')) {
               if (id.includes('recharts')) {
-                return 'recharts';
+                return 'recharts'
               }
               if (id.includes('@tanstack/react-query')) {
-                return 'query';
+                return 'query'
               }
               if (id.includes('lucide-react')) {
-                return 'icons';
+                return 'icons'
               }
               if (id.includes('zod') || id.includes('react-hook-form')) {
-                return 'forms';
+                return 'forms'
               }
               if (id.includes('immer')) {
-                return 'state';
+                return 'state'
               }
               if (id.includes('embla-carousel')) {
-                return 'carousel';
+                return 'carousel'
               }
               if (id.includes('dompurify')) {
-                return 'sanitization';
+                return 'sanitization'
               }
               if (id.includes('@radix-ui')) {
-                return 'vendor';
+                return 'vendor'
               }
             }
-            return undefined;
+            return undefined
           },
         },
       },
@@ -125,18 +203,18 @@ export default ({ mode }: { mode: string }) => {
     },
     resolve: {
       alias: {
-        "@": path.resolve(__dirname, "./src"),
-        "@shared": path.resolve(__dirname, "./shared"),
+        '@': path.resolve(__dirname, './src'),
+        '@shared': path.resolve(__dirname, './shared'),
       },
     },
     optimizeDeps: {
-      include: ["react", "react-dom", "react-router-dom"],
-      exclude: ["agents"],
+      include: ['react', 'react-dom', 'react-router-dom'],
+      exclude: ['agents'],
       force: true,
     },
     define: {
-      global: "globalThis",
+      global: 'globalThis',
     },
-    cacheDir: "node_modules/.vite",
-  });
-};
+    cacheDir: 'node_modules/.vite',
+  })
+}
