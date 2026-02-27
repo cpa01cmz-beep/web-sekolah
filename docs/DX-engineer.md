@@ -51,6 +51,8 @@ DX-engineer focuses on improving Developer Experience through small, safe, measu
 
 ## Recent Improvements
 
+- **2026-02-27**: Fixed Prettier formatting for 9 worker/storage/ files (BaseDateSortedIndex, BaseSecondaryIndex, CompoundSecondaryIndex, DateSortedSecondaryIndex, Index, SecondaryIndex, StudentDateSortedIndex, UserDateSortedIndex, index)
+  - PR: https://github.com/cpa01cmz-beep/web-sekolah/pull/1363
 - **2026-02-27**: Fixed Prettier formatting for 8 src/hooks source files (use-mobile, use-reduced-motion, use-theme, useAdmin, useFormValidation, useParent, useStudent, useTeacher)
   - PR: https://github.com/cpa01cmz-beep/web-sekolah/pull/1352
 - **2026-02-27**: Corrected PR #1335 title/body to accurately reflect it only contains documentation updates (not the claimed 303 file formatting fix)
