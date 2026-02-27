@@ -26,7 +26,7 @@ export const SiteHeader = memo(function SiteHeader() {
             <GraduationCap className="h-8 w-8" style={{ color: THEME_COLORS.PRIMARY }} aria-hidden="true" />
             <span className="text-xl font-bold text-foreground">Akademia Pro</span>
           </Link>
-          <nav className="hidden md:flex items-center space-x-6" aria-label="Main navigation" role="navigation">
+          <nav className="hidden md:flex items-center space-x-6" aria-label="Main navigation">
               {navLinks.map((link) => (
                 link.submenu ? (
                 <DropdownMenu key={link.name}>

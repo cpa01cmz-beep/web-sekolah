@@ -45,7 +45,7 @@ export const PortalSidebar = memo(function PortalSidebar() {
             {isCollapsed ? <ChevronRight className="h-5 w-5" aria-hidden="true" /> : <ChevronLeft className="h-5 w-5" aria-hidden="true" />}
           </Button>
         </div>
-        <nav className="flex-grow p-2 space-y-2" role="navigation" aria-label={`${user.role} portal navigation`}>
+        <nav className="flex-grow p-2 space-y-2" aria-label={`${user.role} portal navigation`}>
           <h2 className="sr-only">Navigation Menu</h2>
           {navLinks.map((link: NavLinkType) => (
             <Tooltip key={link.to}>
