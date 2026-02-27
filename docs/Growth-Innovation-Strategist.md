@@ -10,6 +10,28 @@ This document serves as the long-term memory and domain knowledge for the Growth
 
 ## Implemented Improvements
 
+### 9. Optimize Google Fonts Loading (Feb 2026)
+
+**Issue**: The application used only dns-prefetch for fonts.googleapis.com but not preconnect for fonts.gstatic.com, which is needed for the actual font files from Google Fonts.
+
+**Changes**:
+
+- Added preconnect for fonts.gstatic.com to establish early connection
+- Added dns-prefetch for fonts.gstatic.com as fallback
+
+**Impact**:
+
+- Faster font loading (preconnect establishes early connection before CSS is parsed)
+- Better performance especially on first page load
+- Fallback dns-prefetch for browsers that don't support preconnect
+- Improves Time to First Byte (TTFB) for Google Fonts
+
+**Acceptance Criteria Met**:
+
+- [x] preconnect for fonts.gstatic.com added
+- [x] dns-prefetch for fonts.gstatic.com added
+- [x] Validation passes
+
 ### 8. Fix robots.txt Sitemap URL (Feb 2026)
 
 **Issue**: The `robots.txt` file referenced the sitemap at `/sitemap.xml` but the actual sitemap is served at `/api/public/sitemap.xml`. This inconsistency could prevent search engines from finding the sitemap.
