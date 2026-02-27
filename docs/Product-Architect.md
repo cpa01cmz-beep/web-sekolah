@@ -303,3 +303,28 @@ Updated mapping:
 - Lint: ✅ 0 errors
 - Tests: ✅ 3633 passing
 - PR: #1341
+
+### 2026-02-27: Remove Unused Grades Constants File
+
+**Issue**: Dead code in the codebase:
+
+- `src/constants/grades.ts` was not imported anywhere in the codebase
+- Corresponding test file `src/constants/__tests__/grades.test.ts` was also unused
+- Grade threshold constants are already available in `@shared/constants`
+
+**Solution**:
+
+1. Removed unused `src/constants/grades.ts` file
+2. Removed corresponding test file
+
+**Files Changed**:
+
+- `src/constants/grades.ts` - Removed (unused)
+- `src/constants/__tests__/grades.test.ts` - Removed (unused)
+
+**Verification**:
+
+- TypeScript: ✅ 0 errors
+- Lint: ✅ 0 errors
+- Tests: ✅ 3687 passing
+- PR: #1353
