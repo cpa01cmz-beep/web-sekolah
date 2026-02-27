@@ -1,14 +1,17 @@
-import { memo } from 'react';
-import { Badge } from '@/components/ui/badge';
-import { getGradeColorClass, getGradeLetter } from '@/utils/grades';
+import { memo } from 'react'
+import { Badge } from '@/components/ui/badge'
+import { getGradeColorClass, getGradeLetter } from '@/utils/grades'
 
 interface GradeListItemProps {
-  courseName: string;
-  score: number;
+  courseName: string
+  score: number
 }
 
-export const GradeListItem = memo(function GradeListItem({ courseName, score }: GradeListItemProps) {
-  const isPassing = score >= 70;
+export const GradeListItem = memo(function GradeListItem({
+  courseName,
+  score,
+}: GradeListItemProps) {
+  const isPassing = score >= 70
 
   return (
     <li className="flex items-center justify-between">
@@ -18,5 +21,5 @@ export const GradeListItem = memo(function GradeListItem({ courseName, score }: 
         {getGradeLetter(score)} ({score})
       </Badge>
     </li>
-  );
-});
+  )
+})

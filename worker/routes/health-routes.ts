@@ -1,39 +1,39 @@
-import { Hono } from 'hono';
-import type { Env } from '../core-utils';
-import { ok } from '../core-utils';
-import { integrationMonitor } from '../integration-monitor';
-import type { Context } from 'hono';
+import { Hono } from 'hono'
+import type { Env } from '../core-utils'
+import { ok } from '../core-utils'
+import { integrationMonitor } from '../integration-monitor'
+import type { Context } from 'hono'
 
 interface ReadinessCheck {
-  name: string;
-  healthy: boolean;
-  latency?: number;
-  error?: string;
+  name: string
+  healthy: boolean
+  latency?: number
+  error?: string
 }
 
 async function performReadinessChecks(c: Context): Promise<ReadinessCheck[]> {
-  const checks: ReadinessCheck[] = [];
-  const metrics = integrationMonitor.getHealthMetrics();
+  const checks: ReadinessCheck[] = []
+  const metrics = integrationMonitor.getHealthMetrics()
 
   checks.push({
     name: 'circuitBreaker',
     healthy: !metrics.circuitBreaker?.isOpen,
-  });
+  })
 
-  const webhookSuccessRate = integrationMonitor.getWebhookSuccessRate();
-  const hasWebhookActivity = metrics.webhook.totalDeliveries > 0;
+  const webhookSuccessRate = integrationMonitor.getWebhookSuccessRate()
+  const hasWebhookActivity = metrics.webhook.totalDeliveries > 0
   checks.push({
     name: 'webhook',
     healthy: !hasWebhookActivity || webhookSuccessRate >= 80,
-  });
+  })
 
-  const errorRatePerMinute = metrics.errors.errorRate.perMinute;
+  const errorRatePerMinute = metrics.errors.errorRate.perMinute
   checks.push({
     name: 'errorRate',
     healthy: errorRatePerMinute < 100,
-  });
+  })
 
-  return checks;
+  return checks
 }
 
 export function healthRoutes(app: Hono<{ Bindings: Env }>) {
@@ -41,12 +41,12 @@ export function healthRoutes(app: Hono<{ Bindings: Env }>) {
     return ok(c, {
       status: 'alive',
       timestamp: new Date().toISOString(),
-    });
-  });
+    })
+  })
 
   app.get('/api/health/ready', async (c: Context) => {
-    const checks = await performReadinessChecks(c);
-    const allHealthy = checks.every((check) => check.healthy);
+    const checks = await performReadinessChecks(c)
+    const allHealthy = checks.every(check => check.healthy)
 
     const response = {
       status: allHealthy ? 'ready' : 'not_ready',
@@ -62,7 +62,7 @@ export function healthRoutes(app: Hono<{ Bindings: Env }>) {
         }),
         {}
       ),
-    };
+    }
 
     if (!allHealthy) {
       return c.json(
@@ -73,9 +73,9 @@ export function healthRoutes(app: Hono<{ Bindings: Env }>) {
           data: response,
         },
         503
-      );
+      )
     }
 
-    return ok(c, response);
-  });
+    return ok(c, response)
+  })
 }

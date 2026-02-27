@@ -1,16 +1,16 @@
-import { memo } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Skeleton } from '@/components/ui/skeleton';
-import { cn } from '@/lib/utils';
+import { memo } from 'react'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Skeleton } from '@/components/ui/skeleton'
+import { cn } from '@/lib/utils'
 
 interface DashboardStatCardProps {
-  title: string;
-  value: string | number;
-  icon?: React.ReactNode;
-  subtitle?: string;
-  valueSize?: '2xl' | '3xl';
-  className?: string;
-  loading?: boolean;
+  title: string
+  value: string | number
+  icon?: React.ReactNode
+  subtitle?: string
+  valueSize?: '2xl' | '3xl'
+  className?: string
+  loading?: boolean
 }
 
 export const DashboardStatCard = memo(function DashboardStatCard({
@@ -34,7 +34,7 @@ export const DashboardStatCard = memo(function DashboardStatCard({
           {subtitle && <Skeleton className="h-3 w-32 mt-2" />}
         </CardContent>
       </Card>
-    );
+    )
   }
 
   return (
@@ -47,11 +47,9 @@ export const DashboardStatCard = memo(function DashboardStatCard({
         <div className={cn('font-bold', valueSize === '2xl' ? 'text-2xl' : 'text-3xl')}>
           {value}
         </div>
-        {subtitle && (
-          <p className="text-xs text-muted-foreground mt-1">{subtitle}</p>
-        )}
+        {subtitle && <p className="text-xs text-muted-foreground mt-1">{subtitle}</p>}
       </CardContent>
     </Card>
-  );
-});
-DashboardStatCard.displayName = 'DashboardStatCard';
+  )
+})
+DashboardStatCard.displayName = 'DashboardStatCard'

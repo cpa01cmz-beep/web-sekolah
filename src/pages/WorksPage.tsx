@@ -1,8 +1,8 @@
-import { SiteHeader } from '@/components/SiteHeader';
-import { SiteFooter } from '@/components/SiteFooter';
-import { SkipLink } from '@/components/SkipLink';
-import { SlideUp } from '@/components/animations';
-import { ContentCard } from '@/components/ContentCard';
+import { SiteHeader } from '@/components/SiteHeader'
+import { SiteFooter } from '@/components/SiteFooter'
+import { SkipLink } from '@/components/SkipLink'
+import { SlideUp } from '@/components/animations'
+import { ContentCard } from '@/components/ContentCard'
 
 export function WorksPage() {
   return (
@@ -13,9 +13,7 @@ export function WorksPage() {
         <div className="bg-primary/5">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24 text-center">
             <SlideUp>
-              <h1 className="text-4xl md:text-5xl font-bold text-primary">
-                Karya Siswa
-              </h1>
+              <h1 className="text-4xl md:text-5xl font-bold text-primary">Karya Siswa</h1>
             </SlideUp>
             <SlideUp delay={0.2}>
               <p className="mt-4 max-w-3xl mx-auto text-lg text-muted-foreground">
@@ -102,5 +100,5 @@ export function WorksPage() {
       </main>
       <SiteFooter />
     </div>
-  );
+  )
 }

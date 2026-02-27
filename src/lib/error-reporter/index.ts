@@ -1,5 +1,5 @@
-export { ErrorReporter } from './ErrorReporter';
-export { globalDeduplication } from './deduplication';
+export { ErrorReporter } from './ErrorReporter'
+export { globalDeduplication } from './deduplication'
 export type {
   BaseErrorData,
   ErrorReport,
@@ -10,34 +10,34 @@ export type {
   ConsoleMethod,
   ConsoleArgs,
   ConsoleNative,
-  WrappedConsoleFn
-} from './types';
+  WrappedConsoleFn,
+} from './types'
 export {
   REACT_WARNING_PATTERN,
   WARNING_PREFIX,
   CONSOLE_ERROR_PREFIX,
   SOURCE_FILE_PATTERNS,
-  VENDOR_PATTERNS
-} from './constants';
+  VENDOR_PATTERNS,
+} from './constants'
 export {
   categorizeError,
   isReactRouterFutureFlagMessage,
   isDeprecatedReactWarningMessage,
   hasRelevantSourceInStack,
   parseStackTrace,
-  formatConsoleArgs
-} from './utils';
-export { setupImmediateInterceptors } from './immediate-interceptors';
+  formatConsoleArgs,
+} from './utils'
+export { setupImmediateInterceptors } from './immediate-interceptors'
 
-import { ErrorReporter } from './ErrorReporter';
-import { setupImmediateInterceptors } from './immediate-interceptors';
+import { ErrorReporter } from './ErrorReporter'
+import { setupImmediateInterceptors } from './immediate-interceptors'
 
-export const errorReporter = new ErrorReporter();
+export const errorReporter = new ErrorReporter()
 
-setupImmediateInterceptors();
+setupImmediateInterceptors()
 
-if (typeof window !== "undefined") {
-  window.addEventListener("beforeunload", () => {
-    errorReporter.dispose();
-  });
+if (typeof window !== 'undefined') {
+  window.addEventListener('beforeunload', () => {
+    errorReporter.dispose()
+  })
 }

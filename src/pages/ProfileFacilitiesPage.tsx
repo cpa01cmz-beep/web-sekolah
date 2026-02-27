@@ -1,7 +1,7 @@
-import { SiteHeader } from '@/components/SiteHeader';
-import { SiteFooter } from '@/components/SiteFooter';
-import { SkipLink } from '@/components/SkipLink';
-import { SlideUp, SlideLeft, SlideRight } from '@/components/animations';
+import { SiteHeader } from '@/components/SiteHeader'
+import { SiteFooter } from '@/components/SiteFooter'
+import { SkipLink } from '@/components/SkipLink'
+import { SlideUp, SlideLeft, SlideRight } from '@/components/animations'
 
 export function ProfileFacilitiesPage() {
   return (
@@ -18,7 +18,8 @@ export function ProfileFacilitiesPage() {
             </SlideUp>
             <SlideUp delay={0.2}>
               <p className="mt-4 max-w-3xl mx-auto text-lg text-muted-foreground">
-                Fasilitas lengkap yang kami sediakan untuk mendukung proses belajar mengajar yang optimal.
+                Fasilitas lengkap yang kami sediakan untuk mendukung proses belajar mengajar yang
+                optimal.
               </p>
             </SlideUp>
           </div>
@@ -35,7 +36,8 @@ export function ProfileFacilitiesPage() {
                   <div>
                     <h3 className="text-xl font-bold">Laboratorium Sains</h3>
                     <p className="mt-2 text-muted-foreground">
-                      Laboratorium kimia, fisika, dan biologi yang dilengkapi dengan peralatan modern untuk praktikum siswa.
+                      Laboratorium kimia, fisika, dan biologi yang dilengkapi dengan peralatan
+                      modern untuk praktikum siswa.
                     </p>
                   </div>
                 </div>
@@ -47,7 +49,8 @@ export function ProfileFacilitiesPage() {
                   <div>
                     <h3 className="text-xl font-bold">Perpustakaan Digital</h3>
                     <p className="mt-2 text-muted-foreground">
-                      Perpustakaan dengan koleksi buku fisik dan digital yang lengkap, dilengkapi dengan area baca yang nyaman.
+                      Perpustakaan dengan koleksi buku fisik dan digital yang lengkap, dilengkapi
+                      dengan area baca yang nyaman.
                     </p>
                   </div>
                 </div>
@@ -59,7 +62,8 @@ export function ProfileFacilitiesPage() {
                   <div>
                     <h3 className="text-xl font-bold">Ruang Kelas Canggih</h3>
                     <p className="mt-2 text-muted-foreground">
-                      Ruang kelas yang dilengkapi dengan proyektor, sound system, dan perangkat pembelajaran interaktif.
+                      Ruang kelas yang dilengkapi dengan proyektor, sound system, dan perangkat
+                      pembelajaran interaktif.
                     </p>
                   </div>
                 </div>
@@ -88,7 +92,8 @@ export function ProfileFacilitiesPage() {
                   <div>
                     <h3 className="text-xl font-bold">Kantin Sehat</h3>
                     <p className="mt-2 text-muted-foreground">
-                      Kantin yang menyediakan makanan bergizi seimbang dengan pengawasan giziwan secara rutin.
+                      Kantin yang menyediakan makanan bergizi seimbang dengan pengawasan giziwan
+                      secara rutin.
                     </p>
                   </div>
                 </div>
@@ -100,7 +105,8 @@ export function ProfileFacilitiesPage() {
                   <div>
                     <h3 className="text-xl font-bold">Asrama Siswa</h3>
                     <p className="mt-2 text-muted-foreground">
-                      Asrama yang nyaman dan aman dengan pengawasan ketat, dilengkapi dengan fasilitas laundry dan ruang belajar.
+                      Asrama yang nyaman dan aman dengan pengawasan ketat, dilengkapi dengan
+                      fasilitas laundry dan ruang belajar.
                     </p>
                   </div>
                 </div>
@@ -110,7 +116,9 @@ export function ProfileFacilitiesPage() {
 
           <SlideUp>
             <div className="mt-24">
-              <h2 className="text-3xl font-bold text-foreground text-center mb-12">Galeri Fasilitas</h2>
+              <h2 className="text-3xl font-bold text-foreground text-center mb-12">
+                Galeri Fasilitas
+              </h2>
               <div className="grid md:grid-cols-3 gap-6">
                 <div className="rounded-lg overflow-hidden shadow-md">
                   <div className="h-48 bg-gradient-to-r from-blue-400 to-blue-600"></div>
@@ -137,5 +145,5 @@ export function ProfileFacilitiesPage() {
       </main>
       <SiteFooter />
     </div>
-  );
+  )
 }

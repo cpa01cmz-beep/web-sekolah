@@ -1,18 +1,24 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Switch } from '@/components/ui/switch';
-import { Separator } from '@/components/ui/separator';
-import { PageHeader } from '@/components/PageHeader';
-import { SlideUp } from '@/components/animations';
-import { Skeleton } from '@/components/ui/skeleton';
-import { useSettings, useUpdateSettings } from '@/hooks/useAdmin';
-import type { Settings } from '@shared/types';
-import { toast } from 'sonner';
-import { THEME_COLORS } from '@/theme/colors';
-import { useState, useMemo } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import { Switch } from '@/components/ui/switch'
+import { Separator } from '@/components/ui/separator'
+import { PageHeader } from '@/components/PageHeader'
+import { SlideUp } from '@/components/animations'
+import { Skeleton } from '@/components/ui/skeleton'
+import { useSettings, useUpdateSettings } from '@/hooks/useAdmin'
+import type { Settings } from '@shared/types'
+import { toast } from 'sonner'
+import { THEME_COLORS } from '@/theme/colors'
+import { useState, useMemo } from 'react'
 
 const defaultSettings: Settings = {
   schoolName: '',
@@ -20,32 +26,29 @@ const defaultSettings: Settings = {
   semester: 1,
   allowRegistration: true,
   maintenanceMode: false,
-};
+}
 
 export function AdminSettingsPage() {
-  const { data: settings, isLoading, error } = useSettings();
+  const { data: settings, isLoading, error } = useSettings()
   const updateSettings = useUpdateSettings({
     onSuccess: () => toast.success('Settings saved successfully!'),
-    onError: (err) => toast.error(`Failed to save settings: ${err.message}`),
-  });
+    onError: err => toast.error(`Failed to save settings: ${err.message}`),
+  })
 
-  const mergedSettings = useMemo(
-    () => ({ ...defaultSettings, ...settings }),
-    [settings]
-  );
+  const mergedSettings = useMemo(() => ({ ...defaultSettings, ...settings }), [settings])
 
-  const [localEdits, setLocalEdits] = useState<Partial<Settings>>({});
+  const [localEdits, setLocalEdits] = useState<Partial<Settings>>({})
 
-  const formData = { ...mergedSettings, ...localEdits };
+  const formData = { ...mergedSettings, ...localEdits }
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    updateSettings.mutate(formData);
-  };
+    e.preventDefault()
+    updateSettings.mutate(formData)
+  }
 
   const updateField = <K extends keyof Settings>(field: K, value: Settings[K]) => {
-    setLocalEdits((prev) => ({ ...prev, [field]: value }));
-  };
+    setLocalEdits(prev => ({ ...prev, [field]: value }))
+  }
 
   if (error) {
     return (
@@ -57,7 +60,7 @@ export function AdminSettingsPage() {
           </CardContent>
         </Card>
       </SlideUp>
-    );
+    )
   }
 
   return (
@@ -79,7 +82,7 @@ export function AdminSettingsPage() {
                   <Input
                     id="school-name"
                     value={formData.schoolName}
-                    onChange={(e) => updateField('schoolName', e.target.value)}
+                    onChange={e => updateField('schoolName', e.target.value)}
                     placeholder="Enter school name"
                   />
                 )}
@@ -91,7 +94,7 @@ export function AdminSettingsPage() {
                 ) : (
                   <Select
                     value={formData.academicYear}
-                    onValueChange={(value) => updateField('academicYear', value)}
+                    onValueChange={value => updateField('academicYear', value)}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select year" />
@@ -111,7 +114,7 @@ export function AdminSettingsPage() {
                 ) : (
                   <Select
                     value={formData.semester.toString()}
-                    onValueChange={(value) => updateField('semester', parseInt(value, 10))}
+                    onValueChange={value => updateField('semester', parseInt(value, 10))}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select semester" />
@@ -137,7 +140,12 @@ export function AdminSettingsPage() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="primary-color">Primary Color</Label>
-                <Input id="primary-color" type="color" defaultValue={THEME_COLORS.PRIMARY} className="w-24" />
+                <Input
+                  id="primary-color"
+                  type="color"
+                  defaultValue={THEME_COLORS.PRIMARY}
+                  className="w-24"
+                />
               </div>
             </CardContent>
           </Card>
@@ -160,7 +168,7 @@ export function AdminSettingsPage() {
                   <Switch
                     id="allow-registration"
                     checked={formData.allowRegistration}
-                    onCheckedChange={(checked) => updateField('allowRegistration', checked)}
+                    onCheckedChange={checked => updateField('allowRegistration', checked)}
                   />
                 )}
               </div>
@@ -178,7 +186,7 @@ export function AdminSettingsPage() {
                   <Switch
                     id="maintenance-mode"
                     checked={formData.maintenanceMode}
-                    onCheckedChange={(checked) => updateField('maintenanceMode', checked)}
+                    onCheckedChange={checked => updateField('maintenanceMode', checked)}
                   />
                 )}
               </div>
@@ -192,5 +200,5 @@ export function AdminSettingsPage() {
         </div>
       </form>
     </SlideUp>
-  );
+  )
 }

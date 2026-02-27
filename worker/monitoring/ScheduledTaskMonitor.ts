@@ -1,36 +1,36 @@
-import { IMonitor, type MonitorStats } from './IMonitor';
+import { IMonitor, type MonitorStats } from './IMonitor'
 
 interface InternalScheduledTaskStats {
-  totalExecutions: number;
-  successfulExecutions: number;
-  failedExecutions: number;
-  totalDuration: number;
-  lastExecution?: string;
-  lastSuccess?: string;
-  lastFailure?: string;
-  taskExecutions: Map<string, TaskExecutionStats>;
+  totalExecutions: number
+  successfulExecutions: number
+  failedExecutions: number
+  totalDuration: number
+  lastExecution?: string
+  lastSuccess?: string
+  lastFailure?: string
+  taskExecutions: Map<string, TaskExecutionStats>
 }
 
 export interface ScheduledTaskStats {
-  totalExecutions: number;
-  successfulExecutions: number;
-  failedExecutions: number;
-  totalDuration: number;
-  lastExecution?: string;
-  lastSuccess?: string;
-  lastFailure?: string;
-  taskExecutions: Record<string, TaskExecutionStats>;
+  totalExecutions: number
+  successfulExecutions: number
+  failedExecutions: number
+  totalDuration: number
+  lastExecution?: string
+  lastSuccess?: string
+  lastFailure?: string
+  taskExecutions: Record<string, TaskExecutionStats>
 }
 
 export interface TaskExecutionStats {
-  name: string;
-  totalExecutions: number;
-  successfulExecutions: number;
-  failedExecutions: number;
-  totalDuration: number;
-  lastExecution?: string;
-  lastSuccess?: string;
-  lastFailure?: string;
+  name: string
+  totalExecutions: number
+  successfulExecutions: number
+  failedExecutions: number
+  totalDuration: number
+  lastExecution?: string
+  lastSuccess?: string
+  lastFailure?: string
 }
 
 export class ScheduledTaskMonitor implements IMonitor {
@@ -40,24 +40,24 @@ export class ScheduledTaskMonitor implements IMonitor {
     failedExecutions: 0,
     totalDuration: 0,
     taskExecutions: new Map(),
-  };
+  }
 
   recordExecution(name: string, success: boolean, duration: number): void {
-    const now = new Date().toISOString();
-    
-    this.stats.totalExecutions++;
-    this.stats.totalDuration += duration;
-    this.stats.lastExecution = now;
+    const now = new Date().toISOString()
+
+    this.stats.totalExecutions++
+    this.stats.totalDuration += duration
+    this.stats.lastExecution = now
 
     if (success) {
-      this.stats.successfulExecutions++;
-      this.stats.lastSuccess = now;
+      this.stats.successfulExecutions++
+      this.stats.lastSuccess = now
     } else {
-      this.stats.failedExecutions++;
-      this.stats.lastFailure = now;
+      this.stats.failedExecutions++
+      this.stats.lastFailure = now
     }
 
-    let taskStats = this.stats.taskExecutions.get(name);
+    let taskStats = this.stats.taskExecutions.get(name)
     if (!taskStats) {
       taskStats = {
         name,
@@ -65,29 +65,29 @@ export class ScheduledTaskMonitor implements IMonitor {
         successfulExecutions: 0,
         failedExecutions: 0,
         totalDuration: 0,
-      };
-      this.stats.taskExecutions.set(name, taskStats);
+      }
+      this.stats.taskExecutions.set(name, taskStats)
     }
 
-    taskStats.totalExecutions++;
-    taskStats.totalDuration += duration;
-    taskStats.lastExecution = now;
+    taskStats.totalExecutions++
+    taskStats.totalDuration += duration
+    taskStats.lastExecution = now
 
     if (success) {
-      taskStats.successfulExecutions++;
-      taskStats.lastSuccess = now;
+      taskStats.successfulExecutions++
+      taskStats.lastSuccess = now
     } else {
-      taskStats.failedExecutions++;
-      taskStats.lastFailure = now;
+      taskStats.failedExecutions++
+      taskStats.lastFailure = now
     }
   }
 
   getStats(): ScheduledTaskStats {
-    const taskExecutionsRecord: Record<string, TaskExecutionStats> = {};
+    const taskExecutionsRecord: Record<string, TaskExecutionStats> = {}
     this.stats.taskExecutions.forEach((value, key) => {
-      taskExecutionsRecord[key] = value;
-    });
-    
+      taskExecutionsRecord[key] = value
+    })
+
     return {
       totalExecutions: this.stats.totalExecutions,
       successfulExecutions: this.stats.successfulExecutions,
@@ -97,12 +97,12 @@ export class ScheduledTaskMonitor implements IMonitor {
       lastSuccess: this.stats.lastSuccess,
       lastFailure: this.stats.lastFailure,
       taskExecutions: taskExecutionsRecord,
-    };
+    }
   }
 
   getSuccessRate(): number {
-    if (this.stats.totalExecutions === 0) return 100;
-    return (this.stats.successfulExecutions / this.stats.totalExecutions) * 100;
+    if (this.stats.totalExecutions === 0) return 100
+    return (this.stats.successfulExecutions / this.stats.totalExecutions) * 100
   }
 
   reset(): void {
@@ -112,6 +112,6 @@ export class ScheduledTaskMonitor implements IMonitor {
       failedExecutions: 0,
       totalDuration: 0,
       taskExecutions: new Map(),
-    };
+    }
   }
 }

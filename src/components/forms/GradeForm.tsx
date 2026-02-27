@@ -1,56 +1,80 @@
-import { useState, useMemo, useCallback, memo } from 'react';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter, DialogClose } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Button } from '@/components/ui/button';
-import { FormField } from '@/components/ui/form-field';
-import { isValidScore } from '@/utils/validation';
+import { useState, useMemo, useCallback, memo } from 'react'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogClose,
+} from '@/components/ui/dialog'
+import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
+import { Button } from '@/components/ui/button'
+import { FormField } from '@/components/ui/form-field'
+import { isValidScore } from '@/utils/validation'
 
 interface StudentGrade {
-  id: string;
-  name: string;
-  score: number | null;
-  feedback: string;
-  gradeId: string | null;
+  id: string
+  name: string
+  score: number | null
+  feedback: string
+  gradeId: string | null
 }
 
 interface GradeFormProps {
-  open: boolean;
-  onClose: () => void;
-  editingStudent: StudentGrade | null;
-  onSave: (data: { score: number | null; feedback: string }) => void;
-  isLoading: boolean;
+  open: boolean
+  onClose: () => void
+  editingStudent: StudentGrade | null
+  onSave: (data: { score: number | null; feedback: string }) => void
+  isLoading: boolean
 }
 
-export const GradeForm = memo(function GradeForm({ open, onClose, editingStudent, onSave, isLoading }: GradeFormProps) {
-  const [currentScore, setCurrentScore] = useState<string>(() => editingStudent?.score?.toString() || '');
-  const [currentFeedback, setCurrentFeedback] = useState<string>(() => editingStudent?.feedback || '');
+export const GradeForm = memo(function GradeForm({
+  open,
+  onClose,
+  editingStudent,
+  onSave,
+  isLoading,
+}: GradeFormProps) {
+  const [currentScore, setCurrentScore] = useState<string>(
+    () => editingStudent?.score?.toString() || ''
+  )
+  const [currentFeedback, setCurrentFeedback] = useState<string>(
+    () => editingStudent?.feedback || ''
+  )
 
-  const handleOpenChange = useCallback((newOpen: boolean) => {
-    if (!newOpen) {
-      setCurrentScore('');
-      setCurrentFeedback('');
-      onClose();
-    } else if (editingStudent) {
-      setCurrentScore(editingStudent.score?.toString() || '');
-      setCurrentFeedback(editingStudent.feedback || '');
-    }
-  }, [editingStudent, onClose]);
+  const handleOpenChange = useCallback(
+    (newOpen: boolean) => {
+      if (!newOpen) {
+        setCurrentScore('')
+        setCurrentFeedback('')
+        onClose()
+      } else if (editingStudent) {
+        setCurrentScore(editingStudent.score?.toString() || '')
+        setCurrentFeedback(editingStudent.feedback || '')
+      }
+    },
+    [editingStudent, onClose]
+  )
 
-  const handleSubmit = useCallback((e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const scoreValue = currentScore === '' ? null : parseInt(currentScore, 10);
-    if (currentScore !== '' && !isValidScore(scoreValue)) {
-      return;
-    }
-    onSave({ score: scoreValue, feedback: currentFeedback });
-  }, [currentScore, currentFeedback, onSave]);
+  const handleSubmit = useCallback(
+    (e: React.FormEvent<HTMLFormElement>) => {
+      e.preventDefault()
+      const scoreValue = currentScore === '' ? null : parseInt(currentScore, 10)
+      if (currentScore !== '' && !isValidScore(scoreValue)) {
+        return
+      }
+      onSave({ score: scoreValue, feedback: currentFeedback })
+    },
+    [currentScore, currentFeedback, onSave]
+  )
 
   const scoreError = useMemo(() => {
-    if (currentScore === '') return '';
-    const scoreValue = parseInt(currentScore, 10);
-    return isValidScore(scoreValue) ? '' : 'Please enter a valid score between 0 and 100';
-  }, [currentScore]);
+    if (currentScore === '') return ''
+    const scoreValue = parseInt(currentScore, 10)
+    return isValidScore(scoreValue) ? '' : 'Please enter a valid score between 0 and 100'
+  }, [currentScore])
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
@@ -72,7 +96,7 @@ export const GradeForm = memo(function GradeForm({ open, onClose, editingStudent
                 <Input
                   type="number"
                   value={currentScore}
-                  onChange={(e) => setCurrentScore(e.target.value)}
+                  onChange={e => setCurrentScore(e.target.value)}
                   className="col-span-3"
                   placeholder="0-100"
                   min="0"
@@ -92,7 +116,7 @@ export const GradeForm = memo(function GradeForm({ open, onClose, editingStudent
               >
                 <Textarea
                   value={currentFeedback}
-                  onChange={(e) => setCurrentFeedback(e.target.value)}
+                  onChange={e => setCurrentFeedback(e.target.value)}
                   className="col-span-3"
                   placeholder="Enter feedback..."
                   rows={3}
@@ -103,7 +127,11 @@ export const GradeForm = memo(function GradeForm({ open, onClose, editingStudent
             </div>
           </div>
           <DialogFooter>
-            <DialogClose asChild><Button type="button" variant="secondary">Cancel</Button></DialogClose>
+            <DialogClose asChild>
+              <Button type="button" variant="secondary">
+                Cancel
+              </Button>
+            </DialogClose>
             <Button type="submit" disabled={isLoading} aria-busy={isLoading}>
               {isLoading ? 'Saving...' : 'Save changes'}
             </Button>
@@ -111,6 +139,6 @@ export const GradeForm = memo(function GradeForm({ open, onClose, editingStudent
         </form>
       </DialogContent>
     </Dialog>
-  );
-});
-GradeForm.displayName = 'GradeForm';
+  )
+})
+GradeForm.displayName = 'GradeForm'

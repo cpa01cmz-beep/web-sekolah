@@ -1,2 +1,2 @@
-export * from './error-reporter';
-export { errorReporter } from './error-reporter';
+export * from './error-reporter'
+export { errorReporter } from './error-reporter'

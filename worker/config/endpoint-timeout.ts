@@ -26,12 +26,12 @@ export const EndpointTimeout = {
   HEALTH: {
     CHECK: 5000,
   },
-} as const;
+} as const
 
 export const ConnectionTimeout = {
   STANDARD: 5000,
   FAST: 2000,
-} as const;
+} as const
 
 export const TimeoutCategory = {
   AUTH: EndpointTimeout.QUERY.STANDARD,
@@ -54,16 +54,16 @@ export const TimeoutCategory = {
   REBUILD_INDEXES: EndpointTimeout.SYSTEM.REBUILD_INDEXES,
   SEED: EndpointTimeout.SYSTEM.SEED,
   HEALTH: EndpointTimeout.HEALTH.CHECK,
-} as const;
+} as const
 
 export function getTimeoutForEndpoint(endpoint: keyof typeof TimeoutCategory): number {
-  return TimeoutCategory[endpoint];
+  return TimeoutCategory[endpoint]
 }
 
 export function isFastQuery(timeout: number): boolean {
-  return timeout <= EndpointTimeout.QUERY.STANDARD;
+  return timeout <= EndpointTimeout.QUERY.STANDARD
 }
 
 export function isComplexOperation(timeout: number): boolean {
-  return timeout >= EndpointTimeout.AGGREGATION.COMPLEX;
+  return timeout >= EndpointTimeout.AGGREGATION.COMPLEX
 }

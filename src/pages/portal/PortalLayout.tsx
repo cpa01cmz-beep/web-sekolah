@@ -1,29 +1,29 @@
-import { Outlet, Navigate, NavLink } from 'react-router-dom';
-import { useAuthStore } from '@/stores/authStore';
-import { PortalSidebar } from '@/components/portal/PortalSidebar';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Button } from '@/components/ui/button';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Menu, Bell, GraduationCap } from 'lucide-react';
-import { Toaster } from 'sonner';
-import { cn } from '@/lib/utils';
-import { useState, useCallback, memo } from 'react';
-import { SkipLink } from '@/components/SkipLink';
-import { navLinksMap, NavLink as NavLinkType } from '@/config/navigation';
-import { THEME_COLORS } from '@/theme/colors';
+import { Outlet, Navigate, NavLink } from 'react-router-dom'
+import { useAuthStore } from '@/stores/authStore'
+import { PortalSidebar } from '@/components/portal/PortalSidebar'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Button } from '@/components/ui/button'
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
+import { Menu, Bell, GraduationCap } from 'lucide-react'
+import { Toaster } from 'sonner'
+import { cn } from '@/lib/utils'
+import { useState, useCallback, memo } from 'react'
+import { SkipLink } from '@/components/SkipLink'
+import { navLinksMap, NavLink as NavLinkType } from '@/config/navigation'
+import { THEME_COLORS } from '@/theme/colors'
 export const PortalLayout = memo(function PortalLayout() {
-  const user = useAuthStore((state) => state.user);
-  const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const user = useAuthStore(state => state.user)
+  const [isMobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   const handleMobileNavClose = useCallback(() => {
-    setMobileMenuOpen(false);
-  }, []);
+    setMobileMenuOpen(false)
+  }, [])
   if (!user) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/login" replace />
   }
-  const navLinks = navLinksMap[user.role as keyof typeof navLinksMap] || [];
-  const basePortalPath = `/portal/${user.role}`;
+  const navLinks = navLinksMap[user.role as keyof typeof navLinksMap] || []
+  const basePortalPath = `/portal/${user.role}`
   return (
     <div className="flex h-screen" style={{ backgroundColor: THEME_COLORS.BACKGROUND }}>
       <SkipLink targetId="main-content" />
@@ -37,13 +37,26 @@ export const PortalLayout = memo(function PortalLayout() {
                   <Menu className="h-6 w-6" aria-hidden="true" />
                 </Button>
               </SheetTrigger>
-              <SheetContent side="left" className="p-0 w-64" role="dialog" aria-label="Mobile navigation menu">
+              <SheetContent
+                side="left"
+                className="p-0 w-64"
+                role="dialog"
+                aria-label="Mobile navigation menu"
+              >
                 <div className="flex flex-col h-full">
                   <div className="flex items-center h-16 border-b px-4">
-                    <GraduationCap className="h-7 w-7" style={{ color: THEME_COLORS.PRIMARY }} aria-hidden="true" />
+                    <GraduationCap
+                      className="h-7 w-7"
+                      style={{ color: THEME_COLORS.PRIMARY }}
+                      aria-hidden="true"
+                    />
                     <span className="ml-2 text-lg font-bold">Akademia Pro</span>
                   </div>
-                  <nav className="flex-grow p-4 space-y-2" role="navigation" aria-label={`${user.role} portal navigation`}>
+                  <nav
+                    className="flex-grow p-4 space-y-2"
+                    role="navigation"
+                    aria-label={`${user.role} portal navigation`}
+                  >
                     <h3 className="sr-only">Navigation Menu</h3>
                     {navLinks.map((link: NavLinkType) => (
                       <NavLink
@@ -59,7 +72,9 @@ export const PortalLayout = memo(function PortalLayout() {
                           )
                         }
                       >
-                        <span aria-hidden="true"><link.icon className="h-5 w-5" /></span>
+                        <span aria-hidden="true">
+                          <link.icon className="h-5 w-5" />
+                        </span>
                         <span>{link.label}</span>
                       </NavLink>
                     ))}
@@ -75,7 +90,12 @@ export const PortalLayout = memo(function PortalLayout() {
             <TooltipProvider delayDuration={200}>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button variant="ghost" size="icon" className="rounded-full" aria-label="View notifications">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="rounded-full"
+                    aria-label="View notifications"
+                  >
                     <Bell className="h-5 w-5" aria-hidden="true" />
                   </Button>
                 </TooltipTrigger>
@@ -94,6 +114,6 @@ export const PortalLayout = memo(function PortalLayout() {
       </div>
       <Toaster richColors />
     </div>
-  );
-});
-PortalLayout.displayName = 'PortalLayout';
+  )
+})
+PortalLayout.displayName = 'PortalLayout'

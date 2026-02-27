@@ -1,46 +1,49 @@
-import type { Context } from 'hono';
-import { logger } from '../logger';
-import { TimeoutError } from '../errors/TimeoutError';
+import type { Context } from 'hono'
+import { logger } from '../logger'
+import { TimeoutError } from '../errors/TimeoutError'
 
-type BackgroundTask = () => Promise<void>;
+type BackgroundTask = () => Promise<void>
 
 export function waitUntil(c: Context, task: BackgroundTask): void {
-  const executionCtx = c.executionCtx;
-  
+  const executionCtx = c.executionCtx
+
   if (!executionCtx || typeof executionCtx.waitUntil !== 'function') {
-    logger.warn('waitUntil not available, executing task synchronously');
+    logger.warn('waitUntil not available, executing task synchronously')
     task().catch(error => {
-      logger.error('Background task failed', { error: error instanceof Error ? error.message : 'Unknown error' });
-    });
-    return;
+      logger.error('Background task failed', {
+        error: error instanceof Error ? error.message : 'Unknown error',
+      })
+    })
+    return
   }
 
   executionCtx.waitUntil(
     task().catch(error => {
-      logger.error('Background task failed', { error: error instanceof Error ? error.message : 'Unknown error' });
+      logger.error('Background task failed', {
+        error: error instanceof Error ? error.message : 'Unknown error',
+      })
     })
-  );
+  )
 }
 
-export function waitUntilWithTimeout(
-  c: Context, 
-  task: BackgroundTask, 
-  timeoutMs: number
-): void {
+export function waitUntilWithTimeout(c: Context, task: BackgroundTask, timeoutMs: number): void {
   waitUntil(c, async () => {
     const timeoutPromise = new Promise<void>((_, reject) => {
-      setTimeout(() => reject(new TimeoutError(timeoutMs, `Task timed out after ${timeoutMs}ms`)), timeoutMs);
-    });
+      setTimeout(
+        () => reject(new TimeoutError(timeoutMs, `Task timed out after ${timeoutMs}ms`)),
+        timeoutMs
+      )
+    })
 
     try {
-      await Promise.race([task(), timeoutPromise]);
+      await Promise.race([task(), timeoutPromise])
     } catch (error) {
-      logger.error('Background task with timeout failed', { 
+      logger.error('Background task with timeout failed', {
         error: error instanceof Error ? error.message : 'Unknown error',
-        timeoutMs 
-      });
+        timeoutMs,
+      })
     }
-  });
+  })
 }
 
-export type { BackgroundTask };
+export type { BackgroundTask }

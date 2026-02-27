@@ -1,20 +1,20 @@
-import type { Env } from './core-utils';
-import { logger } from './logger';
-import { UserEntity } from './entities';
-import { hashPassword } from './password-utils';
+import type { Env } from './core-utils'
+import { logger } from './logger'
+import { UserEntity } from './entities'
+import { hashPassword } from './password-utils'
 
 function generateSecureRandomPassword(): string {
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*';
-  const array = new Uint32Array(24);
-  crypto.getRandomValues(array);
-  return Array.from(array, (x) => chars[x % chars.length]).join('');
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*'
+  const array = new Uint32Array(24)
+  crypto.getRandomValues(array)
+  return Array.from(array, x => chars[x % chars.length]).join('')
 }
 
-const MIGRATION_STATE_KEY = 'sys:migration:state';
+const MIGRATION_STATE_KEY = 'sys:migration:state'
 
 interface MigrationState {
-  appliedMigrations: string[];
-  version: number;
+  appliedMigrations: string[]
+  version: number
 }
 
 /**
@@ -23,13 +23,13 @@ interface MigrationState {
  */
 export interface Migration {
   /** Unique migration identifier (e.g., "20250107_add_timestamps") */
-  readonly id: string;
+  readonly id: string
   /** Human-readable description of what the migration does */
-  readonly description: string;
+  readonly description: string
   /** Apply the migration */
-  up(env: Env): Promise<void>;
+  up(env: Env): Promise<void>
   /** Rollback the migration - must be reversible */
-  down(env: Env): Promise<void>;
+  down(env: Env): Promise<void>
 }
 
 /**
@@ -39,26 +39,30 @@ export interface Migration {
 export class MigrationRunner {
   private static async loadState(env: Env): Promise<Set<string>> {
     try {
-      const stub = env.GlobalDurableObject.get(env.GlobalDurableObject.idFromName('sys-migration-state'));
-      const doc = await stub.getDoc(MIGRATION_STATE_KEY) as { data: MigrationState | null } | null;
-      return new Set(doc?.data?.appliedMigrations ?? []);
+      const stub = env.GlobalDurableObject.get(
+        env.GlobalDurableObject.idFromName('sys-migration-state')
+      )
+      const doc = (await stub.getDoc(MIGRATION_STATE_KEY)) as { data: MigrationState | null } | null
+      return new Set(doc?.data?.appliedMigrations ?? [])
     } catch (error) {
-      logger.error('[Migration] Failed to load migration state', error);
-      return new Set();
+      logger.error('[Migration] Failed to load migration state', error)
+      return new Set()
     }
   }
 
   private static async saveState(env: Env, appliedMigrations: Set<string>): Promise<void> {
     try {
-      const stub = env.GlobalDurableObject.get(env.GlobalDurableObject.idFromName('sys-migration-state'));
+      const stub = env.GlobalDurableObject.get(
+        env.GlobalDurableObject.idFromName('sys-migration-state')
+      )
       const state: MigrationState = {
         appliedMigrations: Array.from(appliedMigrations),
-        version: appliedMigrations.size
-      };
-      await stub.casPut(MIGRATION_STATE_KEY, 0, state);
+        version: appliedMigrations.size,
+      }
+      await stub.casPut(MIGRATION_STATE_KEY, 0, state)
     } catch (error) {
-      logger.error('[Migration] Failed to save migration state', error);
-      throw new Error(`Failed to save migration state: ${error}`);
+      logger.error('[Migration] Failed to save migration state', error)
+      throw new Error(`Failed to save migration state: ${error}`)
     }
   }
 
@@ -68,30 +72,33 @@ export class MigrationRunner {
    * @param migrations - Array of migrations to apply
    */
   static async run(env: Env, migrations: Migration[]): Promise<void> {
-    const appliedMigrations = await this.loadState(env);
-    const pending = migrations.filter(m => !appliedMigrations.has(m.id));
-    
+    const appliedMigrations = await this.loadState(env)
+    const pending = migrations.filter(m => !appliedMigrations.has(m.id))
+
     if (pending.length === 0) {
-      logger.info('[Migration] No pending migrations to apply');
-      return;
+      logger.info('[Migration] No pending migrations to apply')
+      return
     }
 
-    logger.info('[Migration] Found pending migrations', { count: pending.length });
+    logger.info('[Migration] Found pending migrations', { count: pending.length })
 
     for (const migration of pending) {
       try {
-        logger.info('[Migration] Applying', { id: migration.id, description: migration.description });
-        await migration.up(env);
-        appliedMigrations.add(migration.id);
-        await this.saveState(env, appliedMigrations);
-        logger.info('[Migration] Successfully applied', { id: migration.id });
+        logger.info('[Migration] Applying', {
+          id: migration.id,
+          description: migration.description,
+        })
+        await migration.up(env)
+        appliedMigrations.add(migration.id)
+        await this.saveState(env, appliedMigrations)
+        logger.info('[Migration] Successfully applied', { id: migration.id })
       } catch (error) {
-        logger.error(`[Migration] Failed to apply ${migration.id}`, error);
-        throw new Error(`Migration ${migration.id} failed: ${error}`);
+        logger.error(`[Migration] Failed to apply ${migration.id}`, error)
+        throw new Error(`Migration ${migration.id} failed: ${error}`)
       }
     }
 
-    logger.info('[Migration] All migrations applied successfully');
+    logger.info('[Migration] All migrations applied successfully')
   }
 
   /**
@@ -101,44 +108,47 @@ export class MigrationRunner {
    * @param count - Number of migrations to rollback (default: 1)
    */
   static async rollback(env: Env, migrations: Migration[], count = 1): Promise<void> {
-    const appliedMigrations = await this.loadState(env);
-    const toRollback = migrations.filter(m => appliedMigrations.has(m.id)).slice(-count);
-    
+    const appliedMigrations = await this.loadState(env)
+    const toRollback = migrations.filter(m => appliedMigrations.has(m.id)).slice(-count)
+
     if (toRollback.length === 0) {
-      logger.info('[Migration] No migrations to rollback');
-      return;
+      logger.info('[Migration] No migrations to rollback')
+      return
     }
 
     for (const migration of toRollback) {
       try {
-        logger.info('[Migration] Rolling back', { id: migration.id, description: migration.description });
-        await migration.down(env);
-        appliedMigrations.delete(migration.id);
-        await this.saveState(env, appliedMigrations);
-        logger.info('[Migration] Successfully rolled back', { id: migration.id });
+        logger.info('[Migration] Rolling back', {
+          id: migration.id,
+          description: migration.description,
+        })
+        await migration.down(env)
+        appliedMigrations.delete(migration.id)
+        await this.saveState(env, appliedMigrations)
+        logger.info('[Migration] Successfully rolled back', { id: migration.id })
       } catch (error) {
-        logger.error(`[Migration] Failed to rollback ${migration.id}`, error);
-        throw new Error(`Rollback of ${migration.id} failed: ${error}`);
+        logger.error(`[Migration] Failed to rollback ${migration.id}`, error)
+        throw new Error(`Rollback of ${migration.id} failed: ${error}`)
       }
     }
 
-    logger.info('[Migration] Rollback completed successfully');
+    logger.info('[Migration] Rollback completed successfully')
   }
 
   /**
    * Get current migration version
    */
   static async getCurrentVersion(env: Env): Promise<number> {
-    const appliedMigrations = await this.loadState(env);
-    return appliedMigrations.size;
+    const appliedMigrations = await this.loadState(env)
+    return appliedMigrations.size
   }
 
   /**
    * Check if a specific migration has been applied
    */
   static async isApplied(env: Env, migrationId: string): Promise<boolean> {
-    const appliedMigrations = await this.loadState(env);
-    return appliedMigrations.has(migrationId);
+    const appliedMigrations = await this.loadState(env)
+    return appliedMigrations.has(migrationId)
   }
 
   /**
@@ -147,12 +157,14 @@ export class MigrationRunner {
    */
   static async reset(env: Env): Promise<void> {
     try {
-      const stub = env.GlobalDurableObject.get(env.GlobalDurableObject.idFromName('sys-migration-state'));
-      await stub.del(MIGRATION_STATE_KEY);
-      logger.warn('[Migration] Migration history has been reset');
+      const stub = env.GlobalDurableObject.get(
+        env.GlobalDurableObject.idFromName('sys-migration-state')
+      )
+      await stub.del(MIGRATION_STATE_KEY)
+      logger.warn('[Migration] Migration history has been reset')
     } catch (error) {
-      logger.error('[Migration] Failed to reset migration state', error);
-      throw new Error(`Failed to reset migration state: ${error}`);
+      logger.error('[Migration] Failed to reset migration state', error)
+      throw new Error(`Failed to reset migration state: ${error}`)
     }
   }
 
@@ -160,8 +172,8 @@ export class MigrationRunner {
    * Get list of applied migrations
    */
   static async getAppliedMigrations(env: Env): Promise<string[]> {
-    const appliedMigrations = await this.loadState(env);
-    return Array.from(appliedMigrations);
+    const appliedMigrations = await this.loadState(env)
+    return Array.from(appliedMigrations)
   }
 }
 
@@ -172,13 +184,13 @@ export const MigrationRegistry = {
   migrations: [] as Migration[],
 
   register(migration: Migration): void {
-    this.migrations.push(migration);
+    this.migrations.push(migration)
   },
 
   getAll(): Migration[] {
-    return [...this.migrations];
-  }
-};
+    return [...this.migrations]
+  },
+}
 
 /**
  * Migration: Add password hash field to users
@@ -190,43 +202,45 @@ export const AddPasswordHashMigration: Migration = {
   description: 'Add passwordHash field to all user entities and set default password',
 
   async up(env: Env): Promise<void> {
-    MigrationHelpers.log('Starting AddPasswordHashMigration');
+    MigrationHelpers.log('Starting AddPasswordHashMigration')
 
     if (env.ENVIRONMENT === 'production') {
-      throw new Error('Cannot set default passwords in production environment. Users must set passwords through a secure password reset flow.');
+      throw new Error(
+        'Cannot set default passwords in production environment. Users must set passwords through a secure password reset flow.'
+      )
     }
 
-    const { items: users } = await UserEntity.list(env);
-    const defaultPassword = env.DEFAULT_PASSWORD || generateSecureRandomPassword();
+    const { items: users } = await UserEntity.list(env)
+    const defaultPassword = env.DEFAULT_PASSWORD || generateSecureRandomPassword()
 
     for (const user of users) {
-      const userEntity = new UserEntity(env, user.id);
+      const userEntity = new UserEntity(env, user.id)
 
       if (!user.passwordHash) {
-        const { hash } = await hashPassword(defaultPassword);
-        await userEntity.patch({ passwordHash: hash });
-        MigrationHelpers.log(`Set default password for user: ${user.email}`);
+        const { hash } = await hashPassword(defaultPassword)
+        await userEntity.patch({ passwordHash: hash })
+        MigrationHelpers.log(`Set default password for user: ${user.email}`)
       }
     }
 
-    MigrationHelpers.log('AddPasswordHashMigration completed successfully');
+    MigrationHelpers.log('AddPasswordHashMigration completed successfully')
   },
 
   async down(env: Env): Promise<void> {
-    MigrationHelpers.log('Rolling back AddPasswordHashMigration');
+    MigrationHelpers.log('Rolling back AddPasswordHashMigration')
 
-    const { items: users } = await UserEntity.list(env);
+    const { items: users } = await UserEntity.list(env)
 
     for (const user of users) {
-      const userEntity = new UserEntity(env, user.id);
-      await userEntity.patch({ passwordHash: null });
+      const userEntity = new UserEntity(env, user.id)
+      await userEntity.patch({ passwordHash: null })
     }
 
-    MigrationHelpers.log('AddPasswordHashMigration rollback completed');
-  }
-};
+    MigrationHelpers.log('AddPasswordHashMigration rollback completed')
+  },
+}
 
-MigrationRegistry.register(AddPasswordHashMigration);
+MigrationRegistry.register(AddPasswordHashMigration)
 
 /**
  * Helper utilities for common migration patterns
@@ -236,7 +250,7 @@ export const MigrationHelpers = {
    * Log migration step
    */
   log(step: string): void {
-    logger.info(`[Migration] ${step}`);
+    logger.info(`[Migration] ${step}`)
   },
 
   /**
@@ -245,24 +259,24 @@ export const MigrationHelpers = {
   async validateIntegrity(
     checks: Array<{ name: string; check: () => Promise<boolean> }>
   ): Promise<void> {
-    const results: Array<{ name: string; passed: boolean }> = [];
-    
+    const results: Array<{ name: string; passed: boolean }> = []
+
     for (const { name, check } of checks) {
       try {
-        const passed = await check();
-        results.push({ name, passed });
+        const passed = await check()
+        results.push({ name, passed })
         if (!passed) {
-          logger.error(`[Migration] Integrity check failed`, { name });
+          logger.error(`[Migration] Integrity check failed`, { name })
         }
       } catch (error) {
-        logger.error(`[Migration] Integrity check error`, error, { name });
-        results.push({ name, passed: false });
+        logger.error(`[Migration] Integrity check error`, error, { name })
+        results.push({ name, passed: false })
       }
     }
 
-    const failed = results.filter(r => !r.passed);
+    const failed = results.filter(r => !r.passed)
     if (failed.length > 0) {
-      throw new Error(`Migration integrity checks failed: ${failed.map(f => f.name).join(', ')}`);
+      throw new Error(`Migration integrity checks failed: ${failed.map(f => f.name).join(', ')}`)
     }
-  }
-};
+  },
+}

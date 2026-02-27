@@ -1,20 +1,27 @@
-import { memo } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { SlideUp } from '@/components/animations';
-import { CalendarDays } from 'lucide-react';
+import { memo } from 'react'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
+import { SlideUp } from '@/components/animations'
+import { CalendarDays } from 'lucide-react'
 
 interface ScheduleItemBase {
-  time: string;
+  time: string
 }
 
 interface ScheduleGridProps<T extends ScheduleItemBase> {
-  groupedSchedule: Record<string, T[]>;
-  renderLessonDetails: (lesson: T) => React.ReactNode;
-  showCalendarIcon?: boolean;
-  emptyMessage?: string;
-  timeColumnLabel?: string;
-  subjectColumnLabel?: string;
+  groupedSchedule: Record<string, T[]>
+  renderLessonDetails: (lesson: T) => React.ReactNode
+  showCalendarIcon?: boolean
+  emptyMessage?: string
+  timeColumnLabel?: string
+  subjectColumnLabel?: string
 }
 
 function ScheduleGridComponent<T extends ScheduleItemBase>({
@@ -62,7 +69,7 @@ function ScheduleGridComponent<T extends ScheduleItemBase>({
         </SlideUp>
       ))}
     </div>
-  );
+  )
 }
 
-export const ScheduleGrid = memo(ScheduleGridComponent) as typeof ScheduleGridComponent;
+export const ScheduleGrid = memo(ScheduleGridComponent) as typeof ScheduleGridComponent

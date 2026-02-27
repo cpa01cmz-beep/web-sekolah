@@ -1,16 +1,16 @@
-import { useState, useEffect, memo, type ReactNode } from 'react';
-import { logger } from '@/lib/logger';
-import { CHART_DEFAULTS } from './types';
+import { useState, useEffect, memo, type ReactNode } from 'react'
+import { logger } from '@/lib/logger'
+import { CHART_DEFAULTS } from './types'
 
 interface ChartComponents {
-  ResponsiveContainer: React.ComponentType<Record<string, unknown>>;
+  ResponsiveContainer: React.ComponentType<Record<string, unknown>>
 }
 
 interface BaseChartProps {
-  height?: number;
-  children: ReactNode;
-  className?: string;
-  'aria-label'?: string;
+  height?: number
+  children: ReactNode
+  className?: string
+  'aria-label'?: string
 }
 
 export const BaseChart = memo(function BaseChart({
@@ -19,23 +19,23 @@ export const BaseChart = memo(function BaseChart({
   className,
   'aria-label': ariaLabel,
 }: BaseChartProps) {
-  const [Chart, setChart] = useState<ChartComponents | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [Chart, setChart] = useState<ChartComponents | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
     const loadChart = async () => {
       try {
-        const { ResponsiveContainer } = await import('recharts/es6/component/ResponsiveContainer');
-        setChart({ ResponsiveContainer });
+        const { ResponsiveContainer } = await import('recharts/es6/component/ResponsiveContainer')
+        setChart({ ResponsiveContainer })
       } catch (error) {
-        logger.error('Failed to load chart components:', error);
+        logger.error('Failed to load chart components:', error)
       } finally {
-        setIsLoading(false);
+        setIsLoading(false)
       }
-    };
+    }
 
-    loadChart();
-  }, []);
+    loadChart()
+  }, [])
 
   if (isLoading || !Chart) {
     return (
@@ -45,7 +45,7 @@ export const BaseChart = memo(function BaseChart({
         role="status"
         aria-label="Loading chart"
       />
-    );
+    )
   }
 
   return (
@@ -54,5 +54,5 @@ export const BaseChart = memo(function BaseChart({
         {children as React.ReactNode}
       </Chart.ResponsiveContainer>
     </div>
-  );
-});
+  )
+})

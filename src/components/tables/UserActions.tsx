@@ -1,27 +1,37 @@
-import { memo } from 'react';
-import { Button } from '@/components/ui/button';
-import { Edit, Trash2 } from 'lucide-react';
+import { memo } from 'react'
+import { Button } from '@/components/ui/button'
+import { Edit, Trash2 } from 'lucide-react'
 
 interface UserActionsProps {
-  userId: string;
-  userName: string;
-  onEdit: (userId: string, userName: string) => void;
-  onDelete: (userId: string) => void;
+  userId: string
+  userName: string
+  onEdit: (userId: string, userName: string) => void
+  onDelete: (userId: string) => void
 }
 
 export const UserActions = memo(({ userId, userName, onEdit, onDelete }: UserActionsProps) => {
-  const handleEdit = () => onEdit(userId, userName);
-  const handleDelete = () => onDelete(userId);
+  const handleEdit = () => onEdit(userId, userName)
+  const handleDelete = () => onDelete(userId)
 
   return (
     <div className="flex gap-2 justify-end">
-      <Button variant="outline" size="icon" onClick={handleEdit} aria-label={`Edit user ${userName}`}>
+      <Button
+        variant="outline"
+        size="icon"
+        onClick={handleEdit}
+        aria-label={`Edit user ${userName}`}
+      >
         <Edit className="h-4 w-4" aria-hidden="true" />
       </Button>
-      <Button variant="destructive" size="icon" onClick={handleDelete} aria-label={`Delete user ${userName}`}>
+      <Button
+        variant="destructive"
+        size="icon"
+        onClick={handleDelete}
+        aria-label={`Delete user ${userName}`}
+      >
         <Trash2 className="h-4 w-4" aria-hidden="true" />
       </Button>
     </div>
-  );
-});
-UserActions.displayName = 'UserActions';
+  )
+})
+UserActions.displayName = 'UserActions'

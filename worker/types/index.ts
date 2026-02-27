@@ -1,1 +1,1 @@
-export { ClientErrorReport, CSPViolationReport } from './error-reporting';
+export { ClientErrorReport, CSPViolationReport } from './error-reporting'

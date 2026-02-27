@@ -1,26 +1,26 @@
-import { ValidationLimits } from '../../shared/constants';
+import { ValidationLimits } from '../../shared/constants'
 
-export const MIN_SCORE = ValidationLimits.GRADE_MIN_SCORE;
+export const MIN_SCORE = ValidationLimits.GRADE_MIN_SCORE
 
-export const MAX_SCORE = ValidationLimits.GRADE_MAX_SCORE;
+export const MAX_SCORE = ValidationLimits.GRADE_MAX_SCORE
 
 export function isValidScore(score: number | null | undefined): score is number {
-  if (score === null || score === undefined) return false;
-  return !isNaN(score) && Number.isInteger(score) && score >= MIN_SCORE && score <= MAX_SCORE;
+  if (score === null || score === undefined) return false
+  return !isNaN(score) && Number.isInteger(score) && score >= MIN_SCORE && score <= MAX_SCORE
 }
 
 export interface ValidationError {
-  field: string;
-  message?: string;
+  field: string
+  message?: string
 }
 
 export interface ValidationRule<T = unknown> {
-  validate: (value: T) => boolean;
-  message: string;
+  validate: (value: T) => boolean
+  message: string
 }
 
 export interface ValidationOptions {
-  showErrors: boolean;
+  showErrors: boolean
 }
 
 export function validateField<T>(
@@ -30,10 +30,10 @@ export function validateField<T>(
 ): string | undefined {
   for (const rule of rules) {
     if (!rule.validate(value)) {
-      return options.showErrors ? rule.message : undefined;
+      return options.showErrors ? rule.message : undefined
     }
   }
-  return undefined;
+  return undefined
 }
 
 export const validationRules = {
@@ -151,87 +151,137 @@ export const validationRules = {
       message: `Subject must be at most ${max} characters`,
     }),
   },
-};
+}
 
-export function validateName(value: string, showErrors: boolean, minLength: number = ValidationLimits.USER_NAME_MIN_LENGTH): string | undefined {
-  return validateField(value, [
-    validationRules.name.required,
-    validationRules.name.minLength(minLength),
-  ], { showErrors });
+export function validateName(
+  value: string,
+  showErrors: boolean,
+  minLength: number = ValidationLimits.USER_NAME_MIN_LENGTH
+): string | undefined {
+  return validateField(
+    value,
+    [validationRules.name.required, validationRules.name.minLength(minLength)],
+    { showErrors }
+  )
 }
 
 export function validateEmail(value: string, showErrors: boolean): string | undefined {
-  return validateField(value, [
-    validationRules.email.required,
-    validationRules.email.format,
-  ], { showErrors });
+  return validateField(value, [validationRules.email.required, validationRules.email.format], {
+    showErrors,
+  })
 }
 
-export function validatePhone(value: string, showErrors: boolean, min: number = ValidationLimits.PHONE_MIN_LENGTH, max: number = ValidationLimits.PHONE_MAX_LENGTH): string | undefined {
-  return validateField(value, [
-    validationRules.phone.required,
-    validationRules.phone.numeric,
-    validationRules.phone.length(min, max),
-  ], { showErrors });
+export function validatePhone(
+  value: string,
+  showErrors: boolean,
+  min: number = ValidationLimits.PHONE_MIN_LENGTH,
+  max: number = ValidationLimits.PHONE_MAX_LENGTH
+): string | undefined {
+  return validateField(
+    value,
+    [
+      validationRules.phone.required,
+      validationRules.phone.numeric,
+      validationRules.phone.length(min, max),
+    ],
+    { showErrors }
+  )
 }
 
-export function validateNisn(value: string, showErrors: boolean, length: number = ValidationLimits.NISN_LENGTH): string | undefined {
-  return validateField(value, [
-    validationRules.nisn.required,
-    validationRules.nisn.numeric,
-    validationRules.nisn.exactLength(length),
-  ], { showErrors });
+export function validateNisn(
+  value: string,
+  showErrors: boolean,
+  length: number = ValidationLimits.NISN_LENGTH
+): string | undefined {
+  return validateField(
+    value,
+    [
+      validationRules.nisn.required,
+      validationRules.nisn.numeric,
+      validationRules.nisn.exactLength(length),
+    ],
+    { showErrors }
+  )
 }
 
-export function validateMessage(value: string, showErrors: boolean, minLength: number = ValidationLimits.ANNOUNCEMENT_CONTENT_MIN_LENGTH): string | undefined {
-  return validateField(value, [
-    validationRules.message.required,
-    validationRules.message.minLength(minLength),
-  ], { showErrors });
+export function validateMessage(
+  value: string,
+  showErrors: boolean,
+  minLength: number = ValidationLimits.ANNOUNCEMENT_CONTENT_MIN_LENGTH
+): string | undefined {
+  return validateField(
+    value,
+    [validationRules.message.required, validationRules.message.minLength(minLength)],
+    { showErrors }
+  )
 }
 
 export function validateRole(value: string, showErrors: boolean): string | undefined {
-  return validateField(value, [
-    validationRules.role.required,
-  ], { showErrors });
+  return validateField(value, [validationRules.role.required], { showErrors })
 }
 
-export function validateTitle(value: string, showErrors: boolean, minLength: number = ValidationLimits.ANNOUNCEMENT_TITLE_MIN_LENGTH): string | undefined {
-  return validateField(value, [
-    validationRules.title.required,
-    validationRules.title.minLength(minLength),
-  ], { showErrors });
+export function validateTitle(
+  value: string,
+  showErrors: boolean,
+  minLength: number = ValidationLimits.ANNOUNCEMENT_TITLE_MIN_LENGTH
+): string | undefined {
+  return validateField(
+    value,
+    [validationRules.title.required, validationRules.title.minLength(minLength)],
+    { showErrors }
+  )
 }
 
-export function validateContent(value: string, showErrors: boolean, minLength: number = ValidationLimits.ANNOUNCEMENT_CONTENT_MIN_LENGTH): string | undefined {
-  return validateField(value, [
-    validationRules.content.required,
-    validationRules.content.minLength(minLength),
-  ], { showErrors });
+export function validateContent(
+  value: string,
+  showErrors: boolean,
+  minLength: number = ValidationLimits.ANNOUNCEMENT_CONTENT_MIN_LENGTH
+): string | undefined {
+  return validateField(
+    value,
+    [validationRules.content.required, validationRules.content.minLength(minLength)],
+    { showErrors }
+  )
 }
 
-export function validateSubject(value: string, showErrors: boolean, minLength: number = 3, maxLength: number = 100): string | undefined {
-  return validateField(value, [
-    validationRules.subject.required,
-    validationRules.subject.minLength(minLength),
-    validationRules.subject.maxLength(maxLength),
-  ], { showErrors });
+export function validateSubject(
+  value: string,
+  showErrors: boolean,
+  minLength: number = 3,
+  maxLength: number = 100
+): string | undefined {
+  return validateField(
+    value,
+    [
+      validationRules.subject.required,
+      validationRules.subject.minLength(minLength),
+      validationRules.subject.maxLength(maxLength),
+    ],
+    { showErrors }
+  )
 }
 
-export function validatePassword(value: string, showErrors: boolean, minLength: number = ValidationLimits.PASSWORD_MIN_LENGTH): string | undefined {
-  return validateField(value, [
-    validationRules.password.required,
-    validationRules.password.minLength(minLength),
-  ], { showErrors });
+export function validatePassword(
+  value: string,
+  showErrors: boolean,
+  minLength: number = ValidationLimits.PASSWORD_MIN_LENGTH
+): string | undefined {
+  return validateField(
+    value,
+    [validationRules.password.required, validationRules.password.minLength(minLength)],
+    { showErrors }
+  )
 }
 
 export function validateRecipient(value: string, showErrors: boolean): string | undefined {
-  return validateField(value, [
-    validationRules.recipient.required,
-  ], { showErrors });
+  return validateField(value, [validationRules.recipient.required], { showErrors })
 }
 
-export function validateRequired(value: string, showErrors: boolean, fieldName: string = 'Field'): string | undefined {
-  if (!showErrors) return undefined;
-  return value.trim().length > 0 ? undefined : `${fieldName} is required`;
+export function validateRequired(
+  value: string,
+  showErrors: boolean,
+  fieldName: string = 'Field'
+): string | undefined {
+  if (!showErrors) return undefined
+  return value.trim().length > 0 ? undefined : `${fieldName} is required`
 }

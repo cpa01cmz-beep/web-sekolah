@@ -1,470 +1,464 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect } from 'vitest'
 
 describe('Webhook Routes - Critical Business Logic', () => {
   describe('Module Loading', () => {
     it('should be able to import webhook-config-routes', async () => {
-      const module = await import('../routes/webhooks/webhook-config-routes');
-      expect(module).toBeDefined();
-      expect(typeof module.webhookConfigRoutes).toBe('function');
-    });
+      const module = await import('../routes/webhooks/webhook-config-routes')
+      expect(module).toBeDefined()
+      expect(typeof module.webhookConfigRoutes).toBe('function')
+    })
 
     it('should be able to import webhook-delivery-routes', async () => {
-      const module = await import('../routes/webhooks/webhook-delivery-routes');
-      expect(module).toBeDefined();
-      expect(typeof module.webhookDeliveryRoutes).toBe('function');
-    });
+      const module = await import('../routes/webhooks/webhook-delivery-routes')
+      expect(module).toBeDefined()
+      expect(typeof module.webhookDeliveryRoutes).toBe('function')
+    })
 
     it('should be able to import webhook-admin-routes', async () => {
-      const module = await import('../routes/webhooks/webhook-admin-routes');
-      expect(module).toBeDefined();
-      expect(typeof module.webhookAdminRoutes).toBe('function');
-    });
-  });
+      const module = await import('../routes/webhooks/webhook-admin-routes')
+      expect(module).toBeDefined()
+      expect(typeof module.webhookAdminRoutes).toBe('function')
+    })
+  })
 
   describe('Webhook Config Routes - Route Definitions', () => {
     it('should define GET /api/webhooks route', () => {
-      const routePath = '/api/webhooks';
-      const routeMethod = 'GET';
+      const routePath = '/api/webhooks'
+      const routeMethod = 'GET'
 
-      expect(routePath).toBe('/api/webhooks');
-      expect(routeMethod).toBe('GET');
-    });
+      expect(routePath).toBe('/api/webhooks')
+      expect(routeMethod).toBe('GET')
+    })
 
     it('should define GET /api/webhooks/:id route', () => {
-      const routePath = '/api/webhooks/:id';
-      const routeMethod = 'GET';
+      const routePath = '/api/webhooks/:id'
+      const routeMethod = 'GET'
 
-      expect(routePath).toBe('/api/webhooks/:id');
-      expect(routeMethod).toBe('GET');
-    });
+      expect(routePath).toBe('/api/webhooks/:id')
+      expect(routeMethod).toBe('GET')
+    })
 
     it('should define POST /api/webhooks route', () => {
-      const routePath = '/api/webhooks';
-      const routeMethod = 'POST';
+      const routePath = '/api/webhooks'
+      const routeMethod = 'POST'
 
-      expect(routePath).toBe('/api/webhooks');
-      expect(routeMethod).toBe('POST');
-    });
+      expect(routePath).toBe('/api/webhooks')
+      expect(routeMethod).toBe('POST')
+    })
 
     it('should define PUT /api/webhooks/:id route', () => {
-      const routePath = '/api/webhooks/:id';
-      const routeMethod = 'PUT';
+      const routePath = '/api/webhooks/:id'
+      const routeMethod = 'PUT'
 
-      expect(routePath).toBe('/api/webhooks/:id');
-      expect(routeMethod).toBe('PUT');
-    });
+      expect(routePath).toBe('/api/webhooks/:id')
+      expect(routeMethod).toBe('PUT')
+    })
 
     it('should define DELETE /api/webhooks/:id route', () => {
-      const routePath = '/api/webhooks/:id';
-      const routeMethod = 'DELETE';
+      const routePath = '/api/webhooks/:id'
+      const routeMethod = 'DELETE'
 
-      expect(routePath).toBe('/api/webhooks/:id');
-      expect(routeMethod).toBe('DELETE');
-    });
-  });
+      expect(routePath).toBe('/api/webhooks/:id')
+      expect(routeMethod).toBe('DELETE')
+    })
+  })
 
   describe('Webhook Config Routes - CRUD Operations', () => {
     it('should handle create webhook config operation', () => {
-      const operation = 'create webhook';
+      const operation = 'create webhook'
       const body = {
         url: 'https://example.com/webhook',
         events: ['user.created'],
         secret: 'secret-key',
-        active: true
-      };
+        active: true,
+      }
 
-      expect(operation).toBe('create webhook');
-      expect(body.url).toMatch(/^https?:\/\/.+/);
-      expect(Array.isArray(body.events)).toBe(true);
-      expect(body.secret).toBeTruthy();
-      expect(typeof body.active).toBe('boolean');
-    });
+      expect(operation).toBe('create webhook')
+      expect(body.url).toMatch(/^https?:\/\/.+/)
+      expect(Array.isArray(body.events)).toBe(true)
+      expect(body.secret).toBeTruthy()
+      expect(typeof body.active).toBe('boolean')
+    })
 
     it('should generate unique webhook config ID', () => {
-      const idPattern = /^webhook-[0-9a-f-]{36}$/;
-      const webhookId = 'webhook-123e4567-e89b-12d3-a456-426614174000';
+      const idPattern = /^webhook-[0-9a-f-]{36}$/
+      const webhookId = 'webhook-123e4567-e89b-12d3-a456-426614174000'
 
-      expect(webhookId).toMatch(idPattern);
-    });
+      expect(webhookId).toMatch(idPattern)
+    })
 
     it('should handle get webhook config operation', () => {
-      const operation = 'get webhook';
-      const param = { id: 'webhook-001' };
+      const operation = 'get webhook'
+      const param = { id: 'webhook-001' }
 
-      expect(operation).toBe('get webhook');
-      expect(param.id).toMatch(/^webhook-.+/);
-    });
+      expect(operation).toBe('get webhook')
+      expect(param.id).toMatch(/^webhook-.+/)
+    })
 
     it('should handle update webhook config operation', () => {
-      const operation = 'update webhook';
-      const param = { id: 'webhook-001' };
+      const operation = 'update webhook'
+      const param = { id: 'webhook-001' }
       const body = {
         url: 'https://example.com/webhook-updated',
-        active: false
-      };
+        active: false,
+      }
 
-      expect(operation).toBe('update webhook');
-      expect(param.id).toMatch(/^webhook-.+/);
-      expect(body.url).toMatch(/^https?:\/\/.+/);
-      expect(body.active).toBe(false);
-    });
+      expect(operation).toBe('update webhook')
+      expect(param.id).toMatch(/^webhook-.+/)
+      expect(body.url).toMatch(/^https?:\/\/.+/)
+      expect(body.active).toBe(false)
+    })
 
     it('should handle delete webhook config operation', () => {
-      const operation = 'delete webhook';
-      const param = { id: 'webhook-001' };
+      const operation = 'delete webhook'
+      const param = { id: 'webhook-001' }
 
-      expect(operation).toBe('delete webhook');
-      expect(param.id).toMatch(/^webhook-.+/);
-    });
+      expect(operation).toBe('delete webhook')
+      expect(param.id).toMatch(/^webhook-.+/)
+    })
 
     it('should handle list webhook configs operation', () => {
-      const operation = 'list webhooks';
+      const operation = 'list webhooks'
 
-      expect(operation).toBe('list webhooks');
-    });
-  });
+      expect(operation).toBe('list webhooks')
+    })
+  })
 
   describe('Webhook Config Routes - Error Handling', () => {
     it('should handle webhook config not found error', () => {
-      const errorMessage = 'Webhook configuration not found';
-      expect(errorMessage).toContain('not found');
-    });
+      const errorMessage = 'Webhook configuration not found'
+      expect(errorMessage).toContain('not found')
+    })
 
     it('should handle deleted webhook config check', () => {
       const config = {
         id: 'webhook-001',
-        deletedAt: '2024-01-21T10:00:00Z'
-      };
+        deletedAt: '2024-01-21T10:00:00Z',
+      }
 
-      expect(config.deletedAt).toBeTruthy();
-    });
+      expect(config.deletedAt).toBeTruthy()
+    })
 
     it('should handle missing webhook config ID parameter', () => {
-      const id = '';
-      const isValid = id.length > 0;
+      const id = ''
+      const isValid = id.length > 0
 
-      expect(isValid).toBe(false);
-    });
+      expect(isValid).toBe(false)
+    })
 
     it('should handle invalid webhook URL format', () => {
-      const invalidUrls = [
-        'not-a-url',
-        'ftp://example.com/webhook',
-        '',
-        null,
-        undefined
-      ];
+      const invalidUrls = ['not-a-url', 'ftp://example.com/webhook', '', null, undefined]
 
       invalidUrls.forEach(url => {
         if (url && typeof url === 'string') {
-          const isValid = url.match(/^https?:\/\/.+/);
-          expect(isValid).toBeNull();
+          const isValid = url.match(/^https?:\/\/.+/)
+          expect(isValid).toBeNull()
         }
-      });
-    });
+      })
+    })
 
     it('should handle missing events array', () => {
       const body = {
         url: 'https://example.com/webhook',
         secret: 'secret-key',
-        active: true
-      };
+        active: true,
+      }
 
-      expect(body).not.toHaveProperty('events');
-    });
+      expect(body).not.toHaveProperty('events')
+    })
 
     it('should handle missing secret parameter', () => {
       const body = {
         url: 'https://example.com/webhook',
         events: ['user.created'],
-        active: true
-      };
+        active: true,
+      }
 
-      expect(body).not.toHaveProperty('secret');
-    });
+      expect(body).not.toHaveProperty('secret')
+    })
 
     it('should handle missing active parameter (defaults to true)', () => {
       const body = {
         url: 'https://example.com/webhook',
         events: ['user.created'],
-        secret: 'secret-key'
-      };
-      const defaultActive = true;
+        secret: 'secret-key',
+      }
+      const defaultActive = true
 
-      expect(body).not.toHaveProperty('active');
-      expect(defaultActive).toBe(true);
-    });
-  });
+      expect(body).not.toHaveProperty('active')
+      expect(defaultActive).toBe(true)
+    })
+  })
 
   describe('Webhook Delivery Routes - Route Definitions', () => {
     it('should define GET /api/webhooks/:id/deliveries route', () => {
-      const routePath = '/api/webhooks/:id/deliveries';
-      const routeMethod = 'GET';
+      const routePath = '/api/webhooks/:id/deliveries'
+      const routeMethod = 'GET'
 
-      expect(routePath).toBe('/api/webhooks/:id/deliveries');
-      expect(routeMethod).toBe('GET');
-    });
+      expect(routePath).toBe('/api/webhooks/:id/deliveries')
+      expect(routeMethod).toBe('GET')
+    })
 
     it('should define GET /api/webhooks/events route', () => {
-      const routePath = '/api/webhooks/events';
-      const routeMethod = 'GET';
+      const routePath = '/api/webhooks/events'
+      const routeMethod = 'GET'
 
-      expect(routePath).toBe('/api/webhooks/events');
-      expect(routeMethod).toBe('GET');
-    });
+      expect(routePath).toBe('/api/webhooks/events')
+      expect(routeMethod).toBe('GET')
+    })
 
     it('should define GET /api/webhooks/events/:id route', () => {
-      const routePath = '/api/webhooks/events/:id';
-      const routeMethod = 'GET';
+      const routePath = '/api/webhooks/events/:id'
+      const routeMethod = 'GET'
 
-      expect(routePath).toBe('/api/webhooks/events/:id');
-      expect(routeMethod).toBe('GET');
-    });
-  });
+      expect(routePath).toBe('/api/webhooks/events/:id')
+      expect(routeMethod).toBe('GET')
+    })
+  })
 
   describe('Webhook Delivery Routes - Operations', () => {
     it('should handle get webhook deliveries operation', () => {
-      const operation = 'get webhook deliveries';
-      const param = { id: 'webhook-001' };
+      const operation = 'get webhook deliveries'
+      const param = { id: 'webhook-001' }
 
-      expect(operation).toBe('get webhook deliveries');
-      expect(param.id).toMatch(/^webhook-.+/);
-    });
+      expect(operation).toBe('get webhook deliveries')
+      expect(param.id).toMatch(/^webhook-.+/)
+    })
 
     it('should handle list webhook events operation', () => {
-      const operation = 'list webhook events';
+      const operation = 'list webhook events'
 
-      expect(operation).toBe('list webhook events');
-    });
+      expect(operation).toBe('list webhook events')
+    })
 
     it('should handle get webhook event operation', () => {
-      const operation = 'get webhook event';
-      const param = { id: 'event-001' };
+      const operation = 'get webhook event'
+      const param = { id: 'event-001' }
 
-      expect(operation).toBe('get webhook event');
-      expect(param.id).toMatch(/^event-.+/);
-    });
-  });
+      expect(operation).toBe('get webhook event')
+      expect(param.id).toMatch(/^event-.+/)
+    })
+  })
 
   describe('Webhook Delivery Routes - Error Handling', () => {
     it('should handle webhook event not found error', () => {
-      const errorMessage = 'Webhook event not found';
-      expect(errorMessage).toContain('not found');
-    });
+      const errorMessage = 'Webhook event not found'
+      expect(errorMessage).toContain('not found')
+    })
 
     it('should handle deleted webhook event check', () => {
       const event = {
         id: 'event-001',
-        deletedAt: '2024-01-21T10:00:00Z'
-      };
+        deletedAt: '2024-01-21T10:00:00Z',
+      }
 
-      expect(event.deletedAt).toBeTruthy();
-    });
+      expect(event.deletedAt).toBeTruthy()
+    })
 
     it('should handle missing event ID parameter', () => {
-      const id = '';
-      const isValid = id.length > 0;
+      const id = ''
+      const isValid = id.length > 0
 
-      expect(isValid).toBe(false);
-    });
+      expect(isValid).toBe(false)
+    })
 
     it('should handle empty deliveries array', () => {
-      const deliveries: any[] = [];
+      const deliveries: any[] = []
 
-      expect(Array.isArray(deliveries)).toBe(true);
-      expect(deliveries).toHaveLength(0);
-    });
+      expect(Array.isArray(deliveries)).toBe(true)
+      expect(deliveries).toHaveLength(0)
+    })
 
     it('should handle empty events array', () => {
       const events = {
-        items: []
-      };
+        items: [],
+      }
 
-      expect(Array.isArray(events.items)).toBe(true);
-      expect(events.items).toHaveLength(0);
-    });
-  });
+      expect(Array.isArray(events.items)).toBe(true)
+      expect(events.items).toHaveLength(0)
+    })
+  })
 
   describe('Webhook Admin Routes - Route Definitions', () => {
     it('should define POST /api/admin/webhooks/process route', () => {
-      const routePath = '/api/admin/webhooks/process';
-      const routeMethod = 'POST';
+      const routePath = '/api/admin/webhooks/process'
+      const routeMethod = 'POST'
 
-      expect(routePath).toBe('/api/admin/webhooks/process');
-      expect(routeMethod).toBe('POST');
-    });
+      expect(routePath).toBe('/api/admin/webhooks/process')
+      expect(routeMethod).toBe('POST')
+    })
 
     it('should define GET /api/admin/webhooks/dead-letter-queue route', () => {
-      const routePath = '/api/admin/webhooks/dead-letter-queue';
-      const routeMethod = 'GET';
+      const routePath = '/api/admin/webhooks/dead-letter-queue'
+      const routeMethod = 'GET'
 
-      expect(routePath).toBe('/api/admin/webhooks/dead-letter-queue');
-      expect(routeMethod).toBe('GET');
-    });
+      expect(routePath).toBe('/api/admin/webhooks/dead-letter-queue')
+      expect(routeMethod).toBe('GET')
+    })
 
     it('should define GET /api/admin/webhooks/dead-letter-queue/:id route', () => {
-      const routePath = '/api/admin/webhooks/dead-letter-queue/:id';
-      const routeMethod = 'GET';
+      const routePath = '/api/admin/webhooks/dead-letter-queue/:id'
+      const routeMethod = 'GET'
 
-      expect(routePath).toBe('/api/admin/webhooks/dead-letter-queue/:id');
-      expect(routeMethod).toBe('GET');
-    });
+      expect(routePath).toBe('/api/admin/webhooks/dead-letter-queue/:id')
+      expect(routeMethod).toBe('GET')
+    })
 
     it('should define DELETE /api/admin/webhooks/dead-letter-queue/:id route', () => {
-      const routePath = '/api/admin/webhooks/dead-letter-queue/:id';
-      const routeMethod = 'DELETE';
+      const routePath = '/api/admin/webhooks/dead-letter-queue/:id'
+      const routeMethod = 'DELETE'
 
-      expect(routePath).toBe('/api/admin/webhooks/dead-letter-queue/:id');
-      expect(routeMethod).toBe('DELETE');
-    });
-  });
+      expect(routePath).toBe('/api/admin/webhooks/dead-letter-queue/:id')
+      expect(routeMethod).toBe('DELETE')
+    })
+  })
 
   describe('Webhook Admin Routes - Operations', () => {
     it('should handle process pending webhook deliveries operation', () => {
-      const operation = 'process webhook deliveries';
-      const responseMessage = { message: 'Pending webhook deliveries processed' };
+      const operation = 'process webhook deliveries'
+      const responseMessage = { message: 'Pending webhook deliveries processed' }
 
-      expect(operation).toBe('process webhook deliveries');
-      expect(responseMessage.message).toContain('processed');
-    });
+      expect(operation).toBe('process webhook deliveries')
+      expect(responseMessage.message).toContain('processed')
+    })
 
     it('should handle get dead letter queue entries operation', () => {
-      const operation = 'get dead letter queue entries';
+      const operation = 'get dead letter queue entries'
 
-      expect(operation).toBe('get dead letter queue entries');
-    });
+      expect(operation).toBe('get dead letter queue entries')
+    })
 
     it('should handle get dead letter queue entry operation', () => {
-      const operation = 'get dead letter queue entry';
-      const param = { id: 'dlq-001' };
+      const operation = 'get dead letter queue entry'
+      const param = { id: 'dlq-001' }
 
-      expect(operation).toBe('get dead letter queue entry');
-      expect(param.id).toMatch(/^dlq-.+/);
-    });
+      expect(operation).toBe('get dead letter queue entry')
+      expect(param.id).toMatch(/^dlq-.+/)
+    })
 
     it('should handle delete dead letter queue entry operation', () => {
-      const operation = 'delete dead letter queue entry';
-      const param = { id: 'dlq-001' };
-      const response = { id: 'dlq-001', deleted: true };
+      const operation = 'delete dead letter queue entry'
+      const param = { id: 'dlq-001' }
+      const response = { id: 'dlq-001', deleted: true }
 
-      expect(operation).toBe('delete dead letter queue entry');
-      expect(param.id).toMatch(/^dlq-.+/);
-      expect(response.deleted).toBe(true);
-    });
-  });
+      expect(operation).toBe('delete dead letter queue entry')
+      expect(param.id).toMatch(/^dlq-.+/)
+      expect(response.deleted).toBe(true)
+    })
+  })
 
   describe('Webhook Admin Routes - Error Handling', () => {
     it('should handle DLQ entry not found error', () => {
-      const errorMessage = 'Dead letter queue entry not found';
-      expect(errorMessage).toContain('not found');
-    });
+      const errorMessage = 'Dead letter queue entry not found'
+      expect(errorMessage).toContain('not found')
+    })
 
     it('should handle deleted DLQ entry check', () => {
       const dlqEntry = {
         id: 'dlq-001',
-        deletedAt: '2024-01-21T10:00:00Z'
-      };
+        deletedAt: '2024-01-21T10:00:00Z',
+      }
 
-      expect(dlqEntry.deletedAt).toBeTruthy();
-    });
+      expect(dlqEntry.deletedAt).toBeTruthy()
+    })
 
     it('should handle missing DLQ ID parameter', () => {
-      const id = '';
-      const isValid = id.length > 0;
+      const id = ''
+      const isValid = id.length > 0
 
-      expect(isValid).toBe(false);
-    });
+      expect(isValid).toBe(false)
+    })
 
     it('should handle empty DLQ entries array', () => {
-      const dlqEntries: any[] = [];
+      const dlqEntries: any[] = []
 
-      expect(Array.isArray(dlqEntries)).toBe(true);
-      expect(dlqEntries).toHaveLength(0);
-    });
-  });
+      expect(Array.isArray(dlqEntries)).toBe(true)
+      expect(dlqEntries).toHaveLength(0)
+    })
+  })
 
   describe('Webhook Entity - ID Generation Patterns', () => {
     it('should generate webhook config ID with correct pattern', () => {
-      const idPattern = /^webhook-[0-9a-f-]{36}$/;
-      const webhookId = 'webhook-123e4567-e89b-12d3-a456-426614174000';
+      const idPattern = /^webhook-[0-9a-f-]{36}$/
+      const webhookId = 'webhook-123e4567-e89b-12d3-a456-426614174000'
 
-      expect(webhookId).toMatch(idPattern);
-    });
+      expect(webhookId).toMatch(idPattern)
+    })
 
     it('should generate webhook event ID with correct pattern', () => {
-      const idPattern = /^event-[0-9a-f-]{36}$/;
-      const eventId = 'event-123e4567-e89b-12d3-a456-426614174000';
+      const idPattern = /^event-[0-9a-f-]{36}$/
+      const eventId = 'event-123e4567-e89b-12d3-a456-426614174000'
 
-      expect(eventId).toMatch(idPattern);
-    });
+      expect(eventId).toMatch(idPattern)
+    })
 
     it('should generate webhook delivery ID with correct pattern', () => {
-      const idPattern = /^delivery-[0-9a-f-]{36}$/;
-      const deliveryId = 'delivery-123e4567-e89b-12d3-a456-426614174000';
+      const idPattern = /^delivery-[0-9a-f-]{36}$/
+      const deliveryId = 'delivery-123e4567-e89b-12d3-a456-426614174000'
 
-      expect(deliveryId).toMatch(idPattern);
-    });
+      expect(deliveryId).toMatch(idPattern)
+    })
 
     it('should generate DLQ ID with correct pattern', () => {
-      const idPattern = /^dlq-[0-9a-f-]{36}$/;
-      const dlqId = 'dlq-123e4567-e89b-12d3-a456-426614174000';
+      const idPattern = /^dlq-[0-9a-f-]{36}$/
+      const dlqId = 'dlq-123e4567-e89b-12d3-a456-426614174000'
 
-      expect(dlqId).toMatch(idPattern);
-    });
-  });
+      expect(dlqId).toMatch(idPattern)
+    })
+  })
 
   describe('Webhook Entity - Timestamp Validation', () => {
     it('should validate ISO 8601 timestamp format', () => {
-      const isoPattern = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
-      const timestamp = '2024-01-21T10:00:00.000Z';
+      const isoPattern = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/
+      const timestamp = '2024-01-21T10:00:00.000Z'
 
-      expect(timestamp).toMatch(isoPattern);
-    });
+      expect(timestamp).toMatch(isoPattern)
+    })
 
     it('should handle createdAt and updatedAt timestamps', () => {
       const entity = {
         createdAt: '2024-01-21T10:00:00.000Z',
-        updatedAt: '2024-01-21T10:30:00.000Z'
-      };
+        updatedAt: '2024-01-21T10:30:00.000Z',
+      }
 
-      expect(entity.createdAt).toMatch(/^\d{4}-\d{2}-\d{2}T/);
-      expect(entity.updatedAt).toMatch(/^\d{4}-\d{2}-\d{2}T/);
-    });
+      expect(entity.createdAt).toMatch(/^\d{4}-\d{2}-\d{2}T/)
+      expect(entity.updatedAt).toMatch(/^\d{4}-\d{2}-\d{2}T/)
+    })
 
     it('should ensure updatedAt is after createdAt for updates', () => {
-      const createdAt = '2024-01-21T10:00:00.000Z';
-      const updatedAt = '2024-01-21T10:30:00.000Z';
+      const createdAt = '2024-01-21T10:00:00.000Z'
+      const updatedAt = '2024-01-21T10:30:00.000Z'
 
-      expect(updatedAt).not.toBe(createdAt);
-      expect(updatedAt > createdAt).toBe(true);
-    });
-  });
+      expect(updatedAt).not.toBe(createdAt)
+      expect(updatedAt > createdAt).toBe(true)
+    })
+  })
 
   describe('Webhook Entity - Status Validation', () => {
     it('should validate webhook delivery statuses', () => {
-      const validStatuses = ['pending', 'delivered', 'failed'];
+      const validStatuses = ['pending', 'delivered', 'failed']
 
       validStatuses.forEach(status => {
-        expect(['pending', 'delivered', 'failed']).toContain(status);
-      });
-    });
+        expect(['pending', 'delivered', 'failed']).toContain(status)
+      })
+    })
 
     it('should validate webhook config active flag', () => {
-      const activeConfig = { active: true };
-      const inactiveConfig = { active: false };
+      const activeConfig = { active: true }
+      const inactiveConfig = { active: false }
 
-      expect(activeConfig.active).toBe(true);
-      expect(inactiveConfig.active).toBe(false);
-    });
+      expect(activeConfig.active).toBe(true)
+      expect(inactiveConfig.active).toBe(false)
+    })
 
     it('should validate webhook event processed flag', () => {
-      const processedEvent = { processed: true };
-      const unprocessedEvent = { processed: false };
+      const processedEvent = { processed: true }
+      const unprocessedEvent = { processed: false }
 
-      expect(processedEvent.processed).toBe(true);
-      expect(unprocessedEvent.processed).toBe(false);
-    });
-  });
+      expect(processedEvent.processed).toBe(true)
+      expect(unprocessedEvent.processed).toBe(false)
+    })
+  })
 
   describe('Webhook Entity - Data Structure Validation', () => {
     it('should validate webhook config structure', () => {
@@ -475,17 +469,17 @@ describe('Webhook Routes - Critical Business Logic', () => {
         secret: 'secret-key',
         active: true,
         createdAt: '2024-01-21T10:00:00.000Z',
-        updatedAt: '2024-01-21T10:00:00.000Z'
-      };
+        updatedAt: '2024-01-21T10:00:00.000Z',
+      }
 
-      expect(config).toHaveProperty('id');
-      expect(config).toHaveProperty('url');
-      expect(config).toHaveProperty('events');
-      expect(config).toHaveProperty('secret');
-      expect(config).toHaveProperty('active');
-      expect(config).toHaveProperty('createdAt');
-      expect(config).toHaveProperty('updatedAt');
-    });
+      expect(config).toHaveProperty('id')
+      expect(config).toHaveProperty('url')
+      expect(config).toHaveProperty('events')
+      expect(config).toHaveProperty('secret')
+      expect(config).toHaveProperty('active')
+      expect(config).toHaveProperty('createdAt')
+      expect(config).toHaveProperty('updatedAt')
+    })
 
     it('should validate webhook event structure', () => {
       const event = {
@@ -494,16 +488,16 @@ describe('Webhook Routes - Critical Business Logic', () => {
         data: { userId: 'user-123' },
         processed: false,
         createdAt: '2024-01-21T10:00:00.000Z',
-        updatedAt: '2024-01-21T10:00:00.000Z'
-      };
+        updatedAt: '2024-01-21T10:00:00.000Z',
+      }
 
-      expect(event).toHaveProperty('id');
-      expect(event).toHaveProperty('eventType');
-      expect(event).toHaveProperty('data');
-      expect(event).toHaveProperty('processed');
-      expect(event).toHaveProperty('createdAt');
-      expect(event).toHaveProperty('updatedAt');
-    });
+      expect(event).toHaveProperty('id')
+      expect(event).toHaveProperty('eventType')
+      expect(event).toHaveProperty('data')
+      expect(event).toHaveProperty('processed')
+      expect(event).toHaveProperty('createdAt')
+      expect(event).toHaveProperty('updatedAt')
+    })
 
     it('should validate webhook delivery structure', () => {
       const delivery = {
@@ -515,19 +509,19 @@ describe('Webhook Routes - Critical Business Logic', () => {
         nextAttemptAt: '2024-01-21T10:01:00.000Z',
         idempotencyKey: 'event-001:webhook-001',
         createdAt: '2024-01-21T10:00:00.000Z',
-        updatedAt: '2024-01-21T10:00:00.000Z'
-      };
+        updatedAt: '2024-01-21T10:00:00.000Z',
+      }
 
-      expect(delivery).toHaveProperty('id');
-      expect(delivery).toHaveProperty('eventId');
-      expect(delivery).toHaveProperty('webhookConfigId');
-      expect(delivery).toHaveProperty('status');
-      expect(delivery).toHaveProperty('attempts');
-      expect(delivery).toHaveProperty('nextAttemptAt');
-      expect(delivery).toHaveProperty('idempotencyKey');
-      expect(delivery).toHaveProperty('createdAt');
-      expect(delivery).toHaveProperty('updatedAt');
-    });
+      expect(delivery).toHaveProperty('id')
+      expect(delivery).toHaveProperty('eventId')
+      expect(delivery).toHaveProperty('webhookConfigId')
+      expect(delivery).toHaveProperty('status')
+      expect(delivery).toHaveProperty('attempts')
+      expect(delivery).toHaveProperty('nextAttemptAt')
+      expect(delivery).toHaveProperty('idempotencyKey')
+      expect(delivery).toHaveProperty('createdAt')
+      expect(delivery).toHaveProperty('updatedAt')
+    })
 
     it('should validate DLQ entry structure', () => {
       const dlqEntry = {
@@ -542,31 +536,31 @@ describe('Webhook Routes - Critical Business Logic', () => {
         errorMessage: 'Max retries exceeded',
         failedAt: '2024-01-21T10:30:00.000Z',
         createdAt: '2024-01-21T10:00:00.000Z',
-        updatedAt: '2024-01-21T10:30:00.000Z'
-      };
+        updatedAt: '2024-01-21T10:30:00.000Z',
+      }
 
-      expect(dlqEntry).toHaveProperty('id');
-      expect(dlqEntry).toHaveProperty('eventId');
-      expect(dlqEntry).toHaveProperty('webhookConfigId');
-      expect(dlqEntry).toHaveProperty('eventType');
-      expect(dlqEntry).toHaveProperty('url');
-      expect(dlqEntry).toHaveProperty('payload');
-      expect(dlqEntry).toHaveProperty('status');
-      expect(dlqEntry).toHaveProperty('attempts');
-      expect(dlqEntry).toHaveProperty('errorMessage');
-      expect(dlqEntry).toHaveProperty('failedAt');
-      expect(dlqEntry).toHaveProperty('createdAt');
-      expect(dlqEntry).toHaveProperty('updatedAt');
-    });
-  });
+      expect(dlqEntry).toHaveProperty('id')
+      expect(dlqEntry).toHaveProperty('eventId')
+      expect(dlqEntry).toHaveProperty('webhookConfigId')
+      expect(dlqEntry).toHaveProperty('eventType')
+      expect(dlqEntry).toHaveProperty('url')
+      expect(dlqEntry).toHaveProperty('payload')
+      expect(dlqEntry).toHaveProperty('status')
+      expect(dlqEntry).toHaveProperty('attempts')
+      expect(dlqEntry).toHaveProperty('errorMessage')
+      expect(dlqEntry).toHaveProperty('failedAt')
+      expect(dlqEntry).toHaveProperty('createdAt')
+      expect(dlqEntry).toHaveProperty('updatedAt')
+    })
+  })
 
   describe('Edge Cases', () => {
     it('should handle concurrent webhook config updates', () => {
-      const config1 = { id: 'webhook-001', active: true, updatedAt: '2024-01-21T10:00:00.000Z' };
-      const config2 = { id: 'webhook-001', active: false, updatedAt: '2024-01-21T10:01:00.000Z' };
+      const config1 = { id: 'webhook-001', active: true, updatedAt: '2024-01-21T10:00:00.000Z' }
+      const config2 = { id: 'webhook-001', active: false, updatedAt: '2024-01-21T10:01:00.000Z' }
 
-      expect(config2.updatedAt > config1.updatedAt).toBe(true);
-    });
+      expect(config2.updatedAt > config1.updatedAt).toBe(true)
+    })
 
     it('should handle webhook config with no events', () => {
       const config = {
@@ -574,46 +568,46 @@ describe('Webhook Routes - Critical Business Logic', () => {
         url: 'https://example.com/webhook',
         events: [],
         secret: 'secret-key',
-        active: true
-      };
+        active: true,
+      }
 
-      expect(config.events).toHaveLength(0);
-    });
+      expect(config.events).toHaveLength(0)
+    })
 
     it('should handle webhook delivery with multiple retries', () => {
       const delivery = {
         id: 'delivery-001',
         attempts: 5,
-        status: 'pending'
-      };
+        status: 'pending',
+      }
 
-      expect(delivery.attempts).toBe(5);
-      expect(delivery.status).toBe('pending');
-    });
+      expect(delivery.attempts).toBe(5)
+      expect(delivery.status).toBe('pending')
+    })
 
     it('should handle DLQ entry with various error statuses', () => {
-      const errorStatuses = [400, 401, 403, 404, 500, 502, 503, 504];
+      const errorStatuses = [400, 401, 403, 404, 500, 502, 503, 504]
 
       errorStatuses.forEach(status => {
-        expect(status).toBeGreaterThanOrEqual(400);
-        expect(status).toBeLessThan(600);
-      });
-    });
+        expect(status).toBeGreaterThanOrEqual(400)
+        expect(status).toBeLessThan(600)
+      })
+    })
 
     it('should handle webhook payload with special characters', () => {
       const payload = {
         userId: 'user-123',
         message: 'Hello, world! 🌍 Testing special chars: á, é, ñ, 中文, 日本語',
         nested: {
-          value: 'Value with "quotes" and \'apostrophes\''
-        }
-      };
+          value: 'Value with "quotes" and \'apostrophes\'',
+        },
+      }
 
-      expect(payload.message).toContain('🌍');
-      expect(payload.message).toContain('中文');
-      expect(payload.nested.value).toContain('"quotes"');
-    });
-  });
+      expect(payload.message).toContain('🌍')
+      expect(payload.message).toContain('中文')
+      expect(payload.nested.value).toContain('"quotes"')
+    })
+  })
 
   describe('Testing Documentation', () => {
     it('should document testing improvements', () => {
@@ -759,10 +753,10 @@ Future Improvements (requires Cloudflare Workers setup):
 7. Test rate limiting on webhook routes
 
 =============================================================================
-      `);
+      `)
 
-      expect(true).toBe(true);
-    });
+      expect(true).toBe(true)
+    })
 
     it('should document testing limitations', () => {
       console.log(`
@@ -810,9 +804,9 @@ Production Safety:
   - All existing tests pass without regression
 
 =============================================================================
-      `);
+      `)
 
-      expect(true).toBe(true);
-    });
-  });
-});
+      expect(true).toBe(true)
+    })
+  })
+})

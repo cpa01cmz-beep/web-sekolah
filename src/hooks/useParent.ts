@@ -1,19 +1,25 @@
-import { useQuery as useTanstackQuery, UseQueryOptions } from '@tanstack/react-query';
-import { parentService } from '@/services/parentService';
-import type { ParentDashboardData, ScheduleItem } from '@shared/types';
-import { CachingTime } from '@/config/time';
-import { createQueryOptions } from '@/config/query-config';
-import { createEntityQueryKey } from '@/config/query-factory';
+import { useQuery as useTanstackQuery, UseQueryOptions } from '@tanstack/react-query'
+import { parentService } from '@/services/parentService'
+import type { ParentDashboardData, ScheduleItem } from '@shared/types'
+import { CachingTime } from '@/config/time'
+import { createQueryOptions } from '@/config/query-config'
+import { createEntityQueryKey } from '@/config/query-factory'
 
-const parentKey = createEntityQueryKey('parents');
+const parentKey = createEntityQueryKey('parents')
 
-export function useParentDashboard(parentId: string, options?: UseQueryOptions<ParentDashboardData>) {
+export function useParentDashboard(
+  parentId: string,
+  options?: UseQueryOptions<ParentDashboardData>
+) {
   return useTanstackQuery({
     queryKey: parentKey(parentId, 'dashboard'),
     queryFn: () => parentService.getDashboard(parentId),
-    ...createQueryOptions<ParentDashboardData>({ enabled: !!parentId, staleTime: CachingTime.FIVE_MINUTES }),
+    ...createQueryOptions<ParentDashboardData>({
+      enabled: !!parentId,
+      staleTime: CachingTime.FIVE_MINUTES,
+    }),
     ...options,
-  });
+  })
 }
 
 export function useChildSchedule(parentId: string, options?: UseQueryOptions<ScheduleItem[]>) {
@@ -22,5 +28,5 @@ export function useChildSchedule(parentId: string, options?: UseQueryOptions<Sch
     queryFn: () => parentService.getChildSchedule(parentId),
     ...createQueryOptions<ScheduleItem[]>({ enabled: !!parentId, staleTime: CachingTime.ONE_HOUR }),
     ...options,
-  });
+  })
 }

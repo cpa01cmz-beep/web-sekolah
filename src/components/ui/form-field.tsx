@@ -1,17 +1,17 @@
-import React, { ReactElement, ReactNode, cloneElement } from 'react';
-import { Label } from '@/components/ui/label';
-import { cn } from '@/lib/utils';
-import { AlertCircle } from 'lucide-react';
+import React, { ReactElement, ReactNode, cloneElement } from 'react'
+import { Label } from '@/components/ui/label'
+import { cn } from '@/lib/utils'
+import { AlertCircle } from 'lucide-react'
 
 export interface FormFieldProps {
-  id: string;
-  label: string;
-  error?: string;
-  helperText?: string;
-  required?: boolean;
-  children: ReactNode;
-  className?: string;
-  showErrorIcon?: boolean;
+  id: string
+  label: string
+  error?: string
+  helperText?: string
+  required?: boolean
+  children: ReactNode
+  className?: string
+  showErrorIcon?: boolean
 }
 
 export function FormField({
@@ -24,23 +24,23 @@ export function FormField({
   className,
   showErrorIcon = true,
 }: FormFieldProps) {
-  const errorId = `${id}-error`;
-  const helperId = `${id}-helper`;
-  const hasError = !!error;
+  const errorId = `${id}-error`
+  const helperId = `${id}-helper`
+  const hasError = !!error
 
-  const safeLabel = String(label || '');
-  const safeError = error ? String(error) : undefined;
-  const safeHelperText = helperText ? String(helperText) : undefined;
+  const safeLabel = String(label || '')
+  const safeError = error ? String(error) : undefined
+  const safeHelperText = helperText ? String(helperText) : undefined
 
-  const child = React.Children.only(children) as ReactElement;
-  const childProps = child.props || {};
+  const child = React.Children.only(children) as ReactElement
+  const childProps = child.props || {}
 
   const enhancedChild = cloneElement(child, {
     id: childProps.id || id,
     'aria-required': childProps['aria-required'] ?? (required ? 'true' : undefined),
     'aria-invalid': childProps['aria-invalid'] ?? (hasError ? 'true' : undefined),
     'aria-describedby': childProps['aria-describedby'] ?? (hasError ? errorId : helperId),
-  });
+  })
 
   return (
     <div className={cn('space-y-2', className)}>
@@ -50,7 +50,9 @@ export function FormField({
       </Label>
       {enhancedChild}
       {safeHelperText && !hasError && (
-        <p id={helperId} className="text-xs text-muted-foreground">{safeHelperText}</p>
+        <p id={helperId} className="text-xs text-muted-foreground">
+          {safeHelperText}
+        </p>
       )}
       {hasError && (
         <p
@@ -64,5 +66,5 @@ export function FormField({
         </p>
       )}
     </div>
-  );
+  )
 }

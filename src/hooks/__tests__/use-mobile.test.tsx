@@ -1,45 +1,46 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { renderHook, act } from '@testing-library/react';
-import { useIsMobile } from '../use-mobile';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { renderHook, act } from '@testing-library/react'
+import { useIsMobile } from '../use-mobile'
 
 describe('useIsMobile', () => {
-  const mockAddEventListener = vi.fn();
-  const mockRemoveEventListener = vi.fn();
+  const mockAddEventListener = vi.fn()
+  const mockRemoveEventListener = vi.fn()
 
-  const createMockMediaQueryList = (matches: boolean): MediaQueryList => ({
-    matches,
-    media: '(max-width: 767px)',
-    onchange: null,
-    addEventListener: mockAddEventListener,
-    removeEventListener: mockRemoveEventListener,
-    dispatchEvent: vi.fn(),
-    addListener: vi.fn(),
-    removeListener: vi.fn(),
-  } as unknown as MediaQueryList);
+  const createMockMediaQueryList = (matches: boolean): MediaQueryList =>
+    ({
+      matches,
+      media: '(max-width: 767px)',
+      onchange: null,
+      addEventListener: mockAddEventListener,
+      removeEventListener: mockRemoveEventListener,
+      dispatchEvent: vi.fn(),
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
+    }) as unknown as MediaQueryList
 
   beforeEach(() => {
-    vi.clearAllMocks();
-    mockAddEventListener.mockClear();
-    mockRemoveEventListener.mockClear();
-    
+    vi.clearAllMocks()
+    mockAddEventListener.mockClear()
+    mockRemoveEventListener.mockClear()
+
     // Reset window.innerWidth to desktop size
     Object.defineProperty(window, 'innerWidth', {
       writable: true,
       configurable: true,
       value: 1024,
-    });
-    
+    })
+
     window.matchMedia = vi.fn((query: string) => {
       if (query === '(max-width: 767px)') {
-        return createMockMediaQueryList(false);
+        return createMockMediaQueryList(false)
       }
-      return createMockMediaQueryList(false);
-    });
-  });
+      return createMockMediaQueryList(false)
+    })
+  })
 
   afterEach(() => {
-    vi.restoreAllMocks();
-  });
+    vi.restoreAllMocks()
+  })
 
   describe('Initialization', () => {
     it('should return false on desktop screen', () => {
@@ -47,115 +48,115 @@ describe('useIsMobile', () => {
         writable: true,
         configurable: true,
         value: 1024,
-      });
-      window.matchMedia = vi.fn((query: string) => createMockMediaQueryList(false));
+      })
+      window.matchMedia = vi.fn((query: string) => createMockMediaQueryList(false))
 
-      const { result } = renderHook(() => useIsMobile());
+      const { result } = renderHook(() => useIsMobile())
 
-      expect(result.current).toBe(false);
-    });
+      expect(result.current).toBe(false)
+    })
 
     it('should return true on mobile screen', () => {
       Object.defineProperty(window, 'innerWidth', {
         writable: true,
         configurable: true,
         value: 500,
-      });
-      window.matchMedia = vi.fn((query: string) => createMockMediaQueryList(true));
+      })
+      window.matchMedia = vi.fn((query: string) => createMockMediaQueryList(true))
 
-      const { result } = renderHook(() => useIsMobile());
+      const { result } = renderHook(() => useIsMobile())
 
-      expect(result.current).toBe(true);
-    });
+      expect(result.current).toBe(true)
+    })
 
     it('should set up media query listener on mount', () => {
-      renderHook(() => useIsMobile());
+      renderHook(() => useIsMobile())
 
-      expect(window.matchMedia).toHaveBeenCalledWith('(max-width: 767px)');
-      expect(mockAddEventListener).toHaveBeenCalledWith('change', expect.any(Function));
-    });
+      expect(window.matchMedia).toHaveBeenCalledWith('(max-width: 767px)')
+      expect(mockAddEventListener).toHaveBeenCalledWith('change', expect.any(Function))
+    })
 
     it('should use correct breakpoint (767px)', () => {
-      renderHook(() => useIsMobile());
+      renderHook(() => useIsMobile())
 
-      expect(window.matchMedia).toHaveBeenCalledWith('(max-width: 767px)');
-    });
+      expect(window.matchMedia).toHaveBeenCalledWith('(max-width: 767px)')
+    })
 
     it('should initialize based on current window width', () => {
       Object.defineProperty(window, 'innerWidth', {
         writable: true,
         configurable: true,
         value: 500,
-      });
-      window.matchMedia = vi.fn((query: string) => createMockMediaQueryList(true));
+      })
+      window.matchMedia = vi.fn((query: string) => createMockMediaQueryList(true))
 
-      const { result } = renderHook(() => useIsMobile());
+      const { result } = renderHook(() => useIsMobile())
 
-      expect(result.current).toBe(true);
-    });
-  });
+      expect(result.current).toBe(true)
+    })
+  })
 
   describe('Media Query Event Listener Setup', () => {
     it('should add change event listener on mount', () => {
-      renderHook(() => useIsMobile());
+      renderHook(() => useIsMobile())
 
-      expect(mockAddEventListener).toHaveBeenCalledWith('change', expect.any(Function));
-    });
+      expect(mockAddEventListener).toHaveBeenCalledWith('change', expect.any(Function))
+    })
 
     it('should add event listener with correct event name', () => {
-      const { unmount } = renderHook(() => useIsMobile());
+      const { unmount } = renderHook(() => useIsMobile())
 
-      expect(mockAddEventListener).toHaveBeenCalledWith('change', expect.any(Function));
-      unmount();
-    });
+      expect(mockAddEventListener).toHaveBeenCalledWith('change', expect.any(Function))
+      unmount()
+    })
 
     it('should store listener for cleanup', () => {
-      const { unmount } = renderHook(() => useIsMobile());
+      const { unmount } = renderHook(() => useIsMobile())
 
-      const callArgs = mockAddEventListener.mock.calls[0];
-      expect(callArgs[0]).toBe('change');
-      expect(typeof callArgs[1]).toBe('function');
+      const callArgs = mockAddEventListener.mock.calls[0]
+      expect(callArgs[0]).toBe('change')
+      expect(typeof callArgs[1]).toBe('function')
 
-      unmount();
-    });
-  });
+      unmount()
+    })
+  })
 
   describe('Media Query Event Listener Cleanup', () => {
     it('should remove change event listener on unmount', () => {
-      const { unmount } = renderHook(() => useIsMobile());
+      const { unmount } = renderHook(() => useIsMobile())
 
-      unmount();
+      unmount()
 
-      expect(mockRemoveEventListener).toHaveBeenCalled();
-    });
+      expect(mockRemoveEventListener).toHaveBeenCalled()
+    })
 
     it('should remove event listener with correct event name', () => {
-      const { unmount } = renderHook(() => useIsMobile());
+      const { unmount } = renderHook(() => useIsMobile())
 
-      unmount();
+      unmount()
 
-      expect(mockRemoveEventListener).toHaveBeenCalledWith('change', expect.any(Function));
-    });
+      expect(mockRemoveEventListener).toHaveBeenCalledWith('change', expect.any(Function))
+    })
 
     it('should remove same listener that was added', () => {
-      const { unmount } = renderHook(() => useIsMobile());
+      const { unmount } = renderHook(() => useIsMobile())
 
-      const addedListener = mockAddEventListener.mock.calls[0]?.[1];
-      unmount();
+      const addedListener = mockAddEventListener.mock.calls[0]?.[1]
+      unmount()
 
-      expect(mockRemoveEventListener).toHaveBeenCalledWith('change', addedListener);
-    });
+      expect(mockRemoveEventListener).toHaveBeenCalledWith('change', addedListener)
+    })
 
     it('should clean up on component unmount', () => {
-      const { unmount } = renderHook(() => useIsMobile());
+      const { unmount } = renderHook(() => useIsMobile())
 
-      expect(mockRemoveEventListener).not.toHaveBeenCalled();
+      expect(mockRemoveEventListener).not.toHaveBeenCalled()
 
-      unmount();
+      unmount()
 
-      expect(mockRemoveEventListener).toHaveBeenCalled();
-    });
-  });
+      expect(mockRemoveEventListener).toHaveBeenCalled()
+    })
+  })
 
   describe('Responsive Behavior', () => {
     it('should update state when media query changes from desktop to mobile', () => {
@@ -163,106 +164,106 @@ describe('useIsMobile', () => {
         writable: true,
         configurable: true,
         value: 1024,
-      });
-      const { result } = renderHook(() => useIsMobile());
+      })
+      const { result } = renderHook(() => useIsMobile())
 
-      expect(result.current).toBe(false);
+      expect(result.current).toBe(false)
 
-      const changeListener = mockAddEventListener.mock.calls[0]?.[1];
+      const changeListener = mockAddEventListener.mock.calls[0]?.[1]
 
       act(() => {
         Object.defineProperty(window, 'innerWidth', {
           writable: true,
           configurable: true,
           value: 500,
-        });
-        changeListener({ matches: true, media: '(max-width: 767px)' } as MediaQueryListEvent);
-      });
+        })
+        changeListener({ matches: true, media: '(max-width: 767px)' } as MediaQueryListEvent)
+      })
 
-      expect(result.current).toBe(true);
-    });
+      expect(result.current).toBe(true)
+    })
 
     it('should update state when media query changes from mobile to desktop', () => {
       Object.defineProperty(window, 'innerWidth', {
         writable: true,
         configurable: true,
         value: 500,
-      });
-      window.matchMedia = vi.fn((query: string) => createMockMediaQueryList(true));
-      const { result } = renderHook(() => useIsMobile());
+      })
+      window.matchMedia = vi.fn((query: string) => createMockMediaQueryList(true))
+      const { result } = renderHook(() => useIsMobile())
 
-      expect(result.current).toBe(true);
+      expect(result.current).toBe(true)
 
-      const changeListener = mockAddEventListener.mock.calls[0]?.[1];
+      const changeListener = mockAddEventListener.mock.calls[0]?.[1]
 
       act(() => {
         Object.defineProperty(window, 'innerWidth', {
           writable: true,
           configurable: true,
           value: 1024,
-        });
-        changeListener({ matches: false, media: '(max-width: 767px)' } as MediaQueryListEvent);
-      });
+        })
+        changeListener({ matches: false, media: '(max-width: 767px)' } as MediaQueryListEvent)
+      })
 
-      expect(result.current).toBe(false);
-    });
+      expect(result.current).toBe(false)
+    })
 
     it('should handle multiple media query changes', () => {
-      const { result } = renderHook(() => useIsMobile());
+      const { result } = renderHook(() => useIsMobile())
 
-      const changeListener = mockAddEventListener.mock.calls[0]?.[1];
+      const changeListener = mockAddEventListener.mock.calls[0]?.[1]
 
       act(() => {
         Object.defineProperty(window, 'innerWidth', {
           writable: true,
           configurable: true,
           value: 500,
-        });
-        changeListener({ matches: true, media: '(max-width: 767px)' } as MediaQueryListEvent);
-      });
+        })
+        changeListener({ matches: true, media: '(max-width: 767px)' } as MediaQueryListEvent)
+      })
 
-      expect(result.current).toBe(true);
+      expect(result.current).toBe(true)
 
       act(() => {
         Object.defineProperty(window, 'innerWidth', {
           writable: true,
           configurable: true,
           value: 1024,
-        });
-        changeListener({ matches: false, media: '(max-width: 767px)' } as MediaQueryListEvent);
-      });
+        })
+        changeListener({ matches: false, media: '(max-width: 767px)' } as MediaQueryListEvent)
+      })
 
-      expect(result.current).toBe(false);
+      expect(result.current).toBe(false)
 
       act(() => {
         Object.defineProperty(window, 'innerWidth', {
           writable: true,
           configurable: true,
           value: 500,
-        });
-        changeListener({ matches: true, media: '(max-width: 767px)' } as MediaQueryListEvent);
-      });
+        })
+        changeListener({ matches: true, media: '(max-width: 767px)' } as MediaQueryListEvent)
+      })
 
-      expect(result.current).toBe(true);
-    });
+      expect(result.current).toBe(true)
+    })
 
     it('should respond to window resize events', () => {
-      const { result } = renderHook(() => useIsMobile());
+      const { result } = renderHook(() => useIsMobile())
 
-      const changeListener = mockAddEventListener.mock.calls[0]?.[1];
+      const changeListener = mockAddEventListener.mock.calls[0]?.[1]
 
       act(() => {
         Object.defineProperty(window, 'innerWidth', {
           writable: true,
           configurable: true,
           value: 500,
-        });
-        changeListener({ matches: true, media: '(max-width: 767px)' } as MediaQueryListEvent);
-      });
+        })
+        changeListener({ matches: true, media: '(max-width: 767px)' } as MediaQueryListEvent)
+      })
 
-      expect(result.current).toBe(true);
-    });
-  });
+      expect(result.current).toBe(true)
+    })
+  })
 
   describe('Multiple Hook Instances', () => {
     it('should work correctly with multiple hook instances', () => {
@@ -270,72 +271,72 @@ describe('useIsMobile', () => {
         writable: true,
         configurable: true,
         value: 1024,
-      });
-      const { result: result1 } = renderHook(() => useIsMobile());
-      const { result: result2 } = renderHook(() => useIsMobile());
+      })
+      const { result: result1 } = renderHook(() => useIsMobile())
+      const { result: result2 } = renderHook(() => useIsMobile())
 
-      expect(result1.current).toBe(false);
-      expect(result2.current).toBe(false);
-    });
+      expect(result1.current).toBe(false)
+      expect(result2.current).toBe(false)
+    })
 
     it('should handle multiple instances independently', () => {
       Object.defineProperty(window, 'innerWidth', {
         writable: true,
         configurable: true,
         value: 500,
-      });
-      window.matchMedia = vi.fn((query: string) => createMockMediaQueryList(true));
+      })
+      window.matchMedia = vi.fn((query: string) => createMockMediaQueryList(true))
 
-      const { result: result1 } = renderHook(() => useIsMobile());
-      const { result: result2 } = renderHook(() => useIsMobile());
+      const { result: result1 } = renderHook(() => useIsMobile())
+      const { result: result2 } = renderHook(() => useIsMobile())
 
-      expect(result1.current).toBe(true);
-      expect(result2.current).toBe(true);
-    });
+      expect(result1.current).toBe(true)
+      expect(result2.current).toBe(true)
+    })
 
     it('should not interfere between multiple instances', () => {
       Object.defineProperty(window, 'innerWidth', {
         writable: true,
         configurable: true,
         value: 1024,
-      });
-      const { result: result1 } = renderHook(() => useIsMobile());
-      const { result: result2 } = renderHook(() => useIsMobile());
+      })
+      const { result: result1 } = renderHook(() => useIsMobile())
+      const { result: result2 } = renderHook(() => useIsMobile())
 
-      const changeListener1 = mockAddEventListener.mock.calls[0]?.[1];
-      const changeListener2 = mockAddEventListener.mock.calls[1]?.[1];
+      const changeListener1 = mockAddEventListener.mock.calls[0]?.[1]
+      const changeListener2 = mockAddEventListener.mock.calls[1]?.[1]
 
       act(() => {
         Object.defineProperty(window, 'innerWidth', {
           writable: true,
           configurable: true,
           value: 500,
-        });
+        })
         // Trigger both change listeners
-        changeListener1({ matches: true, media: '(max-width: 767px)' } as MediaQueryListEvent);
-        changeListener2({ matches: true, media: '(max-width: 767px)' } as MediaQueryListEvent);
-      });
+        changeListener1({ matches: true, media: '(max-width: 767px)' } as MediaQueryListEvent)
+        changeListener2({ matches: true, media: '(max-width: 767px)' } as MediaQueryListEvent)
+      })
 
-      expect(result1.current).toBe(true);
-      expect(result2.current).toBe(true);
-    });
-  });
+      expect(result1.current).toBe(true)
+      expect(result2.current).toBe(true)
+    })
+  })
 
   describe('Edge Cases', () => {
     it('should handle rapid media query changes', () => {
-      const { result } = renderHook(() => useIsMobile());
+      const { result } = renderHook(() => useIsMobile())
 
-      const changeListener = mockAddEventListener.mock.calls[0]?.[1];
+      const changeListener = mockAddEventListener.mock.calls[0]?.[1]
 
       for (let i = 0; i < 10; i++) {
         act(() => {
-          const isMobile = i % 2 === 0;
-          changeListener({ matches: isMobile, media: '(max-width: 767px)' } as MediaQueryListEvent);
-        });
+          const isMobile = i % 2 === 0
+          changeListener({ matches: isMobile, media: '(max-width: 767px)' } as MediaQueryListEvent)
+        })
       }
 
-      expect(typeof result.current).toBe('boolean');
-    });
+      expect(typeof result.current).toBe('boolean')
+    })
 
     it('should handle media query with no matches property', () => {
       const invalidMediaQueryList = {
@@ -344,67 +345,67 @@ describe('useIsMobile', () => {
         addEventListener: mockAddEventListener,
         removeEventListener: mockRemoveEventListener,
         dispatchEvent: vi.fn(),
-      } as unknown as MediaQueryList;
+      } as unknown as MediaQueryList
 
-      window.matchMedia = vi.fn((query: string) => invalidMediaQueryList);
+      window.matchMedia = vi.fn((query: string) => invalidMediaQueryList)
 
-      const { result } = renderHook(() => useIsMobile());
+      const { result } = renderHook(() => useIsMobile())
 
-      expect(typeof result.current).toBe('boolean');
-    });
+      expect(typeof result.current).toBe('boolean')
+    })
 
     it('should maintain boolean return type always', () => {
-      const { result } = renderHook(() => useIsMobile());
+      const { result } = renderHook(() => useIsMobile())
 
-      expect(typeof result.current).toBe('boolean');
-      expect([true, false]).toContain(result.current);
-    });
-  });
+      expect(typeof result.current).toBe('boolean')
+      expect([true, false]).toContain(result.current)
+    })
+  })
 
   describe('Performance', () => {
     it('should not cause unnecessary re-renders', () => {
-      const { result, rerender } = renderHook(() => useIsMobile());
+      const { result, rerender } = renderHook(() => useIsMobile())
 
-      const initialState = result.current;
-      rerender();
-      const stateAfterRerender = result.current;
+      const initialState = result.current
+      rerender()
+      const stateAfterRerender = result.current
 
-      expect(initialState).toBe(stateAfterRerender);
-    });
+      expect(initialState).toBe(stateAfterRerender)
+    })
 
     it('should only update state on media query change', () => {
-      const { result } = renderHook(() => useIsMobile());
+      const { result } = renderHook(() => useIsMobile())
 
-      const initialState = result.current;
+      const initialState = result.current
 
-      const changeListener = mockAddEventListener.mock.calls[0]?.[1];
+      const changeListener = mockAddEventListener.mock.calls[0]?.[1]
 
       act(() => {
-        changeListener({ matches: false, media: '(max-width: 767px)' } as MediaQueryListEvent);
-      });
+        changeListener({ matches: false, media: '(max-width: 767px)' } as MediaQueryListEvent)
+      })
 
-      const stateAfterSameMedia = result.current;
+      const stateAfterSameMedia = result.current
 
-      expect(initialState).toBe(stateAfterSameMedia);
-    });
-  });
+      expect(initialState).toBe(stateAfterSameMedia)
+    })
+  })
 
   describe('Hook Return Value', () => {
     it('should return boolean value', () => {
-      const { result } = renderHook(() => useIsMobile());
+      const { result } = renderHook(() => useIsMobile())
 
-      expect(typeof result.current).toBe('boolean');
-    });
+      expect(typeof result.current).toBe('boolean')
+    })
 
     it('should maintain consistent return value type', () => {
-      const { result } = renderHook(() => useIsMobile());
+      const { result } = renderHook(() => useIsMobile())
 
-      const firstValue = result.current;
-      const secondValue = result.current;
+      const firstValue = result.current
+      const secondValue = result.current
 
-      expect(typeof firstValue).toBe('boolean');
-      expect(typeof secondValue).toBe('boolean');
-    });
+      expect(typeof firstValue).toBe('boolean')
+      expect(typeof secondValue).toBe('boolean')
+    })
 
     it('should return !!isMobile (boolean not undefined)', () => {
       const mediaQueryWithoutMatches = {
@@ -413,48 +414,48 @@ describe('useIsMobile', () => {
         addEventListener: mockAddEventListener,
         removeEventListener: mockRemoveEventListener,
         dispatchEvent: vi.fn(),
-      } as unknown as MediaQueryList;
+      } as unknown as MediaQueryList
 
-      window.matchMedia = vi.fn((query: string) => mediaQueryWithoutMatches);
+      window.matchMedia = vi.fn((query: string) => mediaQueryWithoutMatches)
 
-      const { result } = renderHook(() => useIsMobile());
+      const { result } = renderHook(() => useIsMobile())
 
-      expect(result.current).toBe(false);
-    });
-  });
+      expect(result.current).toBe(false)
+    })
+  })
 
   describe('Media Query Configuration', () => {
     it('should use MOBILE_BREAKPOINT constant of 768', () => {
-      renderHook(() => useIsMobile());
+      renderHook(() => useIsMobile())
 
-      expect(window.matchMedia).toHaveBeenCalledWith('(max-width: 767px)');
-    });
+      expect(window.matchMedia).toHaveBeenCalledWith('(max-width: 767px)')
+    })
 
     it('should use correct max-width query', () => {
-      renderHook(() => useIsMobile());
+      renderHook(() => useIsMobile())
 
-      expect(window.matchMedia.mock.calls[0][0]).toContain('max-width');
-    });
+      expect(window.matchMedia.mock.calls[0][0]).toContain('max-width')
+    })
 
     it('should use breakpoint - 1 in query (767px)', () => {
-      renderHook(() => useIsMobile());
+      renderHook(() => useIsMobile())
 
-      const query = window.matchMedia.mock.calls[0][0];
-      expect(query).toBe('(max-width: 767px)');
-    });
-  });
+      const query = window.matchMedia.mock.calls[0][0]
+      expect(query).toBe('(max-width: 767px)')
+    })
+  })
 
   describe('Integration with Window', () => {
     it('should access window.matchMedia API', () => {
-      renderHook(() => useIsMobile());
+      renderHook(() => useIsMobile())
 
-      expect(window.matchMedia).toHaveBeenCalled();
-    });
+      expect(window.matchMedia).toHaveBeenCalled()
+    })
 
     it('should use window.matchMedia only once on mount', () => {
-      renderHook(() => useIsMobile());
+      renderHook(() => useIsMobile())
 
-      expect(window.matchMedia).toHaveBeenCalledTimes(1);
-    });
-  });
-});
+      expect(window.matchMedia).toHaveBeenCalledTimes(1)
+    })
+  })
+})
