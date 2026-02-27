@@ -9,9 +9,9 @@ import { SlideUp } from '@/components/animations'
 import { useStudentDashboard } from '@/hooks/useStudent'
 import { useAuthStore } from '@/stores/authStore'
 import { calculateAverageScore, getGradeColorClass, getGradeLetter } from '@/utils/grades'
+import { calculateGradeDistribution, gradeDistributionToChartData } from '@/utils/analytics'
 import { ResponsiveTable } from '@/components/ui/responsive-table'
 import { PieChart } from '@/components/charts/PieChart'
-import type { ChartDataPoint } from '@/components/charts/types'
 import { GRADE_COLORS } from '@/theme/colors'
 
 const TABLE_HEADERS = [
@@ -21,21 +21,6 @@ const TABLE_HEADERS = [
   { key: 'grade', label: 'Predikat', className: 'text-center' },
   { key: 'feedback', label: 'Keterangan' },
 ]
-
-function calculateGradeDistribution(grades: { score: number }[]): ChartDataPoint[] {
-  const distribution: Record<string, number> = { A: 0, B: 0, C: 0, D: 0, F: 0 }
-  grades.forEach(grade => {
-    const letter = getGradeLetter(grade.score)
-    distribution[letter]++
-  })
-  return Object.entries(distribution)
-    .filter(([, count]) => count > 0)
-    .map(([name, value]) => ({
-      name,
-      value,
-      color: GRADE_COLORS[name],
-    }))
-}
 
 export function StudentGradesPage() {
   const user = useAuthStore(state => state.user)
@@ -48,7 +33,15 @@ export function StudentGradesPage() {
     [grades]
   )
 
-  const gradeDistribution = useMemo(() => calculateGradeDistribution(grades), [grades])
+  const gradeDistribution = useMemo(() => {
+    const scores = grades.map(g => g.score)
+    const distribution = calculateGradeDistribution(scores)
+    const chartData = gradeDistributionToChartData(distribution)
+    return chartData.map(item => ({
+      ...item,
+      color: GRADE_COLORS[item.name.charAt(0) as keyof typeof GRADE_COLORS],
+    }))
+  }, [grades])
 
   const tableRows = useMemo(
     () =>
