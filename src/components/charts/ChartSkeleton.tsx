@@ -1,9 +1,9 @@
-import { memo } from 'react';
-import { CHART_DEFAULTS } from './types';
+import { memo } from 'react'
+import { CHART_DEFAULTS } from './types'
 
 interface ChartSkeletonProps {
-  height?: number;
-  className?: string;
+  height?: number
+  className?: string
 }
 
 export const ChartSkeleton = memo(function ChartSkeleton({
@@ -17,5 +17,5 @@ export const ChartSkeleton = memo(function ChartSkeleton({
       role="status"
       aria-label="Loading chart"
     />
-  );
-});
+  )
+})

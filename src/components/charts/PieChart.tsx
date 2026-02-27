@@ -1,7 +1,7 @@
-import { memo } from 'react';
-import { CHART_COLORS, CHART_DEFAULTS, type ChartDataPoint } from './types';
-import { ChartSkeleton } from './ChartSkeleton';
-import { useChartComponents } from './chart-hooks';
+import { memo } from 'react'
+import { CHART_COLORS, CHART_DEFAULTS, type ChartDataPoint } from './types'
+import { ChartSkeleton } from './ChartSkeleton'
+import { useChartComponents } from './chart-hooks'
 
 const PIE_CHART_COMPONENTS = [
   'PieChart',
@@ -10,22 +10,22 @@ const PIE_CHART_COMPONENTS = [
   'Tooltip',
   'Legend',
   'ResponsiveContainer',
-] as const;
+] as const
 
 export interface PieChartProps {
-  data: ChartDataPoint[];
-  dataKey?: string;
-  nameKey?: string;
-  height?: number;
-  innerRadius?: number | string;
-  outerRadius?: number | string;
-  showLegend?: boolean;
-  showTooltip?: boolean;
-  showLabels?: boolean;
-  className?: string;
-  ariaLabel?: string;
-  emptyMessage?: string;
-  colors?: string[];
+  data: ChartDataPoint[]
+  dataKey?: string
+  nameKey?: string
+  height?: number
+  innerRadius?: number | string
+  outerRadius?: number | string
+  showLegend?: boolean
+  showTooltip?: boolean
+  showLabels?: boolean
+  className?: string
+  ariaLabel?: string
+  emptyMessage?: string
+  colors?: string[]
 }
 
 const DEFAULT_COLORS = [
@@ -37,7 +37,7 @@ const DEFAULT_COLORS = [
   CHART_COLORS.teal,
   CHART_COLORS.pink,
   CHART_COLORS.orange,
-];
+]
 
 export const PieChart = memo(function PieChart({
   data,
@@ -54,10 +54,10 @@ export const PieChart = memo(function PieChart({
   emptyMessage = 'No data available',
   colors = DEFAULT_COLORS,
 }: PieChartProps) {
-  const { components: Chart, isLoading } = useChartComponents(PIE_CHART_COMPONENTS);
+  const { components: Chart, isLoading } = useChartComponents(PIE_CHART_COMPONENTS)
 
   if (isLoading) {
-    return <ChartSkeleton height={height} className={className} />;
+    return <ChartSkeleton height={height} className={className} />
   }
 
   if (!data || data.length === 0) {
@@ -69,11 +69,11 @@ export const PieChart = memo(function PieChart({
       >
         <p className="text-sm text-muted-foreground">{emptyMessage}</p>
       </div>
-    );
+    )
   }
 
   if (!Chart) {
-    return <ChartSkeleton height={height} className={className} />;
+    return <ChartSkeleton height={height} className={className} />
   }
 
   return (
@@ -103,5 +103,5 @@ export const PieChart = memo(function PieChart({
         </Chart.PieChart>
       </Chart.ResponsiveContainer>
     </div>
-  );
-});
+  )
+})

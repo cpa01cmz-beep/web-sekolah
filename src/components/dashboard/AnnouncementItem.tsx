@@ -1,18 +1,18 @@
-import { memo } from 'react';
-import { Activity, Megaphone } from 'lucide-react';
-import { formatDate } from '@/utils/date';
+import { memo } from 'react'
+import { Activity, Megaphone } from 'lucide-react'
+import { formatDate } from '@/utils/date'
 
 interface BaseAnnouncement {
-  id: string;
-  title: string;
-  date: string;
+  id: string
+  title: string
+  date: string
 }
 
 interface AnnouncementItemProps<T extends BaseAnnouncement> {
-  announcement: T;
-  variant?: 'default' | 'simple' | 'card';
-  showIcon?: boolean;
-  icon?: React.ReactNode;
+  announcement: T
+  variant?: 'default' | 'simple' | 'card'
+  showIcon?: boolean
+  icon?: React.ReactNode
 }
 
 function AnnouncementItemInner<T extends BaseAnnouncement>({
@@ -21,7 +21,9 @@ function AnnouncementItemInner<T extends BaseAnnouncement>({
   showIcon = true,
   icon,
 }: AnnouncementItemProps<T>) {
-  const displayIcon = icon ?? <Activity className="h-4 w-4 text-muted-foreground flex-shrink-0" aria-hidden="true" />;
+  const displayIcon = icon ?? (
+    <Activity className="h-4 w-4 text-muted-foreground flex-shrink-0" aria-hidden="true" />
+  )
 
   if (variant === 'simple') {
     return (
@@ -29,7 +31,7 @@ function AnnouncementItemInner<T extends BaseAnnouncement>({
         <p className="font-medium truncate">{announcement.title}</p>
         <p className="text-xs text-muted-foreground">{formatDate(announcement.date)}</p>
       </li>
-    );
+    )
   }
 
   if (variant === 'card') {
@@ -41,7 +43,7 @@ function AnnouncementItemInner<T extends BaseAnnouncement>({
           <p className="text-xs text-muted-foreground">{formatDate(announcement.date)}</p>
         </div>
       </li>
-    );
+    )
   }
 
   return (
@@ -52,11 +54,11 @@ function AnnouncementItemInner<T extends BaseAnnouncement>({
         <p className="text-xs text-muted-foreground">{formatDate(announcement.date)}</p>
       </div>
     </li>
-  );
+  )
 }
 
 export const AnnouncementItem = memo(AnnouncementItemInner) as <T extends BaseAnnouncement>(
   props: AnnouncementItemProps<T>
-) => React.ReactElement;
+) => React.ReactElement
 
-AnnouncementItem.displayName = 'AnnouncementItem';
+AnnouncementItem.displayName = 'AnnouncementItem'
