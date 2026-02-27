@@ -4,8 +4,8 @@
 
 ### Current Test Coverage
 
-- **Test Files**: 124
-- **Tests**: 3593 passing, 3 skipped, 155 todo
+- **Test Files**: 127
+- **Tests**: 3676 passing, 3 skipped, 155 todo
 - **Pass Rate**: 100%
 
 ### Portal Page Component Tests
@@ -51,14 +51,23 @@ npm run test:run     # Test suite
 
 The following tests are excluded from the test suite in `vitest.config.ts`:
 
-| Test File                                                 | Reason                                                         |
-| --------------------------------------------------------- | -------------------------------------------------------------- |
-| `worker/__tests__/referential-integrity.test.ts`          | Requires proper env mock with `GlobalDurableObject.idFromName` |
-| `worker/domain/__tests__/CommonDataService.test.ts`       | Requires Cloudflare Workers environment                        |
-| `worker/domain/__tests__/StudentDashboardService.test.ts` | Requires Cloudflare Workers environment                        |
-| `worker/domain/__tests__/TeacherService.test.ts`          | Requires Cloudflare Workers environment                        |
-| `worker/domain/__tests__/UserService.test.ts`             | Requires Cloudflare Workers environment                        |
-| `worker/domain/__tests__/ParentDashboardService.test.ts`  | Requires Cloudflare Workers environment                        |
+| Test File                                                 | Reason                                  |
+| --------------------------------------------------------- | --------------------------------------- |
+| `worker/domain/__tests__/CommonDataService.test.ts`       | Requires Cloudflare Workers environment |
+| `worker/domain/__tests__/StudentDashboardService.test.ts` | Requires Cloudflare Workers environment |
+| `worker/domain/__tests__/TeacherService.test.ts`          | Requires Cloudflare Workers environment |
+| `worker/domain/__tests__/UserService.test.ts`             | Requires Cloudflare Workers environment |
+| `worker/domain/__tests__/ParentDashboardService.test.ts`  | Requires Cloudflare Workers environment |
+
+### Enabled Tests
+
+The following tests were previously excluded but are now enabled:
+
+| Test File                                        | Tests | Status  |
+| ------------------------------------------------ | ----- | ------- |
+| `worker/__tests__/referential-integrity.test.ts` | 43    | Passing |
+
+The referential-integrity test was enabled by enhancing the mock environment in `worker/__tests__/utils/mocks.ts` with proper Durable Object stub mocking.
 
 ### Enabling Excluded Tests
 
@@ -96,6 +105,13 @@ The mock file (`__mocks__/cloudflare:workers.ts`) has been enhanced with:
 - `MockDurableObjectStub` - Full stub implementation
 - `MockDurableObjectStorage` - Full storage mock with Map-based storage
 - Pre-configured `ENV` object with mock namespaces for all entity types
+
+### Test Utils Mock
+
+The mock file (`worker/__tests__/utils/mocks.ts`) has been enhanced with:
+
+- `createMockEnv()` - Enhanced to properly mock Durable Object namespace with working `get()` method returning a stub with `getDoc()`, `casPut()`, `del()`, `has()`, and `listPrefix()` methods
+- All entity namespace bindings (USERS, CLASSES, COURSES, GRADES, etc.) are now properly initialized
 
 ## Quality Metrics
 
