@@ -1,22 +1,24 @@
-import { memo, useCallback } from 'react';
-import { Button } from '@/components/ui/button';
-import { useTheme } from '@/hooks/use-theme';
-import { Sun, Moon } from 'lucide-react';
+import { memo, useCallback } from 'react'
+import { Button } from '@/components/ui/button'
+import { useTheme } from '@/hooks/use-theme'
+import { Sun, Moon } from 'lucide-react'
 
 interface ThemeToggleProps {
-  className?: string;
+  className?: string
 }
 
-export const ThemeToggle = memo(function ThemeToggle({ className = "absolute top-4 right-4" }: ThemeToggleProps) {
-  const { isDark, toggleTheme } = useTheme();
+export const ThemeToggle = memo(function ThemeToggle({
+  className = 'absolute top-4 right-4',
+}: ThemeToggleProps) {
+  const { isDark, toggleTheme } = useTheme()
 
   const handleClick = useCallback(() => {
-    toggleTheme();
-  }, [toggleTheme]);
+    toggleTheme()
+  }, [toggleTheme])
 
   return (
-    <Button 
-      onClick={handleClick} 
+    <Button
+      onClick={handleClick}
       variant="ghost"
       size="icon"
       className={`${className} hover:scale-110 transition-all duration-200 active:scale-90 z-50`}
@@ -28,5 +30,5 @@ export const ThemeToggle = memo(function ThemeToggle({ className = "absolute top
         <Moon className="h-5 w-5 transition-transform hover:-rotate-12" aria-hidden="true" />
       )}
     </Button>
-  );
-});
+  )
+})

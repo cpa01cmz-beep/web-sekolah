@@ -1,9 +1,9 @@
-import { memo } from 'react';
-import { CHART_COLORS, CHART_DEFAULTS, type MultiSeriesDataPoint } from './types';
-import { ChartSkeleton } from './ChartSkeleton';
-import { useChartComponents } from './chart-hooks';
+import { memo } from 'react'
+import { CHART_COLORS, CHART_DEFAULTS, type MultiSeriesDataPoint } from './types'
+import { ChartSkeleton } from './ChartSkeleton'
+import { useChartComponents } from './chart-hooks'
 
-const ACTIVE_DOT_CONFIG = { r: 6 } as const;
+const ACTIVE_DOT_CONFIG = { r: 6 } as const
 
 const LINE_CHART_COMPONENTS = [
   'LineChart',
@@ -14,7 +14,7 @@ const LINE_CHART_COMPONENTS = [
   'Tooltip',
   'Legend',
   'ResponsiveContainer',
-] as const;
+] as const
 
 const DEFAULT_COLORS = [
   CHART_COLORS.primary,
@@ -23,27 +23,27 @@ const DEFAULT_COLORS = [
   CHART_COLORS.warning,
   CHART_COLORS.purple,
   CHART_COLORS.teal,
-] as const;
+] as const
 
 export interface LineSeries {
-  dataKey: string;
-  name?: string;
-  color?: string;
-  strokeWidth?: number;
+  dataKey: string
+  name?: string
+  color?: string
+  strokeWidth?: number
 }
 
 export interface LineChartProps {
-  data: MultiSeriesDataPoint[];
-  series: LineSeries[];
-  xAxisKey?: string;
-  height?: number;
-  showGrid?: boolean;
-  showLegend?: boolean;
-  showTooltip?: boolean;
-  showDots?: boolean;
-  className?: string;
-  ariaLabel?: string;
-  emptyMessage?: string;
+  data: MultiSeriesDataPoint[]
+  series: LineSeries[]
+  xAxisKey?: string
+  height?: number
+  showGrid?: boolean
+  showLegend?: boolean
+  showTooltip?: boolean
+  showDots?: boolean
+  className?: string
+  ariaLabel?: string
+  emptyMessage?: string
 }
 
 export const LineChart = memo(function LineChart({
@@ -59,10 +59,10 @@ export const LineChart = memo(function LineChart({
   ariaLabel = 'Line chart',
   emptyMessage = 'No data available',
 }: LineChartProps) {
-  const { components: Chart, isLoading } = useChartComponents(LINE_CHART_COMPONENTS);
+  const { components: Chart, isLoading } = useChartComponents(LINE_CHART_COMPONENTS)
 
   if (isLoading) {
-    return <ChartSkeleton height={height} className={className} />;
+    return <ChartSkeleton height={height} className={className} />
   }
 
   if (!data || data.length === 0) {
@@ -74,11 +74,11 @@ export const LineChart = memo(function LineChart({
       >
         <p className="text-sm text-muted-foreground">{emptyMessage}</p>
       </div>
-    );
+    )
   }
 
   if (!Chart) {
-    return <ChartSkeleton height={height} className={className} />;
+    return <ChartSkeleton height={height} className={className} />
   }
 
   return (
@@ -105,5 +105,5 @@ export const LineChart = memo(function LineChart({
         </Chart.LineChart>
       </Chart.ResponsiveContainer>
     </div>
-  );
-});
+  )
+})

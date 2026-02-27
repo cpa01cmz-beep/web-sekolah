@@ -1,18 +1,18 @@
-import { memo, useCallback } from 'react';
-import { Button } from '@/components/ui/button';
-import { UserRole } from '@shared/types';
-import { THEME_COLORS } from '@/theme/colors';
+import { memo, useCallback } from 'react'
+import { Button } from '@/components/ui/button'
+import { UserRole } from '@shared/types'
+import { THEME_COLORS } from '@/theme/colors'
 
 interface RoleButton {
-  role: UserRole;
-  label: string;
-  variant?: 'primary' | 'secondary';
+  role: UserRole
+  label: string
+  variant?: 'primary' | 'secondary'
 }
 
 interface RoleButtonGridProps {
-  loadingRole: UserRole | null;
-  onRoleSelect: (role: UserRole) => void;
-  buttonClassName?: string;
+  loadingRole: UserRole | null
+  onRoleSelect: (role: UserRole) => void
+  buttonClassName?: string
 }
 
 const DEFAULT_ROLES: RoleButton[] = [
@@ -20,30 +20,37 @@ const DEFAULT_ROLES: RoleButton[] = [
   { role: 'teacher', label: 'Teacher', variant: 'primary' },
   { role: 'parent', label: 'Parent', variant: 'secondary' },
   { role: 'admin', label: 'Admin', variant: 'secondary' },
-];
+]
 
 const PRIMARY_STYLE: React.CSSProperties = {
   '--bg-color': THEME_COLORS.PRIMARY,
   '--bg-hover-color': THEME_COLORS.PRIMARY_HOVER,
   '--bg-focus-color': THEME_COLORS.PRIMARY_HOVER,
-} as React.CSSProperties;
+} as React.CSSProperties
 
 const SECONDARY_STYLE: React.CSSProperties = {
   '--bg-color': THEME_COLORS.SECONDARY,
   '--bg-hover-color': THEME_COLORS.SECONDARY_HOVER,
   '--bg-focus-color': THEME_COLORS.SECONDARY_HOVER,
-} as React.CSSProperties;
+} as React.CSSProperties
 
-export const RoleButtonGrid = memo(function RoleButtonGrid({ loadingRole, onRoleSelect, buttonClassName }: RoleButtonGridProps) {
-  const handleButtonClick = useCallback((role: UserRole) => {
-    onRoleSelect(role);
-  }, [onRoleSelect]);
+export const RoleButtonGrid = memo(function RoleButtonGrid({
+  loadingRole,
+  onRoleSelect,
+  buttonClassName,
+}: RoleButtonGridProps) {
+  const handleButtonClick = useCallback(
+    (role: UserRole) => {
+      onRoleSelect(role)
+    },
+    [onRoleSelect]
+  )
 
   return (
     <div className="grid grid-cols-2 gap-3 w-full">
-      {DEFAULT_ROLES.map((button) => {
-        const isPrimary = button.variant === 'primary';
-        const style = isPrimary ? PRIMARY_STYLE : SECONDARY_STYLE;
+      {DEFAULT_ROLES.map(button => {
+        const isPrimary = button.variant === 'primary'
+        const style = isPrimary ? PRIMARY_STYLE : SECONDARY_STYLE
 
         return (
           <Button
@@ -59,9 +66,9 @@ export const RoleButtonGrid = memo(function RoleButtonGrid({ loadingRole, onRole
           >
             {loadingRole === button.role ? 'Logging in...' : button.label}
           </Button>
-        );
+        )
       })}
     </div>
-  );
-});
-RoleButtonGrid.displayName = 'RoleButtonGrid';
+  )
+})
+RoleButtonGrid.displayName = 'RoleButtonGrid'

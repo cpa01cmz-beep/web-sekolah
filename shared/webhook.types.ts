@@ -1,43 +1,43 @@
-import type { TimestampedEntity } from './common-types';
+import type { TimestampedEntity } from './common-types'
 
 export interface WebhookConfig extends TimestampedEntity {
-  id: string;
-  url: string;
-  events: string[];
-  secret: string;
-  active: boolean;
+  id: string
+  url: string
+  events: string[]
+  secret: string
+  active: boolean
 }
 
 export interface WebhookEvent extends TimestampedEntity {
-  id: string;
-  eventType: string;
-  data: Record<string, unknown>;
-  processed: boolean;
+  id: string
+  eventType: string
+  data: Record<string, unknown>
+  processed: boolean
 }
 
 export interface WebhookDelivery extends TimestampedEntity {
-  id: string;
-  eventId: string;
-  webhookConfigId: string;
-  status: 'pending' | 'delivered' | 'failed';
-  statusCode?: number;
-  attempts: number;
-  nextAttemptAt?: string;
-  errorMessage?: string;
-  idempotencyKey?: string;
+  id: string
+  eventId: string
+  webhookConfigId: string
+  status: 'pending' | 'delivered' | 'failed'
+  statusCode?: number
+  attempts: number
+  nextAttemptAt?: string
+  errorMessage?: string
+  idempotencyKey?: string
 }
 
 export interface DeadLetterQueueWebhook extends TimestampedEntity {
-  id: string;
-  eventId: string;
-  webhookConfigId: string;
-  eventType: string;
-  url: string;
-  payload: Record<string, unknown>;
-  status: number;
-  attempts: number;
-  errorMessage: string;
-  failedAt: string;
+  id: string
+  eventId: string
+  webhookConfigId: string
+  eventType: string
+  url: string
+  payload: Record<string, unknown>
+  status: number
+  attempts: number
+  errorMessage: string
+  failedAt: string
 }
 
 export type WebhookEventType =
@@ -53,7 +53,7 @@ export type WebhookEventType =
   | 'announcement.deleted'
   | 'message.created'
   | 'message.read'
-  | 'message.deleted';
+  | 'message.deleted'
 
 export const WEBHOOK_EVENT_TYPES: readonly WebhookEventType[] = [
   'grade.created',
@@ -69,4 +69,4 @@ export const WEBHOOK_EVENT_TYPES: readonly WebhookEventType[] = [
   'message.created',
   'message.read',
   'message.deleted',
-] as const;
+] as const

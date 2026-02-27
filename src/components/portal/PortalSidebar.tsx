@@ -1,31 +1,31 @@
-import { NavLink, useNavigate } from 'react-router-dom';
-import { useAuthStore } from '@/stores/authStore';
-import { Button } from '@/components/ui/button';
-import { LogOut, GraduationCap, ChevronLeft, ChevronRight } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { useState, useCallback, memo } from 'react';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { navLinksMap, NavLink as NavLinkType } from '@/config/navigation';
-import { THEME_COLORS } from '@/theme/colors';
+import { NavLink, useNavigate } from 'react-router-dom'
+import { useAuthStore } from '@/stores/authStore'
+import { Button } from '@/components/ui/button'
+import { LogOut, GraduationCap, ChevronLeft, ChevronRight } from 'lucide-react'
+import { cn } from '@/lib/utils'
+import { useState, useCallback, memo } from 'react'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
+import { navLinksMap, NavLink as NavLinkType } from '@/config/navigation'
+import { THEME_COLORS } from '@/theme/colors'
 
 export const PortalSidebar = memo(function PortalSidebar() {
-  const user = useAuthStore((state) => state.user);
-  const logout = useAuthStore((state) => state.logout);
-  const navigate = useNavigate();
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  const user = useAuthStore(state => state.user)
+  const logout = useAuthStore(state => state.logout)
+  const navigate = useNavigate()
+  const [isCollapsed, setIsCollapsed] = useState(false)
 
   const handleLogout = useCallback(() => {
-    logout();
-    navigate('/login');
-  }, [logout, navigate]);
+    logout()
+    navigate('/login')
+  }, [logout, navigate])
 
   const handleToggleCollapse = useCallback(() => {
-    setIsCollapsed(prev => !prev);
-  }, []);
+    setIsCollapsed(prev => !prev)
+  }, [])
 
-  if (!user) return null;
-  const navLinks = navLinksMap[user.role as keyof typeof navLinksMap] || [];
-  const basePortalPath = `/portal/${user.role}`;
+  if (!user) return null
+  const navLinks = navLinksMap[user.role as keyof typeof navLinksMap] || []
+  const basePortalPath = `/portal/${user.role}`
   return (
     <TooltipProvider delayDuration={0}>
       <aside
@@ -37,15 +37,33 @@ export const PortalSidebar = memo(function PortalSidebar() {
         <div className="flex items-center justify-between h-16 border-b px-4">
           {!isCollapsed && (
             <div className="flex items-center gap-2">
-              <GraduationCap className="h-7 w-7" style={{ color: THEME_COLORS.PRIMARY }} aria-hidden="true" />
+              <GraduationCap
+                className="h-7 w-7"
+                style={{ color: THEME_COLORS.PRIMARY }}
+                aria-hidden="true"
+              />
               <span className="text-lg font-bold">Akademia Pro</span>
             </div>
           )}
-          <Button variant="ghost" size="icon" onClick={handleToggleCollapse} className="ml-auto" aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}>
-            {isCollapsed ? <ChevronRight className="h-5 w-5" aria-hidden="true" /> : <ChevronLeft className="h-5 w-5" aria-hidden="true" />}
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={handleToggleCollapse}
+            className="ml-auto"
+            aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          >
+            {isCollapsed ? (
+              <ChevronRight className="h-5 w-5" aria-hidden="true" />
+            ) : (
+              <ChevronLeft className="h-5 w-5" aria-hidden="true" />
+            )}
           </Button>
         </div>
-        <nav className="flex-grow p-2 space-y-2" role="navigation" aria-label={`${user.role} portal navigation`}>
+        <nav
+          className="flex-grow p-2 space-y-2"
+          role="navigation"
+          aria-label={`${user.role} portal navigation`}
+        >
           <h2 className="sr-only">Navigation Menu</h2>
           {navLinks.map((link: NavLinkType) => (
             <Tooltip key={link.to}>
@@ -62,7 +80,9 @@ export const PortalSidebar = memo(function PortalSidebar() {
                     )
                   }
                 >
-                  <span aria-hidden="true"><link.icon className="h-5 w-5" /></span>
+                  <span aria-hidden="true">
+                    <link.icon className="h-5 w-5" />
+                  </span>
                   {!isCollapsed && <span>{link.label}</span>}
                 </NavLink>
               </TooltipTrigger>
@@ -73,7 +93,12 @@ export const PortalSidebar = memo(function PortalSidebar() {
         <div className="p-2 border-t">
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button variant="ghost" className={cn('w-full justify-start gap-3', isCollapsed && 'justify-center')} onClick={handleLogout} aria-label={isCollapsed ? 'Logout' : undefined}>
+              <Button
+                variant="ghost"
+                className={cn('w-full justify-start gap-3', isCollapsed && 'justify-center')}
+                onClick={handleLogout}
+                aria-label={isCollapsed ? 'Logout' : undefined}
+              >
                 <LogOut className="h-5 w-5" aria-hidden="true" />
                 {!isCollapsed && <span>Logout</span>}
               </Button>
@@ -83,6 +108,6 @@ export const PortalSidebar = memo(function PortalSidebar() {
         </div>
       </aside>
     </TooltipProvider>
-  );
-});
-PortalSidebar.displayName = 'PortalSidebar';
+  )
+})
+PortalSidebar.displayName = 'PortalSidebar'

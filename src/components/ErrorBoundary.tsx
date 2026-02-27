@@ -1,20 +1,16 @@
-import React, { Component, ErrorInfo, ReactNode } from "react";
-import { errorReporter } from "@/lib/errorReporter";
-import { ErrorFallback } from "./ErrorFallback";
+import React, { Component, ErrorInfo, ReactNode } from 'react'
+import { errorReporter } from '@/lib/errorReporter'
+import { ErrorFallback } from './ErrorFallback'
 
 interface Props {
-  children: ReactNode;
-  fallback?: (
-    error: Error,
-    errorInfo: ErrorInfo,
-    retry: () => void
-  ) => ReactNode;
+  children: ReactNode
+  fallback?: (error: Error, errorInfo: ErrorInfo, retry: () => void) => ReactNode
 }
 
 interface State {
-  hasError: boolean;
-  error: Error | null;
-  errorInfo: ErrorInfo | null;
+  hasError: boolean
+  error: Error | null
+  errorInfo: ErrorInfo | null
 }
 
 export class ErrorBoundary extends Component<Props, State> {
@@ -22,20 +18,20 @@ export class ErrorBoundary extends Component<Props, State> {
     hasError: false,
     error: null,
     errorInfo: null,
-  };
+  }
 
   public static getDerivedStateFromError(error: Error): State {
-    return { hasError: true, error, errorInfo: null };
+    return { hasError: true, error, errorInfo: null }
   }
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     // Update state with error info
-    this.setState({ errorInfo });
+    this.setState({ errorInfo })
 
     // Report error to backend
     errorReporter.report({
       message: error.message,
-      stack: error.stack || "",
+      stack: error.stack || '',
       componentStack: errorInfo.componentStack,
       errorBoundary: true,
       errorBoundaryProps: {
@@ -43,40 +39,30 @@ export class ErrorBoundary extends Component<Props, State> {
       },
       url: window.location.href,
       timestamp: new Date().toISOString(),
-      level: "error",
-    });
+      level: 'error',
+    })
   }
 
   private retry = () => {
-    this.setState({ hasError: false, error: null, errorInfo: null });
+    this.setState({ hasError: false, error: null, errorInfo: null })
     // Reload the page to ensure clean state
-    window.location.reload();
-  };
+    window.location.reload()
+  }
 
   private goHome = () => {
-    window.location.href = "/";
-  };
+    window.location.href = '/'
+  }
 
   public render() {
     if (this.state.hasError && this.state.error) {
       if (this.props.fallback) {
-        return this.props.fallback(
-          this.state.error,
-          this.state.errorInfo!,
-          this.retry
-        );
+        return this.props.fallback(this.state.error, this.state.errorInfo!, this.retry)
       }
 
       // Use shared ErrorFallback component
-      return (
-        <ErrorFallback
-          error={this.state.error}
-          onRetry={this.retry}
-          onGoHome={this.goHome}
-        />
-      );
+      return <ErrorFallback error={this.state.error} onRetry={this.retry} onGoHome={this.goHome} />
     }
 
-    return this.props.children;
+    return this.props.children
   }
 }

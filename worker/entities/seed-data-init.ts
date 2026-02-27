@@ -1,40 +1,42 @@
-import type { Env } from "../core-utils";
-import { UserEntity } from "./UserEntity";
-import { ClassEntity } from "./ClassEntity";
-import { CourseEntity } from "./CourseEntity";
-import { GradeEntity } from "./GradeEntity";
-import { AnnouncementEntity } from "./AnnouncementEntity";
-import { ScheduleEntity } from "./ScheduleEntity";
-import { hashPassword } from "../password-utils";
+import type { Env } from '../core-utils'
+import { UserEntity } from './UserEntity'
+import { ClassEntity } from './ClassEntity'
+import { CourseEntity } from './CourseEntity'
+import { GradeEntity } from './GradeEntity'
+import { AnnouncementEntity } from './AnnouncementEntity'
+import { ScheduleEntity } from './ScheduleEntity'
+import { hashPassword } from '../password-utils'
 
 function generateSecureRandomPassword(): string {
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*';
-  const array = new Uint32Array(24);
-  crypto.getRandomValues(array);
-  return Array.from(array, (x) => chars[x % chars.length]).join('');
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*'
+  const array = new Uint32Array(24)
+  crypto.getRandomValues(array)
+  return Array.from(array, x => chars[x % chars.length]).join('')
 }
 
 export async function ensureAllSeedData(env: Env) {
-  await UserEntity.ensureSeed(env);
-  await ClassEntity.ensureSeed(env);
-  await CourseEntity.ensureSeed(env);
-  await GradeEntity.ensureSeed(env);
-  await AnnouncementEntity.ensureSeed(env);
-  await ScheduleEntity.ensureSeed(env);
+  await UserEntity.ensureSeed(env)
+  await ClassEntity.ensureSeed(env)
+  await CourseEntity.ensureSeed(env)
+  await GradeEntity.ensureSeed(env)
+  await AnnouncementEntity.ensureSeed(env)
+  await ScheduleEntity.ensureSeed(env)
 
-  const { items: users } = await UserEntity.list(env);
+  const { items: users } = await UserEntity.list(env)
 
   if (env.ENVIRONMENT === 'production') {
-    throw new Error('Cannot set default passwords in production environment. Users must set passwords through password reset flow.');
+    throw new Error(
+      'Cannot set default passwords in production environment. Users must set passwords through password reset flow.'
+    )
   }
 
-  const defaultPassword = env.DEFAULT_PASSWORD || generateSecureRandomPassword();
+  const defaultPassword = env.DEFAULT_PASSWORD || generateSecureRandomPassword()
 
   for (const user of users) {
     if (!user.passwordHash) {
-      const { hash } = await hashPassword(defaultPassword);
-      const entity = new UserEntity(env, user.id);
-      await entity.patch({ passwordHash: hash });
+      const { hash } = await hashPassword(defaultPassword)
+      const entity = new UserEntity(env, user.id)
+      await entity.patch({ passwordHash: hash })
     }
   }
 }

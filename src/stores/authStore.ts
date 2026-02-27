@@ -2,23 +2,23 @@
 // Authentication Store
 // ====================
 
-import { create } from 'zustand';
-import { BaseUser, UserRole } from '@shared/types';
-import { AuthService } from '@/services/authService';
-import { logger } from '@/lib/logger';
-import { STORAGE_KEYS } from '@/constants/storage-keys';
-import { storage } from '@/lib/storage';
+import { create } from 'zustand'
+import { BaseUser, UserRole } from '@shared/types'
+import { AuthService } from '@/services/authService'
+import { logger } from '@/lib/logger'
+import { STORAGE_KEYS } from '@/constants/storage-keys'
+import { storage } from '@/lib/storage'
 
 // ====================
 // Types
 // ====================
 
 interface AuthState {
-  user: BaseUser | null;
-  token: string | null;
-  login: (email: string, password: string, role: UserRole) => Promise<void>;
-  logout: () => Promise<void>;
-  initializeAuth: () => Promise<void>;
+  user: BaseUser | null
+  token: string | null
+  login: (email: string, password: string, role: UserRole) => Promise<void>
+  logout: () => Promise<void>
+  initializeAuth: () => Promise<void>
 }
 
 // ====================
@@ -29,10 +29,10 @@ interface AuthState {
  * Zustand store for authentication state management
  * Handles user login, logout, and authentication initialization
  */
-export const useAuthStore = create<AuthState>((set) => ({
+export const useAuthStore = create<AuthState>(set => ({
   user: null,
   token: null,
-  
+
   /**
    * Authenticate user with email, password, and role
    * @param email - User's email address
@@ -42,49 +42,49 @@ export const useAuthStore = create<AuthState>((set) => ({
    */
   login: async (email, password, role) => {
     try {
-      const authResponse = await AuthService.login({ email, password, role });
-      storage.setItem(STORAGE_KEYS.AUTH_TOKEN, authResponse.token);
-      set({ user: authResponse.user, token: authResponse.token });
+      const authResponse = await AuthService.login({ email, password, role })
+      storage.setItem(STORAGE_KEYS.AUTH_TOKEN, authResponse.token)
+      set({ user: authResponse.user, token: authResponse.token })
     } catch (error) {
-      logger.error('Login failed', error, { email, role });
-      throw error;
+      logger.error('Login failed', error, { email, role })
+      throw error
     }
   },
-  
+
   /**
    * Log out the current user and clear authentication state
    * Clears both in-memory state and any stored tokens
    */
   logout: async () => {
     try {
-      await AuthService.logout();
-      set({ user: null, token: null });
+      await AuthService.logout()
+      set({ user: null, token: null })
     } catch (error) {
-      logger.error('Logout failed', error);
-      set({ user: null, token: null });
+      logger.error('Logout failed', error)
+      set({ user: null, token: null })
     }
   },
-  
+
   /**
    * Initialize authentication state from stored token
    * Checks for a stored token and validates it to restore session
    */
   initializeAuth: async () => {
     // Check for stored token and validate it
-    const storedToken = storage.getItem(STORAGE_KEYS.AUTH_TOKEN);
+    const storedToken = storage.getItem(STORAGE_KEYS.AUTH_TOKEN)
     if (storedToken) {
       try {
-        const user = await AuthService.getCurrentUser(storedToken);
+        const user = await AuthService.getCurrentUser(storedToken)
         if (user) {
-          set({ user, token: storedToken });
+          set({ user, token: storedToken })
         } else {
           // Token is invalid, clear it
-          storage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
+          storage.removeItem(STORAGE_KEYS.AUTH_TOKEN)
         }
       } catch (error) {
-        logger.error('Auth initialization failed', error);
-        storage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
+        logger.error('Auth initialization failed', error)
+        storage.removeItem(STORAGE_KEYS.AUTH_TOKEN)
       }
     }
   },
-}));
+}))

@@ -1,19 +1,19 @@
-import { createBrowserRouter } from "react-router-dom";
-import { lazy } from 'react';
-import { RouteErrorBoundary } from '@/components/RouteErrorBoundary';
-import { withSuspense } from './router-utils';
-import { publicRoutes } from './routes/public';
-import { studentRoutes } from './routes/student';
-import { teacherRoutes } from './routes/teacher';
-import { parentRoutes } from './routes/parent';
-import { adminRoutes } from './routes/admin';
+import { createBrowserRouter } from 'react-router-dom'
+import { lazy } from 'react'
+import { RouteErrorBoundary } from '@/components/RouteErrorBoundary'
+import { withSuspense } from './router-utils'
+import { publicRoutes } from './routes/public'
+import { studentRoutes } from './routes/student'
+import { teacherRoutes } from './routes/teacher'
+import { parentRoutes } from './routes/parent'
+import { adminRoutes } from './routes/admin'
 
-const PortalLayout = lazy(() => import('@/pages/portal/PortalLayout'));
+const PortalLayout = lazy(() => import('@/pages/portal/PortalLayout'))
 
 export const router = createBrowserRouter([
   ...publicRoutes,
   {
-    path: "/portal",
+    path: '/portal',
     element: withSuspense(PortalLayout),
     errorElement: <RouteErrorBoundary />,
     children: [
@@ -24,4 +24,4 @@ export const router = createBrowserRouter([
       adminRoutes,
     ],
   },
-]);
+])

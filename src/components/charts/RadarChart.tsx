@@ -1,7 +1,7 @@
-import { memo } from 'react';
-import { CHART_COLORS, CHART_DEFAULTS, type MultiSeriesDataPoint } from './types';
-import { ChartSkeleton } from './ChartSkeleton';
-import { useChartComponents } from './chart-hooks';
+import { memo } from 'react'
+import { CHART_COLORS, CHART_DEFAULTS, type MultiSeriesDataPoint } from './types'
+import { ChartSkeleton } from './ChartSkeleton'
+import { useChartComponents } from './chart-hooks'
 
 const RADAR_CHART_COMPONENTS = [
   'RadarChart',
@@ -12,7 +12,7 @@ const RADAR_CHART_COMPONENTS = [
   'Tooltip',
   'Legend',
   'ResponsiveContainer',
-] as const;
+] as const
 
 const DEFAULT_COLORS = [
   CHART_COLORS.primary,
@@ -21,26 +21,26 @@ const DEFAULT_COLORS = [
   CHART_COLORS.warning,
   CHART_COLORS.purple,
   CHART_COLORS.teal,
-] as const;
+] as const
 
 export interface RadarSeries {
-  dataKey: string;
-  name?: string;
-  color?: string;
-  fillOpacity?: number;
+  dataKey: string
+  name?: string
+  color?: string
+  fillOpacity?: number
 }
 
 export interface RadarChartProps {
-  data: MultiSeriesDataPoint[];
-  series: RadarSeries[];
-  angleKey?: string;
-  height?: number;
-  showGrid?: boolean;
-  showLegend?: boolean;
-  showTooltip?: boolean;
-  className?: string;
-  ariaLabel?: string;
-  emptyMessage?: string;
+  data: MultiSeriesDataPoint[]
+  series: RadarSeries[]
+  angleKey?: string
+  height?: number
+  showGrid?: boolean
+  showLegend?: boolean
+  showTooltip?: boolean
+  className?: string
+  ariaLabel?: string
+  emptyMessage?: string
 }
 
 export const RadarChart = memo(function RadarChart({
@@ -55,10 +55,10 @@ export const RadarChart = memo(function RadarChart({
   ariaLabel = 'Radar chart',
   emptyMessage = 'No data available',
 }: RadarChartProps) {
-  const { components: Chart, isLoading } = useChartComponents(RADAR_CHART_COMPONENTS);
+  const { components: Chart, isLoading } = useChartComponents(RADAR_CHART_COMPONENTS)
 
   if (isLoading) {
-    return <ChartSkeleton height={height} className={className} />;
+    return <ChartSkeleton height={height} className={className} />
   }
 
   if (!data || data.length === 0) {
@@ -70,11 +70,11 @@ export const RadarChart = memo(function RadarChart({
       >
         <p className="text-sm text-muted-foreground">{emptyMessage}</p>
       </div>
-    );
+    )
   }
 
   if (!Chart) {
-    return <ChartSkeleton height={height} className={className} />;
+    return <ChartSkeleton height={height} className={className} />
   }
 
   return (
@@ -99,5 +99,5 @@ export const RadarChart = memo(function RadarChart({
         </Chart.RadarChart>
       </Chart.ResponsiveContainer>
     </div>
-  );
-});
+  )
+})

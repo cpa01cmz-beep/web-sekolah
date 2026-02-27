@@ -1,8 +1,8 @@
-import { cn } from '@/lib/utils';
+import { cn } from '@/lib/utils'
 
 interface SkipLinkProps {
-  targetId: string;
-  className?: string;
+  targetId: string
+  className?: string
 }
 
 export function SkipLink({ targetId, className }: SkipLinkProps) {
@@ -16,5 +16,5 @@ export function SkipLink({ targetId, className }: SkipLinkProps) {
     >
       Skip to main content
     </a>
-  );
+  )
 }

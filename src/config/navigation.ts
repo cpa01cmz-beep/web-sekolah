@@ -1,10 +1,20 @@
-import { LayoutDashboard, Calendar, Award, User, BookCopy, Megaphone, Users, Settings, Mail } from 'lucide-react';
-import type { ComponentType } from 'react';
+import {
+  LayoutDashboard,
+  Calendar,
+  Award,
+  User,
+  BookCopy,
+  Megaphone,
+  Users,
+  Settings,
+  Mail,
+} from 'lucide-react'
+import type { ComponentType } from 'react'
 
 export interface NavLink {
-  to: string;
-  icon: ComponentType<{ className?: string }>;
-  label: string;
+  to: string
+  icon: ComponentType<{ className?: string }>
+  label: string
 }
 
 const iconMap = {
@@ -17,22 +27,22 @@ const iconMap = {
   users: Users,
   settings: Settings,
   mail: Mail,
-} as const;
+} as const
 
-type IconKey = keyof typeof iconMap;
+type IconKey = keyof typeof iconMap
 
 const createLink = (to: string, iconKey: IconKey, label: string): NavLink => ({
   to,
   icon: iconMap[iconKey],
   label,
-});
+})
 
 export const studentLinks: NavLink[] = [
   createLink('dashboard', 'dashboard', 'Dashboard'),
   createLink('schedule', 'calendar', 'Schedule'),
   createLink('grades', 'award', 'Grades'),
   createLink('card', 'user', 'Student Card'),
-];
+]
 
 export const teacherLinks: NavLink[] = [
   createLink('dashboard', 'dashboard', 'Dashboard'),
@@ -40,24 +50,24 @@ export const teacherLinks: NavLink[] = [
   createLink('grades', 'bookCopy', 'Grade Management'),
   createLink('announcements', 'megaphone', 'Announcements'),
   createLink('messages', 'mail', 'Messages'),
-];
+]
 
 export const parentLinks: NavLink[] = [
   createLink('dashboard', 'dashboard', 'Dashboard'),
   createLink('schedule', 'calendar', 'Student Schedule'),
   createLink('messages', 'mail', 'Messages'),
-];
+]
 
 export const adminLinks: NavLink[] = [
   createLink('dashboard', 'dashboard', 'Dashboard'),
   createLink('users', 'users', 'User Management'),
   createLink('announcements', 'megaphone', 'Announcements'),
   createLink('settings', 'settings', 'Settings'),
-];
+]
 
 export const navLinksMap = {
   student: studentLinks,
   teacher: teacherLinks,
   parent: parentLinks,
   admin: adminLinks,
-} as const;
+} as const

@@ -5,125 +5,112 @@ This guide demonstrates how to implement security features using the new middlew
 ## 1. Authentication Middleware
 
 ### Require Authentication
-```typescript
-import { authenticate } from './middleware/auth';
 
-app.use('/api/protected/*', authenticate());
+```typescript
+import { authenticate } from './middleware/auth'
+
+app.use('/api/protected/*', authenticate())
 
 // This endpoint now requires a valid JWT token
-app.get('/api/protected/data', async (c) => {
-  const user = c.get('user'); // { id, email, role }
-  return c.json({ user });
-});
+app.get('/api/protected/data', async c => {
+  const user = c.get('user') // { id, email, role }
+  return c.json({ user })
+})
 ```
 
 ### Optional Authentication
-```typescript
-import { optionalAuthenticate } from './middleware/auth';
 
-app.use('/api/public/*', optionalAuthenticate());
+```typescript
+import { optionalAuthenticate } from './middleware/auth'
+
+app.use('/api/public/*', optionalAuthenticate())
 
 // User data is available if token is provided, otherwise null
-app.get('/api/public/data', async (c) => {
-  const user = c.get('user'); // User object or undefined
-  return c.json({ user });
-});
+app.get('/api/public/data', async c => {
+  const user = c.get('user') // User object or undefined
+  return c.json({ user })
+})
 ```
 
 ## 2. Authorization Middleware
 
 ### Role-Based Access Control
+
 ```typescript
-import { authorize } from './middleware/auth';
+import { authorize } from './middleware/auth'
 
 // Only admins can access this
-app.post('/api/admin/users',
-  authenticate(),
-  authorize('admin'),
-  async (c) => {
-    // Admin only code
-  }
-);
+app.post('/api/admin/users', authenticate(), authorize('admin'), async c => {
+  // Admin only code
+})
 
 // Teachers and admins can access this
-app.get('/api/teacher/classes',
-  authenticate(),
-  authorize('teacher', 'admin'),
-  async (c) => {
-    // Teacher or admin code
-  }
-);
+app.get('/api/teacher/classes', authenticate(), authorize('teacher', 'admin'), async c => {
+  // Teacher or admin code
+})
 
 // All authenticated users can access this
-app.get('/api/protected/data',
+app.get(
+  '/api/protected/data',
   authenticate(),
   authorize('student', 'teacher', 'parent', 'admin'),
-  async (c) => {
+  async c => {
     // Any authenticated user
   }
-);
+)
 ```
 
 ## 3. Input Validation Middleware
 
 ### Validate Request Body
-```typescript
-import { validateBody } from './middleware/validation';
-import { createUserSchema } from './middleware/schemas';
 
-app.post('/api/users',
-  validateBody(createUserSchema),
-  async (c) => {
-    const validatedData = c.get('validatedBody');
-    // Data is already validated and typed
-    return c.json(validatedData);
-  }
-);
+```typescript
+import { validateBody } from './middleware/validation'
+import { createUserSchema } from './middleware/schemas'
+
+app.post('/api/users', validateBody(createUserSchema), async c => {
+  const validatedData = c.get('validatedBody')
+  // Data is already validated and typed
+  return c.json(validatedData)
+})
 ```
 
 ### Validate Query Parameters
-```typescript
-import { validateQuery } from './middleware/validation';
-import { queryParamsSchema } from './middleware/schemas';
 
-app.get('/api/users',
-  validateQuery(queryParamsSchema),
-  async (c) => {
-    const validatedQuery = c.get('validatedQuery');
-    // { page?: number, limit?: number, ... }
-    return c.json(validatedQuery);
-  }
-);
+```typescript
+import { validateQuery } from './middleware/validation'
+import { queryParamsSchema } from './middleware/schemas'
+
+app.get('/api/users', validateQuery(queryParamsSchema), async c => {
+  const validatedQuery = c.get('validatedQuery')
+  // { page?: number, limit?: number, ... }
+  return c.json(validatedQuery)
+})
 ```
 
 ### Validate Path Parameters
-```typescript
-import { validateParams } from './middleware/validation';
-import { paramsSchema } from './middleware/schemas';
 
-app.get('/api/users/:id',
-  validateParams(paramsSchema),
-  async (c) => {
-    const validatedParams = c.get('validatedParams');
-    // { id: string (UUID) }
-    return c.json(validatedParams);
-  }
-);
+```typescript
+import { validateParams } from './middleware/validation'
+import { paramsSchema } from './middleware/schemas'
+
+app.get('/api/users/:id', validateParams(paramsSchema), async c => {
+  const validatedParams = c.get('validatedParams')
+  // { id: string (UUID) }
+  return c.json(validatedParams)
+})
 ```
 
 ## 4. Audit Logging
 
 ### Add Audit Logging to Endpoints
-```typescript
-import { auditLog } from './middleware/audit-log';
 
-app.post('/api/users',
-  authenticate(),
-  auditLog('CREATE_USER'),
-  async (c) => {
-    // Creates a user and logs the action
-  }
-);
+```typescript
+import { auditLog } from './middleware/audit-log'
+
+app.post('/api/users', authenticate(), auditLog('CREATE_USER'), async c => {
+  // Creates a user and logs the action
+})
 
 // Audit logs include:
 // - Timestamp
@@ -141,86 +128,92 @@ app.post('/api/users',
 ## 5. Complete Secure Endpoint Example
 
 ```typescript
-import { Hono } from 'hono';
-import { authenticate, authorize } from './middleware/auth';
-import { validateBody, validateParams } from './middleware/validation';
-import { auditLog } from './middleware/audit-log';
-import { createUserSchema, updateGradeSchema, paramsSchema } from './middleware/schemas';
-import { ok, bad, notFound } from './core-utils';
+import { Hono } from 'hono'
+import { authenticate, authorize } from './middleware/auth'
+import { validateBody, validateParams } from './middleware/validation'
+import { auditLog } from './middleware/audit-log'
+import { createUserSchema, updateGradeSchema, paramsSchema } from './middleware/schemas'
+import { ok, bad, notFound } from './core-utils'
 
-const app = new Hono();
+const app = new Hono()
 
 // Create a new user (admin only, with validation and audit log)
-app.post('/api/users',
+app.post(
+  '/api/users',
   authenticate(),
   authorize('admin'),
   validateBody(createUserSchema),
   auditLog('CREATE_USER'),
-  async (c) => {
-    const userData = c.get('validatedBody');
-    const user = c.get('user');
-    
+  async c => {
+    const userData = c.get('validatedBody')
+    const user = c.get('user')
+
     // userData is already validated and typed
     const newUser = {
       id: crypto.randomUUID(),
       ...userData,
       createdAt: new Date().toISOString(),
-    };
-    
+    }
+
     // ... create user in database ...
-    
-    return ok(c, newUser);
+
+    return ok(c, newUser)
   }
-);
+)
 
 // Update a grade (teacher/admin, with validation and audit log)
-app.put('/api/grades/:id',
+app.put(
+  '/api/grades/:id',
   authenticate(),
   authorize('teacher', 'admin'),
   validateParams(paramsSchema),
   validateBody(updateGradeSchema.partial()),
   auditLog('UPDATE_GRADE'),
-  async (c) => {
-    const gradeId = c.req.param('id');
-    const gradeData = c.get('validatedBody');
-    const user = c.get('user');
-    
+  async c => {
+    const gradeId = c.req.param('id')
+    const gradeData = c.get('validatedBody')
+    const user = c.get('user')
+
     // Additional authorization check: ensure user can update this specific grade
     // if (user.role === 'teacher') {
     //   // Verify teacher owns this grade
     // }
-    
+
     // ... update grade in database ...
-    
-    return ok(c, { id: gradeId, ...gradeData });
+
+    return ok(c, { id: gradeId, ...gradeData })
   }
-);
+)
 
 // Get student dashboard (student/admin, with audit log)
-app.get('/api/students/:id/dashboard',
+app.get(
+  '/api/students/:id/dashboard',
   authenticate(),
   authorize('student', 'admin'),
   validateParams(paramsSchema),
   auditLog('GET_STUDENT_DASHBOARD'),
-  async (c) => {
-    const studentId = c.req.param('id');
-    const user = c.get('user');
-    
+  async c => {
+    const studentId = c.req.param('id')
+    const user = c.get('user')
+
     // Ensure student can only access their own dashboard
     if (user.role === 'student' && user.id !== studentId) {
-      return bad(c, 'Access denied');
+      return bad(c, 'Access denied')
     }
-    
+
     // ... fetch dashboard data ...
-    
-    return ok(c, { /* dashboard data */ });
+
+    return ok(c, {
+      /* dashboard data */
+    })
   }
-);
+)
 ```
 
 ## 6. Security Headers
 
 Security headers are automatically applied to all `/api/*` routes:
+
 - Strict-Transport-Security (HSTS)
 - Content-Security-Policy (CSP)
 - X-Frame-Options
@@ -232,6 +225,7 @@ Security headers are automatically applied to all `/api/*` routes:
 ## 7. CORS Configuration
 
 CORS is configured via the `ALLOWED_ORIGINS` environment variable:
+
 ```bash
 ALLOWED_ORIGINS=https://example.com,https://www.example.com
 ```
@@ -250,7 +244,7 @@ JWT_SECRET=your-super-secret-jwt-key-change-this-in-production-minimum-32-chars
 To generate a JWT token:
 
 ```typescript
-import { generateToken } from './middleware/auth';
+import { generateToken } from './middleware/auth'
 
 const token = await generateToken(
   {
@@ -260,7 +254,7 @@ const token = await generateToken(
   },
   process.env.JWT_SECRET,
   '1h' // expiration
-);
+)
 ```
 
 ## Testing Authenticated Endpoints

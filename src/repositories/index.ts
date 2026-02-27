@@ -1,2 +1,2 @@
-export { IRepository } from './IRepository';
-export { ApiRepository, apiRepository } from './ApiRepository';
+export { IRepository } from './IRepository'
+export { ApiRepository, apiRepository } from './ApiRepository'

@@ -1,43 +1,49 @@
-import { useState, useCallback, memo } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { FormField } from '@/components/ui/form-field';
-import { validateTitle, validateContent } from '@/utils/validation';
-import { useFormValidation } from '@/hooks/useFormValidation';
+import { useState, useCallback, memo } from 'react'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
+import { FormField } from '@/components/ui/form-field'
+import { validateTitle, validateContent } from '@/utils/validation'
+import { useFormValidation } from '@/hooks/useFormValidation'
 
 interface InlineAnnouncementFormProps {
-  onSave: (data: { title: string; content: string }) => void;
-  isLoading: boolean;
+  onSave: (data: { title: string; content: string }) => void
+  isLoading: boolean
 }
 
-export const InlineAnnouncementForm = memo(function InlineAnnouncementForm({ onSave, isLoading }: InlineAnnouncementFormProps) {
-  const [title, setTitle] = useState('');
-  const [content, setContent] = useState('');
+export const InlineAnnouncementForm = memo(function InlineAnnouncementForm({
+  onSave,
+  isLoading,
+}: InlineAnnouncementFormProps) {
+  const [title, setTitle] = useState('')
+  const [content, setContent] = useState('')
 
-  const formData = { title, content };
+  const formData = { title, content }
   const { errors, validateAll } = useFormValidation(formData, {
     validators: {
       title: (value, show) => validateTitle(value, show, 5),
       content: (value, show) => validateContent(value, show, 10),
     },
-  });
+  })
 
-  const handleSubmit = useCallback((e: React.FormEvent) => {
-    e.preventDefault();
-    if (!validateAll()) {
-      return;
-    }
-    onSave({ title: title.trim(), content: content.trim() });
-  }, [title, content, validateAll, onSave]);
+  const handleSubmit = useCallback(
+    (e: React.FormEvent) => {
+      e.preventDefault()
+      if (!validateAll()) {
+        return
+      }
+      onSave({ title: title.trim(), content: content.trim() })
+    },
+    [title, content, validateAll, onSave]
+  )
 
   const handleTitleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setTitle(e.target.value);
-  }, []);
+    setTitle(e.target.value)
+  }, [])
 
   const handleContentChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setContent(e.target.value);
-  }, []);
+    setContent(e.target.value)
+  }, [])
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
@@ -76,6 +82,6 @@ export const InlineAnnouncementForm = memo(function InlineAnnouncementForm({ onS
         {isLoading ? 'Posting...' : 'Post Announcement'}
       </Button>
     </form>
-  );
-});
-InlineAnnouncementForm.displayName = 'InlineAnnouncementForm';
+  )
+})
+InlineAnnouncementForm.displayName = 'InlineAnnouncementForm'

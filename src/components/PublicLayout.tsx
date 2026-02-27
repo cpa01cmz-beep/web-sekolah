@@ -1,10 +1,10 @@
-import { ReactNode, memo } from 'react';
-import { SiteHeader } from '@/components/SiteHeader';
-import { SiteFooter } from '@/components/SiteFooter';
-import { SkipLink } from '@/components/SkipLink';
+import { ReactNode, memo } from 'react'
+import { SiteHeader } from '@/components/SiteHeader'
+import { SiteFooter } from '@/components/SiteFooter'
+import { SkipLink } from '@/components/SkipLink'
 
 interface PublicLayoutProps {
-  children: ReactNode;
+  children: ReactNode
 }
 
 export const PublicLayout = memo(function PublicLayout({ children }: PublicLayoutProps) {
@@ -17,6 +17,6 @@ export const PublicLayout = memo(function PublicLayout({ children }: PublicLayou
       </main>
       <SiteFooter />
     </div>
-  );
-});
-PublicLayout.displayName = 'PublicLayout';
+  )
+})
+PublicLayout.displayName = 'PublicLayout'
